@@ -1,0 +1,829 @@
+{
+  "pass": 48,
+  "fail": 0,
+  "db": "wathefni",
+  "marker": "ATTW2G-5721b374",
+  "results": [
+    {
+      "label": "production db",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "label": "store mode postgres",
+      "ok": true,
+      "detail": "postgres"
+    },
+    {
+      "label": "capture ops on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "capture ingest off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "import off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "CAPTURE_STORE env postgres",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "42 attendance rows pre",
+      "ok": true,
+      "detail": 42
+    },
+    {
+      "label": "42 demo_seed rows pre",
+      "ok": true,
+      "detail": 42
+    },
+    {
+      "label": "four reals present pre",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "label": "register site",
+      "ok": true,
+      "detail": {
+        "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+        "company_code": "WATHEFNI",
+        "name": "ATTW2G-5721b374-Site",
+        "timezone": "Asia/Kuwait",
+        "active": true,
+        "metadata": {},
+        "created_at": "2026-08-02T11:15:20.778602+00:00",
+        "updated_at": "2026-08-02T11:15:20.778602+00:00"
+      }
+    },
+    {
+      "label": "cross-tenant device denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_device_registration_denied",
+        "actor": "OTHERCO",
+        "company": "WATHEFNI"
+      }
+    },
+    {
+      "label": "register device",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "device": {
+          "device_id": "00ae9773-678b-4f13-a362-ddc7c3dec55d",
+          "company_code": "WATHEFNI",
+          "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+          "terminal_sn": "ATTW2G-5721b374-SN",
+          "vendor": "biotime",
+          "active": true,
+          "owned_by_company": "WATHEFNI",
+          "metadata": {},
+          "created_at": "2026-08-02T11:15:20.781594+00:00",
+          "updated_at": "2026-08-02T11:15:20.781594+00:00"
+        }
+      }
+    },
+    {
+      "label": "register connector sealed",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-262478b83f",
+          "company_code": "WATHEFNI",
+          "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+          "device_id": "00ae9773-678b-4f13-a362-ddc7c3dec55d",
+          "status": "registered",
+          "connector_version": "ATTW2G-5721b374-v1",
+          "row_version": 1,
+          "credential_id": "77ccc237-4671-40ab-b8e0-7bcc7add584f",
+          "created_at": "2026-08-02T11:15:20.784182+00:00",
+          "updated_at": "2026-08-02T11:15:20.784182+00:00",
+          "revoked_at": null,
+          "last_rotate_at": null,
+          "checkpoint": null,
+          "metadata": {}
+        },
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "activate",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-262478b83f",
+          "company_code": "WATHEFNI",
+          "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+          "device_id": "00ae9773-678b-4f13-a362-ddc7c3dec55d",
+          "status": "active",
+          "connector_version": "ATTW2G-5721b374-v1",
+          "row_version": 2,
+          "credential_id": "77ccc237-4671-40ab-b8e0-7bcc7add584f",
+          "created_at": "2026-08-02T11:15:20.784182+00:00",
+          "updated_at": "2026-08-02T11:15:20.794362+00:00",
+          "revoked_at": null,
+          "last_rotate_at": null,
+          "checkpoint": null,
+          "metadata": {}
+        }
+      }
+    },
+    {
+      "label": "rotate sealed",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-262478b83f",
+          "company_code": "WATHEFNI",
+          "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+          "device_id": "00ae9773-678b-4f13-a362-ddc7c3dec55d",
+          "status": "rotated",
+          "connector_version": "ATTW2G-5721b374-v1",
+          "row_version": 3,
+          "credential_id": "1dfdb9c6-92bc-4b89-bcbf-1ae8fe68a99a",
+          "created_at": "2026-08-02T11:15:20.784182+00:00",
+          "updated_at": "2026-08-02T11:15:20.798345+00:00",
+          "revoked_at": null,
+          "last_rotate_at": "2026-08-02T11:15:20.798345+00:00",
+          "checkpoint": null,
+          "metadata": {}
+        },
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "stale rotate fail-closed",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "stale_row_version",
+        "current": 3
+      }
+    },
+    {
+      "label": "no plaintext secrets in DB",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "suspicious_sealed": [],
+        "forbidden_columns": []
+      }
+    },
+    {
+      "label": "credential rows Fernet-only",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "health degraded",
+      "ok": true,
+      "detail": {
+        "connector_id": "conn-wathefni-262478b83f",
+        "company_code": "WATHEFNI",
+        "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+        "status": "degraded",
+        "last_sync_at": "2026-08-27T05:00:00+00:00",
+        "lag_seconds": 400.0,
+        "failure_count": 0,
+        "last_error": "lab_lag",
+        "quarantined_events": 0,
+        "open_remediation": 0,
+        "checkpoint": "cp-ATTW2G-5721b374-1",
+        "connector_version": "ATTW2G-5721b374-v1",
+        "alerts": [
+          "connector_failures",
+          "connector_lag_warning"
+        ],
+        "updated_at": "2026-08-02T11:15:20.823747+00:00"
+      }
+    },
+    {
+      "label": "checkpoint save",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "checkpoint": "cp-ATTW2G-5721b374-1",
+        "row_version": 1
+      }
+    },
+    {
+      "label": "checkpoint duplicate exactly-once",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "checkpoint": "cp-ATTW2G-5721b374-1",
+        "row_version": 1
+      }
+    },
+    {
+      "label": "checkpoint advance",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": false,
+        "checkpoint": "cp-ATTW2G-5721b374-2",
+        "row_version": 2
+      }
+    },
+    {
+      "label": "unknown mapping queued",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": false,
+        "item": {
+          "item_id": "a91d01cd-41a1-4a3e-9b12-3f2afd564bab",
+          "company_code": "WATHEFNI",
+          "kind": "unknown_employee",
+          "status": "open",
+          "connector_id": "conn-wathefni-262478b83f",
+          "employee_key": null,
+          "device_id": "ATTW2G-5721b374-SN",
+          "device_user_id": "DU-ATTW2G-5721b374",
+          "work_date": null,
+          "source_event_id": "biotime:w2g-ATTW2G-5721b374-1",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1
+            },
+            "metadata": {},
+            "device_id": "ATTW2G-5721b374-SN",
+            "direction": "in",
+            "punched_at": "2026-08-27T09:05:00+03:00",
+            "company_code": "WATHEFNI",
+            "connector_id": "conn-wathefni-262478b83f",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-ATTW2G-5721b374",
+            "source_event_id": "biotime:w2g-ATTW2G-5721b374-1"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T11:15:20.860077+00:00",
+          "updated_at": "2026-08-02T11:15:20.860077+00:00"
+        }
+      }
+    },
+    {
+      "label": "checkpoint survives restart",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unknown mapping remains queued after restart",
+      "ok": true,
+      "detail": [
+        {
+          "item_id": "a91d01cd-41a1-4a3e-9b12-3f2afd564bab",
+          "status": "open"
+        }
+      ]
+    },
+    {
+      "label": "health survives restart",
+      "ok": true,
+      "detail": [
+        {
+          "connector_id": "conn-wathefni-262478b83f",
+          "company_code": "WATHEFNI",
+          "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+          "status": "degraded",
+          "last_sync_at": "2026-08-27T05:00:00+00:00",
+          "lag_seconds": 400.0,
+          "failure_count": 0,
+          "last_error": "lab_lag",
+          "quarantined_events": 0,
+          "open_remediation": 0,
+          "checkpoint": "cp-ATTW2G-5721b374-1",
+          "connector_version": "ATTW2G-5721b374-v1",
+          "alerts": [
+            "connector_failures",
+            "connector_lag_warning"
+          ],
+          "updated_at": "2026-08-02T11:15:20.823747+00:00"
+        }
+      ]
+    },
+    {
+      "label": "health recover",
+      "ok": true,
+      "detail": {
+        "connector_id": "conn-wathefni-262478b83f",
+        "company_code": "WATHEFNI",
+        "site_id": "ad1d059f-9e4f-4477-a5fc-f6b3c53ccdb0",
+        "status": "online",
+        "last_sync_at": "2026-08-27T06:10:00+00:00",
+        "lag_seconds": 0.0,
+        "failure_count": 0,
+        "last_error": "lab_lag",
+        "quarantined_events": 0,
+        "open_remediation": 0,
+        "checkpoint": "cp-ATTW2G-5721b374-1",
+        "connector_version": "ATTW2G-5721b374-v1",
+        "alerts": [],
+        "updated_at": "2026-08-02T11:15:20.878150+00:00"
+      }
+    },
+    {
+      "label": "health event history retained",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "cross-tenant approve denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_denied"
+      }
+    },
+    {
+      "label": "manager self-action denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "manager_self_action_denied"
+      }
+    },
+    {
+      "label": "manager scope denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "manager_scope_denied"
+      }
+    },
+    {
+      "label": "concurrent approve: exactly one success",
+      "ok": true,
+      "detail": [
+        {
+          "ok": true,
+          "item": {
+            "item_id": "a91d01cd-41a1-4a3e-9b12-3f2afd564bab",
+            "company_code": "WATHEFNI",
+            "kind": "unknown_employee",
+            "status": "approved_replayed",
+            "connector_id": "conn-wathefni-262478b83f",
+            "employee_key": "W2G-SYNTH|5721b374",
+            "device_id": "ATTW2G-5721b374-SN",
+            "device_user_id": "DU-ATTW2G-5721b374",
+            "work_date": null,
+            "source_event_id": "biotime:w2g-ATTW2G-5721b374-1",
+            "payload": {
+              "source": "biotime",
+              "raw_ref": {
+                "id": 1
+              },
+              "metadata": {},
+              "device_id": "ATTW2G-5721b374-SN",
+              "direction": "in",
+              "punched_at": "2026-08-27T09:05:00+03:00",
+              "company_code": "WATHEFNI",
+              "connector_id": "conn-wathefni-262478b83f",
+              "employee_key": null,
+              "capture_method": "card",
+              "device_user_id": "DU-ATTW2G-5721b374",
+              "source_event_id": "biotime:w2g-ATTW2G-5721b374-1"
+            },
+            "row_version": 2,
+            "payroll_excluded": false,
+            "created_at": "2026-08-02T11:15:20.860077+00:00",
+            "updated_at": "2026-08-02T11:15:20.908798+00:00"
+          },
+          "mapping": {
+            "mapping_id": "ca657a5f-dbf8-49d8-8d3b-7c08ff3adeaa",
+            "company_code": "WATHEFNI",
+            "device_user_id": "DU-ATTW2G-5721b374",
+            "employee_key": "W2G-SYNTH|5721b374",
+            "device_id": "ATTW2G-5721b374-SN",
+            "device_key": "ATTW2G-5721b374-SN",
+            "active": true,
+            "created_at": "2026-08-02T11:15:20.908798+00:00",
+            "updated_at": "2026-08-02T11:15:20.908798+00:00"
+          }
+        },
+        {
+          "ok": false,
+          "error": "item_not_open",
+          "status": "approved_replayed"
+        }
+      ]
+    },
+    {
+      "label": "concurrent approve: other fail-closed",
+      "ok": true,
+      "detail": [
+        {
+          "ok": false,
+          "error": "item_not_open",
+          "status": "approved_replayed"
+        }
+      ]
+    },
+    {
+      "label": "reject ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "item": {
+          "item_id": "8c952f2b-5727-48eb-b236-e5746f4a6c8d",
+          "company_code": "WATHEFNI",
+          "kind": "duplicate_conflict",
+          "status": "rejected",
+          "connector_id": "conn-wathefni-262478b83f",
+          "employee_key": null,
+          "device_id": null,
+          "device_user_id": null,
+          "work_date": null,
+          "source_event_id": null,
+          "payload": {
+            "marker": "ATTW2G-5721b374"
+          },
+          "row_version": 2,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T11:15:20.932792+00:00",
+          "updated_at": "2026-08-02T11:15:20.939505+00:00"
+        }
+      }
+    },
+    {
+      "label": "reject idempotent",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "item": {
+          "item_id": "8c952f2b-5727-48eb-b236-e5746f4a6c8d",
+          "company_code": "WATHEFNI",
+          "kind": "duplicate_conflict",
+          "status": "rejected",
+          "connector_id": "conn-wathefni-262478b83f",
+          "employee_key": null,
+          "device_id": null,
+          "device_user_id": null,
+          "work_date": null,
+          "source_event_id": null,
+          "payload": {
+            "marker": "ATTW2G-5721b374"
+          },
+          "row_version": 2,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T11:15:20.932792+00:00",
+          "updated_at": "2026-08-02T11:15:20.939505+00:00"
+        }
+      }
+    },
+    {
+      "label": "approve+replay reaches authority",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "item": {
+          "item_id": "8dc045ff-7088-4107-93d0-52c1c37a4f11",
+          "company_code": "WATHEFNI",
+          "kind": "unknown_employee",
+          "status": "approved_replayed",
+          "connector_id": "conn-wathefni-262478b83f",
+          "employee_key": "W2G-SYNTH|5721b374",
+          "device_id": "ATTW2G-5721b374-SN",
+          "device_user_id": "DU-R-ATTW2G-5721b374",
+          "work_date": null,
+          "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1
+            },
+            "metadata": {},
+            "device_id": "ATTW2G-5721b374-SN",
+            "direction": "in",
+            "punched_at": "2026-08-27T09:05:00+03:00",
+            "company_code": "WATHEFNI",
+            "connector_id": "conn-wathefni-262478b83f",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-R-ATTW2G-5721b374",
+            "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay"
+          },
+          "row_version": 3,
+          "payroll_excluded": false,
+          "created_at": "2026-08-02T11:15:20.944215+00:00",
+          "updated_at": "2026-08-02T11:15:20.979516+00:00"
+        },
+        "mapping": {
+          "mapping_id": "0bed108f-eaf0-47c9-843a-c46066cd7686",
+          "company_code": "WATHEFNI",
+          "device_user_id": "DU-R-ATTW2G-5721b374",
+          "employee_key": "W2G-SYNTH|5721b374",
+          "device_id": "ATTW2G-5721b374-SN",
+          "device_key": "ATTW2G-5721b374-SN",
+          "active": true,
+          "created_at": "2026-08-02T11:15:20.950341+00:00",
+          "updated_at": "2026-08-02T11:15:20.950341+00:00"
+        },
+        "replay": {
+          "ok": true,
+          "ingest": {
+            "ok": true,
+            "created": true,
+            "duplicate": false,
+            "punch": {
+              "punch_id": "4bcb8d59-d440-4ada-b224-1abadd7b22cf",
+              "company_code": "WATHEFNI",
+              "employee_key": "W2G-SYNTH|5721b374",
+              "employee_phone": "965524315721",
+              "employee_name": "W2G-5721b374",
+              "punched_at": "2026-08-27T06:05:00+00:00",
+              "direction": "in",
+              "source": "biotime",
+              "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay",
+              "shift_id": "67f5bf11-9f40-419c-862c-9001c8564c70",
+              "shift_key": "67f5bf11-9f40-419c-862c-9001c8564c70",
+              "work_date": "2026-08-27",
+              "break_paid": null,
+              "metadata": {
+                "raw_ref": {
+                  "id": 1
+                },
+                "device_id": "ATTW2G-5721b374-SN",
+                "connector_id": "conn-wathefni-262478b83f",
+                "capture_method": "card",
+                "device_user_id": "DU-R-ATTW2G-5721b374",
+                "connector_version": "attendance_capture_wave2b_v1"
+              },
+              "created_by_phone": "",
+              "created_at": "2026-08-02T11:15:20.957528+00:00"
+            },
+            "projection": {
+              "projection_id": "f497dd60-98ee-4470-ab3d-456fed4ef368",
+              "company_code": "WATHEFNI",
+              "employee_key": "W2G-SYNTH|5721b374",
+              "employee_phone": "965524315721",
+              "employee_name": "W2G-5721b374",
+              "work_date": "2026-08-27",
+              "shift_id": "67f5bf11-9f40-419c-862c-9001c8564c70",
+              "shift_key": "67f5bf11-9f40-419c-862c-9001c8564c70",
+              "version": 1,
+              "is_current": true,
+              "status": "late",
+              "exception_state": "missing_check_out",
+              "approval_status": "unapproved",
+              "payroll_eligible": false,
+              "check_in_at": "2026-08-27T06:05:00+00:00",
+              "check_out_at": null,
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "late_minutes": 5,
+              "early_leave_minutes": 0,
+              "worked_minutes": 0,
+              "unpaid_break_minutes": 0,
+              "paid_break_minutes": 0,
+              "sessions": [
+                {
+                  "open": true,
+                  "check_in_at": "2026-08-27T09:05:00+03:00",
+                  "check_out_at": null,
+                  "session_index": 1,
+                  "worked_minutes": 0
+                }
+              ],
+              "breaks": [],
+              "source_counts": {
+                "biotime": 1
+              },
+              "authority": "attendance_authority_wave1_v1",
+              "leave_id": null,
+              "derived_from_leave": false,
+              "manual_correction": false,
+              "metadata": {},
+              "superseded_by": null,
+              "created_by_phone": "",
+              "created_at": "2026-08-02T11:15:20.957528+00:00",
+              "updated_at": "2026-08-02T11:15:20.957528+00:00"
+            },
+            "compat": {
+              "attendance_id": "f497dd60-98ee-4470-ab3d-456fed4ef368",
+              "company_code": "WATHEFNI",
+              "employee_key": "W2G-SYNTH|5721b374",
+              "employee_phone": "965524315721",
+              "employee_name": "W2G-5721b374",
+              "shift_id": "67f5bf11-9f40-419c-862c-9001c8564c70",
+              "attendance_date": "2026-08-27",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-08-27T06:05:00+00:00",
+              "check_out_at": null,
+              "status": "late",
+              "late_minutes": 5,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "authority": "attendance_authority_wave1_v1",
+                "projection_version": 1,
+                "exception_state": "missing_check_out",
+                "approval_status": "unapproved",
+                "payroll_eligible": false,
+                "sessions": [
+                  {
+                    "open": true,
+                    "check_in_at": "2026-08-27T09:05:00+03:00",
+                    "check_out_at": null,
+                    "session_index": 1,
+                    "worked_minutes": 0
+                  }
+                ],
+                "breaks": [],
+                "worked_minutes": 0,
+                "shift_key": "67f5bf11-9f40-419c-862c-9001c8564c70"
+              },
+              "created_by_phone": "",
+              "created_at": "2026-08-02T11:15:20.957528+00:00",
+              "updated_at": "2026-08-02T11:15:20.957528+00:00"
+            },
+            "canonical": {
+              "source": "biotime",
+              "raw_ref": {
+                "id": 1
+              },
+              "metadata": {},
+              "device_id": "ATTW2G-5721b374-SN",
+              "direction": "in",
+              "punched_at": "2026-08-27T09:05:00+03:00",
+              "company_code": "WATHEFNI",
+              "connector_id": "conn-wathefni-262478b83f",
+              "employee_key": "W2G-SYNTH|5721b374",
+              "capture_method": "card",
+              "device_user_id": "DU-R-ATTW2G-5721b374",
+              "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay",
+              "connector_version": "attendance_capture_wave2b_v1"
+            }
+          },
+          "item": {
+            "item_id": "8dc045ff-7088-4107-93d0-52c1c37a4f11",
+            "company_code": "WATHEFNI",
+            "kind": "unknown_employee",
+            "status": "approved_replayed",
+            "connector_id": "conn-wathefni-262478b83f",
+            "employee_key": "W2G-SYNTH|5721b374",
+            "device_id": "ATTW2G-5721b374-SN",
+            "device_user_id": "DU-R-ATTW2G-5721b374",
+            "work_date": null,
+            "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay",
+            "payload": {
+              "source": "biotime",
+              "raw_ref": {
+                "id": 1
+              },
+              "metadata": {},
+              "device_id": "ATTW2G-5721b374-SN",
+              "direction": "in",
+              "punched_at": "2026-08-27T09:05:00+03:00",
+              "company_code": "WATHEFNI",
+              "connector_id": "conn-wathefni-262478b83f",
+              "employee_key": null,
+              "capture_method": "card",
+              "device_user_id": "DU-R-ATTW2G-5721b374",
+              "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay"
+            },
+            "row_version": 3,
+            "payroll_excluded": false,
+            "created_at": "2026-08-02T11:15:20.944215+00:00",
+            "updated_at": "2026-08-02T11:15:20.979516+00:00"
+          }
+        }
+      }
+    },
+    {
+      "label": "authority punch exactly once",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "replay idempotent duplicate",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "item": {
+          "item_id": "8dc045ff-7088-4107-93d0-52c1c37a4f11",
+          "company_code": "WATHEFNI",
+          "kind": "unknown_employee",
+          "status": "approved_replayed",
+          "connector_id": "conn-wathefni-262478b83f",
+          "employee_key": "W2G-SYNTH|5721b374",
+          "device_id": "ATTW2G-5721b374-SN",
+          "device_user_id": "DU-R-ATTW2G-5721b374",
+          "work_date": null,
+          "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1
+            },
+            "metadata": {},
+            "device_id": "ATTW2G-5721b374-SN",
+            "direction": "in",
+            "punched_at": "2026-08-27T09:05:00+03:00",
+            "company_code": "WATHEFNI",
+            "connector_id": "conn-wathefni-262478b83f",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-R-ATTW2G-5721b374",
+            "source_event_id": "biotime:w2g-ATTW2G-5721b374-replay"
+          },
+          "row_version": 3,
+          "payroll_excluded": false,
+          "created_at": "2026-08-02T11:15:20.944215+00:00",
+          "updated_at": "2026-08-02T11:15:20.979516+00:00"
+        },
+        "ingest": {
+          "ok": true,
+          "duplicate": true
+        }
+      }
+    },
+    {
+      "label": "authority punch still exactly once",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "reconcile capture\u2194authority",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 1,
+        "matched_in_authority": 1,
+        "missing_in_authority": [],
+        "version": "attendance_capture_ops_wave2f_v1"
+      }
+    },
+    {
+      "label": "audit events immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ops overview store_mode postgres",
+      "ok": true,
+      "detail": {
+        "real_device_ingest": false,
+        "qr_gps_kiosk": false,
+        "synthetic_only_authority": true,
+        "import_enabled": false,
+        "capture_store": "postgres"
+      }
+    },
+    {
+      "label": "freeze skipped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "42 attendance rows post",
+      "ok": true,
+      "detail": 42
+    },
+    {
+      "label": "four reals present post",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "label": "marker sites cleaned",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "label": "evidence leak scan",
+      "ok": true,
+      "detail": {
+        "blocked": false,
+        "files": 13
+      }
+    }
+  ],
+  "version": "attendance_capture_ops_wave2f_v1"
+}

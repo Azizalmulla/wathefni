@@ -1,0 +1,59 @@
+{
+  "verdict": "PASS",
+  "probes": {
+    "desktop": {
+      "cards": [
+        {
+          "id": "calendar-timed-event-short-check-in",
+          "density": "short",
+          "lane": "1/1",
+          "text": "Candidate check-in08:00 AM – 08:30 AM",
+          "height": 28
+        },
+        {
+          "id": "calendar-timed-event-medium-review",
+          "density": "medium",
+          "lane": "1/1",
+          "text": "Hiring review09:00 AM – 10:30 AMDeadline· Tentative",
+          "height": 72
+        },
+        {
+          "id": "calendar-timed-event-long-teams",
+          "density": "long",
+          "lane": "1/1",
+          "text": "Interview · Sara · Product Designer11:00 AM – 02:00 PMInterview· ConfirmedTeamsSARJoin",
+          "height": 144
+        },
+        {
+          "id": "calendar-timed-event-overlap-interview",
+          "density": "long",
+          "lane": "1/2",
+          "text": "Interview · Omar · Finance Lead09:00 AM – 12:00 PMInterview· Confirmed",
+          "height": 144
+        },
+        {
+          "id": "calendar-timed-event-overlap-screen",
+          "density": "medium",
+          "lane": "2/2",
+          "text": "Portfolio review09:30 AM – 11:00 AMMeeting· Confirmed",
+          "height": 72
+        }
+      ],
+      "hasJoin": true,
+      "scopeSwitcherPresent": true
+    },
+    "rtl": {
+      "dir": "rtl",
+      "myCalendar": "تقويمي",
+      "hasArabicJoin": true
+    },
+    "mobile": {
+      "dayMode": true,
+      "hasTeams": true,
+      "hasJoin": true
+    },
+    "empty": {
+      "noTimedCards": true
+    }
+  }
+}

@@ -1,0 +1,26 @@
+PASS  kind selection
+PASS  kind lightImpact
+PASS  kind success
+PASS  kind warning
+PASS  kind error
+PASS  export selectionFeedback
+PASS  export lightImpactFeedback
+PASS  export successFeedback
+PASS  export warningFeedback
+PASS  export errorFeedback
+PASS  per-kind throttle present
+PASS  fire-and-forget (non-blocking)
+PASS  no raw expo-haptics outside central layer
+PASS  PremiumButton has no haptic (not every button)
+PASS  ScheduleWeekStrip uses selectionFeedback
+PASS  ScheduleWeekStrip haptic gated to tap + swipe settle
+PASS  bottom tabs use selectionFeedback
+PASS  app/onboarding.tsx wired
+PASS  app/documents.tsx wired
+PASS  app/bank.tsx wired
+PASS  app/(tabs)/leave.tsx wired
+PASS  app/leave/request.tsx wired
+PASS  app/(tabs)/payslips.tsx wired
+PASS  app/settings.tsx wired
+PASS  app/change-pin.tsx wired
+PASS semantic feedback (25 checks)

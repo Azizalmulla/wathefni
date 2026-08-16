@@ -1,0 +1,10 @@
+local_key_chunks_bytes
+-rw-r--r--@ 1 azizalmulla  staff  218757 Jul 31 05:38 dashboard-B9vwuFXH.js
+-rw-r--r--@ 1 azizalmulla  staff  36908 Jul 31 05:38 JobsPage-uhryU0Nb.js
+-rw-r--r--@ 1 azizalmulla  staff  13200 Jul 31 05:38 CandidatesPage-DBai_6YJ.js
+-rw-r--r--@ 1 azizalmulla  staff  31730 Jul 31 05:38 InterviewsPage-9jUT-0pJ.js
+-rw-r--r--@ 1 azizalmulla  staff  29679 Jul 31 05:38 CalendarShell-Bd288Brh.js
+-rw-r--r--@ 1 azizalmulla  staff  55589 Jul 31 05:38 AssessmentsPage-Cfj8FGBB.js
+-rw-r--r--@ 1 azizalmulla  staff  9249 Jul 31 05:38 RankingPage-C9ezhvy-.js
+-rw-r--r--@ 1 azizalmulla  staff  11416 Jul 31 05:38 ReportsPage-ChDfMhFT.js
+-rw-r--r--@ 1 azizalmulla  staff  15983 Jul 31 05:38 AdminAIPage-B7LbZQ5L.js

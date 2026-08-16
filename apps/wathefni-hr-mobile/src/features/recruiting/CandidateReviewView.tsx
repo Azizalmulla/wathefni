@@ -21,30 +21,12 @@ import {
   type ConfirmationView,
 } from '@/components/primitives'
 import { colors, spacing, type as typography } from '@/theme'
-
-const STAGE_LABELS: Record<string, string> = {
-  awaiting_cv: 'Waiting for CV',
-  cv_processing: 'Processing CV',
-  cv_received: 'Processing CV',
-  screening: 'Processing CV',
-  ready_for_review: 'Ready for review',
-  screening_complete: 'Ready for review',
-  review_pending: 'Ready for review',
-  shortlisted: 'Shortlisted',
-  interview: 'Interview',
-  hired: 'Hired',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-  offered: 'Shortlisted',
-  offer_sent: 'Shortlisted',
-}
-
-function stageLabel(value: string | null | undefined) {
-  const normalized = String(value || '').toLowerCase()
-  if (STAGE_LABELS[normalized]) return STAGE_LABELS[normalized]
-  const spaced = normalized.replaceAll('_', ' ').trim()
-  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : 'Ready for review'
-}
+import {
+  intakeLabel,
+  lifecycleCommunicationLabel,
+  lifecycleStageLabel,
+  workflowLabel,
+} from '@/features/recruiting/lifecycle'
 
 export type CandidateViewState = ResourceState
 
@@ -54,6 +36,7 @@ export function CandidateReviewView({
   state = 'ready',
   onPrepareDecision,
   onConfirmDecision,
+  onScheduleInterview,
   onOpenCV,
   onRetry,
   onLocale,
@@ -63,16 +46,22 @@ export function CandidateReviewView({
   state?: CandidateViewState
   onPrepareDecision?: (action: 'shortlist' | 'reject' | 'hire') => Promise<ConfirmationView>
   onConfirmDecision?: () => Promise<void>
+  onScheduleInterview?: () => void
   onOpenCV?: (action: 'preview' | 'download') => void
   onRetry?: () => void
   onLocale?: () => void
 }) {
-  const { t, isRTL } = useLocale()
+  const { t, isRTL, locale } = useLocale()
   const [confirmation, setConfirmation] = useState<ConfirmationView | null>(null)
   const [preparing, setPreparing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const name = review.overview.candidate?.name || 'Candidate'
   const role = review.overview.position?.title || review.overview.position?.code || 'Role'
+  const stage = review.overview.canonical_stage || review.overview.status
+  const latestCommunication = review.communication_status[0]
+  const communication = review.overview.communication?.status || String(latestCommunication?.status || '')
+  const automaticActivity = review.overview.automatic_activity || []
+  const waitingForHR = review.overview.waiting_for_hr || []
 
   const prepare = async (action: 'shortlist' | 'reject' | 'hire') => {
     setPreparing(true)
@@ -126,18 +115,20 @@ export function CandidateReviewView({
           <Card tone="cream">
             <View style={[styles.topRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <StatusBadge
-                label={review.overview.status_label || stageLabel(review.overview.status) || 'Ready for review'}
+                label={lifecycleStageLabel(stage, locale)}
                 tone="info"
               />
               <Text style={styles.appKey}>#{review.app_key.slice(0, 8)}</Text>
             </View>
             <IdentityRow name={name} subtitle={role} meta={review.overview.candidate?.email} />
             <View style={styles.rule} />
-            <Fact title={t('candidate.experience')} value={name} />
+            <Fact title={t('candidate.applicationStage')} value={lifecycleStageLabel(stage, locale)} />
+            <Fact title={t('common.position')} value={role} />
+            <Fact title={t('candidate.entryMethod')} value={intakeLabel(review.overview.intake_source, locale)} />
             {review.overview.candidate?.email ? (
               <Fact title={t('common.email')} value={review.overview.candidate.email} />
             ) : null}
-            <Fact title={t('common.position')} value={role} />
+            <Fact title={t('candidate.communication')} value={lifecycleCommunicationLabel(communication, locale)} />
             <View style={[styles.scoreWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <View style={styles.scoreRing}>
                 <Text style={styles.score}>{review.ranking.score ?? '—'}</Text>
@@ -150,15 +141,46 @@ export function CandidateReviewView({
             </View>
           </Card>
 
+          {review.overview.communication?.stage_changed_without_contact ? (
+            <Card tone="amber">
+              <View style={[styles.alertRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <Ionicons name="alert-circle-outline" size={22} color={colors.ink} />
+                <Text style={[styles.alertText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('candidate.notInformed')}</Text>
+              </View>
+            </Card>
+          ) : null}
+
+          <Card tone="sage">
+            <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('candidate.automaticActions')}</Text>
+            {(automaticActivity.length ? automaticActivity : [null]).map((item, index) => (
+              <Text key={item || index} style={[styles.sectionLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+                {item ? `• ${workflowLabel(item, locale)}` : t('candidate.noAutomaticActions')}
+              </Text>
+            ))}
+          </Card>
+
+          <Card tone="cream">
+            <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('candidate.waitingForHR')}</Text>
+            {(waitingForHR.length ? waitingForHR : [null]).map((item, index) => (
+              <Text key={item || index} style={[styles.sectionLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+                {item ? `• ${workflowLabel(item, locale)}` : t('candidate.noPendingHR')}
+              </Text>
+            ))}
+          </Card>
+
+          <EvidenceCard title={t('candidate.evidence')} items={review.ranking.evidence.length ? review.ranking.evidence : [t('candidate.noEvidence')]} tone="evidence" icon="document-text-outline" />
           <EvidenceCard
             title={t('candidate.interpretation')}
             items={review.ranking.reasons.length ? review.ranking.reasons : [t('candidate.noEvidence')]}
             tone="missing"
-            icon="sparkles-outline"
+            icon="analytics-outline"
           />
-          <EvidenceCard title={t('candidate.evidence')} items={review.ranking.evidence.length ? review.ranking.evidence : review.ranking.reasons} tone="evidence" icon="checkmark-circle-outline" />
           <EvidenceCard title={t('candidate.concerns')} items={review.ranking.concerns.length ? review.ranking.concerns : [t('candidate.noEvidence')]} tone="concern" icon="alert-circle-outline" />
           <EvidenceCard title={t('candidate.missing')} items={review.ranking.missing_evidence.length ? review.ranking.missing_evidence : [t('candidate.noEvidence')]} tone="missing" icon="help-circle-outline" />
+          <Card tone="lilac">
+            <Fact title={t('candidate.confidence')} value={String(review.ranking.confidence || t('common.none'))} />
+            <Text style={[styles.advisory, { textAlign: isRTL ? 'right' : 'left' }]}>{t('candidate.advisory')}</Text>
+          </Card>
 
           <Card tone="sky">
             <View style={[styles.cvRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -198,13 +220,14 @@ export function CandidateReviewView({
                 <Fact
                   key={index}
                   title={String(entry.message_kind || entry.channel || t('interviews.delivery'))}
-                  value={String(entry.status || t('common.none'))}
+                  value={lifecycleCommunicationLabel(String(entry.status || ''), locale)}
                 />
               ))}
             </Card>
           ) : null}
 
           <View style={styles.actions}>
+            <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('candidate.nextActions')}</Text>
             {visibleActions(review.allowed_actions, ['shortlist']).length ? (
               <ActionButton label={t('candidate.shortlist')} tone="secondary" loading={preparing} onPress={() => void prepare('shortlist')} />
             ) : null}
@@ -220,6 +243,17 @@ export function CandidateReviewView({
                 </View>
               ) : null}
             </View>
+            {visibleActions(review.allowed_actions, ['schedule_interview']).length ? (
+              <>
+                <ActionButton label={t('candidate.viewInterviews')} tone="secondary" onPress={onScheduleInterview} />
+                <Text style={[styles.sectionLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+                  {t('candidate.scheduleOnWeb')}
+                </Text>
+              </>
+            ) : null}
+            {!visibleActions(review.allowed_actions, ['shortlist', 'reject', 'hire', 'schedule_interview']).length ? (
+              <Text style={[styles.sectionLine, { textAlign: isRTL ? 'right' : 'left' }]}>{t('candidate.noActions')}</Text>
+            ) : null}
           </View>
         </>
       )}
@@ -266,6 +300,10 @@ const styles = StyleSheet.create({
   factTitle: { color: colors.muted, fontSize: typography.label, fontWeight: '800' },
   factValue: { color: colors.ink, fontSize: typography.body, lineHeight: 22 },
   communicationTitle: { color: colors.ink, fontSize: typography.section, fontWeight: '800' },
+  sectionTitle: { color: colors.ink, fontSize: typography.section, fontWeight: '800' },
+  sectionLine: { color: colors.muted, fontSize: typography.body, lineHeight: 22 },
+  alertRow: { alignItems: 'center', gap: spacing.sm },
+  alertText: { flex: 1, color: colors.ink, fontSize: typography.body, fontWeight: '800', lineHeight: 22 },
   actions: { gap: spacing.md },
   decisionRow: { gap: spacing.md },
   flex: { flex: 1 },

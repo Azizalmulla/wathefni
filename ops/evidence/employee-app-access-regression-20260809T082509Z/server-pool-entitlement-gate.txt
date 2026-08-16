@@ -1,0 +1,8 @@
+test_employee_app_context_maps_to_503 (__main__.PoolExhaustionEntitlementTests.test_employee_app_context_maps_to_503) ... ok
+test_source_reraises_pool_errors (__main__.PoolExhaustionEntitlementTests.test_source_reraises_pool_errors) ... ok
+test_transient_helper_logic (__main__.PoolExhaustionEntitlementTests.test_transient_helper_logic) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.010s
+
+OK

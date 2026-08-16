@@ -1,0 +1,42 @@
+{
+  "policy": "restore_only_with_verified_canonical_employee_match",
+  "restored_any": false,
+  "orphans": [
+    {
+      "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+      "employee_key": "WATHEFNI-96596552203",
+      "exact_employee_match": null,
+      "phone_like_hits": [],
+      "key_like_hits": [],
+      "quarantine_id": "838dcf75-df78-4e75-bb9f-92f223ec6728",
+      "current_status": "cancelled",
+      "disposition": "permanently_invalid_retain_cancelled_audit",
+      "restoration_eligible": false,
+      "restoration_blocked_reason": "no_verified_canonical_employee_match"
+    },
+    {
+      "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+      "employee_key": "WATHEFNI-96552202357",
+      "exact_employee_match": null,
+      "phone_like_hits": [],
+      "key_like_hits": [],
+      "quarantine_id": "ebdee5cd-2e73-4152-ac08-7f2e04e73828",
+      "current_status": "cancelled",
+      "disposition": "permanently_invalid_retain_cancelled_audit",
+      "restoration_eligible": false,
+      "restoration_blocked_reason": "no_verified_canonical_employee_match"
+    },
+    {
+      "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+      "employee_key": "WATHEFNI-96552263564",
+      "exact_employee_match": null,
+      "phone_like_hits": [],
+      "key_like_hits": [],
+      "quarantine_id": "5abefd3c-6e09-42ee-b847-0d3fd15c0d11",
+      "current_status": "cancelled",
+      "disposition": "permanently_invalid_retain_cancelled_audit",
+      "restoration_eligible": false,
+      "restoration_blocked_reason": "no_verified_canonical_employee_match"
+    }
+  ]
+}

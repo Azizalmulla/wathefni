@@ -1,0 +1,6 @@
+apps/wathefni-dashboard/src/components/ui/page-chrome.tsx
+apps/wathefni-dashboard/src/posthire/employees360/bankReview.ts
+apps/wathefni-dashboard/src/posthire/employees360/onboardingCompletion.ts
+apps/wathefni-dashboard/src/posthire/employees360/OnboardingCompletionStrip.tsx
+apps/wathefni-dashboard/src/posthire/DocumentExtractionSummary.tsx
+apps/wathefni-dashboard/src/posthire/DocumentExtractionSummaryLoader.tsx

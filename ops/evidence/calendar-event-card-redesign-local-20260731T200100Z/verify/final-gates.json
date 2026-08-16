@@ -1,0 +1,25 @@
+{
+  "verdict": "PASS",
+  "deployment": "NO_LOCAL_ONLY",
+  "duration_diagnosis": {
+    "event_id": "c3c3d8e7-dc0c-4fbd-9d57-8c91d1cc053b",
+    "timezone": "Asia/Kuwait",
+    "start_at": "2026-08-01T06:00:00+00:00",
+    "end_at": "2026-08-02T07:00:00+00:00",
+    "duration_minutes": 1500,
+    "css_duration_bug": false
+  },
+  "short_medium_long": true,
+  "overlapping_lanes": true,
+  "empty_week": true,
+  "en_ar_rtl": true,
+  "desktop_mobile": true,
+  "teams_join": true,
+  "scope_switcher_preserved": true,
+  "drawer_preserved": true,
+  "tests": "13/13",
+  "build": true,
+  "lint": true,
+  "calendar_shell_chunk": "CalendarShell-C7IuIh4S.js",
+  "calendar_shell_sha256": "b013f7434f69103f1453a15ef562022a6cc28c092cbf783b0da7dd9cc41e0137"
+}

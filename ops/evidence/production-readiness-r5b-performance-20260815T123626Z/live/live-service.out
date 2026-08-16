@@ -1,0 +1,12 @@
+staging_health=200
+      PASS  live performance customer enableable
+      PASS  live talent still hidden
+      PASS  live health
+      PASS  live /dashboard/performance/workspace not fail-closed
+      PASS  live /dashboard/performance/workspace not public
+      PASS  live /app/performance not fail-closed
+      PASS  live /app/performance not public
+      PASS  live /dashboard/posthire/talent still unreleased
+      PASS  live /dashboard/job-architecture still unreleased
+      PASS  live /app/talent still unreleased
+    LIVE_SERVICE 10 passed, 0 failed

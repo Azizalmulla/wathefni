@@ -1,0 +1,97 @@
+payroll wave4b prod synthetic canary tag=38301248
+[PASS] wave4 enabled
+[PASS] synthetic only
+[PASS] version
+[PASS] payment disabled
+[PASS] no posts payment
+[PASS] journal drafts
+[PASS] no erp journals
+[PASS] bank contract only
+[PASS] no bank files
+[PASS] no bank connection
+[PASS] no wps
+[PASS] no ashal
+[PASS] no pifss
+[PASS] no eos
+[PASS] no AI
+[PASS] native non-auth
+[PASS] external authority
+[PASS] immutable invariant
+[PASS] dual reopen invariant
+[PASS] sod invariant
+[PASS] wave1 enabled
+[PASS] wave2a enabled synthetic
+[PASS] wave2b enabled synthetic
+[PASS] markers include PYW4
+[PASS] markers include PYW1
+[PASS] markers include W4B
+[PASS] emp synthetic
+[PASS] phones synthetic
+[PASS] ux en title
+[PASS] ux ar title
+[PASS] ux honesty
+[PASS] ux payment disabled
+[PASS] ux mobile
+[PASS] ux rtl
+[PASS] period year >= 2032
+connected_db wathefni
+[PASS] production db
+[PASS] settings payment disabled
+[PASS] draft
+[PASS] contract approve
+[PASS] period
+[PASS] preview ok
+[PASS] create close run
+[PASS] native authority
+[PASS] payment disabled on run
+[PASS] create idempotent
+[PASS] sod blocked before submit or bad status
+[PASS] submit review
+[PASS] self approve forbidden
+[PASS] sod approve+export blocked
+[PASS] approve ok
+[PASS] sod close+export blocked
+[PASS] self close forbidden
+[PASS] close ok
+[PASS] closed status
+[PASS] snapshot immutable
+[PASS] snapshot fingerprint
+[PASS] immutable probe
+[PASS] reclose blocked
+[PASS] invalid mapping fail closed
+[PASS] mapping BASIC
+[PASS] mapping TRANSPORT
+[PASS] mapping NET_PAYABLE
+[PASS] journal ok
+[PASS] journal balanced
+[PASS] journal no erp
+[PASS] journal idempotent
+[PASS] bank contract ok
+[PASS] bank no real format
+[PASS] bank no connection
+[PASS] bank no wps
+[PASS] bank idempotent
+[PASS] sod closer≠exporter
+[PASS] sod export+approve blocked
+[PASS] export recorded
+[PASS] recon unmatched
+[PASS] export idempotent
+[PASS] drift detected
+[PASS] bank export recorded
+[PASS] export self approve forbidden
+[PASS] export approved
+[PASS] recon matched
+[PASS] export history
+[PASS] reopen initiate
+[PASS] reopen same actor denied
+[PASS] reopen confirmed
+[PASS] reopened status
+[PASS] external export
+[PASS] external import
+[PASS] external close create
+[PASS] external authority retained
+[PASS] restore prior mode
+[PASS] residual zero
+
+92 passed, 0 failed
+QUALIFICATION_JSON /opt/wathefni/production-evidence/payroll-wave4b-prod-canary/20260803T135930Z/canary/after-redeploy/qualification.json

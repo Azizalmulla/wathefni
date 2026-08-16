@@ -1,0 +1,19 @@
+{
+  "module": "prehiring-interviews",
+  "status": "production-green",
+  "frozen": true,
+  "artifact_sha": "c434d4b2076ccf22e4808b3f8739d48ba9b11f22ee05628915e8026e5f902cb9",
+  "promoted_at": "2026-07-24T21:35:23Z",
+  "backup": "/opt/wathefni/backups/pre-interviews-prod-20260724T213117Z",
+  "db_dump_sha256": "efa33920f85f2de0e699dc6f438830c5f8efb2fdb626fe8147ae677029a1281a",
+  "interview_service_sha256": "8f10e8f741436b5edc22ab0ea14ce1a7c1d539985e5502f00086d84e1c0b01b6",
+  "app_py_sha256": "ba3f4a4a3375bb05b8bd37bf0d4d10b47f24d003596e11d144c1637f6a92a6ef",
+  "live_soak_evidence": "/opt/wathefni/orchestrator/ops/interviews/interviews-live-gcal-soak-20260724T213219Z.json",
+  "matrix_evidence": "/opt/wathefni/orchestrator/ops/interviews/interviews-production-matrix-20260724T213237Z.json",
+  "markers": [
+    "INTVLIVEP",
+    "INTVVIDP",
+    "INTVGCALP"
+  ],
+  "do_not_begin_offers_hiring": true
+}

@@ -1,0 +1,317 @@
+[
+  {
+    "name": "shell wave0 flag",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutations off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ingest off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "production db",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "audit event written",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing leave inbox=False",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav leave present leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no overview leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no jobs leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing shifts inbox=False",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine shifts",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing attendance inbox=False",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine attendance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing payroll inbox=False",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine payroll",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing onboarding+compliance inbox=True",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine onboarding+compliance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing onboarding+compliance inbox=False",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine onboarding+compliance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing shifts+attendance+leave inbox=True",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav leave present shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no overview shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no jobs shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing shifts+attendance+leave inbox=False",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav leave present shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no overview shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no jobs shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine shifts+attendance+leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing leave+attendance+shifts+payroll inbox=True",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav leave present leave+attendance+shifts+payroll",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no overview leave+attendance+shifts+payroll",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nav no jobs leave+attendance+shifts+payroll",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine leave+attendance+shifts+payroll",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "landing pre_hiring+leave+attendance+shifts+payroll+onboarding+compliance+analytics inbox=True",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employees spine pre_hiring+leave+attendance+shifts+payroll+onboarding+compliance+analytics",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave inbox omits analytics",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave inbox omits compliance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave inbox not partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "entitled analytics error partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "entitled compliance present when purchased",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "action inbox live soft-skip",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog leave-only jobs off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog leave-only overview off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog leave-only e360 on people surface",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog leave-only leave on",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog full suite jobs on",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "empty en",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "empty ar",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "empty ar differs or bilingual",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "alerts keep onboarding row",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "alerts drop assessment residue",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "alerts keep generic posthire delivery",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "alerts prehire keeps all issue rows",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 leave-only sections",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 onboarding+compliance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 ops combo",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 no disabled payroll in leave-only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "live e360 modules list",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "canary events deleted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "residual canary 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "durable ack retained",
+    "ok": true,
+    "detail": null
+  }
+]

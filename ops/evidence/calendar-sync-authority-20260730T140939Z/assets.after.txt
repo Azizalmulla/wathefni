@@ -1,0 +1,3 @@
+/var/www/wathefni-dashboard/assets/CalendarShell-2449y5UN.js
+/var/www/wathefni-dashboard/assets/SettingsPage-Cj1Jh3Wk.js
+/var/www/wathefni-dashboard/assets/dashboard-B-yUXbUt.js

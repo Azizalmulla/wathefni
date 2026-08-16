@@ -1,0 +1,32 @@
+{
+  "captured_at": "2026-07-26T00:43:29Z",
+  "active_intake_addresses": [
+    {
+      "address": "965f89c46a9dfbca61a0831f8ba1f631@inbound.postmarkapp.com",
+      "company_code": "WATHEFNI",
+      "status": "active",
+      "position_code": null,
+      "intake_id": "25bdf532-fdc4-40b4-b200-02e6c36d1fc1"
+    }
+  ],
+  "inbound_watermark": "2026-07-25T13:01:59+00:00",
+  "mutations": {
+    "outbound_delivery_events_total": 4102,
+    "application_lifecycle_events_total": 149,
+    "applications_with_position": 47,
+    "applications_held_needs_role": 1,
+    "candidate_rank_evaluations_total": 54,
+    "intake_processing_jobs_total": 4,
+    "inbound_messages_total": 1,
+    "talent_pool_classification_jobs_total": 0,
+    "candidate_classification_runs_total": 0,
+    "sender_acknowledgment_jobs": 0
+  },
+  "guards": {
+    "classification_workers": "must_remain_off",
+    "sender_acknowledgment_job_type": "excluded_from_monitor_worker",
+    "cleanup": "forbidden_until_owner_confirms",
+    "synthetic_fixtures": "forbidden",
+    "production": "untouched"
+  }
+}

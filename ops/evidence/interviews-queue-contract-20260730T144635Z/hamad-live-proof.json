@@ -1,0 +1,81 @@
+{
+  "upcoming": 0,
+  "needs_feedback": 0,
+  "video": 1,
+  "completed": 2,
+  "cancelled": 2,
+  "all": 4,
+  "hamad": [
+    {
+      "id8": "06e4a65d",
+      "status": "cancelled",
+      "interview_type": "async_video",
+      "feedback_status": "notes_pending",
+      "human_feedback_status": "notes_pending",
+      "async_status": "consented",
+      "upcoming": false,
+      "needs_feedback": false,
+      "video": false,
+      "completed": false,
+      "cancelled": true
+    },
+    {
+      "id8": "8552e251",
+      "status": "cancelled",
+      "interview_type": "async_video",
+      "feedback_status": "notes_pending",
+      "human_feedback_status": "notes_pending",
+      "async_status": "link_sent",
+      "upcoming": false,
+      "needs_feedback": false,
+      "video": false,
+      "completed": false,
+      "cancelled": true
+    },
+    {
+      "id8": "669366ae",
+      "status": "completed",
+      "interview_type": "async_video",
+      "feedback_status": "notes_pending",
+      "human_feedback_status": "feedback_complete",
+      "async_status": "completed",
+      "upcoming": false,
+      "needs_feedback": false,
+      "video": true,
+      "completed": true,
+      "cancelled": false
+    },
+    {
+      "id8": "369997d8",
+      "status": "completed",
+      "interview_type": "live",
+      "feedback_status": "feedback_complete",
+      "human_feedback_status": "notes_pending",
+      "async_status": null,
+      "upcoming": false,
+      "needs_feedback": false,
+      "video": false,
+      "completed": true,
+      "cancelled": false
+    }
+  ],
+  "expected": {
+    "upcoming": 0,
+    "needs_feedback": 0,
+    "video": 1,
+    "completed": 2,
+    "cancelled": 2,
+    "all": 4
+  },
+  "counts": {
+    "upcoming": 0,
+    "needs_feedback": 0,
+    "video": 1,
+    "completed": 2,
+    "cancelled": 2,
+    "all": 4
+  },
+  "match": true,
+  "cancelled_retain_feedback": true,
+  "cancelled_retain_async": true
+}

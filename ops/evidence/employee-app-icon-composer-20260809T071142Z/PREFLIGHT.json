@@ -1,0 +1,46 @@
+{
+  "current_installed_build": {
+    "id": "78bb78be-dde2-4d8c-b7db-449e6d97a59f",
+    "resolvedImage": "macos-sonoma-14.5-xcode-15.4",
+    "icon_path": "expo.icon -> ./assets/icon.png (legacy PNG AppIcon.appiconset)",
+    "icon_type": "legacy_png",
+    "ios26_auto_adapting": true,
+    "explicit_icon_composer": false
+  },
+  "new_package": {
+    "path": "assets/WathefniAppIcon.icon",
+    "type": "icon_composer_liquid_glass",
+    "plugin": "plugins/withLiquidGlassIcon.js",
+    "settings": {
+      "fill": "#FEF0D6",
+      "glass": false,
+      "specular": false,
+      "translucency": false,
+      "shadow": "none",
+      "blur-material": 0,
+      "refractivity": false,
+      "default_appearance": "fill-specializations default (= Light/Default)"
+    }
+  },
+  "ictool_default_vs_master": {
+    "master": {
+      "badge_n": 237093,
+      "badge_mean_lum": 0.07446775484725403,
+      "cream_mean": [
+        253.9729743774382,
+        240.0095727345951,
+        214.06315753006868
+      ]
+    },
+    "ictool_default": {
+      "badge_n": 236732,
+      "badge_mean_lum": 0.07477654562965716,
+      "cream_mean": [
+        252.19024114357242,
+        242.0141030056838,
+        218.34788843574978
+      ]
+    }
+  },
+  "master_sha256": "9066753bb2c5c6940b3a9074859b8f5258c15ec9d1431ba783dee6f2ae08c4b4"
+}

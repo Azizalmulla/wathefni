@@ -1,0 +1,57 @@
+stamp=20260803T194208Z
+time_utc=2026-08-03T19:43:03Z
+active
+=== SHAs before ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+f9c7b2343e297438a6cf6bc37f76b631bb89b78220d8b0078e16ef7da308fa02  /opt/wathefni/orchestrator/action_registry.py
+3416837273e526fff8d23eeccddb2dd10870eb7e779b691225c8a4607863d358  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+ls: cannot access '/opt/wathefni/orchestrator/platform_assistant_spine_wave1.py': No such file or directory
+platform_assistant_spine_wave1.py absent
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[19:43:03] backing up modules + dropins
+432b360dc0d35162749a361b6a66891560c0197314a037aa900b74664956c623  modules/assistant_capability_catalog.py
+f9c7b2343e297438a6cf6bc37f76b631bb89b78220d8b0078e16ef7da308fa02  modules/action_registry.py
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  modules/app.py
+3416837273e526fff8d23eeccddb2dd10870eb7e779b691225c8a4607863d358  modules/tool_call_orchestrator.py
+eec8fb531faf1e449ca114996d4088522958c774e99ca50fc0b973883cb36f79  modules/setup_console_wave_a_launch_readiness.py
+[19:43:03] deploying platform assistant wave1 modules
+[19:43:03] writing Wave 1-B production drop-in (mutations off; ingest off; WATHEFNI only)
+[19:43:03] migrate ACK
+wave1_version 1.0.0
+contract platform_assistant_spine_wave1
+honesty_ok {'wathefni_only': True, 'hr_dashboard_only': True, 'mutates_records': False, 'payroll_money': False, 'attendance_ingest': False, 'whatsapp_widening': False, 'default_posthire_entry': 'action_inbox'}
+connected_db wathefni
+ack_event_id 299bebea-95f9-4477-a4bf-141a55896ac3
+ACK_PRODUCTION_PLATFORM_ASSISTANT_W1B=YES
+residual_policy=canary_tagged_cleaned_ack_retained
+MIGRATE_OK
+health_ok
+active
+=== SHAs after ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+a644681eb02527904f53f9dc23a67bee33bef72340f07aea03882133b0264ddd  /opt/wathefni/orchestrator/action_registry.py
+2144878c3bd1c5f75b1ee5cc560883937cc9239997810072eb9345a0be46dafe  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+6f096fa6c75b76894c59e808cccc3c86e35756cb8202b025062bb9ab577b0e22  /opt/wathefni/orchestrator/platform_assistant_spine_wave1.py
+=== flags after ===
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WAVE1 1
+COMPANIES WATHEFNI
+KILL 0
+MUTATIONS 0
+CAPTURE_INGEST off
+enabled True
+company True
+company_external False
+mutations_allowed False
+kill_engaged False
+honesty {'wathefni_only': True, 'hr_dashboard_only': True, 'mutates_records': False, 'payroll_money': False, 'attendance_ingest': False, 'whatsapp_widening': False, 'default_posthire_entry': 'action_inbox'}
+PAW1B_MARKER=PAW1B
+flags_ok_wave1b=true
+DEPLOY_OK stamp=20260803T194208Z backup=/opt/wathefni/backups/production-pre-platform-assistant-wave1b-20260803T194208Z evid=/opt/wathefni/production-evidence/platform-assistant-wave1b-prod-canary/20260803T194208Z

@@ -1,0 +1,344 @@
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+ ❯ src/EmployeeProfile.repro.test.tsx (1 test | 1 failed) 1163ms
+     × opening an employee from the directory does not crash the dashboard 1162ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/EmployeeProfile.repro.test.tsx > employee profile click (production data repro) > opening an employee from the directory does not crash the dashboard
+TestingLibraryElementError: Found multiple elements with the text: Talal Fadhli
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"font-semibold text-text"[39m
+[36m>[39m
+  [0mTalal Fadhli[0m
+[36m</p>[39m
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"flex items-center gap-2 font-semibold text-text"[39m
+[36m>[39m
+  [0mTalal Fadhli[0m
+[36m</p>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<main[39m
+      [33mclass[39m=[32m"app-shell flex h-dvh w-full flex-col overflow-hidden bg-wf-frame text-text lg:flex-row"[39m
+      [33mdata-testid[39m=[32m"app-shell"[39m
+      [33mdir[39m=[32m"ltr"[39m
+      [33mlang[39m=[32m"en"[39m
+    [36m>[39m
+      [36m<aside[39m
+        [33mclass[39m=[32m"wf-sidebar-scroll flex shrink-0 flex-col min-w-0 max-w-full overflow-x-clip bg-wf-sidebar p-3 text-white lg:h-dvh lg:w-[210px] lg:overflow-y-auto lg:overflow-x-hidden lg:p-4"[39m
+        [33mdata-testid[39m=[32m"app-sidebar"[39m
+        [33mdir[39m=[32m"ltr"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mb-7 hidden px-3 py-2 lg:block"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"text-xl font-semibold tracking-[-0.045em]"[39m
+          [36m>[39m
+            [0mWathefni[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/40"[39m
+          [36m>[39m
+            [0mHR workspace[0m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full max-w-full overflow-x-clip"[39m
+          [33mdata-testid[39m=[32m"mobile-prehire-nav"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex w-full min-w-0 items-center gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-current[39m=[32m"page"[39m
+              [33mclass[39m=[32m"flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 before:h-1.5 before:w-1.5 before:shrink-0 before:rounded-full before:bg-wf-accent-active before:content-['']"[39m
+              [33mdata-active[39m=[32m"true"[39m
+              [33mdata-testid[39m=[32m"mobile-active-route-chip"[39m
+              [33mtitle[39m=[32m"Employees"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-users"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 3.128a4 4 0 0 1 0 7.744"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 21v-2a4 4 0 0 0-3-3.87"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"9"[39m
+                  [33mcy[39m=[32m"7"[39m
+                  [33mr[39m=[32m"4"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"truncate"[39m
+              [36m>[39m
+                [0mEmployees[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex min-w-0 flex-1 items-center gap-1 overflow-x-auto overscroll-x-contain"[39m
+              [33mdata-testid[39m=[32m"mobile-prehire-rail"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative shrink-0"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-haspopup[39m=[32m"menu"[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm bg-white/12 font-semibold text-white ring-1 ring-white/25"[39m
+                [33mdata-testid[39m=[32m"mobile-nav-more"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-ellipsis"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"16"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"16"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"1"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"19"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"1"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"5"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"1"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mMore[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</aside>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"min-w-0 max-w-full flex-1 overflow-x-clip min-h-0 overflow-y-auto lg:h-dvh p-4 sm:p-5 lg:p-7"[39m
+        [33mdata-testid[39m=[32m"app-main"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"mb-6 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between border-b border-line/40 pb-5"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-[11px] font-semibold uppercase tracking-[0.28em] text-mist"[39m
+            [36m>[39m
+              [0mPost-Hire[0m
+            [36m</div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"max-w-5xl font-semibold tracking-[-0.045em] text-text mt-2 text-3xl lg:text-[2.35rem]"[39m
+            [36m>[39m
+              [0mEmployees[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-subtle/90 mt-2 max-w-2xl ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<main[39m
+      [33mclass[39m=[32m"app-shell flex h-dvh w-full flex-col overflow-hidden bg-wf-frame text-text lg:flex-row"[39m
+      [33mdata-testid[39m=[32m"app-shell"[39m
+      [33mdir[39m=[32m"ltr"[39m
+      [33mlang[39m=[32m"en"[39m
+    [36m>[39m
+      [36m<aside[39m
+        [33mclass[39m=[32m"wf-sidebar-scroll flex shrink-0 flex-col min-w-0 max-w-full overflow-x-clip bg-wf-sidebar p-3 text-white lg:h-dvh lg:w-[210px] lg:overflow-y-auto lg:overflow-x-hidden lg:p-4"[39m
+        [33mdata-testid[39m=[32m"app-sidebar"[39m
+        [33mdir[39m=[32m"ltr"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mb-7 hidden px-3 py-2 lg:block"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"text-xl font-semibold tracking-[-0.045em]"[39m
+          [36m>[39m
+            [0mWathefni[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/40"[39m
+          [36m>[39m
+            [0mHR workspace[0m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full max-w-full overflow-x-clip"[39m
+          [33mdata-testid[39m=[32m"mobile-prehire-nav"[39m
+          [33mdir[39m=[32m"ltr"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex w-full min-w-0 items-center gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-current[39m=[32m"page"[39m
+              [33mclass[39m=[32m"flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 before:h-1.5 before:w-1.5 before:shrink-0 before:rounded-full before:bg-wf-accent-active before:content-['']"[39m
+              [33mdata-active[39m=[32m"true"[39m
+              [33mdata-testid[39m=[32m"mobile-active-route-chip"[39m
+              [33mtitle[39m=[32m"Employees"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-users"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 3.128a4 4 0 0 1 0 7.744"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M22 21v-2a4 4 0 0 0-3-3.87"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"9"[39m
+                  [33mcy[39m=[32m"7"[39m
+                  [33mr[39m=[32m"4"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"truncate"[39m
+              [36m>[39m
+                [0mEmployees[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex min-w-0 flex-1 items-center gap-1 overflow-x-auto overscroll-x-contain"[39m
+              [33mdata-testid[39m=[32m"mobile-prehire-rail"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative shrink-0"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-haspopup[39m=[32m"menu"[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm bg-white/12 font-semibold text-white ring-1 ring-white/25"[39m
+                [33mdata-testid[39m=[32m"mobile-nav-more"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-ellipsis"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"16"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"16"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"1"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"19"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"1"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"5"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"1"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span>[39m
+                  [0mMore[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</aside>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"min-w-0 max-w-full flex-1 overflow-x-clip min-h-0 overflow-y-auto lg:h-dvh p-4 sm:p-5 lg:p-7"[39m
+        [33mdata-testid[39m=[32m"app-main"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"mb-6 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between border-b border-line/40 pb-5"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-[11px] font-semibold uppercase tracking-[0.28em] text-mist"[39m
+            [36m>[39m
+              [0mPost-Hire[0m
+            [36m</div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"max-w-5xl font-semibold tracking-[-0.045em] text-text mt-2 text-3xl lg:text-[2.35rem]"[39m
+            [36m>[39m
+              [0mEmployees[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-subtle/90 mt-2 max-w-2xl ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/EmployeeProfile.repro.test.tsx:158:18
+    156|       fireEvent.click(await screen.findByRole('menuitem', { name: 'Emp…
+    157|     }
+    158|     await screen.findByText('Talal Fadhli')
+       |                  ^
+    159|     fireEvent.click(screen.getByText('Talal Fadhli'))
+    160|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 15 passed (16)
+   Start at  04:06:25
+   Duration  2.90s (transform 886ms, setup 812ms, import 580ms, tests 1.17s, environment 3.58s)
+

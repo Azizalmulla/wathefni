@@ -1,0 +1,16 @@
+# Payroll Wave 2A-D — External Run Operability (staging)
+
+**Stamp:** `20260803T181542Z`  
+**Evidence:** `/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave2ad-20260803T181542Z`
+
+## Verdicts
+
+| Scope | Verdict |
+|---|---|
+| Staging operability | **GO** (if remote smoke OK) |
+| Production synthetic qualification | **NO-GO** — requires separate Wave 2A-D-B |
+| Money / vendor / package expansion | **NO-GO** |
+
+## Keep
+
+external money authority · native non-authoritative · payment_processing=disabled · no vendor connector · no attendance/leave/shifts package fill · no bank/WPS/PIFSS/EOS/payments/AI

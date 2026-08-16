@@ -1,0 +1,3 @@
+    PRODUCTION READINESS R10 — measured staging latency
+    tenant: R106357A2 headcount=80
+REFUSE TO RUN [synthetic_company_required]: R106357A2 is not an isolated synthetic/test company. Fixture tooling will not write it.

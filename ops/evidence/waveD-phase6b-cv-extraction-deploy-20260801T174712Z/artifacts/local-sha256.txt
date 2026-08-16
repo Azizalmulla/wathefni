@@ -1,0 +1,2 @@
+27c7e2f0d8fe110b2683a0173b29122c5293411a64a71fcb865cdab8d079e790  /Users/azizalmulla/Desktop/claw/ops/evidence/waveD-phase6b-cv-extraction-deploy-20260801T174712Z/artifacts/app.py
+8cf1759371a2a3d4f1f42125e1ba960ae34db23f6c173f657aa1532cd95a4fab  /Users/azizalmulla/Desktop/claw/ops/evidence/waveD-phase6b-cv-extraction-deploy-20260801T174712Z/artifacts/inbound_cv_authority.py

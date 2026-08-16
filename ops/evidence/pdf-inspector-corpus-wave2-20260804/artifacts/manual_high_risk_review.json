@@ -1,0 +1,426 @@
+[
+  {
+    "file": "corpus/syn_broken_encoding_000.pdf",
+    "wall_ms": 13,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "corrupt_or_unusable_text",
+        "chars": 303,
+        "words": 30,
+        "arabic_ratio": 0.0,
+        "preview": "Broken Encoding CV - Bassam AlMutairi\n\nEmail: bassam.almutairi.2111@synthetic-eval.example\nPhone: +96553452673\n\n\nName mo"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 296,
+      "mojibake_hits": 6,
+      "arabic_chars": 0,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": false,
+      "false_skip_candidates_1idx": [
+        1
+      ],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": true,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "corrupt_or_unusable_text": 1
+        },
+        "quality_gate_failed_pages": [
+          1
+        ]
+      },
+      "detections": {
+        "mojibake": true,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/wave0_cv_broken_encoding_01.pdf",
+    "wall_ms": 1,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 172,
+        "words": 17,
+        "arabic_ratio": 0.0,
+        "preview": "Broken Encoding CV - Proxy\nEmail: broken.encoding@example.com\nPhone: +96556667788\nName mojibake: Ù■Ù■Ø±Ø©\nGarbled Arabic"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 169,
+      "mojibake_hits": 4,
+      "arabic_chars": 2,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": true,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/syn_arabic_digital_cv_000.pdf",
+    "wall_ms": 2,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 552,
+        "words": 19,
+        "arabic_ratio": 0.045,
+        "preview": "‫ﺳﺎﺭﺓ ﺍﻟﺪﻭﺳﺮﻱ‬\n                                ‫ﻣﻬﻨﺪﺱ ﻋﻤﻠﻴﺎﺕ‬\n\n  ‫‪.8065@synthetic-eval.example‬يرسودلا‪.‬ةراس ‪Email:‬‬"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 348,
+      "mojibake_hits": 0,
+      "arabic_chars": 146,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/wave0_cv_ar_digital_01.pdf",
+    "wall_ms": 2,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "too_few_words",
+        "chars": 508,
+        "words": 5,
+        "arabic_ratio": 0.057,
+        "preview": "‫ﻧﻮﺭﺓ ﺍﻟﻌﺘﻴﺒﻲ‬\n                              ‫ﻣﻬﻨﺪﺳﺔ ﺑﺮﻣﺠﻴﺎﺕ‬\n                     ‫‪Email: noura.otaibi@example.com‬‬\n "
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 241,
+      "mojibake_hits": 0,
+      "arabic_chars": 155,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": false,
+      "false_skip_candidates_1idx": [
+        1
+      ],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": true,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "too_few_words": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/syn_scanned_image_only_cv_000.pdf",
+    "wall_ms": 0,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "image_only_page",
+        "chars": 0,
+        "words": 0,
+        "arabic_ratio": 0.0,
+        "preview": ""
+      }
+    ],
+    "inspector_type": "scanned",
+    "inspector_ocr": [
+      1
+    ],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 0,
+      "mojibake_hits": 0,
+      "arabic_chars": 0,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [
+        1
+      ],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "image_only_page": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/syn_cid_tounicode_missing_font_000.pdf",
+    "wall_ms": 1,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 219,
+        "words": 19,
+        "arabic_ratio": 0.0,
+        "preview": "CID/ToUnicode stress — Rania AlNasser\nEmail: rania.alnasser.1952@synthetic-eval.example\n\n\n\n■■■■■■■■■■■■■■■■■■■■■■■■\n\n■■■"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 225,
+      "mojibake_hits": 0,
+      "arabic_chars": 0,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": true
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": true,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/syn_bilingual_cv_000.pdf",
+    "wall_ms": 2,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 720,
+        "words": 20,
+        "arabic_ratio": 0.021,
+        "preview": "Yousef AlDosari                                                               ‫ﻋﺎﺩﻝ ﺍﻟﻘﺤﻄﺎﻧﻲ‬\nSoftware Engineer         "
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 394,
+      "mojibake_hits": 0,
+      "arabic_chars": 135,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "corpus/syn_mixed_digital_scanned_000.pdf",
+    "wall_ms": 2,
+    "pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 445,
+        "words": 47,
+        "arabic_ratio": 0.0,
+        "preview": "Yousef AlSabah\nHR Analyst\nEmail: yousef.alsabah.6805@synthetic-eval.example\nPhone: +96559752367\n\n\nEXPERIENCE\n2018-2020 N"
+      },
+      {
+        "page": 2,
+        "disposition": "needs_ocr",
+        "reason": "image_only_page",
+        "chars": 0,
+        "words": 0,
+        "arabic_ratio": 0.0,
+        "preview": ""
+      }
+    ],
+    "inspector_type": "mixed",
+    "inspector_ocr": [
+      2
+    ],
+    "encoding_flag": false,
+    "mq": {
+      "markdown_len": 445,
+      "mojibake_hits": 0,
+      "arabic_chars": 0,
+      "replacement_chars": 0,
+      "cid_tounicode_hint": false
+    },
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        2
+      ],
+      "inspector_pages_needing_ocr_1idx": [
+        2
+      ],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1,
+          "image_only_page": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  }
+]

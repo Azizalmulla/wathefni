@@ -1,0 +1,14 @@
+{
+  "has_showing_candidates": true,
+  "has_plus_jobs": true,
+  "has_active_applications_hover": true,
+  "has_save_this_view": true,
+  "has_new_description": true,
+  "has_no_job_assigned": true,
+  "absent_people_on_this_page": true,
+  "absent_ambiguous_plus_only": false,
+  "ok": true,
+  "js": [
+    "dashboard-DPkeDS49.js"
+  ]
+}

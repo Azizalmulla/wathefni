@@ -1,0 +1,8 @@
+{
+  "wave": "pdf_inspector_shadow_advisor_wave1",
+  "staging": "GO",
+  "production_shadow_observation": "GO",
+  "influences_ocr": false,
+  "p95_shadow_wall_ms": 18,
+  "rollback": "bash /opt/wathefni/backups/production-pre-pdf-inspector-shadow-wave1-*/ROLLBACK.sh"
+}

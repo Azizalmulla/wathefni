@@ -1,0 +1,39 @@
+=== SHAs before ===
+fb3522fc939ec87666853a99dac9e5bc7db757bf95dcfc6dea908ab7a248662b  /opt/wathefni/orchestrator/app.py
+dad7fbc7aabb8d2eb859ce697a6459b4ce54ca5414077992ced77a8f3637d696  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+31e0a7c5f8ea0ce61814363956e3bcbc321513a80112a1da946e5a5cb7fc3b19  /opt/wathefni/orchestrator/employee_policy_packs_wave3h.py
+2828df20cbedca6905ec15adf602994abfa96f678648947ffdf1d3577f2bb5f5  /opt/wathefni/orchestrator/employee_org_wave4.py
+aed53ec6c8244a1a1f0d31b18fc5a3e466dda30ea79247e798bd8ff3245a6f0f  /opt/wathefni/orchestrator/lifecycle-effective-worker.py
+ls: cannot access '/opt/wathefni/orchestrator/employee_selfservice_wave5.py': No such file or directory
+ess_wave5_absent_before
+=== SCHEMA META (lifecycle/org) ===
+/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py:47:SCHEMA_VERSION = "employees360-wave3h-jurisdiction-packs-v1"
+/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py:416:        (SCHEMA_VERSION,),
+/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py:770:                (company, SCHEMA_VERSION),
+/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py:777:        "checklist_version": SCHEMA_VERSION,
+/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py:817:                    SCHEMA_VERSION,
+/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py:844:                "checklist_version": SCHEMA_VERSION,
+=== FLAGS before ===
+WATHEFNI_EMPLOYEE_APP=off
+WATHEFNI_EMPLOYEE_AUTHORITY_V2=on
+WATHEFNI_EMPLOYEE_AUTHORITY_V2_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_EMPLOYEE_NEXT_ACTIONS=on
+WATHEFNI_EMPLOYEE_ORG_V4=on
+WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_DUE=on
+WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_LOOKBACK_DAYS=7
+WATHEFNI_EMPLOYEE_ORG_V4_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H=on
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H_COMPANIES=WATHEFNI
+WATHEFNI_ENV=production
+WATHEFNI_LIFECYCLE_COUNSEL_GATE=off
+=== TIMER ===
+enabled
+active
+=== ESS TABLES before ===
+=== ESS ROUTES BEFORE ===
+0

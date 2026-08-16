@@ -1,0 +1,32 @@
+    wave1 product acceptance — unit
+      PASS  setup wave1 policies module
+      PASS  setup patch requisitions
+      PASS  setup patch preboarding
+      PASS  setup patch probation
+      PASS  task sync requisition
+      PASS  task sync probation
+      PASS  task sync preboard remind
+      PASS  app merges wave1 policies
+      PASS  req http task sync
+      PASS  probation remind task sync
+      PASS  preboard remind task sync
+      PASS  Setup Wave1 card
+      PASS  Setup wires Wave1 card
+      PASS  req banner fixed
+      PASS  preboard banner fixed
+      PASS  probation banner fixed
+      PASS  HR mobile requisitions
+      PASS  HR mobile preboarding
+      PASS  HR mobile probation
+      PASS  employee preboarding
+      PASS  employee probation
+      PASS  visual seed script
+      PASS  product db smoke
+      PASS  freeze WAVE1_LIFECYCLE_FULL_PASS.md
+      PASS  freeze REQUISITIONS_SURFACE_WAVE_FREEZE.md
+      PASS  freeze PREBOARDING_SURFACE_WAVE_FREEZE.md
+      PASS  freeze PROBATION_SURFACE_WAVE_FREEZE.md
+      PASS  freeze HIRE_READY_BRIDGE_FREEZE.md
+
+    28 passed, 0 failed
+WAVE1_PRODUCT_UNIT_PASS

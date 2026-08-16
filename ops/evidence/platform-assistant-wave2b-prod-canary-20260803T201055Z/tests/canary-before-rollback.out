@@ -1,0 +1,98 @@
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2_COMPANIES=WATHEFNI
+CAPTURE_INGEST_OFF_OK
+MUTATIONS_OFF_OK
+WAVE1_ON_OK
+WAVE2_ON_OK
+[PASS] wave1 enabled
+[PASS] wave2 enabled
+[PASS] wathefni company
+[PASS] external denied
+[PASS] mutations off
+[PASS] master kill off
+[PASS] no payroll
+[PASS] no shifts
+[PASS] no onboarding surface
+[PASS] no attendance ingest
+[PASS] capture ingest off
+[PASS] existing records basis
+[PASS] no whatsapp widen
+[PASS] no mutations honesty
+[PASS] hr dashboard only
+[PASS] ingest env off
+[PASS] production db
+[PASS] audit event written
+[PASS] tool leave queue
+[PASS] tool attendance exceptions
+[PASS] wave1 inbox still present
+[PASS] mutation approve_leave hidden
+[PASS] mutation mark_absent hidden
+[PASS] mutation export_payroll hidden
+[PASS] whatsapp wave2 tools hidden
+[PASS] external wave2 tools hidden
+[PASS] leave tool ran
+[PASS] leave freshness
+[PASS] leave authority label
+[PASS] leave citations list
+[PASS] leave no mutate
+[PASS] leave proposed actions prepare-only
+[PASS] leave deep links present
+[PASS] leave groups present
+[PASS] leave viewer_phone injected
+[PASS] leave summary en
+[PASS] leave summary ar
+[PASS] leave soa leave
+[PASS] leave ar locale
+[PASS] attendance tool ran
+[PASS] attendance freshness
+[PASS] attendance authority label
+[PASS] attendance citations list
+[PASS] attendance no mutate
+[PASS] attendance proposed actions prepare-only
+[PASS] attendance capture_ingest off
+[PASS] attendance existing records
+[PASS] attendance ingest-off in summary
+[PASS] attendance groups present
+[PASS] attendance viewer_phone injected
+[PASS] attendance authority synthetic-or-partial
+[PASS] attendance ar locale
+[PASS] attendance ar differs or bilingual
+[PASS] tenant isolation leave
+[PASS] tenant isolation attendance
+[PASS] permission denial leave
+[PASS] permission denial attendance
+[PASS] manager scope denial surfaced
+[PASS] manager scope denial attendance
+[PASS] fallback en missing
+[PASS] fallback ar missing
+[PASS] fallback en stale
+[PASS] fallback ar stale
+[PASS] fallback en partial
+[PASS] fallback ar partial
+[PASS] fallback en unavailable
+[PASS] fallback ar unavailable
+[PASS] fallback en blocked
+[PASS] fallback ar blocked
+[PASS] fallback en unsupported
+[PASS] fallback ar unsupported
+[PASS] fallback en mutations_killed
+[PASS] fallback ar mutations_killed
+[PASS] mutation denial status
+[PASS] approve_leave is mutation
+[PASS] leave queue not mutation
+[PASS] attendance exceptions not mutation
+[PASS] master kill engaged
+[PASS] master kill leave
+[PASS] master kill cleared
+[PASS] whatsapp leave denied
+[PASS] whatsapp attendance denied
+[PASS] canary events deleted
+[PASS] residual canary 0
+[PASS] durable wave2 ack retained
+[PASS] durable wave1 ack retained
+{"pass": 86, "fail": 0, "tag": "5967e986", "residual": 0, "ack_count": 1, "mutations_allowed": false, "leave_authority": "live_controlled", "leave_total": 0, "attendance_authority": "synthetic", "attendance_total": 0, "attendance_capture_ingest": "off"}

@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/lib/workspaceCapability.test.ts src/App.test.tsx
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  2 passed (2)
+      Tests  22 passed (22)
+   Start at  07:14:38
+   Duration  3.36s (transform 571ms, setup 282ms, import 544ms, tests 2.13s, environment 948ms)
+

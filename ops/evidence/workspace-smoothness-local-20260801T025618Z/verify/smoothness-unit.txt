@@ -1,0 +1,39 @@
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+ ✓ src/lib/assessmentCohorts.test.ts > assessmentCohorts > normalizes aliases and tabs 1ms
+ ✓ src/lib/assessmentCohorts.test.ts > assessmentCohorts > queue copy never says Send pending for resend 0ms
+ ✓ src/lib/assessmentCohorts.test.ts > assessmentCohorts > primary action prefers backend allowed actions 0ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > assessment surface-only tabs are not cohort-derived 2ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > assessment openPage URL preserves surface tabs over cohort derivation 0ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > calendar mobile preference resolves day before paint helpers 0ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > work-queue scope prefers stored mine when company hint false 0ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > assistant empty status stays ready while refreshing 0ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > post-hire module data treats param change as loading 0ms
+ ✓ src/lib/workspaceSmoothness.test.ts > workspace smoothness contracts > video interviews stay undefined until authority ready 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > reads durable candidate cohort filters from URL 1ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > writes candidate filters into search params 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > writes and restores stage + view for Candidates 1ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > maps interview scheduling debt to candidates cohort 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > maps role destination with position and cohort 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > person destination keeps candidate app_key 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > overview scroll is restored from URL 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > maps assessment resend cohort to Assessments action surface 0ms
+ ✓ src/lib/dashboardNavigation.test.ts > dashboardNavigation > maps delivery failed and in-progress assessment cohorts 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > candidateFilterAuthority > clearing Follow-up needed drops follow_up + overview_cohort + cohort_key + action 1ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > candidateFilterAuthority > clearing one filter does not remove unrelated filters 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > candidateFilterAuthority > changing a non-context filter clears overview cohort context only 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > candidateFilterAuthority > clear advanced filters clears follow-up context and preserves position/view 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > candidateFilterAuthority > saved view select replaces leftover follow-up instead of merging 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > candidateFilterAuthority > clearFollowUpNeededContext is idempotent on already-clear state 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > Candidates URL contract (Wave 3) > round-trips meaningful flat filters through URL 1ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > Candidates URL contract (Wave 3) > omits default view=all and sort=newest from shared URLs 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > Candidates URL contract (Wave 3) > clearing follow-up from nav filters preserves unrelated URL filters 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > Candidates URL contract (Wave 3) > candidates stage status is not promoted from interview_status 0ms
+ ✓ src/lib/candidateFilterAuthority.test.ts > Candidates URL contract (Wave 3) > shared follow-up URL reproduces the same durable keys after reload parse 0ms
+
+ Test Files  4 passed (4)
+      Tests  30 passed (30)
+   Start at  05:56:32
+   Duration  690ms (transform 162ms, setup 441ms, import 149ms, tests 18ms, environment 1.76s)
+

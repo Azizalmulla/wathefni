@@ -1,0 +1,22 @@
+SHOT /tmp/shifts-w3-before/before-schedule-desktop-en.png
+requests_skip desktop-en Locator.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("[data-shifts-surfaces] [data-surface='requests']")
+
+SHOT /tmp/shifts-w3-before/before-schedule-mobile-en.png
+requests_skip mobile-en Locator.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("[data-shifts-surfaces] [data-surface='requests']")
+
+SHOT /tmp/shifts-w3-before/before-schedule-desktop-ar.png
+requests_skip desktop-ar Locator.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("[data-shifts-surfaces] [data-surface='requests']")
+
+SHOT /tmp/shifts-w3-before/before-schedule-mobile-ar.png
+requests_skip mobile-ar Locator.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("[data-shifts-surfaces] [data-surface='requests']")
+
+SHOTS_DIR /tmp/shifts-w3-before
+SHIFTS_WAVE3_SHOTS_OK

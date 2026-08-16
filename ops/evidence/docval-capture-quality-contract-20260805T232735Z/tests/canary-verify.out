@@ -1,0 +1,18 @@
+{
+  "canary_present": true,
+  "canary_status": "pending",
+  "canary_document_type": "civil_id_canary_test",
+  "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+  "visible_in_employee_app": true,
+  "group": "your_actions",
+  "actions": [
+    "upload"
+  ],
+  "upload_enabled": true,
+  "required_canary": false,
+  "real_civil_id_status": "accepted",
+  "real_civil_id_required": true,
+  "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "required_item_count_excluding_canary": 4
+}
+VERIFY PASS

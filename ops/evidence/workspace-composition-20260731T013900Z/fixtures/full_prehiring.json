@@ -1,0 +1,38 @@
+{
+  "id": "full_prehiring",
+  "label": "Full pre-hiring",
+  "modules": [
+    "pre_hiring",
+    "assessments",
+    "interviews",
+    "video_interviews",
+    "calendar"
+  ],
+  "role": "owner",
+  "nav_groups": [
+    "prehire",
+    "settings"
+  ],
+  "nav_ids": [
+    "overview",
+    "ai",
+    "jobs",
+    "candidates",
+    "interviews",
+    "calendar",
+    "assessments",
+    "ranking",
+    "reports",
+    "notifications",
+    "activity",
+    "settings"
+  ],
+  "overview_layout": "three",
+  "offerable_tabs": {
+    "video_interviews": true
+  },
+  "settings": {
+    "team": true,
+    "integrations": true
+  }
+}

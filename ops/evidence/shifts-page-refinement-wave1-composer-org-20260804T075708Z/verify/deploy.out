@@ -1,0 +1,31 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-oFjO0X5a.js
+BACKUP=/opt/wathefni/backups/production-pre-shifts-page-refinement-wave1-composer-org-20260804T075708Z
+PASS data-shifts-composer-org
+PASS data-shifts-edit-org
+PASS Unmapped
+PASS غير مرتبط
+PASS expected_updated_at
+PASS data-shifts-surfaces
+PASS Schedule a shift
+STATIC_GATES_OK
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+PASS posthire_bundle_present — PostHire-oFjO0X5a.js
+PASS surfaces_marker
+PASS schedule_default_marker
+PASS attention_strip
+PASS primary_schedule
+PASS board_marker
+PASS operations_collapsed
+PASS no_inner_h1_pattern
+PASS governed_filters
+PASS composer_org_governed
+PASS empty_cta
+PASS mutation_concurrency
+PASS mutation_swaps
+PASS arabic_surface
+PASS leave_still_present
+PASS attendance_still_present
+SHIFT_STATUS_COUNTS [{"status": "scheduled", "c": 81}, {"status": "cancelled", "c": 73}]
+PASS shifts_table_readable — statuses=2
+SHIFTS_WAVE1_SMOKE_OK
+DEPLOY_OK

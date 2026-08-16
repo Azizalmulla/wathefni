@@ -1,0 +1,206 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    module catalog — canonical sets + effective entitlements + workspace boot
+      PASS  catalog module keys are unique
+      PASS  catalog contains exactly the 17 canonical product modules
+      PASS  requisitions has no HARD module dependency
+      PASS  preboarding has no HARD module dependency
+      PASS  probation has no HARD module dependency
+      PASS  requisitions alias maps
+      PASS  preboard alias maps
+      PASS  calendar module is opt-in pre_hire hr suite
+      PASS  calendar is not legacy-implied from pre_hiring
+      PASS  live interviews is independent of video_interviews
+      PASS  setup save protects currently-enabled interviews
+      PASS  apply_legacy_module_implications grants interviews from pre_hiring seed
+      PASS  employee_app is a post-hire employee module
+      PASS  employee_app retains the platform master flag
+      PASS  people modules include Wave 1 hire-ready surfaces
+      PASS  post-hire dashboard modules include Wave 1 + analytics
+      PASS  tool-call gated includes Wave 1 + post-hire operational modules
+      PASS  Setup Console catalog includes employee_app
+      PASS  legacy post_hiring alias remains backward compatible
+      PASS  assessments hard-depends on pre_hiring only
+      PASS  video_interviews hard-depends on pre_hiring only
+      PASS  employment_offers hard-depends on pre_hiring only
+      PASS  offers alias maps to employment_offers
+      PASS  workforce ops modules remain independently selectable
+      PASS  expand auto-includes pre_hiring for assessments
+      PASS  missing deps reports assessments without pre_hiring
+      PASS  payroll soft-recommends attendance and leave without requiring them
+      PASS  payroll has no employee-app surface in V1
+      PASS  bundles include hire-ready suite
+      PASS  hiring assessment bundle expands with pre_hiring
+      PASS  app surfaces require employee_app selection
+      PASS  app surface preview derives from selected modules and excludes payroll
+      PASS  GCC setup defaults are canonical
+      PASS  app Setup Console uses canonical catalog
+      PASS  app post-hire dashboard set derives from catalog
+      PASS  app people surfaces derive from catalog
+      PASS  tool orchestrator imports canonical gated set
+      PASS  compliance actions are now module-mapped
+      PASS  compliance audit category is explicit
+      PASS  workspace boot flag defaults to fail-safe OFF semantics
+      PASS  Setup Console V2 defaults OFF
+      PASS  company channel accounts default OFF
+      PASS  bootstrap is hidden while flag OFF
+      PASS  flag OFF preserves historical pre_hiring gate
+      PASS  team route remains pre_hiring-protected while flag OFF
+      PASS  post-hire-only tenant enters workspace when flag ON
+      PASS  workspace mutation uses permission, not pre_hiring module
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-module-catalog.py", line 264, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-module-catalog.py", line 207, in main
+    check("post-hire-only tenant can load team route when flag ON", client.get("/dashboard/team").status_code == 200)
+                                                                    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/testclient.py", line 482, in get
+    return super().get(
+           ~~~~~~~~~~~^
+        url,
+        ^^^^
+    ...<6 lines>...
+        extensions=extensions,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1053, in get
+    return self.request(
+           ~~~~~~~~~~~~^
+        "GET",
+        ^^^^^^
+    ...<7 lines>...
+        extensions=extensions,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/testclient.py", line 454, in request
+    return super().request(
+           ~~~~~~~~~~~~~~~^
+        method,
+        ^^^^^^^
+    ...<11 lines>...
+        extensions=extensions,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+        request,
+    ...<2 lines>...
+        history=[],
+    )
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+        request,
+        follow_redirects=follow_redirects,
+        history=history,
+    )
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/testclient.py", line 356, in handle_request
+    raise exc
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/testclient.py", line 353, in handle_request
+    portal.call(self.app, scope, receive, send)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/anyio/from_thread.py", line 338, in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 450, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py", line 395, in __get_result
+    raise self._exception
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/anyio/from_thread.py", line 263, in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 42071, in _no_store_on_authenticated_surface_reads
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 2692, in app
+    await route.handle(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 1274, in handle
+    await super().handle(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 156, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 142, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 698, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 352, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/starlette/concurrency.py", line 34, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 45847, in dashboard_team_list
+    with db_connect() as conn:
+         ~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 258, in __enter__
+    self._conn = _get_db_pool().getconn()
+                 ~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 235, in _get_db_pool
+    binding = runtime_binding()
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 224, in runtime_binding
+    assert_runtime_environment_binding()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 202, in assert_runtime_environment_binding
+    binding = _runtime_environment.resolve_runtime_binding(os.environ)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/runtime_environment.py", line 101, in resolve_runtime_binding
+    raise RuntimeEnvironmentError("application_environment_missing_or_invalid")
+runtime_environment.RuntimeEnvironmentError: application_environment_missing_or_invalid
+LOCAL_CATALOG_APP_DB_SKIP — catalog assertions already green; app HTTP deferred to staging

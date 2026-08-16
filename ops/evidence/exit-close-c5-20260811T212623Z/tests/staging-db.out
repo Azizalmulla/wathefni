@@ -1,0 +1,20 @@
+    exit close c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  rollback
+      PASS  EN closed
+      PASS  AR ready
+      PASS  assistant out
+      PASS  sole left authority
+      PASS  finalized ≠ paid
+      PASS  real term dark
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  real canary blocked
+      PASS  enable company
+      PASS  interview hidden when disabled
+      PASS  incomplete path resign draft
+      FAIL  incomplete path exit ready :: {'ok': False, 'error': 'invalid_status_transition', 'status': 'approved', 'from_statuses': ['notice_period'], 'to_status': 'ready_for_offboarding'}
+      FAIL  incomplete offboarding started :: {'ok': False, 'error': 'exit_intent_not_ready', 'status': 'approved', 'message': 'Offboarding starts only from ready_for_offboarding exit intent.'}

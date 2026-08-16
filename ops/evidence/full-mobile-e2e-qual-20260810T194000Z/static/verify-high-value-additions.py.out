@@ -1,0 +1,101 @@
+Employee App Phase E — high-value additions
+
+
+-- Request Leave: balance --
+PASS  balance display is gated on the server's balances_enabled flag
+PASS  only fields the API actually emits are read
+PASS  the phantom fields that produced a fake zero are gone from the contract
+PASS  no screen still reads balance_days
+PASS  a missing number is never coerced to zero
+PASS  non-numeric values are refused rather than cast
+PASS  Request Leave reads the balance through the shared accessor
+PASS  the balance shown is for the leave type being requested, not the first row
+PASS  Request Leave reuses the Leave tab's query key rather than a second fetch path
+PASS  balances are labelled as information while the server calls them non-binding
+PASS  eligibility date is surfaced when the balance cannot yet be taken
+
+-- Request Leave: requested duration --
+PASS  duration is fetched from the server
+PASS  the request is keyed on the exact selection so a stale count cannot show
+PASS  the count is only rendered when the server says it is available
+PASS  there is no local day-count fallback anywhere in the request flow
+PASS  the copy says working days, matching what the server computes
+PASS  a range with no working days says so instead of showing 0
+PASS  duration failures are not retried into an error state
+
+-- Profile: manager contact --
+PASS  the manager's name is shown when the roster has one
+PASS  the contact action appears only when the stored number is dialable
+PASS  an unrecognised number produces no action rather than a bad tel: link
+PASS  dialling is a discrete control, not the whole row
+PASS  the call target meets the touch-target floor
+PASS  a device that cannot dial fails quietly
+PASS  no chat, messaging or third-party contact channel was introduced
+PASS  no manager contact field beyond what /app/profile returns is read
+
+-- Inbox: relative time --
+PASS  rows show relative time
+PASS  the exact timestamp is preserved for assistive technology
+PASS  the exact timestamp is rendered in Kuwait time
+PASS  relative-time key time.justNow exists in EN and AR
+PASS  relative-time key time.minutesAgo exists in EN and AR
+PASS  relative-time key time.hoursAgo exists in EN and AR
+PASS  relative-time key time.yesterday exists in EN and AR
+PASS  older messages fall back to a localized date rather than a growing day count
+
+-- Payslips: year grouping --
+PASS  history is grouped by year
+PASS  only the most recent year opens on arrival
+PASS  a lone year cannot be collapsed into an empty screen
+PASS  a non-collapsible group always renders its rows
+PASS  each year is paged rather than rendered whole
+PASS  net pay keeps its prominence
+PASS  no search or filter chrome was added for a 12-per-year dataset
+PASS  documents history gets the same single-year treatment
+
+-- Home: document expiry task --
+PASS  the task detail rides on the server projection, not a second Home fetch
+PASS  Home does not re-query the documents module
+PASS  the day count is derived from the server's expiry date
+PASS  the document is named with the module's own label
+PASS  no detail means the generic label, never an implied urgency
+PASS  an unparseable expiry falls back rather than rendering a wrong count
+PASS  already-expired and expiring-today are stated correctly, not as negative days
+PASS  the expiry copy exists in both locales
+PASS  empty detail fields cannot masquerade as present
+PASS  the task still routes to Documents
+PASS  no permanent expiry dashboard or new compliance surface was added
+
+-- Navigation from Phase C+D is unchanged --
+PASS  bottom tabs remain Home · Schedule · Leave · Payslips · Profile
+PASS  Inbox is not a bottom tab
+PASS  Inbox remains the Home header bell
+PASS  Inbox route is still the canonical standalone route
+PASS  an unentitled module still leaves no dead tab slot
+PASS  Documents is reachable without taking a tab slot
+PASS  employeeAppComposition remains the only composition contract
+
+-- Scope guard --
+PASS  deferred feature not introduced: certificates
+PASS  deferred feature not introduced: announcements
+PASS  deferred feature not introduced: shift acknowledgement
+PASS  deferred feature not introduced: leave edit
+PASS  deferred feature not introduced: YTD earnings
+PASS  deferred feature not introduced: chat
+PASS  deferred feature not introduced: clock in/out
+PASS  deferred feature not introduced: attendance dispute
+PASS  deferred feature not introduced: editable employment profile
+PASS  deferred feature not introduced: org chart / directory
+PASS  deferred feature not introduced: payments / WPS
+PASS  no raw employee key is displayed to the employee
+PASS  no raw company code is displayed to the employee
+PASS  no invented staff number was fabricated in place of the missing field
+
+-- No new business authority on the client --
+PASS  the duration endpoint exists server-side
+PASS  the client never computes chargeable days
+PASS  the client reads the renewal verdict but never assigns one
+PASS  the client never decides whether a balance is enforceable
+PASS  leave submission is unchanged
+
+79 passed, 0 failed

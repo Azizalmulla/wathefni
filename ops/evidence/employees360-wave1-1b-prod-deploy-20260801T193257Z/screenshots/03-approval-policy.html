@@ -1,0 +1,105 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Approval Policy Proof</title>
+<style>body{font:16px/1.45 ui-sans-serif,system-ui;margin:28px;background:#111827;color:#f9fafb}
+h1{font-size:26px;margin:0 0 8px}.ok{color:#34d399}pre{background:#1f2937;padding:16px;border-radius:10px;overflow:auto;font-size:13px}
+.badge{display:inline-block;background:#064e3b;color:#a7f3d0;padding:4px 10px;border-radius:999px;font-size:12px;margin-right:8px}</style></head><body>
+<h1>Production approval-policy proof</h1>
+<p><span class="badge">canary_allowed=false</span><span class="badge">self_approval_allowed=false</span><span class="badge">production_safe_required=true</span></p>
+<p class="ok">Eligible separate approver present for WATHEFNI</p>
+<pre>{
+  "environment": "production",
+  "canary_allowed": false,
+  "self_approval_allowed": false,
+  "production_safe_required": true,
+  "eligible_approver_count": 1,
+  "eligible_approvers": [
+    {
+      "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+      "email": "azizalmulla16@gmail.com",
+      "name": "Aziz Almulla"
+    }
+  ],
+  "no_eligible_example": {
+    "company_code": "ZZZNONE",
+    "status_change_available": false,
+    "blocked_reason": "no_eligible_approver"
+  },
+  "integrity_scan_summary": {
+    "total_orphans": 3,
+    "ok": false,
+    "tables": {
+      "attendance_records": {
+        "orphans": 0,
+        "present": true
+      },
+      "leave_requests": {
+        "orphans": 0,
+        "present": true
+      },
+      "shift_assignments": {
+        "orphans": 0,
+        "present": true
+      },
+      "payroll_timesheets": {
+        "orphans": 0,
+        "present": true
+      },
+      "employee_availability_requests": {
+        "orphans": 0,
+        "present": true
+      },
+      "compliance_documents": {
+        "orphans": 0,
+        "present": true
+      },
+      "employee_messages": {
+        "orphans": 3,
+        "present": true
+      },
+      "employee_sessions": {
+        "orphans": 0,
+        "present": true
+      },
+      "employee_app_invites": {
+        "orphans": 0,
+        "present": true
+      },
+      "employee_status_changes": {
+        "orphans": 0,
+        "present": true
+      },
+      "employee_org_assignments": {
+        "orphans": 0,
+        "present": true
+      },
+      "hr_tasks": {
+        "orphans": 0,
+        "present": true
+      },
+      "document_storage_operations": {
+        "orphans": 0,
+        "present": true
+      },
+      "file_registry": {
+        "orphans": 0,
+        "present": true
+      },
+      "onboarding_items": {
+        "orphans": 0,
+        "present": true
+      },
+      "employee_documents": {
+        "orphans": 0,
+        "present": true
+      }
+    }
+  },
+  "known_null_statuses_preserved": {
+    "WATHEFNI-96597727743": null,
+    "WATHEFNI-96550252254": null
+  },
+  "synthetic_orphan_messages_preserved": 3,
+  "proof_verdict": "PASS",
+  "proof_pass": 37,
+  "proof_fail": 0
+}</pre>
+</body></html>

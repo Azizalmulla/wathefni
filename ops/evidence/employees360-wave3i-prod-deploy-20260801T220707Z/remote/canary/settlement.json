@@ -1,0 +1,36 @@
+{
+  "status": "handed_to_payroll",
+  "packet": {
+    "wave": "wave3f",
+    "inputs": {
+      "leave_balance_refs": "see_impact_snapshot",
+      "probation_end_date": null,
+      "open_timesheet_refs": "see_impact_snapshot",
+      "probation_start_date": null,
+      "attendance_exception_refs": "see_impact_snapshot",
+      "service_certificate_status": "pending"
+    },
+    "ui_copy": "Settlement packet is inputs-only. Payroll calculates EOSB, notice compensation, garden-leave pay and leave encashment outside Employees 360.",
+    "person_id": "afc458d2-b98e-5084-bc9c-c0aa9e936d53",
+    "disclaimer": "Inputs only. No EOSB, notice pay, garden leave, or leave encashment calculated in Employees 360. Payroll owns monetary calculations.",
+    "company_code": "WATHEFNI",
+    "employee_key": "WATHEFNI-96552263564",
+    "contract_type": "unlimited",
+    "employment_id": "ca5b0a5f-4405-58e4-a770-b93f36ebd50b",
+    "pay_frequency": "monthly",
+    "exceptional_case": false,
+    "last_working_day": "2026-08-01",
+    "probation_status": "completed",
+    "termination_type": "resignation",
+    "impact_snapshot_id": "4e078dd0-1b90-443e-8f1d-c9fcf9f697af",
+    "termination_reason": "scheduler path",
+    "impact_snapshot_hash": "293ae0c063800b7c9412a1f0a1695734246eefd1976324fd8003dec4cc9c6c90",
+    "settlement_packet_mode": "inputs_only",
+    "termination_case_class": "resignation",
+    "document_retention_mode": "retain",
+    "termination_effective_on": "2026-08-02",
+    "monetary_calculations_owner": "payroll",
+    "exceptional_escalation_state": null,
+    "document_retention_floor_days": 365
+  }
+}

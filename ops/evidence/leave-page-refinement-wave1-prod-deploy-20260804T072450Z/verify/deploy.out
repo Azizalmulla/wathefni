@@ -1,0 +1,34 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-HPcJNRf5.js
+BACKUP=/opt/wathefni/backups/production-pre-leave-page-refinement-wave1-20260804T072450Z
+PASS data-leave-queue
+PASS data-primary-action
+PASS Open in Leave
+PASS confirm_leave_stale_dual_control
+PASS initiate_leave_stale_dual_control
+PASS expected_row_version
+PASS Start dual-control
+PASS Confirm dual-control
+PASS الاعتماد قرار منفصل
+file PostHire-HPcJNRf5.js
+STATIC_GATES_OK
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+PASS posthire_bundle_present — PostHire-HPcJNRf5.js
+PASS leave_queue_marker
+PASS leave_attention
+PASS primary_action_marker
+PASS open_in_leave
+PASS approve_action
+PASS dual_initiate
+PASS dual_confirm_separate
+PASS row_version
+PASS approve_separate_honesty
+PASS balances_nonbinding
+PASS unpaid_honesty
+PASS stale_conflict_copy
+PASS arabic_rtl_hint
+LEAVE_STATUS_COUNTS [{"status": "approved", "c": 3}, {"status": "rejected", "c": 1}, {"status": "cancelled", "c": 1}, {"status": "expired_stale", "c": 1}]
+PASS leave_table_readable — requested=0 dual_pending=0
+PASS dual_path_ui
+PASS confirm_path_ui
+LEAVE_WAVE1_SMOKE_OK
+DEPLOY_OK

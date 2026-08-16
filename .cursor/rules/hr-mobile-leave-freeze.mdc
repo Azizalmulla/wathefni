@@ -1,0 +1,38 @@
+---
+description: Freeze HR mobile Leave decision detail after cream honesty lock; no workflow expansion
+globs: apps/wathefni-employee-mobile/src/hr/features/leave/**,apps/wathefni-employee-mobile/app/hr/leave/**,apps/wathefni-employee-mobile/scripts/verify-hr-leave-detail.py,apps/wathefni-employee-mobile/scripts/physical-hr-leave-en-ar.py
+alwaysApply: false
+---
+
+# HR mobile Leave detail — freeze
+
+HR mobile Leave decision detail (`/hr/leave/[id]`) is **accepted and frozen** after the cream + honesty lock (`20260810T170800Z`).
+Do **not** expand Leave workflow, invent balance enforcement, or redesign the decision spine while auditing/implementing Candidate detail and later surfaces.
+
+Canonical evidence: `ops/evidence/hr-leave-detail-cream-20260810T170800Z/`  
+Prior audit: `ops/evidence/hr-leave-detail-qual-20260810T165300Z/`  
+Product Leave freeze remains: `.cursor/rules/leave-freeze.mdc`
+
+## Frozen product shape
+
+- Cream `PageScreen` + `HrPushedNav`; one cream surface + one conflict callout
+- Real balance rows from API with observe-only / not-enforced caption
+- Localized conflict copy, confirm action labels (Approve/Reject), and consequence mapping (known EN templates → i18n; unknown server text passthrough)
+- `already_decided` when status ≠ `requested`; success / stale / revoked via decision state
+- Status chip tone from real leave status
+- SOD prepare → confirm; invalidate `mobile-priorities` + `leave`; `useHrSafeBack`
+- No raw `#xxxxxxxx` request-id chrome
+
+## Allowed without owner change-control
+
+- Bugfixes restoring freeze invariants / tenant isolation / RBAC / SOD
+- Docs / canary log / contract-debt notes
+- Shared Home/Inbox priority alignment that does not change Leave UX
+
+## Not allowed without an explicit owner wave
+
+- Balance enforcement (`enforced=true`) or inventing business meaning for unknown consequence text
+- Leave list route, bulk decide, or Payroll money from leave
+- Expanding allowed actions beyond approve/reject SOD
+- Reintroducing plum/amber/sky card stack or fake balance placeholder copy
+- Weakening manager scope / self-approval bans / real-decision allowlist

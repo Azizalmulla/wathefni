@@ -1,0 +1,3 @@
+PASS queue route wired
+PASS detail route wired
+FAIL Wordmark + EditorialHeading

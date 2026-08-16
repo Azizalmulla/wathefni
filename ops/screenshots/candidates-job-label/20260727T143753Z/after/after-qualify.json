@@ -1,0 +1,19 @@
+{
+  "phase": "after",
+  "shots": [
+    "/opt/wathefni/production-evidence/candidates-job-label/20260727T143753Z/after/after/after-candidates-desktop.png",
+    "/opt/wathefni/production-evidence/candidates-job-label/20260727T143753Z/after/after/after-candidates-ar.png"
+  ],
+  "assertions": {
+    "snippet": "2 CVs need attention\nReview\nCandidate list\n\nSee each candidate\u2019s expertise, job, and current hiring stage.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave this view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCJ\nCLJL Zero Job\n\tNot identified\tNo job assigned\tNew\tEmail \u00b7 Today\n\nCJ\nCLJL One Job\n\tNot identified\tHR\tReady for review\tJob application \u00b7 Today\n\nCP\nCLJL Multi Person\n\tNot identified\t2 applications\tInterview\tEmail \u00b7 Today\nShowing 1\u20133 of 3 candidates\nPrevious\nNext",
+    "zero_no_job": true,
+    "one_job_title": true,
+    "multi_count_only": true,
+    "absent_plus_jobs": true,
+    "absent_hr_plus": true,
+    "rtl": true,
+    "ar_no_job": true,
+    "ar_dual_or_plural": true
+  },
+  "ok": true
+}

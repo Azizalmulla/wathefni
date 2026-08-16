@@ -1,0 +1,7 @@
+wave1_version 1.0.0
+contract action_inbox_wave1
+honesty_ok {'read_only': True, 'mutates_records': False, 'synthetic_only': True, 'ai': False, 'hiring_reports_separate': True}
+connected_db wathefni
+ack_id 5
+ACK_PRODUCTION_ACTION_INBOX_W1B=YES
+MIGRATE_OK

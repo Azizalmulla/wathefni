@@ -1,0 +1,54 @@
+wave3 1.0.0
+connected_db wathefni_staging
+payslip_tables ['payroll_payslip_documents', 'payroll_payslip_events', 'payroll_payslip_lines']
+MIGRATE_OK payroll_payslip_wave3
+    payroll payslip wave3
+      PASS  version
+      PASS  payment disabled
+      PASS  not money
+      PASS  native non-auth
+      PASS  external authority
+      PASS  no AI
+      PASS  wave1 unchanged
+      PASS  wave2a unchanged
+      PASS  wave2b unchanged
+      PASS  history never deleted
+      FAIL  ux en title
+      FAIL  ux ar title
+      FAIL  ux honesty native
+      FAIL  ux mobile hint
+      FAIL  ux rtl
+connected_db wathefni_staging
+      PASS  draft
+      PASS  approve
+      PASS  period
+      PASS  preview ok
+      PASS  native payslip ok
+      PASS  native non-auth label
+      PASS  native payment disabled
+      PASS  native idempotent
+      PASS  scope denied
+      PASS  real refused
+      PASS  replace ok
+      PASS  replace version 2
+      PASS  prior replaced status
+      PASS  history retained after replace
+      PASS  download en
+      PASS  download ar
+      PASS  revoke ok
+      PASS  revoke status
+      PASS  history retained after revoke
+      PASS  no hard delete
+      PASS  external export
+      PASS  external import
+      PASS  external payslip ok
+      PASS  external money authority
+      PASS  external not wathefni auth
+      PASS  external idempotent
+      PASS  audit events
+      PASS  residual payslips zero
+      PASS  wave1 still enabled
+      PASS  wave2a still enabled
+      PASS  wave2b still enabled
+
+    41 passed, 5 failed

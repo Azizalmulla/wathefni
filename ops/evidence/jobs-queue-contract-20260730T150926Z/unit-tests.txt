@@ -1,0 +1,19 @@
+1
+0
+200
+test_active_pipeline_excludes_terminals (test_jobs_queue_contract.JobsQueueContractTests.test_active_pipeline_excludes_terminals) ... ok
+test_active_pipeline_sql_fragment (test_jobs_queue_contract.JobsQueueContractTests.test_active_pipeline_sql_fragment) ... ok
+test_effective_status_sql_covers_aliases (test_jobs_queue_contract.JobsQueueContractTests.test_effective_status_sql_covers_aliases) ... ok
+test_lifecycle_reopen_unchanged (test_jobs_queue_contract.JobsQueueContractTests.test_lifecycle_reopen_unchanged) ... ok
+test_pipeline_count_semantics_hired_rejected_withdrawn_archived (test_jobs_queue_contract.JobsQueueContractTests.test_pipeline_count_semantics_hired_rejected_withdrawn_archived)
+Badge / close confirm / View candidates share active_pipeline semantics. ... ok
+test_prehire_jobs_normalize_delegates (test_jobs_queue_contract.JobsQueueContractTests.test_prehire_jobs_normalize_delegates) ... ok
+test_role_active_matches_active_pipeline (test_jobs_queue_contract.JobsQueueContractTests.test_role_active_matches_active_pipeline) ... ok
+test_serialize_job_uses_normalized_aliases (test_jobs_queue_contract.JobsQueueContractTests.test_serialize_job_uses_normalized_aliases) ... ok
+test_status_aliases_normalize (test_jobs_queue_contract.JobsQueueContractTests.test_status_aliases_normalize) ... ok
+test_status_filter_coercion (test_jobs_queue_contract.JobsQueueContractTests.test_status_filter_coercion) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.001s
+
+OK

@@ -11,7 +11,6 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { InteractionManager, Modal, Platform, StyleSheet, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { FullWindowOverlay } from 'react-native-screens'
 
 import { useAuth } from '@/auth/AuthProvider'
@@ -120,18 +119,16 @@ export function LocalUnlockOverlay({ onUnlocked }: Props) {
   return (
     <OverlayHost>
       <View style={styles.root} pointerEvents="auto" accessibilityViewIsModal>
-        <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-          <UnlockWithBiometricGate
-            biometricFeatureOn={biometricFeatureOn}
-            busy={busy}
-            error={error}
-            onUnlockPin={onUnlockPin}
-            onUnlockBiometric={onUnlockBiometric}
-            onForgotPin={() => {
-              void recoverPinByReactivation()
-            }}
-          />
-        </SafeAreaView>
+        <UnlockWithBiometricGate
+          biometricFeatureOn={biometricFeatureOn}
+          busy={busy}
+          error={error}
+          onUnlockPin={onUnlockPin}
+          onUnlockBiometric={onUnlockBiometric}
+          onForgotPin={() => {
+            void recoverPinByReactivation()
+          }}
+        />
       </View>
     </OverlayHost>
   )
@@ -148,7 +145,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
-  safe: { flex: 1, backgroundColor: colors.bg },
   privacy: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 900,

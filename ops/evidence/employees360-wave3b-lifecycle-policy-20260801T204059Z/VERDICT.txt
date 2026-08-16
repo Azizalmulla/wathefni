@@ -1,0 +1,7 @@
+NO-GO
+
+Employees 360 Wave 3B — policy decisions complete; production deploy blocked
+until P0 checklist (policy config, scheduler, revoke-at-LWD, same-key rehire,
+settlement handoff, counsel sign-off, staging re-proof) is done.
+
+Wave 3 staging PASS preserved as baseline. Wave 4 not started. No deploy.

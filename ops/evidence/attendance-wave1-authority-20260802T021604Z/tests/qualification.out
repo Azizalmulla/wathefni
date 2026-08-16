@@ -1,0 +1,80 @@
+PASS  authority default off
+PASS  authority company gated off
+PASS  authority on for allowlisted
+PASS  authority off for other tenant
+PASS  overnight window spans midnight
+PASS  scheduled minutes overnight=480
+PASS  legacy minutes_between_times bug avoided
+PASS  normal day completed
+PASS  normal worked 480
+PASS  normal no exception
+PASS  normal version >= 2
+PASS  overnight status completed/late
+PASS  overnight worked ~477
+PASS  overnight work_date preserved
+PASS  post-midnight punch attributes to shift date
+PASS  multi sessions count=2
+PASS  breaks count=2
+PASS  unpaid break 30
+PASS  paid break 15
+PASS  worked excludes unpaid break
+PASS  duplicate retry not created
+PASS  duplicate same punch_id
+PASS  concurrent no errors
+PASS  concurrent single punch id
+PASS  absence loses to prior check-in
+PASS  absence first ok
+PASS  late check-in supersedes absence
+PASS  late minutes > 0
+PASS  missing check-in exception
+PASS  missing checkout exception
+PASS  incomplete cannot approve/payroll
+PASS  correction requested
+PASS  correction rejected
+PASS  correction disputed
+PASS  correction approved new version
+PASS  correction preserves history (manual flag)
+PASS  old projection not current
+PASS  version history retained
+PASS  manager self-correction denied
+PASS  approved leave status
+PASS  post-leave manual correction applied
+PASS  leave reverse preserves manual correction
+PASS  leave reverse without correction proceeds
+PASS  null shift_key single current
+PASS  null-shift day completed
+PASS  unapproved excluded from payroll
+PASS  day approved payroll_eligible
+PASS  approved snapshot reaches payroll
+PASS  payroll worked reconciles to snapshot
+PASS  payroll authority label
+PASS  tenant services isolated
+PASS  tenant A does not see B
+PASS  tenant B only own rows
+PASS  compat has attendance_id
+PASS  compat has company_code
+PASS  compat has employee_key
+PASS  compat has attendance_date
+PASS  compat has status
+PASS  compat has check_in_at
+PASS  compat has check_out_at
+PASS  compat has late_minutes
+PASS  compat has early_leave_minutes
+PASS  compat has metadata
+PASS  raw punches retained
+PASS  idempotent retry keeps original punched_at
+PASS  schema has attendance_punches
+PASS  schema unique source_event
+PASS  schema shift_key current unique
+PASS  schema payroll snapshots
+PASS  schema corrections
+PASS  app imports authority module
+PASS  app ensures authority schema
+PASS  app flag helper
+PASS  check_in branches on authority
+PASS  payroll approved snapshots branch
+PASS  leave reverse preserves manual
+PASS  freeze smoke-test-employees360-freeze-regression.py exit 0
+PASS  freeze smoke-test-onboarding-freeze-regression.py exit 0
+
+SUMMARY pass=78 fail=0

@@ -1,0 +1,41 @@
+{
+  "completed_at": "2026-07-18T21:00:00+00:00",
+  "environment": "staging",
+  "company_code": "WATHEFNI",
+  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+  "scope": "authenticated_human_review_only",
+  "boundaries": {
+    "generation_run": false,
+    "prompt_model_architecture_validator_changed": false,
+    "production_touched": false,
+    "publish_route_used": false,
+    "live_bank_insertion": false,
+    "pilot_executed": false,
+    "active_authoring_sessions_after": 0,
+    "global_authoring_flag": false
+  },
+  "totals": {
+    "approved": 25,
+    "rewritten": 1,
+    "rejected": 0,
+    "note": "One Arabic rewrite (package #1 typo) was previously applied as immutable revision ec06a808-c330-401d-af84-1ddf07eed770 and was reapproved in this authenticated pass. Final package dispositions are all approve."
+  },
+  "category_totals": {
+    "verbal_reasoning": {"approved": 5, "rewritten": 0, "rejected": 0},
+    "situational_judgment": {"approved": 5, "rewritten": 0, "rejected": 0},
+    "prioritization": {"approved": 5, "rewritten": 0, "rejected": 0},
+    "numerical_reasoning": {"approved": 5, "rewritten": 0, "rejected": 0},
+    "logical_reasoning": {"approved": 5, "rewritten": 0, "rejected": 0}
+  },
+  "en_ar_review_complete": "25/25",
+  "independent_key_verification_complete": "25/25",
+  "unresolved_items": [],
+  "manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "ready_for_pilot": true,
+  "arabic_rewrite_reapproved": {
+    "order": 1,
+    "ar_revision_id": "ec06a808-c330-401d-af84-1ddf07eed770",
+    "translation_pair_id": "47abf8c7-d35a-406f-8777-81bba2d9cd15",
+    "decision": "approve"
+  }
+}

@@ -1,0 +1,8 @@
+try_1=200
+/var/www/wathefni-dashboard/assets/CalendarShell-McJD9Ux2.js
+/var/www/wathefni-dashboard/assets/dashboard-Btr3JHJY.js
+Hiring_team True
+show_team_new True
+show_team_old False
+health=200
+dashboard=200

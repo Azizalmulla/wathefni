@@ -1,0 +1,190 @@
+{
+  "host": "production orchestrator @ /opt/wathefni/orchestrator",
+  "mode": "extract_only_no_side_effects",
+  "pdf": {
+    "file_name": "noor-evidence.pdf",
+    "bytes": 156521,
+    "sha256": "7a04250099a8d8496e6edafc961179a16f182a03b765ce07a1bd20cab50745f3",
+    "wall_latency_ms": 118,
+    "method": "pdftotext",
+    "quality_ok": true,
+    "error": null,
+    "chars": 8396,
+    "stage": "local_extract",
+    "tier": "poppler",
+    "provider": "local",
+    "actual_request_model": "pdftotext",
+    "provider_response_model": "pdftotext",
+    "ocr_call_count": null,
+    "billable_pages": null,
+    "estimated_cost_usd": null,
+    "pages_accepted_local": 2,
+    "pages_ocr": null,
+    "images": null,
+    "needs_review": null,
+    "engine_calls": [
+      {
+        "stage": "local_extract",
+        "tier": "poppler",
+        "provider": "local",
+        "actual_request_model": "pdftotext",
+        "billable_pages": 0,
+        "estimated_cost_usd": 0.0,
+        "retention": "local_only",
+        "quality_ok": true
+      }
+    ],
+    "page_assessments": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 4927
+      },
+      {
+        "page": 2,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 3467
+      }
+    ],
+    "provenance_sample": [],
+    "contact_lines_present": {
+      "email_in_text": true,
+      "phone_in_text": true,
+      "name_in_text": true
+    },
+    "side_effects": {
+      "db": false,
+      "email": false,
+      "screening": false
+    },
+    "prod_code": {
+      "app_py_sha256": "d9074ac3990c922f0648e736722f73f2b380d37b6e35b98dcb8044ede89e507e",
+      "cv_docx_sha256": "5a22dfd413c3826480fbac4d7a189684003dbdc1c88789240a2b8bb67586daeb",
+      "extract_branch": "cv_extraction / pdftotext"
+    }
+  },
+  "docx": {
+    "file_name": "noor-evidence.docx",
+    "bytes": 32189,
+    "sha256": "3f8780557ffa071aab889f4e142cd1b865e1611be3768e928488d94c97ae4d14",
+    "wall_latency_ms": 27,
+    "method": "docx-local-v2",
+    "quality_ok": true,
+    "error": null,
+    "chars": 8388,
+    "stage": "docx_extract",
+    "tier": "docx_local",
+    "provider": "local",
+    "actual_request_model": "docx-local-v2",
+    "provider_response_model": "docx-local-v2",
+    "ocr_call_count": 0,
+    "billable_pages": 0,
+    "estimated_cost_usd": 0,
+    "pages_accepted_local": null,
+    "pages_ocr": null,
+    "images": [
+      {
+        "part": "word/media/image1.jpeg",
+        "classification": "skip_photo",
+        "reason": "square_jpeg_portrait_heuristic",
+        "width": 218,
+        "height": 256,
+        "bytes": 11473
+      }
+    ],
+    "needs_review": false,
+    "engine_calls": [
+      {
+        "stage": "docx_extract",
+        "tier": "docx_local",
+        "provider": "local",
+        "actual_request_model": "docx-local-v2",
+        "billable_pages": 0,
+        "estimated_cost_usd": 0.0,
+        "retention": "local_only",
+        "quality_ok": true
+      }
+    ],
+    "page_assessments": [],
+    "provenance_sample": [
+      {
+        "block_id": "body-paragraph-1",
+        "kind": "paragraph",
+        "text": "Noor Tahat",
+        "order": 1,
+        "rtl": false,
+        "bilingual": false,
+        "section": "body",
+        "source_part": "word/document.xml",
+        "engine": "docx-local",
+        "confidence": 1.0
+      },
+      {
+        "block_id": "body-hlink-2",
+        "kind": "hyperlink",
+        "text": "noortahat3@gmail.com",
+        "order": 2,
+        "rtl": false,
+        "bilingual": false,
+        "href": "mailto:noortahat3@gmail.com",
+        "section": "body",
+        "source_part": "word/document.xml",
+        "engine": "docx-local",
+        "confidence": 1.0
+      },
+      {
+        "block_id": "body-paragraph-3",
+        "kind": "paragraph",
+        "text": "+965 66383372 | noortahat3@gmail.com",
+        "order": 3,
+        "rtl": false,
+        "bilingual": false,
+        "section": "body",
+        "source_part": "word/document.xml",
+        "engine": "docx-local",
+        "confidence": 1.0
+      },
+      {
+        "block_id": "body-paragraph-4",
+        "kind": "paragraph",
+        "text": "Research-oriented Computer Science undergraduate with an outstanding academic record (4.0 GPA), engaged in interdisciplinary projects spanning AI-driven optimization, computational modeling, and intelligent systems design. Experienced in developing algorithmic frameworks and simulation-based analyses under faculty-led research collaborations, including international research with the University of Oxford. Strengthened technical and applied AI skills through award-winning projects in national innovation challenges, including first-place solutions for AWS and KIB. Actively pursuing research projects aimed for publication in prestigious journals and conferences. Aspiring to pursue graduate research in artificial intelligence and machine learning by integrating data modeling with algorithmic approaches to advance intelligent system understanding.",
+        "order": 4,
+        "rtl": false,
+        "bilingual": false,
+        "section": "body",
+        "source_part": "word/document.xml",
+        "engine": "docx-local",
+        "confidence": 1.0
+      },
+      {
+        "block_id": "body-paragraph-5",
+        "kind": "paragraph",
+        "text": "Experience",
+        "order": 5,
+        "rtl": false,
+        "bilingual": false,
+        "section": "body",
+        "source_part": "word/document.xml",
+        "engine": "docx-local",
+        "confidence": 1.0
+      }
+    ],
+    "contact_lines_present": {
+      "email_in_text": true,
+      "phone_in_text": true,
+      "name_in_text": true
+    },
+    "side_effects": {
+      "db": false,
+      "email": false,
+      "screening": false
+    },
+    "prod_code": {
+      "app_py_sha256": "d9074ac3990c922f0648e736722f73f2b380d37b6e35b98dcb8044ede89e507e",
+      "cv_docx_sha256": "5a22dfd413c3826480fbac4d7a189684003dbdc1c88789240a2b8bb67586daeb",
+      "extract_branch": "cv_docx.extract_docx_document"
+    }
+  }
+}

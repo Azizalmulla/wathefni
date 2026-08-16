@@ -1,0 +1,87 @@
+{
+  "verdict": "PASS",
+  "probes": {
+    "en": {
+      "locale": "en",
+      "dir": "ltr",
+      "mineVisible": true,
+      "teamVisible": false,
+      "companyVisible": true,
+      "mineLabel": "My calendar",
+      "teamLabel": null,
+      "companyLabel": "Company calendar",
+      "mineTitle": "Events you own, organize, or attend",
+      "teamTitle": null,
+      "companyTitle": "Company-wide events you are allowed to see",
+      "scopesSeenBeforeSwitch": [
+        "mine",
+        "mine",
+        "mine"
+      ],
+      "scopesSeenAll": [
+        "mine",
+        "mine",
+        "mine",
+        "company",
+        "company",
+        "company",
+        "mine"
+      ],
+      "hasMineQuery": true,
+      "hasTeamQuery": true,
+      "hasCompanyQuery": true,
+      "rtl": true
+    },
+    "ar": {
+      "locale": "ar",
+      "dir": "rtl",
+      "mineVisible": true,
+      "teamVisible": false,
+      "companyVisible": true,
+      "mineLabel": "تقويمي",
+      "teamLabel": null,
+      "companyLabel": "تقويم الشركة",
+      "mineTitle": "أحداثك التي تملكها أو تنظّمها أو تحضرها",
+      "teamTitle": null,
+      "companyTitle": "أحداث الشركة التي يُسمح لك برؤيتها",
+      "scopesSeenBeforeSwitch": [
+        "mine",
+        "mine",
+        "mine"
+      ],
+      "scopesSeenAll": [
+        "mine",
+        "mine",
+        "mine",
+        "company",
+        "company",
+        "company",
+        "mine"
+      ],
+      "hasMineQuery": true,
+      "hasTeamQuery": true,
+      "hasCompanyQuery": true,
+      "rtl": true
+    },
+    "overview": {
+      "title": "My calendar",
+      "hasScopeToggle": false,
+      "overviewScopes": [
+        "mine"
+      ],
+      "onlyMine": true
+    },
+    "hide_company_without_perm": {
+      "companyVisible": true,
+      "teamVisible": false,
+      "hasCompanyPerm": true,
+      "rule": "Company calendar button only renders when canCompany (calendar.company) is true",
+      "observed_consistent": true
+    },
+    "invalid_scope_snap": {
+      "minePressed": true,
+      "teamAbsentOrSelectable": true,
+      "note": "Hiring team hidden; My calendar selected by default"
+    }
+  }
+}

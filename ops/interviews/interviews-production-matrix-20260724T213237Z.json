@@ -1,0 +1,272 @@
+{
+  "marker": "interviews-production-matrix-v1",
+  "started_at": "20260724T213233Z",
+  "companies": {
+    "live": "INTVLIVEP",
+    "video": "INTVVIDP"
+  },
+  "gates": [
+    {
+      "gate": "ranking_interview_unused_or_absent",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "ranking_does_not_require_interview_score",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "assistant_schedule_requires_confirmation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "assistant_cancel_requires_confirmation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "assistant_reschedule_requires_confirmation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "schedule_without_google_phone",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "provider_not_configured_without_google",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "duplicate_confirmation_one_interview",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "one_active_after_duplicate",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "gate": "schedule_physical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "schedule_manual_link",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "candidate_conflict_fail_closed",
+      "ok": true,
+      "detail": "schedule_conflict"
+    },
+    {
+      "gate": "panel_conflict_fail_closed",
+      "ok": true,
+      "detail": "schedule_conflict"
+    },
+    {
+      "gate": "concurrent_schedule_one_winner",
+      "ok": true,
+      "detail": "active=1 winners=['fcf49978-741d-41d3-a892-5c385680f9e3'] errors=['schedule_conflict']"
+    },
+    {
+      "gate": "reschedule_one_active_interview",
+      "ok": true,
+      "detail": "active=1"
+    },
+    {
+      "gate": "truth_not_delivered_from_calendar_alone",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "truth_rsvp_separate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "truth_sync_separate_from_channel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "panel_filter_uses_assignments",
+      "ok": true,
+      "detail": "filtered=1"
+    },
+    {
+      "gate": "panel_filter_tenant_isolated",
+      "ok": true,
+      "detail": "set()"
+    },
+    {
+      "gate": "two_raters_versioned_feedback",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "finalized_feedback_immutable",
+      "ok": true,
+      "detail": "feedback_immutable"
+    },
+    {
+      "gate": "feedback_reopen_audited",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "notes_do_not_complete_human_feedback",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "cancel_idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "google_failure_keeps_wathefni_interview",
+      "ok": true,
+      "detail": "failed"
+    },
+    {
+      "gate": "google_failure_visible_sync",
+      "ok": true,
+      "detail": "failed"
+    },
+    {
+      "gate": "google_connected_creates_one_event",
+      "ok": true,
+      "detail": "event=sshl4pg0i6oph193qdj88ce0vk sync=synced"
+    },
+    {
+      "gate": "google_reschedule_same_event_no_duplicate",
+      "ok": true,
+      "detail": "old=sshl4pg0i6oph193qdj88ce0vk new=sshl4pg0i6oph193qdj88ce0vk sync=synced"
+    },
+    {
+      "gate": "google_cancel_syncs_without_invalidating_history",
+      "ok": true,
+      "detail": "{'ok': True, 'error': None, 'status': 'synced'}"
+    },
+    {
+      "gate": "google_retry_does_not_duplicate_wathefni_row",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "gate": "async_video_create",
+      "ok": true,
+      "detail": "5afd0a76-ac50-4a16-91b7-089f897bc089"
+    },
+    {
+      "gate": "video_completion_does_not_mark_human_feedback_complete",
+      "ok": true,
+      "detail": "notes_pending"
+    },
+    {
+      "gate": "ai_summary_does_not_mark_human_feedback_complete",
+      "ok": true,
+      "detail": "human=notes_pending ai=True maybe=not_ready"
+    },
+    {
+      "gate": "stale_transcription_reclaimed",
+      "ok": true,
+      "detail": "{'ok': True, 'reclaimed_response_ids': ['f114767a-c840-4f1f-b404-4d57e6e10ad7'], 'count': 1}"
+    },
+    {
+      "gate": "stale_processing_reset_to_pending",
+      "ok": true,
+      "detail": "pending"
+    },
+    {
+      "gate": "retention_purge_runs",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "gate": "retention_purge_removed_file",
+      "ok": true,
+      "detail": "/tmp/intv-staging-bnjjalrv.webm"
+    },
+    {
+      "gate": "retention_purge_clears_registry_refs",
+      "ok": true,
+      "detail": "{'local_path': None, 'video_file_id': None}"
+    },
+    {
+      "gate": "agenda_week_view",
+      "ok": true,
+      "detail": "Asia/Kuwait"
+    },
+    {
+      "gate": "reports_no_interview_score_injection",
+      "ok": true,
+      "detail": "scanned report payload"
+    },
+    {
+      "gate": "arabic_interview_copy_present",
+      "ok": true,
+      "detail": "local_copy_exists=False text_len=956814"
+    },
+    {
+      "gate": "a11y_copy_keys_present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "no_automatic_hire_or_reject_from_interview",
+      "ok": true,
+      "detail": "shortlisted"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "ok": true,
+      "detail": "{'interviews': 0, 'assignments': 0, 'ops': 0, 'feedback': 0, 'retention_ops': 0, 'video_responses': 0, 'applications': 0, 'modules': 0, 'companies': 0, 'candidates': 0}"
+    }
+  ],
+  "google_events": [
+    "sshl4pg0i6oph193qdj88ce0vk",
+    "sshl4pg0i6oph193qdj88ce0vk"
+  ],
+  "residuals": {
+    "counts": {
+      "interviews": 0,
+      "assignments": 0,
+      "ops": 0,
+      "feedback": 0,
+      "retention_ops": 0,
+      "video_responses": 0,
+      "applications": 0,
+      "modules": 0,
+      "companies": 0,
+      "candidates": 0
+    }
+  },
+  "cleanup": {
+    "deleted_google_events": [
+      {
+        "event_id": "sshl4pg0i6oph193qdj88ce0vk",
+        "ok": false,
+        "result": {
+          "ok": false,
+          "returncode": 2,
+          "stdout": "",
+          "stderr": "unexpected argument primary\n",
+          "json": null
+        }
+      }
+    ],
+    "removed_paths": []
+  },
+  "finished_at": "20260724T213237Z",
+  "passed": true,
+  "failed_count": 0
+}

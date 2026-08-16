@@ -1,0 +1,29 @@
+
+> wathefni-employee-mobile@0.1.0 verify:capabilities
+> python3 scripts/verify-capability-foundation.py
+
+PASS AuthProvider stores typed /app/me
+PASS AuthProvider revalidates on foreground
+PASS document download refreshes on 401
+PASS optional tabs are capability-driven
+PASS home queries are capability-driven
+PASS home actions are capability-driven
+PASS unsupported employee surfaces remain absent
+PASS temporary design preview does not ship
+PASS Wathefni branding is typography only
+PASS motion respects reduced-motion preference
+PASS leave types come from backend
+PASS documents do not read secure-store tokens directly
+PASS privacy URL is centralized
+PASS localized not-found route exists
+PASS app/(tabs)/shifts.tsx blocks direct access without shifts
+PASS app/(tabs)/leave.tsx blocks direct access without leave
+PASS app/onboarding.tsx blocks direct access without onboarding
+PASS app/documents.tsx blocks direct access without documents
+PASS app/attendance.tsx blocks direct access without attendance
+PASS app/leave/request.tsx blocks direct access without leave
+PASS English account/capability copy complete
+PASS Arabic account/capability copy complete
+PASS English/Arabic keysets match
+PASS translation keys have no scalar/object collisions
+employee mobile capability foundation: GREEN

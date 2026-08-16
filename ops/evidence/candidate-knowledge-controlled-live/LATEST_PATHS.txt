@@ -1,0 +1,2 @@
+STAMP=20260726T220131Z
+REMOTE_EVIDENCE=/opt/wathefni/production-evidence/candidate-knowledge-controlled-live/20260726T220131Z

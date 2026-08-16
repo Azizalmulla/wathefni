@@ -1,0 +1,37 @@
+PASS  leave freeze doc present
+PASS  freeze doc mentions self_approval
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions enforced=false
+PASS  freeze doc mentions legal_reviewed=false
+PASS  freeze doc mentions ledger
+PASS  freeze doc mentions attachment
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions Payroll
+PASS  freeze doc mentions NO-GO
+PASS  freeze doc mentions REAL_DECISION
+PASS  self_decision_denied present
+PASS  self_approval_forbidden string
+PASS  synthetic_only gate
+PASS  lifecycle_gate present
+PASS  policy pack version 2.1.0
+PASS  enforced false in pack
+PASS  ledger reservation idempotency index
+PASS  unpaid payroll_boundary
+PASS  attachment mask helper
+PASS  assert_handoff_has_no_money
+PASS  wave4 real decision gate
+PASS  wave4 dual control
+PASS  wave4 kill switch
+PASS  app wires wave4 gate on approve
+PASS  app attendance reverse event-before-delete
+PASS  app does not set enforced=true for leave policies in wave4
+PASS  LeaveWorkspace present
+PASS  leaveUx present
+PASS  leave freeze cursor rule present
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+35 passed, 0 failed

@@ -1,0 +1,8 @@
+staging_health=200
+staging_ready=200
+ready_status ready
+ready_migrations_ok True
+ready_has_failed_jobs True
+staging_ingest=200
+ingest_ok True event_id 4b162af5-66e1-4c91-9928-0f203d7ecbcd
+LIVE_HEALTH_OK

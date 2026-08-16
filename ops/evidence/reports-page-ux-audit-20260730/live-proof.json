@@ -1,0 +1,110 @@
+{
+  "company": "WATHEFNI",
+  "ui_simulated": {
+    "open_roles": 9,
+    "active_applications_from_stage_labels": 12,
+    "ready_for_review": 2,
+    "interviews_needing_action_from_summary_fields": 0,
+    "interviews_metric_value": {
+      "scheduled": 0,
+      "completed": 2
+    },
+    "assessments_needing_action_pending_plus_completed": 2,
+    "assessment_pending_only": 1,
+    "followups_current": 2
+  },
+  "exports_displayed_vs_download": {
+    "exports_candidate_rows_payload": 10,
+    "exports_assessment_rows_payload": 5,
+    "exports_interview_rows_payload": 2,
+    "exports_followup_rows_payload": 21,
+    "exports_role_rows_payload": 0,
+    "actual_export_row_counts": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 2,
+      "followup_delivery_history": 21
+    },
+    "ui_followups_card_count": 2,
+    "ui_roles_card_count": 9,
+    "role_export_total_metric": 20,
+    "delivery_history_metric": 21
+  },
+  "scope": {
+    "stage_breakdown_apps_no_reviewable": 15,
+    "reviewable_apps": 10,
+    "active_pipeline_apps": 7,
+    "interview_scheduling_debt_apps": 4,
+    "non_production_or_held_in_stage_scope": 5
+  },
+  "raw_assessment_labels": [
+    {
+      "label": "expired",
+      "count": 3
+    },
+    {
+      "label": "completed",
+      "count": 1
+    },
+    {
+      "label": "pending",
+      "count": 1
+    }
+  ],
+  "raw_interview_labels": [
+    {
+      "label": "cancelled",
+      "count": 2
+    },
+    {
+      "label": "completed",
+      "count": 2
+    }
+  ],
+  "stage_labels": [
+    {
+      "label": "Hired",
+      "count": 3
+    },
+    {
+      "label": "Shortlisted",
+      "count": 3
+    },
+    {
+      "label": "Waiting for CV",
+      "count": 2
+    },
+    {
+      "label": "Needs role",
+      "count": 2
+    },
+    {
+      "label": "Screening",
+      "count": 2
+    },
+    {
+      "label": "Ready for review",
+      "count": 3
+    }
+  ],
+  "summary_keys": [
+    "applications",
+    "cv_received",
+    "cvs_received",
+    "followup_delivery_events",
+    "followups",
+    "followups_needed",
+    "hires",
+    "interviews",
+    "offers",
+    "ready_for_review",
+    "shortlisted"
+  ],
+  "action_counts": {
+    "ready_for_review": 2,
+    "follow_up_needed": 2,
+    "assessment_pending": 2
+  }
+}

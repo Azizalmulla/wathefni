@@ -1,0 +1,336 @@
+{
+  "marker": "waveD4-prod-proof-20260801T152150Z",
+  "cases": {
+    "health_200": {
+      "ok": true,
+      "detail": {
+        "orch": 200,
+        "dashboard": 200
+      }
+    },
+    "settings_intake_payload": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "enabled": true,
+        "allowlisted": true,
+        "mailbox_sync_enabled": false
+      }
+    },
+    "open_job_available": {
+      "ok": true,
+      "detail": {
+        "count": 9,
+        "sample": {
+          "position_code": "OCCTST_044035",
+          "title": "OCC status proof 044035",
+          "status": "open"
+        }
+      }
+    },
+    "create_general_needs_role": {
+      "ok": true,
+      "detail": {
+        "reused": true,
+        "row": {
+          "intake_id": "6743a284-8bd9-452d-b847-db25a2c74bb2",
+          "company_code": "WATHEFNI",
+          "address": "wathefni-cv-a0e1d1@inbound.wathefni.ai",
+          "local_part": "wathefni-cv-a0e1d1",
+          "domain": "inbound.wathefni.ai",
+          "position_code": null,
+          "position_title": null,
+          "label": "waveD4-prod-proof-20260801T152150Z-general",
+          "status": "active",
+          "created_at": "2026-08-01T15:26:53.252869+00:00",
+          "updated_at": "2026-08-01T15:26:53.252869+00:00",
+          "role_bound": false,
+          "hold_policy": "needs_role",
+          "health": {
+            "last_received_at": null,
+            "received_count": 3,
+            "received_7d": 0,
+            "last_status": "durable"
+          }
+        }
+      }
+    },
+    "create_job_alias_role_bound": {
+      "ok": true,
+      "detail": {
+        "reused": true,
+        "row": {
+          "intake_id": "cdc7afa9-dc1a-451b-910e-8b426a0284b8",
+          "company_code": "WATHEFNI",
+          "address": "wathefni-cv-1caad5@inbound.wathefni.ai",
+          "local_part": "wathefni-cv-1caad5",
+          "domain": "inbound.wathefni.ai",
+          "position_code": "OCCTST_044035",
+          "position_title": "OCC status proof 044035",
+          "label": "waveD4-prod-proof-20260801T152150Z-job",
+          "status": "active",
+          "created_at": "2026-08-01T15:26:53.284001+00:00",
+          "updated_at": "2026-08-01T15:26:53.284001+00:00",
+          "role_bound": true,
+          "hold_policy": "role_bound",
+          "health": {
+            "last_received_at": null,
+            "received_count": 2,
+            "received_7d": 0,
+            "last_status": "durable"
+          }
+        }
+      }
+    },
+    "inspect_address": {
+      "ok": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    "cross_tenant_inspect_forbidden": {
+      "ok": true,
+      "detail": {
+        "status": 403,
+        "error": "dashboard_company_forbidden"
+      }
+    },
+    "non_allowlisted_fail_closed": {
+      "ok": true,
+      "detail": {
+        "status": 403
+      }
+    },
+    "external_tenants_disabled": {
+      "ok": true,
+      "detail": true
+    },
+    "d2_d3_safety_unchanged": {
+      "ok": true,
+      "detail": true
+    },
+    "held_intake_api": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "total": 2,
+        "groups": 1
+      }
+    },
+    "duplicate_provider_message": {
+      "ok": true,
+      "detail": {
+        "r1": {
+          "durable": true,
+          "inbound_id": "1efb54fa-2795-54ac-8bc8-c61236b63ae6",
+          "submission_id": "e443ec95-77d6-5c10-a522-1279c5ebce4e",
+          "company_code": "WATHEFNI",
+          "job_id": "34372634-2bc1-419c-9274-87577866fc0c",
+          "status": "queued",
+          "quota_code": null,
+          "soft_warnings": [],
+          "attachment_count": 1,
+          "accepted_attachment_count": 1,
+          "total_attachment_bytes": 45,
+          "documents": [
+            {
+              "document_id": "2d42550f-b06d-5b51-9c60-2e4c630eef72",
+              "ordinal": 1,
+              "filename": "D4_Dup.pdf",
+              "storage_status": "stored",
+              "safety_state": "scan_pending",
+              "reason": null,
+              "duplicate_of_document_id": null,
+              "content_sha256": "5a838678058f6de375e8635b5f2fea47a4e5f07cb1a882a44b10f39abc6f34ff"
+            }
+          ],
+          "durability_latency_ms": 47
+        },
+        "r2": {
+          "duplicate": true,
+          "durable": true,
+          "inbound_id": "1efb54fa-2795-54ac-8bc8-c61236b63ae6",
+          "submission_id": "e443ec95-77d6-5c10-a522-1279c5ebce4e",
+          "company_code": "WATHEFNI",
+          "status": "durable"
+        }
+      }
+    },
+    "postmark_held_receive": {
+      "ok": true,
+      "detail": {
+        "note": "seeded_or_prior"
+      }
+    },
+    "postmark_held_receive_2": {
+      "ok": true,
+      "detail": {
+        "note": "seeded_or_prior"
+      }
+    },
+    "role_bound_bulk_seed": {
+      "ok": true,
+      "detail": {
+        "note": "seeded_or_prior"
+      }
+    },
+    "proof_apps_materialized": {
+      "ok": true,
+      "detail": {
+        "held_keys": [
+          "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+          "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT"
+        ],
+        "db_held": [
+          {
+            "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "position_code": ""
+          },
+          {
+            "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "position_code": ""
+          }
+        ]
+      }
+    },
+    "held_review_visible": {
+      "ok": true,
+      "detail": {
+        "held_total": 2,
+        "held_keys": [
+          "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+          "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT"
+        ],
+        "groups": [
+          {
+            "key": "__unclear__",
+            "kind": "unclear",
+            "role_code": null,
+            "role_title": null,
+            "confidence": "none",
+            "count": 2,
+            "app_keys": [
+              "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+              "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT"
+            ],
+            "items": [
+              {
+                "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+                "candidate_name": "yasser al dossary",
+                "candidate_email": "yasser.aldossary@example.com",
+                "original_filename": "Yasser_Al_Dossary_CV_Test.pdf",
+                "import_source": "email_inbound",
+                "status": "needs_role",
+                "suggested_code": null,
+                "suggested_title": null,
+                "suggestion_confidence": null,
+                "suggestion_source": null
+              },
+              {
+                "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+                "candidate_name": "Esraa Aziz",
+                "candidate_email": "azizalmulla16@gmail.com",
+                "original_filename": "Noor Tahat - CV.pdf",
+                "import_source": "email_inbound",
+                "status": "needs_role",
+                "suggested_code": null,
+                "suggested_title": null,
+                "suggestion_confidence": null,
+                "suggestion_source": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "identity_warning_copy_present": {
+      "ok": true,
+      "detail": true
+    },
+    "quarantine_recovery_copy_present": {
+      "ok": true,
+      "detail": true
+    },
+    "intake_operations_absent": {
+      "ok": true,
+      "detail": true
+    },
+    "needs_bound_labels_present": {
+      "ok": true,
+      "detail": true
+    },
+    "duplicate_identity_warnings_ux": {
+      "ok": true,
+      "detail": true
+    },
+    "quarantined_reason_recovery_ux": {
+      "ok": true,
+      "detail": true
+    },
+    "single_assign_and_admit": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+          "status": "ready_for_review",
+          "position_code": "OCCTST_044035"
+        },
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "position": "OCCTST_044035"
+      }
+    },
+    "safe_bulk_admit": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "mode": "assign",
+        "body": {
+          "ok": true,
+          "company_code": "WATHEFNI",
+          "action": "assign",
+          "updated": 1,
+          "skipped": 0,
+          "archived": 0,
+          "promoted": 1
+        },
+        "keys": [
+          "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT"
+        ],
+        "brows": [
+          {
+            "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "position_code": ""
+          }
+        ]
+      }
+    }
+  },
+  "created_intake_ids": [
+    "6743a284-8bd9-452d-b847-db25a2c74bb2",
+    "cdc7afa9-dc1a-451b-910e-8b426a0284b8"
+  ],
+  "created_app_keys": [],
+  "cleanup": {
+    "6743a284-8bd9-452d-b847-db25a2c74bb2": {
+      "disable_status": 200
+    },
+    "cdc7afa9-dc1a-451b-910e-8b426a0284b8": {
+      "disable_status": 200
+    },
+    "disabled_addresses": [],
+    "admit_apps": {
+      "single": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "bulk": [
+        "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT"
+      ]
+    }
+  },
+  "proof_apps": [],
+  "passed": 25,
+  "failed": 0
+}

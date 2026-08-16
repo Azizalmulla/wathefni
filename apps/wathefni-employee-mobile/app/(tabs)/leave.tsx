@@ -10,6 +10,7 @@ import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
 import { ErrorState, LoadingState } from '@/components/States'
 import { FeatureUnavailableState } from '@/components/AccessStates'
 import { approvedErrorMessage } from '@/api/errors'
+import { errorFeedback, successFeedback, warningFeedback } from '@/native/haptics'
 import { LeaveView } from '@/features/remaining/RemainingViews'
 import type { LeaveResponse } from '@/api/types'
 
@@ -30,6 +31,7 @@ export default function LeaveScreen() {
   const onCancel = useCallback(
     (leaveId: string) => {
       if (cancelLocks.current.has(leaveId)) return
+      warningFeedback()
       Alert.alert(t('leave.cancel'), undefined, [
         { text: t('common.cancel'), style: 'cancel' },
         {
@@ -41,8 +43,10 @@ export default function LeaveScreen() {
             setCancelingId(leaveId)
             try {
               await request(`/app/leave/${leaveId}/cancel`, { method: 'POST' })
+              successFeedback()
               await queryClient.invalidateQueries({ queryKey: ['leave'] })
             } catch (err) {
+              errorFeedback()
               Alert.alert(t('common.error'), approvedErrorMessage(err, t))
             } finally {
               cancelLocks.current.delete(leaveId)
@@ -77,6 +81,7 @@ export default function LeaveScreen() {
       refreshing={refreshing}
       onRefresh={() => void onRefresh()}
       onRequest={() => router.push('/leave/request')}
+      onViewAllHistory={() => router.push('/leave/history')}
       onCancel={onCancel}
     />
   )

@@ -1,0 +1,129 @@
+    wave3 product acceptance — db
+      PASS  setup get_all wave3 ok
+      PASS  setup has employment_change
+      PASS  setup has ess_letters_dependents
+      PASS  setup has exit_intent
+      PASS  setup has offboarding
+      PASS  setup has exit_close
+      PASS  setup EN/AR labels
+      PASS  setup patch employment_change
+      PASS  setup patch ess_letters_dependents
+      PASS  setup patch exit_intent
+      PASS  setup patch offboarding
+      PASS  setup patch exit_close
+      PASS  setup owns policies honesty
+      PASS  setup not env-only
+      PASS  matrix size
+      PASS  matrix employment_changes_only employment_change
+      PASS  matrix employment_changes_only ess
+      PASS  matrix employment_changes_only exit_intent
+      PASS  matrix employment_changes_only offboarding
+      PASS  matrix employment_changes_only exit_close
+      PASS  matrix ess_letters_dependents_only employment_change
+      PASS  matrix ess_letters_dependents_only ess
+      PASS  matrix ess_letters_dependents_only exit_intent
+      PASS  matrix ess_letters_dependents_only offboarding
+      PASS  matrix ess_letters_dependents_only exit_close
+      PASS  matrix resignation_without_offboarding employment_change
+      PASS  matrix resignation_without_offboarding ess
+      PASS  matrix resignation_without_offboarding exit_intent
+      PASS  matrix resignation_without_offboarding offboarding
+      PASS  matrix resignation_without_offboarding exit_close
+      PASS  resign without OB: exit visible
+      PASS  resign without OB: offboarding gate off
+      PASS  matrix offboarding_without_payroll employment_change
+      PASS  matrix offboarding_without_payroll ess
+      PASS  matrix offboarding_without_payroll exit_intent
+      PASS  matrix offboarding_without_payroll offboarding
+      PASS  matrix offboarding_without_payroll exit_close
+      PASS  OB without payroll: settlement flag off
+      PASS  matrix offboarding_without_idp employment_change
+      PASS  matrix offboarding_without_idp ess
+      PASS  matrix offboarding_without_idp exit_intent
+      PASS  matrix offboarding_without_idp offboarding
+      PASS  matrix offboarding_without_idp exit_close
+      PASS  OB without IdP: adapter off
+      PASS  matrix offboarding_plus_payroll employment_change
+      PASS  matrix offboarding_plus_payroll ess
+      PASS  matrix offboarding_plus_payroll exit_intent
+      PASS  matrix offboarding_plus_payroll offboarding
+      PASS  matrix offboarding_plus_payroll exit_close
+      PASS  matrix offboarding_plus_idp employment_change
+      PASS  matrix offboarding_plus_idp ess
+      PASS  matrix offboarding_plus_idp exit_intent
+      PASS  matrix offboarding_plus_idp offboarding
+      PASS  matrix offboarding_plus_idp exit_close
+      PASS  matrix full_wave3_suite employment_change
+      PASS  matrix full_wave3_suite ess
+      PASS  matrix full_wave3_suite exit_intent
+      PASS  matrix full_wave3_suite offboarding
+      PASS  matrix full_wave3_suite exit_close
+      PASS  matrix all_disabled employment_change
+      PASS  matrix all_disabled ess
+      PASS  matrix all_disabled exit_intent
+      PASS  matrix all_disabled offboarding
+      PASS  matrix all_disabled exit_close
+      PASS  all disabled clean
+      PASS  enable employment_change
+      PASS  enable ess
+      PASS  enable exit_intent
+      PASS  enable offboarding
+      PASS  enable exit_close
+      PASS  tenant iso C5 other company
+      PASS  real term dark
+      PASS  promotion applied
+      PASS  transfer applied
+      PASS  secondment applied
+      PASS  salary change applied
+      PASS  employment change history intact
+      PASS  ESS letter requested
+      PASS  ESS letter issued
+      PASS  resign without OB ends ready_for_offboarding
+      PASS  resign without OB does not set left
+      PASS  resign without OB: no offboarding case
+      PASS  synthetic termination → ready
+      PASS  termination intent ≠ left
+      PASS  EOC case create renew path
+      PASS  EOC renewal
+      PASS  EOC renew keeps active
+      PASS  EOC case create non-renew
+      PASS  EOC non-renewal
+      PASS  EOC non-renew notice-period authority
+      PASS  exit intent → offboarding case
+      PASS  exactly one OB case (idempotent handoff)
+      PASS  clearance dependency blocks
+      PASS  IdP request ≠ revoked until ack
+      PASS  revoke_requested_is_not_revoked honesty
+      PASS  required clearance ready
+      PASS  offboarding completed
+      PASS  offboarding complete ≠ left
+      PASS  open exit close
+      PASS  settlement/access gates engage
+      PASS  settlement finalized
+      PASS  finalized ≠ acknowledged
+      PASS  finalized ≠ paid
+      PASS  settlement acknowledged
+      PASS  access revoke acknowledged
+      PASS  exit interview complete
+      PASS  exit interview decline
+      PASS  exit interview skip
+      PASS  ready to close
+      PASS  SoD self-close forbidden
+      PASS  stale close rejected
+      PASS  exit close sole writer → left
+      PASS  employment_status left
+      PASS  disappears from active workforce domains
+      PASS  historical employment changes intact after close
+      PASS  idempotent close
+      PASS  no silent reopen
+      PASS  rehire eligibility on same person
+      PASS  last-working-date gate
+      PASS  disable preserves history
+      PASS  rollback preserves left truth
+      PASS  real termination remains OFF
+      PASS  EN closed label
+      PASS  AR ready label
+
+    124 passed, 0 failed
+WAVE3_PRODUCT_FULL_PASS
+STAGING_DB_RC=0

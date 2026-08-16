@@ -1,0 +1,38 @@
+{
+  "chunks_sample": [
+    "RankingPage-Bm2jdD3O.js"
+  ],
+  "index_asset_refs": [
+    "assets/dashboard-CyJ83Ezy.js",
+    "assets/rolldown-runtime-ciTZEWaI.js",
+    "assets/src-CZSZj-pd.js",
+    "assets/lucide-mVBpba_R.js",
+    "assets/react-query-Bf4ZDDW5.js",
+    "assets/utils-B-Q60V4B.js",
+    "assets/react-vendor-CNJu2pDP.js",
+    "assets/button-DU1Pztss.js",
+    "assets/useOverlayA11y-D0zfUN-J.js",
+    "assets/ConfirmDialog-BMOp9Y8b.js",
+    "assets/badge-CYXB7l7U.js",
+    "assets/card-2-X29go4.js",
+    "assets/field-WVkiqePY.js",
+    "assets/api-C0YQmDdL.js",
+    "assets/access-CUofyDXz.js",
+    "assets/dashboardPerf-BkT7Ij7A.js",
+    "assets/fetchers-Ci8JpcZC.js",
+    "assets/recruitingLifecycle-CLKUZH6S.js",
+    "assets/src-CIQB_Gry.css"
+  ],
+  "has_in_review_order": true,
+  "has_job_matches": true,
+  "has_meets_all_requirements": true,
+  "has_eligible_helper": true,
+  "has_ar_in_review": true,
+  "has_ar_job_matches": true,
+  "has_state_none_rankable": true,
+  "has_excluded_note": true,
+  "has_profiler_marks": true,
+  "has_back_to_ranking": true,
+  "has_cv_evidence_label": true,
+  "no_matching_rankable_jargon_badges": true
+}

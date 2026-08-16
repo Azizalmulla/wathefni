@@ -1,0 +1,11 @@
+HTTP/2 200 
+accept-ranges: bytes
+alt-svc: h3=":443"; ma=2592000
+cache-control: no-store, max-age=0
+content-type: text/html; charset=utf-8
+etag: "tjd4701mh"
+last-modified: Thu, 06 Aug 2026 19:16:12 GMT
+server: Caddy
+content-length: 2105
+date: Thu, 06 Aug 2026 19:18:47 GMT
+

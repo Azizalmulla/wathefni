@@ -1,0 +1,78 @@
+{
+  "total": 6,
+  "by_source": {
+    "compliance": 5,
+    "onboarding": 1
+  },
+  "by_system_of_action": {
+    "onboarding": 6
+  },
+  "items": [
+    {
+      "id": "compliance:missing:WATHEFNI-96550252254:civil_id",
+      "source": "compliance",
+      "system_of_action": "onboarding",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "severity": "medium",
+      "what_en": "Talal Fadhli's Civil ID is missing",
+      "deep_link_page": "onboarding",
+      "deep_link_employee": "WATHEFNI-96550252254"
+    },
+    {
+      "id": "compliance:missing:WATHEFNI-96550252254:medical",
+      "source": "compliance",
+      "system_of_action": "onboarding",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "severity": "medium",
+      "what_en": "Talal Fadhli's Medical certificate is missing",
+      "deep_link_page": "onboarding",
+      "deep_link_employee": "WATHEFNI-96550252254"
+    },
+    {
+      "id": "compliance:missing:WATHEFNI-96550252254:passport",
+      "source": "compliance",
+      "system_of_action": "onboarding",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "severity": "medium",
+      "what_en": "Talal Fadhli's Passport is missing",
+      "deep_link_page": "onboarding",
+      "deep_link_employee": "WATHEFNI-96550252254"
+    },
+    {
+      "id": "compliance:missing:WATHEFNI-96550252254:residence",
+      "source": "compliance",
+      "system_of_action": "onboarding",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "severity": "medium",
+      "what_en": "Talal Fadhli's Residence is missing",
+      "deep_link_page": "onboarding",
+      "deep_link_employee": "WATHEFNI-96550252254"
+    },
+    {
+      "id": "compliance:missing:WATHEFNI-96550252254:work_permit",
+      "source": "compliance",
+      "system_of_action": "onboarding",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "severity": "medium",
+      "what_en": "Talal Fadhli's Work permit is missing",
+      "deep_link_page": "onboarding",
+      "deep_link_employee": "WATHEFNI-96550252254"
+    },
+    {
+      "id": "employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "source": "onboarding",
+      "system_of_action": "onboarding",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "severity": "medium",
+      "what_en": "Onboarding incomplete",
+      "deep_link_page": "onboarding",
+      "deep_link_employee": "WATHEFNI-96550252254"
+    }
+  ]
+}

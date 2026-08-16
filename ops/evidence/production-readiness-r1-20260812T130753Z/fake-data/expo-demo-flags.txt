@@ -1,0 +1,30 @@
+== EXPO_PUBLIC demo flags ==
+apps/wathefni-hr-mobile/eas.json:12:        "EXPO_PUBLIC_HR_DESIGN_PREVIEW": "0"
+apps/wathefni-hr-mobile/eas.json:19:        "EXPO_PUBLIC_HR_DESIGN_PREVIEW": "1"
+apps/wathefni-hr-mobile/scripts/export-preview.mjs:19:      EXPO_PUBLIC_HR_DESIGN_PREVIEW: '1',
+apps/wathefni-hr-mobile/scripts/export-preview.mjs:20:      EXPO_PUBLIC_HR_PREVIEW_BUILD: marker,
+apps/wathefni-hr-mobile/app/design-preview.tsx:33:const previewBuild = process.env.EXPO_PUBLIC_HR_PREVIEW_BUILD || 'UNMARKED'
+apps/wathefni-hr-mobile/app/design-preview.tsx:70:  if (process.env.EXPO_PUBLIC_HR_DESIGN_PREVIEW !== '1') {
+apps/wathefni-hr-mobile/app/_layout.tsx:147:    process.env.EXPO_PUBLIC_HR_DESIGN_PREVIEW === '1' &&
+apps/wathefni-employee-mobile/app.config.js:59:      hiringDemo: process.env.EXPO_PUBLIC_HR_HIRING_DEMO || '0',
+apps/wathefni-employee-mobile/app.config.js:61:      attendanceDemo: process.env.EXPO_PUBLIC_HR_ATTENDANCE_DEMO || '0',
+apps/wathefni-employee-mobile/app.config.js:63:      shiftsDemo: process.env.EXPO_PUBLIC_HR_SHIFTS_DEMO || '0',
+apps/wathefni-employee-mobile/app.config.js:65:      onboardingDemo: process.env.EXPO_PUBLIC_HR_ONBOARDING_DEMO || '0',
+apps/wathefni-employee-mobile/app.config.js:67:      documentsDemo: process.env.EXPO_PUBLIC_HR_DOCUMENTS_DEMO || '0',
+apps/wathefni-employee-mobile/app.config.js:69:      tasksDemo: process.env.EXPO_PUBLIC_HR_TASKS_DEMO || '0',
+apps/wathefni-employee-mobile/app.config.js:71:      deliveryAlertsDemo: process.env.EXPO_PUBLIC_HR_DELIVERY_ALERTS_DEMO || '0',
+apps/wathefni-employee-mobile/scripts/verify-hr-delivery-alerts-monitor.py:50:check("app.config deliveryAlertsDemo", "deliveryAlertsDemo:" in config and "EXPO_PUBLIC_HR_DELIVERY_ALERTS_DEMO" in config)
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingDemoGate.ts:10:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_ONBOARDING_DEMO || '').trim()
+apps/wathefni-employee-mobile/scripts/verify-hr-tasks-follow-ups.py:50:check("app.config tasksDemo", "tasksDemo:" in config and "EXPO_PUBLIC_HR_TASKS_DEMO" in config)
+apps/wathefni-employee-mobile/scripts/verify-hr-attendance-exceptions.py:55:check("app.config attendanceDemo", "attendanceDemo:" in config and "EXPO_PUBLIC_HR_ATTENDANCE_DEMO" in config)
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsDemoGate.ts:11:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_SHIFTS_DEMO || '').trim()
+apps/wathefni-employee-mobile/scripts/verify-hr-documents-reviews.py:46:check("app.config documentsDemo", "documentsDemo:" in config and "EXPO_PUBLIC_HR_DOCUMENTS_DEMO" in config)
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsDemoGate.ts:11:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_DOCUMENTS_DEMO || '').trim()
+apps/wathefni-employee-mobile/docs/phase9a2-preview/README.md:6:unless the explicit `EXPO_PUBLIC_DESIGN_PREVIEW=1` build-time flag is present.
+apps/wathefni-employee-mobile/docs/phase9a2-preview/README.md:20:EXPO_PUBLIC_DESIGN_PREVIEW=1 npx expo export --platform web --output-dir /tmp/wathefni-preview
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoGate.ts:4: * Demo is OFF unless EXPO_PUBLIC_HR_HIRING_DEMO=1 (or baked extra).
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoGate.ts:13:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_HIRING_DEMO || '').trim()
+apps/wathefni-employee-mobile/scripts/verify-hr-shifts-companion.py:43:check("app.config shiftsDemo", "shiftsDemo:" in config and "EXPO_PUBLIC_HR_SHIFTS_DEMO" in config)
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/alertsDemoGate.ts:10:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_DELIVERY_ALERTS_DEMO || '').trim()
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksDemoGate.ts:10:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_TASKS_DEMO || '').trim()
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoGate.ts:10:  const fromEnv = String(process.env.EXPO_PUBLIC_HR_ATTENDANCE_DEMO || '').trim()

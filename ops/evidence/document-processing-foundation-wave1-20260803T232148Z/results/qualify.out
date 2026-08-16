@@ -1,0 +1,25 @@
+qualify wave0_cv_ar_digital_01.pdf
+qualify syn_arabic_digital_cv_000.pdf
+qualify wave0_cv_bilingual_01.pdf
+qualify wave0_cv_multicolumn_01.pdf
+qualify wave0_cv_scanned_en_01.pdf
+qualify wave0_cv_mixed_01.pdf
+qualify wave0_cv_broken_encoding_01.pdf
+qualify syn_broken_encoding_000.pdf
+qualify wave0_cv_en_digital_01.pdf
+{
+  "gates": {
+    "nine_fixtures_ran": true,
+    "zero_false_ocr_skips": true,
+    "zero_structured_regression": true,
+    "zero_evidence_regression": true,
+    "v2_completion_same_or_better": true,
+    "automatic_poppler_fallback_proven": true,
+    "gpt_auto_fallback_off": true,
+    "docx_reaches_v2": false,
+    "image_no_gpt_and_reaches_v2": true,
+    "route_matrix_loaded": true,
+    "all_pass": false
+  },
+  "docs": 9
+}

@@ -1,0 +1,27 @@
+    preboarding wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  settings default disabled
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  provisional pending_start created
+      PASS  provisional is_pending_start
+      PASS  resolve canonical employment
+      PASS  hub pending_start (non-active)
+      PASS  ESS not eligible for pending_start
+      PASS  employment_eligible false
+      PASS  create assignment
+      PASS  status not_started or in_progress
+      PASS  joining_date set
+      PASS  kuwait items seeded
+      PASS  civil_id required
+      PASS  bank_details required
+      PASS  idempotent create replay
+      PASS  cosmetic ready forbidden
+      PASS  start in_progress
+      PASS  ready rejected until required complete
+      PASS  manager scope denies other manager
+      PASS  recompute ok
+      PASS  readiness ready derived
+      PASS  assignment status ready

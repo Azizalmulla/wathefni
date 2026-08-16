@@ -1,0 +1,65 @@
+PASS  production database
+PASS  authority on
+PASS  companies WATHEFNI
+PASS  synthetic only on
+PASS  store postgres
+PASS  import still off
+PASS  real denied WATHEFNI-96550252254
+PASS  real denied WATHEFNI-96599411617
+PASS  real denied WATHEFNI-96597727743
+PASS  real denied WATHEFNI-96566363363
+PASS  hooks deny real
+PASS  cleanup GUC absent from app.py
+PASS  baseline 42 rows
+PASS  synthetic allowed
+PASS  normal completed
+PASS  normal worked 480
+PASS  overnight ok
+PASS  multi sessions
+PASS  unpaid/paid breaks
+PASS  worked excludes unpaid
+PASS  restart projection
+PASS  duplicate idempotent
+PASS  concurrent ok
+PASS  rebuild exact
+PASS  absence first
+PASS  late supersedes absence
+PASS  absence loses to check-in
+PASS  correction requested
+PASS  correction rejected
+PASS  correction disputed
+PASS  correction approved
+PASS  self-correction denied
+PASS  leave reverse preserves correction
+PASS  unapproved excluded
+PASS  day approved
+PASS  payroll reconcile exact
+PASS  snapshot immutable
+PASS  punch append-only
+PASS  drift detected+quarantined
+PASS  matched mirror
+PASS  tenant list only synthetic key
+PASS  manager scope helper
+PASS  demo rows untouched count
+PASS  demo fingerprint unchanged
+PASS  synthetic punches cleaned
+PASS  synthetic projections cleaned
+PASS  four reals still present
+{
+  "summary": {
+    "pass": 47,
+    "fail": 0
+  },
+  "synthetic_ids": {
+    "employee_key": "WATHEFNI-ATTW1C-926c95ec",
+    "phone": "965524926c95",
+    "tag": "926c95ec",
+    "shift_id": "1028741b-7c8a-44bc-8204-9fd8662603c0",
+    "oshift_id": "db3ff406-d13d-49aa-a2c7-c723349d7a2c",
+    "punch_in": "fa5306ef-bb69-4cf4-bad4-dae991fe5835",
+    "projection_id": "376be87d-d4c4-4eb8-8edd-b83de124d89f",
+    "snapshot_id": "66d1c355-3ef3-48ea-a61e-63d5af6f2106"
+  }
+}
+
+SUMMARY pass=47 fail=0

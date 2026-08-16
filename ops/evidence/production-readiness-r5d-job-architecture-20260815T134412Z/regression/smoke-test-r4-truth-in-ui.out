@@ -1,0 +1,60 @@
+    PRODUCTION READINESS R4 — truth-in-UI unit contracts
+
+    P1-16 — notification source-module map
+      PASS  leave_decision → leave
+      PASS  shift → shifts
+      PASS  onboarding → onboarding
+      PASS  compliance → compliance
+      PASS  bank → employee_app
+      PASS  app_activation → employee_app
+      PASS  unmapped flow is None (still allowed)
+      PASS  deliver_employee_notification gates on source module
+      PASS  suppressed result uses source_module_disabled
+
+    P0-7 — error is not empty
+      PASS  InterviewsPage has listError
+      PASS  InterviewsPage error test id
+      PASS  InterviewsPage empty test id
+      PASS  Interviews empty is not the error branch
+      PASS  Overview work-queue error state
+      PASS  Overview work-queue empty state
+      PASS  PostHire departments load error
+      PASS  PostHire app-access load error
+      PASS  PostHire pending-status load error
+
+    P1-10 / P1-11 — dead affordances
+      PASS  PostHireDeliveryCenter export gone
+      PASS  lazy delivery-center stub gone
+      PASS  Notifications placeholder gone
+      PASS  Link to Job production control hidden
+      PASS  Link to Job button not rendered
+
+    P1-12 — Overview composition
+      PASS  App passes showWorkQueue
+      PASS  App passes showRolePriority
+      PASS  Overview gates work queue on flag
+      PASS  Overview gates role priority on flag
+
+    P1-13 — canonical permission gates
+      PASS  prehire/RequisitionsWorkspace.tsx has no fake role fallback
+      PASS  posthire/ProbationWorkspace.tsx has no fake role fallback
+      PASS  posthire/PreboardingWorkspace.tsx has no fake role fallback
+      PASS  components/candidates/CandidatesTable.tsx has no fake role fallback
+
+    P1-14 — Alerts permission
+      PASS  nav.notifications has permissionAnyOf
+      PASS  Alerts page fail-closed UI
+
+    P1-17 — migration-sync deep link
+      PASS  legacy page remaps to employees
+      PASS  setup ownership hrefs use employees+view=migration
+      PASS  no live migration-sync href in ownership
+
+    truth-state scan (classify, named blockers must be clean)
+      PASS  Interviews empty copy only in empty ResourceState
+      PASS  PostHire department catch sets error flag
+      PASS  PostHire pending-status catch sets error flag
+      PASS  scan recorded for evidence
+
+    40 passed, 0 failed
+    R4_TRUTH_IN_UI_UNIT_PASS

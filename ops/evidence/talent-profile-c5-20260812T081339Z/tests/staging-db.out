@@ -1,0 +1,80 @@
+    talent profile c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  module key talent
+      PASS  canonical identity
+      PASS  no shadow person
+      PASS  no master score
+      PASS  perf optional
+      PASS  talent w/o perf
+      PASS  no hipo/9box
+      PASS  perf ≠ potential
+      PASS  c3 dev canonical
+      PASS  pool isolated
+      PASS  assistant out
+      PASS  EN claimed
+      PASS  AR claimed
+      PASS  rollback
+      PASS  no forbidden writes
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable talent
+      PASS  perf consume off
+      PASS  canonical profile
+      PASS  identity employee_key
+      PASS  no master score on profile
+      PASS  no shadow person
+      PASS  employee aspiration
+      PASS  aspiration source employee
+      PASS  manager aspiration separate
+      PASS  contradictory aspirations coexist
+      PASS  employee aspiration intact
+      PASS  strength with provenance
+      PASS  dev area confidential
+      PASS  employee cannot see hr_confidential
+      PASS  skill claimed
+      PASS  skill verified distinct
+      PASS  skill history retained
+      PASS  map without skill code rejected
+      PASS  explicit competency map
+      PASS  competency evidence applied
+      PASS  skill ≠ auto competency object
+      PASS  mapping query by skill
+      PASS  not 9-box precompute
+      PASS  potential framework
+      PASS  potential needs sensitive
+      PASS  potential without performance
+      PASS  perf ≠ potential flag
+      PASS  not AI assigned
+      PASS  potential accepted
+      PASS  potential new version
+      PASS  potential history retained
+      PASS  potential hidden from employee
+      PASS  hr sees potential history
+      PASS  perf link blocked when consume off
+      PASS  optional perf evidence
+      PASS  potential with optional perf
+      PASS  still not equals potential
+      PASS  perf evidence marked not potential
+      PASS  readiness primitive
+      PASS  mobility preference
+      PASS  as-of query
+      PASS  as-of has facts
+      PASS  as-of why trackable
+      PASS  aspiration versioned update
+      PASS  aspiration history survives
+      PASS  recruiting pool isolated
+      PASS  cross-tenant denied
+      PASS  disable preserves history
+      PASS  perf history untouched flag
+      PASS  facts remain after disable
+      PASS  potential remains after disable
+      PASS  module-off blocks writes
+      PASS  talent functional perf flags off
+      PASS  write after re-enable
+
+    75 passed, 0 failed
+    TALENT_PROFILE_FULL_PASS
+STAGING_RC=0

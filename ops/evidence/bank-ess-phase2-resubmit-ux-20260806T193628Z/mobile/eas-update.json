@@ -1,0 +1,85 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] warning: Bundler cache is empty, rebuilding (this may take a minute)
+[expo-cli] transform[stderr]: (node:47688) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:47689) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] 
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:47690) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:47691) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:47695) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:47693) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:47694) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:47692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] Android Bundled 12318ms node_modules/expo-router/entry.js (1271 modules)
+[expo-cli] iOS Bundled 14437ms node_modules/expo-router/entry.js (1319 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-4c3ef1210cedee7152730c55b66a31db.hbc (1.81 MB)
+[expo-cli] _expo/static/js/android/entry-4c3ef1210cedee7152730c55b66a31db.hbc.map (6.77 MB)
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-ec9fe7b9a948f61febcd7e727ee85f6a.hbc (1.81 MB)
+[expo-cli] _expo/static/js/ios/entry-ec9fe7b9a948f61febcd7e727ee85f6a.hbc.map (6.76 MB)
+[expo-cli] 
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.06 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 6.9 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fd894-c5e9-7d94-88d5-7a7b36f3aff5",
+    "createdAt": "2026-08-06T19:37:36.489Z",
+    "group": "e3d3ffae-14a8-42f9-bc87-301763b0b0cd",
+    "branch": "canary",
+    "message": "Bank ESS: correction resubmit UX + field errors",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd894-c5e9-7d94-88d5-7a7b36f3aff5",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "cf26d59512a22a7634eb4edd28b4425ec1624405"
+  },
+  {
+    "id": "019fd894-c5e9-7601-bbd2-edaf8618f7d9",
+    "createdAt": "2026-08-06T19:37:36.489Z",
+    "group": "e3d3ffae-14a8-42f9-bc87-301763b0b0cd",
+    "branch": "canary",
+    "message": "Bank ESS: correction resubmit UX + field errors",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd894-c5e9-7601-bbd2-edaf8618f7d9",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "cf26d59512a22a7634eb4edd28b4425ec1624405"
+  }
+]

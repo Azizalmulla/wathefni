@@ -1,0 +1,32 @@
+PASS  wave a version
+PASS  wathefni only constant
+PASS  honest states complete
+PASS  six stages
+PASS  refuses non-wathefni
+PASS  launch readiness page present
+PASS  UI overall status
+PASS  UI important blockers
+PASS  UI pause impact
+PASS  UI EN launch title
+PASS  UI AR launch title
+PASS  UI rtl
+PASS  UI mobile wrap
+PASS  app wires launch view
+PASS  no giant form in launch page
+PASS  route registered
+PASS  module imported in app
+PASS  db evaluate ok
+PASS  overall state present
+PASS  stages returned
+PASS  entitlements cannot bypass
+PASS  payroll money false
+PASS  attendance ingest false
+PASS  modules stage non-empty
+PASS  attendance honest ingest block
+PASS  payroll honest state
+PASS  payroll not claiming money authority
+PASS  blockers have next actions
+PASS  blockers have deep links
+db wathefni_staging
+
+29 passed, 0 failed

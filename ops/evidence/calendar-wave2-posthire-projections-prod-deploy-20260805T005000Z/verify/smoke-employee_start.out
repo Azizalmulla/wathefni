@@ -1,0 +1,5 @@
+=== ENABLE employee_start (min=1) ===
+Environment=WATHEFNI_CALENDAR_PROJECTION_EMPLOYEE_START=on
+health_ok
+SOURCE employee_start meta {'enabled_sources': ['employee_start'], 'injected': 4} count 4
+SMOKE_OK employee_start 4

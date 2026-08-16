@@ -1,0 +1,122 @@
+{
+  "suite": "assessments_cleanup1_owner_review",
+  "environment": "staging",
+  "production_touched": false,
+  "artifact_sha256": "bf638375b90b714da108d58dd8fc1b22bf2ffb361054a2988bcc547a78354ad6",
+  "artifact_match": {
+    "last_green_file": "bf638375b90b714da108d58dd8fc1b22bf2ffb361054a2988bcc547a78354ad6",
+    "local_deploy_formula_recompute": "bf638375b90b714da108d58dd8fc1b22bf2ffb361054a2988bcc547a78354ad6",
+    "staging_orch_content_hashes_match_evidence": true,
+    "staging_dashboard_content_hashes_match_local_dist": true,
+    "service_active": true,
+    "health": 200
+  },
+  "passed": 37,
+  "failed": 0,
+  "total": 37,
+  "sections": {
+    "artifact": 3,
+    "authority_smoke": 29,
+    "migration": 5
+  },
+  "authority_smoke_rerun": {
+    "passed": 29,
+    "failed": 0,
+    "real_delivery_sent": false,
+    "production_touched": false,
+    "synthetic_cleanup_empty": true,
+    "checks": [
+      "duplicate answer is idempotent",
+      "duplicate answer does not advance",
+      "concurrent duplicate inserts one response",
+      "concurrent duplicate advances once",
+      "wrong tenant cannot answer attempt",
+      "WhatsApp returns browser link",
+      "WhatsApp cannot advance answers",
+      "HR cancel terminalizes attempt",
+      "cancelled link rejected",
+      "durable attempt expiry enforced",
+      "expired status persisted",
+      "resend revokes prior token",
+      "resend new token is active",
+      "dry-run delivery is intentionally skipped",
+      "last answer completes from frozen version",
+      "answer after completion rejected",
+      "score and report immutable",
+      "score and report pinned to same version",
+      "completion does not rewrite screening facet",
+      "assessment completion creates no offer",
+      "assessment completion cannot hire",
+      "exact attempt report opens",
+      "incomplete assessment earns zero ranking points",
+      "completed assessment without percent earns zero",
+      "ready_for_review included in assessment queue",
+      "queue and action count are identical",
+      "authoring automated review passes deterministic checks",
+      "human-gated authoring lifecycle reaches approved",
+      "approved draft is not published to live bank"
+    ]
+  },
+  "migration_audit": {
+    "key": "assessments_cleanup1_staging_v1",
+    "attempts_seen": 4,
+    "attempts_pinned": 4,
+    "attempts_expired": 3,
+    "responses_backfilled": 22,
+    "scores_frozen": 1,
+    "reports_frozen": 1,
+    "idempotent_rerun": {
+      "attempts_pinned": 0,
+      "attempts_expired": 0,
+      "responses_backfilled": 0,
+      "scores_frozen": 0,
+      "reports_frozen": 0,
+      "events_added": 0
+    },
+    "pinned_version_id": "4bfa5a53-77bf-4102-9a6c-ffa079a90c3e",
+    "completed_attempt_id": "e4350bf4-d104-4500-90db-6a0de4205325",
+    "historical_screening_facet_sample": {
+      "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "screening_status": "complete",
+      "screening_completed_at": "2026-05-05",
+      "application_status": "review_pending",
+      "canonical_stage": "ready_for_review",
+      "attempt_status": "completed",
+      "note": "screening_completed_at predates assessment completion; Cleanup-1 does not rewrite screening from assessment completion"
+    }
+  },
+  "checklist": [
+    {"requirement": "duplicate answer submission does not advance twice", "result": "PASS", "proof": "duplicate answer is idempotent; duplicate answer does not advance"},
+    {"requirement": "concurrent browser submissions remain safe", "result": "PASS", "proof": "concurrent duplicate inserts one response; concurrent duplicate advances once"},
+    {"requirement": "cancelled attempts reject further answers", "result": "PASS", "proof": "HR cancel terminalizes attempt; cancelled link rejected"},
+    {"requirement": "expired attempts reject further answers", "result": "PASS", "proof": "durable attempt expiry enforced; expired status persisted"},
+    {"requirement": "completed attempts reject mutation", "result": "PASS", "proof": "answer after completion rejected; score and report immutable"},
+    {"requirement": "resend creates the correct delivery/token behavior", "result": "PASS", "proof": "resend new token is active; dry-run delivery is intentionally skipped"},
+    {"requirement": "old links are revoked when required", "result": "PASS", "proof": "resend revokes prior token"},
+    {"requirement": "HR cancellation works and is audited", "result": "PASS", "proof": "HR cancel terminalizes attempt (lifecycle event recorded in smoke)"},
+    {"requirement": "tenant isolation for application, attempt, candidate and WhatsApp context", "result": "PASS", "proof": "wrong tenant cannot answer attempt; WhatsApp returns browser link; WhatsApp cannot advance answers"},
+    {"requirement": "attempt remains pinned to the original immutable battery/item version", "result": "PASS", "proof": "last answer completes from frozen version; score and report pinned to same version; migrated attempts share version 4bfa5a53…"},
+    {"requirement": "completed responses, scores and reports cannot be overwritten", "result": "PASS", "proof": "score and report immutable; live frozen score/report on completed attempt"},
+    {"requirement": "assessment completion no longer writes fake screening completion", "result": "PASS", "proof": "completion does not rewrite screening facet; historical screening_completed_at unchanged"},
+    {"requirement": "pending/in-progress assessments receive no positive ranking credit", "result": "PASS", "proof": "incomplete assessment earns zero ranking points; completed assessment without percent earns zero"},
+    {"requirement": "ready_for_review count and queue match", "result": "PASS", "proof": "ready_for_review included in assessment queue; queue and action count are identical"},
+    {"requirement": "exact report opens from candidate drawer", "result": "PASS", "proof": "exact attempt report opens"},
+    {"requirement": "mobile shows the same authoritative assessment state", "result": "PASS", "proof": "prehire/mobile assessment projection includes status=completed, attempt_id, assessment_version_id; assessments module capability present"},
+    {"requirement": "Offer-1 and hire authority remain unaffected", "result": "PASS", "proof": "assessment completion creates no offer; assessment completion cannot hire"},
+    {"requirement": "AI cannot alter questions, answer keys, scores, norms or candidate decisions", "result": "PASS", "proof": "authoring automated review passes deterministic checks; human-gated authoring lifecycle reaches approved; approved draft is not published to live bank"}
+  ],
+  "remaining_defects": [
+    {
+      "severity": "low",
+      "summary": "Artifact SHA is path-sensitive in deploy.sh (absolute dashboard paths are part of the hash input).",
+      "impact": "Recomputing the green hash from the remote staging tree with absolute remote paths will not equal last-green; content hashes still match. Production gate compares operator-local artifact_sha() to last-green.",
+      "recommendation": "Normalize to content-only hashing (basename or sorted content digests) before the next promotion wave."
+    },
+    {
+      "severity": "low",
+      "summary": "AI authoring foundation is staging-flag gated and does not publish to the live bank; there is no separate AI route that can mutate frozen scores/norms, but send_assessment remains an eligible human-confirm tool action.",
+      "impact": "AI still cannot change questions/keys/scores/norms/decisions; it can only propose authoring drafts under WATHEFNI_ASSESSMENT_AUTHORING.",
+      "recommendation": "Keep authoring flag off in production until a dedicated production authoring cutover is approved."
+    }
+  ]
+}

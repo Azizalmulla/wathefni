@@ -1,0 +1,5 @@
+staging_health=200
+      PASS  live health
+      FAIL  live /dashboard/posthire/talent/trajectory/policy not public :: 404
+      PASS  live /dashboard/posthire/talent/map not public
+    LIVE_SERVICE 2 passed, 1 failed

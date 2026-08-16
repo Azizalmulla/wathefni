@@ -1,0 +1,67 @@
+    PRODUCTION READINESS R6 — setup self-service (unit)
+      PASS  R5A readiness contract preserved
+      PASS  performance still enableable
+      PASS  comp still enableable
+      PASS  JA still enableable
+      PASS  no unreleased capability keys
+      PASS  analytics remains catalog SKU
+      PASS  JA is not a catalog SKU
+      PASS  JA marked platform in wave6
+      PASS  JA not commercial SKU
+      PASS  WFP is commercial SKU
+      PASS  available but disabled
+      PASS  disabled not usable
+      PASS  enabled and usable
+      PASS  R5A customer_facing_state still enabled when usable
+      PASS  R5A usable still true on happy path
+      PASS  R5A/R6 never Enabled when runtime blocked
+      PASS  stored on + kill switch is not Enabled
+      PASS  stored on + kill switch unusable
+      PASS  kill switch copy hides env
+      PASS  Comp without JA is dependency_unmet
+      PASS  WFP without JA is dependency_unmet
+      PASS  ordinary HR is not_permitted
+      PASS  env classification exists
+      PASS  secrets stay out of Setup
+      PASS  push flag is infrastructure
+      PASS  notification preset is customer policy
+      PASS  onboarding seed is infrastructure
+      PASS  legacy HTML preset is non-authoritative
+      PASS  leave canonical is leave_policies
+      PASS  onboarding auto-start canonical
+      PASS  duplicate stores resolved
+      PASS  wave5 setup owns policy
+      PASS  wave5 no second analytics authority
+      PASS  wave5 uses frozen C1
+      PASS  empty Intelligence allowlist admits after R6
+      PASS  explicit allowlist still blocks
+      PASS  kill switch still wins
+      PASS  Setup mounts Wave 5 Intelligence card
+      PASS  Setup mounts delivery card
+      PASS  Setup still remounts WFP
+      PASS  Setup still remounts Comp
+      PASS  Wave5 card bilingual AR
+      PASS  Wave5 card uses effective state
+      PASS  Wave5 failed save restores previous
+      PASS  Comp card no longer lies Enabled+env gate
+      PASS  Comp card shows effective state
+      PASS  Comp failed save reloads
+      PASS  WFP card no longer lies Enabled+env gate
+      PASS  WFP card shows effective state
+      PASS  JA card says not a commercial SKU
+      PASS  Wave6LearningPoliciesCard.tsx no Enabled+env-gate lie
+      PASS  Wave6LearningPoliciesCard.tsx shows effective state
+      PASS  Wave6BenefitsPoliciesCard.tsx no Enabled+env-gate lie
+      PASS  Wave6BenefitsPoliciesCard.tsx shows effective state
+      PASS  Wave6EmployeeRelationsPoliciesCard.tsx no Enabled+env-gate lie
+      PASS  Wave6EmployeeRelationsPoliciesCard.tsx shows effective state
+      PASS  Wave6EngagementPoliciesCard.tsx no Enabled+env-gate lie
+      PASS  Wave6EngagementPoliciesCard.tsx shows effective state
+      PASS  Wave6JobArchitecturePoliciesCard.tsx no Enabled+env-gate lie
+      PASS  Wave6JobArchitecturePoliciesCard.tsx shows effective state
+      PASS  module-policies includes wave5
+      PASS  company-scoped Setup routes exist
+      PASS  dependency enable is 409
+
+    63 passed, 0 failed
+R6_SETUP_SELF_SERVICE_UNIT_PASS

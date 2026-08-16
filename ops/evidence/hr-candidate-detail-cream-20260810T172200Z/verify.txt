@@ -1,0 +1,14 @@
+PASS cream PageScreen + HrPushedNav
+PASS no legacy WorkspaceHeader/plum stack
+PASS stage tone from real stage
+PASS no raw appKey chrome
+PASS localized CV empty
+PASS offer rendered when present
+PASS already_decided wired in route
+PASS confirm action + consequence localized
+PASS safe-back preserved
+PASS SOD invalidation preserved
+PASS composition helpers present
+PASS rankings honesty surfaces job_required
+PASS hrCandidate keys EN+AR
+hr-candidate-detail: GREEN

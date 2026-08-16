@@ -1,0 +1,56 @@
+PASS  secret contract version
+PASS  argv secret flag blocked
+PASS  argv without secrets ok
+PASS  environment file written
+PASS  environment file mode 600
+PASS  raw secrets file in pack blocks qualify
+PASS  clean evidence leak scan pass
+PASS  qualify_or_block allows clean pack
+PASS  simulated secret exposure detected
+PASS  simulated exposure blocks qualification
+PASS  safe_error redacts password
+PASS  leak finding excerpts redacted
+PASS  site registered
+PASS  cross-tenant device registration denied
+PASS  device registered for tenant
+PASS  wrong-tenant device claim fail-closed
+PASS  ownership verify wrong tenant fails
+PASS  ownership verify correct tenant
+PASS  connector registered without secret return
+PASS  cross-tenant connector registration denied
+PASS  connector activated
+PASS  credential rotate ok
+PASS  reconnect after rotate (no secret values)
+PASS  rotate optimistic concurrency stale denied
+PASS  connector revoke
+PASS  reconnect after revoke denied
+PASS  connector cross-tenant assert denied
+PASS  unknown mapping quarantines (not payroll)
+PASS  unknown enters remediation
+PASS  remediation enqueue idempotent
+PASS  mapping approve cross-tenant denied
+PASS  manager self-action denied
+PASS  manager scope denied for out-of-scope employee
+PASS  missing checkout enqueued
+PASS  ambiguous order enqueued
+PASS  missing/ambiguous payroll_excluded
+PASS  connector lag/offline remediation
+PASS  mapping approve+replay ok
+PASS  reject conflict ok
+PASS  reject idempotent
+PASS  accepted punch flowed Wave 1 authority
+PASS  health offline alert
+PASS  health lag critical alert
+PASS  health recovery clears offline/lag alerts
+PASS  health revoked status
+PASS  health contract schema present
+PASS  readonly compat ok
+PASS  readonly compat secrets redacted
+PASS  readonly compat does not set ingest flag
+PASS  secret runbook present
+PASS  pilot checklist present
+PASS  freeze skipped
+{
+  "pass": 52,
+  "fail": 0
+}

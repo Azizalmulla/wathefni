@@ -1,0 +1,81 @@
+== demo/fixture/mock gates in app source (non-test) ==
+apps/wathefni-hr-mobile/app/design-preview.tsx:23:} from '@/preview/fixtures'
+apps/wathefni-hr-mobile/src/i18n/en.json:189:  "preview.label": "Design preview — fixture data only",
+apps/wathefni-hr-mobile/src/preview/fixtures.ts:243:  const fixture = prioritiesFixture(operator)
+apps/wathefni-hr-mobile/src/preview/fixtures.ts:244:  if (locale === 'en') return fixture
+apps/wathefni-hr-mobile/src/preview/fixtures.ts:251:    ...fixture,
+apps/wathefni-hr-mobile/src/preview/fixtures.ts:252:    sections: fixture.sections.map((section) => ({
+apps/wathefni-hr-mobile/src/preview/fixtures.ts:338:  const fixtures: Record<string, OperationalItem[]> = {
+apps/wathefni-hr-mobile/src/preview/fixtures.ts:434:  return fixtures[view] || []
+apps/wathefni-employee-mobile/src/hr/i18n/en.json:215:  "preview.label": "Design preview — fixture data only",
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingComposition.ts:3:import { ONBOARDING_DEMO_ID_PREFIX, ONBOARDING_DEMO_SOURCE } from './onboardingDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingComposition.ts:50:  source: typeof ONBOARDING_DEMO_SOURCE
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingComposition.ts:56:  const key = (s: string) => `${ONBOARDING_DEMO_ID_PREFIX}${s}`
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingComposition.ts:170:  return { source: ONBOARDING_DEMO_SOURCE, queue, all: [...queue, waitingOnly] }
+apps/wathefni-employee-mobile/src/hr/features/onboarding/HROnboardingQueueView.tsx:18:import { onboardingDemoEnabled } from '@hr/features/onboarding/onboardingDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/onboarding/HROnboardingDetailView.tsx:21:} from '@hr/features/onboarding/onboardingDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingDemoGate.ts:6:export const ONBOARDING_DEMO_SOURCE = 'hr_onboarding_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingDemoGate.ts:7:export const ONBOARDING_DEMO_ID_PREFIX = '__demo_ob__'
+apps/wathefni-employee-mobile/src/hr/features/onboarding/onboardingDemoGate.ts:21:  return String(key || '').startsWith(ONBOARDING_DEMO_ID_PREFIX)
+apps/wathefni-employee-mobile/src/hr/features/shifts/HRShiftSwapDetailView.tsx:18:import { isShiftsDemoSwapId, shiftsDemoEnabled } from '@hr/features/shifts/shiftsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/tasks/HRTaskDetailView.tsx:17:import { isTasksDemoId, tasksDemoEnabled } from '@hr/features/tasks/tasksDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoData.ts:5:import { HIRING_DEMO_ID_PREFIX, HIRING_DEMO_SOURCE } from './hiringDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoData.ts:14:const demo = (suffix: string) => `${HIRING_DEMO_ID_PREFIX}${suffix}`
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoData.ts:99:    source: HIRING_DEMO_SOURCE,
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:4:  SHIFTS_DEMO_ID_PREFIX,
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:5:  SHIFTS_DEMO_SHIFT_PREFIX,
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:6:  SHIFTS_DEMO_SOURCE,
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:7:} from './shiftsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:100:  source: typeof SHIFTS_DEMO_SOURCE
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:105:  const swapId = (s: string) => `${SHIFTS_DEMO_ID_PREFIX}${s}`
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:106:  const shiftId = (s: string) => `${SHIFTS_DEMO_SHIFT_PREFIX}${s}`
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsComposition.ts:255:    source: SHIFTS_DEMO_SOURCE,
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksComposition.ts:3:import { TASKS_DEMO_ID_PREFIX, TASKS_DEMO_SOURCE } from './tasksDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksComposition.ts:56:  source: typeof TASKS_DEMO_SOURCE
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksComposition.ts:59:  const id = (s: string) => `${TASKS_DEMO_ID_PREFIX}${s}`
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksComposition.ts:133:  return { source: TASKS_DEMO_SOURCE, open }
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoGate.ts:9:export const HIRING_DEMO_SOURCE = 'hr_hiring_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoGate.ts:10:export const HIRING_DEMO_ID_PREFIX = '__demo__'
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringDemoGate.ts:24:  return String(id || '').startsWith(HIRING_DEMO_ID_PREFIX)
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoData.ts:2:import { ATTENDANCE_DEMO_ID_PREFIX, ATTENDANCE_DEMO_SOURCE } from './attendanceDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoData.ts:4:const id = (suffix: string) => `${ATTENDANCE_DEMO_ID_PREFIX}${suffix}`
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoData.ts:22:  source: typeof ATTENDANCE_DEMO_SOURCE
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoData.ts:132:  return { source: ATTENDANCE_DEMO_SOURCE, today, unresolved }
+apps/wathefni-employee-mobile/src/hr/features/tasks/HRTasksQueueView.tsx:17:import { tasksDemoEnabled } from '@hr/features/tasks/tasksDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsDemoGate.ts:6:export const SHIFTS_DEMO_SOURCE = 'hr_shifts_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsDemoGate.ts:7:export const SHIFTS_DEMO_ID_PREFIX = '__demo_swap__'
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsDemoGate.ts:8:export const SHIFTS_DEMO_SHIFT_PREFIX = '__demo_shift__'
+apps/wathefni-employee-mobile/src/hr/features/shifts/shiftsDemoGate.ts:22:  return String(id || '').startsWith(SHIFTS_DEMO_ID_PREFIX)
+apps/wathefni-employee-mobile/src/hr/features/hiring/hiringComposition.ts:8:import { hiringDemoEnabled } from './hiringDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/shifts/HRShiftsHomeView.tsx:24:import { shiftsDemoEnabled } from '@hr/features/shifts/shiftsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/attendance/HRAttendanceQueueView.tsx:22:import { attendanceDemoEnabled } from '@hr/features/attendance/attendanceDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/attendance/HRAttendanceDetailView.tsx:22:} from '@hr/features/attendance/attendanceDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/hiring/HRHiringHomeView.tsx:22:import { isHiringDemoId } from '@hr/features/hiring/hiringDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/documents/HRDocumentReviewDetailView.tsx:22:} from '@hr/features/documents/documentsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoGate.ts:6:export const ATTENDANCE_DEMO_SOURCE = 'hr_attendance_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoGate.ts:7:export const ATTENDANCE_DEMO_ID_PREFIX = '__demo_att__'
+apps/wathefni-employee-mobile/src/hr/features/attendance/attendanceDemoGate.ts:21:  return String(id || '').startsWith(ATTENDANCE_DEMO_ID_PREFIX)
+apps/wathefni-employee-mobile/src/hr/features/documents/HRDocumentReviewsQueueView.tsx:17:import { documentsDemoEnabled } from '@hr/features/documents/documentsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:4:  DOCUMENTS_DEMO_EMP_PREFIX,
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:5:  DOCUMENTS_DEMO_SOURCE,
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:6:  DOCUMENTS_DEMO_TYPE_PREFIX,
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:7:} from './documentsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:79:  source: typeof DOCUMENTS_DEMO_SOURCE
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:83:  const emp = (s: string) => `${DOCUMENTS_DEMO_EMP_PREFIX}${s}`
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:84:  const typ = (s: string) => `${DOCUMENTS_DEMO_TYPE_PREFIX}${s}`
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsComposition.ts:175:  return { source: DOCUMENTS_DEMO_SOURCE, compliance, onboardingFallback }
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsDemoGate.ts:6:export const DOCUMENTS_DEMO_SOURCE = 'hr_documents_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsDemoGate.ts:7:export const DOCUMENTS_DEMO_EMP_PREFIX = '__demo_doc_emp__'
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsDemoGate.ts:8:export const DOCUMENTS_DEMO_TYPE_PREFIX = '__demo_doc_type__'
+apps/wathefni-employee-mobile/src/hr/features/documents/documentsDemoGate.ts:22:  return String(key || '').startsWith(DOCUMENTS_DEMO_EMP_PREFIX)
+apps/wathefni-dashboard/src/lib/workspaceCapability.ts:512:  // owner fixture. Recruiters without employees.read stay gated out.
+apps/wathefni-dashboard/src/lib/workspaceCapability.ts:592:/** Matrix fixtures used by tests and the composition REPORT. */
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksDemoGate.ts:6:export const TASKS_DEMO_SOURCE = 'hr_tasks_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksDemoGate.ts:7:export const TASKS_DEMO_ID_PREFIX = '__demo_task__'
+apps/wathefni-employee-mobile/src/hr/features/tasks/tasksDemoGate.ts:21:  return String(taskId || '').startsWith(TASKS_DEMO_ID_PREFIX)
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/HRDeliveryAlertsMonitorView.tsx:17:import { alertsDemoEnabled } from '@hr/features/delivery-alerts/alertsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/alertsDemoGate.ts:6:export const ALERTS_DEMO_SOURCE = 'hr_delivery_alerts_demo_v1' as const
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/alertsDemoGate.ts:7:export const ALERTS_DEMO_ID_PREFIX = '__demo_alert__'
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/alertsDemoGate.ts:21:  return String(id || '').startsWith(ALERTS_DEMO_ID_PREFIX)
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/alertsComposition.ts:3:import { ALERTS_DEMO_ID_PREFIX, ALERTS_DEMO_SOURCE } from './alertsDemoGate'
+apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/alertsComposition.ts:53:  source: typeof ALERTS_DEMO_SOURCE

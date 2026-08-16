@@ -1,0 +1,494 @@
+PASS  orchestrator docs warm
+PASS  posthire bundle present — /var/www/wathefni-dashboard/assets/PostHire-CLrMzHLs.js
+PASS  ui_needle:Resend invitation
+PASS  ui_needle:إعادة إرسال الدعوة
+PASS  ui_needle:Re-invite
+PASS  ui_needle:إعادة الدعوة
+PASS  ui_needle:Show activation code
+PASS  ui_needle:عرض رمز التفعيل
+PASS  ui_needle:Delivered
+PASS  ui_needle:تم التسليم
+PASS  ui_needle:Needs attention
+PASS  ui_needle:تحتاج متابعة
+PASS  ui_needle:Expired
+PASS  ui_needle:منتهية
+PASS  ui_needle:Failed
+PASS  ui_needle:فشل التسليم
+PASS  ui_needle:App access
+PASS  ui_needle:وصول التطبيق
+PASS  api client has app-invitation
+PASS  api client has resend path
+PASS  show_code_exception gated in UI
+PASS  hr get invitation 200 — 200
+PASS  hr snapshot no code
+PASS  hr snapshot has status
+PASS  hr resend 200 — {"ok":true,"reused":false,"invite_id":"e7c56c4f-60ff-4f8d-bbd7-4e0f1bc8a2b3","delivered":true,"delivery_status":"delivered","channel":"email","error":null,"snapshot":{"ok":true,"employee_key":"WATHEFNI-96599338566","invitation_status":"delivered","invite_id":"e7c56c4f-60ff-4f8d-bbd7-4e0f1bc8a2b3","c
+PASS  hr resend ok
+PASS  hr resend code_disclosed false
+PASS  hr resend no activation_code
+PASS  hr resend has invite_id
+PASS  hr resend status updated — delivered
+PASS  only one pending after resend — 1
+PASS  hr reinvite 200 — {"ok":true,"reused":false,"invite_id":"9ffc593b-4736-4311-a205-9213a09e48bc","delivered":true,"delivery_status":"delivered","channel":"email","error":null,"snapshot":{"ok":true,"employee_key":"WATHEFNI-96599338566","invitation_status":"delivered","invite_id":"9ffc593b-4736-4311-a205-9213a09e48bc","c
+PASS  hr reinvite ok
+PASS  hr reinvite code_disclosed false
+PASS  hr reinvite no activation_code
+PASS  only one pending after reinvite — 1
+PASS  have invite for state matrix
+PASS  state delivered — delivered
+PASS  delivered: no show_code_exception
+PASS  state failed — failed
+PASS  failed: no show_code_exception
+PASS  state needs_attention — needs_attention
+PASS  needs_attention: show_code_exception
+PASS  exception handoff status — {"ok":true,"invite_id":"59043c83-e19b-4710-b741-d4ed32d7a9cd","task_id":"fb0a6211-dee5-496c-8bf5-971edad24735","audit_result_id":"02b604ea-4231-403f-a81e-12973de3eb45","employee_key":"WATHEFNI-96599338566","expires_at":"2026-08-08T06:36:37.664111+00:00","delivery_mode":"hr_task_only","activation_code":"557751"}
+PASS  exception handoff returns code
+PASS  aziz invite delivered or sent — ('delivered', 'email', None)
+PASS  only one pending before activate — 1
+PASS  hr after deliver still no code
+PASS  show_code_exception false when not needs_attention
+PASS  state expired — expired
+PASS  aziz activate 200 — 200
+PASS  aziz activate ok
+PASS  aziz /app/me 200 — 200
+PASS  aziz me employee key — WATHEFNI-96599338566
+PASS  aziz refresh (reopen) 200 — 200
+PASS  aziz me after reopen 200
+PASS  stale code rejected — 401
+PASS  hr invitation_status activated — activated
+PASS  hr app access active
+PASS  hr final no code
+PASS  no pending invites after activate — 0
+PASS  no /app/devices phase6
+---
+{
+  "fail_count": 0,
+  "fails": [],
+  "evidence": {
+    "checks": [
+      {
+        "name": "orchestrator docs warm",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "posthire bundle present",
+        "ok": true,
+        "detail": "/var/www/wathefni-dashboard/assets/PostHire-CLrMzHLs.js"
+      },
+      {
+        "name": "ui_needle:Resend invitation",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u0625\u0639\u0627\u062f\u0629 \u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u062f\u0639\u0648\u0629",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:Re-invite",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062f\u0639\u0648\u0629",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:Show activation code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u0639\u0631\u0636 \u0631\u0645\u0632 \u0627\u0644\u062a\u0641\u0639\u064a\u0644",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:Delivered",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u062a\u0645 \u0627\u0644\u062a\u0633\u0644\u064a\u0645",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:Needs attention",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u062a\u062d\u062a\u0627\u062c \u0645\u062a\u0627\u0628\u0639\u0629",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:Expired",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u0645\u0646\u062a\u0647\u064a\u0629",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:Failed",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u0641\u0634\u0644 \u0627\u0644\u062a\u0633\u0644\u064a\u0645",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:App access",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "ui_needle:\u0648\u0635\u0648\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "api client has app-invitation",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "api client has resend path",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "show_code_exception gated in UI",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr get invitation 200",
+        "ok": true,
+        "detail": 200
+      },
+      {
+        "name": "hr snapshot no code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr snapshot has status",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr resend 200",
+        "ok": true,
+        "detail": "{\"ok\":true,\"reused\":false,\"invite_id\":\"e7c56c4f-60ff-4f8d-bbd7-4e0f1bc8a2b3\",\"delivered\":true,\"delivery_status\":\"delivered\",\"channel\":\"email\",\"error\":null,\"snapshot\":{\"ok\":true,\"employee_key\":\"WATHEFNI-96599338566\",\"invitation_status\":\"delivered\",\"invite_id\":\"e7c56c4f-60ff-4f8d-bbd7-4e0f1bc8a2b3\",\"c"
+      },
+      {
+        "name": "hr resend ok",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr resend code_disclosed false",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr resend no activation_code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr resend has invite_id",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr resend status updated",
+        "ok": true,
+        "detail": "delivered"
+      },
+      {
+        "name": "only one pending after resend",
+        "ok": true,
+        "detail": 1
+      },
+      {
+        "name": "hr reinvite 200",
+        "ok": true,
+        "detail": "{\"ok\":true,\"reused\":false,\"invite_id\":\"9ffc593b-4736-4311-a205-9213a09e48bc\",\"delivered\":true,\"delivery_status\":\"delivered\",\"channel\":\"email\",\"error\":null,\"snapshot\":{\"ok\":true,\"employee_key\":\"WATHEFNI-96599338566\",\"invitation_status\":\"delivered\",\"invite_id\":\"9ffc593b-4736-4311-a205-9213a09e48bc\",\"c"
+      },
+      {
+        "name": "hr reinvite ok",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr reinvite code_disclosed false",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr reinvite no activation_code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "only one pending after reinvite",
+        "ok": true,
+        "detail": 1
+      },
+      {
+        "name": "have invite for state matrix",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "state delivered",
+        "ok": true,
+        "detail": "delivered"
+      },
+      {
+        "name": "delivered: no show_code_exception",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "state failed",
+        "ok": true,
+        "detail": "failed"
+      },
+      {
+        "name": "failed: no show_code_exception",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "state needs_attention",
+        "ok": true,
+        "detail": "needs_attention"
+      },
+      {
+        "name": "needs_attention: show_code_exception",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "exception handoff status",
+        "ok": true,
+        "detail": "{\"ok\":true,\"invite_id\":\"59043c83-e19b-4710-b741-d4ed32d7a9cd\",\"task_id\":\"fb0a6211-dee5-496c-8bf5-971edad24735\",\"audit_result_id\":\"02b604ea-4231-403f-a81e-12973de3eb45\",\"employee_key\":\"WATHEFNI-96599338566\",\"expires_at\":\"2026-08-08T06:36:37.664111+00:00\",\"delivery_mode\":\"hr_task_only\",\"activation_code\":\"557751\"}"
+      },
+      {
+        "name": "exception handoff returns code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "aziz invite delivered or sent",
+        "ok": true,
+        "detail": [
+          "delivered",
+          "email",
+          null
+        ]
+      },
+      {
+        "name": "only one pending before activate",
+        "ok": true,
+        "detail": 1
+      },
+      {
+        "name": "hr after deliver still no code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "show_code_exception false when not needs_attention",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "state expired",
+        "ok": true,
+        "detail": "expired"
+      },
+      {
+        "name": "aziz activate 200",
+        "ok": true,
+        "detail": 200
+      },
+      {
+        "name": "aziz activate ok",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "aziz /app/me 200",
+        "ok": true,
+        "detail": 200
+      },
+      {
+        "name": "aziz me employee key",
+        "ok": true,
+        "detail": "WATHEFNI-96599338566"
+      },
+      {
+        "name": "aziz refresh (reopen) 200",
+        "ok": true,
+        "detail": 200
+      },
+      {
+        "name": "aziz me after reopen 200",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "stale code rejected",
+        "ok": true,
+        "detail": 401
+      },
+      {
+        "name": "hr invitation_status activated",
+        "ok": true,
+        "detail": "activated"
+      },
+      {
+        "name": "hr app access active",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "hr final no code",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "no pending invites after activate",
+        "ok": true,
+        "detail": 0
+      },
+      {
+        "name": "no /app/devices phase6",
+        "ok": true,
+        "detail": null
+      }
+    ],
+    "aziz": {
+      "delivered_code_len": 6,
+      "outbound_ok": true,
+      "delivery_status": "delivered",
+      "channel": "email",
+      "activate_ok": true,
+      "replaced_previous_device": false
+    },
+    "hr": {
+      "aziz_before": {
+        "invitation_status": "activated",
+        "channel": "email",
+        "actions": {
+          "resend": false,
+          "reinvite": true,
+          "revoke_access": true,
+          "show_code_exception": false
+        },
+        "app_access_active": true
+      },
+      "resend": {
+        "ok": true,
+        "delivered": true,
+        "delivery_status": "delivered",
+        "channel": "email",
+        "code_disclosed": false,
+        "invite_id": "e7c56c4f-60ff-4f8d-bbd7-4e0f1bc8a2b3"
+      },
+      "reinvite": {
+        "ok": true,
+        "delivered": true,
+        "delivery_status": "delivered",
+        "channel": "email",
+        "code_disclosed": false,
+        "invite_id": "9ffc593b-4736-4311-a205-9213a09e48bc"
+      },
+      "exception_handoff": {
+        "ok": true,
+        "has_code": true,
+        "invite_id": "59043c83-e19b-4710-b741-d4ed32d7a9cd"
+      },
+      "aziz_after": {
+        "invitation_status": "activated",
+        "channel": "email",
+        "app_access_active": true,
+        "actions": {
+          "resend": false,
+          "reinvite": true,
+          "revoke_access": true,
+          "show_code_exception": false
+        },
+        "access": {
+          "active": true,
+          "platform": "ios",
+          "activated_at": "2026-08-07T06:36:38.288135+00:00",
+          "last_active_at": "2026-08-07T06:36:38.437423+00:00"
+        }
+      }
+    },
+    "states": {
+      "delivered": {
+        "ok": true,
+        "employee_key": "WATHEFNI-96599338566",
+        "invitation_status": "delivered",
+        "invite_id": "9ffc593b-4736-4311-a205-9213a09e48bc",
+        "channel": "email",
+        "sent_at": "2026-08-07 06:36:37.572471+00:00",
+        "expires_at": "2026-08-08 06:36:37.144008+00:00",
+        "delivery_mode": "auto_delivery",
+        "last_error": null,
+        "app_access_active": true,
+        "actions": {
+          "resend": true,
+          "reinvite": true,
+          "revoke_access": true,
+          "show_code_exception": false
+        }
+      },
+      "failed": {
+        "invitation_status": "failed",
+        "actions": {
+          "resend": true,
+          "reinvite": true,
+          "revoke_access": true,
+          "show_code_exception": false
+        },
+        "last_error": "physical_acceptance_force"
+      },
+      "needs_attention": {
+        "invitation_status": "needs_attention",
+        "actions": {
+          "resend": true,
+          "reinvite": true,
+          "revoke_access": true,
+          "show_code_exception": true
+        },
+        "last_error": "physical_acceptance_force"
+      },
+      "expired": {
+        "invitation_status": "expired",
+        "actions": {
+          "resend": true,
+          "reinvite": true,
+          "revoke_access": false,
+          "show_code_exception": false
+        }
+      }
+    }
+  }
+}
+PASS employee_app_invitation_physical_acceptance

@@ -1,0 +1,11 @@
+{
+  "batch": 1,
+  "proved": [
+    "fixture_create",
+    "fixture_idempotent_upsert",
+    "fixture_cleanup_contract"
+  ],
+  "deferred": "module destructive probes attach in IAX_BATCH>=1 using unproven-p1-register.json",
+  "note": "Batch >=1 reserved for progressive property handlers. No live customer mutations; handlers must use IAX fixtures only.",
+  "register_count": 495
+}

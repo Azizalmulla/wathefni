@@ -1,0 +1,46 @@
+{
+  "name": "canary",
+  "id": "019fd252-ff83-7881-82d0-47a97c1add86",
+  "currentPage": [
+    {
+      "branch": "canary",
+      "message": "\"Rollback Bank ESS UI OTA crash 326e2040 (fresh start)\" (17 seconds ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "cb2655a4-6451-4724-b321-0d20929aa838",
+      "platforms": "android, ios"
+    },
+    {
+      "branch": "canary",
+      "message": "\"Bank ESS + onboarding completion UI 20260806T170025Z (release 6547a25)\" (8 minutes ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "326e2040-6603-4c34-a6db-1022ff8095a6",
+      "platforms": "android, ios"
+    },
+    {
+      "branch": "canary",
+      "message": "\"Civil ID dual-side Front/Back slots 20260806T015133Z\" (15 hours ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "968adf2a-135f-4cae-b4cc-7136f74628de",
+      "platforms": "android, ios"
+    },
+    {
+      "branch": "canary",
+      "message": "\"DocVal Try again reopens picker 20260805T231332Z\" (18 hours ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "18b27224-09d0-4fcf-b6da-cd91e28c21bf",
+      "platforms": "android, ios"
+    },
+    {
+      "branch": "canary",
+      "message": "\"Document Validation Parity mobile UX 20260805T224917Z\" (18 hours ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "b6bccf66-d7a2-4b95-b5dd-73543f9faa86",
+      "platforms": "android, ios"
+    }
+  ]
+}

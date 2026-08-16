@@ -1,0 +1,31 @@
+WAVE2C_PRODUCTION_SYNTHETIC_BIOTIME_CANARY=PASS
+CANARY=54/0
+E360_FREEZE=57/0
+ONBOARDING_FREEZE=54/0
+BACKUP_ROLLBACK_REDEPLOY=PASS
+REAL_DEVICE=NOT_CONNECTED
+REAL_CLOCKING=OFF
+IMPORT_QR_GPS_KIOSK=OFF
+LEGACY_DEMO_ROWS=42_UNTOUCHED
+FOUR_REALS=UNTOUCHED
+CREDENTIAL_KEY_ROTATED_AFTER_DEPLOY_LOG_EXPOSURE=true
+
+# Separate verdicts
+
+SYNTHETIC_BIOTIME_PRODUCTION_CONNECTOR=PASS
+# Lab BioTime HTTP fixture → REST pull → privacy sanitize → authority.
+# Normal/overnight, pagination, duplicates, metadata-only verify types.
+
+ONPREM_AGENT_DURABILITY=PASS
+# Sqlite outbox/checkpoint, offline enqueue, reconnect replay,
+# sealed credentials, restart resume, health/lag/error states,
+# invalid auth + rotation.
+
+CSV_XLSX_FALLBACK=PASS
+# Identical-content multi-file idempotency, XLSX ingest,
+# SFTP drop digest resume, reimport after correction safe.
+
+READINESS_FOR_FIRST_REAL_CUSTOMER_DEVICE_PILOT=NO-GO
+# Synthetic/lab only. No real device, no real employee allowlist expansion,
+# no live BioTime customer middleware. Requires separate pilot wave with
+# customer NDA, mapping dual-control, and capture readiness review.

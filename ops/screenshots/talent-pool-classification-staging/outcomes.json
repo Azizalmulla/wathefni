@@ -1,0 +1,291 @@
+{
+  "software": {
+    "status": "classified",
+    "outcome_label": "Clear evidence",
+    "suggestion_count": 8,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "cert.aws",
+      "edu.computer_science",
+      "fn.technology",
+      "ind.banking",
+      "role.software_engineer",
+      "sen.senior",
+      "skill.python",
+      "skill.sql"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "hr": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 7,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "fn.hr",
+      "fn.technology",
+      "ind.retail",
+      "lang.arabic",
+      "lang.english",
+      "role.hr_generalist",
+      "skill.recruiting"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "finance": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 7,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "edu.accounting",
+      "fn.finance",
+      "fn.technology",
+      "role.accountant",
+      "role.audit",
+      "role.treasury",
+      "skill.excel"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "engineering": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 6,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "edu.mechanical",
+      "fn.engineering",
+      "fn.technology",
+      "ind.oil_gas",
+      "role.mechanical_engineer",
+      "skill.autocad"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "sales": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 4,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "fn.sales_marketing",
+      "fn.technology",
+      "ind.retail",
+      "role.sales_executive"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "marketing": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 3,
+    "bands": [
+      "High"
+    ],
+    "node_ids": [
+      "fn.sales_marketing",
+      "fn.technology",
+      "role.marketing_specialist"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "operations": {
+    "status": "classified",
+    "outcome_label": "Clear evidence",
+    "suggestion_count": 2,
+    "bands": [
+      "High"
+    ],
+    "node_ids": [
+      "fn.operations",
+      "role.operations_coordinator"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "multi": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 6,
+    "bands": [
+      "High"
+    ],
+    "node_ids": [
+      "fn.engineering",
+      "fn.operations",
+      "fn.technology",
+      "role.software_engineer",
+      "skill.excel",
+      "skill.recruiting"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "career_change": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 6,
+    "bands": [
+      "High"
+    ],
+    "node_ids": [
+      "fn.engineering",
+      "fn.technology",
+      "role.mechanical_engineer",
+      "role.software_engineer",
+      "skill.autocad",
+      "skill.python"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "short_clear": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 7,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "edu.computer_science",
+      "fn.engineering",
+      "fn.technology",
+      "role.software_engineer",
+      "sen.intern",
+      "sen.junior",
+      "skill.python"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "long_unclear": {
+    "status": "classified",
+    "outcome_label": "Clear evidence",
+    "suggestion_count": 1,
+    "bands": [
+      "High"
+    ],
+    "node_ids": [
+      "fn.technology"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "incomplete_facts": {
+    "status": "classified",
+    "outcome_label": "Clear evidence",
+    "suggestion_count": 5,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "fn.technology",
+      "ind.banking",
+      "role.software_engineer",
+      "skill.python",
+      "skill.sql"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "insufficient": {
+    "status": "unclassified",
+    "outcome_label": "Insufficient evidence to classify",
+    "suggestion_count": 0,
+    "bands": [],
+    "node_ids": [],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "arabic": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 5,
+    "bands": [
+      "High"
+    ],
+    "node_ids": [
+      "fn.engineering",
+      "fn.technology",
+      "role.software_engineer",
+      "skill.python",
+      "skill.sql"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "english": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 4,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "fn.sales_marketing",
+      "fn.technology",
+      "lang.english",
+      "role.marketing_specialist"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  },
+  "bilingual": {
+    "status": "classified_multi",
+    "outcome_label": "Multiple relevant areas",
+    "suggestion_count": 4,
+    "bands": [
+      "High",
+      "Medium"
+    ],
+    "node_ids": [
+      "fn.sales_marketing",
+      "fn.technology",
+      "ind.retail",
+      "role.marketing_specialist"
+    ],
+    "ocr_triggered": false,
+    "workers_started": false,
+    "idempotent_hit": false
+  }
+}

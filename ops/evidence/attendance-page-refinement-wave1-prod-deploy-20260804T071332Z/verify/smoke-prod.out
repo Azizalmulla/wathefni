@@ -1,0 +1,26 @@
+PASS posthire_bundle_present — PostHire-D7arwIkG.js
+PASS board_first_marker
+PASS attention_strip
+PASS operations_collapsed_marker
+PASS ops_exception_row
+PASS no_board_correct_save
+PASS resolve_cta
+PASS request_correction_cta
+PASS apply_separate_hint
+PASS dual_pending_copy
+PASS payroll_locked_copy
+PASS stale_row_copy
+PASS show_operations_default
+PASS arabic_rtl_hint
+PASS no_attendance_correction_row_component
+OPS_KIND_STATUS []
+PASS ops_table_readable — absence_open=0
+PASS absence_ops_path_ui
+ATTENDANCE_WAVE1_SMOKE_OK
+{
+  "absence_samples": [],
+  "recent_cases": [],
+  "case_statuses": [],
+  "dual_and_apply_separate": true
+}
+AUTHORITY_READ_OK

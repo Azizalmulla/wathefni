@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useI18n, readingEdgeAlign } from '@/i18n'
-import { StatusChip } from '@/components/ui'
 import {
   ContentSkeleton,
   EditorialHeading,
@@ -14,6 +13,7 @@ import {
   Wordmark,
 } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
+import { PageBackButton } from '@/components/lists'
 import { formatDate } from '@/lib/format'
 import { colors, font, layout, radius, spacing, typeScaling } from '@/theme'
 import type {
@@ -22,6 +22,7 @@ import type {
   BankStatusResponse,
   BankSubmissionState,
 } from '@/api/types'
+import { BankLifeMark, QuietSettledMark } from './bankLifeMarks'
 
 /** Order is deliberate: the account identifier first, then the descriptive fields. */
 export const BANK_FIELDS = [
@@ -64,25 +65,6 @@ export type BankViewProps = {
   onUploadCertificate?: () => void
 }
 
-function chipTone(state: string): 'neutral' | 'success' | 'warning' | 'danger' {
-  switch (state) {
-    case 'applied':
-      return 'success'
-    case 'approved':
-    case 'pending_payroll':
-      return 'warning'
-    case 'pending_hr':
-    case 'pending_review':
-    case 'draft':
-      return 'warning'
-    case 'rejected':
-    case 'needs_correction':
-      return 'danger'
-    default:
-      return 'neutral'
-  }
-}
-
 export function BankView({
   data,
   form,
@@ -122,7 +104,6 @@ export function BankView({
     submissionState === 'approved'
   const isDraft = submissionState === 'draft'
   const needsFix = submissionState === 'rejected' || submissionState === 'needs_correction'
-  // The backend owns "what next"; the app only chooses the wording.
   const nextStep = data.next_step?.message || nextStepCopy(submissionState, hasVerified, t) || ''
   const evidence = submission?.evidence || []
   const proposedDisplay = submission?.proposed?.display || {}
@@ -133,33 +114,27 @@ export function BankView({
     [form.iban, form.account_number],
   )
 
-  // The screen answers one question first: which account will be paid, and is it
-  // settled? Payroll's effective account is that answer when it exists, otherwise
-  // the account HR confirmed.
   const effectiveDisplay = data.payroll_effective?.display || {}
   const verifiedDisplay = data.verified?.display || {}
   const paidAccount = hasEffective ? effectiveDisplay : hasVerified ? verifiedDisplay : null
-  // The confirmed account is only worth its own card while it differs from the
-  // account payroll is actually using. Printing the same masked IBAN under two
-  // headings read as two accounts.
   const showVerifiedSeparately =
     hasEffective && hasVerified && !sameDisplay(effectiveDisplay, verifiedDisplay)
-  // A submission that payroll has already applied is the paid account above, not
-  // a pending change.
   const pendingChange = showProposed && submissionState !== 'applied'
+  // One short guidance line for the pending section — never restate the chip.
+  const pendingGuidance = underReview
+    ? t('bank.pending.noActionNeeded')
+    : needsFix
+      ? t('bank.next.needs_correction')
+      : isDraft
+        ? t('bank.next.draft')
+        : nextStep
+  const showAddActions = !formOpen && !underReview && (data.can_submit_new !== false || needsFix)
 
   return (
     <PageScreen>
-      <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
+      <PageScrollView refreshing={refreshing} onRefresh={onRefresh} keyboardInsets>
         <View style={styles.nav}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}
-            onPress={onBack}
-            style={styles.backButton}
-          >
-            <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
-          </Pressable>
+          <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
           <Wordmark compact align="center" />
           <View style={styles.navSpacer} />
         </View>
@@ -169,17 +144,15 @@ export function BankView({
           <Text style={[styles.subtitle, align]}>{t('bank.subtitle')}</Text>
         </FadeIn>
 
-        {/* One account surface: the account that will be paid, stated once.
-            Butter is the single colour moment on this screen. */}
-        <PastelCard tone="butter" style={styles.card}>
+        {/* 1. Current salary account — sole butter ambient; review marks stay non-yellow. */}
+        <PastelCard tone="butter" style={styles.summaryCard}>
           <View style={styles.cardHead}>
-            <Text style={[styles.cardTitle, align]}>
+            <Text style={[styles.cardTitle, styles.flex, align]}>
               {hasEffective ? t('bank.payrollEffectiveTitle') : t('bank.verifiedTitle')}
             </Text>
             {paidAccount ? (
-              <StatusChip
+              <QuietSettledMark
                 label={hasEffective ? t('bank.payrollEffectiveChip') : t('bank.verifiedChip')}
-                tone="success"
               />
             ) : null}
           </View>
@@ -204,45 +177,28 @@ export function BankView({
           )}
         </PastelCard>
 
-        {/* One human status line: what happens next, never a dead end. */}
-        {nextStep ? (
-          <View style={styles.statusLine}>
-            <View style={styles.cardHead}>
-              <Text style={[styles.subTitle, align]}>{t('bank.nextStepTitle')}</Text>
-              <StatusChip label={submissionLabel(submissionState, t)} tone={chipTone(submissionState)} />
-            </View>
-            <Text style={[styles.body, align]}>{nextStep}</Text>
-            {underReview ? (
-              <Text style={[styles.note, align]}>{t('bank.payrollEffectiveUnchangedNote')}</Text>
-            ) : null}
-          </View>
-        ) : null}
-
-        {/* Only shown while HR's confirmed account and payroll's differ — otherwise
-            it would be the masked IBAN above under a second heading. */}
         {showVerifiedSeparately ? (
           <View style={styles.statusLine}>
-            <View style={styles.cardHead}>
-              <Text style={[styles.subTitle, align]}>{t('bank.verifiedTitle')}</Text>
-              <StatusChip label={t('bank.verifiedChip')} tone="success" />
-            </View>
+            <Text style={[styles.subTitle, align]}>{t('bank.verifiedTitle')}</Text>
             <FieldList values={verifiedDisplay} t={t} align={align} />
             <Text style={[styles.note, align]}>{t('bank.verifiedUnchangedNote')}</Text>
           </View>
         ) : null}
 
-        {/* The change the employee asked for, and why it came back. */}
+        {/* 2. Pending change — merges “what happens next” + “what you submitted”. */}
         {pendingChange ? (
-          <PastelCard tone="cream" style={styles.card}>
+          <View style={styles.ledgerBlock}>
             <View style={styles.cardHead}>
-              <Text style={[styles.cardTitle, align]}>{t('bank.submittedTitle')}</Text>
-              <StatusChip label={submissionLabel(submissionState, t)} tone={chipTone(submissionState)} />
+              <Text style={[styles.cardTitle, styles.flex, align]}>{t('bank.pendingChangeTitle')}</Text>
+              <BankLifeMark label={submissionLabel(submissionState, t)} state={submissionState} />
             </View>
+            {pendingGuidance ? <Text style={[styles.body, align]}>{pendingGuidance}</Text> : null}
+            {underReview ? (
+              <Text style={[styles.note, align]}>{t('bank.payrollEffectiveUnchangedNote')}</Text>
+            ) : null}
             <FieldList values={proposedDisplay} t={t} align={align} />
             {submission?.submitted_at ? (
               <Text style={[styles.note, align]}>
-                {/* Compose outside i18n interpolation — returned/resubmitted states
-                    previously showed the literal "{date}" placeholder on device. */}
                 {`${t('bank.submittedOn')} ${formatDate(submission.submitted_at, locale)}`}
               </Text>
             ) : null}
@@ -264,7 +220,7 @@ export function BankView({
                     accessibilityRole="button"
                     accessibilityLabel={row.filename || t('bank.evidenceTitle')}
                     onPress={() => onOpenEvidence(row)}
-                    style={styles.evidenceRow}
+                    style={({ pressed }) => [styles.evidenceRow, pressed && styles.pressed]}
                   >
                     <Ionicons name="document-attach-outline" size={18} color={colors.ink} />
                     <Text style={[styles.evidenceName, align]} numberOfLines={1}>
@@ -272,40 +228,54 @@ export function BankView({
                         ? t('common.loading')
                         : row.filename || row.evidence_id}
                     </Text>
+                    <Ionicons
+                      name={isRTL ? 'chevron-back' : 'chevron-forward'}
+                      size={15}
+                      color={colors.navMuted}
+                    />
                   </Pressable>
                 ))}
               </View>
             ) : null}
 
-            <View style={styles.actionRow}>
-              {isDraft ? (
-                <PremiumButton
-                  label={t('bank.submitDraft')}
-                  onPress={onSubmitDraft}
-                  busy={submitting}
-                  disabled={submitting || withdrawing}
-                />
-              ) : null}
-              {submission?.can_withdraw ? (
-                <PremiumButton
-                  label={t('bank.withdraw')}
-                  onPress={onWithdraw}
-                  busy={withdrawing}
-                  disabled={submitting || withdrawing}
-                />
-              ) : null}
-              {(isDraft || underReview) && !uploading ? (
-                <PremiumButton label={t('bank.attachEvidence')} onPress={onUploadEvidence} />
-              ) : null}
-              {uploading ? <PremiumButton label={t('bank.uploading')} onPress={() => {}} busy /> : null}
-            </View>
-          </PastelCard>
+            {/* 3. Actions on an active change — secondary while under review. */}
+            {isDraft || submission?.can_withdraw || underReview || uploading ? (
+              <View style={styles.actionRow}>
+                {isDraft ? (
+                  <PremiumButton
+                    label={t('bank.submitDraft')}
+                    onPress={onSubmitDraft}
+                    busy={submitting}
+                    disabled={submitting || withdrawing}
+                  />
+                ) : null}
+                {submission?.can_withdraw ? (
+                  <PremiumButton
+                    label={t('bank.withdraw')}
+                    onPress={onWithdraw}
+                    busy={withdrawing}
+                    disabled={submitting || withdrawing}
+                    tone="secondary"
+                  />
+                ) : null}
+                {(isDraft || underReview) && !uploading ? (
+                  <PremiumButton
+                    label={t('bank.attachEvidence')}
+                    onPress={onUploadEvidence}
+                    tone="secondary"
+                  />
+                ) : null}
+                {uploading ? (
+                  <PremiumButton label={t('bank.uploading')} busy tone="secondary" />
+                ) : null}
+              </View>
+            ) : null}
+          </View>
         ) : null}
 
-        {/* Document-first: upload certificate, then confirm/correct. One change
-            action, and only while a change is actually allowed. */}
-        {!formOpen && !underReview && (data.can_submit_new !== false || needsFix) ? (
-          <PastelCard tone="cream" style={styles.card}>
+        {/* 3. Actions — add / correct when no review is in flight. */}
+        {showAddActions ? (
+          <View style={styles.ledgerBlock}>
             <Text style={[styles.cardTitle, align]}>
               {needsFix
                 ? t('bank.correctAndResubmit')
@@ -327,14 +297,14 @@ export function BankView({
                 label={needsFix ? t('bank.correctAndResubmit') : t('bank.enterManually')}
                 onPress={onOpenForm}
                 disabled={uploading || submitting || withdrawing}
+                tone="secondary"
               />
             </View>
-          </PastelCard>
+          </View>
         ) : null}
 
-        {/* Add or change — confirm/correct extracted values or manual entry. */}
         {formOpen ? (
-          <PastelCard tone="cream" style={styles.card}>
+          <View style={styles.ledgerBlock}>
             <Text style={[styles.cardTitle, align]}>
               {needsFix
                 ? t('bank.correctAndResubmit')
@@ -350,6 +320,7 @@ export function BankView({
                 onPress={onUploadEvidence}
                 busy={uploading}
                 disabled={uploading || submitting || savingDraft}
+                tone="secondary"
               />
             </View>
             {BANK_FIELDS.map((field) => (
@@ -397,6 +368,7 @@ export function BankView({
                 onPress={onSaveDraft}
                 busy={savingDraft}
                 disabled={requiredMissing || submitting || savingDraft}
+                tone="secondary"
               />
               <Pressable
                 accessibilityRole="button"
@@ -407,15 +379,15 @@ export function BankView({
                 <Text style={styles.linkText}>{t('common.cancel')}</Text>
               </Pressable>
             </View>
-          </PastelCard>
+          </View>
         ) : null}
 
-        {/* Masking and encryption are reassurance, not a section: footnotes. */}
+        {/* 4. Safety note — small footnotes only. */}
         <View style={styles.footnotes}>
-          <Text style={[styles.note, align]}>{t('bank.maskedNote')}</Text>
+          <Text style={[styles.footnote, align]}>{t('bank.maskedNote')}</Text>
           <View style={styles.securityRow}>
-            <Ionicons name="lock-closed-outline" size={16} color={colors.success} />
-            <Text style={[styles.note, styles.flex, align]}>{t('bank.secureMessage')}</Text>
+            <Ionicons name="lock-closed-outline" size={14} color={colors.subtle} />
+            <Text style={[styles.footnote, styles.flex, align]}>{t('bank.secureMessage')}</Text>
           </View>
         </View>
       </PageScrollView>
@@ -527,11 +499,20 @@ function nextStepCopy(
   }
 }
 
-export function BankLoadingView() {
+export function BankLoadingView({ onBack }: { onBack?: () => void }) {
+  const { t } = useI18n()
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.content}>
-        <Wordmark compact align="center" />
+        {onBack ? (
+          <View style={styles.pushedNav}>
+            <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
+            <Wordmark compact align="center" />
+            <View style={styles.navSpacer} />
+          </View>
+        ) : (
+          <Wordmark compact align="center" />
+        )}
         <ContentSkeleton />
       </View>
     </SafeAreaView>
@@ -545,6 +526,11 @@ export function BankUnavailableView({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
       <View style={[styles.content, styles.errorWrap]}>
+        <View style={styles.pushedNav}>
+          <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
+          <Wordmark compact align="center" />
+          <View style={styles.navSpacer} />
+        </View>
         <Text style={[styles.cardTitle, align]}>{t('bank.unavailableTitle')}</Text>
         <Text style={[styles.body, align]}>{t('bank.unavailableMessage')}</Text>
         <PremiumButton label={t('common.back')} onPress={onBack} />
@@ -553,15 +539,23 @@ export function BankUnavailableView({ onBack }: { onBack: () => void }) {
   )
 }
 
-export function BankErrorView({ onRetry }: { onRetry: () => void }) {
+export function BankErrorView({ onRetry, onBack }: { onRetry: () => void; onBack?: () => void }) {
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
       <View style={[styles.content, styles.errorWrap]}>
+        {onBack ? (
+          <View style={styles.pushedNav}>
+            <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
+            <Wordmark compact align="center" />
+            <View style={styles.navSpacer} />
+          </View>
+        ) : null}
         <Text style={[styles.cardTitle, align]}>{t('common.error')}</Text>
         <Text style={[styles.body, align]}>{t('error.generic')}</Text>
         <PremiumButton label={t('common.retry')} onPress={onRetry} />
+        {onBack ? <PremiumButton label={t('common.back')} onPress={onBack} tone="secondary" /> : null}
       </View>
     </SafeAreaView>
   )
@@ -577,27 +571,33 @@ const styles = StyleSheet.create({
     gap: layout.sectionGap,
   },
   nav: { minHeight: layout.touchTarget, flexDirection: 'row', alignItems: 'center' },
-  backButton: {
-    width: layout.touchTarget,
-    height: layout.touchTarget,
+  pushedNav: {
+    minHeight: layout.touchTarget,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   navSpacer: { width: layout.touchTarget },
   hero: { gap: spacing.sm },
-  subtitle: { color: colors.subtle, fontSize: font.body, lineHeight: 22 },
-  card: { gap: spacing.sm },
-  /** A stated fact, not a card: neutral surface, hairline edge, no elevation. */
+  subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20 },
+  /** One colour moment — the paid account. */
+  summaryCard: { gap: spacing.sm },
+  /** Cream ledger blocks — no stacked white cards. */
+  ledgerBlock: {
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  /** Human status on cream — hairline only, no white panel. */
   statusLine: {
     gap: spacing.xs,
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
-  footnotes: { gap: spacing.xs },
+  footnotes: { gap: 2, paddingTop: spacing.md },
+  footnote: { color: colors.navMuted, fontSize: font.tiny, lineHeight: 15 },
   cardHead: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -634,8 +634,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth * 2,
+    backgroundColor: 'transparent',
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.danger,
     gap: 4,
   },
@@ -644,6 +644,7 @@ const styles = StyleSheet.create({
   evidenceList: { gap: spacing.xs, marginTop: spacing.sm },
   evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 },
   evidenceName: { flex: 1, color: colors.ink, fontSize: font.small, fontWeight: '600' },
+  pressed: { opacity: 0.85 },
   actionRow: { gap: spacing.sm, marginTop: spacing.sm },
   linkButton: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   linkText: { color: colors.text, fontWeight: '700', textDecorationLine: 'underline' },

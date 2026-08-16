@@ -1,0 +1,33 @@
+{
+  "seeded": {
+    "attendance_id": "bd743aa2-bc85-4d66-b21f-60a27e7ff0c6",
+    "company_code": "WATHEFNI",
+    "employee_key": "WATHEFNI-9655237101",
+    "employee_phone": "9655237101",
+    "employee_name": "W2B-SYNTH| Onboarding Visual",
+    "shift_id": null,
+    "attendance_date": "2026-08-09",
+    "scheduled_start": "09:00:00",
+    "scheduled_end": "17:00:00",
+    "check_in_at": "2026-08-09 08:58:00+00:00",
+    "check_out_at": null,
+    "status": "late",
+    "late_minutes": 28,
+    "early_leave_minutes": 0,
+    "notes": " [hr-cfa-20260810T182638Z]",
+    "source_text": null,
+    "metadata": {
+      "demo_seed": "wathefni_v1"
+    },
+    "created_by_phone": null,
+    "created_at": "2026-08-09 09:00:24.912428+00:00",
+    "updated_at": "2026-08-10 18:26:40.437573+00:00"
+  },
+  "restore": {
+    "attendance_id": "bd743aa2-bc85-4d66-b21f-60a27e7ff0c6",
+    "status": "present",
+    "late_minutes": 0,
+    "check_out_at": "2026-08-09 17:03:00+00:00",
+    "notes": null
+  }
+}

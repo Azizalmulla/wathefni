@@ -1,0 +1,14 @@
+
+> wathefni-dashboard@0.0.0 build
+> tsc -b && vite build
+
+src/posthire/AttendanceDailyBoard.tsx(9,16): error TS6133: 'CardContent' is declared but its value is never read.
+src/posthire/AttendanceDailyBoard.tsx(229,43): error TS2322: Type '{ children: "Payroll excluded" | "مستبعد من الرواتب"; variant: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+src/posthire/AttendanceOpsPanel.tsx(98,26): error TS2339: Property 'payload' does not exist on type 'DashboardApiError'.
+src/posthire/AttendanceOpsPanel.tsx(599,38): error TS2322: Type '{ children: string; variant: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+src/posthire/AttendanceOpsPanel.tsx(601,40): error TS2322: Type '{ children: string; variant: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+src/posthire/AttendanceOpsPanel.tsx(696,62): error TS2322: Type '{ children: "Second approval required" | "يلزم موافقة ثانية"; variant: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone | undefined; }'.

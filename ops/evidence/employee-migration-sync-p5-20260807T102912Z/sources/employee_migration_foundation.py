@@ -1,0 +1,4193 @@
+"""Employee Migration Foundation — production-safe roster import + safe updates.
+
+P1 (Migration & Sync expansion): this module is the *only* production employee
+migration import path. The legacy CSV import that could seed compliance is
+disabled at the HTTP boundary.
+
+Create path stays create-only for new people. Controlled updates for matched
+existing employees (name/email/title/department/start date/manager via
+assignment history). Match: source_system+external_employee_id, else phone;
+never name alone. No messages · no auto-onboarding · no compliance seed · no
+deactivation · no leave/docs/shifts/payroll · no ERP/SFTP yet (P5).
+"""
+
+from __future__ import annotations
+
+import csv
+import hashlib
+import io
+import json
+import os
+import re
+import unicodedata
+import uuid
+from datetime import datetime, timezone
+from typing import Any
+
+import schema_contract
+
+CONTRACT = "employee_migration_sync_p5_connectors"
+CONTRACT_VERSION = "5.0.0"
+DOMAIN = "employee_roster"
+SCHEMA_LOCK_ID = 770_911_221
+
+BATCH_STATUSES = frozenset(
+    {"draft", "previewed", "committing", "committed", "partial", "failed", "rolled_back"}
+)
+ROW_STATUSES = frozenset(
+    {
+        "pending",
+        "will_create",
+        "will_update",
+        "skipped",
+        "conflict",
+        "invalid",
+        "created",
+        "updated",
+        "failed",
+        "rolled_back",
+    }
+)
+# HR-facing totals. Deactivate stays 0 in P3.
+TOTAL_KEYS = ("create", "update", "skip", "review", "invalid", "warnings")
+SAFE_UPDATE_FIELDS = ("name", "email", "position_title", "department", "start_date")
+
+HEADER_ALIASES = {
+    "name": "name",
+    "full_name": "name",
+    "employee_name": "name",
+    "fullname": "name",
+    "phone": "phone",
+    "mobile": "phone",
+    "whatsapp": "phone",
+    "phone_number": "phone",
+    "whatsapp_number": "phone",
+    "mobile_number": "phone",
+    "contact": "phone",
+    "email": "email",
+    "email_address": "email",
+    "e_mail": "email",
+    "mail": "email",
+    "email_id": "email",
+    "work_email": "email",
+    "personal_email": "email",
+    "job_title": "position_title",
+    "title": "position_title",
+    "position": "position_title",
+    "position_title": "position_title",
+    "role": "position_title",
+    "designation": "position_title",
+    "department": "department",
+    "team": "department",
+    "dept": "department",
+    "division": "department",
+    "start_date": "start_date",
+    "hire_date": "start_date",
+    "joining_date": "start_date",
+    "start": "start_date",
+    "external_employee_id": "external_employee_id",
+    "external_id": "external_employee_id",
+    "employee_id": "external_employee_id",
+    "emp_id": "external_employee_id",
+    "source_employee_id": "external_employee_id",
+    "ats_id": "external_employee_id",
+    "payroll_id": "payroll_id",
+    "payroll_employee_id": "payroll_id",
+    "pay_id": "payroll_id",
+    "source_system": "source_system",
+    "source": "source_system",
+    "system": "source_system",
+    "hris": "source_system",
+    "manager_phone": "manager_phone",
+    "manager": "manager_phone",
+    "manager_mobile": "manager_phone",
+    "reports_to": "manager_phone",
+    "reports_to_phone": "manager_phone",
+    "line_manager": "manager_phone",
+    "line_manager_phone": "manager_phone",
+}
+
+REQUIRED_TABLES = [
+    "employee_import_batches",
+    "employee_import_rows",
+    "employee_source_mappings",
+]
+
+SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS employee_import_batches (
+  batch_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_code text NOT NULL,
+  domain text NOT NULL DEFAULT 'employee_roster',
+  contract text NOT NULL DEFAULT 'employee_migration_foundation_p0p2',
+  contract_version text NOT NULL DEFAULT '1.0.0',
+  status text NOT NULL DEFAULT 'draft',
+  filename text,
+  content_sha256 text NOT NULL,
+  idempotency_key text NOT NULL,
+  source_system text,
+  total_rows integer NOT NULL DEFAULT 0,
+  totals jsonb NOT NULL DEFAULT '{}'::jsonb,
+  options jsonb NOT NULL DEFAULT '{}'::jsonb,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_by text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  committed_at timestamptz,
+  rolled_back_at timestamptz,
+  UNIQUE (company_code, idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS idx_employee_import_batches_company
+  ON employee_import_batches(company_code, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_employee_import_batches_sha
+  ON employee_import_batches(company_code, content_sha256);
+
+CREATE TABLE IF NOT EXISTS employee_import_rows (
+  row_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id uuid NOT NULL REFERENCES employee_import_batches(batch_id) ON DELETE CASCADE,
+  company_code text NOT NULL,
+  row_number integer NOT NULL,
+  status text NOT NULL DEFAULT 'pending',
+  name text,
+  phone text,
+  email text,
+  position_title text,
+  department text,
+  start_date text,
+  external_employee_id text,
+  payroll_id text,
+  source_system text,
+  employee_key text,
+  reason text,
+  raw jsonb NOT NULL DEFAULT '{}'::jsonb,
+  normalized jsonb NOT NULL DEFAULT '{}'::jsonb,
+  detail jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (batch_id, row_number)
+);
+CREATE INDEX IF NOT EXISTS idx_employee_import_rows_batch_status
+  ON employee_import_rows(batch_id, status);
+CREATE INDEX IF NOT EXISTS idx_employee_import_rows_company
+  ON employee_import_rows(company_code, batch_id);
+
+CREATE TABLE IF NOT EXISTS employee_source_mappings (
+  mapping_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_code text NOT NULL,
+  employee_key text NOT NULL,
+  source_system text NOT NULL,
+  external_employee_id text,
+  payroll_id text,
+  attributes jsonb NOT NULL DEFAULT '{}'::jsonb,
+  batch_id uuid,
+  row_id uuid,
+  active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_employee_source_mappings_employee
+  ON employee_source_mappings(company_code, employee_key)
+  WHERE active;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_employee_source_ext_id
+  ON employee_source_mappings(company_code, source_system, external_employee_id)
+  WHERE active AND external_employee_id IS NOT NULL AND btrim(external_employee_id) <> '';
+CREATE UNIQUE INDEX IF NOT EXISTS uq_employee_source_payroll_id
+  ON employee_source_mappings(company_code, source_system, payroll_id)
+  WHERE active AND payroll_id IS NOT NULL AND btrim(payroll_id) <> '';
+"""
+
+
+def _flag_on(name: str, default: str = "") -> bool:
+    return os.environ.get(name, default).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def foundation_enabled(company_code: str | None = None) -> bool:
+    if not _flag_on("WATHEFNI_EMPLOYEE_MIGRATION_FOUNDATION"):
+        return False
+    company = str(company_code or "").strip().upper()
+    if not company:
+        return True
+    return company_allowed(company)
+
+
+def allowed_companies() -> set[str] | None:
+    raw = (os.environ.get("WATHEFNI_EMPLOYEE_MIGRATION_FOUNDATION_COMPANIES") or "").strip()
+    if not raw:
+        return None
+    return {c.strip().upper() for c in raw.split(",") if c.strip()}
+
+
+def company_allowed(company_code: str) -> bool:
+    allowed = allowed_companies()
+    if allowed is None:
+        return True
+    return str(company_code or "").strip().upper() in allowed
+
+
+def honesty_payload() -> dict[str, Any]:
+    base = {
+        "contract": CONTRACT,
+        "version": CONTRACT_VERSION,
+        "domain": DOMAIN,
+        "production_path_foundation_only": True,
+        "legacy_import_disabled": True,
+        "create_only_for_new": True,
+        "controlled_updates": True,
+        "no_messages": True,
+        "no_invites": True,
+        "no_auto_onboarding": True,
+        "no_auto_compliance_seed_on_import": True,
+        "start_onboarding_form_rejected": True,
+        "no_deactivation": True,
+        "no_erp_sftp": False,
+        "connected_systems_p5": True,
+        "match_priority": ["source_system+external_employee_id", "phone_alias"],
+        "never_match_by_name_alone": True,
+        "material_name_change_needs_review": True,
+        "active_review_queue_deduped": True,
+        "approved_name_change_apply_once": True,
+        "canonical_review_apply": True,
+        "safe_update_fields": list(SAFE_UPDATE_FIELDS) + ["manager"],
+        "source_mapping_model": True,
+        "allowed_companies": sorted(allowed_companies() or []),
+        "expansion_phases_deferred": ["P6_leavers"],
+        "field_layers": ["canonical", "company_custom", "raw_source_payload"],
+        "mapping_profiles": True,
+        "bank_proposed_only_on_import": True,
+        "identity_imported_non_authoritative": True,
+        "documents_balances_partial": True,
+        "onboarding_migration_p3": True,
+        "no_fake_onboarding_completion": True,
+        "opening_balances_p4": True,
+        "no_fake_historical_transactions": True,
+    }
+    try:
+        import employee_migration_field_model as _fm
+
+        base["field_model"] = _fm.honesty_payload()
+    except Exception:
+        pass
+    try:
+        import employee_migration_onboarding as _omo
+
+        base["onboarding_migration"] = _omo.honesty_payload()
+    except Exception:
+        pass
+    try:
+        import employee_migration_cutover as _p4
+
+        base["opening_balances"] = _p4.honesty_payload()
+    except Exception:
+        pass
+    try:
+        import employee_migration_connectors as _p5
+
+        base["connected_systems"] = _p5.honesty_payload()
+    except Exception:
+        pass
+    return base
+
+
+def require_foundation(legacy: Any, company_code: str) -> None:
+    """Hard gate: migration import APIs refuse when foundation is off for company."""
+    if foundation_enabled(company_code):
+        return
+    raise legacy.HTTPException(
+        status_code=503,
+        detail={
+            "error": "migration_foundation_required",
+            "message": (
+                "Employee migration uses the production-safe foundation path only. "
+                "The legacy import that could seed compliance or start onboarding is disabled."
+            ),
+            "contract": CONTRACT,
+            "version": CONTRACT_VERSION,
+            "company": str(company_code or "").strip().upper(),
+        },
+    )
+
+
+def reject_migration_onboarding_request(legacy: Any, start_onboarding: bool) -> None:
+    """Migration never starts onboarding — reject explicit requests instead of ignoring."""
+    if not start_onboarding:
+        return
+    raise legacy.HTTPException(
+        status_code=422,
+        detail={
+            "error": "migration_onboarding_forbidden",
+            "message": (
+                "Migration import cannot start onboarding or send invitations. "
+                "Use the onboarding workflow after employees are accepted into Wathefni."
+            ),
+            "contract": CONTRACT,
+            "version": CONTRACT_VERSION,
+        },
+    )
+
+
+def _status_to_total_key(status: str) -> str | None:
+    if status in {"will_create", "created"}:
+        return "create"
+    if status in {"will_update", "updated"}:
+        return "update"
+    if status == "skipped":
+        return "skip"
+    if status == "conflict":
+        return "review"
+    if status in {"invalid", "failed"}:
+        return "invalid"
+    return None
+
+
+def _legacy_bucket(status: str) -> str:
+    if status in {"will_create", "created"}:
+        return "created"
+    if status in {"will_update", "updated"}:
+        return "updated"
+    if status == "skipped":
+        return "skipped"
+    if status == "conflict":
+        return "needs_review"
+    return "failed"
+
+
+def _hr_outcome(status: str, detail: dict[str, Any] | None = None) -> str:
+    if status == "will_update" and isinstance(detail, dict) and _json_flag(detail.get("name_change_approved")):
+        return "Approved"
+    return {
+        "will_create": "Will be added",
+        "created": "Added",
+        "will_update": "Will be updated",
+        "updated": "Updated",
+        "skipped": "Will be skipped",
+        "conflict": "Needs review",
+        "invalid": "Will be skipped",
+        "failed": "Could not apply",
+        "rolled_back": "Undone",
+    }.get(status, status)
+
+
+_SCHEMA_READY = False
+
+
+def ensure_schema(cur: Any, *, force: bool = False) -> None:
+    global _SCHEMA_READY
+    if _SCHEMA_READY and not force:
+        return
+    # Do not pass lock_id: schema_contract.apply_sql rolls back the connection in
+    # its unlock finally-block, which would undo CREATE TABLE. Caller commits.
+    schema_contract.ensure_sql(
+        cur,
+        SCHEMA_SQL,
+        required_tables=REQUIRED_TABLES,
+        module="employee_migration_foundation",
+        lock_id=None,
+    )
+    try:
+        import employee_migration_field_model as _fm
+
+        _fm.ensure_field_model_schema(cur, force=force)
+    except Exception:
+        if force:
+            raise
+    try:
+        import employee_migration_onboarding as _omo
+
+        _omo.ensure_onboarding_migration_schema(cur, force=force)
+    except Exception:
+        if force:
+            raise
+    try:
+        import employee_migration_cutover as _p4
+
+        _p4.ensure_cutover_schema(cur, force=force)
+    except Exception:
+        if force:
+            raise
+    try:
+        import employee_migration_connectors as _p5
+
+        _p5.ensure_connectors_schema(cur, force=force)
+    except Exception:
+        if force:
+            raise
+    _SCHEMA_READY = True
+
+def _normalize_header(value: Any) -> str:
+    text = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    while "__" in text:
+        text = text.replace("__", "_")
+    return text.strip("_")
+
+
+def content_sha256(raw: bytes) -> str:
+    return hashlib.sha256(raw or b"").hexdigest()
+
+
+def default_idempotency_key(
+    *,
+    company_code: str,
+    content_sha: str,
+    source_system: str | None = None,
+) -> str:
+    company = str(company_code or "").strip().upper()
+    src = str(source_system or "").strip().lower() or "unspecified"
+    material = f"{company}|{DOMAIN}|{CONTRACT_VERSION}|{content_sha}|{src}"
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()
+
+
+def empty_totals() -> dict[str, int]:
+    return {k: 0 for k in TOTAL_KEYS}
+
+
+def _jsonable(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(k): _jsonable(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_jsonable(v) for v in value]
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, uuid.UUID):
+        return str(value)
+    return value
+
+
+def parse_employee_import_workbook(
+    raw: bytes, filename: str
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Parse CSV/XLSX preserving original headers/values (layer 3) + alias-normalized roster fields."""
+    name = str(filename or "").lower()
+    try:
+        if name.endswith(".xlsx") or name.endswith(".xlsm"):
+            import openpyxl
+
+            wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+            ws = wb.active
+            if ws is None:
+                return [], "We couldn't read this spreadsheet."
+            iterator = ws.iter_rows(values_only=True)
+            try:
+                header = next(iterator)
+            except StopIteration:
+                return [], "The file is empty."
+            headers = [str(h).strip() if h is not None else "" for h in header]
+            mapped = [HEADER_ALIASES.get(_normalize_header(h)) for h in headers]
+            if "name" not in mapped or "phone" not in mapped:
+                return [], "The file needs a 'name' and a 'phone' column."
+            rows: list[dict[str, Any]] = []
+            for values in iterator:
+                if not values:
+                    continue
+                source_values: dict[str, str] = {}
+                rec: dict[str, str] = {}
+                for key, header_name, val in zip(mapped, headers, values):
+                    if val is None:
+                        continue
+                    if isinstance(val, float) and val.is_integer():
+                        val = int(val)
+                    text = str(val).strip()
+                    if not text:
+                        continue
+                    if header_name:
+                        source_values[header_name] = text
+                    if key:
+                        rec[key] = text
+                if rec or source_values:
+                    rows.append(
+                        {
+                            "normalized": rec,
+                            "source_payload": {"headers": headers, "values": source_values},
+                        }
+                    )
+            return rows, None
+
+        text = raw.decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(text))
+        if not reader.fieldnames:
+            return [], "The file is empty."
+        headers = [str(fn) for fn in reader.fieldnames]
+        field_map = {fn: HEADER_ALIASES.get(_normalize_header(fn)) for fn in headers}
+        if "name" not in field_map.values() or "phone" not in field_map.values():
+            return [], "The file needs a 'name' and a 'phone' column."
+        rows = []
+        for raw_rec in reader:
+            source_values: dict[str, str] = {}
+            rec: dict[str, str] = {}
+            for fn, key in field_map.items():
+                value = str(raw_rec.get(fn) or "").strip()
+                if not value:
+                    continue
+                source_values[str(fn)] = value
+                if key:
+                    rec[key] = value
+            if rec or source_values:
+                rows.append(
+                    {
+                        "normalized": rec,
+                        "source_payload": {"headers": headers, "values": source_values},
+                    }
+                )
+        return rows, None
+    except Exception:
+        return [], "We couldn't read this file. Please upload a CSV or XLSX with name and phone columns."
+
+
+def parse_employee_import_rows(raw: bytes, filename: str) -> tuple[list[dict[str, str]], str | None]:
+    """Backward-compatible normalized-only parse."""
+    rows, err = parse_employee_import_workbook(raw, filename)
+    if err:
+        return [], err
+    return [dict(r.get("normalized") or {}) for r in rows], None
+
+
+def _manager_warning(manager_phone: str) -> str:
+    return (
+        f"Manager phone {manager_phone} was not found in the workforce or earlier rows in this file — "
+        "manager will be left unset."
+    )
+
+
+def _apply_p2_field_layers_after_hub_write(
+    legacy: Any,
+    *,
+    company: str,
+    employee_key: str,
+    row: dict[str, Any],
+    batch_id: str,
+    source_system: str | None,
+    actor: str | None,
+) -> dict[str, Any]:
+    """Apply custom values + deep canonical fields from stored mapping on the row."""
+    import employee_migration_field_model as _fm
+
+    norm = row.get("normalized") or {}
+    if isinstance(norm, str):
+        norm = json.loads(norm)
+    mapped_canonical = dict(norm.get("_mapped_canonical") or {})
+    mapped_custom = list(norm.get("_mapped_custom") or [])
+    # Fallback: re-derive from source_payload + batch mapping when older rows lack embeds
+    if not mapped_canonical and not mapped_custom:
+        sp = row.get("source_payload") or {}
+        if isinstance(sp, str):
+            sp = json.loads(sp)
+        # no batch mapping here — skip soft
+        pass
+    notes: dict[str, Any] = {"applied": [], "review": [], "custom": []}
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            for custom in mapped_custom:
+                result = _fm.upsert_custom_value(
+                    cur,
+                    company=company,
+                    employee_key=employee_key,
+                    field_key=str(custom.get("field_key") or ""),
+                    label_en=str(custom.get("label_en") or custom.get("field_key") or ""),
+                    label_ar=custom.get("label_ar"),
+                    value_type=str(custom.get("value_type") or "text"),
+                    value=str(custom.get("value") or ""),
+                    create=bool(custom.get("create")),
+                    source_system=source_system,
+                    batch_id=str(batch_id),
+                    row_id=str(row.get("row_id")),
+                    actor=actor,
+                )
+                notes["custom"].append(result)
+            deep = _fm.apply_deep_canonical_fields(
+                legacy,
+                cur,
+                company=company,
+                employee_key=employee_key,
+                canonical={
+                    k: v
+                    for k, v in mapped_canonical.items()
+                    if not str(k).startswith("onboarding_")
+                },
+                batch_id=str(batch_id),
+                row_id=str(row.get("row_id")),
+                source_system=source_system,
+                actor=actor,
+            )
+            notes["applied"] = deep.get("applied") or []
+            notes["review"] = deep.get("review") or []
+        conn.commit()
+
+    # P3 onboarding migration in its own transaction so deep-field failures cannot skip it.
+    try:
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                ensure_schema(cur)
+                onboarding_keys = {
+                    k: v for k, v in mapped_canonical.items() if str(k).startswith("onboarding_")
+                }
+                if not onboarding_keys:
+                    snap = row.get("detail") or {}
+                    if isinstance(snap, str):
+                        snap = json.loads(snap)
+                    preview_ob = (snap or {}).get("onboarding_migration")
+                    if preview_ob:
+                        onboarding_keys = {
+                            "onboarding_migration_disposition": preview_ob.get("disposition") or "",
+                            "onboarding_status": preview_ob.get("source_status") or "",
+                            "onboarding_completed_at": preview_ob.get("source_completed_at") or "",
+                        }
+                        if preview_ob.get("history"):
+                            onboarding_keys["onboarding_history"] = json.dumps(preview_ob.get("history"))
+                        if preview_ob.get("start_requested"):
+                            onboarding_keys["onboarding_start_after_import"] = "true"
+                if onboarding_keys:
+                    import employee_migration_onboarding as _omo
+
+                    resolved = _omo.resolve_disposition_from_canonical(onboarding_keys)
+                    snap = row.get("detail") or {}
+                    if isinstance(snap, str):
+                        snap = json.loads(snap)
+                    if (snap or {}).get("onboarding_migration"):
+                        resolved = dict((snap or {}).get("onboarding_migration") or resolved)
+                    ob = _omo.upsert_onboarding_migration(
+                        cur,
+                        company=company,
+                        employee_key=employee_key,
+                        resolved=resolved,
+                        batch_id=str(batch_id),
+                        row_id=str(row.get("row_id")),
+                        source_system=source_system,
+                        actor=actor,
+                    )
+                    notes["onboarding_migration"] = ob
+                    if ob.get("ok") and resolved.get("start_requested"):
+                        notes["onboarding_start"] = {"pending_explicit_start": True}
+                    detail = row.get("detail") or {}
+                    if isinstance(detail, str):
+                        detail = json.loads(detail)
+                    detail = dict(detail)
+                    if notes.get("review"):
+                        detail["field_authority_reviews"] = notes["review"]
+                    detail["onboarding_migration_applied"] = notes["onboarding_migration"]
+                    cur.execute(
+                        """
+                        UPDATE employee_import_rows
+                        SET detail=%s::jsonb, updated_at=now()
+                        WHERE row_id=%s AND company_code=%s
+                        """,
+                        (json.dumps(detail), row.get("row_id"), company),
+                    )
+                elif notes.get("review"):
+                    detail = row.get("detail") or {}
+                    if isinstance(detail, str):
+                        detail = json.loads(detail)
+                    detail = dict(detail)
+                    detail["field_authority_reviews"] = notes["review"]
+                    cur.execute(
+                        """
+                        UPDATE employee_import_rows
+                        SET detail=%s::jsonb, updated_at=now()
+                        WHERE row_id=%s AND company_code=%s
+                        """,
+                        (json.dumps(detail), row.get("row_id"), company),
+                    )
+                conn.commit()
+    except Exception as ob_exc:
+        notes["onboarding_migration_error"] = str(ob_exc)[:240]
+
+    # Deliberate Wathefni onboarding start (outside the DB cursor txn)
+    if (
+        notes.get("onboarding_migration", {}).get("ok")
+        and str(mapped_canonical.get("onboarding_start_after_import") or "").lower()
+        in {"1", "true", "yes", "y"}
+    ):
+        import employee_migration_onboarding as _omo
+
+        resolved = _omo.resolve_disposition_from_canonical(
+            {k: v for k, v in mapped_canonical.items() if str(k).startswith("onboarding_")}
+        )
+        if not resolved.get("start_requested"):
+            snap = row.get("detail") or {}
+            if isinstance(snap, str):
+                snap = json.loads(snap)
+            resolved = dict((snap or {}).get("onboarding_migration") or resolved)
+        if resolved.get("start_requested"):
+            notes["onboarding_start"] = _omo.maybe_start_wathefni_onboarding(
+                legacy,
+                company=company,
+                employee_key=employee_key,
+                start_requested=True,
+            )
+    return notes
+
+
+def _resolve_manager_preview(
+    legacy: Any,
+    *,
+    company: str,
+    manager_phone_raw: Any,
+    earlier_batch: dict[str, dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Resolve manager_phone against tenant + earlier will_create rows in this batch.
+
+    Returns None when no manager column value was provided.
+    """
+    raw = str(manager_phone_raw or "").strip()
+    if not raw:
+        return None
+    phone = legacy.canonical_employee_phone(raw)
+    if not phone:
+        return {
+            "manager_phone": raw,
+            "resolved": False,
+            "manager_employee_key": None,
+            "source": None,
+            "warning": f"Manager phone '{raw}' is invalid — manager will be left unset.",
+        }
+    existing = legacy.find_employee_by_phone(phone, company_code=company)
+    if existing and existing.get("employee_key"):
+        return {
+            "manager_phone": phone,
+            "resolved": True,
+            "manager_employee_key": str(existing["employee_key"]),
+            "source": "tenant",
+            "warning": None,
+        }
+    earlier = earlier_batch.get(phone)
+    if earlier:
+        return {
+            "manager_phone": phone,
+            "resolved": True,
+            "manager_employee_key": str(earlier.get("employee_key") or f"{company}-{phone}"),
+            "source": "batch_earlier",
+            "warning": None,
+            "batch_row": earlier.get("row_number"),
+        }
+    return {
+        "manager_phone": phone,
+        "resolved": False,
+        "manager_employee_key": None,
+        "source": None,
+        "warning": _manager_warning(phone),
+    }
+
+
+def _current_manager_key(legacy: Any, company: str, employee_key: str) -> str | None:
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT manager_employee_key
+                FROM employee_org_assignment_history
+                WHERE company_code=%s AND employee_key=%s AND effective_to IS NULL
+                ORDER BY effective_from DESC, created_at DESC
+                LIMIT 1
+                """,
+                (company, employee_key),
+            )
+            hit = cur.fetchone()
+            if hit:
+                key = (hit["manager_employee_key"] if isinstance(hit, dict) else hit[0]) or None
+                if key:
+                    conn.commit()
+                    return str(key)
+            cur.execute(
+                "SELECT raw_json FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
+                (company, employee_key),
+            )
+            row = cur.fetchone()
+            conn.commit()
+            if not row:
+                return None
+            raw = row["raw_json"] if isinstance(row, dict) else row[0]
+            if isinstance(raw, str):
+                raw = json.loads(raw)
+            if isinstance(raw, dict) and raw.get("manager_employee_key"):
+                return str(raw["manager_employee_key"])
+    return None
+
+
+def _lookup_by_external_id(
+    legacy: Any,
+    *,
+    company: str,
+    source_system: str,
+    external_employee_id: str,
+) -> dict[str, Any] | None:
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT employee_key FROM employee_source_mappings
+                WHERE company_code=%s AND source_system=%s AND external_employee_id=%s AND active
+                LIMIT 1
+                """,
+                (company, source_system, external_employee_id),
+            )
+            hit = cur.fetchone()
+            if not hit:
+                conn.commit()
+                return None
+            ek = str(hit["employee_key"] if isinstance(hit, dict) else hit[0])
+            cur.execute(
+                "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
+                (company, ek),
+            )
+            emp = cur.fetchone()
+            conn.commit()
+            return dict(emp) if emp else None
+
+
+def _hub_field_snapshot(emp: dict[str, Any]) -> dict[str, Any]:
+    profile = emp.get("profile") if isinstance(emp.get("profile"), dict) else {}
+    start = emp.get("start_date")
+    if hasattr(start, "isoformat"):
+        start = start.isoformat()
+    return {
+        "name": str(emp.get("name") or "").strip() or None,
+        "email": str(emp.get("email") or "").strip() or None,
+        "position_title": str(emp.get("position_title") or "").strip() or None,
+        "department": str(profile.get("department") or emp.get("department") or "").strip() or None,
+        "start_date": str(start)[:10] if start else None,
+        "phone": str(emp.get("phone") or "").strip() or None,
+        "updated_at": emp.get("updated_at").isoformat() if hasattr(emp.get("updated_at"), "isoformat") else emp.get("updated_at"),
+    }
+
+
+def _diff_safe_fields(
+    *,
+    before: dict[str, Any],
+    normalized: dict[str, Any],
+    before_manager: str | None,
+    after_manager: str | None,
+) -> dict[str, dict[str, Any]]:
+    changes: dict[str, dict[str, Any]] = {}
+    for field in SAFE_UPDATE_FIELDS:
+        old = before.get(field)
+        new = normalized.get(field)
+        # Normalize empty strings to None for comparison
+        old_n = str(old).strip() if old not in (None, "") else None
+        new_n = str(new).strip() if new not in (None, "") else None
+        if field == "start_date":
+            old_n = (old_n or "")[:10] or None
+            new_n = (new_n or "")[:10] or None
+        if old_n != new_n:
+            # Only include fields supplied in the file (normalized has value or explicit clear?)
+            # For import: update when incoming value is present and differs; ignore omitted empty
+            # except we always have name. For optional fields, empty incoming means no change.
+            if field != "name" and new_n is None:
+                continue
+            changes[field] = {"before": old_n, "after": new_n}
+    if (before_manager or None) != (after_manager or None):
+        # Manager change only when incoming manager_phone was provided (resolved or unresolved)
+        changes["manager_employee_key"] = {"before": before_manager, "after": after_manager}
+    return changes
+
+
+def _normalize_person_name(value: Any) -> str:
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = text.casefold()
+    # Keep letters/digits (incl. Arabic) and spaces; drop punctuation.
+    text = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
+    text = re.sub(r"\s+", " ", text).strip()
+    # Common Arabic definite-article spacing: "al dosari" / "al-dosari" → "aldosari"
+    text = re.sub(r"\bal[\s\-]+", "al", text)
+    return text
+
+
+def _name_tokens(value: Any) -> list[str]:
+    return [t for t in _normalize_person_name(value).split(" ") if t]
+
+
+def _employee_name_aliases(emp: dict[str, Any]) -> list[str]:
+    aliases: list[str] = []
+    raw = emp.get("raw_json") or {}
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except Exception:
+            raw = {}
+    profile = emp.get("profile") if isinstance(emp.get("profile"), dict) else {}
+    if isinstance(raw, dict):
+        for key in ("name_aliases", "aliases", "aka", "alternate_names", "known_names"):
+            val = raw.get(key)
+            if isinstance(val, str) and val.strip():
+                aliases.append(val.strip())
+            elif isinstance(val, list):
+                aliases.extend(str(x).strip() for x in val if str(x).strip())
+    if isinstance(profile, dict):
+        for key in ("name_aliases", "aliases", "aka", "alternate_names"):
+            val = profile.get(key)
+            if isinstance(val, str) and val.strip():
+                aliases.append(val.strip())
+            elif isinstance(val, list):
+                aliases.extend(str(x).strip() for x in val if str(x).strip())
+    return aliases
+
+
+def _names_compatible(
+    existing_name: str | None,
+    incoming_name: str | None,
+    *,
+    known_aliases: list[str] | None = None,
+) -> bool:
+    """True when name difference is safe (normalization / alias), not a material identity change."""
+    existing = str(existing_name or "").strip()
+    incoming = str(incoming_name or "").strip()
+    if not existing or not incoming:
+        return False
+    a = _normalize_person_name(existing)
+    b = _normalize_person_name(incoming)
+    if a == b:
+        return True
+    for alias in known_aliases or []:
+        if _normalize_person_name(alias) == b:
+            return True
+    ta = _name_tokens(existing)
+    tb = _name_tokens(incoming)
+    if not ta or not tb:
+        return False
+    # Same token multiset after normalization (order-insensitive).
+    if sorted(ta) == sorted(tb):
+        return True
+    # Minor extension/omission of middle tokens with same first+last.
+    if ta[0] == tb[0] and ta[-1] == tb[-1] and (set(ta) <= set(tb) or set(tb) <= set(ta)):
+        return True
+    return False
+
+
+def _material_name_change(
+    existing_emp: dict[str, Any],
+    incoming_name: str,
+) -> bool:
+    before = str(existing_emp.get("name") or "").strip()
+    if not before:
+        return False
+    if _normalize_person_name(before) == _normalize_person_name(incoming_name):
+        return False
+    return not _names_compatible(
+        before,
+        incoming_name,
+        known_aliases=_employee_name_aliases(existing_emp),
+    )
+
+
+def _classify_row(
+    legacy: Any,
+    *,
+    company: str,
+    row_number: int,
+    rec: dict[str, str],
+    seen_phones: dict[str, int],
+    batch_source_system: str | None,
+    earlier_batch: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    clean_name = str(rec.get("name") or "").strip()
+    phone_digits = legacy.canonical_employee_phone(rec.get("phone"))
+    row_label = clean_name or str(rec.get("phone") or "").strip() or f"Row {row_number}"
+    source_system = str(rec.get("source_system") or batch_source_system or "").strip() or None
+    external_employee_id = str(rec.get("external_employee_id") or "").strip() or None
+    payroll_id = str(rec.get("payroll_id") or "").strip() or None
+    manager_phone_raw = str(rec.get("manager_phone") or "").strip() or None
+    manager = _resolve_manager_preview(
+        legacy,
+        company=company,
+        manager_phone_raw=manager_phone_raw,
+        earlier_batch=earlier_batch,
+    )
+    normalized = {
+        "name": clean_name,
+        "phone": phone_digits or str(rec.get("phone") or "").strip(),
+        "email": str(rec.get("email") or "").strip() or None,
+        "position_title": str(rec.get("position_title") or "").strip() or None,
+        "department": str(rec.get("department") or "").strip() or None,
+        "start_date": str(rec.get("start_date") or "").strip() or None,
+        "external_employee_id": external_employee_id,
+        "payroll_id": payroll_id,
+        "source_system": source_system,
+        "manager_phone": (manager or {}).get("manager_phone") or manager_phone_raw,
+        "manager_employee_key": (manager or {}).get("manager_employee_key") if manager and manager.get("resolved") else None,
+    }
+    detail: dict[str, Any] = {"match": None, "changes": {}}
+    warnings: list[str] = []
+    if manager:
+        detail["manager"] = {
+            "manager_phone": manager.get("manager_phone"),
+            "resolved": bool(manager.get("resolved")),
+            "manager_employee_key": manager.get("manager_employee_key"),
+            "source": manager.get("source"),
+            "batch_row": manager.get("batch_row"),
+        }
+        if manager.get("warning"):
+            warnings.append(str(manager["warning"]))
+    if warnings:
+        detail["warnings"] = warnings
+
+    if not phone_digits:
+        return {
+            "status": "invalid",
+            "reason": "Missing or invalid phone number.",
+            "name": row_label,
+            "phone": None,
+            "normalized": normalized,
+            "detail": detail,
+        }
+    if not clean_name:
+        return {
+            "status": "invalid",
+            "reason": "Missing name.",
+            "name": row_label,
+            "phone": phone_digits,
+            "normalized": normalized,
+            "detail": detail,
+        }
+    if phone_digits in seen_phones:
+        return {
+            "status": "conflict",
+            "reason": f"Duplicate phone in this file (also row {seen_phones[phone_digits]}).",
+            "name": row_label,
+            "phone": phone_digits,
+            "normalized": normalized,
+            "detail": detail,
+        }
+    seen_phones[phone_digits] = row_number
+
+    # Match priority: source_system + external_employee_id, else phone/alias. Never name alone.
+    mapped_emp = None
+    phone_emp = legacy.find_employee_by_phone(phone_digits, company_code=company)
+    if source_system and external_employee_id:
+        mapped_emp = _lookup_by_external_id(
+            legacy,
+            company=company,
+            source_system=source_system,
+            external_employee_id=external_employee_id,
+        )
+
+    existing = None
+    match_via = None
+    if mapped_emp and phone_emp:
+        map_key = str(mapped_emp.get("employee_key") or "")
+        phone_key = str(phone_emp.get("employee_key") or "")
+        if map_key != phone_key:
+            return {
+                "status": "conflict",
+                "reason": (
+                    f"Needs review: external ID maps to {map_key} but phone matches {phone_key}."
+                ),
+                "name": row_label,
+                "phone": phone_digits,
+                "employee_key": map_key,
+                "normalized": normalized,
+                "detail": {
+                    **detail,
+                    "match": {
+                        "via": "ambiguous",
+                        "mapped_employee_key": map_key,
+                        "phone_employee_key": phone_key,
+                    },
+                },
+            }
+        # Same person — but phone on file must match hub phone (phone is not an auto-update field)
+        hub_phone = legacy.canonical_employee_phone(mapped_emp.get("phone"))
+        if hub_phone and hub_phone != phone_digits:
+            return {
+                "status": "conflict",
+                "reason": (
+                    f"Needs review: external ID matches {map_key} but phone differs from the record."
+                ),
+                "name": row_label,
+                "phone": phone_digits,
+                "employee_key": map_key,
+                "normalized": normalized,
+                "detail": {**detail, "match": {"via": "external_id_phone_mismatch", "employee_key": map_key}},
+            }
+        existing = mapped_emp
+        match_via = "external_id"
+    elif mapped_emp:
+        existing = mapped_emp
+        match_via = "external_id"
+        hub_phone = legacy.canonical_employee_phone(mapped_emp.get("phone"))
+        if hub_phone and phone_digits and hub_phone != phone_digits:
+            return {
+                "status": "conflict",
+                "reason": (
+                    f"Needs review: external ID matches {existing.get('employee_key')} but phone differs from the record."
+                ),
+                "name": row_label,
+                "phone": phone_digits,
+                "employee_key": existing.get("employee_key"),
+                "normalized": normalized,
+                "detail": {
+                    **detail,
+                    "match": {"via": "external_id_phone_mismatch", "employee_key": existing.get("employee_key")},
+                },
+            }
+    elif phone_emp:
+        existing = phone_emp
+        match_via = "phone"
+
+    if existing:
+        ek = str(existing.get("employee_key") or "")
+        before = _hub_field_snapshot(existing)
+        before_mgr = _current_manager_key(legacy, company, ek)
+        # Manager auto-update only when resolved; unresolved phone → warning, keep current manager.
+        if manager_phone_raw and manager and manager.get("resolved") and manager.get("manager_employee_key"):
+            after_mgr = str(manager["manager_employee_key"])
+        else:
+            after_mgr = before_mgr
+        changes = _diff_safe_fields(
+            before=before,
+            normalized=normalized,
+            before_manager=before_mgr,
+            after_manager=after_mgr,
+        )
+        if not (manager_phone_raw and manager and manager.get("resolved") and manager.get("manager_employee_key")):
+            changes.pop("manager_employee_key", None)
+        detail["match"] = {"via": match_via, "employee_key": ek}
+        detail["before"] = before
+        detail["before_manager_employee_key"] = before_mgr
+        detail["changes"] = changes
+        detail["expected_updated_at"] = before.get("updated_at")
+
+        # Identity-sensitive guard: external ID (or phone) may match, but a materially
+        # different name must not auto-update. Minor normalization / known aliases stay safe.
+        name_approved = bool(detail.get("name_change_approved"))
+        if (
+            "name" in changes
+            and not name_approved
+            and _material_name_change(existing, clean_name)
+        ):
+            existing_name = str(existing.get("name") or "").strip()
+            detail["name_identity_review"] = True
+            detail["approvable"] = True
+            detail["proposed_changes"] = changes
+            return {
+                "status": "conflict",
+                "reason": (
+                    f"Needs review: name on file ('{clean_name}') differs from "
+                    f"'{existing_name}'. Approve if this is the same person."
+                ),
+                "name": row_label,
+                "phone": phone_digits,
+                "employee_key": ek,
+                "normalized": normalized,
+                "detail": detail,
+            }
+
+        if not changes:
+            return {
+                "status": "skipped",
+                "reason": "Will be skipped — already up to date.",
+                "name": row_label,
+                "phone": phone_digits,
+                "employee_key": ek,
+                "normalized": normalized,
+                "detail": detail,
+            }
+        change_labels = ", ".join(sorted(changes.keys()))
+        reason = f"Will be updated ({change_labels})."
+        if warnings:
+            reason = f"{reason} {warnings[0]}"
+        return {
+            "status": "will_update",
+            "reason": reason,
+            "name": row_label,
+            "phone": phone_digits,
+            "employee_key": ek,
+            "normalized": normalized,
+            "detail": detail,
+        }
+
+    reason = "Will be added."
+    if warnings:
+        reason = f"Will be added. {warnings[0]}"
+    detail["match"] = {"via": "none"}
+    return {
+        "status": "will_create",
+        "reason": reason,
+        "name": row_label,
+        "phone": phone_digits,
+        "normalized": normalized,
+        "detail": detail,
+    }
+
+
+def _row_entry(row: dict[str, Any]) -> dict[str, Any]:
+    detail = row.get("detail") or {}
+    if isinstance(detail, str):
+        detail = json.loads(detail)
+    norm = row.get("normalized") or {}
+    if isinstance(norm, str):
+        norm = json.loads(norm)
+    manager = detail.get("manager") if isinstance(detail, dict) else None
+    warnings = detail.get("warnings") if isinstance(detail, dict) else None
+    changes = detail.get("changes") if isinstance(detail, dict) else None
+    status = str(row.get("status") or "")
+    name_approved = _json_flag(detail.get("name_change_approved")) if isinstance(detail, dict) else False
+    name_applied = _json_flag(detail.get("name_change_applied")) if isinstance(detail, dict) else False
+    applyable = status == "will_update" and name_approved and not name_applied
+    return {
+        "row": int(row.get("row_number") or 0),
+        "row_id": str(row.get("row_id")) if row.get("row_id") else None,
+        "batch_id": str(row.get("batch_id")) if row.get("batch_id") else None,
+        "name": row.get("name") or f"Row {row.get('row_number')}",
+        "reason": row.get("reason"),
+        "status": status,
+        "outcome": _hr_outcome(status, detail if isinstance(detail, dict) else None),
+        "employee_key": row.get("employee_key"),
+        "phone": row.get("phone") or norm.get("phone"),
+        "external_employee_id": row.get("external_employee_id") or norm.get("external_employee_id"),
+        "payroll_id": row.get("payroll_id") or norm.get("payroll_id"),
+        "source_system": row.get("source_system") or norm.get("source_system"),
+        "manager_phone": (manager or {}).get("manager_phone") if manager else norm.get("manager_phone"),
+        "manager_employee_key": (manager or {}).get("manager_employee_key") if manager else None,
+        "manager_resolved": (manager or {}).get("resolved") if manager else None,
+        "manager_source": (manager or {}).get("source") if manager else None,
+        "warnings": warnings or [],
+        "changes": changes or {},
+        "name_identity_review": _json_flag(detail.get("name_identity_review")) if isinstance(detail, dict) else False,
+        "approvable": _json_flag(detail.get("approvable")) if isinstance(detail, dict) else False,
+        "name_change_approved": name_approved,
+        "name_change_approved_by": detail.get("name_change_approved_by") if isinstance(detail, dict) else None,
+        "name_change_approved_at": detail.get("name_change_approved_at") if isinstance(detail, dict) else None,
+        "name_change_applied": name_applied,
+        "name_change_applied_by": detail.get("name_change_applied_by") if isinstance(detail, dict) else None,
+        "name_change_applied_at": detail.get("name_change_applied_at") if isinstance(detail, dict) else None,
+        "applyable": applyable,
+        "detail": detail,
+    }
+
+
+def _parse_expected_updated_at(value: Any) -> datetime | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, datetime):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _stamp_manager_on_employee(
+    cur: Any,
+    *,
+    company: str,
+    employee_key: str,
+    manager_employee_key: str | None,
+    manager_phone: str | None,
+    batch_id: str,
+    unresolved: bool = False,
+) -> None:
+    payload: dict[str, Any] = {
+        "manager_phone": manager_phone,
+        "employee_migration_manager_batch_id": str(batch_id),
+    }
+    if unresolved:
+        payload["manager_unresolved"] = True
+        payload["manager_employee_key"] = None
+    elif manager_employee_key:
+        payload["manager_employee_key"] = manager_employee_key
+        payload["manager_unresolved"] = False
+    cur.execute(
+        """
+        UPDATE employees
+        SET raw_json = COALESCE(raw_json, '{}'::jsonb) || %s::jsonb,
+            updated_at=now()
+        WHERE company_code=%s AND employee_key=%s
+        """,
+        (json.dumps(payload), company, employee_key),
+    )
+
+
+def _apply_manager_authoritative(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    employee_key: str,
+    manager_employee_key: str,
+    manager_phone: str | None,
+    batch_id: str,
+    position_title: str | None = None,
+) -> dict[str, Any]:
+    """Persist manager via Wave4 assignment history (canonical) + hub stamp.
+
+    Preview/raw_json alone is not enough for Employee Profile assignment history.
+    """
+    from datetime import date as _date
+
+    import employee_org_wave4 as _w4
+
+    company = str(context.get("company_code") or "").upper()
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            _stamp_manager_on_employee(
+                cur,
+                company=company,
+                employee_key=employee_key,
+                manager_employee_key=manager_employee_key,
+                manager_phone=manager_phone,
+                batch_id=str(batch_id),
+                unresolved=False,
+            )
+            conn.commit()
+
+    if not _w4.org_v4_enabled(company):
+        return {"ok": False, "error": "org_v4_disabled", "hub_stamped": True}
+
+    try:
+        out = _w4.apply_assignment_change(
+            legacy,
+            context,
+            employee_key=employee_key,
+            effective_from=_date.today(),
+            change_type="migration",
+            reason=f"employee migration foundation batch {batch_id}",
+            manager_employee_key=manager_employee_key,
+            position_title=position_title,
+            batch_id=str(batch_id),
+            provenance={
+                "foundation_batch_id": str(batch_id),
+                "source": "employee_migration_foundation",
+                "manager_phone": manager_phone,
+            },
+        )
+        return {"ok": True, "hub_stamped": True, "assignment": out}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)[:240], "hub_stamped": True}
+
+
+def repair_foundation_batch_side_effects(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    batch_id: str,
+) -> dict[str, Any]:
+    """One-shot repair for committed foundation batches:
+
+    - Wire resolved managers into org assignment history when missing
+    - Remove auto-seeded missing civil_id/passport created by import (no campaign yet)
+    """
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+
+    managers_applied = 0
+    managers_skipped = 0
+    managers_failed: list[dict[str, Any]] = []
+    compliance_removed = 0
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT employee_key, raw_json, position_title
+                FROM employees
+                WHERE company_code=%s
+                  AND raw_json->>%s = %s
+                  AND COALESCE((raw_json->>'employee_migration_hub_created')::boolean, false) = true
+                """,
+                (company, "employee_migration_batch_id", str(batch_id)),
+            )
+            employees = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+
+    for emp in employees:
+        ek = str(emp.get("employee_key") or "")
+        raw_json = emp.get("raw_json") or {}
+        if isinstance(raw_json, str):
+            raw_json = json.loads(raw_json)
+        mgr = str(raw_json.get("manager_employee_key") or "").strip() or None
+        if not mgr:
+            managers_skipped += 1
+        else:
+            with legacy.db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT count(*) AS c FROM employee_org_assignment_history
+                        WHERE company_code=%s AND employee_key=%s
+                          AND manager_employee_key=%s
+                        """,
+                        (company, ek, mgr),
+                    )
+                    hit = cur.fetchone()
+                    already = int((hit["c"] if isinstance(hit, dict) else hit[0]) or 0)
+                    conn.commit()
+            if already:
+                managers_skipped += 1
+            else:
+                result = _apply_manager_authoritative(
+                    legacy,
+                    context,
+                    employee_key=ek,
+                    manager_employee_key=mgr,
+                    manager_phone=raw_json.get("manager_phone"),
+                    batch_id=str(batch_id),
+                    position_title=emp.get("position_title"),
+                )
+                if result.get("ok"):
+                    managers_applied += 1
+                else:
+                    managers_failed.append({"employee_key": ek, "error": result.get("error")})
+
+        # Remove import-auto-seeded missing checklist rows (campaign not approved).
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    DELETE FROM compliance_documents
+                    WHERE company_code=%s AND employee_key=%s
+                      AND status='missing'
+                      AND document_type IN ('civil_id','passport')
+                    """,
+                    (company, ek),
+                )
+                compliance_removed += int(cur.rowcount or 0)
+                conn.commit()
+
+    return {
+        "ok": True,
+        "batch_id": str(batch_id),
+        "employees": len(employees),
+        "managers_applied": managers_applied,
+        "managers_skipped": managers_skipped,
+        "managers_failed": managers_failed,
+        "compliance_missing_removed": compliance_removed,
+        "honesty": {
+            **honesty_payload(),
+            "no_auto_compliance_seed_on_import": True,
+            "manager_via_assignment_history": True,
+        },
+    }
+
+
+def _resolve_manager_at_commit(
+    legacy: Any,
+    cur: Any,
+    *,
+    company: str,
+    batch_id: str,
+    manager_phone: str | None,
+    preview_manager: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if preview_manager and preview_manager.get("resolved") and preview_manager.get("manager_employee_key"):
+        # Re-validate key still exists (or was created earlier in this batch).
+        key = str(preview_manager["manager_employee_key"])
+        cur.execute(
+            "SELECT employee_key FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
+            (company, key),
+        )
+        if cur.fetchone():
+            return {
+                "manager_phone": preview_manager.get("manager_phone") or manager_phone,
+                "resolved": True,
+                "manager_employee_key": key,
+                "source": preview_manager.get("source") or "preview",
+            }
+    phone = legacy.canonical_employee_phone(manager_phone) if manager_phone else None
+    if not phone and preview_manager:
+        phone = legacy.canonical_employee_phone(preview_manager.get("manager_phone"))
+    if not phone:
+        return preview_manager
+    existing = legacy.find_employee_by_phone(phone, company_code=company)
+    if existing and existing.get("employee_key"):
+        return {
+            "manager_phone": phone,
+            "resolved": True,
+            "manager_employee_key": str(existing["employee_key"]),
+            "source": "tenant",
+        }
+    cur.execute(
+        """
+        SELECT employee_key FROM employee_import_rows
+        WHERE batch_id=%s AND company_code=%s AND phone=%s AND status='created'
+        ORDER BY row_number LIMIT 1
+        """,
+        (batch_id, company, phone),
+    )
+    hit = cur.fetchone()
+    if hit:
+        key = hit["employee_key"] if isinstance(hit, dict) else hit[0]
+        return {
+            "manager_phone": phone,
+            "resolved": True,
+            "manager_employee_key": str(key),
+            "source": "batch_earlier",
+        }
+    return {
+        "manager_phone": phone,
+        "resolved": False,
+        "manager_employee_key": None,
+        "source": None,
+        "warning": _manager_warning(phone),
+    }
+
+
+def _upsert_source_mapping(
+    cur: Any,
+    *,
+    company: str,
+    employee_key: str,
+    source_system: str | None,
+    external_employee_id: str | None,
+    payroll_id: str | None,
+    batch_id: str,
+    row_id: str,
+) -> None:
+    system = str(source_system or "").strip()
+    ext = str(external_employee_id or "").strip() or None
+    pay = str(payroll_id or "").strip() or None
+    if not system or (not ext and not pay):
+        return
+    attrs = json.dumps({"contract": CONTRACT, "version": CONTRACT_VERSION})
+    # Look up existing active mapping for this system+id (partial unique indexes).
+    existing = None
+    if ext:
+        cur.execute(
+            """
+            SELECT mapping_id FROM employee_source_mappings
+            WHERE company_code=%s AND source_system=%s AND external_employee_id=%s AND active
+            LIMIT 1
+            """,
+            (company, system, ext),
+        )
+        existing = cur.fetchone()
+    if not existing and pay:
+        cur.execute(
+            """
+            SELECT mapping_id FROM employee_source_mappings
+            WHERE company_code=%s AND source_system=%s AND payroll_id=%s AND active
+            LIMIT 1
+            """,
+            (company, system, pay),
+        )
+        existing = cur.fetchone()
+    if existing:
+        mid = existing["mapping_id"] if isinstance(existing, dict) else existing[0]
+        cur.execute(
+            """
+            UPDATE employee_source_mappings
+            SET employee_key=%s,
+                external_employee_id=COALESCE(%s, external_employee_id),
+                payroll_id=COALESCE(%s, payroll_id),
+                batch_id=%s, row_id=%s, attributes=%s::jsonb, updated_at=now(), active=true
+            WHERE mapping_id=%s
+            """,
+            (employee_key, ext, pay, batch_id, row_id, attrs, mid),
+        )
+        return
+    cur.execute(
+        """
+        INSERT INTO employee_source_mappings (
+          company_code, employee_key, source_system, external_employee_id, payroll_id,
+          attributes, batch_id, row_id, active, updated_at
+        ) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s,%s,true,now())
+        """,
+        (company, employee_key, system, ext, pay, attrs, batch_id, row_id),
+    )
+
+
+def _batch_payload(batch: dict[str, Any], rows: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    totals = batch.get("totals") or {}
+    if isinstance(totals, str):
+        totals = json.loads(totals)
+    # Prefer P3 keys; tolerate older batches that stored "conflict" instead of "review".
+    review_count = int(totals.get("review") if totals.get("review") is not None else totals.get("conflict") or 0)
+    update_count = int(totals.get("update") or 0)
+    legacy_counts = {
+        "created": int(totals.get("create") or 0),
+        "updated": update_count,
+        "skipped": int(totals.get("skip") or 0),
+        "needs_review": review_count,
+        "failed": int(totals.get("invalid") or 0),
+    }
+    results = {
+        "created": [],
+        "updated": [],
+        "skipped": [],
+        "needs_review": [],
+        "failed": [],
+    }
+    if rows is not None:
+        for row in rows:
+            bucket = _legacy_bucket(str(row.get("status") or ""))
+            results.setdefault(bucket, []).append(_row_entry(row))
+    return {
+        "ok": True,
+        "foundation": True,
+        "honesty": honesty_payload(),
+        "batch_id": str(batch.get("batch_id")),
+        "status": batch.get("status"),
+        "idempotency_key": batch.get("idempotency_key"),
+        "content_sha256": batch.get("content_sha256"),
+        "source_system": batch.get("source_system"),
+        "filename": batch.get("filename"),
+        "dry_run": batch.get("status") == "previewed",
+        "total_rows": int(batch.get("total_rows") or 0),
+        "totals": {
+            "create": int(totals.get("create") or 0),
+            "update": update_count,
+            "skip": int(totals.get("skip") or 0),
+            "review": review_count,
+            # Alias for older UI; same as review.
+            "conflict": review_count,
+            "invalid": int(totals.get("invalid") or 0),
+            "warnings": int(totals.get("warnings") or 0),
+            "deactivate": 0,
+        },
+        "counts": legacy_counts,
+        "results": results,
+        "labels": {
+            "create": "Will be added",
+            "update": "Will be updated",
+            "skip": "Will be skipped",
+            "review": "Needs review",
+            "invalid": "Will be skipped",
+            "deactivate": "Will be deactivated",
+        },
+        "batch": _jsonable(batch),
+    }
+
+
+def preview_or_replay_import(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    raw: bytes,
+    filename: str,
+    source_system: str | None = None,
+    idempotency_key: str | None = None,
+) -> dict[str, Any]:
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+
+    rows_workbook, parse_error = parse_employee_import_workbook(raw, filename)
+    if parse_error:
+        raise legacy.HTTPException(status_code=422, detail={"error": "unreadable_file", "message": parse_error})
+    if len(rows_workbook) > int(getattr(legacy, "EMPLOYEE_IMPORT_MAX_ROWS", 1000)):
+        raise legacy.HTTPException(
+            status_code=422,
+            detail={
+                "error": "too_many_rows",
+                "message": f"Please import up to {legacy.EMPLOYEE_IMPORT_MAX_ROWS} employees per file.",
+            },
+        )
+
+    content_sha = content_sha256(raw)
+    batch_source = str(source_system or "").strip() or None
+    key = str(idempotency_key or "").strip() or default_idempotency_key(
+        company_code=company, content_sha=content_sha, source_system=batch_source
+    )
+    actor = str(context.get("user_id") or context.get("email") or "").strip() or None
+
+    import employee_migration_field_model as _fm
+
+    headers: list[str] = []
+    if rows_workbook:
+        headers = list((rows_workbook[0].get("source_payload") or {}).get("headers") or [])
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            conn.commit()
+            mapping_rules: list[dict[str, Any]] = []
+            mapping_profile_id = None
+            profile = _fm.get_active_mapping_profile(cur, company, batch_source or "csv")
+            if profile:
+                mapping_profile_id = str(profile.get("profile_id"))
+                mapping_rules = profile.get("mappings") or []
+                if isinstance(mapping_rules, str):
+                    mapping_rules = json.loads(mapping_rules)
+            else:
+                custom_keys = _fm.list_custom_field_keys(cur, company)
+                mapping_rules = _fm.suggest_mapping_for_headers(headers, existing_custom_keys=custom_keys)
+            mapping_snapshot = {
+                "profile_id": mapping_profile_id,
+                "source_system": batch_source or "csv",
+                "mappings": mapping_rules,
+                "summary": _fm.mapping_summary(mapping_rules),
+            }
+
+            cur.execute(
+                """
+                SELECT * FROM employee_import_batches
+                WHERE company_code=%s AND idempotency_key=%s
+                LIMIT 1
+                """,
+                (company, key),
+            )
+            existing = cur.fetchone()
+            if existing:
+                batch = dict(existing)
+                # Committed outcomes are immutable replays. Previewed batches refresh so
+                # classification fixes (e.g. manager warnings) apply on re-upload.
+                if batch.get("status") in {"committed", "partial", "rolled_back", "committing"}:
+                    cur.execute(
+                        "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                        (batch["batch_id"], company),
+                    )
+                    rows = [dict(r) for r in (cur.fetchall() or [])]
+                    conn.commit()
+                    out = _batch_payload(batch, rows)
+                    out["replayed"] = True
+                    out["dry_run"] = False
+                    out["mapping"] = mapping_snapshot
+                    return out
+
+            seen_phones: dict[str, int] = {}
+            earlier_batch: dict[str, dict[str, Any]] = {}
+            classified: list[dict[str, Any]] = []
+            totals = empty_totals()
+            for idx, workbook_row in enumerate(rows_workbook, start=1):
+                rec = dict(workbook_row.get("normalized") or {})
+                source_payload = workbook_row.get("source_payload") or {"headers": headers, "values": {}}
+                mapped = _fm.apply_mapping_to_source_values(source_payload.get("values") or {}, mapping_rules)
+                # Merge mapped canonical into roster classification input (roster keys win from aliases if already set)
+                for ck, cv in (mapped.get("canonical") or {}).items():
+                    if ck in {
+                        "name",
+                        "phone",
+                        "email",
+                        "position_title",
+                        "department",
+                        "start_date",
+                        "manager_phone",
+                        "external_employee_id",
+                        "payroll_id",
+                        "source_system",
+                    }:
+                        rec.setdefault(ck, cv)
+                # Prefer batch-level source_system when row omits it.
+                if batch_source and not rec.get("source_system"):
+                    rec = {**rec, "source_system": batch_source}
+                item = _classify_row(
+                    legacy,
+                    company=company,
+                    row_number=idx,
+                    rec=rec,
+                    seen_phones=seen_phones,
+                    batch_source_system=batch_source,
+                    earlier_batch=earlier_batch,
+                )
+                detail = dict(item.get("detail") or {})
+                detail["field_layers"] = {
+                    "canonical_extra": {
+                        k: v
+                        for k, v in (mapped.get("canonical") or {}).items()
+                        if k
+                        not in {
+                            "name",
+                            "phone",
+                            "email",
+                            "position_title",
+                            "department",
+                            "start_date",
+                            "manager_phone",
+                            "external_employee_id",
+                            "payroll_id",
+                            "source_system",
+                        }
+                    },
+                    "custom": mapped.get("custom") or [],
+                    "source_only_count": len(mapped.get("source_only") or {}),
+                }
+                try:
+                    import employee_migration_onboarding as _omo
+
+                    onboarding_keys = {
+                        k: v
+                        for k, v in (mapped.get("canonical") or {}).items()
+                        if k.startswith("onboarding_")
+                    }
+                    # Mapped onboarding columns with blank cells still mean "not supplied"
+                    # → unknown disposition (never invent already-onboarded).
+                    if not onboarding_keys:
+                        for rule in mapping_rules:
+                            if (
+                                rule.get("disposition") == "canonical"
+                                and rule.get("confirmed")
+                                and str(rule.get("canonical_field") or "").startswith("onboarding_")
+                            ):
+                                onboarding_keys[str(rule["canonical_field"])] = ""
+                    if onboarding_keys:
+                        resolved = _omo.resolve_disposition_from_canonical(onboarding_keys)
+                        detail["onboarding_migration"] = resolved
+                        # Never block roster create/update solely for unknown onboarding evidence —
+                        # surface disposition in preview; do not fake completion.
+                except Exception:
+                    pass
+                try:
+                    import employee_migration_cutover as _p4
+
+                    cutover_keys = {
+                        k: v
+                        for k, v in (mapped.get("canonical") or {}).items()
+                        if k in _p4.CUTOVER_CANONICAL_FIELDS
+                        or k
+                        in {
+                            "compliance_doc_type",
+                            "compliance_status",
+                            "compliance_expiry",
+                        }
+                    }
+                    # Include blank mapped cutover columns as not_supplied in preview
+                    for rule in mapping_rules:
+                        if (
+                            rule.get("disposition") == "canonical"
+                            and rule.get("confirmed")
+                            and str(rule.get("canonical_field") or "") in _p4.CUTOVER_CANONICAL_FIELDS
+                            and str(rule.get("canonical_field")) not in cutover_keys
+                        ):
+                            cutover_keys[str(rule["canonical_field"])] = ""
+                    if cutover_keys:
+                        existing_snap: dict[str, Any] = {}
+                        ek = item.get("employee_key")
+                        if ek:
+                            try:
+                                existing_snap = _p4.load_existing_cutover_snapshot(
+                                    cur, company=company, employee_key=str(ek)
+                                )
+                            except Exception:
+                                existing_snap = {}
+                        detail["opening_balances"] = _p4.resolve_cutover_preview(
+                            cutover_keys,
+                            existing=existing_snap,
+                            source_system=batch_source or (mapped.get("canonical") or {}).get("source_system"),
+                        )
+                except Exception:
+                    pass
+                item["detail"] = detail
+                classified.append(
+                    {
+                        "row_number": idx,
+                        "raw": rec,
+                        "source_payload": source_payload,
+                        "mapped_canonical": mapped.get("canonical") or {},
+                        "mapped_custom": mapped.get("custom") or [],
+                        **item,
+                    }
+                )
+                total_key = _status_to_total_key(item["status"])
+                if total_key:
+                    totals[total_key] += 1
+                if detail.get("warnings"):
+                    totals["warnings"] += 1
+                if item.get("status") == "will_create" and item.get("phone"):
+                    earlier_batch[str(item["phone"])] = {
+                        "row_number": idx,
+                        "employee_key": f"{company}-{item['phone']}",
+                        "name": item.get("name"),
+                    }
+
+            if existing:
+                batch_id = dict(existing)["batch_id"]
+                cur.execute("DELETE FROM employee_import_rows WHERE batch_id=%s AND company_code=%s", (batch_id, company))
+                cur.execute("DELETE FROM employee_import_source_payloads WHERE batch_id=%s AND company_code=%s", (batch_id, company))
+                cur.execute(
+                    """
+                    UPDATE employee_import_batches
+                    SET status='previewed', filename=%s, content_sha256=%s, source_system=%s,
+                        total_rows=%s, totals=%s::jsonb, updated_at=now(),
+                        metadata=%s::jsonb,
+                        mapping_profile_id=%s,
+                        mapping_snapshot=%s::jsonb,
+                        contract=%s,
+                        contract_version=%s
+                    WHERE batch_id=%s AND company_code=%s
+                    RETURNING *
+                    """,
+                    (
+                        filename,
+                        content_sha,
+                        batch_source,
+                        len(classified),
+                        json.dumps(totals),
+                        json.dumps({"replay_refreshed": True}),
+                        mapping_profile_id,
+                        json.dumps(mapping_snapshot),
+                        CONTRACT,
+                        CONTRACT_VERSION,
+                        batch_id,
+                        company,
+                    ),
+                )
+                batch = dict(cur.fetchone())
+            else:
+                cur.execute(
+                    """
+                    INSERT INTO employee_import_batches (
+                      company_code, domain, contract, contract_version, status, filename,
+                      content_sha256, idempotency_key, source_system, total_rows, totals,
+                      options, metadata, created_by, mapping_profile_id, mapping_snapshot
+                    ) VALUES (
+                      %s,%s,%s,%s,'previewed',%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb
+                    )
+                    RETURNING *
+                    """,
+                    (
+                        company,
+                        DOMAIN,
+                        CONTRACT,
+                        CONTRACT_VERSION,
+                        filename,
+                        content_sha,
+                        key,
+                        batch_source,
+                        len(classified),
+                        json.dumps(totals),
+                        json.dumps({"create_only": True, "no_messages": True}),
+                        json.dumps({}),
+                        actor,
+                        mapping_profile_id,
+                        json.dumps(mapping_snapshot),
+                    ),
+                )
+                batch = dict(cur.fetchone())
+
+            for item in classified:
+                norm = item.get("normalized") or item.get("raw") or {}
+                cur.execute(
+                    """
+                    INSERT INTO employee_import_rows (
+                      batch_id, company_code, row_number, status, name, phone, email,
+                      position_title, department, start_date, external_employee_id, payroll_id,
+                      source_system, employee_key, reason, raw, normalized, detail, source_payload
+                    ) VALUES (
+                      %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb,%s::jsonb
+                    )
+                    RETURNING row_id
+                    """,
+                    (
+                        batch["batch_id"],
+                        company,
+                        item["row_number"],
+                        item["status"],
+                        item.get("name"),
+                        item.get("phone") or norm.get("phone"),
+                        norm.get("email"),
+                        norm.get("position_title"),
+                        norm.get("department"),
+                        norm.get("start_date"),
+                        norm.get("external_employee_id"),
+                        norm.get("payroll_id"),
+                        norm.get("source_system") or batch_source,
+                        item.get("employee_key"),
+                        item.get("reason"),
+                        json.dumps(item.get("raw") or {}),
+                        json.dumps(
+                            {
+                                **(item.get("raw") or {}),
+                                "_mapped_canonical": item.get("mapped_canonical") or {},
+                                "_mapped_custom": item.get("mapped_custom") or [],
+                            }
+                        ),
+                        json.dumps(item.get("detail") or {}),
+                        json.dumps(item.get("source_payload") or {}),
+                    ),
+                )
+                row_id = str((cur.fetchone() or {}).get("row_id"))
+                sp = item.get("source_payload") or {}
+                _fm.persist_source_payload(
+                    cur,
+                    company=company,
+                    batch_id=str(batch["batch_id"]),
+                    row_id=row_id,
+                    row_number=int(item["row_number"]),
+                    source_system=batch_source,
+                    external_employee_id=norm.get("external_employee_id"),
+                    headers=list(sp.get("headers") or headers),
+                    values=dict(sp.get("values") or {}),
+                )
+
+            conn.commit()
+            cur.execute(
+                "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                (batch["batch_id"], company),
+            )
+            rows = [dict(r) for r in (cur.fetchall() or [])]
+    out = _batch_payload(batch, rows)
+    out["replayed"] = False
+    out["dry_run"] = True
+    out["mapping"] = mapping_snapshot
+    return out
+
+
+
+def commit_import_batch(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    batch_id: str | None = None,
+    raw: bytes | None = None,
+    filename: str | None = None,
+    source_system: str | None = None,
+    idempotency_key: str | None = None,
+) -> dict[str, Any]:
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+
+    # Allow confirm-with-file: resolve/create preview first when batch_id omitted.
+    if not batch_id:
+        if raw is None:
+            raise legacy.HTTPException(status_code=422, detail={"error": "batch_id_or_file_required"})
+        preview = preview_or_replay_import(
+            legacy,
+            context,
+            raw=raw,
+            filename=filename or "import.csv",
+            source_system=source_system,
+            idempotency_key=idempotency_key,
+        )
+        batch_id = preview["batch_id"]
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT * FROM employee_import_batches
+                WHERE company_code=%s AND batch_id=%s
+                FOR UPDATE
+                """,
+                (company, batch_id),
+            )
+            batch_row = cur.fetchone()
+            if not batch_row:
+                raise legacy.HTTPException(status_code=404, detail={"error": "batch_not_found"})
+            batch = dict(batch_row)
+            if batch.get("status") == "rolled_back":
+                raise legacy.HTTPException(status_code=409, detail={"error": "batch_rolled_back"})
+            if batch.get("status") == "committed":
+                cur.execute(
+                    "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                    (batch_id, company),
+                )
+                rows = [dict(r) for r in (cur.fetchall() or [])]
+                conn.commit()
+                out = _batch_payload(batch, rows)
+                out["replayed"] = True
+                out["dry_run"] = False
+                return out
+            if batch.get("status") == "partial":
+                cur.execute(
+                    "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                    (batch_id, company),
+                )
+                existing_rows = [dict(r) for r in (cur.fetchall() or [])]
+                pending_apply = [
+                    r
+                    for r in existing_rows
+                    if str(r.get("status") or "") in {"will_create", "will_update"}
+                ]
+                if not pending_apply:
+                    # No pending apply work — immutable history replay (conflicts stay until approve+apply).
+                    conn.commit()
+                    out = _batch_payload(batch, existing_rows)
+                    out["replayed"] = True
+                    out["dry_run"] = False
+                    return out
+            elif batch.get("status") not in {"previewed", "committing", "failed"}:
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={"error": "batch_not_committable", "status": batch.get("status")},
+                )
+            cur.execute(
+                """
+                UPDATE employee_import_batches
+                SET status='committing', updated_at=now()
+                WHERE batch_id=%s AND company_code=%s
+                """,
+                (batch_id, company),
+            )
+            cur.execute(
+                """
+                SELECT * FROM employee_import_rows
+                WHERE batch_id=%s AND company_code=%s
+                ORDER BY row_number
+                FOR UPDATE
+                """,
+                (batch_id, company),
+            )
+            rows = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+
+    created = 0
+    updated = 0
+    failed = 0
+    for row in rows:
+        status = str(row.get("status") or "")
+        if status not in {"will_create", "will_update"}:
+            continue
+        norm = row.get("normalized") or {}
+        if isinstance(norm, str):
+            norm = json.loads(norm)
+        detail = row.get("detail") or {}
+        if isinstance(detail, str):
+            detail = json.loads(detail)
+
+        if status == "will_update":
+            employee_key = str(row.get("employee_key") or detail.get("match", {}).get("employee_key") or "").strip()
+            changes = detail.get("changes") if isinstance(detail, dict) else {}
+            if not isinstance(changes, dict):
+                changes = {}
+            if not employee_key or not changes:
+                with legacy.db_connect() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='failed', reason=%s, updated_at=now()
+                            WHERE row_id=%s AND company_code=%s
+                            """,
+                            ("Update preview missing employee or changes.", row["row_id"], company),
+                        )
+                        failed += 1
+                        conn.commit()
+                continue
+            try:
+                fields: dict[str, Any] = {}
+                for field, ch in changes.items():
+                    if field == "manager_employee_key":
+                        continue
+                    if not isinstance(ch, dict):
+                        continue
+                    fields[field] = ch.get("after")
+                expected = _parse_expected_updated_at(
+                    (detail or {}).get("expected_updated_at") if isinstance(detail, dict) else None
+                )
+                result = (
+                    legacy.update_company_employee(
+                        company,
+                        employee_key,
+                        fields=fields,
+                        expected_updated_at=expected,
+                    )
+                    if fields
+                    else {"status": "noop"}
+                )
+                upd_status = result.get("status")
+                if upd_status == "conflict":
+                    with legacy.db_connect() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                """
+                                UPDATE employee_import_rows
+                                SET status='failed', reason=%s, updated_at=now(),
+                                    detail = COALESCE(detail, '{}'::jsonb) || %s::jsonb
+                                WHERE row_id=%s AND company_code=%s
+                                """,
+                                (
+                                    "Could not update — this person changed after preview. Needs review.",
+                                    json.dumps({"commit_conflict": True}),
+                                    row["row_id"],
+                                    company,
+                                ),
+                            )
+                            failed += 1
+                            conn.commit()
+                    continue
+                if upd_status in {"not_found", "failed", "duplicate"}:
+                    with legacy.db_connect() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                """
+                                UPDATE employee_import_rows
+                                SET status='failed', reason=%s, updated_at=now()
+                                WHERE row_id=%s AND company_code=%s
+                                """,
+                                (result.get("reason") or "Could not be updated.", row["row_id"], company),
+                            )
+                            failed += 1
+                            conn.commit()
+                    continue
+                if fields and upd_status not in {"updated", "noop"}:
+                    with legacy.db_connect() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                """
+                                UPDATE employee_import_rows
+                                SET status='failed', reason=%s, updated_at=now()
+                                WHERE row_id=%s AND company_code=%s
+                                """,
+                                (result.get("reason") or f"Unexpected update status: {upd_status}", row["row_id"], company),
+                            )
+                            failed += 1
+                            conn.commit()
+                    continue
+
+                # Manager via canonical assignment history when included in changes.
+                mgr_change = changes.get("manager_employee_key")
+                applied_manager = None
+                if isinstance(mgr_change, dict) and mgr_change.get("after"):
+                    try:
+                        applied_manager = _apply_manager_authoritative(
+                            legacy,
+                            context,
+                            employee_key=employee_key,
+                            manager_employee_key=str(mgr_change["after"]),
+                            manager_phone=norm.get("manager_phone"),
+                            batch_id=str(batch_id),
+                            position_title=norm.get("position_title") or row.get("position_title"),
+                        )
+                    except Exception as mgr_exc:
+                        with legacy.db_connect() as conn:
+                            with conn.cursor() as cur:
+                                next_detail = dict(detail) if isinstance(detail, dict) else {}
+                                next_detail["manager_apply_error"] = str(mgr_exc)[:240]
+                                cur.execute(
+                                    """
+                                    UPDATE employee_import_rows
+                                    SET status='failed', reason=%s, updated_at=now(), detail=%s::jsonb
+                                    WHERE row_id=%s AND company_code=%s
+                                    """,
+                                    (
+                                        "Updated fields but manager could not be applied. Needs review.",
+                                        json.dumps(next_detail),
+                                        row["row_id"],
+                                        company,
+                                    ),
+                                )
+                                failed += 1
+                                conn.commit()
+                        continue
+
+                with legacy.db_connect() as conn:
+                    with conn.cursor() as cur:
+                        stamp = {
+                            "employee_migration_batch_id": str(batch_id),
+                            "employee_migration_row_id": str(row["row_id"]),
+                            "employee_migration_hub_updated": True,
+                            "source_system": norm.get("source_system") or batch.get("source_system"),
+                        }
+                        cur.execute(
+                            """
+                            UPDATE employees
+                            SET raw_json = COALESCE(raw_json, '{}'::jsonb) || %s::jsonb,
+                                updated_at=now()
+                            WHERE company_code=%s AND employee_key=%s
+                            """,
+                            (json.dumps(stamp), company, employee_key),
+                        )
+                        next_detail = dict(detail) if isinstance(detail, dict) else {}
+                        next_detail["applied_changes"] = changes
+                        if next_detail.get("name_change_approved"):
+                            actor = str(
+                                context.get("user_id") or context.get("email") or ""
+                            ).strip() or None
+                            next_detail["name_change_applied"] = True
+                            next_detail["name_change_applied_by"] = actor
+                            next_detail["name_change_applied_at"] = datetime.now(timezone.utc).isoformat()
+                        if applied_manager is not None:
+                            next_detail["manager_applied"] = True
+                        reason = f"Updated ({', '.join(sorted(changes.keys()))})."
+                        if next_detail.get("name_change_approved"):
+                            reason = (
+                                f"Applied approved name change ({', '.join(sorted(changes.keys()))})."
+                            )
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='updated', employee_key=%s, reason=%s, updated_at=now(),
+                                detail=%s::jsonb
+                            WHERE row_id=%s AND company_code=%s
+                            """,
+                            (
+                                employee_key,
+                                reason,
+                                json.dumps(next_detail),
+                                row["row_id"],
+                                company,
+                            ),
+                        )
+                        conn.commit()
+                try:
+                    _apply_p2_field_layers_after_hub_write(
+                        legacy,
+                        company=company,
+                        employee_key=employee_key,
+                        row={**dict(row), "normalized": norm, "detail": next_detail},
+                        batch_id=str(batch_id),
+                        source_system=norm.get("source_system") or batch.get("source_system"),
+                        actor=str(context.get("user_id") or context.get("email") or "") or None,
+                    )
+                except Exception:
+                    pass
+                try:
+                    with legacy.db_connect() as conn2:
+                        with conn2.cursor() as cur2:
+                            _upsert_source_mapping(
+                                cur2,
+                                company=company,
+                                employee_key=employee_key,
+                                source_system=norm.get("source_system") or batch.get("source_system"),
+                                external_employee_id=norm.get("external_employee_id")
+                                or row.get("external_employee_id"),
+                                payroll_id=norm.get("payroll_id") or row.get("payroll_id"),
+                                batch_id=str(batch_id),
+                                row_id=str(row["row_id"]),
+                            )
+                            conn2.commit()
+                except Exception:
+                    pass
+                updated += 1
+            except Exception as exc:
+                failed += 1
+                with legacy.db_connect() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='failed', reason=%s, updated_at=now(),
+                                detail=%s::jsonb
+                            WHERE row_id=%s AND company_code=%s
+                            """,
+                            (
+                                "Could not be updated right now.",
+                                json.dumps({"error": str(exc)[:240]}),
+                                row["row_id"],
+                                company,
+                            ),
+                        )
+                        conn.commit()
+            continue
+
+        # will_create
+        try:
+            result = legacy.create_company_employee(
+                company,
+                name=norm.get("name") or row.get("name"),
+                phone=norm.get("phone") or row.get("phone"),
+                email=norm.get("email") or row.get("email"),
+                position_title=norm.get("position_title") or row.get("position_title"),
+                department=norm.get("department") or row.get("department"),
+                start_date=norm.get("start_date") or row.get("start_date"),
+                # Existing-workforce import must not auto-open a compliance gap campaign.
+                # HR enables a reconciliation campaign later; nationality/role drive applicability then.
+                seed_compliance=False,
+                start_onboarding=False,
+            )
+            status_c = result.get("status")
+            with legacy.db_connect() as conn:
+                with conn.cursor() as cur:
+                    if status_c == "created":
+                        employee_key = str(result.get("employee_key") or "")
+                        preview_manager = detail.get("manager") if isinstance(detail, dict) else None
+                        manager = _resolve_manager_at_commit(
+                            legacy,
+                            cur,
+                            company=company,
+                            batch_id=str(batch_id),
+                            manager_phone=norm.get("manager_phone"),
+                            preview_manager=preview_manager,
+                        )
+                        stamp = {
+                            "employee_migration_batch_id": str(batch_id),
+                            "employee_migration_row_id": str(row["row_id"]),
+                            "employee_migration_hub_created": True,
+                            "source_system": norm.get("source_system") or batch.get("source_system"),
+                        }
+                        if manager and manager.get("resolved") and manager.get("manager_employee_key"):
+                            stamp["manager_employee_key"] = manager["manager_employee_key"]
+                            stamp["manager_phone"] = manager.get("manager_phone")
+                            stamp["manager_unresolved"] = False
+                        elif manager and manager.get("manager_phone"):
+                            stamp["manager_phone"] = manager.get("manager_phone")
+                            stamp["manager_unresolved"] = True
+                            stamp["manager_employee_key"] = None
+                        cur.execute(
+                            """
+                            UPDATE employees
+                            SET raw_json = COALESCE(raw_json, '{}'::jsonb) || %s::jsonb,
+                                updated_at=now()
+                            WHERE company_code=%s AND employee_key=%s
+                            """,
+                            (json.dumps(stamp), company, employee_key),
+                        )
+                        next_detail = dict(detail) if isinstance(detail, dict) else {}
+                        if manager:
+                            next_detail["manager"] = {
+                                "manager_phone": manager.get("manager_phone"),
+                                "resolved": bool(manager.get("resolved")),
+                                "manager_employee_key": manager.get("manager_employee_key"),
+                                "source": manager.get("source"),
+                            }
+                            if manager.get("warning"):
+                                next_detail["warnings"] = list(next_detail.get("warnings") or []) + [
+                                    str(manager["warning"])
+                                ]
+                        reason = "Added."
+                        if manager and not manager.get("resolved") and manager.get("manager_phone"):
+                            reason = f"Added. {_manager_warning(str(manager.get('manager_phone')))}"
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='created', employee_key=%s, reason=%s, updated_at=now(),
+                                detail = %s::jsonb
+                            WHERE row_id=%s AND company_code=%s
+                            """,
+                            (
+                                employee_key,
+                                reason,
+                                json.dumps(next_detail),
+                                row["row_id"],
+                                company,
+                            ),
+                        )
+                        conn.commit()
+                        # Best-effort side effects — never roll back hub create/stamp.
+                        try:
+                            apply_notes = _apply_p2_field_layers_after_hub_write(
+                                legacy,
+                                company=company,
+                                employee_key=employee_key,
+                                row={**dict(row), "normalized": norm, "detail": next_detail},
+                                batch_id=str(batch_id),
+                                source_system=norm.get("source_system") or batch.get("source_system"),
+                                actor=str(context.get("user_id") or context.get("email") or "") or None,
+                            )
+                            if apply_notes.get("onboarding_migration_error") or apply_notes.get("onboarding_migration"):
+                                with legacy.db_connect() as conn3:
+                                    with conn3.cursor() as cur3:
+                                        cur3.execute(
+                                            "SELECT detail FROM employee_import_rows WHERE row_id=%s",
+                                            (row["row_id"],),
+                                        )
+                                        drow = cur3.fetchone() or {}
+                                        detail3 = drow.get("detail") if isinstance(drow, dict) else {}
+                                        if isinstance(detail3, str):
+                                            detail3 = json.loads(detail3 or "{}")
+                                        detail3 = dict(detail3 or {})
+                                        detail3["field_layer_notes"] = {
+                                            k: apply_notes.get(k)
+                                            for k in (
+                                                "onboarding_migration",
+                                                "onboarding_migration_error",
+                                                "onboarding_start",
+                                                "review",
+                                            )
+                                            if apply_notes.get(k) is not None
+                                        }
+                                        cur3.execute(
+                                            "UPDATE employee_import_rows SET detail=%s::jsonb WHERE row_id=%s",
+                                            (json.dumps(detail3), row["row_id"]),
+                                        )
+                                        conn3.commit()
+                        except Exception as apply_exc:
+                            with legacy.db_connect() as conn3:
+                                with conn3.cursor() as cur3:
+                                    cur3.execute(
+                                        "SELECT detail FROM employee_import_rows WHERE row_id=%s",
+                                        (row["row_id"],),
+                                    )
+                                    drow = cur3.fetchone() or {}
+                                    detail3 = drow.get("detail") if isinstance(drow, dict) else {}
+                                    if isinstance(detail3, str):
+                                        detail3 = json.loads(detail3 or "{}")
+                                    detail3 = dict(detail3 or {})
+                                    detail3["field_layer_error"] = str(apply_exc)[:240]
+                                    cur3.execute(
+                                        "UPDATE employee_import_rows SET detail=%s::jsonb WHERE row_id=%s",
+                                        (json.dumps(detail3), row["row_id"]),
+                                    )
+                                    conn3.commit()
+                        try:
+                            with legacy.db_connect() as conn2:
+                                with conn2.cursor() as cur2:
+                                    _upsert_source_mapping(
+                                        cur2,
+                                        company=company,
+                                        employee_key=employee_key,
+                                        source_system=norm.get("source_system") or batch.get("source_system"),
+                                        external_employee_id=norm.get("external_employee_id")
+                                        or row.get("external_employee_id"),
+                                        payroll_id=norm.get("payroll_id") or row.get("payroll_id"),
+                                        batch_id=str(batch_id),
+                                        row_id=str(row["row_id"]),
+                                    )
+                                    conn2.commit()
+                        except Exception:
+                            pass
+                        if manager and manager.get("resolved") and manager.get("manager_employee_key"):
+                            try:
+                                _apply_manager_authoritative(
+                                    legacy,
+                                    context,
+                                    employee_key=employee_key,
+                                    manager_employee_key=str(manager["manager_employee_key"]),
+                                    manager_phone=manager.get("manager_phone"),
+                                    batch_id=str(batch_id),
+                                    position_title=norm.get("position_title") or row.get("position_title"),
+                                )
+                            except Exception:
+                                pass
+                        created += 1
+                    elif status_c == "exists":
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='skipped', employee_key=%s, reason=%s, updated_at=now()
+                            WHERE row_id=%s AND company_code=%s
+                            """,
+                            (
+                                result.get("employee_key"),
+                                "Already in the workforce.",
+                                row["row_id"],
+                                company,
+                            ),
+                        )
+                        conn.commit()
+                    else:
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='failed', reason=%s, updated_at=now()
+                            WHERE row_id=%s AND company_code=%s
+                            """,
+                            (result.get("reason") or "Could not be added.", row["row_id"], company),
+                        )
+                        failed += 1
+                        conn.commit()
+        except Exception as exc:
+            failed += 1
+            with legacy.db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        UPDATE employee_import_rows
+                        SET status='failed', reason=%s, updated_at=now(),
+                            detail=%s::jsonb
+                        WHERE row_id=%s AND company_code=%s
+                        """,
+                        (
+                            "Could not be added right now.",
+                            json.dumps({"error": str(exc)[:240]}),
+                            row["row_id"],
+                            company,
+                        ),
+                    )
+                    conn.commit()
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                (batch_id, company),
+            )
+            final_rows = [dict(r) for r in (cur.fetchall() or [])]
+            totals = empty_totals()
+            for row in final_rows:
+                key = _status_to_total_key(str(row.get("status") or ""))
+                if key:
+                    totals[key] += 1
+                detail = row.get("detail") or {}
+                if isinstance(detail, str):
+                    detail = json.loads(detail)
+                if detail.get("warnings") or (
+                    isinstance(detail.get("manager"), dict) and detail["manager"].get("resolved") is False
+                ):
+                    totals["warnings"] += 1
+            applied = created + updated
+            has_pending = any(
+                str(r.get("status") or "") in {"will_create", "will_update", "conflict"}
+                for r in final_rows
+            )
+            if has_pending:
+                # Keep original batch actionable for approve / apply / confirm of remaining rows.
+                final_status = "partial"
+            elif applied == 0 and failed > 0:
+                final_status = "failed"
+            elif failed:
+                final_status = "partial"
+            else:
+                final_status = "committed"
+            cur.execute(
+                """
+                UPDATE employee_import_batches
+                SET status=%s, totals=%s::jsonb, committed_at=now(), updated_at=now()
+                WHERE batch_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (final_status, json.dumps(totals), batch_id, company),
+            )
+            batch = dict(cur.fetchone())
+            conn.commit()
+
+    if created or updated:
+        legacy.record_admin_audit(
+            context,
+            "employees_imported",
+            summary=(
+                f"Migration batch {batch_id}: added {created}, updated {updated}."
+            ),
+            target_type="company",
+            target=company,
+            details={
+                "batch_id": str(batch_id),
+                "created": created,
+                "updated": updated,
+                "failed": failed,
+                "totals": totals,
+            },
+        )
+    out = _batch_payload(batch, final_rows)
+    out["replayed"] = False
+    out["dry_run"] = False
+    return out
+
+
+def list_import_batches(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    limit: int = 25,
+) -> dict[str, Any]:
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+    limit = max(1, min(int(limit or 25), 100))
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT batch_id, company_code, status, filename, content_sha256, idempotency_key,
+                       source_system, total_rows, totals, created_by, created_at, updated_at,
+                       committed_at, rolled_back_at
+                FROM employee_import_batches
+                WHERE company_code=%s
+                ORDER BY created_at DESC
+                LIMIT %s
+                """,
+                (company, limit),
+            )
+            batches = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+    return {"ok": True, "batches": _jsonable(batches), "honesty": honesty_payload()}
+
+
+def _parse_row_detail(row: dict[str, Any]) -> dict[str, Any]:
+    detail = row.get("detail") or {}
+    if isinstance(detail, str):
+        try:
+            detail = json.loads(detail)
+        except Exception:
+            detail = {}
+    return detail if isinstance(detail, dict) else {}
+
+
+def _parse_row_normalized(row: dict[str, Any]) -> dict[str, Any]:
+    norm = row.get("normalized") or {}
+    if isinstance(norm, str):
+        try:
+            norm = json.loads(norm)
+        except Exception:
+            norm = {}
+    return norm if isinstance(norm, dict) else {}
+
+
+def _review_identity_key(row: dict[str, Any], detail: dict[str, Any] | None = None) -> str:
+    """Stable key for one unresolved employee/source conflict across preview retries."""
+    detail = detail if detail is not None else _parse_row_detail(row)
+    norm = _parse_row_normalized(row)
+    match = detail.get("match") if isinstance(detail.get("match"), dict) else {}
+    ek = (
+        str(row.get("employee_key") or "").strip()
+        or str(match.get("employee_key") or "").strip()
+        or str(match.get("mapped_employee_key") or "").strip()
+    )
+    source = str(row.get("source_system") or norm.get("source_system") or "").strip()
+    ext = str(row.get("external_employee_id") or norm.get("external_employee_id") or "").strip()
+    phone = str(row.get("phone") or norm.get("phone") or "").strip()
+    if ek and source and ext:
+        return f"ext:{ek}|{source}|{ext}"
+    if ek:
+        return f"emp:{ek}"
+    if source and ext:
+        return f"src:{source}|{ext}"
+    if phone:
+        return f"phone:{phone}"
+    # Fallback: unique per row (no cross-batch merge)
+    return f"row:{row.get('batch_id')}:{row.get('row_id')}"
+
+
+def _is_actionable_identity_conflict(row: dict[str, Any], detail: dict[str, Any] | None = None) -> bool:
+    """True for HR-resolvable identity conflicts — not invalids or intra-file duplicates."""
+    if str(row.get("status") or "") != "conflict":
+        return False
+    detail = detail if detail is not None else _parse_row_detail(row)
+    if detail.get("name_identity_review"):
+        return True
+    via = str((detail.get("match") or {}).get("via") or "")
+    if via in {"ambiguous", "external_id_phone_mismatch"}:
+        return True
+    reason = str(row.get("reason") or "").lower()
+    if "duplicate phone in this file" in reason:
+        return False
+    if "missing or invalid" in reason or reason.startswith("missing "):
+        return False
+    if "needs review:" in reason and (
+        "maps to" in reason or "phone differs" in reason or "name on file" in reason
+    ):
+        return True
+    return False
+
+
+def _json_flag(value: Any) -> bool:
+    """Truthy for jsonb bools and common string forms — never treat 'false' as True."""
+    if value is True:
+        return True
+    if value is False or value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return value == 1
+    text = str(value).strip().lower()
+    return text in {"1", "true", "yes", "on"}
+
+
+def _is_resolved_identity_row(row: dict[str, Any], detail: dict[str, Any] | None = None) -> bool:
+    """Applied identity outcomes that clear the active queue for that person."""
+    status = str(row.get("status") or "")
+    detail = detail if detail is not None else _parse_row_detail(row)
+    if status == "updated" and (
+        _json_flag(detail.get("name_change_applied"))
+        or _json_flag(detail.get("name_change_approved"))
+        or _json_flag(detail.get("name_identity_review"))
+    ):
+        return True
+    return False
+
+
+def _is_approved_pending_apply(row: dict[str, Any], detail: dict[str, Any] | None = None) -> bool:
+    """Approved on the original batch, waiting for Apply / Confirm — not yet written to the employee."""
+    if str(row.get("status") or "") != "will_update":
+        return False
+    detail = detail if detail is not None else _parse_row_detail(row)
+    return _json_flag(detail.get("name_change_approved")) and not _json_flag(detail.get("name_change_applied"))
+
+
+def _batch_is_applyable(batch_status: Any) -> bool:
+    return str(batch_status or "") in {"previewed", "partial", "committing"}
+
+
+def _activity_ts(row: dict[str, Any]) -> datetime:
+    """When this ledger row last changed — used so apply clears newer-but-stale conflict cards."""
+    detail = _parse_row_detail(row)
+    for key in ("name_change_applied_at", "name_change_approved_at"):
+        raw = detail.get(key)
+        if raw:
+            try:
+                text = str(raw).strip()
+                if text.endswith("Z"):
+                    text = text[:-1] + "+00:00"
+                return _as_utc_dt(datetime.fromisoformat(text))
+            except Exception:
+                pass
+    return _as_utc_dt(row.get("updated_at") or row.get("batch_created_at") or row.get("created_at"))
+
+
+def _as_utc_dt(value: Any) -> datetime:
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value
+    return datetime.min.replace(tzinfo=timezone.utc)
+
+
+def _row_recency_tuple(row: dict[str, Any]) -> tuple:
+    batch_at = _as_utc_dt(row.get("batch_created_at") or row.get("created_at"))
+    row_at = _as_utc_dt(row.get("updated_at") or row.get("created_at") or batch_at)
+    return (batch_at, row_at, int(row.get("row_number") or 0))
+
+
+def list_review_items(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    limit: int = 100,
+) -> dict[str, Any]:
+    """Active Needs review queue — unresolved conflicts + approved-pending-apply on their batch.
+
+    Ledger rows are never deleted. Invalids and intra-file duplicates stay in
+    History / exception CSV only. Newer matching conflicts supersede older ones;
+    applied identity rows clear the active card. Approved (not yet applied) rows
+    stay visible on the original batch until Apply / Confirm.
+    """
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+    limit = max(1, min(int(limit or 100), 500))
+    fetch_n = max(limit * 20, 200)
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT r.*, b.filename, b.status AS batch_status, b.created_at AS batch_created_at
+                FROM employee_import_rows r
+                JOIN employee_import_batches b ON b.batch_id = r.batch_id AND b.company_code = r.company_code
+                WHERE r.company_code=%s
+                  AND b.status IN ('previewed', 'committed', 'partial', 'failed')
+                  AND (
+                    r.status = 'conflict'
+                    OR (
+                      r.status = 'will_update'
+                      AND COALESCE(r.detail->>'name_change_approved', 'false') = 'true'
+                    )
+                    OR (
+                      r.status = 'updated'
+                      AND (
+                        COALESCE(r.detail->>'name_change_approved', 'false') = 'true'
+                        OR COALESCE(r.detail->>'name_change_applied', 'false') = 'true'
+                        OR COALESCE(r.detail->>'name_identity_review', 'false') = 'true'
+                      )
+                    )
+                  )
+                ORDER BY b.created_at DESC, r.updated_at DESC NULLS LAST, r.row_number ASC
+                LIMIT %s
+                """,
+                (company, fetch_n),
+            )
+            rows = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+
+    # Group candidates per identity, then prefer:
+    # 1) approved-pending-apply on original batch (keeps Apply actionable; no silent transfer)
+    # 2) else newest unresolved conflict
+    # 3) applied/updated clears when it is at least as new as any conflict
+    by_identity: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        detail = _parse_row_detail(row)
+        status = str(row.get("status") or "")
+        if status == "conflict" and not _is_actionable_identity_conflict(row, detail):
+            continue
+        if status == "will_update" and not _is_approved_pending_apply(row, detail):
+            continue
+        if status == "updated" and not _is_resolved_identity_row(row, detail):
+            continue
+        if status not in {"conflict", "will_update", "updated"}:
+            continue
+        key = _review_identity_key(row, detail)
+        by_identity.setdefault(key, []).append(row)
+
+    selected: list[dict[str, Any]] = []
+    for _key, cands in by_identity.items():
+        # Only actionable approved-pending (batch still applyable) — UI and Apply share this row.
+        approved = [
+            r
+            for r in cands
+            if _is_approved_pending_apply(r, _parse_row_detail(r))
+            and _batch_is_applyable(r.get("batch_status"))
+        ]
+        conflicts = [
+            r for r in cands if str(r.get("status") or "") == "conflict" and _is_actionable_identity_conflict(r)
+        ]
+        resolved = [r for r in cands if _is_resolved_identity_row(r)]
+        if approved:
+            pick = max(approved, key=_row_recency_tuple)
+            selected.append(pick)
+            continue
+        if conflicts:
+            newest_conflict = max(conflicts, key=_row_recency_tuple)
+            if resolved:
+                newest_resolved = max(resolved, key=_activity_ts)
+                # Apply/update activity clears conflicts even if the conflict's batch is newer.
+                if _activity_ts(newest_resolved) >= _activity_ts(newest_conflict):
+                    continue
+            # Stranded conflicts on sealed batches are history-only — not actionable in the queue.
+            if not _batch_is_applyable(newest_conflict.get("batch_status")) and str(
+                newest_conflict.get("batch_status") or ""
+            ) == "committed":
+                # Still show only if no resolved apply exists and batch was wrongly sealed with conflicts.
+                # Prefer showing so HR sees the person — but Approve requires previewed/partial.
+                # If sealed, leave in queue only when approvable is false we'll show calm "re-import" — skip sealed.
+                continue
+            if _batch_is_applyable(newest_conflict.get("batch_status")):
+                selected.append(newest_conflict)
+
+    items: list[dict[str, Any]] = []
+    for row in sorted(selected, key=_row_recency_tuple, reverse=True):
+        detail = _parse_row_detail(row)
+        status = str(row.get("status") or "")
+        if status == "updated":
+            continue
+        if status == "conflict" and not _is_actionable_identity_conflict(row, detail):
+            continue
+        if status == "will_update" and not _is_approved_pending_apply(row, detail):
+            continue
+        entry = _row_entry(row)
+        entry["batch_id"] = str(row.get("batch_id"))
+        entry["row_id"] = str(row.get("row_id")) if row.get("row_id") else None
+        entry["filename"] = row.get("filename")
+        entry["batch_status"] = row.get("batch_status")
+        entry["batch_created_at"] = (
+            row.get("batch_created_at").isoformat()
+            if hasattr(row.get("batch_created_at"), "isoformat")
+            else row.get("batch_created_at")
+        )
+        identity_key = _review_identity_key(row, detail)
+        entry["review_identity_key"] = identity_key
+        # Canonical ids — UI Apply must use exactly these (same row approval was stored on).
+        entry["canonical_batch_id"] = entry["batch_id"]
+        entry["canonical_row_id"] = entry["row_id"]
+        if _is_approved_pending_apply(row, detail) and _batch_is_applyable(row.get("batch_status")):
+            entry["reason"] = "Approved — apply to update this person."
+            entry["applyable"] = True
+            entry["outcome"] = "Approved"
+        elif detail.get("name_identity_review"):
+            entry["applyable"] = False
+            before = (detail.get("before") or {}).get("name") if isinstance(detail.get("before"), dict) else None
+            before = before or (detail.get("changes") or {}).get("name", {}).get("before")
+            after = (detail.get("changes") or {}).get("name", {}).get("after") or row.get("name")
+            if before and after and before != after:
+                entry["reason"] = f"Name on file (“{after}”) differs from the record (“{before}”)."
+        else:
+            entry["applyable"] = False
+        items.append(entry)
+        if len(items) >= limit:
+            break
+
+    return {
+        "ok": True,
+        "items": items,
+        "count": len(items),
+        "honesty": honesty_payload(),
+        "deactivate_enabled": False,
+        "queue": "active_identity_review",
+    }
+
+
+def get_import_batch(legacy: Any, context: dict[str, Any], *, batch_id: str) -> dict[str, Any]:
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                "SELECT * FROM employee_import_batches WHERE company_code=%s AND batch_id=%s LIMIT 1",
+                (company, batch_id),
+            )
+            batch = cur.fetchone()
+            if not batch:
+                raise legacy.HTTPException(status_code=404, detail={"error": "batch_not_found"})
+            batch = dict(batch)
+            cur.execute(
+                "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                (batch_id, company),
+            )
+            rows = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+    out = _batch_payload(batch, rows)
+    out["dry_run"] = batch.get("status") == "previewed"
+    return out
+
+
+def _recompute_totals_from_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
+    totals = empty_totals()
+    for row in rows:
+        key = _status_to_total_key(str(row.get("status") or ""))
+        if key:
+            totals[key] += 1
+        detail = row.get("detail") or {}
+        if isinstance(detail, str):
+            detail = json.loads(detail)
+        if detail.get("warnings") or (
+            isinstance(detail.get("manager"), dict) and detail["manager"].get("resolved") is False
+        ):
+            totals["warnings"] += 1
+    return totals
+
+
+def approve_identity_name_change(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    batch_id: str,
+    row_id: str,
+) -> dict[str, Any]:
+    """HR explicitly approves a material name change on a Needs-review row.
+
+    Keeps the original batch actionable. Does not mutate the employee. Moves the
+    row to will_update (Approved) so Apply approved change / Confirm import on
+    this same batch can apply once.
+    """
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT * FROM employee_import_batches
+                WHERE company_code=%s AND batch_id=%s
+                FOR UPDATE
+                """,
+                (company, batch_id),
+            )
+            batch_row = cur.fetchone()
+            if not batch_row:
+                raise legacy.HTTPException(status_code=404, detail={"error": "batch_not_found"})
+            batch = dict(batch_row)
+            if batch.get("status") not in {"previewed", "committing", "partial"}:
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "batch_not_approvable",
+                        "message": "Approve name changes on the original preview or partial import batch.",
+                        "status": batch.get("status"),
+                    },
+                )
+            cur.execute(
+                """
+                SELECT * FROM employee_import_rows
+                WHERE company_code=%s AND batch_id=%s AND row_id=%s
+                FOR UPDATE
+                """,
+                (company, batch_id, row_id),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise legacy.HTTPException(status_code=404, detail={"error": "row_not_found"})
+            row = dict(row)
+            detail = row.get("detail") or {}
+            if isinstance(detail, str):
+                detail = json.loads(detail)
+            if str(row.get("status")) != "conflict" or not detail.get("name_identity_review"):
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "row_not_name_identity_review",
+                        "message": "This item is not waiting for a name-change approval. Refresh Needs review.",
+                    },
+                )
+            changes = detail.get("proposed_changes") or detail.get("changes") or {}
+            if not isinstance(changes, dict) or not changes:
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "no_proposed_changes",
+                        "message": "There is nothing to approve on this item. Refresh Needs review.",
+                    },
+                )
+
+            actor = str(context.get("user_id") or context.get("email") or "").strip() or None
+            approved_at = datetime.now(timezone.utc).isoformat()
+            next_detail = dict(detail)
+            next_detail["name_change_approved"] = True
+            next_detail["name_change_approved_by"] = actor
+            next_detail["name_change_approved_at"] = approved_at
+            next_detail["name_change_applied"] = False
+            next_detail["changes"] = changes
+            next_detail["approvable"] = False
+            # Keep mapping / employee_key intact — approval stays on this batch only.
+            employee_key = row.get("employee_key") or (detail.get("match") or {}).get("employee_key")
+            change_labels = ", ".join(sorted(changes.keys()))
+            reason = (
+                f"Approved ({change_labels}) — apply on this import to update the person."
+            )
+            cur.execute(
+                """
+                UPDATE employee_import_rows
+                SET status='will_update', reason=%s, employee_key=COALESCE(%s, employee_key),
+                    detail=%s::jsonb, updated_at=now()
+                WHERE row_id=%s AND company_code=%s
+                """,
+                (reason, employee_key, json.dumps(next_detail), row_id, company),
+            )
+            cur.execute(
+                "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                (batch_id, company),
+            )
+            rows = [dict(r) for r in (cur.fetchall() or [])]
+            totals = _recompute_totals_from_rows(rows)
+            # Keep partial batches partial (still actionable); previewed stays previewed.
+            next_batch_status = batch.get("status")
+            if next_batch_status == "committing":
+                next_batch_status = "partial"
+            cur.execute(
+                """
+                UPDATE employee_import_batches
+                SET totals=%s::jsonb, status=%s, updated_at=now()
+                WHERE batch_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (json.dumps(totals), next_batch_status, batch_id, company),
+            )
+            batch = dict(cur.fetchone())
+            conn.commit()
+
+    legacy.record_admin_audit(
+        context,
+        "employees_import_name_change_approved",
+        summary=f"Approved material name change on import row {row_id} in batch {batch_id}.",
+        target_type="import_batch",
+        target=str(batch_id),
+        details={
+            "batch_id": str(batch_id),
+            "row_id": str(row_id),
+            "employee_key": employee_key,
+            "approved_by": actor,
+            "approved_at": approved_at,
+            "before_after": changes,
+        },
+    )
+    out = _batch_payload(batch, rows)
+    out["ok"] = True
+    out["approved_row_id"] = str(row_id)
+    out["approved_employee_key"] = str(employee_key) if employee_key else None
+    out["confirm_still_required"] = True
+    out["apply_still_required"] = True
+    out["message"] = (
+        "Name change approved on this import. Apply approved change, or Confirm import on the same file — no re-upload needed."
+    )
+    out["dry_run"] = True
+    return out
+
+
+def _find_canonical_approved_pending(
+    cur: Any,
+    *,
+    company: str,
+    employee_key: str | None,
+    identity_hint: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Return the newest actionable approved-pending row for this identity (exact Apply target)."""
+    ek = str(employee_key or "").strip()
+    hint = identity_hint or {}
+    source = str(hint.get("source_system") or "").strip()
+    ext = str(hint.get("external_employee_id") or "").strip()
+    phone = str(hint.get("phone") or "").strip()
+    cur.execute(
+        """
+        SELECT r.*, b.filename, b.status AS batch_status, b.created_at AS batch_created_at
+        FROM employee_import_rows r
+        JOIN employee_import_batches b ON b.batch_id = r.batch_id AND b.company_code = r.company_code
+        WHERE r.company_code=%s
+          AND r.status = 'will_update'
+          AND COALESCE(r.detail->>'name_change_approved', 'false') = 'true'
+          AND COALESCE(r.detail->>'name_change_applied', 'false') <> 'true'
+          AND b.status IN ('previewed', 'partial', 'committing')
+        ORDER BY b.created_at DESC, r.updated_at DESC NULLS LAST
+        LIMIT 100
+        """,
+        (company,),
+    )
+    rows = [dict(r) for r in (cur.fetchall() or [])]
+    matches: list[dict[str, Any]] = []
+    for row in rows:
+        if not _is_approved_pending_apply(row):
+            continue
+        if not _batch_is_applyable(row.get("batch_status")):
+            continue
+        detail = _parse_row_detail(row)
+        key = _review_identity_key(row, detail)
+        if ek and (
+            str(row.get("employee_key") or "") == ek
+            or key.startswith(f"ext:{ek}|")
+            or key == f"emp:{ek}"
+        ):
+            matches.append(row)
+            continue
+        if source and ext and key == f"src:{source}|{ext}":
+            matches.append(row)
+            continue
+        if phone and key == f"phone:{phone}":
+            matches.append(row)
+    if not matches:
+        return None
+    return max(matches, key=_row_recency_tuple)
+
+
+def _find_applied_identity_row(
+    cur: Any,
+    *,
+    company: str,
+    employee_key: str | None,
+) -> dict[str, Any] | None:
+    ek = str(employee_key or "").strip()
+    if not ek:
+        return None
+    cur.execute(
+        """
+        SELECT r.*, b.status AS batch_status, b.created_at AS batch_created_at
+        FROM employee_import_rows r
+        JOIN employee_import_batches b ON b.batch_id = r.batch_id AND b.company_code = r.company_code
+        WHERE r.company_code=%s
+          AND r.employee_key=%s
+          AND r.status = 'updated'
+          AND (
+            COALESCE(r.detail->>'name_change_applied', 'false') = 'true'
+            OR COALESCE(r.detail->>'name_change_approved', 'false') = 'true'
+          )
+        ORDER BY r.updated_at DESC NULLS LAST
+        LIMIT 1
+        """,
+        (company, ek),
+    )
+    row = cur.fetchone()
+    return dict(row) if row else None
+
+
+def apply_approved_name_change(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    batch_id: str,
+    row_id: str,
+) -> dict[str, Any]:
+    """Apply one HR-approved name-change row on its original batch — once.
+
+    Resolves the canonical approved-pending row for the identity when the client
+    sends a stale/superseded batch_id+row_id, so UI and Apply always target the
+    same ledger row approval was stored on.
+    """
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT * FROM employee_import_batches
+                WHERE company_code=%s AND batch_id=%s
+                FOR UPDATE
+                """,
+                (company, batch_id),
+            )
+            batch_row = cur.fetchone()
+            if not batch_row:
+                raise legacy.HTTPException(
+                    status_code=404,
+                    detail={
+                        "error": "batch_not_found",
+                        "message": "That import is no longer available. Refresh Needs review and try again.",
+                    },
+                )
+            batch = dict(batch_row)
+            cur.execute(
+                """
+                SELECT * FROM employee_import_rows
+                WHERE company_code=%s AND batch_id=%s AND row_id=%s
+                FOR UPDATE
+                """,
+                (company, batch_id, row_id),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise legacy.HTTPException(
+                    status_code=404,
+                    detail={
+                        "error": "row_not_found",
+                        "message": "That review item is no longer available. Refresh Needs review and try again.",
+                    },
+                )
+            row = dict(row)
+            detail = _parse_row_detail(row)
+            employee_key = str(
+                row.get("employee_key") or (detail.get("match") or {}).get("employee_key") or ""
+            ).strip() or None
+
+            # Idempotent: this exact row already applied.
+            if str(row.get("status")) == "updated" and (
+                _json_flag(detail.get("name_change_applied")) or _json_flag(detail.get("name_change_approved"))
+            ):
+                cur.execute(
+                    "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                    (batch_id, company),
+                )
+                rows = [dict(r) for r in (cur.fetchall() or [])]
+                conn.commit()
+                out = _batch_payload(batch, rows)
+                out["ok"] = True
+                out["replayed"] = True
+                out["dry_run"] = False
+                out["applied_row_id"] = str(row_id)
+                out["applied_employee_key"] = employee_key
+                out["message"] = "Approved change was already applied on this import."
+                return out
+
+            # Stale client ids: resolve the canonical approved-pending row for this identity.
+            if not _is_approved_pending_apply(row, detail) or not _batch_is_applyable(batch.get("status")):
+                hint = {
+                    "source_system": row.get("source_system") or (row.get("normalized") or {}).get("source_system")
+                    if isinstance(row.get("normalized"), dict)
+                    else row.get("source_system"),
+                    "external_employee_id": row.get("external_employee_id"),
+                    "phone": row.get("phone"),
+                }
+                if isinstance(row.get("normalized"), str):
+                    try:
+                        norm_tmp = json.loads(row["normalized"])
+                        hint["source_system"] = hint.get("source_system") or norm_tmp.get("source_system")
+                        hint["phone"] = hint.get("phone") or norm_tmp.get("phone")
+                        hint["external_employee_id"] = hint.get("external_employee_id") or norm_tmp.get(
+                            "external_employee_id"
+                        )
+                    except Exception:
+                        pass
+                canonical = _find_canonical_approved_pending(
+                    cur, company=company, employee_key=employee_key, identity_hint=hint
+                )
+                if canonical:
+                    # Switch to the canonical row/batch — same identity, actionable approval.
+                    batch_id = str(canonical["batch_id"])
+                    row_id = str(canonical["row_id"])
+                    cur.execute(
+                        """
+                        SELECT * FROM employee_import_batches
+                        WHERE company_code=%s AND batch_id=%s
+                        FOR UPDATE
+                        """,
+                        (company, batch_id),
+                    )
+                    batch = dict(cur.fetchone())
+                    cur.execute(
+                        """
+                        SELECT * FROM employee_import_rows
+                        WHERE company_code=%s AND batch_id=%s AND row_id=%s
+                        FOR UPDATE
+                        """,
+                        (company, batch_id, row_id),
+                    )
+                    row = dict(cur.fetchone())
+                    detail = _parse_row_detail(row)
+                    employee_key = str(
+                        row.get("employee_key") or (detail.get("match") or {}).get("employee_key") or ""
+                    ).strip() or employee_key
+                else:
+                    already = _find_applied_identity_row(cur, company=company, employee_key=employee_key)
+                    if already:
+                        cur.execute(
+                            "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                            (str(already["batch_id"]), company),
+                        )
+                        rows = [dict(r) for r in (cur.fetchall() or [])]
+                        cur.execute(
+                            "SELECT * FROM employee_import_batches WHERE company_code=%s AND batch_id=%s",
+                            (company, str(already["batch_id"])),
+                        )
+                        hist_batch = dict(cur.fetchone())
+                        conn.commit()
+                        out = _batch_payload(hist_batch, rows)
+                        out["ok"] = True
+                        out["replayed"] = True
+                        out["dry_run"] = False
+                        out["applied_row_id"] = str(already.get("row_id"))
+                        out["applied_employee_key"] = employee_key
+                        out["message"] = "This change was already applied. Needs review is up to date."
+                        return out
+                    conn.commit()
+                    raise legacy.HTTPException(
+                        status_code=409,
+                        detail={
+                            "error": "review_state_stale",
+                            "message": "This review item changed. Refresh Needs review and try again.",
+                        },
+                    )
+
+            if not _is_approved_pending_apply(row, detail):
+                conn.commit()
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "review_state_stale",
+                        "message": "This review item changed. Refresh Needs review and try again.",
+                    },
+                )
+            if not _batch_is_applyable(batch.get("status")):
+                conn.commit()
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={
+                        "error": "batch_not_applyable",
+                        "message": "This approval is on an older import that can no longer be applied. Refresh Needs review.",
+                        "status": batch.get("status"),
+                    },
+                )
+            # Mark committing while we apply this single row.
+            cur.execute(
+                """
+                UPDATE employee_import_batches
+                SET status='committing', updated_at=now()
+                WHERE batch_id=%s AND company_code=%s
+                """,
+                (batch_id, company),
+            )
+            conn.commit()
+
+    # Reuse commit path for this single approved will_update by temporarily
+    # leaving other will_* rows alone: commit applies all will_*; so mark other
+    # pending will_* as parked... Better: inline apply for this one row only.
+    norm = row.get("normalized") or {}
+    if isinstance(norm, str):
+        norm = json.loads(norm)
+    employee_key = str(row.get("employee_key") or detail.get("match", {}).get("employee_key") or "").strip()
+    changes = detail.get("changes") if isinstance(detail, dict) else {}
+    if not isinstance(changes, dict):
+        changes = {}
+    if not employee_key or not changes:
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE employee_import_rows
+                    SET status='failed', reason=%s, updated_at=now()
+                    WHERE row_id=%s AND company_code=%s
+                    """,
+                    ("Approved update missing employee or changes.", row_id, company),
+                )
+                cur.execute(
+                    """
+                    UPDATE employee_import_batches
+                    SET status='partial', updated_at=now()
+                    WHERE batch_id=%s AND company_code=%s
+                    """,
+                    (batch_id, company),
+                )
+                conn.commit()
+        raise legacy.HTTPException(
+            status_code=409,
+            detail={
+                "error": "approved_row_incomplete",
+                "message": "This approved change is missing details. Refresh Needs review and try again.",
+            },
+        )
+
+    actor = str(context.get("user_id") or context.get("email") or "").strip() or None
+    applied_at = datetime.now(timezone.utc).isoformat()
+    fields: dict[str, Any] = {}
+    for field, ch in changes.items():
+        if field == "manager_employee_key":
+            continue
+        if not isinstance(ch, dict):
+            continue
+        fields[field] = ch.get("after")
+    expected = _parse_expected_updated_at(
+        (detail or {}).get("expected_updated_at") if isinstance(detail, dict) else None
+    )
+    try:
+        result = (
+            legacy.update_company_employee(
+                company,
+                employee_key,
+                fields=fields,
+                expected_updated_at=expected,
+            )
+            if fields
+            else {"status": "noop"}
+        )
+    except Exception as exc:
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE employee_import_rows
+                    SET status='failed', reason=%s, updated_at=now(), detail=%s::jsonb
+                    WHERE row_id=%s AND company_code=%s
+                    """,
+                    (
+                        "Could not apply approved change right now.",
+                        json.dumps({**detail, "error": str(exc)[:240]}),
+                        row_id,
+                        company,
+                    ),
+                )
+                cur.execute(
+                    """
+                    UPDATE employee_import_batches
+                    SET status='partial', updated_at=now()
+                    WHERE batch_id=%s AND company_code=%s
+                    """,
+                    (batch_id, company),
+                )
+                conn.commit()
+        raise legacy.HTTPException(
+            status_code=409,
+            detail={
+                "error": "apply_failed",
+                "message": "We couldn’t apply this change right now. Refresh Needs review and try again.",
+            },
+        )
+
+    upd_status = result.get("status")
+    if upd_status == "conflict":
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE employee_import_rows
+                    SET status='failed', reason=%s, updated_at=now(),
+                        detail = COALESCE(detail, '{}'::jsonb) || %s::jsonb
+                    WHERE row_id=%s AND company_code=%s
+                    """,
+                    (
+                        "Could not apply — this person changed after approval. Needs review.",
+                        json.dumps({"commit_conflict": True}),
+                        row_id,
+                        company,
+                    ),
+                )
+                cur.execute(
+                    """
+                    UPDATE employee_import_batches
+                    SET status='partial', updated_at=now()
+                    WHERE batch_id=%s AND company_code=%s
+                    """,
+                    (batch_id, company),
+                )
+                conn.commit()
+        raise legacy.HTTPException(
+            status_code=409,
+            detail={
+                "error": "apply_conflict",
+                "message": "This person changed after approval. Refresh Needs review and review again.",
+            },
+        )
+    if fields and upd_status not in {"updated", "noop"}:
+        with legacy.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE employee_import_rows
+                    SET status='failed', reason=%s, updated_at=now()
+                    WHERE row_id=%s AND company_code=%s
+                    """,
+                    (result.get("reason") or f"Unexpected update status: {upd_status}", row_id, company),
+                )
+                cur.execute(
+                    """
+                    UPDATE employee_import_batches
+                    SET status='partial', updated_at=now()
+                    WHERE batch_id=%s AND company_code=%s
+                    """,
+                    (batch_id, company),
+                )
+                conn.commit()
+        raise legacy.HTTPException(
+            status_code=409,
+            detail={
+                "error": "apply_failed",
+                "message": "We couldn’t apply this change right now. Refresh Needs review and try again.",
+                "status": upd_status,
+            },
+        )
+
+    # Optional manager from approved changes.
+    mgr_change = changes.get("manager_employee_key")
+    applied_manager = None
+    if isinstance(mgr_change, dict) and mgr_change.get("after"):
+        try:
+            applied_manager = _apply_manager_authoritative(
+                legacy,
+                context,
+                employee_key=employee_key,
+                manager_employee_key=str(mgr_change["after"]),
+                manager_phone=norm.get("manager_phone"),
+                batch_id=str(batch_id),
+                position_title=norm.get("position_title") or row.get("position_title"),
+            )
+        except Exception as mgr_exc:
+            with legacy.db_connect() as conn:
+                with conn.cursor() as cur:
+                    next_detail = dict(detail)
+                    next_detail["manager_apply_error"] = str(mgr_exc)[:240]
+                    cur.execute(
+                        """
+                        UPDATE employee_import_rows
+                        SET status='failed', reason=%s, updated_at=now(), detail=%s::jsonb
+                        WHERE row_id=%s AND company_code=%s
+                        """,
+                        (
+                            "Updated fields but manager could not be applied. Needs review.",
+                            json.dumps(next_detail),
+                            row_id,
+                            company,
+                        ),
+                    )
+                    cur.execute(
+                        """
+                        UPDATE employee_import_batches
+                        SET status='partial', updated_at=now()
+                        WHERE batch_id=%s AND company_code=%s
+                        """,
+                        (batch_id, company),
+                    )
+                    conn.commit()
+            raise legacy.HTTPException(
+                status_code=409,
+                detail={
+                    "error": "manager_apply_failed",
+                    "message": "The name was ready, but the manager update could not be applied. Refresh Needs review.",
+                },
+            )
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            stamp = {
+                "employee_migration_batch_id": str(batch_id),
+                "employee_migration_row_id": str(row_id),
+                "employee_migration_hub_updated": True,
+                "source_system": norm.get("source_system") or batch.get("source_system"),
+            }
+            cur.execute(
+                """
+                UPDATE employees
+                SET raw_json = COALESCE(raw_json, '{}'::jsonb) || %s::jsonb,
+                    updated_at=now()
+                WHERE company_code=%s AND employee_key=%s
+                """,
+                (json.dumps(stamp), company, employee_key),
+            )
+            next_detail = dict(detail)
+            next_detail["applied_changes"] = changes
+            next_detail["name_change_applied"] = True
+            next_detail["name_change_applied_by"] = actor
+            next_detail["name_change_applied_at"] = applied_at
+            if applied_manager is not None:
+                next_detail["manager_applied"] = True
+            cur.execute(
+                """
+                UPDATE employee_import_rows
+                SET status='updated', employee_key=%s, reason=%s, updated_at=now(),
+                    detail=%s::jsonb
+                WHERE row_id=%s AND company_code=%s
+                """,
+                (
+                    employee_key,
+                    f"Applied approved name change ({', '.join(sorted(changes.keys()))}).",
+                    json.dumps(next_detail),
+                    row_id,
+                    company,
+                ),
+            )
+            try:
+                _upsert_source_mapping(
+                    cur,
+                    company=company,
+                    employee_key=employee_key,
+                    source_system=norm.get("source_system") or batch.get("source_system"),
+                    external_employee_id=norm.get("external_employee_id") or row.get("external_employee_id"),
+                    payroll_id=norm.get("payroll_id") or row.get("payroll_id"),
+                    batch_id=str(batch_id),
+                    row_id=str(row_id),
+                )
+            except Exception:
+                pass
+            cur.execute(
+                "SELECT * FROM employee_import_rows WHERE batch_id=%s AND company_code=%s ORDER BY row_number",
+                (batch_id, company),
+            )
+            final_rows = [dict(r) for r in (cur.fetchall() or [])]
+            totals = _recompute_totals_from_rows(final_rows)
+            has_pending = any(
+                str(r.get("status") or "") in {"will_create", "will_update", "conflict"}
+                for r in final_rows
+            )
+            final_status = "partial" if has_pending else "committed"
+            cur.execute(
+                """
+                UPDATE employee_import_batches
+                SET status=%s, totals=%s::jsonb, committed_at=COALESCE(committed_at, now()), updated_at=now()
+                WHERE batch_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (final_status, json.dumps(totals), batch_id, company),
+            )
+            batch = dict(cur.fetchone())
+            conn.commit()
+
+    legacy.record_admin_audit(
+        context,
+        "employees_import_name_change_applied",
+        summary=f"Applied approved name change on import row {row_id} in batch {batch_id}.",
+        target_type="import_batch",
+        target=str(batch_id),
+        details={
+            "batch_id": str(batch_id),
+            "row_id": str(row_id),
+            "employee_key": employee_key,
+            "approved_by": detail.get("name_change_approved_by"),
+            "approved_at": detail.get("name_change_approved_at"),
+            "applied_by": actor,
+            "applied_at": applied_at,
+            "before_after": changes,
+        },
+    )
+    out = _batch_payload(batch, final_rows)
+    out["ok"] = True
+    out["dry_run"] = False
+    out["applied_row_id"] = str(row_id)
+    out["applied_employee_key"] = employee_key
+    out["message"] = "Approved change applied. This person is updated."
+    return out
+
+
+def exception_csv(legacy: Any, context: dict[str, Any], *, batch_id: str) -> tuple[str, str]:
+    """Return (filename, csv_text) for non-create outcomes."""
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                "SELECT batch_id FROM employee_import_batches WHERE company_code=%s AND batch_id=%s LIMIT 1",
+                (company, batch_id),
+            )
+            if not cur.fetchone():
+                raise legacy.HTTPException(status_code=404, detail={"error": "batch_not_found"})
+            cur.execute(
+                """
+                SELECT row_number, status, name, phone, email, external_employee_id, payroll_id,
+                       source_system, employee_key, reason, detail, normalized
+                FROM employee_import_rows
+                WHERE batch_id=%s AND company_code=%s
+                  AND (
+                    status IN ('skipped','conflict','invalid','failed','rolled_back')
+                    OR COALESCE(detail->'warnings', '[]'::jsonb) <> '[]'::jsonb
+                    OR COALESCE(detail->'manager'->>'resolved', 'true') = 'false'
+                  )
+                ORDER BY row_number
+                """,
+                (batch_id, company),
+            )
+            rows = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+
+    buf = io.StringIO()
+    writer = csv.DictWriter(
+        buf,
+        fieldnames=[
+            "row_number",
+            "status",
+            "name",
+            "phone",
+            "email",
+            "external_employee_id",
+            "payroll_id",
+            "source_system",
+            "manager_phone",
+            "manager_resolved",
+            "manager_employee_key",
+            "employee_key",
+            "reason",
+            "warnings",
+        ],
+    )
+    writer.writeheader()
+    for row in rows:
+        detail = row.get("detail") or {}
+        if isinstance(detail, str):
+            detail = json.loads(detail)
+        norm = row.get("normalized") or {}
+        if isinstance(norm, str):
+            norm = json.loads(norm)
+        manager = detail.get("manager") if isinstance(detail, dict) else {}
+        warnings = detail.get("warnings") if isinstance(detail, dict) else []
+        writer.writerow(
+            {
+                "row_number": row.get("row_number"),
+                "status": row.get("status"),
+                "name": row.get("name"),
+                "phone": row.get("phone"),
+                "email": row.get("email"),
+                "external_employee_id": row.get("external_employee_id"),
+                "payroll_id": row.get("payroll_id"),
+                "source_system": row.get("source_system"),
+                "manager_phone": (manager or {}).get("manager_phone") or norm.get("manager_phone"),
+                "manager_resolved": (manager or {}).get("resolved"),
+                "manager_employee_key": (manager or {}).get("manager_employee_key"),
+                "employee_key": row.get("employee_key"),
+                "reason": row.get("reason"),
+                "warnings": " | ".join(warnings or []),
+            }
+        )
+    return f"employee-import-exceptions-{batch_id}.csv", buf.getvalue()
+
+
+def rollback_import_batch(
+    legacy: Any,
+    context: dict[str, Any],
+    *,
+    batch_id: str,
+    idempotency_key: str,
+) -> dict[str, Any]:
+    company = legacy.require_employee_roster_admin(context)
+    if not foundation_enabled(company):
+        raise legacy.HTTPException(status_code=403, detail={"error": "employee_migration_foundation_disabled"})
+    rollback_key = str(idempotency_key or "").strip()
+    if not rollback_key:
+        raise legacy.HTTPException(status_code=422, detail={"error": "idempotency_key_required"})
+
+    with legacy.db_connect() as conn:
+        with conn.cursor() as cur:
+            ensure_schema(cur)
+            cur.execute(
+                """
+                SELECT * FROM employee_import_batches
+                WHERE company_code=%s AND batch_id=%s
+                FOR UPDATE
+                """,
+                (company, batch_id),
+            )
+            batch_row = cur.fetchone()
+            if not batch_row:
+                raise legacy.HTTPException(status_code=404, detail={"error": "batch_not_found"})
+            batch = dict(batch_row)
+            meta = batch.get("metadata") or {}
+            if isinstance(meta, str):
+                meta = json.loads(meta)
+            prior = meta.get("rollback")
+            if prior and prior.get("idempotency_key") == rollback_key:
+                conn.commit()
+                return {
+                    "ok": True,
+                    "replayed": True,
+                    "batch_id": str(batch_id),
+                    "status": batch.get("status"),
+                    "removed": int(prior.get("removed") or 0),
+                    "blocked": prior.get("blocked") or [],
+                }
+            if batch.get("status") == "rolled_back":
+                conn.commit()
+                return {"ok": True, "replayed": True, "batch_id": str(batch_id), "status": "rolled_back", "removed": 0, "blocked": []}
+            if batch.get("status") not in {"committed", "partial", "failed"}:
+                raise legacy.HTTPException(
+                    status_code=409,
+                    detail={"error": "batch_not_rollbackable", "status": batch.get("status")},
+                )
+
+            cur.execute(
+                """
+                SELECT * FROM employee_import_rows
+                WHERE batch_id=%s AND company_code=%s AND status IN ('created', 'updated')
+                ORDER BY row_number
+                FOR UPDATE
+                """,
+                (batch_id, company),
+            )
+            applied_rows = [dict(r) for r in (cur.fetchall() or [])]
+            removed = 0
+            reverted = 0
+            skipped_fields: list[dict[str, Any]] = []
+            blocked: list[dict[str, Any]] = []
+            for row in applied_rows:
+                employee_key = str(row.get("employee_key") or "").strip()
+                if not employee_key:
+                    continue
+                row_status = str(row.get("status") or "")
+
+                if row_status == "updated":
+                    detail = row.get("detail") or {}
+                    if isinstance(detail, str):
+                        detail = json.loads(detail)
+                    changes = detail.get("changes") or detail.get("applied_changes") or {}
+                    if not isinstance(changes, dict) or not changes:
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='rolled_back', reason=%s, updated_at=now()
+                            WHERE row_id=%s
+                            """,
+                            ("No field changes to undo.", row["row_id"]),
+                        )
+                        reverted += 1
+                        continue
+                    cur.execute(
+                        "SELECT * FROM employees WHERE company_code=%s AND employee_key=%s FOR UPDATE",
+                        (company, employee_key),
+                    )
+                    emp = cur.fetchone()
+                    if not emp:
+                        cur.execute(
+                            """
+                            UPDATE employee_import_rows
+                            SET status='rolled_back', reason=%s, updated_at=now()
+                            WHERE row_id=%s
+                            """,
+                            ("Employee already absent.", row["row_id"]),
+                        )
+                        reverted += 1
+                        continue
+                    emp = dict(emp)
+                    current = _hub_field_snapshot(emp)
+                    revert_fields: dict[str, Any] = {}
+                    field_notes: list[str] = []
+                    for field, ch in changes.items():
+                        if field == "manager_employee_key":
+                            continue
+                        if not isinstance(ch, dict):
+                            continue
+                        after = ch.get("after")
+                        before = ch.get("before")
+                        cur_val = current.get(field)
+                        # Normalize for comparison
+                        cur_n = str(cur_val).strip() if cur_val not in (None, "") else None
+                        after_n = str(after).strip() if after not in (None, "") else None
+                        if field == "start_date":
+                            cur_n = (cur_n or "")[:10] or None
+                            after_n = (after_n or "")[:10] or None
+                        if cur_n == after_n:
+                            revert_fields[field] = before
+                        else:
+                            field_notes.append(field)
+                            skipped_fields.append(
+                                {
+                                    "employee_key": employee_key,
+                                    "field": field,
+                                    "reason": "changed_after_batch",
+                                    "current": cur_n,
+                                    "batch_after": after_n,
+                                }
+                            )
+                    if revert_fields:
+                        # Apply in-place within this transaction via SQL (avoid nested connections).
+                        set_parts = []
+                        params: list[Any] = []
+                        profile = emp.get("profile") if isinstance(emp.get("profile"), dict) else {}
+                        for col, val in revert_fields.items():
+                            if col == "department":
+                                profile = {**profile}
+                                if val:
+                                    profile["department"] = val
+                                else:
+                                    profile.pop("department", None)
+                                set_parts.append("profile=%s::jsonb")
+                                params.append(json.dumps(profile))
+                            else:
+                                set_parts.append(f"{col}=%s")
+                                params.append(val)
+                        set_parts.append("updated_at=now()")
+                        params.extend([employee_key, company])
+                        cur.execute(
+                            f"UPDATE employees SET {', '.join(set_parts)} WHERE employee_key=%s AND company_code=%s",
+                            params,
+                        )
+                    # Manager undo concurrency-safe
+                    mgr_ch = changes.get("manager_employee_key")
+                    if isinstance(mgr_ch, dict):
+                        cur_mgr = None
+                        cur.execute(
+                            """
+                            SELECT manager_employee_key
+                            FROM employee_org_assignment_history
+                            WHERE company_code=%s AND employee_key=%s AND effective_to IS NULL
+                            ORDER BY effective_from DESC, created_at DESC
+                            LIMIT 1
+                            """,
+                            (company, employee_key),
+                        )
+                        hit = cur.fetchone()
+                        if hit:
+                            cur_mgr = (hit["manager_employee_key"] if isinstance(hit, dict) else hit[0]) or None
+                            if cur_mgr:
+                                cur_mgr = str(cur_mgr)
+                        after_mgr = mgr_ch.get("after")
+                        before_mgr = mgr_ch.get("before")
+                        if (cur_mgr or None) == (str(after_mgr) if after_mgr else None):
+                            # Defer assignment restore outside FOR UPDATE loop via note; apply after commit below
+                            detail["_undo_manager"] = {"before": before_mgr, "after": after_mgr}
+                        else:
+                            skipped_fields.append(
+                                {
+                                    "employee_key": employee_key,
+                                    "field": "manager_employee_key",
+                                    "reason": "changed_after_batch",
+                                    "current": cur_mgr,
+                                    "batch_after": after_mgr,
+                                }
+                            )
+                            field_notes.append("manager_employee_key")
+                    reason = "Update undone."
+                    if field_notes:
+                        reason = (
+                            f"Update partially undone (left alone: {', '.join(field_notes)} — changed after this batch)."
+                        )
+                    next_detail = dict(detail) if isinstance(detail, dict) else {}
+                    next_detail["undo"] = {
+                        "reverted_fields": list(revert_fields.keys()),
+                        "skipped_fields": field_notes,
+                    }
+                    cur.execute(
+                        """
+                        UPDATE employee_import_rows
+                        SET status='rolled_back', reason=%s, updated_at=now(), detail=%s::jsonb
+                        WHERE row_id=%s
+                        """,
+                        (reason, json.dumps(next_detail), row["row_id"]),
+                    )
+                    reverted += 1
+                    continue
+
+                # created → remove if stamped and no progress
+                cur.execute(
+                    """
+                    SELECT employee_key, raw_json, onboarding_status
+                    FROM employees
+                    WHERE company_code=%s AND employee_key=%s
+                    FOR UPDATE
+                    """,
+                    (company, employee_key),
+                )
+                emp = cur.fetchone()
+                if not emp:
+                    cur.execute(
+                        """
+                        UPDATE employee_import_rows
+                        SET status='rolled_back', reason=%s, updated_at=now()
+                        WHERE row_id=%s
+                        """,
+                        ("Hub row already absent.", row["row_id"]),
+                    )
+                    removed += 1
+                    continue
+                emp = dict(emp)
+                raw_json = emp.get("raw_json") or {}
+                if isinstance(raw_json, str):
+                    raw_json = json.loads(raw_json)
+                stamped = str(raw_json.get("employee_migration_batch_id") or "") == str(batch_id)
+                hub_created = bool(raw_json.get("employee_migration_hub_created"))
+                onboarding = str(emp.get("onboarding_status") or "").lower()
+                if not stamped or not hub_created or onboarding not in {"", "not_started", "pending"}:
+                    blocked.append(
+                        {
+                            "employee_key": employee_key,
+                            "reason": "employee_has_progress_or_missing_stamp",
+                        }
+                    )
+                    continue
+                cur.execute(
+                    """
+                    UPDATE employee_source_mappings
+                    SET active=false, updated_at=now()
+                    WHERE company_code=%s AND employee_key=%s AND batch_id=%s
+                    """,
+                    (company, employee_key, batch_id),
+                )
+                cur.execute(
+                    "DELETE FROM employees WHERE company_code=%s AND employee_key=%s",
+                    (company, employee_key),
+                )
+                cur.execute(
+                    """
+                    UPDATE employee_import_rows
+                    SET status='rolled_back', reason=%s, updated_at=now()
+                    WHERE row_id=%s
+                    """,
+                    ("Rolled back.", row["row_id"]),
+                )
+                removed += 1
+
+            meta["rollback"] = {
+                "idempotency_key": rollback_key,
+                "removed": removed,
+                "reverted": reverted,
+                "skipped_fields": skipped_fields,
+                "blocked": blocked,
+                "at": datetime.now(timezone.utc).isoformat(),
+            }
+            try:
+                import employee_migration_field_model as _fm
+
+                meta["rollback"]["field_model"] = _fm.rollback_field_model_for_batch(
+                    cur, company=company, batch_id=str(batch_id)
+                )
+            except Exception as fm_exc:
+                meta["rollback"]["field_model_error"] = str(fm_exc)[:200]
+            try:
+                import employee_migration_onboarding as _omo
+
+                meta["rollback"]["onboarding_migration"] = _omo.rollback_onboarding_migration_for_batch(
+                    cur, company=company, batch_id=str(batch_id)
+                )
+            except Exception as om_exc:
+                meta["rollback"]["onboarding_migration_error"] = str(om_exc)[:200]
+            # Opening balances also rolled via field_model.rollback; stamp explicit meta when present.
+            fm_rb = meta.get("rollback", {}).get("field_model") or {}
+            if isinstance(fm_rb, dict) and fm_rb.get("cutover") is not None:
+                meta["rollback"]["opening_balances"] = fm_rb.get("cutover")
+            cur.execute(
+                """
+                UPDATE employee_import_batches
+                SET status='rolled_back', rolled_back_at=now(), updated_at=now(), metadata=%s::jsonb
+                WHERE batch_id=%s AND company_code=%s
+                RETURNING *
+                """,
+                (json.dumps(meta), batch_id, company),
+            )
+            batch = dict(cur.fetchone())
+            # Collect manager undos that need assignment history restore
+            cur.execute(
+                """
+                SELECT row_id, employee_key, detail FROM employee_import_rows
+                WHERE batch_id=%s AND company_code=%s AND status='rolled_back'
+                """,
+                (batch_id, company),
+            )
+            undo_mgr_rows = [dict(r) for r in (cur.fetchall() or [])]
+            conn.commit()
+
+    # Restore managers outside the batch lock (Wave4 uses its own connections).
+    for row in undo_mgr_rows:
+        detail = row.get("detail") or {}
+        if isinstance(detail, str):
+            detail = json.loads(detail)
+        undo_mgr = detail.get("_undo_manager") if isinstance(detail, dict) else None
+        if not undo_mgr or not undo_mgr.get("before"):
+            continue
+        try:
+            _apply_manager_authoritative(
+                legacy,
+                context,
+                employee_key=str(row.get("employee_key")),
+                manager_employee_key=str(undo_mgr["before"]),
+                manager_phone=None,
+                batch_id=str(batch_id),
+            )
+        except Exception:
+            skipped_fields.append(
+                {
+                    "employee_key": row.get("employee_key"),
+                    "field": "manager_employee_key",
+                    "reason": "manager_restore_failed",
+                }
+            )
+
+    legacy.record_admin_audit(
+        context,
+        "employees_import_rolled_back",
+        summary=(
+            f"Rolled back employee import batch {batch_id} "
+            f"({removed} removed, {reverted} updates undone)."
+        ),
+        target_type="company",
+        target=company,
+        details={
+            "batch_id": str(batch_id),
+            "removed": removed,
+            "reverted": reverted,
+            "skipped_fields": skipped_fields,
+            "blocked": blocked,
+            "idempotency_key": rollback_key,
+        },
+    )
+    return {
+        "ok": True,
+        "replayed": False,
+        "batch_id": str(batch_id),
+        "status": "rolled_back",
+        "removed": removed,
+        "reverted": reverted,
+        "skipped_fields": skipped_fields,
+        "blocked": blocked,
+        "honesty": honesty_payload(),
+    }

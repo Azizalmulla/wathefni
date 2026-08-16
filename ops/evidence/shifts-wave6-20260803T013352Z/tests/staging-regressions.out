@@ -1,0 +1,312 @@
+=== W6 ===
+PASS  version 6.0.0
+PASS  wave6 enabled
+PASS  company WATHEFNI
+PASS  honesty rotations true
+PASS  honesty pam_export true
+PASS  honesty pam_submission false
+PASS  honesty payroll_money false
+PASS  honesty leave_balances_mutated false
+PASS  honesty attendance_authority_mutated false
+PASS  honesty publishing true
+PASS  honesty templates true
+PASS  honesty remote_rosters true
+PASS  honesty compliance_profiles true
+PASS  honesty coverage_rules true
+PASS  w5 honesty rotations false
+PASS  w5 honesty pam_export false
+PASS  w4 honesty publishing false
+PASS  shw6 synthetic key
+PASS  real phone not synth
+PASS  permission_matrix export_pam hr/admin
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  four_on_four_off length 8
+PASS  four_on_four_off work/rest split 4/4
+PASS  panama_223 length 14
+PASS  hitch_n_n 14/14 length 28
+PASS  hitch_n_n travel edges present (2)
+PASS  hitch_n_n work count 13
+PASS  hitch_n_n rest count 13
+PASS  day template
+PASS  night template ends_next_day
+PASS  pattern four_on_four_off
+PASS  pattern alternating_day_night
+PASS  pattern hitch_n_n
+PASS  assign rotation A
+PASS  assign rotation B (overnight, different offset)
+PASS  assign rotation C (hitch, preview only)
+PASS  different cycle_offsets for two employees
+PASS  preview A ok
+PASS  preview A work counts
+PASS  preview A rest counts
+PASS  preview C (hitch) ok
+PASS  preview C work counts
+PASS  preview C rest counts
+PASS  preview C travel counts
+PASS  create period1
+PASS  generate_draft_from_rotation ok
+PASS  draft_rows > 0
+PASS  l0_written false
+PASS  L0 unchanged after draft
+PASS  draft includes work day_kind
+PASS  draft includes rest day_kind
+PASS  at least one work row for compliance rules
+PASS  compliance profile upsert
+PASS  compliance evaluate ok
+PASS  compliance payroll_money false
+PASS  compliance ramadan_hours warn
+PASS  compliance midday_restriction warn
+PASS  compliance daily_hours_warning present
+PASS  compliance weekly_rest_days present
+PASS  compliance public_holiday_warning present
+PASS  compliance blocks_publish false (all warn)
+PASS  transition draft->in_review
+PASS  transition in_review->draft (return)
+PASS  transition draft->in_review (again)
+PASS  transition in_review->approved
+PASS  publish version1 ok
+PASS  publish created work rows
+PASS  publish skipped non-work rows
+PASS  published L0 rows present
+PASS  pam export ok
+PASS  pam export fingerprint present
+PASS  pam export csv_en present
+PASS  pam export csv_ar present
+PASS  pam export report_en present
+PASS  pam export report_ar present
+PASS  pam export status manual_submission_required
+PASS  pam export submission false
+PASS  published rows exist before regenerate
+PASS  create_draft_from_published (cycle edit)
+PASS  regenerate rotation into new draft ok
+PASS  regenerate l0_written false
+PASS  published L0 fingerprint unchanged after regenerate
+PASS  regenerate after soft-cancel ok
+PASS  cancelled_held row_class present
+PASS  create period2 (overnight)
+PASS  generate_draft_from_rotation B (overnight) ok
+PASS  draftB l0_written false
+PASS  draftB rows > 0
+PASS  transition B draft->in_review
+PASS  transition B in_review->approved
+PASS  publish overnight version ok
+PASS  publish overnight created rows
+PASS  overnight L0 rows via night template
+PASS  cleanup residual_total
+PASS  cleanup contract version 1.3.x
+
+96 passed, 0 failed
+W6_RC=0
+=== W5 ===
+PASS  version 5.0.0
+PASS  wave5 enabled
+PASS  company WATHEFNI
+PASS  honesty publishing true
+PASS  honesty open_shifts true
+PASS  honesty draft_publish true
+PASS  honesty coverage_rules true
+PASS  honesty payroll false
+PASS  honesty leave false
+PASS  honesty attendance false
+PASS  honesty rotations false
+PASS  honesty pam_export false
+PASS  w4 honesty publishing false
+PASS  w3 honesty templates false
+PASS  shw5 synthetic key
+PASS  real phone not synth
+PASS  permission_matrix self_approval false
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  PERIOD_STATES complete
+PASS  VERSION_STATES complete
+PASS  day template
+PASS  overnight template
+PASS  weekly recurrence
+PASS  create period
+PASS  generate_draft ok
+PASS  draft_rows > 0
+PASS  l0_written false
+PASS  L0 unchanged after draft
+PASS  transition in_review
+PASS  transition approved
+PASS  review_diff ok
+PASS  coverage warn rule
+PASS  understaffed warning
+PASS  warn blocks_publish false
+PASS  coverage block rule
+PASS  block blocks_publish true
+PASS  publish blocked by coverage
+PASS  overnight coverage rule
+PASS  unresolved open shift
+PASS  coverage unresolved_open_shift
+PASS  publish ok
+PASS  published L0 with schedule metadata
+PASS  republish idempotent
+PASS  test lock acquired
+PASS  concurrent publish lock held
+PASS  create_draft_from_published
+PASS  publish second version
+PASS  rollback_to_version
+PASS  skipped_locked field present
+PASS  overnight open shift
+PASS  claim by A
+PASS  self-approval denied
+PASS  claim by B
+PASS  approve A wins
+PASS  second approve B rejected
+PASS  open shift for direct assign
+PASS  direct assign open shift
+PASS  gate_conflict without ack
+PASS  optional require_publish period
+PASS  manual L0 with optional period
+PASS  cleanup residual_total
+
+62 passed, 0 failed
+W5_RC=0
+=== W4 ===
+PASS  version 4.0.0
+PASS  wave4 enabled
+PASS  company WATHEFNI
+PASS  honesty templates true
+PASS  honesty recurring true
+PASS  honesty rotations false
+PASS  honesty publishing false
+PASS  honesty payroll false
+PASS  honesty leave false
+PASS  honesty attendance false
+PASS  honesty draft_publish false
+PASS  w3 honesty still templates false
+PASS  shw4 synthetic
+PASS  real phone not synth
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  same-day template
+PASS  overnight template
+PASS  split afternoon template
+PASS  fixed weekly recurrence
+PASS  six-on/one-off recurrence
+PASS  alternating day/night recurrence
+PASS  team-targeted recurrence
+PASS  split schedule second recurrence
+PASS  preview ok
+PASS  preview has newly_generated
+PASS  effective window present
+PASS  materialize weekly ok
+PASS  materialize created rows
+PASS  duplicate materialize idempotent
+PASS  unchanged after rematerialize
+PASS  test lock acquired
+PASS  concurrent materialize lock held
+PASS  alternating materialize ok
+PASS  overnight generated rows
+PASS  split PM materialize ok
+PASS  team materialize attempted
+PASS  six-on materialize ok
+PASS  one-off exception skip
+PASS  pause recurrence
+PASS  paused preview empty
+PASS  resume recurrence
+PASS  no historical generated for weekly (skip today)
+PASS  cancelled held on rematerialize
+PASS  cancelled does not return
+PASS  manual override detached class
+PASS  template edit ok
+PASS  template planning_version bumped
+PASS  end recurrence
+PASS  cleanup residual_total
+PASS  create_template present
+PASS  preview_recurrence present
+PASS  materialize_recurrence present
+PASS  app imports wave4
+
+54 passed, 0 failed
+W4_RC=0
+=== W3 UX ===
+PASS  version 3.1.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  SHW3B synthetic key
+PASS  965531 synthetic phone
+PASS  real phone not wave3 synth
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+43 passed, 0 failed
+W3_RC=0
+=== W1 ===
+      PASS  orphan restore audit event
+      PASS  beyond-end flagged audited
+      PASS  beyond-end never silent-deleted
+      PASS  beyond-end soft-cancelled
+      PASS  lifecycle blocks terminated
+      PASS  tenant isolation company mismatch
+
+    90 passed, 0 failed
+W1_RC=0
+=== W2 ===
+      PASS  no silent lifecycle cancel
+      PASS  leave recon flags without cancel
+      PASS  no silent leave cancel
+      PASS  recon acknowledge audited
+      PASS  recon cancel is audited soft-cancel
+      PASS  recon cancel sets cancelled
+      PASS  recon cancel reason code
+      PASS  wave2 honesty denies leave balance mutation
+      PASS  wave2 module no leave balance SQL
+      PASS  wave2 module no payroll money calc
+
+    82 passed, 0 failed
+W2_RC=0
+=== E360 ===
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+=== ONB ===
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+=== ATT ===
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+=== LEAVE ===
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+STAGING_REGRESSIONS_DONE

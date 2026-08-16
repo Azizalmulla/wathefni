@@ -1,0 +1,13 @@
+test_assessment_default_unused_and_lateral_null_without_selection (test_ranking_queue_contract.RankingQueueContractTests.test_assessment_default_unused_and_lateral_null_without_selection) ... ok
+test_assessment_lateral_uses_matching_selection_not_latest_any (test_ranking_queue_contract.RankingQueueContractTests.test_assessment_lateral_uses_matching_selection_not_latest_any) ... ok
+test_counters_reconcile_including_not_applicable (test_ranking_queue_contract.RankingQueueContractTests.test_counters_reconcile_including_not_applicable) ... ok
+test_matching_excludes_archived_and_terminals (test_ranking_queue_contract.RankingQueueContractTests.test_matching_excludes_archived_and_terminals) ... ok
+test_rankable_includes_not_applicable_not_hard_eligible (test_ranking_queue_contract.RankingQueueContractTests.test_rankable_includes_not_applicable_not_hard_eligible) ... ok
+test_restricted_held_not_rankable_but_counted (test_ranking_queue_contract.RankingQueueContractTests.test_restricted_held_not_rankable_but_counted) ... ok
+test_top_n_never_fills_with_unrankable (test_ranking_queue_contract.RankingQueueContractTests.test_top_n_never_fills_with_unrankable) ... ok
+test_visibility_clause_signature_documented (test_ranking_queue_contract.RankingQueueContractTests.test_visibility_clause_signature_documented) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.000s
+
+OK

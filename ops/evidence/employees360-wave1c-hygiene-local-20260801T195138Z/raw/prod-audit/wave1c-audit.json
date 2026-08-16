@@ -1,0 +1,2609 @@
+{
+  "stamp": "20260801T195444Z",
+  "mode": "read_only",
+  "company_code": "WATHEFNI",
+  "known_null_keys": [
+    "WATHEFNI-96597727743",
+    "WATHEFNI-96550252254"
+  ],
+  "known_orphan_key": "WATHEFNI-P0-DUP-1",
+  "database": {
+    "db": "wathefni",
+    "txn_ro": "on"
+  },
+  "employees_snapshot": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "***2254",
+      "email": "t***@gmail.com",
+      "name": "Talal Fadhli",
+      "employment_status": null,
+      "onboarding_status": "in_progress",
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "hire_date": "2026-05-12",
+      "start_date": null,
+      "created_at": "2026-05-12T20:43:01.670538+00:00",
+      "updated_at": "2026-06-09T19:17:43.087577+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "***3363",
+      "email": "f***@gmail.com",
+      "name": "Fouad Burhamad",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "hire_date": "2026-05-07",
+      "start_date": null,
+      "created_at": "2026-05-07T11:44:31.945877+00:00",
+      "updated_at": "2026-07-12T15:46:31.905837+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "***7743",
+      "email": "",
+      "name": "mohammad alqattan",
+      "employment_status": null,
+      "onboarding_status": "in_progress",
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "hire_date": "2026-05-07",
+      "start_date": null,
+      "created_at": "2026-05-07T18:54:27.277275+00:00",
+      "updated_at": "2026-06-09T14:40:54.108887+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "***1617",
+      "email": "b***@gmail.com",
+      "name": "Brian Saleh",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "app_key": null,
+      "hire_date": null,
+      "start_date": null,
+      "created_at": "2026-07-13T19:21:39.853058+00:00",
+      "updated_at": "2026-07-13T19:22:41.486318+00:00"
+    }
+  ],
+  "null_status_classifications": [
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "classification": "null_should_be_active",
+      "proposed_status": "active",
+      "confidence": "high",
+      "reasons": [
+        "employment_status IS NULL",
+        "hire-linked via app_key=96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "onboarding_status='in_progress'",
+        "attendance_records=14",
+        "shift_assignments=7",
+        "leave_requests=1",
+        "employee_messages=12",
+        "no employee_status_changes / left markers found",
+        "runtime already coerces null\u2192active via coalesce/canonical helpers"
+      ],
+      "evidence": {
+        "employee": {
+          "employee_key": "WATHEFNI-96597727743",
+          "company_code": "WATHEFNI",
+          "phone_redacted": "***7743",
+          "email_redacted": "",
+          "name": "mohammad alqattan",
+          "position_title": "Marketing Specialist",
+          "employment_status": null,
+          "onboarding_status": "in_progress",
+          "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+          "hire_date": "2026-05-07",
+          "start_date": null,
+          "created_at": "2026-05-07T18:54:27.277275+00:00",
+          "updated_at": "2026-06-09T14:40:54.108887+00:00",
+          "documents_pending": 2,
+          "documents_complete": 2,
+          "compliance_status": "pending",
+          "profile_keys": [
+            "app_key",
+            "company_code",
+            "compliance_status",
+            "created_from",
+            "documents_complete",
+            "documents_pending",
+            "email",
+            "employee_key",
+            "hire_date",
+            "name",
+            "onboarding_status",
+            "phone",
+            "position_title",
+            "start_date",
+            "updated_at"
+          ],
+          "raw_json_keys": [
+            "app_key",
+            "company_code",
+            "compliance_status",
+            "created_from",
+            "documents_complete",
+            "documents_pending",
+            "email",
+            "employee_key",
+            "hire_date",
+            "name",
+            "onboarding_status",
+            "phone",
+            "position_title",
+            "start_date",
+            "updated_at"
+          ]
+        },
+        "applications": [
+          {
+            "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+            "status": "hired",
+            "company_code": "WATHEFNI",
+            "phone": "***7743",
+            "created_at": "2026-05-03",
+            "updated_at": "2026-05-03"
+          }
+        ],
+        "candidates_by_phone": [
+          {
+            "phone": "***7743",
+            "email": "m***@gmail.com",
+            "name": "MOHAMMAD QATTAN",
+            "created_at": "2026-05-03T15:12:57.373955+00:00"
+          }
+        ],
+        "onboarding_items": {
+          "present": true,
+          "count": 6,
+          "samples": [
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "item_id": "civil_id",
+              "label": "Civil ID (front + back)",
+              "item_type": "document",
+              "required": true,
+              "document_type": "civil_id",
+              "status": "received",
+              "value": "Document shared: civil id.png",
+              "local_path": "/root/.openclaw/media/inbound/civil_id---d97f1d65-e331-43bb-9fc3-d56e2eb29923.png",
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"civil_id\", \"type\": \"document\", \"label\": \"Civil ID (front + back)\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u0627\\u0644\\u0628\\u0637\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0645\\u062f\\u0646\\u064a\\u0629 (\\u0623\\u0645\\u0627\\u0645 \\u0648\\u062e\\u0644\\u0641)\", \"required\": true, \"updated_at\": \"2026-05-07T18:54:27Z\", \"received_at\": \"2026-05-07T19:58:32Z\", \"instructions\": \"Please send\u2026",
+              "created_at": "2026-05-07T18:54:27.277275+00:00",
+              "updated_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_provider": "local",
+              "storage_object_key": "data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png",
+              "external_file_id": null,
+              "storage_url": "local://data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png",
+              "content_sha256": "b061c8b10034995d1476d9390696c608e4d10fafd6334ea92c2e5e67e7a4793b",
+              "mime_type": "image/png",
+              "stored_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_status": "stored",
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "item_id": "medical",
+              "label": "Medical fitness certificate",
+              "item_type": "document",
+              "required": false,
+              "document_type": "medical",
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"medical\", \"type\": \"document\", \"label\": \"Medical fitness certificate\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u0634\\u0647\\u0627\\u062f\\u0629 \\u0627\\u0644\\u0644\\u064a\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0637\\u0628\\u064a\\u0629\", \"required\": false, \"updated_at\": \"2026-05-07T18:54:27Z\", \"instructions\": \"Please send your medical fitness certificate (if you have one).\", \"docume\u2026",
+              "created_at": "2026-05-07T18:54:27.277275+00:00",
+              "updated_at": "2026-05-07T18:54:27.277275+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "item_id": "education_cert",
+              "label": "Educational certificates",
+              "item_type": "document",
+              "required": false,
+              "document_type": null,
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"education_cert\", \"type\": \"document\", \"label\": \"Educational certificates\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u0627\\u0644\\u0634\\u0647\\u0627\\u062f\\u0627\\u062a \\u0627\\u0644\\u062f\\u0631\\u0627\\u0633\\u064a\\u0629\", \"required\": false, \"updated_at\": \"2026-05-07T18:54:27Z\", \"instructions\": \"Please send your highest educational certificate or degree.\", \"document_type\": nul\u2026",
+              "created_at": "2026-05-07T18:54:27.277275+00:00",
+              "updated_at": "2026-05-07T18:54:27.277275+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "item_id": "bank_details",
+              "label": "Bank account (IBAN)",
+              "item_type": "text",
+              "required": true,
+              "document_type": null,
+              "status": "received",
+              "value": "KW10NBOK0000000000001003130140",
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"bank_details\", \"type\": \"text\", \"label\": \"Bank account (IBAN)\", \"accept\": [\"text\", \"image\"], \"status\": \"pending\", \"label_ar\": \"\\u062d\\u0633\\u0627\\u0628 \\u0627\\u0644\\u0628\\u0646\\u0643 (IBAN)\", \"required\": true, \"updated_at\": \"2026-05-07T18:54:27Z\", \"received_at\": \"2026-05-07T19:57:34Z\", \"instructions\": \"Please send your bank name and IBAN number.\", \"document_type\": null, \"extracts_expiry\": f\u2026",
+              "created_at": "2026-05-07T18:54:27.277275+00:00",
+              "updated_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_provider": "metadata_only",
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_status": "not_required",
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "item_id": "personal_photo",
+              "label": "Personal photo",
+              "item_type": "photo",
+              "required": true,
+              "document_type": null,
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"personal_photo\", \"type\": \"photo\", \"label\": \"Personal photo\", \"accept\": [\"image\"], \"status\": \"pending\", \"label_ar\": \"\\u0635\\u0648\\u0631\\u0629 \\u0634\\u062e\\u0635\\u064a\\u0629\", \"required\": true, \"updated_at\": \"2026-05-07T18:54:27Z\", \"instructions\": \"Please send a recent personal photo (passport-style or professional).\", \"document_type\": null, \"extracts_expiry\": false, \"instructions_ar\": \"\\u06\u2026",
+              "created_at": "2026-05-07T18:54:27.277275+00:00",
+              "updated_at": "2026-05-14T19:08:19.351814+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 4,
+              "last_reminded_at": "2026-05-14T19:08:18.769610+00:00",
+              "escalated_at": "2026-05-13T18:08:28.467756+00:00",
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            }
+          ]
+        },
+        "compliance_documents": {
+          "present": true,
+          "count": 5,
+          "samples": [
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "document_type": "work_permit",
+              "label": "Work Permit",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "PAM",
+              "notes": "Issued by Public Authority for Manpower. Tied to residency and employer sponsorship.",
+              "raw_json": "{\"label\": \"Work Permit\", \"notes\": \"Issued by Public Authority for Manpower. Tied to residency and employer sponsorship.\", \"status\": \"missing\", \"label_ar\": \"\\u0625\\u0630\\u0646 \\u0627\\u0644\\u0639\\u0645\\u0644\", \"required\": true, \"authority\": \"PAM\", \"updated_at\": \"2026-05-07T18:54:27Z\", \"expiry_date\": null, \"document_type\": \"work_permit\", \"last_reminded\": null, \"reminder_count\": 0, \"days_until_expiry\"\u2026",
+              "updated_at": "2026-05-07T18:54:27.277275+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "document_type": "passport",
+              "label": "Passport",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "Embassy / Home Country",
+              "notes": "Employee responsibility. Must have 6+ months validity for residency renewal. Employer tracks for visa purposes.",
+              "raw_json": "{\"label\": \"Passport\", \"notes\": \"Employee responsibility. Must have 6+ months validity for residency renewal. Employer tracks for visa purposes.\", \"status\": \"missing\", \"label_ar\": \"\\u062c\\u0648\\u0627\\u0632 \\u0627\\u0644\\u0633\\u0641\\u0631\", \"required\": true, \"authority\": \"Embassy / Home Country\", \"updated_at\": \"2026-05-07T18:54:27Z\", \"expiry_date\": null, \"document_type\": \"passport\", \"last_reminded\": \u2026",
+              "updated_at": "2026-05-07T18:54:27.277275+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "document_type": "medical",
+              "label": "Medical Fitness Certificate",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "MOH",
+              "notes": "Required for initial residency and some renewals. Done at designated MOH clinics.",
+              "raw_json": "{\"label\": \"Medical Fitness Certificate\", \"notes\": \"Required for initial residency and some renewals. Done at designated MOH clinics.\", \"status\": \"missing\", \"label_ar\": \"\\u0634\\u0647\\u0627\\u062f\\u0629 \\u0627\\u0644\\u0644\\u064a\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0637\\u0628\\u064a\\u0629\", \"required\": true, \"authority\": \"MOH\", \"updated_at\": \"2026-05-07T18:54:27Z\", \"expiry_date\": null, \"document_type\": \"med\u2026",
+              "updated_at": "2026-05-07T18:54:27.277275+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "document_type": "civil_id",
+              "label": "Civil ID",
+              "status": "valid",
+              "expiry_date": "2030-10-09",
+              "days_until_expiry": 1606,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "PACI",
+              "notes": "Document shared: civil id.png",
+              "raw_json": "{\"label\": \"Civil ID (front + back)\", \"value\": \"Document shared: civil id.png\", \"item_id\": \"civil_id\", \"storage\": {\"ok\": true, \"metadata\": {\"local_path\": \"/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png\", \"company_code\": \"WATHEFNI\"}, \"provider\": \"local\", \"drive_url\": null, \"mime_type\": \"image/png\", \"stored_at\": \"\u2026",
+              "updated_at": "2026-05-17T15:08:37.836315+00:00",
+              "document_number": "300111601145",
+              "issued_date": null,
+              "extracted_at": "2026-05-09T16:46:15.522137+00:00",
+              "extraction_status": "extracted",
+              "extraction_error": null,
+              "extraction_confidence": 0.99,
+              "last_checked_at": "2026-05-17T15:08:37.836315+00:00",
+              "last_alerted_at": null,
+              "warning_days": 30,
+              "renewal_status": null,
+              "severity": "ok",
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "document_type": "residency",
+              "label": "Residency Permit",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "MOI",
+              "notes": "Article 18 (private sector) or Article 20 (dependent). Late renewal incurs 2 KD/day fine. Renewal requires valid passport, medical, and employer sponsorship.",
+              "raw_json": "{\"label\": \"Residency Permit\", \"notes\": \"Article 18 (private sector) or Article 20 (dependent). Late renewal incurs 2 KD/day fine. Renewal requires valid passport, medical, and employer sponsorship.\", \"status\": \"missing\", \"label_ar\": \"\\u0627\\u0644\\u0625\\u0642\\u0627\\u0645\\u0629\", \"required\": true, \"authority\": \"MOI\", \"updated_at\": \"2026-05-07T18:54:27Z\", \"expiry_date\": null, \"document_type\": \"reside\u2026",
+              "updated_at": "2026-05-07T18:54:27.277275+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            }
+          ]
+        },
+        "attendance_records": {
+          "present": true,
+          "count": 14,
+          "samples": [
+            {
+              "attendance_id": "fe8d3982-b0f2-44c4-bb19-c52c8db81164",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_id": null,
+              "attendance_date": "2026-06-07",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-07T08:58:00+00:00",
+              "check_out_at": "2026-06-07T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "fcc70375-9f63-4466-8ad1-1eeb1a71ce37",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_id": null,
+              "attendance_date": "2026-05-24",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-05-24T08:58:00+00:00",
+              "check_out_at": "2026-05-24T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "f8370ace-b233-4480-b985-f594c1e7f442",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_id": null,
+              "attendance_date": "2026-06-02",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-02T08:58:00+00:00",
+              "check_out_at": "2026-06-02T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "e8d24ff4-bf32-4064-9032-69cf510ca265",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_id": null,
+              "attendance_date": "2026-06-09",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-09T08:58:00+00:00",
+              "check_out_at": "2026-06-09T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "ca48a0fb-b054-4a4d-9420-17d86e6de3ab",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_id": null,
+              "attendance_date": "2026-06-04",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-04T08:58:00+00:00",
+              "check_out_at": "2026-06-04T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            }
+          ]
+        },
+        "leave_requests": {
+          "present": true,
+          "count": 1,
+          "samples": [
+            {
+              "leave_id": "51cd940f-a04b-4ad1-9a6a-43e3da59a222",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "start_date": "2026-06-12",
+              "end_date": "2026-06-12",
+              "leave_type": "sick",
+              "status": "rejected",
+              "reason": "Medical appointment",
+              "decision_note": null,
+              "source_text": null,
+              "requested_by_phone": null,
+              "decided_by_phone": "96599338566",
+              "requested_at": "2026-06-09T23:09:43.663432+00:00",
+              "decided_at": "2026-07-23T19:32:30.890101+00:00",
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-07-23T19:32:30.890101+00:00"
+            }
+          ]
+        },
+        "shift_assignments": {
+          "present": true,
+          "count": 7,
+          "samples": [
+            {
+              "shift_id": "e3cadd8e-1790-447f-a68b-e45a04bb4075",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_date": "2026-06-11",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": null,
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "shift_id": "c6e116e2-9981-4ebf-93f5-a1c5bf981ad5",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_date": "2026-06-16",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": "2026-06-16T03:17:19.947542+00:00",
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-16T03:17:19.947542+00:00"
+            },
+            {
+              "shift_id": "b85842f8-09aa-4a9d-9eda-4be14b4ac9de",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_date": "2026-05-11",
+              "start_time": "08:00:00",
+              "end_time": "15:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": null,
+              "location": null,
+              "status": "scheduled",
+              "notes": null,
+              "source_text": "Cancel Mohammad\u2019s shift tomorrow and schedule him 8am to 3pm",
+              "metadata": {
+                "action": {
+                  "date": "2026-05-11",
+                  "employee": {
+                    "name": "mohammad alqattan",
+                    "email": "",
+                    "phone": "96597727743",
+                    "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+                    "profile": {
+                      "name": "mohammad alqattan",
+                      "email": "",
+                      "phone": "96597727743",
+                      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+                      "hire_date": "2026-05-07",
+                      "start_date": null,
+                      "updated_at": "2026-05-07T18:54:27Z",
+                      "company_code": "WATHEFNI",
+                      "created_from": "hired_application",
+                      "employee_key": "WATHEFNI-96597727743",
+                      "position_title": "Marketing Specialist",
+                      "compliance_status": "pending",
+                      "documents_pending": 4,
+                      "onboarding_status": "not_started",
+                      "documents_complete": 0
+                    },
+                    "raw_json": {
+                      "name": "mohammad alqattan",
+                      "email": "",
+                      "phone": "96597727743",
+                      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+                      "hire_date": "2026-05-07",
+                      "start_date": null,
+                      "updated_at": "2026-05-07T18:54:27Z",
+                      "company_code": "WATHEFNI",
+                      "created_from": "hired_application",
+                      "employee_key": "WATHEFNI-96597727743",
+                      "position_title": "Marketing Specialist",
+                      "compliance_status": "pending",
+                      "documents_pending": 4,
+                      "onboarding_status": "not_started",
+                      "documents_complete": 0
+                    },
+                    "hire_date": "2026-05-07",
+                    "created_at": "2026-05-07T18:54:27.277275+00:00",
+                    "start_date": null,
+                    "updated_at": "2026-05-10T16:46:38.612258+00:00",
+                    "company_code": "WATHEFNI",
+                    "employee_key": "WATHEFNI-96597727743",
+                    "position_title": "Marketing Specialist",
+                    "compliance_status": "pending",
+                    "documents_pending": 2,
+                    "onboarding_status": "in_progress",
+                    "documents_complete": 2
+                  },
+                  "end_date": "2026-05-11",
+                  "end_time": "15:00",
+                  "start_date": "2026-05-11",
+                  "start_time": "08:00",
+                  "action_type": "replace_conflicting_shift_assignment",
+                  "prompt_text": "Cancel Mohammad\u2019s shift tomorrow and schedule him 8am to 3pm",
+                  "replace_mode": "explicit_cancel_and_schedule",
+                  "subject_name": "mohammad alqattan",
+                  "subject_type": "shift",
+                  "subject_phone": "96597727743",
+                  "allow_create_without_cancel": true
+                },
+                "source": "hr_whatsapp"
+              },
+              "reminder_sent_at": "2026-05-11T02:17:16.147116+00:00",
+              "created_by_phone": "96599338566",
+              "created_at": "2026-05-10T19:28:34.805820+00:00",
+              "updated_at": "2026-05-11T02:17:16.147116+00:00"
+            },
+            {
+              "shift_id": "4b435014-b22b-436f-b411-1240152fe669",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_date": "2026-06-14",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": null,
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "shift_id": "3de94a86-e61c-498d-9a28-56d50d452613",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "employee_phone": "96597727743",
+              "employee_name": "mohammad alqattan",
+              "shift_date": "2026-05-11",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": null,
+              "location": null,
+              "status": "cancelled",
+              "notes": null,
+              "source_text": "Yes, schedule Fouad Burhamad and mohammad alqattan for work shifts tomorrow from 9 AM to 5 PM.",
+              "metadata": {
+                "action": {
+                  "date": "2026-05-11",
+                  "role": "",
+                  "notes": "",
+                  "query": "Yes, schedule Fouad Burhamad and mohammad alqattan for work shifts tomorrow from 9 AM to 5 PM.",
+                  "end_date": "",
+                  "end_time": "17:00",
+                  "location": "",
+                  "employees": [
+                    "Fouad Burhamad",
+                    "mohammad alqattan"
+                  ],
+                  "planned_by": "llm_planner",
+                  "start_date": "",
+                  "start_time": "09:00",
+                  "action_type": "create_shift_assignment",
+                  "assignments": [],
+                  "prompt_text": "Yes, schedule Fouad Burhamad and mohammad alqattan for work shifts tomorrow from 9 AM to 5 PM.",
+                  "subject_name": null,
+                  "subject_type": "shift",
+                  "subject_phone": null,
+                  "planner_reason": "responses_tool_call",
+                  "planner_confidence": 0.9
+                },
+                "source": "hr_whatsapp"
+              },
+              "reminder_sent_at": null,
+              "created_by_phone": "96599338566",
+              "created_at": "2026-05-10T15:19:10.487054+00:00",
+              "updated_at": "2026-05-10T19:21:29.128002+00:00"
+            }
+          ]
+        },
+        "employee_messages": {
+          "present": true,
+          "count": 12,
+          "samples": [
+            {
+              "message_id": "f4cb9a38-8c24-476a-8a01-c661b999f63a",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96597727743",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Monday, 15 June 2026",
+                "shift_time": "09:00",
+                "company_name": "Wathefni",
+                "employee_name": "mohammad alqattan"
+              },
+              "body_preview": "Reminder: your shift is on Monday, 15 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-15T03:17:38.366544+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": "auto:shift:shift_reminder:WATHEFNI-96597727743:f4c6ccb38ffe:2969155",
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-15T03:17:38.357522+00:00",
+              "updated_at": "2026-06-15T03:17:38.366709+00:00"
+            },
+            {
+              "message_id": "f0df4c7a-c0a3-401a-9709-2354178241c4",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96597727743",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Sunday, 14 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "mohammad alqattan"
+              },
+              "body_preview": "Reminder: your shift is on Sunday, 14 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-14T04:17:18.459823+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-14T04:17:18.451484+00:00",
+              "updated_at": "2026-06-14T04:17:18.460063+00:00"
+            },
+            {
+              "message_id": "e868a16c-f52c-4704-9dcc-dcffe3763028",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96597727743",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Tuesday, 16 June 2026",
+                "shift_time": "09:00",
+                "company_name": "Wathefni",
+                "employee_name": "mohammad alqattan"
+              },
+              "body_preview": "Reminder: your shift is on Tuesday, 16 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-16T03:17:19.942938+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": "auto:shift:shift_reminder:WATHEFNI-96597727743:d324cbde0b8c:2969299",
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-16T03:17:19.928154+00:00",
+              "updated_at": "2026-06-16T03:17:19.943247+00:00"
+            },
+            {
+              "message_id": "e1d2048a-1086-417c-b7b0-9e5ad0189dd2",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96597727743",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Thursday, 11 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "mohammad alqattan"
+              },
+              "body_preview": "Reminder: your shift is on Thursday, 11 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-11T04:17:29.509532+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-11T04:17:29.499079+00:00",
+              "updated_at": "2026-06-11T04:17:29.509798+00:00"
+            },
+            {
+              "message_id": "da18a06d-9dcc-4a48-b67f-67cbddc7d197",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96597727743",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Wednesday, 10 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "mohammad alqattan"
+              },
+              "body_preview": "Reminder: your shift is on Wednesday, 10 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-10T05:18:18.956390+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-10T05:18:18.949457+00:00",
+              "updated_at": "2026-06-10T05:18:18.956501+00:00"
+            }
+          ]
+        },
+        "employee_status_changes": {
+          "present": true,
+          "count": 0,
+          "samples": []
+        },
+        "employee_documents": {
+          "present": true,
+          "count": 2,
+          "samples": [
+            {
+              "document_id": "54857f6b-14e0-4582-ba3e-9a39a4848108",
+              "employee_key": "WATHEFNI-96597727743",
+              "phone": "96597727743",
+              "company_code": "WATHEFNI",
+              "item_id": "civil_id",
+              "document_type": "civil_id",
+              "filename": "civil_id---d97f1d65-e331-43bb-9fc3-d56e2eb29923.png",
+              "local_path": "/root/.openclaw/media/inbound/civil_id---d97f1d65-e331-43bb-9fc3-d56e2eb29923.png",
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": "2030-10-09",
+              "status": "received",
+              "metadata": {
+                "label": "Civil ID (front + back)",
+                "value": "Document shared: civil id.png",
+                "item_id": "civil_id",
+                "storage": {
+                  "ok": true,
+                  "metadata": {
+                    "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png",
+                    "company_code": "WATHEFNI"
+                  },
+                  "provider": "local",
+                  "drive_url": null,
+                  "mime_type": "image/png",
+                  "stored_at": "2026-05-08T22:57:23Z",
+                  "storage_url": "local://data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png",
+                  "drive_file_id": null,
+                  "content_sha256": "b061c8b10034995d1476d9390696c608e4d10fafd6334ea92c2e5e67e7a4793b",
+                  "storage_status": "stored",
+                  "external_file_id": null,
+                  "storage_object_key": "data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png"
+                },
+                "extraction": {
+                  "reason": "Kuwait Civil ID card clearly visible with Civil ID number, name, nationality, birth date, and expiry date.",
+                  "full_name": "MOHAMMAD SALEH ABDULWAHAB ALQATTAN",
+                  "confidence": 0.99,
+                  "expiry_date": "2030-10-09",
+                  "issued_date": null,
+                  "nationality": "KWT",
+                  "date_of_birth": "2000-11-16",
+                  "document_type": "civil_id",
+                  "document_number": "300111601145",
+                  "extraction_status": "extracted",
+                  "expiry_date_parsed": "2030-10-09",
+                  "issued_date_parsed": null,
+                  "date_of_birth_parsed": "2000-11-16"
+                },
+                "received_at": "2026-05-08T22:57:23Z"
+              },
+              "raw_json": "{\"label\": \"Civil ID (front + back)\", \"value\": \"Document shared: civil id.png\", \"item_id\": \"civil_id\", \"storage\": {\"ok\": true, \"metadata\": {\"local_path\": \"/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png\", \"company_code\": \"WATHEFNI\"}, \"provider\": \"local\", \"drive_url\": null, \"mime_type\": \"image/png\", \"stored_at\": \"\u2026",
+              "received_at": "2026-05-08",
+              "created_at": "2026-05-08T22:57:23.632206+00:00",
+              "updated_at": "2026-05-09T16:46:15.522137+00:00",
+              "storage_provider": "local",
+              "storage_object_key": "data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png",
+              "external_file_id": null,
+              "storage_url": "local://data/companies/WATHEFNI/employees/96597727743/documents/civil_id/civil_id-b061c8b10034.png",
+              "content_sha256": "b061c8b10034995d1476d9390696c608e4d10fafd6334ea92c2e5e67e7a4793b",
+              "mime_type": "image/png",
+              "stored_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_status": "stored",
+              "storage_error": null,
+              "document_number": "300111601145",
+              "issued_at": null,
+              "extracted_at": "2026-05-09T16:46:15.522137+00:00",
+              "extraction_status": "extracted",
+              "extraction_error": null,
+              "extraction_confidence": 0.99
+            },
+            {
+              "document_id": "4a85ffe9-0260-4c7e-9a47-93f6e4555197",
+              "employee_key": "WATHEFNI-96597727743",
+              "phone": "96597727743",
+              "company_code": "WATHEFNI",
+              "item_id": "bank_details",
+              "document_type": "bank_details",
+              "filename": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "status": "received",
+              "metadata": {
+                "label": "Bank account (IBAN)",
+                "value": "KW10NBOK0000000000001003130140",
+                "item_id": "bank_details",
+                "storage": {
+                  "ok": true,
+                  "metadata": {},
+                  "provider": "metadata_only",
+                  "storage_status": "not_required"
+                },
+                "received_at": "2026-05-08T22:57:23Z"
+              },
+              "raw_json": {
+                "label": "Bank account (IBAN)",
+                "value": "KW10NBOK0000000000001003130140",
+                "item_id": "bank_details",
+                "storage": {
+                  "ok": true,
+                  "metadata": {},
+                  "provider": "metadata_only",
+                  "storage_status": "not_required"
+                },
+                "received_at": "2026-05-08T22:57:23Z"
+              },
+              "received_at": "2026-05-08",
+              "created_at": "2026-05-08T22:57:23.632206+00:00",
+              "updated_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_provider": "metadata_only",
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": "2026-05-08T22:57:23.632206+00:00",
+              "storage_status": "not_required",
+              "storage_error": null,
+              "document_number": null,
+              "issued_at": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null
+            }
+          ]
+        },
+        "file_registry": {
+          "present": true,
+          "count": 0,
+          "samples": [],
+          "note": "no employee_key"
+        },
+        "hr_tasks": {
+          "present": true,
+          "count": 1,
+          "samples": [
+            {
+              "task_id": "aa1c4c6f-cdd4-4570-973c-367eeff36cae",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96597727743",
+              "task_type": "delivery_failed",
+              "source": "leave_decision",
+              "title": "Couldn't reach employee: Leave decision",
+              "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+              "status": "open",
+              "priority": "high",
+              "related_message_id": "910f44c8-127a-492d-bafe-4e6410a149be",
+              "metadata": {
+                "flow": "leave_decision",
+                "template_key": "leave_request_rejected",
+                "attempt_reasons": [
+                  "session:missing_candidate_conversation_id",
+                  "template:template_disabled",
+                  "email:no_employee_email"
+                ]
+              },
+              "resolved_by_phone": null,
+              "resolved_at": null,
+              "created_at": "2026-07-23T19:32:30.917583+00:00",
+              "updated_at": "2026-07-23T19:32:30.917583+00:00",
+              "related_invite_id": null,
+              "assigned_to_user_id": null
+            }
+          ]
+        },
+        "audit_hits_count": 0,
+        "audit_hits": []
+      }
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "classification": "null_should_be_active",
+      "proposed_status": "active",
+      "confidence": "high",
+      "reasons": [
+        "employment_status IS NULL",
+        "hire-linked via app_key=96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "onboarding_status='in_progress'",
+        "attendance_records=14",
+        "shift_assignments=5",
+        "employee_messages=11",
+        "no employee_status_changes / left markers found",
+        "runtime already coerces null\u2192active via coalesce/canonical helpers"
+      ],
+      "evidence": {
+        "employee": {
+          "employee_key": "WATHEFNI-96550252254",
+          "company_code": "WATHEFNI",
+          "phone_redacted": "***2254",
+          "email_redacted": "t***@gmail.com",
+          "name": "Talal Fadhli",
+          "position_title": "Social Media Manager",
+          "employment_status": null,
+          "onboarding_status": "in_progress",
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "hire_date": "2026-05-12",
+          "start_date": null,
+          "created_at": "2026-05-12T20:43:01.670538+00:00",
+          "updated_at": "2026-06-09T19:17:43.087577+00:00",
+          "documents_pending": 4,
+          "documents_complete": 0,
+          "compliance_status": "pending",
+          "profile_keys": [
+            "app_key",
+            "company_code",
+            "compliance_status",
+            "created_from",
+            "documents_complete",
+            "documents_pending",
+            "email",
+            "employee_key",
+            "hire_date",
+            "name",
+            "onboarding_status",
+            "phone",
+            "position_title",
+            "start_date",
+            "updated_at"
+          ],
+          "raw_json_keys": [
+            "app_key",
+            "company_code",
+            "compliance_status",
+            "created_from",
+            "documents_complete",
+            "documents_pending",
+            "email",
+            "employee_key",
+            "hire_date",
+            "name",
+            "onboarding_status",
+            "phone",
+            "position_title",
+            "start_date",
+            "updated_at"
+          ]
+        },
+        "applications": [
+          {
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "status": "hired",
+            "company_code": "WATHEFNI",
+            "phone": "***2254",
+            "created_at": "2026-05-04",
+            "updated_at": "2026-05-12"
+          }
+        ],
+        "candidates_by_phone": [
+          {
+            "phone": "***2254",
+            "email": "t***@gmail.com",
+            "name": "Talal Fadhli",
+            "created_at": "2026-05-04T13:29:20.836755+00:00"
+          }
+        ],
+        "onboarding_items": {
+          "present": true,
+          "count": 6,
+          "samples": [
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "item_id": "civil_id",
+              "label": "Civil ID (front + back)",
+              "item_type": "document",
+              "required": true,
+              "document_type": "civil_id",
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"civil_id\", \"type\": \"document\", \"label\": \"Civil ID (front + back)\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u0627\\u0644\\u0628\\u0637\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0645\\u062f\\u0646\\u064a\\u0629 (\\u0623\\u0645\\u0627\\u0645 \\u0648\\u062e\\u0644\\u0641)\", \"required\": true, \"updated_at\": \"2026-05-12T20:43:01Z\", \"instructions\": \"Please send a clear photo of your Civil ID \\u2014 \u2026",
+              "created_at": "2026-05-12T20:43:01.670538+00:00",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "item_id": "passport",
+              "label": "Passport (photo page)",
+              "item_type": "document",
+              "required": true,
+              "document_type": "passport",
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"passport\", \"type\": \"document\", \"label\": \"Passport (photo page)\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u062c\\u0648\\u0627\\u0632 \\u0627\\u0644\\u0633\\u0641\\u0631 (\\u0635\\u0641\\u062d\\u0629 \\u0627\\u0644\\u0635\\u0648\\u0631\\u0629)\", \"required\": true, \"updated_at\": \"2026-05-12T20:43:01Z\", \"instructions\": \"Please send a clear photo of your passport's photo page.\", \"document_t\u2026",
+              "created_at": "2026-05-12T20:43:01.670538+00:00",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "item_id": "bank_details",
+              "label": "Bank account (IBAN)",
+              "item_type": "text",
+              "required": true,
+              "document_type": null,
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"bank_details\", \"type\": \"text\", \"label\": \"Bank account (IBAN)\", \"accept\": [\"text\", \"image\"], \"status\": \"pending\", \"label_ar\": \"\\u062d\\u0633\\u0627\\u0628 \\u0627\\u0644\\u0628\\u0646\\u0643 (IBAN)\", \"required\": true, \"updated_at\": \"2026-05-12T20:43:01Z\", \"instructions\": \"Please send your bank name and IBAN number.\", \"document_type\": null, \"extracts_expiry\": false, \"instructions_ar\": \"\\u0623\\u0631\\\u2026",
+              "created_at": "2026-05-12T20:43:01.670538+00:00",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "item_id": "medical",
+              "label": "Medical fitness certificate",
+              "item_type": "document",
+              "required": false,
+              "document_type": "medical",
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"medical\", \"type\": \"document\", \"label\": \"Medical fitness certificate\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u0634\\u0647\\u0627\\u062f\\u0629 \\u0627\\u0644\\u0644\\u064a\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0637\\u0628\\u064a\\u0629\", \"required\": false, \"updated_at\": \"2026-05-12T20:43:01Z\", \"instructions\": \"Please send your medical fitness certificate (if you have one).\", \"docume\u2026",
+              "created_at": "2026-05-12T20:43:01.670538+00:00",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "item_id": "education_cert",
+              "label": "Educational certificates",
+              "item_type": "document",
+              "required": false,
+              "document_type": null,
+              "status": "pending",
+              "value": null,
+              "local_path": null,
+              "drive_file_id": null,
+              "drive_url": null,
+              "expiry_date": null,
+              "raw_json": "{\"id\": \"education_cert\", \"type\": \"document\", \"label\": \"Educational certificates\", \"accept\": [\"image\", \"pdf\"], \"status\": \"pending\", \"label_ar\": \"\\u0627\\u0644\\u0634\\u0647\\u0627\\u062f\\u0627\\u062a \\u0627\\u0644\\u062f\\u0631\\u0627\\u0633\\u064a\\u0629\", \"required\": false, \"updated_at\": \"2026-05-12T20:43:01Z\", \"instructions\": \"Please send your highest educational certificate or degree.\", \"document_type\": nul\u2026",
+              "created_at": "2026-05-12T20:43:01.670538+00:00",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "storage_provider": null,
+              "storage_object_key": null,
+              "external_file_id": null,
+              "storage_url": null,
+              "content_sha256": null,
+              "mime_type": null,
+              "stored_at": null,
+              "storage_status": null,
+              "storage_error": null,
+              "reminder_count": 0,
+              "last_reminded_at": null,
+              "escalated_at": null,
+              "category": null,
+              "owner": null,
+              "sort_order": null
+            }
+          ]
+        },
+        "compliance_documents": {
+          "present": true,
+          "count": 5,
+          "samples": [
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "document_type": "residency",
+              "label": "Residency Permit",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "MOI",
+              "notes": "Article 18 (private sector) or Article 20 (dependent). Late renewal incurs 2 KD/day fine. Renewal requires valid passport, medical, and employer sponsorship.",
+              "raw_json": "{\"label\": \"Residency Permit\", \"notes\": \"Article 18 (private sector) or Article 20 (dependent). Late renewal incurs 2 KD/day fine. Renewal requires valid passport, medical, and employer sponsorship.\", \"status\": \"missing\", \"label_ar\": \"\\u0627\\u0644\\u0625\\u0642\\u0627\\u0645\\u0629\", \"required\": true, \"authority\": \"MOI\", \"updated_at\": \"2026-05-12T20:43:01Z\", \"expiry_date\": null, \"document_type\": \"reside\u2026",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "document_type": "work_permit",
+              "label": "Work Permit",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "PAM",
+              "notes": "Issued by Public Authority for Manpower. Tied to residency and employer sponsorship.",
+              "raw_json": "{\"label\": \"Work Permit\", \"notes\": \"Issued by Public Authority for Manpower. Tied to residency and employer sponsorship.\", \"status\": \"missing\", \"label_ar\": \"\\u0625\\u0630\\u0646 \\u0627\\u0644\\u0639\\u0645\\u0644\", \"required\": true, \"authority\": \"PAM\", \"updated_at\": \"2026-05-12T20:43:01Z\", \"expiry_date\": null, \"document_type\": \"work_permit\", \"last_reminded\": null, \"reminder_count\": 0, \"days_until_expiry\"\u2026",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "document_type": "passport",
+              "label": "Passport",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "Embassy / Home Country",
+              "notes": "Employee responsibility. Must have 6+ months validity for residency renewal. Employer tracks for visa purposes.",
+              "raw_json": "{\"label\": \"Passport\", \"notes\": \"Employee responsibility. Must have 6+ months validity for residency renewal. Employer tracks for visa purposes.\", \"status\": \"missing\", \"label_ar\": \"\\u062c\\u0648\\u0627\\u0632 \\u0627\\u0644\\u0633\\u0641\\u0631\", \"required\": true, \"authority\": \"Embassy / Home Country\", \"updated_at\": \"2026-05-12T20:43:01Z\", \"expiry_date\": null, \"document_type\": \"passport\", \"last_reminded\": \u2026",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "document_type": "medical",
+              "label": "Medical Fitness Certificate",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "MOH",
+              "notes": "Required for initial residency and some renewals. Done at designated MOH clinics.",
+              "raw_json": "{\"label\": \"Medical Fitness Certificate\", \"notes\": \"Required for initial residency and some renewals. Done at designated MOH clinics.\", \"status\": \"missing\", \"label_ar\": \"\\u0634\\u0647\\u0627\\u062f\\u0629 \\u0627\\u0644\\u0644\\u064a\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0637\\u0628\\u064a\\u0629\", \"required\": true, \"authority\": \"MOH\", \"updated_at\": \"2026-05-12T20:43:01Z\", \"expiry_date\": null, \"document_type\": \"med\u2026",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "document_type": "civil_id",
+              "label": "Civil ID",
+              "status": "missing",
+              "expiry_date": null,
+              "days_until_expiry": null,
+              "last_reminded": null,
+              "reminder_count": 0,
+              "authority": "PACI",
+              "notes": "Issued by PACI. Required for all residents. Renewal at PACI branches or online.",
+              "raw_json": "{\"label\": \"Civil ID\", \"notes\": \"Issued by PACI. Required for all residents. Renewal at PACI branches or online.\", \"status\": \"missing\", \"label_ar\": \"\\u0627\\u0644\\u0628\\u0637\\u0627\\u0642\\u0629 \\u0627\\u0644\\u0645\\u062f\\u0646\\u064a\\u0629\", \"required\": true, \"authority\": \"PACI\", \"updated_at\": \"2026-05-12T20:43:01Z\", \"expiry_date\": null, \"document_type\": \"civil_id\", \"last_reminded\": null, \"reminder_coun\u2026",
+              "updated_at": "2026-05-12T21:41:35.233584+00:00",
+              "document_number": null,
+              "issued_date": null,
+              "extracted_at": null,
+              "extraction_status": null,
+              "extraction_error": null,
+              "extraction_confidence": null,
+              "last_checked_at": null,
+              "last_alerted_at": null,
+              "warning_days": null,
+              "renewal_status": null,
+              "severity": null,
+              "company_code": "WATHEFNI"
+            }
+          ]
+        },
+        "attendance_records": {
+          "present": true,
+          "count": 14,
+          "samples": [
+            {
+              "attendance_id": "e873e0c3-6d75-4a91-94a7-41e5d3c2ffea",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_id": null,
+              "attendance_date": "2026-06-01",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-01T08:58:00+00:00",
+              "check_out_at": "2026-06-01T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "e4f3632e-2503-4434-863f-ff24c55fa3c4",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_id": null,
+              "attendance_date": "2026-05-28",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-05-28T08:58:00+00:00",
+              "check_out_at": "2026-05-28T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "db7ccfa3-d10f-404c-b827-9bade59ba3ef",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_id": null,
+              "attendance_date": "2026-06-04",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-04T08:58:00+00:00",
+              "check_out_at": "2026-06-04T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "cc813dff-0e7d-4cd2-862e-97302d20d312",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_id": null,
+              "attendance_date": "2026-05-31",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-05-31T08:58:00+00:00",
+              "check_out_at": "2026-05-31T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "attendance_id": "c3a5d001-a910-49de-a9b0-66f58ecaeab7",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_id": null,
+              "attendance_date": "2026-06-02",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-06-02T08:58:00+00:00",
+              "check_out_at": "2026-06-02T17:03:00+00:00",
+              "status": "present",
+              "late_minutes": 0,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            }
+          ]
+        },
+        "leave_requests": {
+          "present": true,
+          "count": 0,
+          "samples": []
+        },
+        "shift_assignments": {
+          "present": true,
+          "count": 5,
+          "samples": [
+            {
+              "shift_id": "cb445860-b7c8-4184-9c37-fdbb5db4b754",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_date": "2026-06-11",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": null,
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "shift_id": "ca7e5289-21bd-4ca6-9035-b10ff65fd854",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_date": "2026-06-14",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": null,
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "shift_id": "a3dc09a7-b407-41ef-9030-91c2968b8439",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_date": "2026-06-16",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": "2026-06-16T03:17:20.327404+00:00",
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-16T03:17:20.327404+00:00"
+            },
+            {
+              "shift_id": "7a03af13-03d3-4ad9-baf3-e519cc528e5c",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_date": "2026-06-10",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": null,
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-09T23:09:43.663432+00:00"
+            },
+            {
+              "shift_id": "5759604c-8cd1-4608-a385-0d77c7d6c603",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "employee_phone": "96550252254",
+              "employee_name": "Talal Fadhli",
+              "shift_date": "2026-06-15",
+              "start_time": "09:00:00",
+              "end_time": "17:00:00",
+              "timezone": "Asia/Kuwait",
+              "role": "Branch staff",
+              "location": "Main Branch",
+              "status": "scheduled",
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "demo_seed": "wathefni_v1"
+              },
+              "reminder_sent_at": "2026-06-15T03:17:38.737130+00:00",
+              "created_by_phone": null,
+              "created_at": "2026-06-09T23:09:43.663432+00:00",
+              "updated_at": "2026-06-15T03:17:38.737130+00:00"
+            }
+          ]
+        },
+        "employee_messages": {
+          "present": true,
+          "count": 11,
+          "samples": [
+            {
+              "message_id": "faa0df07-12d9-4066-99d4-f2baf4830fb8",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96550252254",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Sunday, 14 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "Talal Fadhli"
+              },
+              "body_preview": "Reminder: your shift is on Sunday, 14 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-14T05:17:14.718032+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-14T05:17:14.711860+00:00",
+              "updated_at": "2026-06-14T05:17:14.718152+00:00"
+            },
+            {
+              "message_id": "f9c4a172-482d-4c20-b388-b9912be66c15",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96550252254",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Wednesday, 10 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "Talal Fadhli"
+              },
+              "body_preview": "Reminder: your shift is on Wednesday, 10 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-10T05:18:18.964891+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-10T05:18:18.959381+00:00",
+              "updated_at": "2026-06-10T05:18:18.965328+00:00"
+            },
+            {
+              "message_id": "bd71c526-8363-4fbb-9c5e-08b15074fe72",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96550252254",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Wednesday, 10 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "Talal Fadhli"
+              },
+              "body_preview": "Reminder: your shift is on Wednesday, 10 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-10T03:18:21.777608+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-10T03:18:21.770546+00:00",
+              "updated_at": "2026-06-10T03:18:21.777919+00:00"
+            },
+            {
+              "message_id": "bcf9f485-685b-4dd6-911f-53d03ce25159",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96550252254",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Thursday, 11 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "Talal Fadhli"
+              },
+              "body_preview": "Reminder: your shift is on Thursday, 11 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-11T05:17:24.260284+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-11T05:17:24.251201+00:00",
+              "updated_at": "2026-06-11T05:17:24.260437+00:00"
+            },
+            {
+              "message_id": "b380a365-1727-4694-aa52-f89555ba4ff0",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-96550252254",
+              "flow": "shift",
+              "template_key": "shift_reminder",
+              "criticality": "informational",
+              "sensitivity": "preview",
+              "locale": "en",
+              "target_phone": "96550252254",
+              "target_email": null,
+              "account_id": "default",
+              "variables": {
+                "shift_date": "Thursday, 11 June 2026",
+                "shift_time": "09:00",
+                "employee_name": "Talal Fadhli"
+              },
+              "body_preview": "Reminder: your shift is on Thursday, 11 June 2026 from 09:00 to 17:00.",
+              "body_encrypted": null,
+              "body_key_version": null,
+              "status": "failed",
+              "channel_used": null,
+              "last_error": "session:no_usable_conversation_id; template:template_disabled; email:no_employee_email",
+              "attempts": 1,
+              "max_attempts": 6,
+              "attempt_log": [
+                {
+                  "at": "2026-06-11T04:17:29.522378+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:no_usable_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "hr_task_id": null,
+              "dedupe_key": null,
+              "next_attempt_at": null,
+              "delivered_at": null,
+              "metadata": {},
+              "created_by_phone": null,
+              "created_at": "2026-06-11T04:17:29.513404+00:00",
+              "updated_at": "2026-06-11T04:17:29.522774+00:00"
+            }
+          ]
+        },
+        "employee_status_changes": {
+          "present": true,
+          "count": 0,
+          "samples": []
+        },
+        "employee_documents": {
+          "present": true,
+          "count": 0,
+          "samples": []
+        },
+        "file_registry": {
+          "present": true,
+          "count": 0,
+          "samples": [],
+          "note": "no employee_key"
+        },
+        "hr_tasks": {
+          "present": true,
+          "count": 0,
+          "samples": []
+        },
+        "audit_hits_count": 0,
+        "audit_hits": []
+      }
+    }
+  ],
+  "additional_null_statuses": [],
+  "orphan_message_classification": {
+    "employee_key": "WATHEFNI-P0-DUP-1",
+    "message_count": 3,
+    "messages": [
+      {
+        "message_id": "9131f0be-0330-4527-856d-6d254e494faa",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "flow": "shift",
+        "template_key": "shift_assigned",
+        "criticality": "standard",
+        "sensitivity": "preview",
+        "locale": "en",
+        "target_phone": "96500001001",
+        "target_email": null,
+        "account_id": "WATHEFNI",
+        "variables": {
+          "location": "",
+          "shift_date": "Wednesday, 19 August 2026",
+          "shift_time": "10:00",
+          "company_name": "Wathefni",
+          "employee_name": "Authority P0 Twin"
+        },
+        "body_preview": "You have been scheduled for:\n- Wednesday, 19 August 2026: 10:00-12:00",
+        "body_encrypted": null,
+        "body_key_version": null,
+        "status": "failed",
+        "channel_used": null,
+        "last_error": "session:missing_candidate_conversation_id; template:template_disabled; email:no_employee_email",
+        "attempts": 1,
+        "max_attempts": 6,
+        "attempt_log": [
+          {
+            "at": "2026-07-20T02:26:04.697961+00:00",
+            "status": "failed",
+            "attempt": 1,
+            "channel": null,
+            "reasons": [
+              "session:missing_candidate_conversation_id",
+              "template:template_disabled",
+              "email:no_employee_email"
+            ]
+          }
+        ],
+        "hr_task_id": null,
+        "dedupe_key": "auto:shift:shift_assigned:WATHEFNI-P0-DUP-1:112fca140ce1:2974190",
+        "next_attempt_at": null,
+        "delivered_at": null,
+        "metadata": {},
+        "created_by_phone": null,
+        "created_at": "2026-07-20T02:26:04.682894+00:00",
+        "updated_at": "2026-07-20T02:26:04.698069+00:00"
+      },
+      {
+        "message_id": "593f8836-3a12-43d4-aec2-17c79b9416b6",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "flow": "shift",
+        "template_key": "shift_assigned",
+        "criticality": "standard",
+        "sensitivity": "preview",
+        "locale": "en",
+        "target_phone": "96500001001",
+        "target_email": null,
+        "account_id": "WATHEFNI",
+        "variables": {
+          "location": "",
+          "shift_date": "Wednesday, 19 August 2026",
+          "shift_time": "10:00",
+          "company_name": "Wathefni",
+          "employee_name": "Authority P0 Twin"
+        },
+        "body_preview": "You have been scheduled for:\n- Wednesday, 19 August 2026: 10:00-12:00",
+        "body_encrypted": null,
+        "body_key_version": null,
+        "status": "delivered_whatsapp",
+        "channel_used": "whatsapp_session",
+        "last_error": null,
+        "attempts": 1,
+        "max_attempts": 6,
+        "attempt_log": [
+          {
+            "at": "2026-07-20T03:57:01.879476+00:00",
+            "status": "delivered_whatsapp",
+            "attempt": 1,
+            "channel": "whatsapp_session",
+            "reasons": []
+          }
+        ],
+        "hr_task_id": null,
+        "dedupe_key": "auto:shift:shift_assigned:WATHEFNI-P0-DUP-1:112fca140ce1:2974199",
+        "next_attempt_at": null,
+        "delivered_at": "2026-07-20T03:57:01.879741+00:00",
+        "metadata": {},
+        "created_by_phone": null,
+        "created_at": "2026-07-20T03:57:01.857205+00:00",
+        "updated_at": "2026-07-20T03:57:01.879741+00:00"
+      },
+      {
+        "message_id": "35be03eb-bae6-4cc5-9153-e9e4291f064e",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "flow": "leave_decision",
+        "template_key": "leave_request_approved",
+        "criticality": "critical",
+        "sensitivity": "preview",
+        "locale": "en",
+        "target_phone": "96500001001",
+        "target_email": null,
+        "account_id": null,
+        "variables": {
+          "end_date": "2026-09-08",
+          "start_date": "2026-09-08",
+          "company_name": "Wathefni",
+          "employee_name": "Authority P0 Twin"
+        },
+        "body_preview": "Your leave request for 2026-09-08 has been approved.",
+        "body_encrypted": null,
+        "body_key_version": null,
+        "status": "delivered_whatsapp",
+        "channel_used": "whatsapp_session",
+        "last_error": null,
+        "attempts": 1,
+        "max_attempts": 6,
+        "attempt_log": [
+          {
+            "at": "2026-07-20T03:57:02.029544+00:00",
+            "status": "delivered_whatsapp",
+            "attempt": 1,
+            "channel": "whatsapp_session",
+            "reasons": []
+          }
+        ],
+        "hr_task_id": null,
+        "dedupe_key": "leave_decision:817997e2-7220-4c0c-8727-0b38a0139030:approved",
+        "next_attempt_at": null,
+        "delivered_at": "2026-07-20T03:57:02.029648+00:00",
+        "metadata": {},
+        "created_by_phone": null,
+        "created_at": "2026-07-20T03:57:02.025021+00:00",
+        "updated_at": "2026-07-20T03:57:02.029648+00:00"
+      }
+    ],
+    "classification": "synthetic_orphan_quarantine",
+    "confidence": "high",
+    "reasons": [
+      "employee_key 'WATHEFNI-P0-DUP-1' matches synthetic naming pattern",
+      "no employees row exists for this key",
+      "no valid application/attendance/onboarding/doc references found",
+      "3 orphan employee_messages rows remain"
+    ],
+    "synthetic_markers": [
+      "key:P0-DUP"
+    ],
+    "references": {
+      "employees": [],
+      "other_tables": {
+        "applications": [
+          {
+            "n": 0
+          }
+        ],
+        "attendance_records": [
+          {
+            "n": 0
+          }
+        ],
+        "onboarding_items": [
+          {
+            "n": 0
+          }
+        ],
+        "compliance_documents": [
+          {
+            "n": 0
+          }
+        ],
+        "leave_requests": [
+          {
+            "n": 0
+          }
+        ],
+        "shift_assignments": [
+          {
+            "n": 0
+          }
+        ],
+        "employee_documents": [
+          {
+            "n": 0
+          }
+        ],
+        "employee_status_changes": [
+          {
+            "n": 0
+          }
+        ],
+        "employee_sessions": [
+          {
+            "n": 0
+          }
+        ],
+        "employee_app_invites": [
+          {
+            "n": 0
+          }
+        ]
+      }
+    },
+    "proposed_remediation": "quarantine_archive"
+  },
+  "integrity_scan": {
+    "total_orphans": 3,
+    "ok": false,
+    "tables": {
+      "attendance_records": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "leave_requests": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "shift_assignments": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "payroll_timesheets": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_availability_requests": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "compliance_documents": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_messages": {
+        "present": true,
+        "orphans": 3,
+        "samples": [
+          {
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-P0-DUP-1",
+            "n": 3
+          }
+        ],
+        "mode": "company_employee"
+      },
+      "employee_sessions": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_app_invites": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_status_changes": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_org_assignments": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "hr_tasks": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "document_storage_operations": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "file_registry": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee",
+        "skipped": "columns"
+      },
+      "onboarding_items": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "employee_only"
+      },
+      "employee_documents": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "employee_only"
+      }
+    }
+  },
+  "migration_readiness_map": {
+    "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+    "company_code": "WATHEFNI",
+    "employee_count": 4,
+    "employees": [
+      {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96550252254",
+        "phone_redacted": "***2254",
+        "email_redacted": "t***@gmail.com",
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "employment_status": null,
+        "onboarding_status": "in_progress",
+        "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+        "person_seed": "person:WATHEFNI:phone:96550252254",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "assignments": [
+          {
+            "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+            "source": "synthetic_primary",
+            "raw": {
+              "role": "primary_employment"
+            }
+          }
+        ],
+        "compatibility": {
+          "legacy_pk": "employee_key",
+          "future_person_pk": "person_id",
+          "future_employment_pk": "employment_id",
+          "future_assignment_pk": "assignment_id",
+          "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+        }
+      },
+      {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96566363363",
+        "phone_redacted": "***3363",
+        "email_redacted": "f***@gmail.com",
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "employment_status": "active",
+        "onboarding_status": "in_progress",
+        "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+        "person_seed": "person:WATHEFNI:phone:96566363363",
+        "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+        "assignments": [
+          {
+            "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+            "source": "synthetic_primary",
+            "raw": {
+              "role": "primary_employment"
+            }
+          }
+        ],
+        "compatibility": {
+          "legacy_pk": "employee_key",
+          "future_person_pk": "person_id",
+          "future_employment_pk": "employment_id",
+          "future_assignment_pk": "assignment_id",
+          "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+        }
+      },
+      {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96597727743",
+        "phone_redacted": "***7743",
+        "email_redacted": "",
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "employment_status": null,
+        "onboarding_status": "in_progress",
+        "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+        "person_seed": "person:WATHEFNI:phone:96597727743",
+        "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+        "assignments": [
+          {
+            "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+            "source": "synthetic_primary",
+            "raw": {
+              "role": "primary_employment"
+            }
+          }
+        ],
+        "compatibility": {
+          "legacy_pk": "employee_key",
+          "future_person_pk": "person_id",
+          "future_employment_pk": "employment_id",
+          "future_assignment_pk": "assignment_id",
+          "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+        }
+      },
+      {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599411617",
+        "phone_redacted": "***1617",
+        "email_redacted": "b***@gmail.com",
+        "app_key": null,
+        "employment_status": "active",
+        "onboarding_status": "in_progress",
+        "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+        "person_seed": "person:WATHEFNI:phone:96599411617",
+        "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+        "assignments": [
+          {
+            "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+            "source": "synthetic_primary",
+            "raw": {
+              "role": "primary_employment"
+            }
+          }
+        ],
+        "compatibility": {
+          "legacy_pk": "employee_key",
+          "future_person_pk": "person_id",
+          "future_employment_pk": "employment_id",
+          "future_assignment_pk": "assignment_id",
+          "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+        }
+      }
+    ],
+    "synthetic_orphans_excluded_from_person_mint": [
+      {
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "person_id": null,
+        "employment_id": null,
+        "assignments": [],
+        "note": "synthetic orphan \u2014 do not mint person/employment IDs; quarantine messages only"
+      }
+    ],
+    "wave2_notes": [
+      "Do not create person/employment/assignment tables in Wave 1C",
+      "IDs are deterministic uuid5 from stable seeds \u2014 safe to recompute",
+      "Phone-canonical person seed aligns with Wave 1 alias model",
+      "Quarantined synthetic keys must not receive person_id"
+    ]
+  }
+}

@@ -1,0 +1,4680 @@
+{
+  "stamp": "20260804",
+  "created_at": "2026-08-04T03:16:11.774018+00:00",
+  "corpus": "/opt/wathefni/staging/claw-mirror/ops/evidence/identity-wave1-corpus-20260804",
+  "n_fixtures": 12,
+  "gpt_dependency_map": {
+    "primary_extractor": {
+      "symbol": "app.extract_compliance_document_metadata",
+      "file": "wathefni-orchestrator/app.py",
+      "approx_lines": "30121-30220",
+      "provider": "planner_provider_config() → default gpt-5.6-terra",
+      "input": "media_data_uri(media) vision image",
+      "fields": [
+        "document_type",
+        "document_number",
+        "issued_date",
+        "expiry_date",
+        "nationality",
+        "full_name",
+        "date_of_birth",
+        "confidence",
+        "reason"
+      ],
+      "confidence_gate": "extracted if confidence >= 0.55 else low_confidence",
+      "known_breakage": "app.extract_compliance_document_metadata sends temperature=0; gpt-5.6-terra on openai-responses rejects temperature. Wave 1 bench omits temperature to score the intended GPT path."
+    },
+    "related_gpt_callers": [
+      {
+        "symbol": "app.verify_onboarding_media_item",
+        "approx_lines": "29955+",
+        "gate": "confidence >= 0.65"
+      },
+      {
+        "symbol": "app.classify_onboarding_media_upload",
+        "approx_lines": "30034+",
+        "gate": "confidence >= 0.75"
+      }
+    ],
+    "storage_authority": {
+      "tables": [
+        "employee_documents",
+        "compliance_documents",
+        "governed_document_versions"
+      ],
+      "ocr_proposal_authoritative": false,
+      "hr_confirmation_required": true
+    },
+    "foundation_route_matrix": {
+      "document_class": "identity",
+      "structuring": "identity_processor_current_gpt_vision",
+      "authority_in_this_wave": "legacy_gpt_vision_until_replacement_qualified",
+      "ocr_policy": "do_not_use_cv_v2",
+      "note": "Route matrix not mutated in Wave 1 qualification"
+    },
+    "replacement_module": "wathefni-orchestrator/identity_document_extraction.py",
+    "gpt_auto_fallback_in_new_path": false,
+    "cv_v2_usage": false
+  },
+  "mistral_summary": {
+    "n": 12,
+    "mean_field_accuracy": 0.963,
+    "mean_latency_ms": 4479,
+    "total_cost_usd": 0.048,
+    "mean_cost_usd": 0.004,
+    "invented_fields": 0,
+    "missing_fields": 0,
+    "incorrect_fields": 4,
+    "hr_review_burden_proxy": 4,
+    "arabic_integrity_rate": 0.875,
+    "needs_review_count": 0
+  },
+  "gpt_summary": {
+    "n": 12,
+    "mean_field_accuracy": 0.9106,
+    "mean_latency_ms": 2529,
+    "total_cost_usd": 0.053437,
+    "mean_cost_usd": 0.004453,
+    "invented_fields": 2,
+    "missing_fields": 0,
+    "incorrect_fields": 8,
+    "hr_review_burden_proxy": 10,
+    "arabic_integrity_rate": 0.875,
+    "needs_review_count": 0
+  },
+  "comparison": {
+    "accuracy_delta_mistral_minus_gpt": 0.0524,
+    "latency_delta_ms_mistral_minus_gpt": 1950,
+    "cost_ratio_mistral_over_gpt": 0.8983,
+    "hr_burden_delta_mistral_minus_gpt": -6
+  },
+  "failure_classes": [
+    {
+      "class": "gpt_incorrect:document_number",
+      "count": 2
+    },
+    {
+      "class": "gpt_invented:full_name_en",
+      "count": 2
+    },
+    {
+      "class": "gpt_arabic_corrupt:full_name_ar",
+      "count": 1
+    },
+    {
+      "class": "gpt_incorrect:date_of_birth",
+      "count": 1
+    },
+    {
+      "class": "gpt_incorrect:employer_or_sponsor",
+      "count": 1
+    },
+    {
+      "class": "gpt_incorrect:expiry_date",
+      "count": 1
+    },
+    {
+      "class": "gpt_incorrect:full_name_en",
+      "count": 1
+    },
+    {
+      "class": "gpt_incorrect:nationality",
+      "count": 1
+    },
+    {
+      "class": "mistral_arabic_corrupt:full_name_ar",
+      "count": 1
+    },
+    {
+      "class": "mistral_incorrect:date_of_birth",
+      "count": 1
+    },
+    {
+      "class": "mistral_incorrect:document_number",
+      "count": 1
+    },
+    {
+      "class": "mistral_incorrect:employer_or_sponsor",
+      "count": 1
+    }
+  ],
+  "gates": {
+    "STAGING_AUTHORITY_GO": "GO",
+    "PRODUCTION_DEPLOY_THIS_WAVE": "NO-GO",
+    "reasons": {
+      "mistral_mean_field_accuracy": 0.963,
+      "gpt_mean_field_accuracy": 0.9106,
+      "invented_fields": 0,
+      "needs_review_count": 0,
+      "circuit_ok": true,
+      "no_gpt_fallback": true,
+      "provenance_ok": true
+    },
+    "smallest_production_cutover_wave": {
+      "wave": "Identity Document Processing Wave 2 — Staging Authority → Production Shadow then Canary",
+      "steps": [
+        "1) Staging: flip onboarding extract/classify/verify to identity_document_extraction under shadow flag",
+        "2) Staging authority canary for civil_id+passport only with HR confirmation gate unchanged",
+        "3) Production shadow (write proposals, GPT still live) for 1 week",
+        "4) Production canary company WATHEFNI then expand residency/work_permit/medical",
+        "5) Remove GPT extract/verify/classify calls for identity after dual-run parity"
+      ],
+      "do_not_change": [
+        "CV extraction",
+        "Ranking",
+        "Candidate Knowledge",
+        "Migration Wave 1",
+        "document_processing_foundation route matrix until cutover owner GO"
+      ]
+    }
+  },
+  "constraints_honored": {
+    "no_cv_v2": true,
+    "no_gpt_auto_fallback": true,
+    "hr_final_authority": true,
+    "no_production_deploy": true,
+    "foundation_route_matrix_unchanged": true
+  },
+  "rows": [
+    {
+      "id": "civil_id_front_bilingual_01",
+      "label": {
+        "document_type": "civil_id",
+        "document_number": "289123456789",
+        "full_name_ar": "أحمد عبدالله محمد الكندري",
+        "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1989-03-14",
+        "issue_date": "2022-01-10",
+        "expiry_date": "2032-01-09",
+        "employer_or_sponsor": null,
+        "side": "front",
+        "lang": "bilingual",
+        "variant": "scan",
+        "document_relationship": "civil_id_front"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.985,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2317,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+          "identifier_key": "civil_id:289123456789"
+        },
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "front",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "أحمد عبدالله محمد الكندري",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "289123456789",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1989-03-14",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2022-01-10",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2032-01-09",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2022-01-10",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "civil_id",
+          "document_number": "289123456789",
+          "full_name_ar": "أحمد عبدالله محمد الكندري",
+          "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1989-03-14",
+          "issue_date": "2022-01-10",
+          "expiry_date": "2032-01-09",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2317
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.00391,
+        "latency_ms": 1715,
+        "fields": {
+          "document_type": "civil_id",
+          "document_number": "289123456789",
+          "full_name_ar": "أحمد عبدالله محمد الكندري",
+          "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1989-03-14",
+          "issue_date": "2022-01-10",
+          "expiry_date": "2032-01-09",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "civil_id",
+          "document_number": "289123456789",
+          "issued_date": "2022-01-10",
+          "expiry_date": "2032-01-09",
+          "nationality": "Kuwaiti",
+          "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "full_name_ar": "أحمد عبدالله محمد الكندري",
+          "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "side": "front",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1989-03-14",
+          "confidence": 0.99,
+          "reason": "Civil ID front; all requested identity and date fields visible."
+        },
+        "usage": {
+          "input_tokens": 1020,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 136,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1156
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "civil_id_back_bilingual_01",
+      "label": {
+        "document_type": "civil_id",
+        "document_number": "289123456789",
+        "full_name_ar": "أحمد عبدالله محمد الكندري",
+        "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1989-03-14",
+        "issue_date": "2022-01-10",
+        "expiry_date": "2032-01-09",
+        "employer_or_sponsor": null,
+        "side": "back",
+        "lang": "bilingual",
+        "variant": "scan",
+        "document_relationship": "civil_id_back_of:civil_id_front_bilingual_01"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.985,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2324,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "84b374aba2e9879b44bb78f146e377aa8b13bc81bac9506a78dd872fc7824073",
+          "identifier_key": "civil_id:289123456789"
+        },
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "back",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "pair_with_front",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "أحمد عبدالله محمد الكندري",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "289123456789",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1989-03-14",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2022-01-10",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2032-01-09",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2022-01-10",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "civil_id",
+          "document_number": "289123456789",
+          "full_name_ar": "أحمد عبدالله محمد الكندري",
+          "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1989-03-14",
+          "issue_date": "2022-01-10",
+          "expiry_date": "2032-01-09",
+          "employer_or_sponsor": null,
+          "side": "back",
+          "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2324
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.00393,
+        "latency_ms": 1914,
+        "fields": {
+          "document_type": "civil_id",
+          "document_number": "289123456789",
+          "full_name_ar": "أحمد عبدالله محمد الكندري",
+          "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1989-03-14",
+          "issue_date": "2022-01-10",
+          "expiry_date": "2032-01-09",
+          "employer_or_sponsor": null,
+          "side": "back",
+          "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "civil_id",
+          "document_number": "289123456789",
+          "issued_date": "2022-01-10",
+          "expiry_date": "2032-01-09",
+          "nationality": "Kuwaiti",
+          "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "full_name_ar": "أحمد عبدالله محمد الكندري",
+          "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "side": "back",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1989-03-14",
+          "confidence": 0.99,
+          "reason": "Civil ID back; all requested identity and date fields are visibly printed."
+        },
+        "usage": {
+          "input_tokens": 1020,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 138,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1158
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "civil_id_front_ar_mobile_01",
+      "label": {
+        "document_type": "civil_id",
+        "document_number": "291045678901",
+        "full_name_ar": "فاطمة حسين علي العتيبي",
+        "full_name_en": null,
+        "nationality": "كويتي",
+        "date_of_birth": "1991-07-22",
+        "issue_date": "2021-05-01",
+        "expiry_date": "2031-04-30",
+        "employer_or_sponsor": null,
+        "side": "front",
+        "lang": "arabic",
+        "variant": "mobile_photo",
+        "document_relationship": "civil_id_front"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.985,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 26511,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "fe348c9d815443488b0af06dfbb73f34c11deae3b9bf953388cf28345dc0be5f",
+          "identifier_key": "civil_id:291045678901"
+        },
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "front",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "فاطمة حسين علي العتيبي",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "291045678901",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "كويتي",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1991-07-22",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2021-05-01",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2031-04-30",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "فاطمة حسين علي العتيبي",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2021-05-01",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "civil_id",
+          "document_number": "291045678901",
+          "full_name_ar": "فاطمة حسين علي العتيبي",
+          "full_name_en": null,
+          "nationality": "كويتي",
+          "date_of_birth": "1991-07-22",
+          "issue_date": "2021-05-01",
+          "expiry_date": "2031-04-30",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "فاطمة حسين علي العتيبي"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 8,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 26511
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.00373,
+        "latency_ms": 2045,
+        "fields": {
+          "document_type": "civil_id",
+          "document_number": "291045678901",
+          "full_name_ar": "فاطمة حسين علي العتيبي",
+          "full_name_en": "فاطمة حسين علي العتيبي",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1991-07-22",
+          "issue_date": "2021-05-01",
+          "expiry_date": "2031-04-30",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "فاطمة حسين علي العتيبي"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "civil_id",
+          "document_number": "291045678901",
+          "issued_date": "2021-05-01",
+          "expiry_date": "2031-04-30",
+          "nationality": "Kuwaiti",
+          "full_name": "فاطمة حسين علي العتيبي",
+          "full_name_ar": "فاطمة حسين علي العتيبي",
+          "full_name_en": null,
+          "side": "front",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1991-07-22",
+          "confidence": 0.99,
+          "reason": "Civil ID front; all core fields visible."
+        },
+        "usage": {
+          "input_tokens": 1020,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 118,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1138
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 0.7777777777777778,
+          "matches": 7,
+          "scored": 9,
+          "invented": 1,
+          "missing": 0,
+          "incorrect": 1,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": false,
+              "kind": "invented"
+            },
+            "nationality": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 2
+        }
+      }
+    },
+    {
+      "id": "civil_id_front_en_lowres_01",
+      "label": {
+        "document_type": "civil_id",
+        "document_number": "294112233445",
+        "full_name_ar": null,
+        "full_name_en": "SARA NASSER ALMUTAIRI",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1994-11-02",
+        "issue_date": "2020-09-15",
+        "expiry_date": "2030-09-14",
+        "employer_or_sponsor": null,
+        "side": "front",
+        "lang": "english",
+        "variant": "low_resolution",
+        "document_relationship": "civil_id_front"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.985,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2352,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "f416bfcfc4498c9c5deb3165e723ff352857905c383669486c6e6398054ce2f4",
+          "identifier_key": "civil_id:294112233445"
+        },
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "front",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "SARA NASSER ALMUTAIRI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "294112233445",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1994-11-02",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2020-09-15",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2030-09-14",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "SARA NASSER ALMUTAIRI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2020-09-15",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "civil_id",
+          "document_number": "294112233445",
+          "full_name_ar": null,
+          "full_name_en": "SARA NASSER ALMUTAIRI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1994-11-02",
+          "issue_date": "2020-09-15",
+          "expiry_date": "2030-09-14",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "SARA NASSER ALMUTAIRI"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 8,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2352
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.82,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.00731,
+        "latency_ms": 5766,
+        "fields": {
+          "document_type": "civil_id",
+          "document_number": "298112233445",
+          "full_name_ar": null,
+          "full_name_en": "SAJLA NASSER ALMUTAIRI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1994-11-02",
+          "issue_date": "2020-09-15",
+          "expiry_date": "2030-09-14",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "SAJLA NASSER ALMUTAIRI"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "civil_id",
+          "document_number": "298112233445",
+          "issued_date": "2020-09-15",
+          "expiry_date": "2030-09-14",
+          "nationality": "Kuwaiti",
+          "full_name": "SAJLA NASSER ALMUTAIRI",
+          "full_name_ar": null,
+          "full_name_en": "SAJLA NASSER ALMUTAIRI",
+          "side": "front",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1994-11-02",
+          "confidence": 0.82,
+          "reason": "Civil ID card front; English name, Civil ID number, nationality, birth date, issue date, and expiry date are visible."
+        },
+        "usage": {
+          "input_tokens": 1020,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 476,
+          "output_tokens_details": {
+            "reasoning_tokens": 335
+          },
+          "total_tokens": 1496
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 0.75,
+          "matches": 6,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 2,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 2
+        }
+      }
+    },
+    {
+      "id": "civil_id_front_rotated_01",
+      "label": {
+        "document_type": "civil_id",
+        "document_number": "287556677889",
+        "full_name_ar": "يوسف سالم فهد الشمري",
+        "full_name_en": "YOUSEF SALEM FAHAD ALSHAMMARI",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1987-12-01",
+        "issue_date": "2019-03-20",
+        "expiry_date": "2029-03-19",
+        "employer_or_sponsor": null,
+        "side": "front",
+        "lang": "bilingual",
+        "variant": "rotated",
+        "document_relationship": "civil_id_front"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 1.0,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2541,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "8ad86120d5baa2f6dd0c67ad016605e98f8d5148c058c23abab0694c66a71169",
+          "identifier_key": "civil_id:287556677889"
+        },
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "front",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "يوسف سالم فهد الشمري",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "YOUSEF SALEM FAHAD ALSHAMMARI",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "287556677889",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1987-12-01",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2019-03-20",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2029-03-19",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "YOUSEF SALEM FAHAD ALSHAMMARI",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2019-03-20",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "civil_id",
+          "document_number": "287556677889",
+          "full_name_ar": "يوسف سالم فهد الشمري",
+          "full_name_en": "YOUSEF SALEM FAHAD ALSHAMMARI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1987-12-01",
+          "issue_date": "2019-03-20",
+          "expiry_date": "2029-03-19",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "YOUSEF SALEM FAHAD ALSHAMMARI"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2541
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.004815,
+        "latency_ms": 2102,
+        "fields": {
+          "document_type": "civil_id",
+          "document_number": "287556677889",
+          "full_name_ar": "يوسف سالم فهد الشمري",
+          "full_name_en": "YOUSEF SALEM FAHAD ALSHAMMARI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1987-12-01",
+          "issue_date": "2019-03-20",
+          "expiry_date": "2029-03-19",
+          "employer_or_sponsor": null,
+          "side": "front",
+          "full_name": "YOUSEF SALEM FAHAD ALSHAMMARI"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "civil_id",
+          "document_number": "287556677889",
+          "issued_date": "2019-03-20",
+          "expiry_date": "2029-03-19",
+          "nationality": "Kuwaiti",
+          "full_name": "YOUSEF SALEM FAHAD ALSHAMMARI",
+          "full_name_ar": "يوسف سالم فهد الشمري",
+          "full_name_en": "YOUSEF SALEM FAHAD ALSHAMMARI",
+          "side": "front",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1987-12-01",
+          "confidence": 0.99,
+          "reason": "Civil ID front; all requested identity fields are visible."
+        },
+        "usage": {
+          "input_tokens": 1386,
+          "input_tokens_details": {
+            "cache_write_tokens": 1383,
+            "cached_tokens": 0
+          },
+          "output_tokens": 135,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1521
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "passport_en_01",
+      "label": {
+        "document_type": "passport",
+        "document_number": "P1234567",
+        "full_name_ar": null,
+        "full_name_en": "MOHAMMED RASHID ALHAJRI",
+        "nationality": "KUWAITI",
+        "date_of_birth": "1985-06-18",
+        "issue_date": "2018-08-01",
+        "expiry_date": "2028-07-31",
+        "employer_or_sponsor": null,
+        "side": "single",
+        "lang": "english",
+        "variant": "scan",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.985,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2252,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "9e72b0472c3ac1788bcfeb63e4e703acbb4ceae033c995d74aca23ef6fafbd72",
+          "identifier_key": "passport:p1234567"
+        },
+        "fields": {
+          "document_type": {
+            "value": "passport",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "MOHAMMED RASHID ALHAJRI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "P1234567",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "KUWAITI",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1985-06-18",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2018-08-01",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2028-07-31",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.985,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "MOHAMMED RASHID ALHAJRI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2018-08-01",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "passport",
+          "document_number": "P1234567",
+          "full_name_ar": null,
+          "full_name_en": "MOHAMMED RASHID ALHAJRI",
+          "nationality": "KUWAITI",
+          "date_of_birth": "1985-06-18",
+          "issue_date": "2018-08-01",
+          "expiry_date": "2028-07-31",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "MOHAMMED RASHID ALHAJRI"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 8,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2252
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.003717,
+        "latency_ms": 1822,
+        "fields": {
+          "document_type": "passport",
+          "document_number": "P1234567",
+          "full_name_ar": null,
+          "full_name_en": "MOHAMMED RASHID ALHAJRI",
+          "nationality": "KUWAITI",
+          "date_of_birth": "1985-06-18",
+          "issue_date": "2018-08-01",
+          "expiry_date": "2028-07-31",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "MOHAMMED RASHID ALHAJRI"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "passport",
+          "document_number": "P1234567",
+          "issued_date": "2018-08-01",
+          "expiry_date": "2028-07-31",
+          "nationality": "KUWAITI",
+          "full_name": "MOHAMMED RASHID ALHAJRI",
+          "full_name_ar": null,
+          "full_name_en": "MOHAMMED RASHID ALHAJRI",
+          "side": "single",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1985-06-18",
+          "confidence": 0.99,
+          "reason": "Passport details clearly visible."
+        },
+        "usage": {
+          "input_tokens": 1019,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 117,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1136
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 8,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "passport_bilingual_mobile_01",
+      "label": {
+        "document_type": "passport",
+        "document_number": "N9988776",
+        "full_name_ar": "نورة خالد إبراهيم الصباح",
+        "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+        "nationality": "KUWAITI / كويتي",
+        "date_of_birth": "1992-04-09",
+        "issue_date": "2023-01-12",
+        "expiry_date": "2033-01-11",
+        "employer_or_sponsor": null,
+        "side": "single",
+        "lang": "bilingual",
+        "variant": "mobile_photo",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.97,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 3385,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "17a267cf6f2b730b5a5d9bb12834f78a474d14cadd814ed0f41b5e60e16412ff",
+          "identifier_key": "passport:n9988776"
+        },
+        "fields": {
+          "document_type": {
+            "value": "passport",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "نورة خالد إبراهيم الصباح",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "NOURA KHALED IBRAHIM ALSABAH",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "N9988776",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "KUWAITI / كويتي",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1992-04-09",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2023-01-12",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2033-01-11",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "NOURA KHALED IBRAHIM ALSABAH",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2023-01-12",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "passport",
+          "document_number": "N9988776",
+          "full_name_ar": "نورة خالد إبراهيم الصباح",
+          "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+          "nationality": "KUWAITI / كويتي",
+          "date_of_birth": "1992-04-09",
+          "issue_date": "2023-01-12",
+          "expiry_date": "2033-01-11",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "NOURA KHALED IBRAHIM ALSABAH"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 3385
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.003827,
+        "latency_ms": 2408,
+        "fields": {
+          "document_type": "passport",
+          "document_number": "N9988776",
+          "full_name_ar": "نورة خالد إبراهيم الصباح",
+          "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+          "nationality": "KUWAITI",
+          "date_of_birth": "1992-04-09",
+          "issue_date": "2023-01-12",
+          "expiry_date": "2033-01-11",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "NOURA KHALED IBRAHIM ALSABAH"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "passport",
+          "document_number": "N9988776",
+          "issued_date": "2023-01-12",
+          "expiry_date": "2033-01-11",
+          "nationality": "KUWAITI",
+          "full_name": "NOURA KHALED IBRAHIM ALSABAH",
+          "full_name_ar": "نورة خالد إبراهيم الصباح",
+          "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+          "side": "single",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1992-04-09",
+          "confidence": 0.99,
+          "reason": "Passport details clearly visible."
+        },
+        "usage": {
+          "input_tokens": 1019,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 128,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1147
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "residency_bilingual_01",
+      "label": {
+        "document_type": "residency",
+        "document_number": "RES-778899",
+        "full_name_ar": "راجيش كومار شارما",
+        "full_name_en": "RAJESH KUMAR SHARMA",
+        "nationality": "Indian",
+        "date_of_birth": "1988-02-25",
+        "issue_date": "2024-01-01",
+        "expiry_date": "2026-12-31",
+        "employer_or_sponsor": "WATHEFNI TRADING CO",
+        "side": "single",
+        "lang": "bilingual",
+        "variant": "scan",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.97,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2810,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+          "identifier_key": "residency:res-778899"
+        },
+        "fields": {
+          "document_type": {
+            "value": "residency",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "راجيش كومار شارما",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "RAJESH KUMAR SHARMA",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "RES-778899",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Indian",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1988-02-25",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2024-01-01",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2026-12-31",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": "WATHEFNI TRADING CO",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "RAJESH KUMAR SHARMA",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2024-01-01",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "residency",
+          "document_number": "RES-778899",
+          "full_name_ar": "راجيش كومار شارما",
+          "full_name_en": "RAJESH KUMAR SHARMA",
+          "nationality": "Indian",
+          "date_of_birth": "1988-02-25",
+          "issue_date": "2024-01-01",
+          "expiry_date": "2026-12-31",
+          "employer_or_sponsor": "WATHEFNI TRADING CO",
+          "side": "single",
+          "full_name": "RAJESH KUMAR SHARMA"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 10,
+          "scored": 10,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2810
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.003863,
+        "latency_ms": 1757,
+        "fields": {
+          "document_type": "residency",
+          "document_number": "RES-778899",
+          "full_name_ar": "راجيش كومار شارما",
+          "full_name_en": "RAJESH KUMAR SHARMA",
+          "nationality": "Indian",
+          "date_of_birth": "1988-02-25",
+          "issue_date": "2024-01-01",
+          "expiry_date": "2026-12-31",
+          "employer_or_sponsor": "WATHEFNI TRADING CO",
+          "side": "single",
+          "full_name": "RAJESH KUMAR SHARMA"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "residency",
+          "document_number": "RES-778899",
+          "issued_date": "2024-01-01",
+          "expiry_date": "2026-12-31",
+          "nationality": "Indian",
+          "full_name": "RAJESH KUMAR SHARMA",
+          "full_name_ar": "راجيش كومار شارما",
+          "full_name_en": "RAJESH KUMAR SHARMA",
+          "side": "single",
+          "employer_or_sponsor": "WATHEFNI TRADING CO",
+          "date_of_birth": "1988-02-25",
+          "confidence": 0.99,
+          "reason": "Residency document details are clearly visible."
+        },
+        "usage": {
+          "input_tokens": 1021,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 131,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1152
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 10,
+          "scored": 10,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "work_permit_en_01",
+      "label": {
+        "document_type": "work_permit",
+        "document_number": "WP-445566",
+        "full_name_ar": null,
+        "full_name_en": "JUAN CARLOS MENDOZA",
+        "nationality": "Filipino",
+        "date_of_birth": "1990-09-30",
+        "issue_date": "2024-06-01",
+        "expiry_date": "2025-05-31",
+        "employer_or_sponsor": "AL MURQAB SERVICES",
+        "side": "single",
+        "lang": "english",
+        "variant": "scan",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 1.0,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2279,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "cf699770d33043f69655448b41667b60e3d3ba52bba22d5369980a3c1851f922",
+          "identifier_key": "work_permit:wp-445566"
+        },
+        "fields": {
+          "document_type": {
+            "value": "work_permit",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": null,
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "JUAN CARLOS MENDOZA",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "WP-445566",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Filipino",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1990-09-30",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2024-06-01",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2025-05-31",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": "AL MURQAB SERVICES",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "JUAN CARLOS MENDOZA",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2024-06-01",
+            "confidence": 1.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "work_permit",
+          "document_number": "WP-445566",
+          "full_name_ar": null,
+          "full_name_en": "JUAN CARLOS MENDOZA",
+          "nationality": "Filipino",
+          "date_of_birth": "1990-09-30",
+          "issue_date": "2024-06-01",
+          "expiry_date": "2025-05-31",
+          "employer_or_sponsor": "AL MURQAB SERVICES",
+          "side": "single",
+          "full_name": "JUAN CARLOS MENDOZA"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2279
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.003733,
+        "latency_ms": 2926,
+        "fields": {
+          "document_type": "work_permit",
+          "document_number": "WP-445566",
+          "full_name_ar": null,
+          "full_name_en": "JUAN CARLOS MENDOZA",
+          "nationality": "Filipino",
+          "date_of_birth": "1990-09-30",
+          "issue_date": "2024-06-01",
+          "expiry_date": "2025-05-31",
+          "employer_or_sponsor": "AL MURQAB SERVICES",
+          "side": "single",
+          "full_name": "JUAN CARLOS MENDOZA"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "work_permit",
+          "document_number": "WP-445566",
+          "issued_date": "2024-06-01",
+          "expiry_date": "2025-05-31",
+          "nationality": "Filipino",
+          "full_name": "JUAN CARLOS MENDOZA",
+          "full_name_ar": null,
+          "full_name_en": "JUAN CARLOS MENDOZA",
+          "side": "single",
+          "employer_or_sponsor": "AL MURQAB SERVICES",
+          "date_of_birth": "1990-09-30",
+          "confidence": 0.99,
+          "reason": "Work permit details clearly visible"
+        },
+        "usage": {
+          "input_tokens": 1021,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 118,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1139
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "work_permit_ar_lowres_01",
+      "label": {
+        "document_type": "work_permit",
+        "document_number": "تصريح-112233",
+        "full_name_ar": "محمد أنور حسين",
+        "full_name_en": null,
+        "nationality": "مصري",
+        "date_of_birth": "1986-01-15",
+        "issue_date": "2023-11-01",
+        "expiry_date": "2024-10-31",
+        "employer_or_sponsor": "شركة الوثفني",
+        "side": "single",
+        "lang": "arabic",
+        "variant": "low_resolution",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.98,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2187,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "c956c3cb4f9bc3b1da208c683ca55fad80c5d3a5b7670a13e65f206485a7ccd1",
+          "identifier_key": "work_permit:112233"
+        },
+        "fields": {
+          "document_type": {
+            "value": "work_permit",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "محمد أبو حسين",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": null,
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "112233",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "مصر",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1988-01-15",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2023-11-01",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2024-10-31",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": "شركة الونفي",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "محمد أبو حسين",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2023-11-01",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "work_permit",
+          "document_number": "112233",
+          "full_name_ar": "محمد أبو حسين",
+          "full_name_en": null,
+          "nationality": "مصر",
+          "date_of_birth": "1988-01-15",
+          "issue_date": "2023-11-01",
+          "expiry_date": "2024-10-31",
+          "employer_or_sponsor": "شركة الونفي",
+          "side": "single",
+          "full_name": "محمد أبو حسين"
+        },
+        "eval": {
+          "field_accuracy": 0.5555555555555556,
+          "matches": 5,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 4,
+          "arabic_ok": false,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "full_name_ar": {
+              "match": false,
+              "kind": "arabic_corrupt"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 4
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2187
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.78,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.005923,
+        "latency_ms": 4518,
+        "fields": {
+          "document_type": "work_permit",
+          "document_number": "10236",
+          "full_name_ar": "محمد أحمد حسن",
+          "full_name_en": "محمد أحمد حسن",
+          "nationality": "مصري",
+          "date_of_birth": "1985-09-15",
+          "issue_date": "2023-11-01",
+          "expiry_date": "2025-10-31",
+          "employer_or_sponsor": "شركة الأمل",
+          "side": "single",
+          "full_name": "محمد أحمد حسن"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "work_permit",
+          "document_number": "10236",
+          "issued_date": "2023-11-01",
+          "expiry_date": "2025-10-31",
+          "nationality": "مصري",
+          "full_name": "محمد أحمد حسن",
+          "full_name_ar": "محمد أحمد حسن",
+          "full_name_en": null,
+          "side": "single",
+          "employer_or_sponsor": "شركة الأمل",
+          "date_of_birth": "1985-09-15",
+          "confidence": 0.78,
+          "reason": "Work permit fields are visible; some Arabic text is slightly blurred."
+        },
+        "usage": {
+          "input_tokens": 1021,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 337,
+          "output_tokens_details": {
+            "reasoning_tokens": 223
+          },
+          "total_tokens": 1358
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 0.4,
+          "matches": 4,
+          "scored": 10,
+          "invented": 1,
+          "missing": 0,
+          "incorrect": 5,
+          "arabic_ok": false,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "full_name_ar": {
+              "match": false,
+              "kind": "arabic_corrupt"
+            },
+            "full_name_en": {
+              "match": false,
+              "kind": "invented"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "employer_or_sponsor": {
+              "match": false,
+              "kind": "incorrect"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 6
+        }
+      }
+    },
+    {
+      "id": "medical_en_01",
+      "label": {
+        "document_type": "medical",
+        "document_number": "MED-2024-8899",
+        "full_name_ar": null,
+        "full_name_en": "LAYLA HASSAN ALQALLAF",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1995-08-08",
+        "issue_date": "2024-03-01",
+        "expiry_date": "2025-02-28",
+        "employer_or_sponsor": null,
+        "side": "single",
+        "lang": "english",
+        "variant": "scan",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.97,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2448,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "1c13bdb2dbf75986d5ebecdde32598d6b3eaada4b7244f10b56ae5787f033365",
+          "identifier_key": "medical:med-2024-8899"
+        },
+        "fields": {
+          "document_type": {
+            "value": "medical",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "LAYLA HASSAN ALQALLAF",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "MED-2024-8899",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1995-08-08",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2024-03-01",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2025-02-28",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "LAYLA HASSAN ALQALLAF",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2024-03-01",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "medical",
+          "document_number": "MED-2024-8899",
+          "full_name_ar": null,
+          "full_name_en": "LAYLA HASSAN ALQALLAF",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1995-08-08",
+          "issue_date": "2024-03-01",
+          "expiry_date": "2025-02-28",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "LAYLA HASSAN ALQALLAF"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 8,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2448
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.003867,
+        "latency_ms": 1630,
+        "fields": {
+          "document_type": "medical",
+          "document_number": "MED-2024-8899",
+          "full_name_ar": null,
+          "full_name_en": "LAYLA HASSAN ALQALLAF",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1995-08-08",
+          "issue_date": "2024-03-01",
+          "expiry_date": "2025-02-28",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "LAYLA HASSAN ALQALLAF"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "medical",
+          "document_number": "MED-2024-8899",
+          "issued_date": "2024-03-01",
+          "expiry_date": "2025-02-28",
+          "nationality": "Kuwaiti",
+          "full_name": "LAYLA HASSAN ALQALLAF",
+          "full_name_ar": null,
+          "full_name_en": "LAYLA HASSAN ALQALLAF",
+          "side": "single",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1995-08-08",
+          "confidence": 0.99,
+          "reason": "Medical certificate with clearly visible identity, document, nationality, birth, issue, and expiry details."
+        },
+        "usage": {
+          "input_tokens": 1019,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 132,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1151
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 8,
+          "scored": 8,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": null,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    },
+    {
+      "id": "medical_bilingual_rotated_01",
+      "label": {
+        "document_type": "medical",
+        "document_number": "MED-2023-4411",
+        "full_name_ar": "خالد فهد العازمي",
+        "full_name_en": "KHALED FAHAD ALAZEMI",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1983-05-19",
+        "issue_date": "2023-10-10",
+        "expiry_date": "2024-10-09",
+        "employer_or_sponsor": null,
+        "side": "single",
+        "lang": "bilingual",
+        "variant": "rotated",
+        "document_relationship": "standalone"
+      },
+      "mistral": {
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "confidence": 0.97,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "cost_usd": 0.004,
+        "latency_ms": 2346,
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        },
+        "duplicate_keys": {
+          "content_sha256": "a068c90ef22a8ee53137a985a78972f0e21a7504246799c8e1864d3f6d02a67f",
+          "identifier_key": "medical:med-2023-4411"
+        },
+        "fields": {
+          "document_type": {
+            "value": "medical",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "خالد فهد العازمي",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "KHALED FAHAD ALAZEMI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "MED-2023-4411",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1983-05-19",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2023-10-10",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2024-10-09",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "KHALED FAHAD ALAZEMI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2023-10-10",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "flat_fields": {
+          "document_type": "medical",
+          "document_number": "MED-2023-4411",
+          "full_name_ar": "خالد فهد العازمي",
+          "full_name_en": "KHALED FAHAD ALAZEMI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1983-05-19",
+          "issue_date": "2023-10-10",
+          "expiry_date": "2024-10-09",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "KHALED FAHAD ALAZEMI"
+        },
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        },
+        "envelope_contract": "document_envelope@1",
+        "attempts": [
+          {
+            "attempt": 1,
+            "ok": true,
+            "latency_ms": 2346
+          }
+        ]
+      },
+      "gpt": {
+        "ok": true,
+        "extraction_status": "extracted",
+        "confidence": 0.99,
+        "provider": "gpt",
+        "model": "gpt-5.6-terra",
+        "cost_usd": 0.004812,
+        "latency_ms": 1756,
+        "fields": {
+          "document_type": "medical",
+          "document_number": "MED-2023-4411",
+          "full_name_ar": "خالد فهد العازمي",
+          "full_name_en": "KHALED FAHAD ALAZEMI",
+          "nationality": "Kuwaiti",
+          "date_of_birth": "1983-05-19",
+          "issue_date": "2023-10-10",
+          "expiry_date": "2024-10-09",
+          "employer_or_sponsor": null,
+          "side": "single",
+          "full_name": "KHALED FAHAD ALAZEMI"
+        },
+        "authoritative": false,
+        "raw": {
+          "document_type": "medical",
+          "document_number": "MED-2023-4411",
+          "issued_date": "2023-10-10",
+          "expiry_date": "2024-10-09",
+          "nationality": "Kuwaiti",
+          "full_name": "KHALED FAHAD ALAZEMI",
+          "full_name_ar": "خالد فهد العازمي",
+          "full_name_en": "KHALED FAHAD ALAZEMI",
+          "side": "single",
+          "employer_or_sponsor": null,
+          "date_of_birth": "1983-05-19",
+          "confidence": 0.99,
+          "reason": "Medical certificate; all primary identity and validity fields are visible."
+        },
+        "usage": {
+          "input_tokens": 1385,
+          "input_tokens_details": {
+            "cache_write_tokens": 1382,
+            "cached_tokens": 0
+          },
+          "output_tokens": 135,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1520
+        },
+        "api": "openai-responses",
+        "temperature_omitted_for_terra": true,
+        "eval": {
+          "field_accuracy": 1.0,
+          "matches": 9,
+          "scored": 9,
+          "invented": 0,
+          "missing": 0,
+          "incorrect": 0,
+          "arabic_ok": true,
+          "per_field": {
+            "document_type": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "document_number": {
+              "match": true,
+              "kind": "exact"
+            },
+            "full_name_ar": {
+              "match": true,
+              "kind": "arabic"
+            },
+            "full_name_en": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "nationality": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "date_of_birth": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "issue_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "expiry_date": {
+              "match": true,
+              "kind": "fuzzy"
+            },
+            "employer_or_sponsor": {
+              "match": true,
+              "kind": "both_missing"
+            },
+            "side": {
+              "match": true,
+              "kind": "fuzzy"
+            }
+          },
+          "hr_review_burden": 0
+        }
+      }
+    }
+  ]
+}

@@ -4,10 +4,7 @@ Wathefni owns ALL import logic; `gog` is only a stateless transport. This test
 mocks the `gog` subprocess and the OAuth token mint so it never touches the
 network, then proves:
   - GmailProvider parses search -> get -> attachment into the neutral message shape
-  - run_mailbox_sync(GmailProvider) feeds the SAME shared import core
-  - emailed CVs are held in Needs role and excluded from Ranking
-  - cursor advances; re-running dedupes by checksum (no double import)
-  - a provider/auth failure maps to a calm "needs reconnecting" (no raw error)
+  - live legacy mailbox sync fails closed before candidate/import mutation
   - the access token travels ONLY via $GOG_ACCESS_TOKEN env, never argv/results
   - OAuth state signing round-trips and rejects tampered/expired state
   - label listing parses and failures fail closed to needs_reconnect
@@ -186,46 +183,47 @@ def run_checks() -> None:
     app.mint_google_access_token = lambda refresh_token: ACCESS_TOKEN
     try:
         mailbox = _connect_live_gmail()
+        connection = app.get_mailbox_connection(COMPANY, mailbox)
+        provider = app.build_mailbox_provider(connection)
+        messages, next_cursor = provider.fetch_new_messages(
+            connection=connection,
+            cursor={},
+        )
+        assert_true(len(messages) == 2, "Gmail transport must parse two messages")
+        assert_true(
+            [a["filename"] for m in messages for a in m["attachments"]]
+            == ["Ali_CV.pdf", "Sara_CV.pdf"],
+            "Gmail transport must include only CV attachments",
+        )
+        assert_true(
+            next_cursor["after_epoch"] == 1748736000,
+            "Gmail transport must return the provider cursor",
+        )
 
-        # Run 1: GmailProvider resolved by build_mailbox_provider; imports 2 CVs.
+        # Live legacy sync cannot attach those files until migrated to durable intake.
         r1 = app.run_mailbox_sync(COMPANY, mailbox, "manual")
-        _collect(r1)
-        assert_true(r1["ok"] and not r1.get("dry_run"), "live gmail sync should run")
-        assert_true(r1["counts"]["imported"] == 2, f"expected 2 imported, got {r1['counts']}")
-        assert_true(r1["counts"]["needs_role"] == 2, "emailed CVs must land in needs_role")
-        # The junk .bin attachment is filtered before download (not even fetched).
-        assert_true(all("junk-" not in c["cmd"][4] for c in _gog_calls if c["cmd"][2] == "attachment"), "non-CV attachments must not be downloaded")
-
-        by_file = {it["original_filename"]: it for it in r1["items"]}
-        ali_app = by_file["Ali_CV.pdf"]["app_key"]
-        sara_app = by_file["Sara_CV.pdf"]["app_key"]
-
-        with app.db_connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT status FROM applications WHERE app_key=%s", (ali_app,))
-                assert_true(cur.fetchone()["status"] == "needs_role", "emailed candidate held as needs_role")
-                cur.execute("SELECT extraction_status FROM candidate_documents WHERE app_key=%s", (ali_app,))
-                assert_true(cur.fetchone()["extraction_status"] == "pending_extraction", "CV doc pending for the worker")
-                cur.execute("SELECT source FROM import_batches WHERE batch_id=%s", (r1["batch_id"],))
-                assert_true(cur.fetchone()["source"] == "email", "batch source must be email")
-                cur.execute("SELECT source_message_id, source_sender, source_label FROM import_items WHERE app_key=%s", (ali_app,))
-                prov = cur.fetchone()
-                assert_true(prov["source_message_id"] == "m1" and "ali@example.com" in (prov["source_sender"] or ""), "email provenance stored")
-                assert_true(prov["source_label"] == "Recruitment/CVs", "label provenance stored")
-                cur.execute("SELECT cursor->>'after_epoch' AS a, status FROM mailbox_connections WHERE mailbox_id=%s", (mailbox,))
-                crow = cur.fetchone()
-                assert_true(int(crow["a"]) == 1748736000 and crow["status"] == "connected", "cursor advances to internalDate seconds")
-
-        # No early Ranking, no candidate messaging.
+        assert_true(
+            not r1["ok"]
+            and r1["error"] == "durable_scan_and_identity_authority_required",
+            "live Gmail sync must fail closed at the authority boundary",
+        )
         with app.db_connect() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT COUNT(*) AS c FROM applications a WHERE a.company_code=%s AND a.app_key=ANY(%s) AND {app.reviewable_application_predicate('a')}",
-                    (COMPANY, [ali_app, sara_app]),
+                    "SELECT count(*) AS c FROM import_batches WHERE mailbox_id=%s",
+                    (mailbox,),
                 )
-                assert_true(cur.fetchone()["c"] == 0, "emailed imports excluded from Ranking")
-                cur.execute("SELECT COUNT(*) AS c FROM outbound_delivery_events WHERE subject_key = ANY(%s)", ([ali_app, sara_app],))
-                assert_true(cur.fetchone()["c"] == 0, "sync must never message candidates")
+                assert_true(cur.fetchone()["c"] == 0, "blocked Gmail sync creates no import batch")
+                cur.execute(
+                    "SELECT count(*) AS c FROM applications WHERE company_code=%s",
+                    (COMPANY,),
+                )
+                assert_true(cur.fetchone()["c"] == 0, "blocked Gmail sync creates no candidate application")
+                cur.execute(
+                    "SELECT cursor FROM mailbox_connections WHERE mailbox_id=%s",
+                    (mailbox,),
+                )
+                assert_true(cur.fetchone()["cursor"] == {}, "blocked Gmail sync does not advance cursor")
 
         # Token hygiene: token only ever travels via env, never argv.
         assert_true(_gog_calls, "gog must have been invoked")
@@ -237,23 +235,12 @@ def run_checks() -> None:
         public = app.mailbox_connection_ui(app.get_mailbox_connection(COMPANY, mailbox))
         assert_true(ACCESS_TOKEN not in json.dumps(public) and "cursor" not in public and "fake-refresh-token" not in json.dumps(public), "no secrets in public serializer")
 
-        # Run 2: search returns the same ids, get returns same content -> checksum dedupe.
-        r2 = app.run_mailbox_sync(COMPANY, mailbox, "manual")
-        _collect(r2)
-        assert_true(r2["counts"]["imported"] == 0 and r2["counts"]["duplicate"] == 2, f"re-sync must dedupe, got {r2['counts']}")
-
         # Labels: parsed for the picker; failures fail closed.
         labels = app.gmail_list_labels_safe(COMPANY, mailbox)
         assert_true(labels["ok"] and "Recruitment/CVs" in labels["labels"], "label list must parse")
 
-        # Provider/auth failure -> calm needs_reconnect, generic error (no raw leak).
+        # Provider/auth failure in label access remains calm and secret-free.
         app.mint_google_access_token = lambda refresh_token: (_ for _ in ()).throw(RuntimeError("google_token_failed:401"))
-        fail = app.run_mailbox_sync(COMPANY, mailbox, "manual")
-        assert_true(fail.get("error") == "mailbox_fetch_failed" and "401" not in json.dumps(fail), "auth failure maps to generic mailbox_fetch_failed")
-        with app.db_connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT status FROM mailbox_connections WHERE mailbox_id=%s", (mailbox,))
-                assert_true(cur.fetchone()["status"] == "needs_reconnect", "auth failure -> needs_reconnect")
         lab_fail = app.gmail_list_labels_safe(COMPANY, mailbox)
         assert_true(not lab_fail["ok"] and lab_fail["error"] == "mailbox_needs_reconnect", "label failure fails closed")
 

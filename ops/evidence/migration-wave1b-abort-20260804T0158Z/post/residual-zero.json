@@ -1,0 +1,45 @@
+{
+  "probe_utc": "2026-08-04T02:02:09.992845+00:00",
+  "target_batch": "70679db7-62c7-4de0-b09d-dd5560d7eb66",
+  "actions": [
+    {
+      "removed_synthetic_stage_dirs": [
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-10k",
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-iso-b",
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-core",
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-iso-a",
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-dry",
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-retry",
+        "/root/.openclaw/workspaces/company-wathefni/migw1b-1k",
+        "/root/.openclaw/workspaces/company-wathefni/allowlist-check"
+      ]
+    }
+  ],
+  "checks": {
+    "migration_batches_for_id": 0,
+    "migration_rows_for_id": 0,
+    "migration_chunk_jobs_for_id": 0,
+    "migration_events_retained": 0,
+    "open_canary_batches": 0,
+    "iso_migration_batches": 0,
+    "apps_for_batch": 0,
+    "wathefni_migration_apps_any": 0,
+    "iso_apps": 0,
+    "iso_companies": 0,
+    "deferred_migration_docs": 0,
+    "docs_linked_to_migration_apps": 0,
+    "files_linked_to_migration_apps": 0,
+    "import_batches_via_migration": 0,
+    "active_migration_extraction": 0,
+    "active_jobs_for_batch": 0,
+    "jobs_for_batch_by_status": {},
+    "active_other_ats_export": 0,
+    "active_or_failed_chunk_jobs_wathefni": 0,
+    "synthetic_iso_settings": 0
+  },
+  "remaining_stage_dirs": [],
+  "active_residual_total": 0,
+  "residual_zero": true,
+  "note": "migration_events retained as audit if any; terminal intake jobs preserved"
+}
+RESIDUAL_ZERO_OK

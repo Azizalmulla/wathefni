@@ -1,0 +1,9 @@
+PASS  expired civil id goes to attention
+PASS  reviewed passport stays current
+PASS  current files are not duplicated in history
+PASS  previous version and orphan registry files appear once in history
+PASS  complianceUnavailable is false when journey rows exist
+PASS  registry-only payload marks compliance partial
+PASS  empty payload is genuinely empty
+---
+PASS documents hierarchy (7 checks)

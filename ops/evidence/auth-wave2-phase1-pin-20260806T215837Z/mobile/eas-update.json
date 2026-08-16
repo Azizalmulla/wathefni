@@ -1,0 +1,15 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "group": "b41cdbcf-9338-4073-a0be-af8ea9773c71",
+  "androidUpdateId": "019fd916-842b-7fc2-b99d-5efd93a3575f",
+  "iosUpdateId": "019fd916-842b-7d70-98b1-ed614e01937f",
+  "message": "Auth Wave 2 Phase 1 local PIN unlock (Aziz/Talal canary)",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
+    "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "0"
+  },
+  "nativeBuildRequired": false,
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/b41cdbcf-9338-4073-a0be-af8ea9773c71"
+}

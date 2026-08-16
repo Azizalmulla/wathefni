@@ -1,0 +1,84 @@
+    hr intelligence recruiting c3 — prove
+      PASS  c3 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  uses c1 evaluator
+      PASS  no second math engine
+      PASS  ttf distinct tth
+      PASS  no universal source score
+      PASS  unknown stays unknown
+      PASS  canonical hire bridge
+      PASS  EN open
+      PASS  AR filled
+      PASS  source unknown en
+      PASS  source referral
+      PASS  c3 global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable c3
+      PASS  publish recruiting kpis
+      PASS  universal score blocked
+      PASS  req filled
+      PASS  historical dept preserved
+      PASS  ttf ok
+      PASS  ttf milestones pinned
+      PASS  ttf cancelled excluded
+      PASS  ttf includes reopen cycle
+      PASS  ttf pins definition
+      PASS  unknown source preserved
+      PASS  merge ok
+      PASS  offers issued
+      PASS  offer versions not multiplied
+      PASS  offers accepted
+      PASS  offers declined
+      PASS  accept rate
+      PASS  accept denom reproducible
+      PASS  hire bridge a
+      PASS  tth ok
+      PASS  tth distinct milestones
+      PASS  tth excludes rejected
+      PASS  tth multi-app person
+      PASS  merge no double tth
+      PASS  recruiting hires
+      PASS  hire uses employment keys
+      PASS  c3/c2 reconcile shared
+      PASS  shared authority key
+      PASS  apps by source referral
+      PASS  unknown source apps
+      PASS  hires by source
+      PASS  observed not causal
+      PASS  source conversion
+      PASS  no magical score flag
+      PASS  funnel events
+      PASS  funnel event based
+      PASS  hm scope ttf
+      PASS  hm no leak
+      PASS  candidate ids withheld
+      PASS  preboard rate
+      PASS  onboard template historical
+      PASS  onboard rate
+      PASS  onboard time
+      PASS  probation no freetext outcome
+      PASS  probation outcomes
+      PASS  probation governed
+      PASS  correction
+      PASS  idempotent rebuild
+      PASS  no double hire count
+      PASS  definition versioned
+      PASS  pinned historical eval version
+      PASS  preboard unavailable not zero
+      PASS  probation unavailable not zero
+      PASS  recruiting without preboard/probation
+      PASS  onboarding unavailable
+      PASS  zero denom not_applicable
+      PASS  ttf insufficient_data
+      PASS  bilingual ttf
+      PASS  disable preserves
+      PASS  hires survive disable
+      PASS  eval blocked when disabled
+      PASS  all off after prove
+
+    79 passed, 0 failed
+HR_INTELLIGENCE_RECRUITING_FULL_PASS
+STAGING_RC=0

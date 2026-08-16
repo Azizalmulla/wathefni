@@ -1,0 +1,15 @@
+total 2064
+drwxr-xr-x 2 root root   4096 Aug  4 18:02 .
+drwxr-xr-x 5 root root   4096 Aug  4 17:58 ..
+-rw-r--r-- 1 root root 266901 Aug  4 18:02 create-drawer-desktop-ar.png
+-rw-r--r-- 1 root root 324065 Aug  4 18:02 create-drawer-desktop-en.png
+-rw-r--r-- 1 root root  84150 Aug  4 18:02 create-drawer-mobile-ar.png
+-rw-r--r-- 1 root root  99832 Aug  4 18:02 create-drawer-mobile-en.png
+-rw-r--r-- 1 root root 163881 Aug  4 18:02 requests-desktop-ar.png
+-rw-r--r-- 1 root root 208465 Aug  4 18:02 requests-desktop-en.png
+-rw-r--r-- 1 root root  90883 Aug  4 18:02 requests-mobile-ar.png
+-rw-r--r-- 1 root root 129969 Aug  4 18:02 requests-mobile-en.png
+-rw-r--r-- 1 root root 207121 Aug  4 18:02 schedule-desktop-ar.png
+-rw-r--r-- 1 root root 246951 Aug  4 18:02 schedule-desktop-en.png
+-rw-r--r-- 1 root root 118273 Aug  4 18:02 schedule-mobile-ar.png
+-rw-r--r-- 1 root root 139181 Aug  4 18:02 schedule-mobile-en.png

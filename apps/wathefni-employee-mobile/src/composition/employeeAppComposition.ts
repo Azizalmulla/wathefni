@@ -19,6 +19,11 @@ export const MODULE_SURFACES = [
   'leave',
   'payslips',
   'bank',
+  'performance',
+  'talent',
+  'learning',
+  'benefits',
+  'engagement',
 ] as const
 
 export type ModuleSurface = (typeof MODULE_SURFACES)[number]
@@ -33,6 +38,11 @@ export type HomeModuleTile =
   | 'leave'
   | 'documents'
   | 'payslips'
+  | 'performance'
+  | 'talent'
+  | 'learning'
+  | 'benefits'
+  | 'engagement'
 
 export type HomeDestination = {
   id: HomeModuleTile
@@ -93,6 +103,12 @@ export type EmployeeAppComposition = {
   /** Demote onboarding after completion — no empty permanent module. */
   onboardingDemoted: boolean
   /**
+   * Preboarding / probation are journeys, not Home tiles. Reachable from Home
+   * journey cards, Profile, and push — never from MODULE_SURFACES destinations.
+   */
+  showPreboardingJourney: boolean
+  showProbationJourney: boolean
+  /**
    * Bottom tab visibility. Inbox is deliberately not a tab: it is a platform
    * surface an employee visits when something arrives, not a place they work, so
    * it lives behind the unread bell in the Home header and keeps a tab slot for a
@@ -127,6 +143,11 @@ const TILE_ROUTES: Record<HomeModuleTile, string> = {
   leave: '/(tabs)/leave',
   documents: '/documents',
   payslips: '/payslips',
+  performance: '/performance',
+  talent: '/talent',
+  learning: '/learning',
+  benefits: '/benefits',
+  engagement: '/engagement',
 }
 
 export function compositionFromMe(
@@ -141,6 +162,11 @@ export function compositionFromMe(
     leave: hasFeature(me, 'leave'),
     payslips: hasFeature(me, 'payslips'),
     bank: hasFeature(me, 'bank'),
+    performance: hasFeature(me, 'performance'),
+    talent: hasFeature(me, 'talent'),
+    learning: hasFeature(me, 'learning'),
+    benefits: hasFeature(me, 'benefits'),
+    engagement: hasFeature(me, 'engagement'),
   } satisfies Record<ModuleSurface, boolean>
 
   const schedule = {
@@ -154,6 +180,11 @@ export function compositionFromMe(
   if (modules.leave) homeTiles.push('leave')
   if (modules.documents) homeTiles.push('documents')
   if (modules.payslips) homeTiles.push('payslips')
+  if (modules.performance) homeTiles.push('performance')
+  if (modules.talent) homeTiles.push('talent')
+  if (modules.learning) homeTiles.push('learning')
+  if (modules.benefits) homeTiles.push('benefits')
+  if (modules.engagement) homeTiles.push('engagement')
 
   const requiredPending = onboarding?.requiredPending ?? 0
   const pendingCount = onboarding?.pendingCount ?? 0
@@ -182,6 +213,8 @@ export function compositionFromMe(
       : null,
     showOnboardingJourney: incomplete,
     onboardingDemoted: completed || !featureOn,
+    showPreboardingJourney: hasFeature(me, 'preboarding'),
+    showProbationJourney: hasFeature(me, 'probation'),
     tabs: {
       home: true,
       schedule: schedule.available,
@@ -230,10 +263,30 @@ export const APP_ROUTES = {
   '/privacy-support': { feature: 'core' },
   '/change-pin': { feature: 'core' },
   '/(tabs)/schedule': { feature: ['shifts', 'attendance'] },
+  '/schedule/history': { feature: 'attendance' },
   '/(tabs)/leave': { feature: 'leave' },
   '/leave/request': { feature: 'leave' },
+  '/leave/history': { feature: 'leave' },
   '/documents': { feature: 'documents' },
   '/onboarding': { feature: 'onboarding' },
+  '/preboarding': { feature: 'preboarding' },
+  '/probation': { feature: 'probation' },
+  '/performance': { feature: 'performance' },
+  '/performance/goals': { feature: 'performance' },
+  '/performance/reviews': { feature: 'performance' },
+  '/performance/check-ins': { feature: 'performance' },
+  '/performance/development': { feature: 'performance' },
+  '/talent': { feature: 'talent' },
+  '/talent/profile': { feature: 'talent' },
+  '/learning': { feature: 'learning' },
+  '/learning/catalog': { feature: 'learning' },
+  '/learning/certificates': { feature: 'learning' },
+  '/learning/session': { feature: 'learning', params: ['session_id'] },
+  '/benefits': { feature: 'benefits' },
+  '/benefits/plan': { feature: 'benefits', params: ['plan_id'] },
+  '/benefits/history': { feature: 'benefits' },
+  '/engagement': { feature: 'engagement' },
+  '/engagement/survey': { feature: 'engagement', params: ['campaign_id'] },
   '/payslips': { feature: 'payslips', params: ['payslip_id'] },
   '/bank': { feature: 'bank' },
 } as const satisfies Record<string, RouteSpec>
@@ -256,6 +309,7 @@ const ROUTE_ALIASES: Record<string, AppRoute> = {
   '/shifts': '/(tabs)/schedule',
   '/(tabs)/shifts': '/(tabs)/schedule',
   '/attendance': '/(tabs)/schedule',
+  '/attendance/history': '/schedule/history',
   '/leave': '/(tabs)/leave',
 }
 

@@ -1,0 +1,765 @@
+{
+  "pass": 35,
+  "fail": 0,
+  "checks": [
+    {
+      "label": "schema version set",
+      "ok": true,
+      "detail": "employees360-wave2-authority-v1"
+    },
+    {
+      "label": "backfill 4/4 maps",
+      "ok": true,
+      "detail": [
+        {
+          "employee_key": "WATHEFNI-96550252254",
+          "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+          "mapping_status": "active",
+          "employee_number": "EMP-0003",
+          "primary_phone": "96550252254",
+          "primary_email": "talalabdalla89@gmail.com",
+          "employment_status": "active",
+          "legacy_employee_key": "WATHEFNI-96550252254"
+        },
+        {
+          "employee_key": "WATHEFNI-96566363363",
+          "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+          "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+          "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+          "mapping_status": "active",
+          "employee_number": "EMP-0001",
+          "primary_phone": "96566363363",
+          "primary_email": "fb-urhama@gmail.com",
+          "employment_status": "active",
+          "legacy_employee_key": "WATHEFNI-96566363363"
+        },
+        {
+          "employee_key": "WATHEFNI-96597727743",
+          "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+          "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+          "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+          "mapping_status": "active",
+          "employee_number": "EMP-0002",
+          "primary_phone": "96597727743",
+          "primary_email": null,
+          "employment_status": "active",
+          "legacy_employee_key": "WATHEFNI-96597727743"
+        },
+        {
+          "employee_key": "WATHEFNI-96599411617",
+          "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+          "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+          "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+          "mapping_status": "active",
+          "employee_number": "EMP-0004",
+          "primary_phone": "96599411617",
+          "primary_email": "briansaleh92@gmail.com",
+          "employment_status": "active",
+          "legacy_employee_key": "WATHEFNI-96599411617"
+        }
+      ]
+    },
+    {
+      "label": "exactly 4 persons for company maps",
+      "ok": true,
+      "detail": {
+        "persons": 4,
+        "employments": 4,
+        "assignments": 4
+      }
+    },
+    {
+      "label": "map active WATHEFNI-96550252254",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96550252254",
+        "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+        "mapping_status": "active",
+        "employee_number": "EMP-0003",
+        "primary_phone": "96550252254",
+        "primary_email": "talalabdalla89@gmail.com",
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96550252254"
+      }
+    },
+    {
+      "label": "employee_number WATHEFNI-96550252254",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96550252254",
+        "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+        "mapping_status": "active",
+        "employee_number": "EMP-0003",
+        "primary_phone": "96550252254",
+        "primary_email": "talalabdalla89@gmail.com",
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96550252254"
+      }
+    },
+    {
+      "label": "map active WATHEFNI-96566363363",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96566363363",
+        "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+        "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+        "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+        "mapping_status": "active",
+        "employee_number": "EMP-0001",
+        "primary_phone": "96566363363",
+        "primary_email": "fb-urhama@gmail.com",
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96566363363"
+      }
+    },
+    {
+      "label": "employee_number WATHEFNI-96566363363",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96566363363",
+        "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+        "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+        "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+        "mapping_status": "active",
+        "employee_number": "EMP-0001",
+        "primary_phone": "96566363363",
+        "primary_email": "fb-urhama@gmail.com",
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96566363363"
+      }
+    },
+    {
+      "label": "map active WATHEFNI-96597727743",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96597727743",
+        "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+        "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+        "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+        "mapping_status": "active",
+        "employee_number": "EMP-0002",
+        "primary_phone": "96597727743",
+        "primary_email": null,
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96597727743"
+      }
+    },
+    {
+      "label": "employee_number WATHEFNI-96597727743",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96597727743",
+        "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+        "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+        "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+        "mapping_status": "active",
+        "employee_number": "EMP-0002",
+        "primary_phone": "96597727743",
+        "primary_email": null,
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96597727743"
+      }
+    },
+    {
+      "label": "map active WATHEFNI-96599411617",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96599411617",
+        "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+        "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+        "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+        "mapping_status": "active",
+        "employee_number": "EMP-0004",
+        "primary_phone": "96599411617",
+        "primary_email": "briansaleh92@gmail.com",
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96599411617"
+      }
+    },
+    {
+      "label": "employee_number WATHEFNI-96599411617",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96599411617",
+        "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+        "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+        "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+        "mapping_status": "active",
+        "employee_number": "EMP-0004",
+        "primary_phone": "96599411617",
+        "primary_email": "briansaleh92@gmail.com",
+        "employment_status": "active",
+        "legacy_employee_key": "WATHEFNI-96599411617"
+      }
+    },
+    {
+      "label": "no dup persons",
+      "ok": true,
+      "detail": {
+        "persons": [],
+        "employments": [],
+        "assignments": []
+      }
+    },
+    {
+      "label": "no dup employments",
+      "ok": true,
+      "detail": {
+        "persons": [],
+        "employments": [],
+        "assignments": []
+      }
+    },
+    {
+      "label": "no dup assignments",
+      "ok": true,
+      "detail": {
+        "persons": [],
+        "employments": [],
+        "assignments": []
+      }
+    },
+    {
+      "label": "deterministic approved IDs 4/4",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "mismatches": []
+      }
+    },
+    {
+      "label": "compatibility matrix complete",
+      "ok": true,
+      "detail": [
+        {
+          "employee_key": "WATHEFNI-96550252254",
+          "hub_phone": "96550252254",
+          "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+          "employee_number": "EMP-0003",
+          "hub_employment_status": "active",
+          "authority_employment_status": "active"
+        },
+        {
+          "employee_key": "WATHEFNI-96566363363",
+          "hub_phone": "96566363363",
+          "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+          "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+          "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+          "employee_number": "EMP-0001",
+          "hub_employment_status": "active",
+          "authority_employment_status": "active"
+        },
+        {
+          "employee_key": "WATHEFNI-96597727743",
+          "hub_phone": "96597727743",
+          "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+          "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+          "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+          "employee_number": "EMP-0002",
+          "hub_employment_status": "active",
+          "authority_employment_status": "active"
+        },
+        {
+          "employee_key": "WATHEFNI-96599411617",
+          "hub_phone": "96599411617",
+          "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+          "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+          "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+          "employee_number": "EMP-0004",
+          "hub_employment_status": "active",
+          "authority_employment_status": "active"
+        }
+      ]
+    },
+    {
+      "label": "card fields WATHEFNI-96550252254",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96550252254",
+        "name": "Talal Fadhli",
+        "phone": "96550252254",
+        "email": "talalabdalla89@gmail.com",
+        "position_title": "Social Media Manager",
+        "department": "",
+        "onboarding_status": "in_progress",
+        "employment_status": "active",
+        "start_date": null,
+        "updated_at": "2026-08-01T20:03:20.703316+00:00"
+      }
+    },
+    {
+      "label": "card fields WATHEFNI-96566363363",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96566363363",
+        "name": "Fouad Burhamad",
+        "phone": "96566363363",
+        "email": "fb-urhama@gmail.com",
+        "position_title": "IT Maintenance",
+        "department": "",
+        "onboarding_status": "in_progress",
+        "employment_status": "active",
+        "start_date": null,
+        "updated_at": "2026-07-12T15:46:31.905837+00:00"
+      }
+    },
+    {
+      "label": "card fields WATHEFNI-96597727743",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96597727743",
+        "name": "mohammad alqattan",
+        "phone": "96597727743",
+        "email": "",
+        "position_title": "Marketing Specialist",
+        "department": "",
+        "onboarding_status": "in_progress",
+        "employment_status": "active",
+        "start_date": null,
+        "updated_at": "2026-08-01T20:03:20.680449+00:00"
+      }
+    },
+    {
+      "label": "card fields WATHEFNI-96599411617",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96599411617",
+        "name": "Brian Saleh",
+        "phone": "96599411617",
+        "email": "briansaleh92@gmail.com",
+        "position_title": "",
+        "department": "",
+        "onboarding_status": "in_progress",
+        "employment_status": "active",
+        "start_date": null,
+        "updated_at": "2026-07-13T19:22:41.486318+00:00"
+      }
+    },
+    {
+      "label": "alias local resolves",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96550252254",
+        "phone": "96550252254",
+        "company_code": "WATHEFNI",
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "name": "Talal Fadhli",
+        "email": "talalabdalla89@gmail.com",
+        "position_title": "Social Media Manager",
+        "hire_date": "2026-05-12",
+        "start_date": null,
+        "onboarding_status": "in_progress",
+        "documents_pending": 4,
+        "documents_complete": 0,
+        "compliance_status": "pending",
+        "profile": {
+          "name": "Talal Fadhli",
+          "email": "talalabdalla89@gmail.com",
+          "phone": "96550252254",
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "hire_date": "2026-05-12",
+          "start_date": null,
+          "updated_at": "2026-05-12T21:41:35Z",
+          "company_code": "WATHEFNI",
+          "created_from": "hired_application",
+          "employee_key": "WATHEFNI-96550252254",
+          "position_title": "Social Media Manager",
+          "compliance_status": "pending",
+          "documents_pending": 4,
+          "onboarding_status": "not_started",
+          "documents_complete": 0
+        },
+        "raw_json": {
+          "name": "Talal Fadhli",
+          "email": "talalabdalla89@gmail.com",
+          "phone": "96550252254",
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "hire_date": "2026-05-12",
+          "start_date": null,
+          "updated_at": "2026-05-12T21:41:35Z",
+          "company_code": "WATHEFNI",
+          "created_from": "hired_application",
+          "employee_key": "WATHEFNI-96550252254",
+          "position_title": "Social Media Manager",
+          "compliance_status": "pending",
+          "documents_pending": 4,
+          "onboarding_status": "not_started",
+          "documents_complete": 0
+        },
+        "created_at": "2026-05-12 20:43:01.670538+00:00",
+        "updated_at": "2026-08-01 20:03:20.703316+00:00",
+        "employment_status": "active",
+        "device_user_id": null,
+        "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3"
+      }
+    },
+    {
+      "label": "alias 965 resolves same",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96550252254",
+        "phone": "96550252254",
+        "company_code": "WATHEFNI",
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "name": "Talal Fadhli",
+        "email": "talalabdalla89@gmail.com",
+        "position_title": "Social Media Manager",
+        "hire_date": "2026-05-12",
+        "start_date": null,
+        "onboarding_status": "in_progress",
+        "documents_pending": 4,
+        "documents_complete": 0,
+        "compliance_status": "pending",
+        "profile": {
+          "name": "Talal Fadhli",
+          "email": "talalabdalla89@gmail.com",
+          "phone": "96550252254",
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "hire_date": "2026-05-12",
+          "start_date": null,
+          "updated_at": "2026-05-12T21:41:35Z",
+          "company_code": "WATHEFNI",
+          "created_from": "hired_application",
+          "employee_key": "WATHEFNI-96550252254",
+          "position_title": "Social Media Manager",
+          "compliance_status": "pending",
+          "documents_pending": 4,
+          "onboarding_status": "not_started",
+          "documents_complete": 0
+        },
+        "raw_json": {
+          "name": "Talal Fadhli",
+          "email": "talalabdalla89@gmail.com",
+          "phone": "96550252254",
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "hire_date": "2026-05-12",
+          "start_date": null,
+          "updated_at": "2026-05-12T21:41:35Z",
+          "company_code": "WATHEFNI",
+          "created_from": "hired_application",
+          "employee_key": "WATHEFNI-96550252254",
+          "position_title": "Social Media Manager",
+          "compliance_status": "pending",
+          "documents_pending": 4,
+          "onboarding_status": "not_started",
+          "documents_complete": 0
+        },
+        "created_at": "2026-05-12 20:43:01.670538+00:00",
+        "updated_at": "2026-08-01 20:03:20.703316+00:00",
+        "employment_status": "active",
+        "device_user_id": null,
+        "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3"
+      }
+    },
+    {
+      "label": "alias maps to person",
+      "ok": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96550252254",
+        "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+        "mapping_status": "active",
+        "provenance": {
+          "source": "wave2_backfill",
+          "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+          "person_seed": "person:WATHEFNI:phone:96550252254",
+          "legacy_employee_key": "WATHEFNI-96550252254"
+        },
+        "created_at": "2026-08-01T20:28:13.928245+00:00",
+        "updated_at": "2026-08-01T20:28:13.976569+00:00",
+        "employee_number": "EMP-0003",
+        "person_name": "Talal Fadhli",
+        "authority_employment_status": "active",
+        "employment_start_date": "2026-05-12",
+        "employment_end_date": null,
+        "assignment_position_title": "Social Media Manager",
+        "assignment_department": null
+      }
+    },
+    {
+      "label": "same tenant ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cross tenant denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manual create",
+      "ok": true,
+      "detail": {
+        "status": "created",
+        "employee_key": "WATHEFNI-965570172",
+        "employee": {
+          "employee_key": "WATHEFNI-965570172",
+          "name": "W2 Prod Smoke 17bf2cf6",
+          "phone": "965570172",
+          "email": "",
+          "position_title": "Temp",
+          "department": "",
+          "onboarding_status": "not_started",
+          "employment_status": "active",
+          "start_date": null,
+          "updated_at": "2026-08-01T20:28:14.058601+00:00"
+        },
+        "compliance_seeded": 0,
+        "onboarding_seeded": 0
+      }
+    },
+    {
+      "label": "create shadow-sync",
+      "ok": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-965570172",
+        "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+        "employment_id": "b7010f55-2d17-56a3-a3c3-dec90cae3556",
+        "assignment_id": "02e37b55-4d80-52c5-9519-3a7c10893ff7",
+        "mapping_status": "active",
+        "provenance": {
+          "source": "dashboard_roster",
+          "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+          "person_seed": "person:WATHEFNI:phone:965570172",
+          "legacy_employee_key": "WATHEFNI-965570172"
+        },
+        "created_at": "2026-08-01T20:28:14.064591+00:00",
+        "updated_at": "2026-08-01T20:28:14.078183+00:00",
+        "employee_number": "EMP-0005",
+        "person_name": "W2 Prod Smoke 17bf2cf6",
+        "authority_employment_status": "active",
+        "employment_start_date": null,
+        "employment_end_date": null,
+        "assignment_position_title": "Temp",
+        "assignment_department": null
+      }
+    },
+    {
+      "label": "manual edit",
+      "ok": true,
+      "detail": {
+        "status": "updated",
+        "employee_key": "WATHEFNI-965570172",
+        "employee": {
+          "employee_key": "WATHEFNI-965570172",
+          "name": "W2 Prod Smoke 17bf2cf6",
+          "phone": "965570172",
+          "email": "",
+          "position_title": "Temp Edited",
+          "department": "",
+          "onboarding_status": "not_started",
+          "employment_status": "active",
+          "start_date": null,
+          "updated_at": "2026-08-01T20:28:14.098800+00:00"
+        }
+      }
+    },
+    {
+      "label": "edit shadow-sync title",
+      "ok": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-965570172",
+        "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+        "employment_id": "b7010f55-2d17-56a3-a3c3-dec90cae3556",
+        "assignment_id": "02e37b55-4d80-52c5-9519-3a7c10893ff7",
+        "mapping_status": "active",
+        "provenance": {
+          "source": "employee_edit",
+          "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+          "person_seed": "person:WATHEFNI:phone:965570172",
+          "legacy_employee_key": "WATHEFNI-965570172"
+        },
+        "created_at": "2026-08-01T20:28:14.064591+00:00",
+        "updated_at": "2026-08-01T20:28:14.111333+00:00",
+        "employee_number": "EMP-0005",
+        "person_name": "W2 Prod Smoke 17bf2cf6",
+        "authority_employment_status": "active",
+        "employment_start_date": null,
+        "employment_end_date": null,
+        "assignment_position_title": "Temp Edited",
+        "assignment_department": null
+      }
+    },
+    {
+      "label": "hire shadow-sync path",
+      "ok": true,
+      "detail": {
+        "person": {
+          "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+          "company_code": "WATHEFNI",
+          "display_name": "W2 Prod Smoke 17bf2cf6",
+          "primary_phone": "965570172",
+          "primary_email": null,
+          "employee_number": "EMP-0005",
+          "status": "active",
+          "provenance": {
+            "source": "canonical_hire",
+            "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+            "person_seed": "person:WATHEFNI:phone:965570172",
+            "legacy_employee_key": "WATHEFNI-965570172"
+          },
+          "created_at": "2026-08-01T20:28:14.064591+00:00",
+          "updated_at": "2026-08-01T20:28:14.123928+00:00"
+        },
+        "employment": {
+          "employment_id": "b7010f55-2d17-56a3-a3c3-dec90cae3556",
+          "company_code": "WATHEFNI",
+          "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+          "employment_status": "active",
+          "start_date": null,
+          "end_date": null,
+          "hire_source": "dashboard_roster",
+          "app_key": null,
+          "legacy_employee_key": "WATHEFNI-965570172",
+          "provenance": {
+            "source": "canonical_hire",
+            "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+            "person_seed": "person:WATHEFNI:phone:965570172",
+            "legacy_employee_key": "WATHEFNI-965570172"
+          },
+          "created_at": "2026-08-01T20:28:14.064591+00:00",
+          "updated_at": "2026-08-01T20:28:14.123928+00:00"
+        },
+        "assignment": {
+          "assignment_id": "02e37b55-4d80-52c5-9519-3a7c10893ff7",
+          "company_code": "WATHEFNI",
+          "employment_id": "b7010f55-2d17-56a3-a3c3-dec90cae3556",
+          "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+          "is_primary": true,
+          "position_title": "Temp Edited",
+          "department": null,
+          "location": null,
+          "manager_employee_key": null,
+          "team_key": null,
+          "branch_key": null,
+          "cost_center": null,
+          "working_pattern": {},
+          "effective_from": null,
+          "effective_to": null,
+          "provenance": {
+            "source": "canonical_hire",
+            "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+            "person_seed": "person:WATHEFNI:phone:965570172",
+            "legacy_employee_key": "WATHEFNI-965570172"
+          },
+          "created_at": "2026-08-01T20:28:14.064591+00:00",
+          "updated_at": "2026-08-01T20:28:14.123928+00:00"
+        },
+        "mapping": {
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-965570172",
+          "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+          "employment_id": "b7010f55-2d17-56a3-a3c3-dec90cae3556",
+          "assignment_id": "02e37b55-4d80-52c5-9519-3a7c10893ff7",
+          "mapping_status": "active",
+          "provenance": {
+            "source": "canonical_hire",
+            "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+            "person_seed": "person:WATHEFNI:phone:965570172",
+            "legacy_employee_key": "WATHEFNI-965570172"
+          },
+          "created_at": "2026-08-01T20:28:14.064591+00:00",
+          "updated_at": "2026-08-01T20:28:14.123928+00:00"
+        },
+        "ids": {
+          "person_id": "e5b678ca-6918-540d-9b09-9d6c14a3bcdb",
+          "employment_id": "b7010f55-2d17-56a3-a3c3-dec90cae3556",
+          "assignment_id": "02e37b55-4d80-52c5-9519-3a7c10893ff7",
+          "person_seed": "person:WATHEFNI:phone:965570172"
+        }
+      }
+    },
+    {
+      "label": "api present list_employees",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "api present workspace_integrity_scan",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "api present create_company_employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "api present update_company_employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "integrity no employee-linked orphans",
+      "ok": true,
+      "detail": 0
+    }
+  ],
+  "matrix": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "hub_phone": "96550252254",
+      "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+      "employee_number": "EMP-0003",
+      "hub_employment_status": "active",
+      "authority_employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "hub_phone": "96566363363",
+      "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+      "employee_number": "EMP-0001",
+      "hub_employment_status": "active",
+      "authority_employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "hub_phone": "96597727743",
+      "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+      "employee_number": "EMP-0002",
+      "hub_employment_status": "active",
+      "authority_employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "hub_phone": "96599411617",
+      "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+      "employee_number": "EMP-0004",
+      "hub_employment_status": "active",
+      "authority_employment_status": "active"
+    }
+  ],
+  "journal": [
+    {
+      "journal_id": "54c41793-e6c0-4125-ac0e-52057716b07b",
+      "action": "backfill_authority",
+      "idempotency_key": "wave2-backfill:WATHEFNI:approved-map-v1",
+      "status": "applied",
+      "created_at": "2026-08-01 20:28:13.928245+00:00"
+    }
+  ]
+}

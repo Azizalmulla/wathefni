@@ -1,0 +1,7 @@
+/opt/wathefni/backups/staging-pre-migration-wave1br-20260804T021355Z
+c574c653fc608b0ed6e43416cfd6e5ec8e271be85dadadbaf3dbe784fcbe8f2f  /opt/wathefni/staging/orchestrator/schema_contract.py
+f0c5cd2fc4551447183b47189a92c32417f5316c75fd51d0292a386bdd20b554  /opt/wathefni/staging/orchestrator/inbound_cv_intake.py
+1ee4db61474e965e8d97004e327043b8f17c234da74631d0ee6c81071e454c0d  /opt/wathefni/staging/orchestrator/app.py
+4a243518c7434a183d3bc323655d8df38c1fcc62396332b912e0725e1ed4f136  /opt/wathefni/staging/orchestrator/migration_wave1_cv_foundation.py
+active
+STAGING_MODULES_INSTALLED

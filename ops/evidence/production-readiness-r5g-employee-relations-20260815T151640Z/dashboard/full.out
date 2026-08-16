@@ -1,0 +1,41 @@
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ src/EmployeeProfile.repro.test.tsx (1 test | 1 failed) 5017ms
+     × opening an employee from the directory does not crash the dashboard 5011ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/EmployeeProfile.repro.test.tsx > employee profile click (production data repro) > opening an employee from the directory does not crash the dashboard
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/EmployeeProfile.repro.test.tsx:129:3
+    127|
+    128| describe('employee profile click (production data repro)', () => {
+    129|   test('opening an employee from the directory does not crash the dash…
+       |   ^
+    130|     localStorage.setItem('wathefni_dashboard_token', 'saved-token')
+    131|     localStorage.setItem('wathefni_hr_phone', '96599338566')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 88 passed (89)
+      Tests  1 failed | 480 passed (481)
+   Start at  18:16:42
+   Duration  43.29s (transform 26.50s, setup 64.37s, import 42.35s, tests 79.34s, environment 242.21s)
+

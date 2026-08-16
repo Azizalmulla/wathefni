@@ -1,0 +1,8 @@
+release version 0.1.0 runtime None updates None
+release expo-updates None
+release has_node_modules False
+src version 0.1.0 runtime {'policy': 'appVersion'} updates {'url': 'https://u.expo.dev/e381fb7c-bf1b-4ff6-b9ac-6c2d904f67e8', 'fallbackToCacheTimeout': 0, 'checkAutomatically': 'ON_LOAD', 'enabled': True}
+src expo-updates ~0.25.28
+src has_node_modules True
+native_file_diff ''
+OTA_COMPATIBLE=yes JS-only

@@ -1,0 +1,102 @@
+    compensation planning c6 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  ja hard
+      PASS  no duplicate grade
+      PASS  not payroll
+      PASS  finalized not applied
+      PASS  plan approved not salary
+      PASS  change package not paid
+      PASS  performance optional
+      PASS  rating not auto
+      PASS  talent optional
+      PASS  hipo not auto
+      PASS  works payroll off
+      PASS  midpoint not recommended
+      PASS  promotion not role mutation
+      PASS  bonus not paid
+      PASS  currency explicit
+      PASS  assistant mutations out
+      PASS  no second analytics
+      PASS  employee draft hidden
+      PASS  setup wave6 comp
+      PASS  setup honesty ja hard
+      PASS  setup honesty not payroll
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  no local grade table
+      PASS  gate requires ja env
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on with ja
+      PASS  tenant gate
+      PASS  schema cycles
+      PASS  schema bands
+      PASS  schema handoffs
+      PASS  employment mutated check
+      PASS  payroll paid check
+      PASS  no cp_grade ddl
+      PASS  refs ja_grade
+      PASS  ja must be enabled
+      PASS  enable ja
+      PASS  enable company
+      PASS  kwd default
+      PASS  sod default
+      PASS  setup policy get
+      PASS  ja grade
+      PASS  band requires ja grade
+      PASS  band v1
+      PASS  midpoint not recommended flag
+      PASS  create cycle
+      PASS  launch freeze
+      PASS  eligible n
+      PASS  eligible not guaranteed
+      PASS  band v2 new version
+      PASS  snapshot band immutable
+      PASS  ineligible explicit
+      PASS  budget create
+      PASS  manager scope denied
+      PASS  budget hard block
+      PASS  merit recommendation
+      PASS  rating not auto on rec
+      PASS  promotion types distinct
+      PASS  promotion not role mutation
+      PASS  performance off blocks guided
+      PASS  hipo not automatic pay
+      PASS  talent off blocks guided
+      PASS  calibrate
+      PASS  calibration not original
+      PASS  sod recommend≠approve
+      PASS  approve
+      PASS  history layers
+      PASS  original in history
+      PASS  employee draft hidden pre-final
+      PASS  no draft leak
+      PASS  finalize
+      PASS  decisions present
+      PASS  decision not applied
+      PASS  employee still no draft after finalize
+      PASS  payroll handoff optional/off
+      PASS  explicit handoff
+      PASS  comp does not mutate employment
+      PASS  not payroll paid
+      PASS  employment change authority
+      PASS  external payroll path
+      PASS  compa ratio
+      PASS  compa definition
+      PASS  assistant read
+      PASS  assistant cannot recommend
+      PASS  bonus type distinct
+      PASS  bonus finalize
+      PASS  approved bonus not paid
+      PASS  wave5 eligible fact
+      PASS  wave5 approved fact
+      PASS  disable retains history
+      PASS  module off blocks
+      PASS  history kept
+      PASS  tenant other gated or empty
+
+    COMPENSATION_PLANNING_FULL_PASS
+    97 passed, 0 failed
+STAGING_RC=0

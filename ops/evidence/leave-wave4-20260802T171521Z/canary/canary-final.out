@@ -1,0 +1,130 @@
+73036b5909191b09a4e3af55d8d989ba12af7e9103f5d48961cf949019699029  /opt/wathefni/orchestrator/app.py
+health_ok
+Request info
+dual-control
+non-binding
+طلب معلومات
+غير ملزم
+Leave Wave 4 prod canary tag=fe5d7401 phone=965527257401
+[PASS] wave4 version
+[PASS] wave4 enabled
+[PASS] wave3 enabled
+[PASS] real decision gate on
+[PASS] allowlist has HR1
+[PASS] allowlist has HR2
+[PASS] allowlist size >= 2
+[PASS] enforced=false
+[PASS] legal_reviewed=false
+[PASS] non-allowlisted real denied
+[PASS] synthetic bypasses allowlist
+[PASS] unpaid handoff no money
+[PASS] am vs pm no overlap
+[PASS] db is wathefni
+[PASS] preflight: frozen leave count 2
+[PASS] preflight: frozen fp 51cd940f
+[PASS] preflight: frozen fp e3217e0e
+[PASS] eligibility rows 4
+[PASS] eligibility all found
+[PASS] eligibility enforced false
+[PASS] holiday status present
+[PASS] holiday fail-closed when not approved
+[PASS] employee app require allowlist
+[PASS] employee app Talal-only or empty-fail-closed
+[PASS] stale already resolved (idempotent)
+[PASS] post-dual-control: frozen leave count 2
+[PASS] post-dual-control: frozen fp 51cd940f
+[PASS] post-dual-control: frozen fp e3217e0e
+[PASS] synthetic employee
+[PASS] accrual posted
+[PASS] annual half-day request
+[PASS] enrich next_action decide
+[PASS] enrich non-binding
+[PASS] synth self-approval denied
+[PASS] stale concurrency exercised
+[PASS] HR approve half-day
+[PASS] attendance derived or noted
+[PASS] hourly request
+[PASS] sick request
+[PASS] needs-info
+[PASS] resubmit
+[PASS] attachment upload
+[PASS] sensitive attachment masked for stranger
+[PASS] sensitive attachment visible to privileged HR
+[PASS] mask helper redacts
+[PASS] withdraw
+[PASS] unpaid request
+[PASS] unpaid no reservation money
+[PASS] unpaid approve
+[PASS] unpaid payroll handoff no money
+[PASS] cancel future approved
+[PASS] overlap or conflict surfaced
+[PASS] kill switch disables wave4
+[PASS] kill switch restored
+[PASS] post-cleanup: frozen leave count 2
+[PASS] post-cleanup: frozen fp 51cd940f
+[PASS] post-cleanup: frozen fp e3217e0e
+[PASS] residual synthetic employees 0
+[PASS] balances count unchanged vs preflight
+[PASS] ledger count unchanged vs preflight
+
+60 passed, 0 failed  evid=/opt/wathefni/production-evidence/leave-wave4/20260802T171521Z/canary-final
+PASS  leave freeze doc present
+PASS  freeze doc mentions self_approval
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions enforced=false
+PASS  freeze doc mentions legal_reviewed=false
+PASS  freeze doc mentions ledger
+PASS  freeze doc mentions attachment
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions Payroll
+PASS  freeze doc mentions NO-GO
+PASS  freeze doc mentions REAL_DECISION
+PASS  self_decision_denied present
+PASS  self_approval_forbidden string
+PASS  synthetic_only gate
+PASS  lifecycle_gate present
+PASS  policy pack version 2.1.0
+PASS  enforced false in pack
+PASS  ledger reservation idempotency index
+PASS  unpaid payroll_boundary
+PASS  attachment mask helper
+PASS  assert_handoff_has_no_money
+PASS  wave4 real decision gate
+PASS  wave4 dual control
+PASS  wave4 kill switch
+PASS  app wires wave4 gate on approve
+PASS  app attendance reverse event-before-delete
+PASS  app does not set enforced=true for leave policies in wave4
+PASS  LeaveWorkspace present (orch enrich fallback)
+PASS  leave freeze cursor rule present
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+34 passed, 0 failed
+73036b5909191b09a4e3af55d8d989ba12af7e9103f5d48961cf949019699029  /opt/wathefni/orchestrator/app.py
+4fdfe59d2f1c2bdc1672236afaf1ad504ae8390ec789784435d4c6fb311b79a9  /opt/wathefni/orchestrator/leave_wave4_controlled.py
+c8dad47eaca79e57be84dbecb6bd5891768e3554db035a45404e35f88be4e7d4  /opt/wathefni/orchestrator/leave_workflow_wave3.py
+809d427c8163395ee92bf7b1e15446450d122c662b95a985146283ac9286d5b7  /opt/wathefni/orchestrator/leave_policy_wave2.py
+b153a0cf6154d82698f3f54342efa15e1591c6e6df14c05b5d47ca45b9ee8e8a  /opt/wathefni/orchestrator/leave_authority_wave1.py
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525,965526,965527
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_LEAVE_POLICY_WAVE2=on
+WATHEFNI_LEAVE_REAL_DECISION_ALLOWLIST=96599338566,96588009911
+WATHEFNI_LEAVE_REAL_DECISION_GATE=on
+WATHEFNI_LEAVE_WAVE4=on
+WATHEFNI_LEAVE_WORKFLOW_WAVE3=on
+enabled
+active
+WAVE4_FINAL_OK

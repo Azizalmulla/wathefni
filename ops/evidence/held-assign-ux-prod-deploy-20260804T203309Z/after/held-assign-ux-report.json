@@ -1,0 +1,103 @@
+{
+  "events": [
+    {
+      "step": "card",
+      "scope": "explicit"
+    },
+    {
+      "step": "no-bulk-before-select",
+      "ok": true
+    },
+    {
+      "step": "first_key",
+      "app_key": "imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT"
+    },
+    {
+      "step": "confirm_disabled_without_job",
+      "ok": true
+    },
+    {
+      "step": "no_sibling_panel",
+      "ok": true,
+      "open": "held-row-assign-panel-imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT"
+    },
+    {
+      "step": "job_chosen",
+      "job": "OCCTST_044035",
+      "label": "OCC status proof 044035"
+    },
+    {
+      "step": "single_assign_payload",
+      "body": {
+        "action": "assign",
+        "app_keys": [
+          "imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT"
+        ],
+        "position_code": "OCCTST_044035",
+        "position_title": "OCC status proof 044035"
+      },
+      "ok": true
+    },
+    {
+      "step": "bulk_toolbar",
+      "copy": "1 selected \u2014 all selected candidates will receive the same job."
+    },
+    {
+      "step": "bulk_disabled_without_job",
+      "ok": true
+    },
+    {
+      "step": "unchecked_siblings",
+      "siblings": [
+        "imp-wathefni-4115005c9dcdfc37-WATHEFNI-IMPORT"
+      ],
+      "ok": true
+    },
+    {
+      "step": "bulk_one_selected_excludes_siblings",
+      "body": {
+        "action": "assign",
+        "app_keys": [
+          "imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT"
+        ],
+        "position_code": "OCCTST_044035",
+        "position_title": "OCC status proof 044035"
+      },
+      "ok": true
+    },
+    {
+      "step": "preview",
+      "ok": true
+    },
+    {
+      "step": "no_whole_group_fallback",
+      "ok": true
+    }
+  ],
+  "intercepted": [
+    {
+      "url": "http://127.0.0.1:8010/dashboard/prehire/import/items/bulk",
+      "body": {
+        "action": "assign",
+        "app_keys": [
+          "imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT"
+        ],
+        "position_code": "OCCTST_044035",
+        "position_title": "OCC status proof 044035"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8010/dashboard/prehire/import/items/bulk",
+      "body": {
+        "action": "assign",
+        "app_keys": [
+          "imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT"
+        ],
+        "position_code": "OCCTST_044035",
+        "position_title": "OCC status proof 044035"
+      },
+      "fulfilled": true
+    }
+  ],
+  "proof_ok": true
+}

@@ -1,0 +1,11 @@
+PASS  profile payload is ok
+PASS  personal name/phone/email come from the employee row
+PASS  employment carries position and department
+PASS  employment carries employee/company identifiers
+PASS  start_date is projected when stored — 2024-03-15
+PASS  manager is resolved from the stored manager phone — {'name': 'Profile aec5d7a0 99', 'phone': '96596585990', 'employee_key': 'WATHEFNI-96596585990'}
+PASS  lean employee card remains present for older clients
+PASS  /app/me stays on the compact public shape
+PASS  manager is omitted when no manager phone is stored — None
+---
+PASS employee app profile projection contract

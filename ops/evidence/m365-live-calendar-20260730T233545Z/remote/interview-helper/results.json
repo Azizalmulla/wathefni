@@ -1,0 +1,41 @@
+{
+  "stamp": "20260730T233644Z",
+  "create": {
+    "ok": true,
+    "event_id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0kqAAA=",
+    "meet_link": "",
+    "web_link": "https://outlook.office365.com/owa/?itemid=AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG%2Bod7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0kqAAA%3D&exvsurl=1&path=/calendar/item",
+    "error": null,
+    "status": null
+  },
+  "attendee_count": 2,
+  "reschedule": {
+    "ok": true,
+    "event_id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0kqAAA=",
+    "meet_link": "",
+    "error": null,
+    "status": null
+  },
+  "cancel": {
+    "ok": true,
+    "event_id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0kqAAA=",
+    "status": 204,
+    "error": null
+  },
+  "outside_au": {
+    "ok": false,
+    "status": 403,
+    "error": "graph_http_403",
+    "detail": "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access is denied. Check credentials and try again.\"}}"
+  },
+  "assistant_probe": {
+    "attempted": false,
+    "meeting_types_include_teams": true,
+    "microsoft_env_configured": true,
+    "registry_symbols": [
+      "_reschedule_interview_executor",
+      "_schedule_interview_executor",
+      "_scheduled_interview_for_current_app"
+    ]
+  }
+}

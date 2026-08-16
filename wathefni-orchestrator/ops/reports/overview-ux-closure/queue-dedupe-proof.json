@@ -1,0 +1,10 @@
+{
+  "total": 12,
+  "items": 12,
+  "duplicate_action_app_pairs": [],
+  "same_app_same_action_ok": true,
+  "pagination": {"page1": 5, "page2": 5, "combined_unique": 10, "no_cross_page_dupes": true, "api_total": 12},
+  "same_name_multi_app_preserved": true,
+  "same_app_different_actions_preserved": true,
+  "note": "Hamad Almulla appears twice only because two distinct app_keys (ACCOUNTING_EXCEL and HR) both need follow-up."
+}

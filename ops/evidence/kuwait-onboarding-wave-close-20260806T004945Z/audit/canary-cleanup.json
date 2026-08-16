@@ -1,0 +1,25 @@
+{
+  "action": "cleanup",
+  "item_id": "civil_id_canary_test",
+  "employee_key": "WATHEFNI-96599338566",
+  "deleted": {
+    "governed_document_events": 3,
+    "governed_document_versions": 3,
+    "employee_documents": 1,
+    "file_registry": 3,
+    "document_storage_operations": 3,
+    "onboarding_audit_events": 0,
+    "onboarding_items": 1
+  },
+  "civil_id_preserved": {
+    "status": "accepted",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "required": true
+  },
+  "flags_unchanged": {
+    "SOFT": "on",
+    "HARD": "off",
+    "LIFECYCLE_V2A": "on",
+    "allowlist": ["WATHEFNI-96599338566", "WATHEFNI-96550252254"]
+  }
+}

@@ -1,0 +1,362 @@
+{
+  "checks": [
+    {
+      "label": "seed globally off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "hr_mutate globally off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic canary on",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "template 2.0.0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank ESS only",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "nineteen real checklist rows",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed blocked for real 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "mutate blocked for real 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "start blocked for real 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed blocked for real 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "mutate blocked for real 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "start blocked for real 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed blocked for real 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "mutate blocked for real 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "start blocked for real 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed blocked for real 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "mutate blocked for real 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "start blocked for real 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic recognized",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed allowed synthetic",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "mutate allowed synthetic",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "delayed start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "delayed no seed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reschedule to today",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "unattended activate",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seeded after activate",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "assignment version pinned",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed idempotent",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "duplicate start idempotent",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "due dates present",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "dependency blocks residence",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "employee/hr document store",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "hr waive",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "stale mutation fail closed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reminder recorded",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank plaintext mark blocked",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank receipt blocked",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank forbidden helper",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank ess confirm without plaintext",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "mark employment_contract",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "second delayed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "emp2 in progress",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cancel ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cancel preserves history",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cancel idempotent",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "abandon ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "abandon preserves history",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "abandon idempotent",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cross-tenant empty",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "out-of-scope or terminal fail closed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "audit events recorded",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "due-proof start",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reschedule future",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reschedule updates open due dates",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "four reals fingerprint unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic employees cleaned",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic items cleaned",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic assignments cleaned",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic audit cleaned",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "tag": "ad4a3254",
+    "employee_key": "WATHEFNI-96552356722",
+    "employee_key_abandon": "WATHEFNI-96552356729",
+    "phone": "96552356722",
+    "phone_abandon": "96552356729",
+    "name": "W2B-SYNTH|Prod Canary ad4a3254"
+  },
+  "fingerprints": {
+    "before": [
+      "WATHEFNI-96550252254|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96566363363|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96566363363|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96566363363|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96566363363|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96566363363|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96566363363|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96597727743|bank_details|True|received|bad78241880ae6d5ae7d9512cb8bb321|0",
+      "WATHEFNI-96597727743|civil_id|True|received|fd1de835a88e1a642bc3fc17125e19e8|0",
+      "WATHEFNI-96597727743|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96597727743|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96597727743|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+      "WATHEFNI-96597727743|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+      "WATHEFNI-96599411617|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0"
+    ],
+    "after": [
+      "WATHEFNI-96550252254|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96550252254|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96566363363|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96566363363|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96566363363|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96566363363|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96566363363|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96566363363|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+      "WATHEFNI-96597727743|bank_details|True|received|bad78241880ae6d5ae7d9512cb8bb321|0",
+      "WATHEFNI-96597727743|civil_id|True|received|fd1de835a88e1a642bc3fc17125e19e8|0",
+      "WATHEFNI-96597727743|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96597727743|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+      "WATHEFNI-96597727743|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+      "WATHEFNI-96597727743|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+      "WATHEFNI-96599411617|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0"
+    ]
+  },
+  "cleanup": {
+    "onboarding_audit_events": 19,
+    "employee_onboarding_assignments": 3,
+    "onboarding_items": 108,
+    "file_registry": 1,
+    "employees": 3
+  },
+  "summary": {
+    "pass": 59,
+    "fail": 0
+  }
+}

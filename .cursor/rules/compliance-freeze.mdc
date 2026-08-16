@@ -1,0 +1,33 @@
+---
+description: Compliance Wave 1 Findings Contract freeze — do not reopen without owner change-control
+globs: apps/wathefni-dashboard/src/posthire/PostHire.tsx,wathefni-orchestrator/compliance_findings_wave1.py,wathefni-orchestrator/app.py
+alwaysApply: false
+---
+
+# Compliance Wave 1 freeze
+
+Compliance Findings Contract is **production-qualified under synthetic-only posture** and **frozen**. See `ops/COMPLIANCE_WAVE1_FINDINGS_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- Document compliance only
+- `WATHEFNI_COMPLIANCE_WAVE1=1` + `SYNTHETIC_ONLY=1` (markers `CFW1`, phones `965541*`)
+- Never government verified; no legal-compliance claims; no fines/filing/gov APIs
+- Alerts & Delivery owns reminder delivery
+- Analytics excludes Compliance metrics
+- money_authority: false
+
+## Hard bans
+
+1. **Do not add AI** inside Compliance.
+2. **Do not add government APIs, filing, fine engines, or automatic legal-compliance claims.**
+3. **Do not add Compliance metrics to Analytics.**
+4. **Do not weaken evidence honesty** (HR reviewed ≠ government verified).
+5. **Do not change frozen module contracts** to unblock Compliance.
+6. **Do not start Compliance Wave 2** without owner-approved change-control.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- `smoke-test-compliance-freeze-regression.py`

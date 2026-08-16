@@ -1,0 +1,1820 @@
+{
+  "tag": "19709E98",
+  "checks": [
+    {
+      "name": "db_is_wathefni",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "name": "wave3_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "version_3_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_gate_on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlists_empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_reminders_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "shw3b_synth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_mutation_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synth_mutation_allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_payroll_money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_templates",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create_same_day",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "status": "created",
+        "message": "SHW3B-SYNTH| A 19709E98's shift was scheduled.",
+        "shift": {
+          "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-08",
+          "start_time": "09:00:00",
+          "end_time": "13:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "scheduled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-08",
+              "role": null,
+              "reason": "w3b same-day 19709E98",
+              "end_time": "13:00",
+              "location": null,
+              "site_key": "W3B-SITE",
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-08",
+              "start_time": "09:00",
+              "reason_note": "w3b same-day 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": "965531197001",
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": false,
+              "acknowledge_availability": false,
+              "ack_availability_conflict": false
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.824410+00:00",
+          "updated_at": "2026-08-02T23:04:59.824410+00:00",
+          "ends_next_day": false,
+          "break_minutes": null,
+          "site_key": "W3B-SITE",
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 1,
+          "current_version_no": 1,
+          "schedule_reason_code": null,
+          "lineage_json": {},
+          "ui_state": "scheduled",
+          "is_overnight": false,
+          "is_split_hint": false,
+          "open_reconciliation_count": 0,
+          "display_window": {
+            "shift_date": "2026-08-08",
+            "start_time": "09:00",
+            "end_time": "13:00",
+            "ends_next_day": false,
+            "spans_next_date": false
+          }
+        },
+        "created": [
+          {
+            "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+            "employee_phone": "965531197001",
+            "employee_name": "SHW3B-SYNTH| A 19709E98",
+            "shift_date": "2026-08-08",
+            "start_time": "09:00:00",
+            "end_time": "13:00:00",
+            "timezone": "Asia/Kuwait",
+            "role": null,
+            "location": null,
+            "status": "scheduled",
+            "notes": null,
+            "source_text": "",
+            "metadata": {
+              "action": {
+                "date": "2026-08-08",
+                "role": null,
+                "reason": "w3b same-day 19709E98",
+                "end_time": "13:00",
+                "location": null,
+                "site_key": "W3B-SITE",
+                "team_key": null,
+                "branch_key": null,
+                "shift_date": "2026-08-08",
+                "start_time": "09:00",
+                "reason_note": "w3b same-day 19709E98",
+                "source_text": "dashboard_shifts_composer",
+                "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                "viewer_phone": "96588009911",
+                "employee_name": "SHW3B-SYNTH| A 19709E98",
+                "employee_phone": "965531197001",
+                "confirm_overlap": false,
+                "_employee_resolution": {
+                  "status": "resolved",
+                  "choices": []
+                },
+                "allow_leave_conflicts": false,
+                "acknowledge_availability": false,
+                "ack_availability_conflict": false
+              },
+              "source": "hr_whatsapp",
+              "shifts_wave1": true,
+              "payroll_money": false
+            },
+            "reminder_sent_at": null,
+            "created_by_phone": "96588009911",
+            "created_at": "2026-08-02T23:04:59.824410+00:00",
+            "updated_at": "2026-08-02T23:04:59.824410+00:00",
+            "ends_next_day": false,
+            "break_minutes": null,
+            "site_key": "W3B-SITE",
+            "branch_key": null,
+            "team_key": null,
+            "position_key": null,
+            "idempotency_key": null,
+            "row_version": 1,
+            "current_version_no": 1,
+            "schedule_reason_code": null,
+            "lineage_json": {}
+          }
+        ],
+        "warnings": [],
+        "wave3": {
+          "shifts_wave3_version": "3.1.0",
+          "payroll_money": false,
+          "leave_balances_mutated": false,
+          "attendance_authority_mutated": false,
+          "templates": false,
+          "recurring_schedules": false,
+          "rotations": false,
+          "publishing": false,
+          "open_shifts": false,
+          "pam_export": false,
+          "broad_employee_app": false,
+          "talal_read_only": true,
+          "real_reminders": false,
+          "operator_timers_default": "disabled",
+          "real_mutation_gate": true,
+          "wave3b_synthetic_markers": {
+            "key_markers": [
+              "SHW3B",
+              "SHW3B-SYNTH|"
+            ],
+            "phone_prefixes": [
+              "965531"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "create_split_second_row",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "status": "created",
+        "message": "SHW3B-SYNTH| A 19709E98's shift was scheduled.",
+        "shift": {
+          "shift_id": "7ef2cf78-5f23-492c-8e65-044b32254fea",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-08",
+          "start_time": "14:00:00",
+          "end_time": "18:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "scheduled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-08",
+              "role": null,
+              "reason": "w3b split 19709E98",
+              "end_time": "18:00",
+              "location": null,
+              "site_key": null,
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-08",
+              "start_time": "14:00",
+              "reason_note": "w3b split 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": null,
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": false,
+              "acknowledge_availability": false,
+              "ack_availability_conflict": false
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.863589+00:00",
+          "updated_at": "2026-08-02T23:04:59.863589+00:00",
+          "ends_next_day": false,
+          "break_minutes": null,
+          "site_key": null,
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 1,
+          "current_version_no": 1,
+          "schedule_reason_code": null,
+          "lineage_json": {},
+          "ui_state": "scheduled",
+          "is_overnight": false,
+          "is_split_hint": false,
+          "open_reconciliation_count": 0,
+          "display_window": {
+            "shift_date": "2026-08-08",
+            "start_time": "14:00",
+            "end_time": "18:00",
+            "ends_next_day": false,
+            "spans_next_date": false
+          }
+        },
+        "created": [
+          {
+            "shift_id": "7ef2cf78-5f23-492c-8e65-044b32254fea",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+            "employee_phone": "965531197001",
+            "employee_name": "SHW3B-SYNTH| A 19709E98",
+            "shift_date": "2026-08-08",
+            "start_time": "14:00:00",
+            "end_time": "18:00:00",
+            "timezone": "Asia/Kuwait",
+            "role": null,
+            "location": null,
+            "status": "scheduled",
+            "notes": null,
+            "source_text": "",
+            "metadata": {
+              "action": {
+                "date": "2026-08-08",
+                "role": null,
+                "reason": "w3b split 19709E98",
+                "end_time": "18:00",
+                "location": null,
+                "site_key": null,
+                "team_key": null,
+                "branch_key": null,
+                "shift_date": "2026-08-08",
+                "start_time": "14:00",
+                "reason_note": "w3b split 19709E98",
+                "source_text": "dashboard_shifts_composer",
+                "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                "viewer_phone": "96588009911",
+                "employee_name": "SHW3B-SYNTH| A 19709E98",
+                "employee_phone": null,
+                "confirm_overlap": false,
+                "_employee_resolution": {
+                  "status": "resolved",
+                  "choices": []
+                },
+                "allow_leave_conflicts": false,
+                "acknowledge_availability": false,
+                "ack_availability_conflict": false
+              },
+              "source": "hr_whatsapp",
+              "shifts_wave1": true,
+              "payroll_money": false
+            },
+            "reminder_sent_at": null,
+            "created_by_phone": "96588009911",
+            "created_at": "2026-08-02T23:04:59.863589+00:00",
+            "updated_at": "2026-08-02T23:04:59.863589+00:00",
+            "ends_next_day": false,
+            "break_minutes": null,
+            "site_key": null,
+            "branch_key": null,
+            "team_key": null,
+            "position_key": null,
+            "idempotency_key": null,
+            "row_version": 1,
+            "current_version_no": 1,
+            "schedule_reason_code": null,
+            "lineage_json": {}
+          }
+        ],
+        "warnings": [],
+        "wave3": {
+          "shifts_wave3_version": "3.1.0",
+          "payroll_money": false,
+          "leave_balances_mutated": false,
+          "attendance_authority_mutated": false,
+          "templates": false,
+          "recurring_schedules": false,
+          "rotations": false,
+          "publishing": false,
+          "open_shifts": false,
+          "pam_export": false,
+          "broad_employee_app": false,
+          "talal_read_only": true,
+          "real_reminders": false,
+          "operator_timers_default": "disabled",
+          "real_mutation_gate": true,
+          "wave3b_synthetic_markers": {
+            "key_markers": [
+              "SHW3B",
+              "SHW3B-SYNTH|"
+            ],
+            "phone_prefixes": [
+              "965531"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "create_overnight",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "status": "created",
+        "message": "SHW3B-SYNTH| A 19709E98's shift was scheduled.",
+        "shift": {
+          "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-09",
+          "start_time": "22:00:00",
+          "end_time": "18:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "scheduled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-09",
+              "role": null,
+              "reason": "w3b overnight 19709E98",
+              "end_time": "06:00",
+              "location": null,
+              "site_key": null,
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-09",
+              "start_time": "22:00",
+              "reason_note": "w3b overnight 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": null,
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": true,
+              "acknowledge_availability": true,
+              "ack_availability_conflict": true
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.892851+00:00",
+          "updated_at": "2026-08-02T23:04:59.892851+00:00",
+          "ends_next_day": true,
+          "break_minutes": null,
+          "site_key": null,
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 1,
+          "current_version_no": 1,
+          "schedule_reason_code": null,
+          "lineage_json": {},
+          "ui_state": "scheduled",
+          "is_overnight": true,
+          "is_split_hint": false,
+          "open_reconciliation_count": 0,
+          "display_window": {
+            "shift_date": "2026-08-09",
+            "start_time": "22:00",
+            "end_time": "18:00",
+            "ends_next_day": true,
+            "spans_next_date": true
+          }
+        },
+        "created": [
+          {
+            "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+            "employee_phone": "965531197001",
+            "employee_name": "SHW3B-SYNTH| A 19709E98",
+            "shift_date": "2026-08-09",
+            "start_time": "22:00:00",
+            "end_time": "18:00:00",
+            "timezone": "Asia/Kuwait",
+            "role": null,
+            "location": null,
+            "status": "scheduled",
+            "notes": null,
+            "source_text": "",
+            "metadata": {
+              "action": {
+                "date": "2026-08-09",
+                "role": null,
+                "reason": "w3b overnight 19709E98",
+                "end_time": "06:00",
+                "location": null,
+                "site_key": null,
+                "team_key": null,
+                "branch_key": null,
+                "shift_date": "2026-08-09",
+                "start_time": "22:00",
+                "reason_note": "w3b overnight 19709E98",
+                "source_text": "dashboard_shifts_composer",
+                "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                "viewer_phone": "96588009911",
+                "employee_name": "SHW3B-SYNTH| A 19709E98",
+                "employee_phone": null,
+                "confirm_overlap": false,
+                "_employee_resolution": {
+                  "status": "resolved",
+                  "choices": []
+                },
+                "allow_leave_conflicts": true,
+                "acknowledge_availability": true,
+                "ack_availability_conflict": true
+              },
+              "source": "hr_whatsapp",
+              "shifts_wave1": true,
+              "payroll_money": false
+            },
+            "reminder_sent_at": null,
+            "created_by_phone": "96588009911",
+            "created_at": "2026-08-02T23:04:59.892851+00:00",
+            "updated_at": "2026-08-02T23:04:59.892851+00:00",
+            "ends_next_day": true,
+            "break_minutes": null,
+            "site_key": null,
+            "branch_key": null,
+            "team_key": null,
+            "position_key": null,
+            "idempotency_key": null,
+            "row_version": 1,
+            "current_version_no": 1,
+            "schedule_reason_code": null,
+            "lineage_json": {}
+          }
+        ],
+        "warnings": [],
+        "wave3": {
+          "shifts_wave3_version": "3.1.0",
+          "payroll_money": false,
+          "leave_balances_mutated": false,
+          "attendance_authority_mutated": false,
+          "templates": false,
+          "recurring_schedules": false,
+          "rotations": false,
+          "publishing": false,
+          "open_shifts": false,
+          "pam_export": false,
+          "broad_employee_app": false,
+          "talal_read_only": true,
+          "real_reminders": false,
+          "operator_timers_default": "disabled",
+          "real_mutation_gate": true,
+          "wave3b_synthetic_markers": {
+            "key_markers": [
+              "SHW3B",
+              "SHW3B-SYNTH|"
+            ],
+            "phone_prefixes": [
+              "965531"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "overnight_ends_next_day",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_no_duplicate_authority",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "name": "list_wave3_on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "list_contains_synth",
+      "ok": true,
+      "detail": {
+        "found": 3,
+        "week": 0,
+        "window": [
+          "2026-08-03",
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "name": "history_versions",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "shift": {
+          "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-08",
+          "start_time": "09:00:00",
+          "end_time": "13:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "scheduled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-08",
+              "role": null,
+              "reason": "w3b same-day 19709E98",
+              "end_time": "13:00",
+              "location": null,
+              "site_key": "W3B-SITE",
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-08",
+              "start_time": "09:00",
+              "reason_note": "w3b same-day 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": "965531197001",
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": false,
+              "acknowledge_availability": false,
+              "ack_availability_conflict": false
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.824410+00:00",
+          "updated_at": "2026-08-02T23:04:59.824410+00:00",
+          "ends_next_day": false,
+          "break_minutes": null,
+          "site_key": "W3B-SITE",
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 1,
+          "current_version_no": 1,
+          "schedule_reason_code": "created",
+          "lineage_json": {
+            "last_reason_code": "created",
+            "current_version_no": 1
+          },
+          "ui_state": "scheduled",
+          "is_overnight": false,
+          "is_split_hint": false,
+          "open_reconciliation_count": 0,
+          "display_window": {
+            "shift_date": "2026-08-08",
+            "start_time": "09:00",
+            "end_time": "13:00",
+            "ends_next_day": false,
+            "spans_next_date": false
+          }
+        },
+        "versions": [
+          {
+            "version_id": "d621e4b9-ea72-49fc-82f0-90703fc6aeba",
+            "company_code": "WATHEFNI",
+            "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+            "version_no": 1,
+            "is_current": true,
+            "effective_at": "2026-08-02T23:04:59.824410+00:00",
+            "superseded_at": null,
+            "reason_code": "created",
+            "reason_note": "w3b same-day 19709E98",
+            "actor_phone": "96588009911",
+            "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+            "previous_employee_key": null,
+            "shift_date": "2026-08-08",
+            "start_time": "09:00:00",
+            "end_time": "13:00:00",
+            "ends_next_day": false,
+            "status": "scheduled",
+            "snapshot": {
+              "role": null,
+              "notes": null,
+              "status": "scheduled",
+              "end_time": "13:00:00",
+              "location": null,
+              "metadata": "{'action': {'date': '2026-08-08', 'role': None, 'reason': 'w3b same-day 19709E98', 'end_time': '13:00', 'location': None, 'site_key': 'W3B-SITE', 'team_key': None, 'branch_key': None, 'shift_date': '2026-08-08', 'start_time': '09:00', 'reason_note': 'w3b same-day 19709E98', 'source_text': 'dashboard_shifts_composer', 'employee_key': 'WATHEFNI-SHW3B-A-19709E98', 'viewer_phone': '96588009911', 'employee_name': 'SHW3B-SYNTH| A 19709E98', 'employee_phone': '965531197001', 'confirm_overlap': False, '_employee_resolution': {'status': 'resolved', 'choices': []}, 'allow_leave_conflicts': False, 'acknowledge_availability': False, 'ack_availability_conflict': False}, 'source': 'hr_whatsapp', 'shifts_wave1': True, 'payroll_money': False}",
+              "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+              "site_key": "W3B-SITE",
+              "team_key": null,
+              "timezone": "Asia/Kuwait",
+              "branch_key": null,
+              "created_at": "2026-08-02T23:04:59.824410+00:00",
+              "shift_date": "2026-08-08",
+              "start_time": "09:00:00",
+              "updated_at": "2026-08-02T23:04:59.824410+00:00",
+              "row_version": 1,
+              "source_text": "",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "lineage_json": "{}",
+              "position_key": null,
+              "break_minutes": null,
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "ends_next_day": false,
+              "employee_phone": "965531197001",
+              "idempotency_key": null,
+              "created_by_phone": "96588009911",
+              "reminder_sent_at": null,
+              "current_version_no": 1,
+              "schedule_reason_code": null
+            },
+            "lineage": {},
+            "created_at": "2026-08-02T23:04:59.824410+00:00"
+          }
+        ],
+        "events": [
+          {
+            "event_id": "20e6457a-3c1e-4919-89c5-62e7202a4252",
+            "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+            "event_type": "created",
+            "payload": {
+              "shift": {
+                "role": null,
+                "notes": null,
+                "status": "scheduled",
+                "end_time": "13:00:00",
+                "location": null,
+                "metadata": {
+                  "action": {
+                    "date": "2026-08-08",
+                    "role": null,
+                    "reason": "w3b same-day 19709E98",
+                    "end_time": "13:00",
+                    "location": null,
+                    "site_key": "W3B-SITE",
+                    "team_key": null,
+                    "branch_key": null,
+                    "shift_date": "2026-08-08",
+                    "start_time": "09:00",
+                    "reason_note": "w3b same-day 19709E98",
+                    "source_text": "dashboard_shifts_composer",
+                    "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                    "viewer_phone": "96588009911",
+                    "employee_name": "SHW3B-SYNTH| A 19709E98",
+                    "employee_phone": "965531197001",
+                    "confirm_overlap": false,
+                    "_employee_resolution": {
+                      "status": "resolved",
+                      "choices": []
+                    },
+                    "allow_leave_conflicts": false,
+                    "acknowledge_availability": false,
+                    "ack_availability_conflict": false
+                  },
+                  "source": "hr_whatsapp",
+                  "shifts_wave1": true,
+                  "payroll_money": false
+                },
+                "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+                "site_key": "W3B-SITE",
+                "team_key": null,
+                "timezone": "Asia/Kuwait",
+                "branch_key": null,
+                "created_at": "2026-08-02T23:04:59.824410+00:00",
+                "shift_date": "2026-08-08",
+                "start_time": "09:00:00",
+                "updated_at": "2026-08-02T23:04:59.824410+00:00",
+                "row_version": 1,
+                "source_text": "",
+                "company_code": "WATHEFNI",
+                "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                "lineage_json": {},
+                "position_key": null,
+                "break_minutes": null,
+                "employee_name": "SHW3B-SYNTH| A 19709E98",
+                "ends_next_day": false,
+                "employee_phone": "965531197001",
+                "idempotency_key": null,
+                "created_by_phone": "96588009911",
+                "reminder_sent_at": null,
+                "current_version_no": 1,
+                "schedule_reason_code": null
+              },
+              "action": {
+                "date": "2026-08-08",
+                "role": null,
+                "reason": "w3b same-day 19709E98",
+                "end_time": "13:00",
+                "location": null,
+                "site_key": "W3B-SITE",
+                "team_key": null,
+                "branch_key": null,
+                "shift_date": "2026-08-08",
+                "start_time": "09:00",
+                "reason_note": "w3b same-day 19709E98",
+                "source_text": "dashboard_shifts_composer",
+                "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                "viewer_phone": "96588009911",
+                "employee_name": "SHW3B-SYNTH| A 19709E98",
+                "employee_phone": "965531197001",
+                "confirm_overlap": false,
+                "_employee_resolution": {
+                  "status": "resolved",
+                  "choices": []
+                },
+                "allow_leave_conflicts": false,
+                "acknowledge_availability": false,
+                "ack_availability_conflict": false
+              }
+            },
+            "created_by_phone": "96588009911",
+            "created_at": "2026-08-02T23:04:59.824410+00:00"
+          }
+        ],
+        "wave3": {
+          "shifts_wave3_version": "3.1.0",
+          "payroll_money": false,
+          "leave_balances_mutated": false,
+          "attendance_authority_mutated": false,
+          "templates": false,
+          "recurring_schedules": false,
+          "rotations": false,
+          "publishing": false,
+          "open_shifts": false,
+          "pam_export": false,
+          "broad_employee_app": false,
+          "talal_read_only": true,
+          "real_reminders": false,
+          "operator_timers_default": "disabled",
+          "real_mutation_gate": true,
+          "wave3b_synthetic_markers": {
+            "key_markers": [
+              "SHW3B",
+              "SHW3B-SYNTH|"
+            ],
+            "phone_prefixes": [
+              "965531"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "stale_rejected",
+      "ok": true,
+      "detail": {
+        "error": "stale_state",
+        "message": "That shift changed. Refresh and try again."
+      }
+    },
+    {
+      "name": "reschedule_ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "status": "rescheduled",
+        "message": "SHW3B-SYNTH| A 19709E98's shift was moved to 2026-08-08.",
+        "shift": {
+          "shift_id": "3be18019-3922-4478-bdc4-230173ca3cd7",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-08",
+          "start_time": "10:00:00",
+          "end_time": "14:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "scheduled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-08",
+              "role": null,
+              "reason": "w3b same-day 19709E98",
+              "end_time": "13:00",
+              "location": null,
+              "site_key": "W3B-SITE",
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-08",
+              "start_time": "09:00",
+              "reason_note": "w3b same-day 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": "965531197001",
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": false,
+              "acknowledge_availability": false,
+              "ack_availability_conflict": false
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.824410+00:00",
+          "updated_at": "2026-08-02T23:05:00.011918+00:00",
+          "ends_next_day": false,
+          "break_minutes": null,
+          "site_key": "W3B-SITE",
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 2,
+          "current_version_no": 1,
+          "schedule_reason_code": "created",
+          "lineage_json": {
+            "last_reason_code": "created",
+            "current_version_no": 1
+          }
+        },
+        "notified": true
+      }
+    },
+    {
+      "name": "soft_cancel_ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "status": "cancelled",
+        "message": "SHW3B-SYNTH| A 19709E98's shift was cancelled.",
+        "shift": {
+          "shift_id": "7ef2cf78-5f23-492c-8e65-044b32254fea",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-08",
+          "start_time": "14:00:00",
+          "end_time": "18:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "cancelled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-08",
+              "role": null,
+              "reason": "w3b split 19709E98",
+              "end_time": "18:00",
+              "location": null,
+              "site_key": null,
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-08",
+              "start_time": "14:00",
+              "reason_note": "w3b split 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": null,
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": false,
+              "acknowledge_availability": false,
+              "ack_availability_conflict": false
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.863589+00:00",
+          "updated_at": "2026-08-02T23:05:00.069836+00:00",
+          "ends_next_day": false,
+          "break_minutes": null,
+          "site_key": null,
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 1,
+          "current_version_no": 1,
+          "schedule_reason_code": "cancelled",
+          "lineage_json": {
+            "last_reason_code": "created",
+            "current_version_no": 1
+          }
+        },
+        "notified": true
+      }
+    },
+    {
+      "name": "real_create_blocked",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "shifts_real_mutation_not_allowlisted",
+        "message": "Real shift mutations are limited to the named WATHEFNI HR/manager allowlist while Shifts Wave 3 is in controlled readiness.",
+        "shifts_wave3_version": "3.1.0",
+        "payroll_money": false,
+        "leave_balances_mutated": false,
+        "attendance_authority_mutated": false,
+        "templates": false,
+        "recurring_schedules": false,
+        "rotations": false,
+        "publishing": false,
+        "open_shifts": false,
+        "pam_export": false,
+        "broad_employee_app": false,
+        "talal_read_only": true,
+        "real_reminders": false,
+        "operator_timers_default": "disabled",
+        "real_mutation_gate": true,
+        "wave3b_synthetic_markers": {
+          "key_markers": [
+            "SHW3B",
+            "SHW3B-SYNTH|"
+          ],
+          "phone_prefixes": [
+            "965531"
+          ]
+        }
+      }
+    },
+    {
+      "name": "swap_requested",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "swap": {
+          "swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8",
+          "company_code": "WATHEFNI",
+          "requester_employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "requester_employee_phone": "965531197001",
+          "requester_employee_name": "SHW3B-SYNTH| A 19709E98",
+          "target_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+          "target_employee_phone": "965531197002",
+          "target_employee_name": "SHW3B-SYNTH| B 19709E98",
+          "requester_shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "target_shift_id": null,
+          "shift_date": "2026-08-09",
+          "status": "requested",
+          "reason": "w3b swap 19709E98",
+          "decision_note": null,
+          "source_text": "",
+          "requested_by_phone": "965531197001",
+          "decided_by_phone": null,
+          "requested_at": "2026-08-02T23:05:00.110847+00:00",
+          "decided_at": null,
+          "metadata": {
+            "action": {
+              "reason": "w3b swap 19709E98",
+              "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "requester_shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "target_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": [],
+                "searched": {}
+              },
+              "requester_employee_key": "WATHEFNI-SHW3B-A-19709E98"
+            },
+            "source": "whatsapp",
+            "target_shift": {},
+            "requester_shift": {
+              "role": null,
+              "notes": null,
+              "status": "scheduled",
+              "end_time": "18:00:00",
+              "location": null,
+              "metadata": {
+                "action": {
+                  "date": "2026-08-09",
+                  "role": null,
+                  "reason": "w3b overnight 19709E98",
+                  "end_time": "06:00",
+                  "location": null,
+                  "site_key": null,
+                  "team_key": null,
+                  "branch_key": null,
+                  "shift_date": "2026-08-09",
+                  "start_time": "22:00",
+                  "reason_note": "w3b overnight 19709E98",
+                  "source_text": "dashboard_shifts_composer",
+                  "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                  "viewer_phone": "96588009911",
+                  "employee_name": "SHW3B-SYNTH| A 19709E98",
+                  "employee_phone": null,
+                  "confirm_overlap": false,
+                  "_employee_resolution": {
+                    "status": "resolved",
+                    "choices": []
+                  },
+                  "allow_leave_conflicts": true,
+                  "acknowledge_availability": true,
+                  "ack_availability_conflict": true
+                },
+                "source": "hr_whatsapp",
+                "shifts_wave1": true,
+                "payroll_money": false
+              },
+              "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "site_key": null,
+              "team_key": null,
+              "timezone": "Asia/Kuwait",
+              "branch_key": null,
+              "created_at": "2026-08-02T23:04:59.892851+00:00",
+              "shift_date": "2026-08-09",
+              "start_time": "22:00:00",
+              "updated_at": "2026-08-02T23:04:59.892851+00:00",
+              "row_version": 1,
+              "source_text": "",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "lineage_json": {
+                "last_reason_code": "created",
+                "current_version_no": 1
+              },
+              "position_key": null,
+              "break_minutes": null,
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "ends_next_day": true,
+              "employee_phone": "965531197001",
+              "idempotency_key": null,
+              "created_by_phone": "96588009911",
+              "reminder_sent_at": null,
+              "current_version_no": 1,
+              "schedule_reason_code": "created"
+            }
+          },
+          "created_at": "2026-08-02T23:05:00.110847+00:00",
+          "updated_at": "2026-08-02T23:05:00.110847+00:00"
+        },
+        "requester": {
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "phone": "965531197001",
+          "company_code": "WATHEFNI",
+          "app_key": null,
+          "name": "SHW3B-SYNTH| A 19709E98",
+          "email": null,
+          "position_title": null,
+          "hire_date": null,
+          "start_date": null,
+          "onboarding_status": "not_started",
+          "documents_pending": 0,
+          "documents_complete": 0,
+          "compliance_status": "pending",
+          "profile": {},
+          "raw_json": {
+            "tag": "19709E98",
+            "shw3b": true
+          },
+          "created_at": "2026-08-02T23:04:59.807962+00:00",
+          "updated_at": "2026-08-02T23:04:59.807962+00:00",
+          "employment_status": null,
+          "device_user_id": null,
+          "person_id": null,
+          "employment_id": null,
+          "assignment_id": null,
+          "onboarding_template_version": null
+        },
+        "target": {
+          "employee_key": "WATHEFNI-SHW3B-B-19709E98",
+          "phone": "965531197002",
+          "company_code": "WATHEFNI",
+          "app_key": null,
+          "name": "SHW3B-SYNTH| B 19709E98",
+          "email": null,
+          "position_title": null,
+          "hire_date": null,
+          "start_date": null,
+          "onboarding_status": "not_started",
+          "documents_pending": 0,
+          "documents_complete": 0,
+          "compliance_status": "pending",
+          "profile": {},
+          "raw_json": {
+            "tag": "19709E98",
+            "shw3b": true
+          },
+          "created_at": "2026-08-02T23:04:59.807962+00:00",
+          "updated_at": "2026-08-02T23:04:59.807962+00:00",
+          "employment_status": null,
+          "device_user_id": null,
+          "person_id": null,
+          "employment_id": null,
+          "assignment_id": null,
+          "onboarding_template_version": null
+        },
+        "requester_shift": {
+          "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "employee_phone": "965531197001",
+          "employee_name": "SHW3B-SYNTH| A 19709E98",
+          "shift_date": "2026-08-09",
+          "start_time": "22:00:00",
+          "end_time": "18:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "scheduled",
+          "notes": null,
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-09",
+              "role": null,
+              "reason": "w3b overnight 19709E98",
+              "end_time": "06:00",
+              "location": null,
+              "site_key": null,
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-09",
+              "start_time": "22:00",
+              "reason_note": "w3b overnight 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": null,
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": true,
+              "acknowledge_availability": true,
+              "ack_availability_conflict": true
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.892851+00:00",
+          "updated_at": "2026-08-02T23:04:59.892851+00:00",
+          "ends_next_day": true,
+          "break_minutes": null,
+          "site_key": null,
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 1,
+          "current_version_no": 1,
+          "schedule_reason_code": "created",
+          "lineage_json": {
+            "last_reason_code": "created",
+            "current_version_no": 1
+          }
+        },
+        "hr_notification": {
+          "ok": true,
+          "skipped": "shw3b"
+        }
+      }
+    },
+    {
+      "name": "self_decision_denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "self_swap_decision_forbidden",
+        "message": "You cannot approve or reject a shift swap that involves you.",
+        "swap": {
+          "swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8",
+          "company_code": "WATHEFNI",
+          "requester_employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "requester_employee_phone": "965531197001",
+          "requester_employee_name": "SHW3B-SYNTH| A 19709E98",
+          "target_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+          "target_employee_phone": "965531197002",
+          "target_employee_name": "SHW3B-SYNTH| B 19709E98",
+          "requester_shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "target_shift_id": null,
+          "shift_date": "2026-08-09",
+          "status": "requested",
+          "reason": "w3b swap 19709E98",
+          "decision_note": null,
+          "source_text": "",
+          "requested_by_phone": "965531197001",
+          "decided_by_phone": null,
+          "requested_at": "2026-08-02T23:05:00.110847+00:00",
+          "decided_at": null,
+          "metadata": {
+            "action": {
+              "reason": "w3b swap 19709E98",
+              "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "requester_shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "target_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": [],
+                "searched": {}
+              },
+              "requester_employee_key": "WATHEFNI-SHW3B-A-19709E98"
+            },
+            "source": "whatsapp",
+            "target_shift": {},
+            "requester_shift": {
+              "role": null,
+              "notes": null,
+              "status": "scheduled",
+              "end_time": "18:00:00",
+              "location": null,
+              "metadata": {
+                "action": {
+                  "date": "2026-08-09",
+                  "role": null,
+                  "reason": "w3b overnight 19709E98",
+                  "end_time": "06:00",
+                  "location": null,
+                  "site_key": null,
+                  "team_key": null,
+                  "branch_key": null,
+                  "shift_date": "2026-08-09",
+                  "start_time": "22:00",
+                  "reason_note": "w3b overnight 19709E98",
+                  "source_text": "dashboard_shifts_composer",
+                  "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                  "viewer_phone": "96588009911",
+                  "employee_name": "SHW3B-SYNTH| A 19709E98",
+                  "employee_phone": null,
+                  "confirm_overlap": false,
+                  "_employee_resolution": {
+                    "status": "resolved",
+                    "choices": []
+                  },
+                  "allow_leave_conflicts": true,
+                  "acknowledge_availability": true,
+                  "ack_availability_conflict": true
+                },
+                "source": "hr_whatsapp",
+                "shifts_wave1": true,
+                "payroll_money": false
+              },
+              "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "site_key": null,
+              "team_key": null,
+              "timezone": "Asia/Kuwait",
+              "branch_key": null,
+              "created_at": "2026-08-02T23:04:59.892851+00:00",
+              "shift_date": "2026-08-09",
+              "start_time": "22:00:00",
+              "updated_at": "2026-08-02T23:04:59.892851+00:00",
+              "row_version": 1,
+              "source_text": "",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "lineage_json": {
+                "last_reason_code": "created",
+                "current_version_no": 1
+              },
+              "position_key": null,
+              "break_minutes": null,
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "ends_next_day": true,
+              "employee_phone": "965531197001",
+              "idempotency_key": null,
+              "created_by_phone": "96588009911",
+              "reminder_sent_at": null,
+              "current_version_no": 1,
+              "schedule_reason_code": "created"
+            }
+          },
+          "created_at": "2026-08-02T23:05:00.110847+00:00",
+          "updated_at": "2026-08-02T23:05:00.110847+00:00"
+        },
+        "action": {
+          "swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8"
+        }
+      }
+    },
+    {
+      "name": "swap_scoped_decision_attempted",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "swap": {
+          "swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8",
+          "company_code": "WATHEFNI",
+          "requester_employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "requester_employee_phone": "965531197001",
+          "requester_employee_name": "SHW3B-SYNTH| A 19709E98",
+          "target_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+          "target_employee_phone": "965531197002",
+          "target_employee_name": "SHW3B-SYNTH| B 19709E98",
+          "requester_shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "target_shift_id": null,
+          "shift_date": "2026-08-09",
+          "status": "approved",
+          "reason": "w3b swap 19709E98",
+          "decision_note": null,
+          "source_text": "",
+          "requested_by_phone": "965531197001",
+          "decided_by_phone": "96588009911",
+          "requested_at": "2026-08-02T23:05:00.110847+00:00",
+          "decided_at": "2026-08-02T23:05:00.127516+00:00",
+          "metadata": {
+            "action": {
+              "reason": "w3b swap 19709E98",
+              "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "requester_shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "target_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": [],
+                "searched": {}
+              },
+              "requester_employee_key": "WATHEFNI-SHW3B-A-19709E98"
+            },
+            "source": "whatsapp",
+            "target_shift": {},
+            "requester_shift": {
+              "role": null,
+              "notes": null,
+              "status": "scheduled",
+              "end_time": "18:00:00",
+              "location": null,
+              "metadata": {
+                "action": {
+                  "date": "2026-08-09",
+                  "role": null,
+                  "reason": "w3b overnight 19709E98",
+                  "end_time": "06:00",
+                  "location": null,
+                  "site_key": null,
+                  "team_key": null,
+                  "branch_key": null,
+                  "shift_date": "2026-08-09",
+                  "start_time": "22:00",
+                  "reason_note": "w3b overnight 19709E98",
+                  "source_text": "dashboard_shifts_composer",
+                  "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                  "viewer_phone": "96588009911",
+                  "employee_name": "SHW3B-SYNTH| A 19709E98",
+                  "employee_phone": null,
+                  "confirm_overlap": false,
+                  "_employee_resolution": {
+                    "status": "resolved",
+                    "choices": []
+                  },
+                  "allow_leave_conflicts": true,
+                  "acknowledge_availability": true,
+                  "ack_availability_conflict": true
+                },
+                "source": "hr_whatsapp",
+                "shifts_wave1": true,
+                "payroll_money": false
+              },
+              "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+              "site_key": null,
+              "team_key": null,
+              "timezone": "Asia/Kuwait",
+              "branch_key": null,
+              "created_at": "2026-08-02T23:04:59.892851+00:00",
+              "shift_date": "2026-08-09",
+              "start_time": "22:00:00",
+              "updated_at": "2026-08-02T23:04:59.892851+00:00",
+              "row_version": 1,
+              "source_text": "",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "lineage_json": {
+                "last_reason_code": "created",
+                "current_version_no": 1
+              },
+              "position_key": null,
+              "break_minutes": null,
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "ends_next_day": true,
+              "employee_phone": "965531197001",
+              "idempotency_key": null,
+              "created_by_phone": "96588009911",
+              "reminder_sent_at": null,
+              "current_version_no": 1,
+              "schedule_reason_code": "created"
+            }
+          },
+          "created_at": "2026-08-02T23:05:00.110847+00:00",
+          "updated_at": "2026-08-02T23:05:00.127516+00:00"
+        },
+        "updated_shifts": [
+          {
+            "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-SHW3B-B-19709E98",
+            "employee_phone": "965531197002",
+            "employee_name": "SHW3B-SYNTH| B 19709E98",
+            "shift_date": "2026-08-09",
+            "start_time": "22:00:00",
+            "end_time": "18:00:00",
+            "timezone": "Asia/Kuwait",
+            "role": null,
+            "location": null,
+            "status": "scheduled",
+            "notes": "Assigned by approved shift swap",
+            "source_text": "",
+            "metadata": {
+              "action": {
+                "date": "2026-08-09",
+                "role": null,
+                "reason": "w3b overnight 19709E98",
+                "end_time": "06:00",
+                "location": null,
+                "site_key": null,
+                "team_key": null,
+                "branch_key": null,
+                "shift_date": "2026-08-09",
+                "start_time": "22:00",
+                "reason_note": "w3b overnight 19709E98",
+                "source_text": "dashboard_shifts_composer",
+                "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+                "viewer_phone": "96588009911",
+                "employee_name": "SHW3B-SYNTH| A 19709E98",
+                "employee_phone": null,
+                "confirm_overlap": false,
+                "_employee_resolution": {
+                  "status": "resolved",
+                  "choices": []
+                },
+                "allow_leave_conflicts": true,
+                "acknowledge_availability": true,
+                "ack_availability_conflict": true
+              },
+              "source": "hr_whatsapp",
+              "shifts_wave1": true,
+              "payroll_money": false,
+              "approved_shift_swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8"
+            },
+            "reminder_sent_at": null,
+            "created_by_phone": "96588009911",
+            "created_at": "2026-08-02T23:04:59.892851+00:00",
+            "updated_at": "2026-08-02T23:05:00.127516+00:00",
+            "ends_next_day": true,
+            "break_minutes": null,
+            "site_key": null,
+            "branch_key": null,
+            "team_key": null,
+            "position_key": null,
+            "idempotency_key": null,
+            "row_version": 1,
+            "current_version_no": 1,
+            "schedule_reason_code": "created",
+            "lineage_json": {
+              "last_reason_code": "created",
+              "current_version_no": 1
+            }
+          }
+        ],
+        "requester_notification": {
+          "ok": true,
+          "skipped": "shw3b"
+        },
+        "target_notification": {
+          "ok": true,
+          "skipped": "shw3b"
+        }
+      }
+    },
+    {
+      "name": "recon_acknowledge",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "flag": {
+          "flag_id": "f8574bc2-24a3-4ed6-a5ca-6963442f4010",
+          "company_code": "WATHEFNI",
+          "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "flag_type": "lifecycle_fact_change",
+          "status": "acknowledged",
+          "details": {
+            "tag": "19709E98",
+            "shw3b": true
+          },
+          "created_by_phone": null,
+          "acknowledged_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:05:00.151798+00:00",
+          "resolved_at": "2026-08-02T23:05:00.170974+00:00"
+        }
+      }
+    },
+    {
+      "name": "recon_audited_cancel",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "flag": {
+          "flag_id": "c77cf97b-3c16-44ce-9c75-b05e0be61c81",
+          "company_code": "WATHEFNI",
+          "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+          "flag_type": "lifecycle_fact_change",
+          "status": "cancelled",
+          "details": {
+            "tag": "19709E98",
+            "shw3b": true,
+            "cancel": true
+          },
+          "created_by_phone": null,
+          "acknowledged_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:05:00.215336+00:00",
+          "resolved_at": "2026-08-02T23:05:00.243762+00:00"
+        },
+        "shift": {
+          "shift_id": "32ee253b-0834-4898-816f-bda302c971d8",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-SHW3B-B-19709E98",
+          "employee_phone": "965531197002",
+          "employee_name": "SHW3B-SYNTH| B 19709E98",
+          "shift_date": "2026-08-09",
+          "start_time": "22:00:00",
+          "end_time": "18:00:00",
+          "timezone": "Asia/Kuwait",
+          "role": null,
+          "location": null,
+          "status": "cancelled",
+          "notes": "Assigned by approved shift swap",
+          "source_text": "",
+          "metadata": {
+            "action": {
+              "date": "2026-08-09",
+              "role": null,
+              "reason": "w3b overnight 19709E98",
+              "end_time": "06:00",
+              "location": null,
+              "site_key": null,
+              "team_key": null,
+              "branch_key": null,
+              "shift_date": "2026-08-09",
+              "start_time": "22:00",
+              "reason_note": "w3b overnight 19709E98",
+              "source_text": "dashboard_shifts_composer",
+              "employee_key": "WATHEFNI-SHW3B-A-19709E98",
+              "viewer_phone": "96588009911",
+              "employee_name": "SHW3B-SYNTH| A 19709E98",
+              "employee_phone": null,
+              "confirm_overlap": false,
+              "_employee_resolution": {
+                "status": "resolved",
+                "choices": []
+              },
+              "allow_leave_conflicts": true,
+              "acknowledge_availability": true,
+              "ack_availability_conflict": true
+            },
+            "source": "hr_whatsapp",
+            "shifts_wave1": true,
+            "payroll_money": false,
+            "approved_shift_swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8"
+          },
+          "reminder_sent_at": null,
+          "created_by_phone": "96588009911",
+          "created_at": "2026-08-02T23:04:59.892851+00:00",
+          "updated_at": "2026-08-02T23:05:00.243762+00:00",
+          "ends_next_day": true,
+          "break_minutes": null,
+          "site_key": null,
+          "branch_key": null,
+          "team_key": null,
+          "position_key": null,
+          "idempotency_key": null,
+          "row_version": 2,
+          "current_version_no": 2,
+          "schedule_reason_code": "reconcile_cancel",
+          "lineage_json": {
+            "swap_id": "9ef815ad-4288-4e88-8927-a17aa0a28cc8",
+            "to_employee_key": "WATHEFNI-SHW3B-B-19709E98",
+            "last_reason_code": "reassigned_swap",
+            "from_employee_key": "WATHEFNI-SHW3B-A-19709E98",
+            "current_version_no": 2
+          }
+        }
+      }
+    },
+    {
+      "name": "terminal_reminders_key_present",
+      "ok": true,
+      "detail": [
+        "company_code",
+        "shifts",
+        "swaps",
+        "availability",
+        "reconciliation_flags",
+        "terminal_reminders",
+        "start_date",
+        "end_date",
+        "week",
+        "view",
+        "total_count",
+        "limit",
+        "offset",
+        "has_more",
+        "wave3"
+      ]
+    },
+    {
+      "name": "cleanup_residual_zero",
+      "ok": true,
+      "detail": {
+        "contract_version": "1.0.0",
+        "dry_run": false,
+        "markers": [
+          "SHW3B",
+          "SHW3B-SYNTH|"
+        ],
+        "phone_prefixes": [
+          "965531"
+        ],
+        "tag": "19709E98",
+        "deleted_shift_ids": [
+          "3be18019-3922-4478-bdc4-230173ca3cd7",
+          "7ef2cf78-5f23-492c-8e65-044b32254fea",
+          "32ee253b-0834-4898-816f-bda302c971d8"
+        ],
+        "deleted": {
+          "shift_reminder_queue": 4,
+          "shift_reconciliation_flags": 2,
+          "shift_assignment_versions": 7,
+          "shift_lifecycle_flags": 0,
+          "shift_orphan_quarantine": 0,
+          "shift_swap_events": 2,
+          "shift_swap_requests": 1,
+          "shift_events": 7,
+          "employee_availability_requests": 0,
+          "shift_assignments": 3,
+          "leave_requests": 0,
+          "shift_seasonal_policies": 0,
+          "employees": 2
+        },
+        "deletion_order": [
+          "shift_reminder_queue",
+          "shift_reconciliation_flags",
+          "shift_assignment_versions",
+          "shift_lifecycle_flags",
+          "shift_orphan_quarantine",
+          "shift_swap_events",
+          "shift_swap_requests",
+          "shift_events",
+          "employee_availability_requests",
+          "shift_assignments",
+          "leave_requests",
+          "shift_seasonal_policies",
+          "employees"
+        ],
+        "residual": {
+          "assignments": 0,
+          "versions": 0,
+          "reminders": 0,
+          "reconciliation_flags": 0,
+          "lifecycle_flags": 0,
+          "swaps": 0,
+          "availability": 0,
+          "leave": 0,
+          "seasonal_policies": 0,
+          "employees": 0,
+          "total": 0
+        },
+        "residual_total": 0,
+        "total": 0,
+        "residual_assignments": 0,
+        "residual_swaps": 0,
+        "residual_employees": 0
+      }
+    },
+    {
+      "name": "real_fps_unchanged",
+      "ok": true,
+      "detail": {
+        "before": 23,
+        "after": 23
+      }
+    }
+  ],
+  "pass": 31,
+  "fail": 0
+}

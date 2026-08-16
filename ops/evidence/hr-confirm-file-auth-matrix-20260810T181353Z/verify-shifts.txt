@@ -1,0 +1,14 @@
+PASS home route wired
+PASS swap detail route wired
+PASS Needs Attention + Today tabs
+PASS kuwaitToday for schedule day
+PASS requested swaps filter
+PASS permission states for splits
+PASS Today rows read-only
+PASS both sides on detail
+PASS no invented pending default
+PASS demo gated
+PASS app.config shiftsDemo
+PASS extensible attention kind
+PASS hrShifts keys EN+AR
+hr-shifts-companion: GREEN

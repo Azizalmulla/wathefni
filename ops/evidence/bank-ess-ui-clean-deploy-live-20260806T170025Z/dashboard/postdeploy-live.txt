@@ -1,0 +1,6 @@
+=== after ===
+-rw-r--r-- 1 501 staff 531016 Aug  6 17:00 /var/www/wathefni-dashboard/assets/PostHire-BRA7Ln_S.js
+e833ce5c8ec7b1a77165848028b53a39f298fd3267de4c20179d5ebb62005317  /var/www/wathefni-dashboard/assets/PostHire-BRA7Ln_S.js
+88cce046906dc8ac1350ec0c1da1eff2f9b9535e2c1ed73f9f649228225d4781  /var/www/wathefni-dashboard/index.html
+health:200
+index:308

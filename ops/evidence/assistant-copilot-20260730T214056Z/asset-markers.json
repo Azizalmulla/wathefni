@@ -1,0 +1,10 @@
+{
+  "assistant_profiler": true,
+  "rtl_dir": true,
+  "overlay_a11y": true,
+  "workflow_card": true,
+  "stop_control": true,
+  "files": [
+    "AdminAIPage-B7l25off.js"
+  ]
+}

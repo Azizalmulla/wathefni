@@ -1,0 +1,17 @@
+{
+  "before_status": "activated",
+  "ok": true,
+  "delivered": false,
+  "delivery_status": "failed",
+  "channel": null,
+  "code_in_result": false,
+  "after_status": "failed",
+  "after_channel": null,
+  "actions": {
+    "resend": true,
+    "reinvite": true,
+    "revoke_access": true,
+    "show_code_exception": false
+  }
+}
+PASS aziz_live_reinvite_delivery

@@ -1,0 +1,98 @@
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_MODULE_AWARE_SHELL_WAVE0=1
+CAPTURE_INGEST_OFF_OK
+MUTATIONS_OFF_OK
+SHELL_WAVE0_ON_OK
+PASS  landing leave inbox=False
+PASS  landing shifts inbox=False
+PASS  landing attendance inbox=False
+PASS  landing payroll inbox=False
+PASS  landing onboarding+compliance inbox=True
+PASS  landing onboarding+compliance inbox=False
+PASS  landing shifts+attendance+leave inbox=True
+PASS  landing shifts+attendance+leave inbox=False
+PASS  landing leave+attendance+shifts+payroll inbox=True
+PASS  landing pre_hiring+leave+attendance+shifts+payroll+onboarding+compliance+analytics inbox=True
+PASS  leave nav has employees
+PASS  leave nav has leave
+PASS  leave nav no overview
+PASS  leave nav no jobs
+PASS  catalog leave on
+PASS  catalog prehire jobs off without module
+PASS  catalog overview off without pre_hiring
+PASS  catalog e360 follows people surface
+PASS  catalog jobs on with pre_hiring
+PASS  leave inbox omits analytics
+PASS  leave inbox omits compliance
+PASS  leave inbox not partial when employees live
+PASS  entitled analytics error is partial
+PASS  empty en
+PASS  empty ar
+
+25 passed, 0 failed
+[PASS] shell wave0 flag
+[PASS] mutations off
+[PASS] ingest off
+[PASS] production db
+[PASS] audit event written
+[PASS] landing leave inbox=False
+[PASS] nav leave present leave
+[PASS] nav no overview leave
+[PASS] nav no jobs leave
+[PASS] employees spine leave
+[PASS] landing shifts inbox=False
+[PASS] employees spine shifts
+[PASS] landing attendance inbox=False
+[PASS] employees spine attendance
+[PASS] landing payroll inbox=False
+[PASS] employees spine payroll
+[PASS] landing onboarding+compliance inbox=True
+[PASS] employees spine onboarding+compliance
+[PASS] landing onboarding+compliance inbox=False
+[PASS] employees spine onboarding+compliance
+[PASS] landing shifts+attendance+leave inbox=True
+[PASS] nav leave present shifts+attendance+leave
+[PASS] nav no overview shifts+attendance+leave
+[PASS] nav no jobs shifts+attendance+leave
+[PASS] employees spine shifts+attendance+leave
+[PASS] landing shifts+attendance+leave inbox=False
+[PASS] nav leave present shifts+attendance+leave
+[PASS] nav no overview shifts+attendance+leave
+[PASS] nav no jobs shifts+attendance+leave
+[PASS] employees spine shifts+attendance+leave
+[PASS] landing leave+attendance+shifts+payroll inbox=True
+[PASS] nav leave present leave+attendance+shifts+payroll
+[PASS] nav no overview leave+attendance+shifts+payroll
+[PASS] nav no jobs leave+attendance+shifts+payroll
+[PASS] employees spine leave+attendance+shifts+payroll
+[PASS] landing pre_hiring+leave+attendance+shifts+payroll+onboarding+compliance+analytics inbox=True
+[PASS] employees spine pre_hiring+leave+attendance+shifts+payroll+onboarding+compliance+analytics
+[PASS] leave inbox omits analytics
+[PASS] leave inbox omits compliance
+[PASS] leave inbox not partial
+[PASS] entitled analytics error partial
+[PASS] entitled compliance present when purchased
+[PASS] action inbox live soft-skip
+[PASS] catalog leave-only jobs off
+[PASS] catalog leave-only overview off
+[PASS] catalog leave-only e360 on people surface
+[PASS] catalog leave-only leave on
+[PASS] catalog full suite jobs on
+[PASS] empty en
+[PASS] empty ar
+[PASS] empty ar differs or bilingual
+[PASS] alerts keep onboarding row
+[PASS] alerts drop assessment residue
+[PASS] alerts keep generic posthire delivery
+[PASS] alerts prehire keeps all issue rows
+[PASS] e360 leave-only sections
+[PASS] e360 onboarding+compliance
+[PASS] e360 ops combo
+[PASS] e360 no disabled payroll in leave-only
+[PASS] live e360 modules list
+[PASS] canary events deleted
+[PASS] residual canary 0
+[PASS] durable ack retained
+{"pass": 63, "fail": 0, "tag": "bc6f66ee", "residual": 0, "ack_count": 1, "mutations_allowed": false, "shell_wave0": "1"}

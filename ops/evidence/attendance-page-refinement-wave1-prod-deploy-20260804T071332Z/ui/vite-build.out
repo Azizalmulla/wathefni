@@ -1,0 +1,43 @@
+vite v8.0.12 building client environment for production...
+[2Ktransforming...✓ 1909 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/setup-console.html                              1.63 kB │ gzip:   0.54 kB
+dist/index.html                                      2.01 kB │ gzip:   0.58 kB
+dist/assets/src-sQIimv-N.css                       128.70 kB │ gzip:  19.64 kB
+dist/assets/rolldown-runtime-ciTZEWaI.js             0.56 kB │ gzip:   0.36 kB
+dist/assets/src-DOhZAM10.js                          0.69 kB │ gzip:   0.39 kB
+dist/assets/load-more-bar-CCCZP2tI.js                0.75 kB │ gzip:   0.50 kB
+dist/assets/access-C4CF0MqA.js                       1.06 kB │ gzip:   0.45 kB
+dist/assets/card-BSvR7FVV.js                         1.14 kB │ gzip:   0.54 kB
+dist/assets/badge-u5gjg8B1.js                        1.20 kB │ gzip:   0.53 kB
+dist/assets/button-2Bl4knZ8.js                       1.27 kB │ gzip:   0.69 kB
+dist/assets/field-9HywNlKK.js                        1.32 kB │ gzip:   0.44 kB
+dist/assets/useOverlayA11y-BAroQDg2.js               1.42 kB │ gzip:   0.64 kB
+dist/assets/dashboardPerf-YTc1theN.js                1.70 kB │ gzip:   0.75 kB
+dist/assets/ConfirmDialog-DNAN4-Qw.js                3.14 kB │ gzip:   1.48 kB
+dist/assets/fetchers-kJ3rv01h.js                     3.55 kB │ gzip:   1.23 kB
+dist/assets/inboundIntakePresentation-B5lLioGw.js    3.59 kB │ gzip:   1.55 kB
+dist/assets/NotificationsPage-x5N6At7I.js            7.39 kB │ gzip:   2.42 kB
+dist/assets/RankingPage-Dci7kyXF.js                  9.77 kB │ gzip:   3.34 kB
+dist/assets/JobWorkspace-JxR6qSe1.js                12.49 kB │ gzip:   3.90 kB
+dist/assets/ReportsPage-B4xpC4IP.js                 13.42 kB │ gzip:   4.09 kB
+dist/assets/AdminAIPage-Dv1Vb2fa.js                 17.64 kB │ gzip:   5.74 kB
+dist/assets/react-query-DTZlYvss.js                 25.39 kB │ gzip:   8.36 kB
+dist/assets/utils-B-Q60V4B.js                       28.17 kB │ gzip:   9.13 kB
+dist/assets/lucide-D1hBzyKi.js                      28.73 kB │ gzip:   9.97 kB
+dist/assets/CandidatesPage-e7gnF1ho.js              30.84 kB │ gzip:   9.23 kB
+dist/assets/InterviewsPage-D_LnkVhH.js              33.14 kB │ gzip:   8.41 kB
+dist/assets/CalendarShell-CfGkCt3F.js               38.20 kB │ gzip:  11.03 kB
+dist/assets/JobsPage-D0YnaYJO.js                    39.07 kB │ gzip:  12.99 kB
+dist/assets/CandidateProfilePage-pgr8Zjw1.js        45.11 kB │ gzip:  12.58 kB
+dist/assets/api-sYOc6kIY.js                         46.40 kB │ gzip:   8.95 kB
+dist/assets/SettingsPage-DPieLyMR.js                51.45 kB │ gzip:  13.92 kB
+dist/assets/recruitingLifecycle-DXQht60b.js         52.22 kB │ gzip:  13.72 kB
+dist/assets/AssessmentsPage-rLUyRLd1.js             57.67 kB │ gzip:  15.39 kB
+dist/assets/setupConsole-DXbbOLL1.js                69.54 kB │ gzip:  17.32 kB
+dist/assets/react-vendor-DlwfAkxi.js               181.78 kB │ gzip:  57.18 kB
+dist/assets/dashboard-DSLTwSr_.js                  231.50 kB │ gzip:  67.90 kB
+dist/assets/PostHire-D7arwIkG.js                   432.22 kB │ gzip: 105.92 kB
+
+✓ built in 268ms

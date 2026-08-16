@@ -1,0 +1,48 @@
+{
+  "period_id": "e7997812-ee6e-45b7-9545-f4e3517acd41",
+  "version_ids": [
+    "e1319270-fdba-4164-b2a2-b84b30c2ea2a",
+    "6882cfc6-f14b-4320-bc81-d55291493a24"
+  ],
+  "open_shift_ids": [
+    "f45f2b11-acc1-4909-9218-473b261bdc71",
+    "7a7a950e-3d48-494d-a9fa-080c71301638",
+    "a2e803cf-216a-4801-9ced-3d28bcf1ea9d",
+    "bdca0e3a-46ca-4143-8eb9-0c6c595461e1"
+  ],
+  "coverage_rule_names": [
+    "SHW5B Warn CA4D3A84",
+    "SHW5B Block CA4D3A84",
+    "SHW5B OvernightCov CA4D3A84"
+  ],
+  "shift_ids": [
+    "f7c6dce9-848a-4cd6-947e-4e12fd41eab2",
+    "af74a556-acf9-4d71-8c65-9bbfab8c22d2",
+    "dfd88c14-238c-40dc-acef-c83d0e3b46e8",
+    "9c3189f0-b597-45c2-8ff7-93a188458619",
+    "204c6af0-4cd9-4a7c-bcd8-2428ff2fcf0c",
+    "17bf32cd-4fa3-4843-8547-10dbcecb9a34",
+    "31f69121-aa0c-48c1-8659-b763a1862f5d",
+    "62397075-f21d-4a7c-a806-48022d5315b1",
+    "f636de03-baf8-4dde-baad-6d38b6aee750",
+    "f7c6dce9-848a-4cd6-947e-4e12fd41eab2",
+    "af74a556-acf9-4d71-8c65-9bbfab8c22d2",
+    "dfd88c14-238c-40dc-acef-c83d0e3b46e8",
+    "9c3189f0-b597-45c2-8ff7-93a188458619",
+    "204c6af0-4cd9-4a7c-bcd8-2428ff2fcf0c",
+    "17bf32cd-4fa3-4843-8547-10dbcecb9a34",
+    "31f69121-aa0c-48c1-8659-b763a1862f5d",
+    "62397075-f21d-4a7c-a806-48022d5315b1",
+    "f636de03-baf8-4dde-baad-6d38b6aee750",
+    "4645b84b-62aa-4754-a1e9-8dc11ffb240b",
+    "1c954374-b3d1-4c5c-b58c-fcce7ef7411a",
+    "63117174-c175-4775-97be-60bcc9993067"
+  ],
+  "employees": [
+    "WATHEFNI-SHW5B-CA4D3A84",
+    "WATHEFNI-SHW5B-B-CA4D3A84"
+  ],
+  "day_template": "fc56afee-2dc6-4478-ac4e-796b7c0f5533",
+  "night_template": "4546e97d-be3a-46fd-b2ec-1e0aaef7d20f",
+  "weekly_recurrence": "3be5bc79-bcce-4083-bb88-2a58b31ec10b"
+}

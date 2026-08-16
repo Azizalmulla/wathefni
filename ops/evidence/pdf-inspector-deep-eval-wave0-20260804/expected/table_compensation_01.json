@@ -1,0 +1,22 @@
+{
+  "fixture_id": "table_compensation_01",
+  "category": "table_heavy",
+  "language": "en",
+  "layout": "table",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Compensation Breakdown",
+    "Basic Salary",
+    "Total Cash",
+    "1175"
+  ],
+  "expected_fields": {
+    "basic_salary": "900",
+    "total_cash": "1175"
+  },
+  "notes": "Compensation table for section/table preservation scoring.",
+  "sha256": "a14385e68db39e24ca6e95af5235fd2b60078d050c00576ec5ed082ee0977cf0",
+  "bytes": 32456
+}

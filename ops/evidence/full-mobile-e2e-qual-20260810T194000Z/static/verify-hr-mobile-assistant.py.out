@@ -1,0 +1,49 @@
+PASS route file exports HRAssistantView
+PASS Stack.Screen assistant registered
+PASS More launcher includes assistant
+PASS capability route definition
+PASS destinationAvailable gates /assistant
+PASS canonical parent → More
+PASS getAccessToken for SSE
+PASS mobile API under /dashboard/mobile/assistant
+PASS stream + non-stream fallback
+PASS expo/fetch for streaming body
+PASS client reveal fallback deltas
+PASS channel never spoofs web_dashboard in client
+PASS no ai-recruiter references
+PASS deep links use destinationAvailable
+PASS web-only pages blocked
+PASS ranking remaps to jobs picker
+PASS jobs page maps to /hr/jobs
+PASS interviews use interview_id not app_key
+PASS streamAssistantChat used
+PASS Thinking phase before stream
+PASS no cheap ellipsis placeholder
+PASS confirm only via pending confirmation
+PASS EN/AR readingEdgeAlign + composer RTL
+PASS hasCapability assistant gate
+PASS floating composer + keyboard avoidance
+PASS circular arrow-up send
+PASS pink send when active
+PASS quiet send when empty
+PASS no suggestion chips UI
+PASS logo badge not text wordmark hero
+PASS empty: Kuwait greeting
+PASS FlatList conversation scroll
+PASS empty land present
+PASS composer single/multiline shells
+PASS auto-grow input capped
+PASS rapid-send guard
+PASS hrAssistant + greeting keys EN+AR
+PASS Thinking copy EN+AR
+PASS Arabic title present
+PASS English brand title
+PASS PAGE_TO_HR omits overview
+PASS PAGE_TO_HR omits reports
+PASS PAGE_TO_HR omits ai
+PASS PAGE_TO_HR omits settings
+PASS PAGE_TO_HR omits assessments
+PASS PAGE_TO_HR omits calendar
+PASS PAGE_TO_HR includes jobs
+PASS assessments stay web-only
+hr-mobile-assistant: GREEN

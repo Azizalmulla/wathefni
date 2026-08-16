@@ -1,0 +1,37 @@
+{
+  "employee": {
+    "employment_status": null,
+    "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+    "onboarding_status": "in_progress",
+    "name": "mohammad alqattan",
+    "employee_key": "WATHEFNI-96597727743"
+  },
+  "applications": [
+    {
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "status": "hired",
+      "company_code": "WATHEFNI"
+    }
+  ],
+  "attendance_records": {
+    "count": 14
+  },
+  "shift_assignments": {
+    "count": 7
+  },
+  "leave_requests": {
+    "count": 1
+  },
+  "employee_messages": {
+    "count": 12
+  },
+  "employee_status_changes": {
+    "count": 0
+  },
+  "onboarding_items": {
+    "count": 6
+  },
+  "compliance_documents": {
+    "count": 5
+  }
+}

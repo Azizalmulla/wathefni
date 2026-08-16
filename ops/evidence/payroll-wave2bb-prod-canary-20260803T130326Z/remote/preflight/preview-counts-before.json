@@ -1,0 +1,14 @@
+{
+  "db": "wathefni",
+  "payroll_preview_runs": {
+    "present": false
+  },
+  "payroll_compensation_contracts": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_adapter_export_runs": {
+    "present": true,
+    "count": 0
+  }
+}

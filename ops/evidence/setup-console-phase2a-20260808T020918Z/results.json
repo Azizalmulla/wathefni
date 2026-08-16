@@ -1,0 +1,101 @@
+{
+  "pass": 19,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "attendance_ux_maps_to_runtime",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend:/dashboard/superadmin/setup/companies/{company_code}/pay",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend:company_payroll_setup_owned_by_setup_console",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend:SetupPayrollSetupPatch",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:id=\"classic-payroll-setup\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-payroll-setup-mode",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-payroll-setup-statutory",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Apply SME defaults",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Wathefni Payroll",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:External Payroll",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Owned by Wathefni",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_p6_synthetic_jargon",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "posthire_policy_editor_retired",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "components_panel_policy_create_retired",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:payroll_mode",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:attendance_payroll_mode",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:approval_sod_chain",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:mode_a_entitlement_opt_in",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_api_skipped_no_token",
+      "detail": null
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+COMPLIANCE_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('CFW1', 'CFW1-SYNTH|')
+prefixes ('965541',)
+honesty {'document_compliance_only': True, 'government_verified': False, 'legal_compliance_claims': False, 'fine_calculations': False, 'ai': False, 'analytics_excludes_compliance': True, 'synthetic_only': True}
+flags_ok_synthetic=true

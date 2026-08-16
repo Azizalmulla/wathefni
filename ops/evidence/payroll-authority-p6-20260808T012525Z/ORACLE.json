@@ -1,0 +1,329 @@
+{
+  "ok": true,
+  "oracle_version": "1.0.0",
+  "fixture_version": "KW_P6_ORACLE_v1.0.0",
+  "statutory_policy_version": "KW_PUBLIC_BASELINE_v1.0.0",
+  "results": [
+    {
+      "scenario_id": "A_normal_full_period",
+      "oracle_version": "1.0.0",
+      "policy_versions": {
+        "company_policy": "informational_no_ot_money",
+        "statutory": "KW_PUBLIC_BASELINE_v1.0.0"
+      },
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 600.0
+        },
+        {
+          "code": "TRANSPORT",
+          "category": "earning_allowance_recurring",
+          "amount": 50.0
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 650.0,
+      "net": 650.0,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "A_mid_month_hire",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 320.0
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 320.0,
+      "net": 320.0,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "A_mid_month_leaver",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 300.0
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 300.0,
+      "net": 300.0,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "A_salary_increase_mid",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 651.613
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 651.613,
+      "net": 651.613,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "A_bonus_and_deduction",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 500.0
+        },
+        {
+          "code": "BONUS",
+          "category": "earning_allowance_one_off",
+          "amount": 100.0
+        }
+      ],
+      "deductions": [
+        {
+          "code": "LOAN",
+          "category": "deduction_recurring",
+          "amount": 75.0
+        }
+      ],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 600.0,
+      "net": 525.0,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "A_unpaid_leave",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 620.0
+        }
+      ],
+      "deductions": [
+        {
+          "code": "UNPAID_LEAVE",
+          "category": "deduction_unpaid_leave",
+          "amount": 40.0
+        }
+      ],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 620.0,
+      "net": 580.0,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "B_ot_rest_ph",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 560.0
+        },
+        {
+          "code": "OT_ORDINARY",
+          "category": "earning_ot_ordinary",
+          "amount": 26.92
+        },
+        {
+          "code": "REST_DAY",
+          "category": "earning_rest_day",
+          "amount": 32.304
+        },
+        {
+          "code": "PH_WORK",
+          "category": "earning_public_holiday",
+          "amount": 43.072
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 662.296,
+      "net": 662.296,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "B_absence_lateness",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 560.0
+        }
+      ],
+      "deductions": [
+        {
+          "code": "ABSENCE",
+          "category": "deduction_absence",
+          "amount": 20.0
+        },
+        {
+          "code": "LATENESS",
+          "category": "deduction_lateness",
+          "amount": 5.0
+        }
+      ],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 560.0,
+      "net": 535.0,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "C_pifss_resolvable",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 800.0
+        },
+        {
+          "code": "HOUSING",
+          "category": "earning_allowance_recurring",
+          "amount": 100.0
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [
+        {
+          "code": "PIFSS_EE",
+          "amount": 67.5
+        }
+      ],
+      "statutory_employer": [
+        {
+          "code": "PIFSS_ER",
+          "amount": 103.5
+        }
+      ],
+      "gross": 900.0,
+      "net": 832.5,
+      "blockers": [],
+      "warnings": [],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "C_non_applicable_statutory",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 700.0
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 700.0,
+      "net": 700.0,
+      "blockers": [],
+      "warnings": [
+        "statutory_not_applicable"
+      ],
+      "authoritative_eligible": true
+    },
+    {
+      "scenario_id": "C_gated_gcc_blocks",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "BASIC",
+          "category": "earning_basic",
+          "amount": 900.0
+        }
+      ],
+      "deductions": [],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 900.0,
+      "net": 900.0,
+      "blockers": [
+        "gcc_extension_review_required"
+      ],
+      "warnings": [],
+      "authoritative_eligible": false
+    },
+    {
+      "scenario_id": "D_external_mode_b_mirror",
+      "oracle_version": "1.0.0",
+      "policy_versions": {},
+      "earnings": [
+        {
+          "code": "EXTERNAL_GROSS",
+          "category": "external",
+          "amount": 1000.0
+        }
+      ],
+      "deductions": [
+        {
+          "code": "EXTERNAL_DEDUCTIONS",
+          "category": "external",
+          "amount": 50.0
+        }
+      ],
+      "statutory_employee": [],
+      "statutory_employer": [],
+      "gross": 1000.0,
+      "net": 950.0,
+      "blockers": [],
+      "warnings": [
+        "mode_b_external_authority"
+      ],
+      "authoritative_eligible": false,
+      "money_authority": "external"
+    }
+  ],
+  "fixture_self_consistency_residuals": [],
+  "residual_count": 0
+}

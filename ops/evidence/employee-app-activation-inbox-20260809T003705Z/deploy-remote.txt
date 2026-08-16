@@ -1,0 +1,7 @@
+144a608f6fd3297d89b203206570c245b0bd2db0c137375a54223a8985ecfce8  /opt/wathefni/backups/production-pre-employee-app-activation-inbox-20260809T003705Z/app.py.pre
+b8802f1a81d66149354f6e2980c50d30bf03384e11caae400b0568530338fad3  /opt/wathefni/backups/production-pre-employee-app-activation-inbox-20260809T003705Z/employee_app_invitation.py.pre
+BACKUP_OK /opt/wathefni/backups/production-pre-employee-app-activation-inbox-20260809T003705Z
+7a1a49edcf82fa7fdd134b5318021da145d3d8422ced2b2ec921ca3587f5865c  /opt/wathefni/orchestrator/app.py
+01163d7f12d775af50847a03db5a8bb2455c1d98a87fd84be18d03ac38437c41  /opt/wathefni/orchestrator/employee_app_invitation.py
+active
+health=000

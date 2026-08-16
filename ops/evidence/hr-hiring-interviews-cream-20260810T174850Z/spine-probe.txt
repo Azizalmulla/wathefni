@@ -1,0 +1,9 @@
+PRIORITY_DESTS [{"type": "prehire_follow_up", "destination": "/jobs", "status": "follow_up_needed"}, {"type": "prehire_ready_for_review", "destination": "/jobs", "status": "ready_for_review"}, {"type": "prehire_assessment_pending", "destination": "/jobs", "status": "assessment_pending"}, {"type": "prehire_role_priority", "destination": "/candidates?position=HR", "status": "role_priority"}]
+CANDS_UNSCOPED {'ok': True, 'total': 0, 'requires_position': True, 'ranking_unavailable': True, 'ranking_error': 'job_required'}
+CANDS_HR 3 2 False
+INTERVIEWS 4
+SAMPLE_IID 369997d8-0ea5-429a-b5b5-40db0634c632
+DETAIL_TOKENS {'updated_at': '2026-06-07T14:01:41.795650+00:00', 'notes_version': 0, 'notes_status': 'notes_present', 'notes_len': 8}
+NOTES_WITHOUT_TOKEN_EXC AttributeError module 'operator_mobile_data' has no attribute 'mobile_interview_notes'
+NOTES_WITH_DTO_TOKEN_OK True {'updated_at': '2026-08-10T17:49:54.401017+00:00', 'notes_version': None}
+SPINE_OK True

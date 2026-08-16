@@ -1,0 +1,37 @@
+{
+  "employee": {
+    "employment_status": null,
+    "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+    "onboarding_status": "in_progress",
+    "name": "Talal Fadhli",
+    "employee_key": "WATHEFNI-96550252254"
+  },
+  "applications": [
+    {
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "status": "hired",
+      "company_code": "WATHEFNI"
+    }
+  ],
+  "attendance_records": {
+    "count": 14
+  },
+  "shift_assignments": {
+    "count": 5
+  },
+  "leave_requests": {
+    "count": 0
+  },
+  "employee_messages": {
+    "count": 11
+  },
+  "employee_status_changes": {
+    "count": 0
+  },
+  "onboarding_items": {
+    "count": 6
+  },
+  "compliance_documents": {
+    "count": 5
+  }
+}

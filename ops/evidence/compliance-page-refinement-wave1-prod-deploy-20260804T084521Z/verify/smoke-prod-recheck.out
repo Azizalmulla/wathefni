@@ -1,0 +1,22 @@
+PASS posthire_bundle_present — PostHire-CTpKApnh.js
+PASS findings_marker
+PASS findings_list_marker
+PASS register_marker
+PASS surfaces_marker
+PASS filters_marker
+PASS summary_marker
+PASS methodology_marker
+PASS remind_marker
+PASS purpose_copy
+PASS all_documents_label
+PASS open_in_findings
+PASS no_remind_all
+PASS governed_dates_modal
+PASS hr_reviewed_honesty
+PASS arabic_surface
+PASS analytics_still_present
+PASS payroll_still_present
+PASS shifts_still_present
+COMPLIANCE_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+COMPLIANCE_PAGE_WAVE1_SMOKE_OK

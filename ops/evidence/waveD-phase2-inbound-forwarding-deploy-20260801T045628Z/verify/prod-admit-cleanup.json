@@ -1,0 +1,54 @@
+{
+  "admit_results": [
+    {
+      "app_key": "imp-wathefni-6fe7c151f3f171aa-WATHEFNI-IMPORT",
+      "status": 200,
+      "body": {
+        "ok": true,
+        "app_key": "imp-wathefni-6fe7c151f3f171aa-WATHEFNI-IMPORT",
+        "status": "ready_for_review",
+        "position_code": "GENERAL"
+      }
+    }
+  ],
+  "disable_results": [
+    {
+      "intake_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+      "status": 200,
+      "addr_status": "disabled"
+    },
+    {
+      "intake_id": "80da2266-f722-4084-aadb-3b525cccb309",
+      "status": 200,
+      "addr_status": "disabled"
+    },
+    {
+      "intake_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+      "status": 200,
+      "addr_status": "disabled"
+    }
+  ],
+  "archived": [
+    {
+      "app_key": "imp-wathefni-6fe7c151f3f171aa-WATHEFNI-IMPORT",
+      "path": "/dashboard/prehire/import/items/archive",
+      "status": 405,
+      "body": {
+        "detail": "Method Not Allowed"
+      }
+    },
+    {
+      "app_key": "imp-wathefni-6fe7c151f3f171aa-WATHEFNI-IMPORT",
+      "path": "/dashboard/prehire/import/items/assign",
+      "status": 409,
+      "body": {
+        "detail": {
+          "error": "not_in_import_review",
+          "message": "This candidate is already in the pipeline."
+        }
+      }
+    }
+  ],
+  "admit_ok": true,
+  "disable_ok": true
+}

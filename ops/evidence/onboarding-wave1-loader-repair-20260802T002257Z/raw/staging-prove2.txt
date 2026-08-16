@@ -1,0 +1,14 @@
+WorkingDirectory=/opt/wathefni/staging/orchestrator
+EnvironmentFile=-/opt/wathefni/staging/var/employees360-wave4.env
+EnvironmentFile=/root/.openclaw/secrets/gog-keyring.env
+EnvironmentFile=-/root/.openclaw/secrets/mistral.env
+# Jobs Phase 2 Stage B — defaults; allowlist/live flags come from canary EnvironmentFile.
+EnvironmentFile=-/root/.openclaw/secrets/wathefni-stage-b-canary.env
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8011
+EnvironmentFile=-/root/.openclaw/secrets/assessment-ai.staging.env
+EnvironmentFile=-/opt/wathefni/staging/var/ck-flags.env
+EnvironmentFile=-/root/.openclaw/secrets/wathefni-civil-id.staging.env
+EnvironmentFile=-/root/.openclaw/secrets/wathefni-intake.staging.env
+EXEC={ path=/opt/wathefni/orchestrator/.venv/bin/uvicorn ; argv[]=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8011 ; ignore_errors=no ; start_time=[Sun 2026-08-02 00:23:40 UTC] ; stop_time=[n/a] ; pid=2025121 ; code=(null) ; status=0/0 }
+PY_CANDIDATE=/opt/wathefni/orchestrator/.venv/bin/uvicorn
+/opt/wathefni/orchestrator/.venv/bin/python3 /opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8011 

@@ -1,0 +1,22 @@
+# Shared: cold launch IPA, wait for OTA download, relaunch into intended UnsignedEntry.
+# IPA 0.3.0 (23) embeds principal chooser; canary OTA removes it. Do not assert chooser as ship UI.
+appId: ai.wathefni.employee
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "WATHEFNI"
+    timeout: 90000
+# Give expo-updates time to fetch canary OTA (fallbackToCacheTimeout: 0 → first paint is embedded).
+- waitForAnimationToEnd:
+    timeout: 50000
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.methodSwitch"
+    timeout: 90000
+- assertVisible:
+    id: "e2e.auth.method.phone"
+- assertVisible:
+    id: "e2e.auth.method.workEmail"

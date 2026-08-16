@@ -1,0 +1,290 @@
+{
+  "checks": [
+    {
+      "label": "schema has employment_offers",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema has employment_offer_versions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema has employment_offer_events",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema has employment_offer_tokens",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema has employment_offer_deliveries",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema has employment_offer_hire_override_audits",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "WATHEFNI employment_offers enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "self-approval disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "probe tenant module disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic applications inserted",
+      "ok": true,
+      "detail": "OFFER1PROD-A-809a5190,OFFER1PROD-B-3b449ac8,OFFER1PROD-C-73c73aee"
+    },
+    {
+      "label": "draft\u2192submit\u2192approve\u2192send",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "delivery intentionally_skipped",
+      "ok": true,
+      "detail": "intentionally_skipped"
+    },
+    {
+      "label": "immutable sent version",
+      "ok": true,
+      "detail": "stale_offer"
+    },
+    {
+      "label": "hire blocked before acceptance",
+      "ok": true,
+      "detail": "accepted_offer_required"
+    },
+    {
+      "label": "token accept",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "one-time token",
+      "ok": true,
+      "detail": "token_used"
+    },
+    {
+      "label": "hire allowed after acceptance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "token decline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "withdrawal/token revocation",
+      "ok": true,
+      "detail": "token_revoked"
+    },
+    {
+      "label": "token expiry",
+      "ok": true,
+      "detail": "token_expired"
+    },
+    {
+      "label": "self-approval denied",
+      "ok": true,
+      "detail": "self_approval_forbidden"
+    },
+    {
+      "label": "override requires permission",
+      "ok": true,
+      "detail": "permission_denied"
+    },
+    {
+      "label": "override requires confirmation",
+      "ok": true,
+      "detail": "override_confirm_required"
+    },
+    {
+      "label": "override requires reason",
+      "ok": true,
+      "detail": "override_reason_required"
+    },
+    {
+      "label": "no-offer override with UUID actor",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no-offer override with non-UUID actor",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "UUID override audit durable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "non-UUID override audit durable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "AI/Assistant override denied",
+      "ok": true,
+      "detail": "ai_forbidden"
+    },
+    {
+      "label": "tenant isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "mobile allowed actions match execution",
+      "ok": true,
+      "detail": [
+        "approve",
+        "return_draft",
+        "withdraw"
+      ]
+    },
+    {
+      "label": "mobile employment_offers capability",
+      "ok": true,
+      "detail": [
+        "read",
+        "approve",
+        "return_draft",
+        "record_accept",
+        "record_decline",
+        "withdraw"
+      ]
+    },
+    {
+      "label": "English offer document",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Arabic offer document",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "failed audit prevents hire",
+      "ok": true,
+      "detail": "override_audit_failed"
+    },
+    {
+      "label": "synthetic cleanup offers gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup applications gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup audits gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup candidates gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real applications unchanged",
+      "ok": true,
+      "detail": "17\u219217"
+    },
+    {
+      "label": "real interviews unchanged",
+      "ok": true,
+      "detail": "4\u21924"
+    },
+    {
+      "label": "real employees unchanged",
+      "ok": true,
+      "detail": "4\u21924"
+    },
+    {
+      "label": "outbound counters unchanged",
+      "ok": true,
+      "detail": "5\u21925"
+    },
+    {
+      "label": "WATHEFNI module still enabled after proof",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no external tenants have employment_offers enabled",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "migration": {
+    "employment_offers": true,
+    "employment_offer_versions": true,
+    "employment_offer_events": true,
+    "employment_offer_tokens": true,
+    "employment_offer_deliveries": true,
+    "employment_offer_hire_override_audits": true,
+    "ensure_schema": "ok"
+  },
+  "tenant": {
+    "wathefni_employment_offers": true,
+    "offer_allow_self_approval": false,
+    "disabled_other_tenants": [],
+    "probe_company": "OFFER1XO",
+    "probe_module_enabled": false
+  },
+  "cleanup": {
+    "tokens": 4,
+    "deliveries": 4,
+    "events": 22,
+    "versions": 5,
+    "offers": 5,
+    "override_audits": 2,
+    "lifecycle_events": 0,
+    "applications": 3,
+    "candidates": 3,
+    "probe_modules": 1,
+    "probe_company": 1
+  },
+  "hashes": {
+    "offer_en_sha256": "10022a67fd44c78e43380c315b665f1867a77f2561129988efb71a335e213623",
+    "offer_ar_sha256": "683950858c85ee588909b7f066399d5bfd941de6d14bc59d90eb92da6341a945"
+  },
+  "wathefni_before": {
+    "applications": 17,
+    "interviews": 4,
+    "employees": 4,
+    "outbound": 5,
+    "non_marker_offers": 0
+  },
+  "wathefni_after": {
+    "applications": 17,
+    "interviews": 4,
+    "employees": 4,
+    "outbound": 5,
+    "non_marker_offers": 0
+  },
+  "passed": 45,
+  "failed": 0,
+  "total": 45
+}

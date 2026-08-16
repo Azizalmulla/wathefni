@@ -1,0 +1,58 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:14255) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] 
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:14256) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] 
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] iOS Bundled 2704ms node_modules/expo-router/entry.js (1379 modules)
+[expo-cli] Android Bundled 4196ms node_modules/expo-router/entry.js (1382 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-54d1011f1a4ff742077f0296215a812e.hbc (1.99 MB)
+[expo-cli] _expo/static/js/ios/entry-54d1011f1a4ff742077f0296215a812e.hbc.map (7.32 MB)
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-18365c3797a34e0167c23f948ae48e29.hbc (1.99 MB)
+[expo-cli] _expo/static/js/android/entry-18365c3797a34e0167c23f948ae48e29.hbc.map (7.34 MB)
+[expo-cli] 
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.06 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 6.9 KB)
+✔ Uploaded assetmap.json 1s
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+Branch             canary
+Runtime version    0.1.0
+Platform           android, ios
+Update group ID    dff580af-bca4-44dd-94b8-97c5282b9968
+Android update ID  019fe44d-b5b0-7bce-b0ac-26a80b63122b
+iOS update ID      019fe44d-b5b0-7049-8029-b19b160c2aa9
+Message            Schedule redesign: quiet 30d summary line, QuietEmpty day/upcoming, taller week capsule; Home untouched
+Commit             2fa16534c8846887472dabbd10cc164a6c788f3f*
+EAS Dashboard      https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/dff580af-bca4-44dd-94b8-97c5282b9968
+

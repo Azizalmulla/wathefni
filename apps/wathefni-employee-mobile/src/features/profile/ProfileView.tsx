@@ -2,7 +2,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useI18n, readingEdgeAlign } from '@/i18n'
-import { PastelCard, WathefniBloom, Wordmark } from '@/components/premium'
+import { PastelCard, Wordmark } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
 import { SectionHeader } from '@/components/lists'
 import { displayPhone, telHref } from '@/lib/contact'
@@ -17,6 +17,8 @@ type Props = {
   refreshing?: boolean
   onRefresh?: () => void
   onBank?: () => void
+  onPreboarding?: () => void
+  onProbation?: () => void
   onSettings: () => void
   onPrivacySupport: () => void
   onSignOut: () => void
@@ -34,6 +36,8 @@ export function ProfileView({
   refreshing,
   onRefresh,
   onBank,
+  onPreboarding,
+  onProbation,
   onSettings,
   onPrivacySupport,
   onSignOut,
@@ -75,7 +79,6 @@ export function ProfileView({
               ) : null}
             </View>
           </View>
-          <WathefniBloom variant="watermark" />
         </PastelCard>
 
         {/* A failed read is a status, not an ambient moment: neutral card, semantic edge. */}
@@ -160,6 +163,18 @@ export function ProfileView({
             <SectionHeader title={t('profile.bank')} />
             <MenuRow icon="card-outline" label={t('bank.menuEntry')} onPress={onBank} />
             <Text style={[styles.supporting, align]}>{t('profile.bankHint')}</Text>
+          </View>
+        ) : null}
+
+        {onPreboarding || onProbation ? (
+          <View style={styles.section}>
+            <SectionHeader title={t('profile.journeys')} />
+            {onPreboarding ? (
+              <MenuRow icon="airplane-outline" label={t('profile.preboarding')} onPress={onPreboarding} />
+            ) : null}
+            {onProbation ? (
+              <MenuRow icon="hourglass-outline" label={t('profile.probation')} onPress={onProbation} />
+            ) : null}
           </View>
         ) : null}
 

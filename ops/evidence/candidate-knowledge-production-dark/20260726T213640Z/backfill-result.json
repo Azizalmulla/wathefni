@@ -1,0 +1,42 @@
+{
+  "enqueue": {
+    "eligible_current_cvs": 2,
+    "enqueued": [
+      {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "version_id": "44cfbc94-9220-4d11-8af7-fd7823376079",
+        "job_id": "f08ff221-24d4-4ff3-a9a8-8023b667fcb2",
+        "status": "completed",
+        "nchars": null
+      },
+      {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "version_id": "c36c0291-ceec-4697-91d8-02e4c108d5b5",
+        "job_id": "7a21a909-9178-429a-ab3c-af5e300cc9c6",
+        "status": "completed",
+        "nchars": null
+      }
+    ],
+    "resumed": true,
+    "poison_job_id": null
+  },
+  "result": {
+    "counts": {
+      "completed": 2
+    },
+    "dead_letter_backfill": 0,
+    "chunks_current": 10,
+    "chunk_states": {
+      "current": 10
+    },
+    "poison": {
+      "status": "failed",
+      "attempts": 5,
+      "dead_letter": true,
+      "last_error": "missing_index_payload_text"
+    },
+    "elapsed_s": 0,
+    "jobs_per_s": null,
+    "resumed": true
+  }
+}

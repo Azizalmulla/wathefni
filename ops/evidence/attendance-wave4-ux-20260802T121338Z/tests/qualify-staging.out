@@ -1,0 +1,33 @@
+staging dashboard updated: /opt/wathefni/staging/dashboard-dist
+active
+PYBIN=/opt/wathefni/orchestrator/.venv/bin/python
+[PASS] comment added
+[PASS] attachment ref stored
+[PASS] secret storage_ref rejected
+[PASS] audit events present
+[PASS] tenant isolation ATTW3
+[PASS] tenant isolation OTHERCO
+[PASS] cross-tenant get denied
+[PASS] connector issue exception
+[PASS] ambiguous kind supported
+[PASS] raw punch still present after corrections
+[PASS] correction punches are separate source
+[PASS] freeze smoke-test-employees360-freeze-regression.py
+[FAIL] freeze smoke-test-onboarding-freeze-regression.py :: SS  freeze doc mentions smoke-test-onboarding-freeze-regression.py
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Wave D
+PASS  cursor onboarding freeze rule present
+PASS  E360 freeze intact
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+51 passed, 3 failed
+
+[PASS] app registers ops routes
+[PASS] app ensures ops schema
+[PASS] http module present
+[PASS] postgres module present
+
+Wave 3 smoke: 55/56 passed, 1 failed

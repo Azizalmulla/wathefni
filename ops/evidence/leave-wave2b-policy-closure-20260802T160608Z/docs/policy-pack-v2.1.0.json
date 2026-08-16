@@ -1,0 +1,330 @@
+{
+  "pack": {
+    "pack_code": "kw_private_sector_v2",
+    "jurisdiction_code": "KW",
+    "worker_category": "private_sector",
+    "version": "2.1.0",
+    "timezone": "Asia/Kuwait",
+    "weekend_days": [
+      "fri",
+      "sat"
+    ],
+    "exclude_public_holidays": true,
+    "carryover_enabled": false,
+    "carryover_rules": {
+      "max_years_without_extra_consent": 2,
+      "more_than_two_years_requires_mutual_consent": true,
+      "invented_expiry_days": null,
+      "writers_enabled": false,
+      "article": "Law 6/2010 Art.72"
+    },
+    "public_source_verified": true,
+    "legal_reviewed": false,
+    "enforced": false,
+    "eligibility_resolution": "law_85_2017_art70_six_months",
+    "policies": {
+      "annual": {
+        "days_per_year": 30,
+        "day_basis": "working_days",
+        "accrual_method": "monthly_accrual",
+        "eligibility_months": 6,
+        "allow_negative": false,
+        "tiers": []
+      },
+      "sick": {
+        "days_per_year": 0,
+        "accrual_method": "none",
+        "eligibility_months": 0,
+        "allow_negative": false,
+        "tiers": [
+          {
+            "band": 1,
+            "days": 15,
+            "pay_fraction": 1.0,
+            "label": "full_pay"
+          },
+          {
+            "band": 2,
+            "days": 10,
+            "pay_fraction": 0.75,
+            "label": "three_quarter_pay"
+          },
+          {
+            "band": 3,
+            "days": 10,
+            "pay_fraction": 0.5,
+            "label": "half_pay"
+          },
+          {
+            "band": 4,
+            "days": 10,
+            "pay_fraction": 0.25,
+            "label": "quarter_pay"
+          },
+          {
+            "band": 5,
+            "days": 30,
+            "pay_fraction": 0.0,
+            "label": "unpaid_sick_band"
+          }
+        ]
+      },
+      "unpaid": {
+        "days_per_year": 0,
+        "accrual_method": "none",
+        "eligibility_months": 0,
+        "allow_negative": false,
+        "tiers": [],
+        "payroll_boundary": true,
+        "article": "Law 6/2010 Art.79 discretionary special unpaid"
+      }
+    }
+  },
+  "eligibility": {
+    "months": 6,
+    "confidence": "high",
+    "public_source_verified": true,
+    "legal_reviewed": false,
+    "resolution": {
+      "final_product_rule_months": 6,
+      "obsolete_figure_months": 9,
+      "obsolete_source": "Original Law 6/2010 Art.70 Arabic (pre-amendment): تسعة أشهر",
+      "why_obsolete": "Law 85/2017 Art.1 expressly replaces Art.70; gazette text uses ستة أشهر. Nine-month figure is the superseded original wording / unamended EN reprints — not a different entitlement.",
+      "gazette": "Kuwait Today 1348 / 2017-07-09",
+      "source_sha256": "f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448"
+    },
+    "source_sha256": "f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448"
+  },
+  "product_copy": {
+    "disclaimer_en": "Leave figures reflect Kuwait private-sector Labour Law research for software operation. Wathefni does not provide legal advice and does not claim automatic legal compliance. Balance enforcement is off until counsel review and an explicit product flip.",
+    "disclaimer_ar": "أرقام الإجازات مبنية على بحث قانون العمل للقطاع الأهلي لتشغيل البرمجيات. وثفني لا تقدّم استشارة قانونية ولا تدّعي الامتثال التلقائي. إنفاذ الأرصدة متوقف حتى مراجعة قانونية وتفعيل صريح.",
+    "eligibility_rule_en": "Annual leave: at least 30 paid working days per year; first-year leave may be taken after 6 months of service (Law 6/2010 Art. 70 as amended by Law 85/2017).",
+    "payroll_boundary_en": "Leave records day bands and paid/unpaid classification inputs only. Payroll owns monetary values and salary fractions.",
+    "holiday_contract_en": "Fixed Gregorian holidays may be versioned with provenance. Islamic/decree holidays require official yearly announcement load, review, and approval. Unreviewed dates fail closed for enforced calculations."
+  },
+  "matrix": [
+    {
+      "field": "annual_days_per_year",
+      "value": 30,
+      "unit": "working_days",
+      "classification": "statutory",
+      "article": "Law 6/2010 Art. 70 as amended by Law 85/2017",
+      "arabic_excerpt": "إجازة سنوية لا تقل عن ثلاثين يوم عمل مدفوعة الأجر",
+      "sources": [
+        "Kuwait Today (الكويت اليوم) Issue 1348, 2017-07-09 — Law 85/2017 Art.1 replacing Art.70 (sha256:f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448)",
+        "MOJ Arabic PDF Law 6/2010 (original pre-amendment text; sha256:20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326)",
+        "ILO NATLEX KWT-2010-L-83616 (secondary index; notes Law 85/2017 amendment)"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Amended text: no less than thirty paid working days (يوم عمل)."
+    },
+    {
+      "field": "annual_eligibility_months",
+      "value": 6,
+      "classification": "statutory",
+      "article": "Law 6/2010 Art. 70 as amended by Law 85/2017",
+      "arabic_excerpt": "بعد قضائه ستة أشهر على الأقل في خدمة صاحب العمل",
+      "resolution": {
+        "final_product_rule_months": 6,
+        "obsolete_figure_months": 9,
+        "obsolete_source": "Original Law 6/2010 Art.70 Arabic (pre-amendment): تسعة أشهر",
+        "why_obsolete": "Law 85/2017 Art.1 expressly replaces Art.70; gazette text uses ستة أشهر. Nine-month figure is the superseded original wording / unamended EN reprints — not a different entitlement.",
+        "gazette": "Kuwait Today 1348 / 2017-07-09",
+        "source_sha256": "f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448"
+      },
+      "sources": [
+        "Official Gazette Law 85/2017 replacing Art.70 (sha256:f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448)",
+        "PAM Know Your Rights republished summary (Arab Times 2026-07-28) — aligns with 6 months",
+        "Ogletree/Al Tamimi 2018 secondary commentary — aligns with 6 months",
+        "HLB/older EN reprints citing 9 months — obsolete relative to Law 85/2017"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "pack_default": 6,
+      "notes": "Conflict closed at public-source level. Product still legal_reviewed=false until counsel sign-off for enforcement."
+    },
+    {
+      "field": "annual_excludes_weekends_holidays_sick",
+      "value": true,
+      "classification": "statutory",
+      "article": "Law 6/2010 Art. 70 as amended by Law 85/2017",
+      "arabic_excerpt": "ولا تحسب ضمن الإجازة السنوية أيام العطل الأسبوعية والعطل الرسمية وأيام الإجازات المرضية الواقعة خلالها",
+      "sources": [
+        "Official Gazette Law 85/2017 Art.70 (sha256:f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448)",
+        "Explanatory memo to Law 85/2017 (same gazette) — weekly rest days during leave not counted"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Chargeable-day calc excludes configured weekly rest + public holidays. Sick-day overlap exclusion is day accounting, not a payroll wage calc."
+    },
+    {
+      "field": "weekend_days_default",
+      "value": [
+        "fri",
+        "sat"
+      ],
+      "classification": "configurable_company_policy",
+      "article": "Art.70 references العطل الأسبوعية without naming Fri/Sat",
+      "sources": [
+        "Law 85/2017 Art.70 (weekly rest days excluded; pair not prescribed)",
+        "Employer calendar / sector practice"
+      ],
+      "confidence": "medium",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Default Fri+Sat for KW private pack; companies may override leave_policies.weekend_days."
+    },
+    {
+      "field": "sick_tiers_art69",
+      "value": [
+        {
+          "days": 15,
+          "pay_fraction": 1.0
+        },
+        {
+          "days": 10,
+          "pay_fraction": 0.75
+        },
+        {
+          "days": 10,
+          "pay_fraction": 0.5
+        },
+        {
+          "days": 10,
+          "pay_fraction": 0.25
+        },
+        {
+          "days": 30,
+          "pay_fraction": 0.0
+        }
+      ],
+      "classification": "statutory",
+      "article": "Law 6/2010 Art. 69",
+      "arabic_excerpt": "خمسة عشر يوما بأجر كامل … ثلاثون يوما من دون أجر",
+      "sources": [
+        "Consolidated Arabic Art.69 (lawskw / mesferlaw republications of Law 6/2010)",
+        "MOJ Law 6/2010 PDF (sha256:20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326) — original statute article present"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Tier day structure is statutory. Pay fractions are Payroll-owned monetary application — Leave stores classification inputs only."
+    },
+    {
+      "field": "annual_leave_cash_settlement",
+      "value": "on_contract_end_for_accumulated_days",
+      "classification": "payroll_owned",
+      "article": "Law 6/2010 Art. 73",
+      "arabic_excerpt": "مقابل نقدي لأيام إجازاته السنوية المجتمعة في حالة انتهاء عقده",
+      "sources": [
+        "Law 6/2010 Art.73 Arabic"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Leave may flag settlement-due days; cash amount is Payroll-owned."
+    },
+    {
+      "field": "annual_leave_pay_before_taking",
+      "value": "employer_pays_leave_wage_before_start",
+      "classification": "payroll_owned",
+      "article": "Law 6/2010 Art. 71",
+      "sources": [
+        "Law 6/2010 Art.71 Arabic"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Timing of leave wage payment is Payroll/employer process — out of Leave money calc."
+    },
+    {
+      "field": "public_holidays_fixed_gregorian",
+      "value": [
+        "New Year (1 Jan)",
+        "National Day (25 Feb)",
+        "Liberation Day (26 Feb)"
+      ],
+      "classification": "statutory",
+      "sources": [
+        "Kuwait national observances (National Day 25 Feb; Liberation Day 26 Feb)",
+        "Versioned with source_provenance on public_holidays rows"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Fixed Gregorian holidays seedable with provenance. Still subject to yearly calendar approval under enforced mode."
+    },
+    {
+      "field": "public_holidays_islamic_movable",
+      "value": null,
+      "classification": "manual",
+      "sources": [
+        "Annual Official Gazette / PAM / Council of Ministers holiday decrees"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Must be loaded from official yearly announcements. Never invent dates. Unreviewed → fail closed when enforced."
+    },
+    {
+      "field": "carryover_rules",
+      "value": {
+        "enabled": false,
+        "max_years_without_extra_consent": 2,
+        "more_than_two_years_requires_mutual_consent": true,
+        "invented_expiry_days": null
+      },
+      "classification": "statutory",
+      "article": "Law 6/2010 Art. 72",
+      "arabic_excerpt": "تجميع إجازاته بما لا يزيد على إجازة سنتين … ويجوز موافقة الطرفين تجميع … لأكثر من سنتين",
+      "sources": [
+        "Law 6/2010 Art.72 Arabic"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "Public-law boundary verified: accumulate up to two years' leave; more only with mutual consent. No statutory invented day-expiry beyond that boundary. Product writers remain DISABLED (carryover_enabled=false) until an enforcement-ready implementation of consent rules."
+    },
+    {
+      "field": "unpaid_leave",
+      "value": "employer_may_grant_special_unpaid_on_request",
+      "classification": "configurable_company_policy",
+      "article": "Law 6/2010 Art. 79",
+      "arabic_excerpt": "إجازة خاصة من دون أجر خلاف الإجازات المشار إليها",
+      "sources": [
+        "Law 6/2010 Art.79 — discretionary special unpaid leave on worker request",
+        "Art.69 unpaid sick band and Art.24 unpaid childcare are separate statutory bands"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "No statutory universal unpaid-day bank. Catalogue type is company-configurable; wage impact Payroll-owned."
+    },
+    {
+      "field": "timezone",
+      "value": "Asia/Kuwait",
+      "classification": "configurable_company_policy",
+      "sources": [
+        "Wathefni operational standard for KW tenants"
+      ],
+      "confidence": "high",
+      "public_source_verified": true,
+      "legal_reviewed": false,
+      "notes": "All Wave 2/2B as-of / boundary dates use Asia/Kuwait."
+    }
+  ],
+  "hashes": {
+    "law85": "f6f6cb68e4210649b89036786e0017b40737943dd66eb4f7c5e78b9f9df72448",
+    "moj": "20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326"
+  },
+  "verdicts": {
+    "wave2_synthetic_prod_canary": "CONDITIONAL_GO",
+    "controlled_real_hr_leave_decisions": "NO_GO",
+    "real_balance_enforcement": "NO_GO",
+    "payroll_monetary_calculations": "NO_GO_OUT_OF_LEAVE"
+  }
+}

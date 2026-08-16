@@ -1,0 +1,32 @@
+{
+  "id": "one_module_prehire",
+  "label": "One enabled module (pre_hiring)",
+  "modules": [
+    "pre_hiring"
+  ],
+  "role": "owner",
+  "nav_groups": [
+    "prehire",
+    "settings"
+  ],
+  "nav_ids": [
+    "overview",
+    "ai",
+    "jobs",
+    "candidates",
+    "interviews",
+    "ranking",
+    "reports",
+    "notifications",
+    "activity",
+    "settings"
+  ],
+  "overview_layout": "two",
+  "offerable_tabs": {
+    "video_interviews": false
+  },
+  "settings": {
+    "team": true,
+    "integrations": true
+  }
+}

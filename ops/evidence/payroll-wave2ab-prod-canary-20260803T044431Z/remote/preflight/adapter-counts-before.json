@@ -1,0 +1,16 @@
+{
+  "db": "wathefni",
+  "payroll_adapter_export_runs": {
+    "present": false
+  },
+  "payroll_adapter_import_runs": {
+    "present": false
+  },
+  "payroll_adapter_quarantine": {
+    "present": false
+  },
+  "payroll_compensation_contracts": {
+    "present": true,
+    "count": 0
+  }
+}

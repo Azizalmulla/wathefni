@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import {
   ActivityIndicator,
   Animated,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -13,7 +14,8 @@ import {
   type ViewStyle,
 } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { keyboardSafeBehavior, keyboardSafeOffset } from '@/components/keyboardSafe'
 
 import { useLocale } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
@@ -30,6 +32,7 @@ export function Screen({
   contentStyle?: StyleProp<ViewStyle>
 }) {
   const embed = usePreviewEmbed()
+  const insets = useSafeAreaInsets()
   const body = <View style={[styles.screenContent, contentStyle]}>{children}</View>
   const shouldScroll = scroll && !embed
   if (embed) {
@@ -37,17 +40,25 @@ export function Screen({
   }
   return (
     <SafeAreaView style={styles.safe}>
-      {shouldScroll ? (
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {body}
-        </ScrollView>
-      ) : (
-        body
-      )}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={keyboardSafeBehavior()}
+        keyboardVerticalOffset={keyboardSafeOffset(insets.top)}
+      >
+        {shouldScroll ? (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            automaticallyAdjustKeyboardInsets
+          >
+            {body}
+          </ScrollView>
+        ) : (
+          body
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -520,6 +531,7 @@ const actionTones = StyleSheet.create({
 })
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   safe: { flex: 1, backgroundColor: colors.canvas },
   safeEmbed: { width: '100%', backgroundColor: colors.canvas },
   scroll: { flex: 1, backgroundColor: colors.canvas },
@@ -581,7 +593,6 @@ const styles = StyleSheet.create({
   confirmLabel: { color: colors.faint, fontSize: typography.micro, fontWeight: '800', textTransform: 'uppercase' },
   confirmValue: { color: colors.ink, fontSize: typography.body, lineHeight: 22, fontWeight: '600' },
   sheetActions: { gap: spacing.md },
-  flex: { flex: 1 },
   statePanel: { minHeight: 260, alignItems: 'center', justifyContent: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.xxl, borderWidth: 1, borderColor: colors.line },
   stateIcon: { width: 54, height: 54, borderRadius: 20, backgroundColor: colors.plumSoft, alignItems: 'center', justifyContent: 'center' },
   stateTitle: { color: colors.ink, fontSize: typography.section, fontWeight: '800' },

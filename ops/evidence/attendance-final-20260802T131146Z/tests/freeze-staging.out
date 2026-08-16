@@ -1,0 +1,14 @@
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  freeze doc mentions Wave D
+PASS  cursor onboarding freeze rule present
+PASS  E360 freeze intact
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+STAGING_FREEZES_OK

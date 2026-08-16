@@ -1,0 +1,548 @@
+{
+  "stamp": "20260806T033827Z",
+  "mode": "live_http_uvicorn",
+  "ok": true,
+  "civil_id_after": {
+    "status": "accepted",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+  },
+  "canary_items_remaining": 0,
+  "matrix": {
+    "civil_id_dual_side_canary": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "identity_matching",
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null,
+      "approve_status": "accepted",
+      "reject_status": "replacement_required",
+      "civil_untouched": {
+        "status": "accepted",
+        "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+        "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+      }
+    },
+    "docs_qual_passport": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null,
+      "approve_status": "accepted",
+      "reject_status": "replacement_required",
+      "civil_untouched": {
+        "status": "accepted",
+        "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+        "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+      }
+    },
+    "docs_qual_residence": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null,
+      "approve_status": "accepted",
+      "reject_status": "replacement_required",
+      "civil_untouched": {
+        "status": "accepted",
+        "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+        "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+      }
+    },
+    "docs_qual_work_permit": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null,
+      "approve_status": "accepted",
+      "reject_status": "replacement_required",
+      "civil_untouched": {
+        "status": "accepted",
+        "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+        "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+      }
+    },
+    "docs_qual_employment_contract": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null,
+      "approve_status": "accepted",
+      "reject_status": "replacement_required",
+      "civil_untouched": {
+        "status": "accepted",
+        "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+        "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+      }
+    },
+    "docs_qual_personal_photo": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null,
+      "approve_status": "accepted",
+      "reject_status": "replacement_required",
+      "civil_untouched": {
+        "status": "accepted",
+        "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+        "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+      }
+    }
+  },
+  "schemas": {
+    "civil_id_dual_side_canary": {
+      "extracted_schema": {
+        "document_number": "290000001234",
+        "expiry_date": "2030-01-14",
+        "_top_level_keys": [
+          "authoritative",
+          "document_number",
+          "expiry_date",
+          "hr_review_recommended",
+          "hr_warnings",
+          "issue_date",
+          "pair_validated_at",
+          "parts",
+          "parts_schema"
+        ],
+        "_field_keys": []
+      },
+      "ocr_keys_api": [
+        "authoritative",
+        "document_number",
+        "expiry_date",
+        "hr_review_recommended",
+        "hr_warnings",
+        "issue_date",
+        "pair_validated_at",
+        "parts",
+        "parts_schema"
+      ],
+      "hr_ui_shown": [
+        "expiry_date",
+        "issue_date",
+        "review_status",
+        "rejection_reason",
+        "versions"
+      ],
+      "hr_api_hidden_from_ui": [
+        "document_number"
+      ],
+      "version_fields": {
+        "document_number": "290000001234",
+        "expiry_date": null,
+        "issue_date": null,
+        "review_status": "pending_hr_review",
+        "parts_complete": true
+      },
+      "expiry_check": "2030-01-14"
+    },
+    "docs_qual_passport": {
+      "extracted_schema": {
+        "document_type": "passport",
+        "side": "front",
+        "full_name": "ABDULAZIZ H R ALMULLA",
+        "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0631\u0627\u0634\u062f \u0627\u0644\u0645\u0644\u0627",
+        "full_name_en": "ABDULAZIZ H R ALMULLA",
+        "document_number": "A12345678",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1990-01-15",
+        "issue_date": "2022-06-01",
+        "expiry_date": "2032-05-31",
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "date_of_birth",
+          "document_number",
+          "document_type",
+          "expiry_date",
+          "extraction_status",
+          "full_name",
+          "full_name_ar",
+          "full_name_en",
+          "issue_date",
+          "name",
+          "nationality",
+          "side"
+        ],
+        "_field_keys": []
+      },
+      "ocr_keys_api": [
+        "authoritative",
+        "confidence",
+        "date_of_birth",
+        "document_number",
+        "document_type",
+        "expiry_date",
+        "extraction_status",
+        "full_name",
+        "full_name_ar",
+        "full_name_en",
+        "issue_date",
+        "name",
+        "nationality",
+        "side"
+      ],
+      "hr_ui_shown": [
+        "expiry_date",
+        "issue_date",
+        "review_status",
+        "rejection_reason",
+        "versions"
+      ],
+      "hr_api_hidden_from_ui": [
+        "full_name",
+        "full_name_en",
+        "full_name_ar",
+        "name",
+        "document_number",
+        "nationality",
+        "date_of_birth",
+        "side",
+        "confidence"
+      ],
+      "version_fields": {
+        "document_number": "A12345678",
+        "expiry_date": "2032-05-31",
+        "issue_date": "2022-06-01",
+        "review_status": "pending_hr_review",
+        "parts_complete": false
+      },
+      "expiry_check": "2032-05-31"
+    },
+    "docs_qual_residence": {
+      "extracted_schema": {
+        "document_type": "residence",
+        "side": "single",
+        "full_name": "ABDULAZIZ H R ALMULLA",
+        "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0631\u0627\u0634\u062f \u0627\u0644\u0645\u0644\u0627",
+        "full_name_en": "ABDULAZIZ H R ALMULLA",
+        "document_number": "RES-889900",
+        "nationality": "Non-Kuwaiti sample",
+        "issue_date": "2024-01-10",
+        "expiry_date": "2026-12-31",
+        "employer_or_sponsor": "WATHEFNI CO",
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "document_number",
+          "document_type",
+          "employer_or_sponsor",
+          "expiry_date",
+          "extraction_status",
+          "full_name",
+          "full_name_ar",
+          "full_name_en",
+          "issue_date",
+          "name",
+          "nationality",
+          "side"
+        ],
+        "_field_keys": []
+      },
+      "ocr_keys_api": [
+        "authoritative",
+        "confidence",
+        "document_number",
+        "document_type",
+        "employer_or_sponsor",
+        "expiry_date",
+        "extraction_status",
+        "full_name",
+        "full_name_ar",
+        "full_name_en",
+        "issue_date",
+        "name",
+        "nationality",
+        "side"
+      ],
+      "hr_ui_shown": [
+        "expiry_date",
+        "issue_date",
+        "review_status",
+        "rejection_reason",
+        "versions"
+      ],
+      "hr_api_hidden_from_ui": [
+        "full_name",
+        "full_name_en",
+        "full_name_ar",
+        "name",
+        "document_number",
+        "nationality",
+        "side",
+        "employer_or_sponsor",
+        "confidence"
+      ],
+      "version_fields": {
+        "document_number": "RES-889900",
+        "expiry_date": "2026-12-31",
+        "issue_date": "2024-01-10",
+        "review_status": "pending_hr_review",
+        "parts_complete": false
+      },
+      "expiry_check": "2026-12-31"
+    },
+    "docs_qual_work_permit": {
+      "extracted_schema": {
+        "document_type": "work_permit",
+        "side": "single",
+        "full_name": "ABDULAZIZ H R ALMULLA",
+        "full_name_en": "ABDULAZIZ H R ALMULLA",
+        "document_number": "WP-445566",
+        "issue_date": "2025-02-01",
+        "expiry_date": "2028-01-31",
+        "employer_or_sponsor": "WATHEFNI CO",
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "document_number",
+          "document_type",
+          "employer_or_sponsor",
+          "expiry_date",
+          "extraction_status",
+          "full_name",
+          "full_name_en",
+          "issue_date",
+          "name",
+          "side"
+        ],
+        "_field_keys": []
+      },
+      "ocr_keys_api": [
+        "authoritative",
+        "confidence",
+        "document_number",
+        "document_type",
+        "employer_or_sponsor",
+        "expiry_date",
+        "extraction_status",
+        "full_name",
+        "full_name_en",
+        "issue_date",
+        "name",
+        "side"
+      ],
+      "hr_ui_shown": [
+        "expiry_date",
+        "issue_date",
+        "review_status",
+        "rejection_reason",
+        "versions"
+      ],
+      "hr_api_hidden_from_ui": [
+        "full_name",
+        "full_name_en",
+        "name",
+        "document_number",
+        "side",
+        "employer_or_sponsor",
+        "confidence"
+      ],
+      "version_fields": {
+        "document_number": "WP-445566",
+        "expiry_date": "2028-01-31",
+        "issue_date": "2025-02-01",
+        "review_status": "pending_hr_review",
+        "parts_complete": false
+      },
+      "expiry_check": "2028-01-31"
+    },
+    "docs_qual_employment_contract": {
+      "extracted_schema": {
+        "document_type": "employment_contract",
+        "full_name": "ABDULAZIZ H R ALMULLA",
+        "employer_or_sponsor": "WATHEFNI Company W.L.L.",
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "document_type",
+          "employer_or_sponsor",
+          "extraction_status",
+          "full_name",
+          "name"
+        ],
+        "_field_keys": []
+      },
+      "ocr_keys_api": [
+        "authoritative",
+        "confidence",
+        "document_type",
+        "employer_or_sponsor",
+        "extraction_status",
+        "full_name",
+        "name"
+      ],
+      "hr_ui_shown": [
+        "expiry_date",
+        "issue_date",
+        "review_status",
+        "rejection_reason",
+        "versions"
+      ],
+      "hr_api_hidden_from_ui": [
+        "full_name",
+        "name",
+        "employer_or_sponsor",
+        "confidence"
+      ],
+      "version_fields": {
+        "document_number": null,
+        "expiry_date": null,
+        "issue_date": null,
+        "review_status": "pending_hr_review",
+        "parts_complete": false
+      },
+      "expiry_check": null
+    },
+    "docs_qual_personal_photo": {
+      "extracted_schema": {
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "extraction_status"
+        ],
+        "_field_keys": []
+      },
+      "ocr_keys_api": [
+        "authoritative",
+        "confidence",
+        "extraction_status"
+      ],
+      "hr_ui_shown": [
+        "expiry_date",
+        "issue_date",
+        "review_status",
+        "rejection_reason",
+        "versions"
+      ],
+      "hr_api_hidden_from_ui": [
+        "confidence"
+      ],
+      "version_fields": {
+        "document_number": null,
+        "expiry_date": null,
+        "issue_date": null,
+        "review_status": "pending_hr_review",
+        "parts_complete": false
+      },
+      "expiry_check": null
+    }
+  },
+  "bank_ess": "out_of_scope"
+}

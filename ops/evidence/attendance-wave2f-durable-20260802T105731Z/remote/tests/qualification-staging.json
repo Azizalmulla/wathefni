@@ -1,0 +1,928 @@
+{
+  "pass": 41,
+  "fail": 0,
+  "db": "wathefni_staging",
+  "marker": "ATTW2F-5276eff3",
+  "results": [
+    {
+      "label": "not production db",
+      "ok": true,
+      "detail": "wathefni_staging"
+    },
+    {
+      "label": "db matches expected",
+      "ok": true,
+      "detail": {
+        "db": "wathefni_staging",
+        "expected": "wathefni_staging"
+      }
+    },
+    {
+      "label": "wave2f schema ensure",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "store mode postgres",
+      "ok": true,
+      "detail": "postgres"
+    },
+    {
+      "label": "register site",
+      "ok": true,
+      "detail": {
+        "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+        "company_code": "ATTW2F",
+        "name": "ATTW2F-5276eff3-Site",
+        "timezone": "Asia/Kuwait",
+        "active": true,
+        "metadata": {},
+        "created_at": "2026-08-02T10:58:10.051129+00:00",
+        "updated_at": "2026-08-02T10:58:10.051129+00:00"
+      }
+    },
+    {
+      "label": "cross-tenant device denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_device_registration_denied",
+        "actor": "ATTW2FX",
+        "company": "ATTW2F"
+      }
+    },
+    {
+      "label": "register device",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "device": {
+          "device_id": "ec09e0b9-164b-43fa-b757-306e6895d446",
+          "company_code": "ATTW2F",
+          "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+          "terminal_sn": "ATTW2F-5276eff3-SN",
+          "vendor": "biotime",
+          "active": true,
+          "owned_by_company": "ATTW2F",
+          "metadata": {},
+          "created_at": "2026-08-02T10:58:10.054852+00:00",
+          "updated_at": "2026-08-02T10:58:10.054852+00:00"
+        }
+      }
+    },
+    {
+      "label": "register connector",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-attw2f-843ab35523",
+          "company_code": "ATTW2F",
+          "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+          "device_id": "ec09e0b9-164b-43fa-b757-306e6895d446",
+          "status": "registered",
+          "connector_version": "ATTW2F-5276eff3-v1",
+          "row_version": 1,
+          "credential_id": "101a66d9-b9be-418a-882a-73711c0e8c92",
+          "created_at": "2026-08-02T10:58:10.058812+00:00",
+          "updated_at": "2026-08-02T10:58:10.058812+00:00",
+          "revoked_at": null,
+          "last_rotate_at": null,
+          "checkpoint": null,
+          "metadata": {}
+        },
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "activate connector",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-attw2f-843ab35523",
+          "company_code": "ATTW2F",
+          "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+          "device_id": "ec09e0b9-164b-43fa-b757-306e6895d446",
+          "status": "active",
+          "connector_version": "ATTW2F-5276eff3-v1",
+          "row_version": 2,
+          "credential_id": "101a66d9-b9be-418a-882a-73711c0e8c92",
+          "created_at": "2026-08-02T10:58:10.058812+00:00",
+          "updated_at": "2026-08-02T10:58:10.069381+00:00",
+          "revoked_at": null,
+          "last_rotate_at": null,
+          "checkpoint": null,
+          "metadata": {}
+        }
+      }
+    },
+    {
+      "label": "rotate credentials sealed",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-attw2f-843ab35523",
+          "company_code": "ATTW2F",
+          "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+          "device_id": "ec09e0b9-164b-43fa-b757-306e6895d446",
+          "status": "rotated",
+          "connector_version": "ATTW2F-5276eff3-v1",
+          "row_version": 3,
+          "credential_id": "6bc63dc6-015a-40a3-b6c7-03ca08f725a7",
+          "created_at": "2026-08-02T10:58:10.058812+00:00",
+          "updated_at": "2026-08-02T10:58:10.071328+00:00",
+          "revoked_at": null,
+          "last_rotate_at": "2026-08-02T10:58:10.071328+00:00",
+          "checkpoint": null,
+          "metadata": {}
+        },
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "rotate stale_row_version fail-closed",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "stale_row_version",
+        "current": 3
+      }
+    },
+    {
+      "label": "no plaintext secrets in DB",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "suspicious_sealed": [],
+        "forbidden_columns": []
+      }
+    },
+    {
+      "label": "credential rows Fernet-only (no raw password)",
+      "ok": true,
+      "detail": {
+        "leaked": [],
+        "n": 2
+      }
+    },
+    {
+      "label": "health upsert degraded",
+      "ok": true,
+      "detail": {
+        "connector_id": "conn-attw2f-843ab35523",
+        "company_code": "ATTW2F",
+        "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+        "status": "degraded",
+        "last_sync_at": "2026-08-26T05:00:00+00:00",
+        "lag_seconds": 400.0,
+        "failure_count": 0,
+        "last_error": "lab_lag",
+        "quarantined_events": 0,
+        "open_remediation": 0,
+        "checkpoint": "cp-ATTW2F-5276eff3-1",
+        "connector_version": "ATTW2F-5276eff3-v1",
+        "alerts": [
+          "connector_failures",
+          "connector_lag_warning"
+        ],
+        "updated_at": "2026-08-02T10:58:10.096635+00:00"
+      }
+    },
+    {
+      "label": "checkpoint save (health-synced or first write)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "checkpoint": "cp-ATTW2F-5276eff3-1",
+        "row_version": 1
+      }
+    },
+    {
+      "label": "checkpoint duplicate exactly-once",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "checkpoint": "cp-ATTW2F-5276eff3-1",
+        "row_version": 1
+      }
+    },
+    {
+      "label": "checkpoint advance",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": false,
+        "checkpoint": "cp-ATTW2F-5276eff3-2",
+        "row_version": 2
+      }
+    },
+    {
+      "label": "unknown mapping queued",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": false,
+        "item": {
+          "item_id": "0a25ea09-74a0-48e3-948e-9a28d7b5cb4a",
+          "company_code": "ATTW2F",
+          "kind": "unknown_employee",
+          "status": "open",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": null,
+          "device_id": "ATTW2F-5276eff3-SN",
+          "device_user_id": "DU-ATTW2F-5276eff3",
+          "work_date": null,
+          "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1,
+              "emp_code": "DU-ATTW2F-5276eff3"
+            },
+            "metadata": {},
+            "device_id": "ATTW2F-5276eff3-SN",
+            "direction": "in",
+            "punched_at": "2026-08-26T09:05:00+03:00",
+            "company_code": "ATTW2F",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-ATTW2F-5276eff3",
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T10:58:10.105383+00:00",
+          "updated_at": "2026-08-02T10:58:10.105383+00:00"
+        }
+      }
+    },
+    {
+      "label": "enqueue idempotent",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "item": {
+          "item_id": "0a25ea09-74a0-48e3-948e-9a28d7b5cb4a",
+          "company_code": "ATTW2F",
+          "kind": "unknown_employee",
+          "status": "open",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": null,
+          "device_id": "ATTW2F-5276eff3-SN",
+          "device_user_id": "DU-ATTW2F-5276eff3",
+          "work_date": null,
+          "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1,
+              "emp_code": "DU-ATTW2F-5276eff3"
+            },
+            "metadata": {},
+            "device_id": "ATTW2F-5276eff3-SN",
+            "direction": "in",
+            "punched_at": "2026-08-26T09:05:00+03:00",
+            "company_code": "ATTW2F",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-ATTW2F-5276eff3",
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T10:58:10.105383+00:00",
+          "updated_at": "2026-08-02T10:58:10.105383+00:00"
+        }
+      }
+    },
+    {
+      "label": "checkpoint survives restart",
+      "ok": true,
+      "detail": "cp-ATTW2F-5276eff3-2"
+    },
+    {
+      "label": "unknown mapping remains queued after restart",
+      "ok": true,
+      "detail": [
+        {
+          "item_id": "0a25ea09-74a0-48e3-948e-9a28d7b5cb4a",
+          "company_code": "ATTW2F",
+          "kind": "unknown_employee",
+          "status": "open",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": null,
+          "device_id": "ATTW2F-5276eff3-SN",
+          "device_user_id": "DU-ATTW2F-5276eff3",
+          "work_date": null,
+          "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1,
+              "emp_code": "DU-ATTW2F-5276eff3"
+            },
+            "metadata": {},
+            "device_id": "ATTW2F-5276eff3-SN",
+            "direction": "in",
+            "punched_at": "2026-08-26T09:05:00+03:00",
+            "company_code": "ATTW2F",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-ATTW2F-5276eff3",
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T10:58:10.105383+00:00",
+          "updated_at": "2026-08-02T10:58:10.105383+00:00"
+        }
+      ]
+    },
+    {
+      "label": "health survives restart",
+      "ok": true,
+      "detail": [
+        {
+          "connector_id": "conn-attw2f-843ab35523",
+          "company_code": "ATTW2F",
+          "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+          "status": "degraded",
+          "last_sync_at": "2026-08-26T05:00:00+00:00",
+          "lag_seconds": 400.0,
+          "failure_count": 0,
+          "last_error": "lab_lag",
+          "quarantined_events": 0,
+          "open_remediation": 0,
+          "checkpoint": "cp-ATTW2F-5276eff3-1",
+          "connector_version": "ATTW2F-5276eff3-v1",
+          "alerts": [
+            "connector_failures",
+            "connector_lag_warning"
+          ],
+          "updated_at": "2026-08-02T10:58:10.096635+00:00"
+        }
+      ]
+    },
+    {
+      "label": "health recover",
+      "ok": true,
+      "detail": {
+        "connector_id": "conn-attw2f-843ab35523",
+        "company_code": "ATTW2F",
+        "site_id": "f28f5cd0-2acf-45e3-825c-f577b89c74f9",
+        "status": "online",
+        "last_sync_at": "2026-08-26T06:10:00+00:00",
+        "lag_seconds": 0.0,
+        "failure_count": 0,
+        "last_error": "lab_lag",
+        "quarantined_events": 0,
+        "open_remediation": 0,
+        "checkpoint": "cp-ATTW2F-5276eff3-1",
+        "connector_version": "ATTW2F-5276eff3-v1",
+        "alerts": [],
+        "updated_at": "2026-08-02T10:58:10.117463+00:00"
+      }
+    },
+    {
+      "label": "health event history retained",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "cross-tenant approve denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_denied"
+      }
+    },
+    {
+      "label": "manager self-action denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "manager_self_action_denied"
+      }
+    },
+    {
+      "label": "manager scope denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "manager_scope_denied"
+      }
+    },
+    {
+      "label": "concurrent approve: exactly one success",
+      "ok": true,
+      "detail": [
+        {
+          "ok": true,
+          "item": {
+            "item_id": "0a25ea09-74a0-48e3-948e-9a28d7b5cb4a",
+            "company_code": "ATTW2F",
+            "kind": "unknown_employee",
+            "status": "approved_replayed",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": "ATTW2F-96557305276",
+            "device_id": "ATTW2F-5276eff3-SN",
+            "device_user_id": "DU-ATTW2F-5276eff3",
+            "work_date": null,
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1",
+            "payload": {
+              "source": "biotime",
+              "raw_ref": {
+                "id": 1,
+                "emp_code": "DU-ATTW2F-5276eff3"
+              },
+              "metadata": {},
+              "device_id": "ATTW2F-5276eff3-SN",
+              "direction": "in",
+              "punched_at": "2026-08-26T09:05:00+03:00",
+              "company_code": "ATTW2F",
+              "connector_id": "conn-attw2f-843ab35523",
+              "employee_key": null,
+              "capture_method": "card",
+              "device_user_id": "DU-ATTW2F-5276eff3",
+              "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1"
+            },
+            "row_version": 2,
+            "payroll_excluded": false,
+            "created_at": "2026-08-02T10:58:10.105383+00:00",
+            "updated_at": "2026-08-02T10:58:10.128948+00:00"
+          },
+          "mapping": {
+            "mapping_id": "7c0b4daa-fb37-409c-afc7-33e573f9877f",
+            "company_code": "ATTW2F",
+            "device_user_id": "DU-ATTW2F-5276eff3",
+            "employee_key": "ATTW2F-96557305276",
+            "device_id": "ATTW2F-5276eff3-SN",
+            "device_key": "ATTW2F-5276eff3-SN",
+            "active": true,
+            "created_at": "2026-08-02T10:58:10.128948+00:00",
+            "updated_at": "2026-08-02T10:58:10.128948+00:00"
+          }
+        },
+        {
+          "ok": false,
+          "error": "item_not_open",
+          "status": "approved_replayed"
+        }
+      ]
+    },
+    {
+      "label": "concurrent approve: other fail-closed stale",
+      "ok": true,
+      "detail": [
+        {
+          "ok": false,
+          "error": "item_not_open",
+          "status": "approved_replayed"
+        }
+      ]
+    },
+    {
+      "label": "item approved after concurrency",
+      "ok": true,
+      "detail": {
+        "item_id": "0a25ea09-74a0-48e3-948e-9a28d7b5cb4a",
+        "company_code": "ATTW2F",
+        "kind": "unknown_employee",
+        "status": "approved_replayed",
+        "connector_id": "conn-attw2f-843ab35523",
+        "employee_key": "ATTW2F-96557305276",
+        "device_id": "ATTW2F-5276eff3-SN",
+        "device_user_id": "DU-ATTW2F-5276eff3",
+        "work_date": null,
+        "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1",
+        "payload": {
+          "source": "biotime",
+          "raw_ref": {
+            "id": 1,
+            "emp_code": "DU-ATTW2F-5276eff3"
+          },
+          "metadata": {},
+          "device_id": "ATTW2F-5276eff3-SN",
+          "direction": "in",
+          "punched_at": "2026-08-26T09:05:00+03:00",
+          "company_code": "ATTW2F",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": null,
+          "capture_method": "card",
+          "device_user_id": "DU-ATTW2F-5276eff3",
+          "source_event_id": "biotime:w2f-ATTW2F-5276eff3-1"
+        },
+        "row_version": 2,
+        "payroll_excluded": false,
+        "created_at": "2026-08-02T10:58:10.105383+00:00",
+        "updated_at": "2026-08-02T10:58:10.128948+00:00"
+      }
+    },
+    {
+      "label": "reject ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "item": {
+          "item_id": "8137710c-645a-44d3-973e-2af634303d6e",
+          "company_code": "ATTW2F",
+          "kind": "duplicate_conflict",
+          "status": "rejected",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": null,
+          "device_id": null,
+          "device_user_id": null,
+          "work_date": null,
+          "source_event_id": null,
+          "payload": {
+            "marker": "ATTW2F-5276eff3"
+          },
+          "row_version": 2,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T10:58:10.163007+00:00",
+          "updated_at": "2026-08-02T10:58:10.171733+00:00"
+        }
+      }
+    },
+    {
+      "label": "reject idempotent when already rejected",
+      "ok": true,
+      "detail": {
+        "rej2": {
+          "ok": true,
+          "duplicate": true,
+          "item": {
+            "item_id": "8137710c-645a-44d3-973e-2af634303d6e",
+            "company_code": "ATTW2F",
+            "kind": "duplicate_conflict",
+            "status": "rejected",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "device_id": null,
+            "device_user_id": null,
+            "work_date": null,
+            "source_event_id": null,
+            "payload": {
+              "marker": "ATTW2F-5276eff3"
+            },
+            "row_version": 2,
+            "payroll_excluded": true,
+            "created_at": "2026-08-02T10:58:10.163007+00:00",
+            "updated_at": "2026-08-02T10:58:10.171733+00:00"
+          }
+        },
+        "rej3": {
+          "ok": true,
+          "duplicate": true,
+          "item": {
+            "item_id": "8137710c-645a-44d3-973e-2af634303d6e",
+            "company_code": "ATTW2F",
+            "kind": "duplicate_conflict",
+            "status": "rejected",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "device_id": null,
+            "device_user_id": null,
+            "work_date": null,
+            "source_event_id": null,
+            "payload": {
+              "marker": "ATTW2F-5276eff3"
+            },
+            "row_version": 2,
+            "payroll_excluded": true,
+            "created_at": "2026-08-02T10:58:10.163007+00:00",
+            "updated_at": "2026-08-02T10:58:10.171733+00:00"
+          }
+        }
+      }
+    },
+    {
+      "label": "approve+replay reaches authority",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "item": {
+          "item_id": "3b618bea-ff06-4878-a7b8-2fcd856174df",
+          "company_code": "ATTW2F",
+          "kind": "unknown_employee",
+          "status": "approved_replayed",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": "ATTW2F-96557305276",
+          "device_id": "ATTW2F-5276eff3-SN",
+          "device_user_id": "DU-R-ATTW2F-5276eff3",
+          "work_date": null,
+          "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1,
+              "emp_code": "DU-ATTW2F-5276eff3"
+            },
+            "metadata": {},
+            "device_id": "ATTW2F-5276eff3-SN",
+            "direction": "in",
+            "punched_at": "2026-08-26T09:05:00+03:00",
+            "company_code": "ATTW2F",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-R-ATTW2F-5276eff3",
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay"
+          },
+          "row_version": 3,
+          "payroll_excluded": false,
+          "created_at": "2026-08-02T10:58:10.181887+00:00",
+          "updated_at": "2026-08-02T10:58:10.201038+00:00"
+        },
+        "mapping": {
+          "mapping_id": "f9bfda68-3c3d-4982-96ed-c1ef7ca3c713",
+          "company_code": "ATTW2F",
+          "device_user_id": "DU-R-ATTW2F-5276eff3",
+          "employee_key": "ATTW2F-96557305276",
+          "device_id": "ATTW2F-5276eff3-SN",
+          "device_key": "ATTW2F-5276eff3-SN",
+          "active": true,
+          "created_at": "2026-08-02T10:58:10.183599+00:00",
+          "updated_at": "2026-08-02T10:58:10.183599+00:00"
+        },
+        "replay": {
+          "ok": true,
+          "ingest": {
+            "ok": true,
+            "created": true,
+            "duplicate": false,
+            "punch": {
+              "punch_id": "7acf7182-9ae3-4db8-8bd9-803f74e4083e",
+              "company_code": "ATTW2F",
+              "employee_key": "ATTW2F-96557305276",
+              "employee_phone": "96557305276",
+              "employee_name": "W2F-5276eff3",
+              "punched_at": "2026-08-26T06:05:00+00:00",
+              "direction": "in",
+              "source": "biotime",
+              "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay",
+              "shift_id": "d866ee5e-2573-4459-9020-c6aab62e5f1e",
+              "shift_key": "d866ee5e-2573-4459-9020-c6aab62e5f1e",
+              "work_date": "2026-08-26",
+              "break_paid": null,
+              "metadata": {
+                "raw_ref": {
+                  "id": 1,
+                  "emp_code": "DU-ATTW2F-5276eff3"
+                },
+                "device_id": "ATTW2F-5276eff3-SN",
+                "connector_id": "conn-attw2f-843ab35523",
+                "capture_method": "card",
+                "device_user_id": "DU-R-ATTW2F-5276eff3",
+                "connector_version": "attendance_capture_wave2b_v1"
+              },
+              "created_by_phone": "",
+              "created_at": "2026-08-02T10:58:10.192530+00:00"
+            },
+            "projection": {
+              "projection_id": "300ff04d-5aa5-4183-b96b-31fa6c171eab",
+              "company_code": "ATTW2F",
+              "employee_key": "ATTW2F-96557305276",
+              "employee_phone": "96557305276",
+              "employee_name": "W2F-5276eff3",
+              "work_date": "2026-08-26",
+              "shift_id": "d866ee5e-2573-4459-9020-c6aab62e5f1e",
+              "shift_key": "d866ee5e-2573-4459-9020-c6aab62e5f1e",
+              "version": 1,
+              "is_current": true,
+              "status": "late",
+              "exception_state": "missing_check_out",
+              "approval_status": "unapproved",
+              "payroll_eligible": false,
+              "check_in_at": "2026-08-26T06:05:00+00:00",
+              "check_out_at": null,
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "late_minutes": 5,
+              "early_leave_minutes": 0,
+              "worked_minutes": 0,
+              "unpaid_break_minutes": 0,
+              "paid_break_minutes": 0,
+              "sessions": [
+                {
+                  "open": true,
+                  "check_in_at": "2026-08-26T09:05:00+03:00",
+                  "check_out_at": null,
+                  "session_index": 1,
+                  "worked_minutes": 0
+                }
+              ],
+              "breaks": [],
+              "source_counts": {
+                "biotime": 1
+              },
+              "authority": "attendance_authority_wave1_v1",
+              "leave_id": null,
+              "derived_from_leave": false,
+              "manual_correction": false,
+              "metadata": {},
+              "superseded_by": null,
+              "created_by_phone": "",
+              "created_at": "2026-08-02T10:58:10.192530+00:00",
+              "updated_at": "2026-08-02T10:58:10.192530+00:00"
+            },
+            "compat": {
+              "attendance_id": "300ff04d-5aa5-4183-b96b-31fa6c171eab",
+              "company_code": "ATTW2F",
+              "employee_key": "ATTW2F-96557305276",
+              "employee_phone": "96557305276",
+              "employee_name": "W2F-5276eff3",
+              "shift_id": "d866ee5e-2573-4459-9020-c6aab62e5f1e",
+              "attendance_date": "2026-08-26",
+              "scheduled_start": "09:00:00",
+              "scheduled_end": "17:00:00",
+              "check_in_at": "2026-08-26T06:05:00+00:00",
+              "check_out_at": null,
+              "status": "late",
+              "late_minutes": 5,
+              "early_leave_minutes": 0,
+              "notes": null,
+              "source_text": null,
+              "metadata": {
+                "authority": "attendance_authority_wave1_v1",
+                "projection_version": 1,
+                "exception_state": "missing_check_out",
+                "approval_status": "unapproved",
+                "payroll_eligible": false,
+                "sessions": [
+                  {
+                    "open": true,
+                    "check_in_at": "2026-08-26T09:05:00+03:00",
+                    "check_out_at": null,
+                    "session_index": 1,
+                    "worked_minutes": 0
+                  }
+                ],
+                "breaks": [],
+                "worked_minutes": 0,
+                "shift_key": "d866ee5e-2573-4459-9020-c6aab62e5f1e"
+              },
+              "created_by_phone": "",
+              "created_at": "2026-08-02T10:58:10.192530+00:00",
+              "updated_at": "2026-08-02T10:58:10.192530+00:00"
+            },
+            "canonical": {
+              "source": "biotime",
+              "raw_ref": {
+                "id": 1,
+                "emp_code": "DU-ATTW2F-5276eff3"
+              },
+              "metadata": {},
+              "device_id": "ATTW2F-5276eff3-SN",
+              "direction": "in",
+              "punched_at": "2026-08-26T09:05:00+03:00",
+              "company_code": "ATTW2F",
+              "connector_id": "conn-attw2f-843ab35523",
+              "employee_key": "ATTW2F-96557305276",
+              "capture_method": "card",
+              "device_user_id": "DU-R-ATTW2F-5276eff3",
+              "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay",
+              "connector_version": "attendance_capture_wave2b_v1"
+            }
+          },
+          "item": {
+            "item_id": "3b618bea-ff06-4878-a7b8-2fcd856174df",
+            "company_code": "ATTW2F",
+            "kind": "unknown_employee",
+            "status": "approved_replayed",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": "ATTW2F-96557305276",
+            "device_id": "ATTW2F-5276eff3-SN",
+            "device_user_id": "DU-R-ATTW2F-5276eff3",
+            "work_date": null,
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay",
+            "payload": {
+              "source": "biotime",
+              "raw_ref": {
+                "id": 1,
+                "emp_code": "DU-ATTW2F-5276eff3"
+              },
+              "metadata": {},
+              "device_id": "ATTW2F-5276eff3-SN",
+              "direction": "in",
+              "punched_at": "2026-08-26T09:05:00+03:00",
+              "company_code": "ATTW2F",
+              "connector_id": "conn-attw2f-843ab35523",
+              "employee_key": null,
+              "capture_method": "card",
+              "device_user_id": "DU-R-ATTW2F-5276eff3",
+              "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay"
+            },
+            "row_version": 3,
+            "payroll_excluded": false,
+            "created_at": "2026-08-02T10:58:10.181887+00:00",
+            "updated_at": "2026-08-02T10:58:10.201038+00:00"
+          }
+        }
+      }
+    },
+    {
+      "label": "authority punch exactly once after first replay",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "replay idempotent duplicate",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "item": {
+          "item_id": "3b618bea-ff06-4878-a7b8-2fcd856174df",
+          "company_code": "ATTW2F",
+          "kind": "unknown_employee",
+          "status": "approved_replayed",
+          "connector_id": "conn-attw2f-843ab35523",
+          "employee_key": "ATTW2F-96557305276",
+          "device_id": "ATTW2F-5276eff3-SN",
+          "device_user_id": "DU-R-ATTW2F-5276eff3",
+          "work_date": null,
+          "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay",
+          "payload": {
+            "source": "biotime",
+            "raw_ref": {
+              "id": 1,
+              "emp_code": "DU-ATTW2F-5276eff3"
+            },
+            "metadata": {},
+            "device_id": "ATTW2F-5276eff3-SN",
+            "direction": "in",
+            "punched_at": "2026-08-26T09:05:00+03:00",
+            "company_code": "ATTW2F",
+            "connector_id": "conn-attw2f-843ab35523",
+            "employee_key": null,
+            "capture_method": "card",
+            "device_user_id": "DU-R-ATTW2F-5276eff3",
+            "source_event_id": "biotime:w2f-ATTW2F-5276eff3-replay"
+          },
+          "row_version": 3,
+          "payroll_excluded": false,
+          "created_at": "2026-08-02T10:58:10.181887+00:00",
+          "updated_at": "2026-08-02T10:58:10.201038+00:00"
+        },
+        "ingest": {
+          "ok": true,
+          "duplicate": true
+        }
+      }
+    },
+    {
+      "label": "authority punch still exactly once after duplicate replay",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "reconcile capture\u2194authority ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 1,
+        "matched_in_authority": 1,
+        "missing_in_authority": [],
+        "version": "attendance_capture_ops_wave2f_v1"
+      }
+    },
+    {
+      "label": "audit events immutable",
+      "ok": true,
+      "detail": {
+        "event_id": "da55fea9-c8ff-4c3b-82b2-d8e2efdc9ac4"
+      }
+    },
+    {
+      "label": "ops store mode",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ops overview store_mode postgres",
+      "ok": true,
+      "detail": {
+        "real_device_ingest": false,
+        "qr_gps_kiosk": false,
+        "synthetic_only_authority": true,
+        "import_enabled": false,
+        "capture_store": "postgres"
+      }
+    },
+    {
+      "label": "freeze skipped",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "version": "attendance_capture_ops_wave2f_v1"
+}

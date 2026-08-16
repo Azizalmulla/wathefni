@@ -1,0 +1,111 @@
+    wave6 product acceptance — db
+      PASS  c8 phase
+      PASS  stamp
+      PASS  acceptance only
+      PASS  anti-duplication
+      PASS  frozen contract reprove
+      PASS  setup card scan helper
+      PASS  matrix ja_only
+      PASS  matrix learning_only
+      PASS  matrix benefits_only
+      PASS  matrix er_only
+      PASS  matrix engagement_only
+      PASS  matrix comp_plus_ja_only
+      PASS  matrix wfp_plus_ja_only
+      PASS  matrix learning_plus_performance_optional
+      PASS  matrix learning_plus_talent_optional
+      PASS  matrix benefits_plus_payroll_optional
+      PASS  matrix benefits_without_payroll
+      PASS  matrix comp_plus_payroll_optional
+      PASS  matrix comp_without_payroll
+      PASS  matrix wfp_plus_recruiting_optional
+      PASS  matrix wfp_without_recruiting
+      PASS  matrix full_wave6_enabled
+      PASS  matrix all_wave6_disabled all unavailable
+      PASS  benefits works payroll off
+      PASS  comp works payroll off
+      PASS  wfp works recruiting off
+      PASS  ld works without ja
+      PASS  ld works perf/talent off
+      PASS  comp without ja blocked
+      PASS  wfp without ja blocked
+      PASS  setup contract
+      PASS  setup module job_architecture
+      PASS  setup module learning
+      PASS  setup module benefits
+      PASS  setup module employee_relations
+      PASS  setup module engagement
+      PASS  setup module comp_planning
+      PASS  setup module workforce_planning
+      PASS  enable ja
+      PASS  ja path
+      PASS  ja historical stable id
+      PASS  enable learning
+      PASS  ld catalog item
+      PASS  ld offering
+      PASS  ld assignment
+      PASS  ld ne development sot
+      PASS  enable benefits
+      PASS  bn claims absent honesty
+      PASS  bn eligible≠enrolled
+      PASS  enable er
+      PASS  er ordinary hr ≠ er
+      PASS  er manager ≠ er
+      PASS  er outcome ≠ mutation
+      PASS  enable engagement
+      PASS  eg min5
+      PASS  eg upward
+      PASS  eg no respondent map
+      PASS  eg recognition out
+      PASS  eg recognition absent
+      PASS  enable comp
+      PASS  comp band ja-linked
+      PASS  comp launch freeze
+      PASS  comp recommend
+      PASS  comp calibrate preserves original
+      PASS  comp sod
+      PASS  comp approve ≠ salary
+      PASS  comp finalized ≠ applied
+      PASS  comp explicit handoff
+      PASS  comp employee draft hidden
+      PASS  comp assistant no mutate
+      PASS  enable wfp
+      PASS  wfp baseline freeze
+      PASS  wfp demand
+      PASS  wfp projection
+      PASS  wfp approved ≠ execution
+      PASS  wfp handoff no auto hire
+      PASS  wfp handoff idempotent
+      PASS  wfp employee no leak
+      PASS  wfp assistant no mutate
+      PASS  wfp emitted planning facts
+      PASS  wfp facts not mixed as actual hc
+      PASS  comp emitted wave5 facts
+      PASS  disable learning retains history
+      PASS  disable benefits retains history
+      PASS  disable er retains history
+      PASS  disable engagement retains history
+      PASS  disable comp retains history
+      PASS  disable wfp retains history
+      PASS  ja still healthy after others off
+      PASS  comp off clean block
+      PASS  handoff matrix size
+      PASS  permission matrix size
+      PASS  en label job_architecture_c1
+      PASS  ar label job_architecture_c1
+      PASS  en label learning_development_c2
+      PASS  ar label learning_development_c2
+      PASS  en label benefits_administration_c3
+      PASS  ar label benefits_administration_c3
+      PASS  en label employee_relations_c4
+      PASS  ar label employee_relations_c4
+      PASS  en label engagement_c5
+      PASS  ar label engagement_c5
+      PASS  en label compensation_planning_c6
+      PASS  ar label compensation_planning_c6
+      PASS  en label workforce_planning_c7
+      PASS  ar label workforce_planning_c7
+
+    WAVE6_PRODUCT_FULL_PASS
+    106 passed, 0 failed
+STAGING_RC=0

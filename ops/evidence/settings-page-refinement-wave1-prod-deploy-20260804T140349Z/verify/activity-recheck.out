@@ -1,0 +1,18 @@
+PASS posthire_bundle_present — PostHire-BRvMp5qE.js
+PASS timeline_marker
+PASS list_marker
+PASS filters_marker
+PASS export_marker
+PASS details_marker
+PASS purpose_copy
+PASS no_company_activity_card
+PASS no_decorative_category_meta
+PASS rbac_admins
+PASS no_hr_managers_copy
+PASS arabic_surface
+PASS read_only_honesty
+PASS alerts_still_present
+PASS compliance_still_present
+ACTIVITY_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ACTIVITY_PAGE_WAVE1_SMOKE_OK

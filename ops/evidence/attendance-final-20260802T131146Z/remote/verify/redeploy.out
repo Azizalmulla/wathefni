@@ -1,0 +1,78 @@
+stamp=20260802T131146Z
+time_utc=2026-08-02T13:16:27Z
+active
+=== SHAs before ===
+31640a4a0a7e1f6a108a2cca1d4eb056616b08a9489922a6dc83051a6a1b0756  /opt/wathefni/orchestrator/attendance_ops_http.py
+7fc45fde7fb14c58ca802db99bbae14e55ef4b1413516bff4e6ce6021536d1fe  /opt/wathefni/orchestrator/attendance_ops_postgres.py
+4ead4e737938682a409e0864069ede535534609890ef550104aca524129c703b  /opt/wathefni/orchestrator/attendance_ops_wave3.py
+834f5220b5ca6b0443794af8ab5db5d072c9a4d45a52589b64b3df28ba41260f  /opt/wathefni/orchestrator/attendance_authority_hooks.py
+28fd2cde37d7f4751589839a0a4e4fc20887fb4386ec129c019bea9ec1332203  /opt/wathefni/orchestrator/attendance_authority_postgres.py
+5e9c2780499a59c9799e0e4d8f194f33c9b4647e461094d50e4e3cfe61657f02  /opt/wathefni/orchestrator/attendance_authority_wave1.py
+0ac71abd7e21c151b88797f4b1b46b0ce57fee72fc78d9efcc44b707f2220a1e  /opt/wathefni/orchestrator/attendance_capture_ops.py
+4efc5400d97e66310e20e312b3f8c68825c941998427537ef70d91913602f603  /opt/wathefni/orchestrator/attendance_capture_ops_http.py
+0f13238daf5431b087da549c57abf17e3eb890453302af21ce409c7d64c349aa  /var/www/wathefni-dashboard/assets/PostHire-BrW2GlcR.js
+=== flags before ===
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_ATTENDANCE_OPS=on
+WATHEFNI_ATTENDANCE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS=absence,early_leave
+WATHEFNI_ATTENDANCE_OPS_STORE=postgres
+WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY=on
+WATHEFNI_CAPTURE_CREDENTIAL_KEY=[REDACTED]
+{
+  "db": "wathefni",
+  "wathefni_rows": 42,
+  "demo_seed": 42,
+  "four_reals": 4
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[13:16:29] backing up orchestrator + dashboard + dropins
+c684e783713e0a8e2f51df44bf532a95395fa964f959d18b6c2f5a6d3469e9cb  app.py
+bfbdb6020e5afea84cbd3c4a54dd9a52e5d1d1672ea40eceda37214bff5f2fbc  attendance-records-fingerprint.csv
+0f13238daf5431b087da549c57abf17e3eb890453302af21ce409c7d64c349aa  dashboard-dist/assets/PostHire-BrW2GlcR.js
+[13:16:29] deploying orchestrator modules
+[13:16:29] promoting dashboard dist
+2f4cfd5303727e59839a180d7bac2d4a227b01703c25e3c102e0546e547ae5f6  /var/www/wathefni-dashboard/assets/PostHire-D8YjEnpm.js
+chunk=/var/www/wathefni-dashboard/assets/PostHire-D8YjEnpm.js
+FOUND Attendance operations
+FOUND عمليات الحضور
+FOUND Connector health
+FOUND Day detail
+FOUND Approved — ready to apply
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}=== flags after ===
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_ATTENDANCE_OPS=on
+WATHEFNI_ATTENDANCE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS=absence,early_leave
+WATHEFNI_ATTENDANCE_OPS_STORE=postgres
+WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY=on
+WATHEFNI_CAPTURE_CREDENTIAL_KEY=[REDACTED]
+{
+  "wathefni_rows": 42,
+  "demo_seed": 42,
+  "four_reals": 4
+}
+5be5770f27de36d2933a6f37e85d72bd2677887097fc8cec4e6fe53d63bbce1f  /opt/wathefni/orchestrator/attendance_ops_wave3.py
+5e9c2780499a59c9799e0e4d8f194f33c9b4647e461094d50e4e3cfe61657f02  /opt/wathefni/orchestrator/attendance_authority_wave1.py
+2f4cfd5303727e59839a180d7bac2d4a227b01703c25e3c102e0546e547ae5f6  /var/www/wathefni-dashboard/assets/PostHire-D8YjEnpm.js
+DEPLOY_OK stamp=20260802T131146Z

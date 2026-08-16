@@ -1,0 +1,388 @@
+{
+  "checks": [
+    {
+      "label": "canary disabled in production",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "production not in canary env allowlist",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Wave D mailbox sync remains off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Wave D inbound email flag readable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "integrity scan runs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "integrity includes employee_messages",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "integrity includes file_registry",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "policy self_approval_allowed false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "policy production_safe_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "policy has eligible separate approver",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "aziz listed as eligible for fouad",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manual create canonicalizes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lookup local resolves",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lookup 965 resolves same",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "duplicate creation blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "import uses alias find",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "recruiting hire canonical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale edit conflict",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "fresh edit ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "in-scope manager mutation works",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "out-of-scope mutation fail-closed",
+      "ok": true,
+      "detail": {
+        "error": "employee_not_found",
+        "message": "We couldn't find that employee."
+      }
+    },
+    {
+      "label": "orphan-doc fail-closed present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "requester cannot self-approve request",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cancel works",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "separate approver can reject",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "reject leaves status unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale request fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "replay same hash idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "replay different hash conflicts",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "separate approver can approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "approve applies left",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "production canary direct status denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "canary deny code",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no eligible approver fails closed clearly",
+      "ok": true,
+      "detail": {
+        "company_code": "ZZZNONE",
+        "environment": "production",
+        "canary_allowed": false,
+        "production_safe_required": true,
+        "self_approval_allowed": false,
+        "requester_has_approve_permission": false,
+        "requester_dual_grant": false,
+        "eligible_approver_count": 0,
+        "eligible_approvers": [],
+        "status_change_available": false,
+        "blocked_reason": "no_eligible_approver",
+        "rules": {
+          "dual_grant_cannot_self_approve_outside_canary": true,
+          "fake_approver_forbidden": true,
+          "silent_auto_approve_forbidden": true,
+          "rejected_leaves_employee_unchanged": true,
+          "cancelled_leaves_employee_unchanged": true,
+          "stale_expected_version_conflict": "employee_version_conflict",
+          "replay_same_hash": "idempotent",
+          "replay_different_hash": "idempotency_conflict"
+        }
+      }
+    },
+    {
+      "label": "aziz also has separate eligible approver",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "null statuses not cleaned",
+      "ok": true,
+      "detail": {
+        "WATHEFNI-96597727743": null,
+        "WATHEFNI-96550252254": null
+      }
+    },
+    {
+      "label": "synthetic orphan messages not deleted",
+      "ok": true,
+      "detail": 3
+    }
+  ],
+  "integrity_scan": {
+    "company_code": "WATHEFNI",
+    "scanned_at": "2026-08-01T19:41:54Z",
+    "total_orphans": 3,
+    "ok": false,
+    "tables": {
+      "attendance_records": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "leave_requests": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "shift_assignments": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "payroll_timesheets": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_availability_requests": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "compliance_documents": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_messages": {
+        "present": true,
+        "orphans": 3,
+        "samples": [
+          {
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-P0-DUP-1"
+          }
+        ],
+        "mode": "company_employee"
+      },
+      "employee_sessions": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_app_invites": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_status_changes": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "employee_org_assignments": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "hr_tasks": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "document_storage_operations": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      },
+      "file_registry": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "file_registry_employee"
+      },
+      "onboarding_items": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "employee_key_join"
+      },
+      "employee_documents": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "employee_key_join"
+      }
+    }
+  },
+  "approval_policy_fouad": {
+    "company_code": "WATHEFNI",
+    "environment": "production",
+    "canary_allowed": false,
+    "production_safe_required": true,
+    "self_approval_allowed": false,
+    "requester_has_approve_permission": true,
+    "requester_dual_grant": true,
+    "eligible_approver_count": 1,
+    "eligible_approvers": [
+      {
+        "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+        "name": "Aziz Almulla",
+        "email": "azizalmulla16@gmail.com",
+        "role": "owner",
+        "phone": "96599338566"
+      }
+    ],
+    "status_change_available": true,
+    "blocked_reason": null,
+    "rules": {
+      "dual_grant_cannot_self_approve_outside_canary": true,
+      "fake_approver_forbidden": true,
+      "silent_auto_approve_forbidden": true,
+      "rejected_leaves_employee_unchanged": true,
+      "cancelled_leaves_employee_unchanged": true,
+      "stale_expected_version_conflict": "employee_version_conflict",
+      "replay_same_hash": "idempotent",
+      "replay_different_hash": "idempotency_conflict"
+    }
+  },
+  "approval_policy_empty": {
+    "company_code": "ZZZNONE",
+    "environment": "production",
+    "canary_allowed": false,
+    "production_safe_required": true,
+    "self_approval_allowed": false,
+    "requester_has_approve_permission": false,
+    "requester_dual_grant": false,
+    "eligible_approver_count": 0,
+    "eligible_approvers": [],
+    "status_change_available": false,
+    "blocked_reason": "no_eligible_approver",
+    "rules": {
+      "dual_grant_cannot_self_approve_outside_canary": true,
+      "fake_approver_forbidden": true,
+      "silent_auto_approve_forbidden": true,
+      "rejected_leaves_employee_unchanged": true,
+      "cancelled_leaves_employee_unchanged": true,
+      "stale_expected_version_conflict": "employee_version_conflict",
+      "replay_same_hash": "idempotent",
+      "replay_different_hash": "idempotency_conflict"
+    }
+  },
+  "known_null_statuses": {
+    "WATHEFNI-96597727743": null,
+    "WATHEFNI-96550252254": null
+  },
+  "synthetic_orphan_messages": 3,
+  "pass": 37,
+  "fail": 0,
+  "verdict": "PASS"
+}

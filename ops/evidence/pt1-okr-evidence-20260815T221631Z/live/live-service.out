@@ -1,0 +1,7 @@
+staging_health=200
+      PASS  live health
+      PASS  live /dashboard/performance/okr-cycles not public
+      PASS  live /dashboard/performance/workspace not public
+      PASS  live /app/performance/okr-cycles/current not public
+      PASS  live /dashboard/posthire/talent/evidence-index/x not public
+    LIVE_SERVICE 5 passed, 0 failed

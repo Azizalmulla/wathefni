@@ -1,0 +1,51 @@
+=== dashboard live verify (20260806T200247Z) ===
+assets/ConfirmDialog-B1z6I9X4.js
+assets/access-jb0jv3UY.js
+assets/api-CdlXhpLo.js
+assets/badge-ByGi6G6Z.js
+assets/button-CdsJfbcM.js
+assets/card-CRyt1qVN.js
+assets/dashboard-DElmN1iD.js
+assets/dashboardPerf-BmWSAjrQ.js
+assets/fetchers-BudFlB02.js
+assets/field-jjpJt-eD.js
+assets/freshness-D5u22DzA.js
+assets/keys-CPFej8aV.js
+assets/lucide-DXG-lAS2.js
+assets/react-query-C-0RpxWl.js
+assets/react-vendor-K9trxRfS.js
+assets/recruitingLifecycle-BwGtHlaT.js
+assets/rolldown-runtime-ciTZEWaI.js
+assets/src-cJU8MxPJ.js
+assets/useOverlayA11y-Cdn2kTJj.js
+--- chunk codes ---
+new_posthire=200
+old_posthire=404
+health=200
+=== public edge verify (api.wathefni.ai) ===
+curl: (56) The requested URL returned error: 404
+health=404
+curl: (56) The requested URL returned error: 404
+dashboard_index=404
+curl: (56) The requested URL returned error: 404
+new_posthire=404
+curl: (56) The requested URL returned error: 404
+old_posthire=404
+=== public edge verify (dashboard.wathefni.ai) ===
+curl: (56) The requested URL returned error: 404
+dashboard_index=404
+curl: (56) The requested URL returned error: 404
+new_posthire=404
+old_posthire=404
+curl: (56) The requested URL returned error: 404
+api_health=404
+curl: (56) The requested URL returned error: 404
+app_health=404
+dashboard.wathefni.ai index=000 new_posthire=000 old_posthire=000
+app.wathefni.ai index=000 new_posthire=000 old_posthire=000
+api.wathefni.ai index=404 new_posthire=404 old_posthire=404
+=== public edge verify (api.wathefni.ai/dashboard) ===
+dashboard_shell=200
+new_posthire=200
+old_posthire=404
+api_health=200

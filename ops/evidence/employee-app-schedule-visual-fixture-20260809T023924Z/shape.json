@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "stamp": "20260809T023924Z",
+  "employee_key": "WATHEFNI-96550010001",
+  "name": "Noura Almutairi",
+  "phone": "96550010001",
+  "shape": {
+    "date": "2026-08-09",
+    "authority": {
+      "shifts": "ready",
+      "attendance": "ready",
+      "shifts_upcoming": "ready"
+    },
+    "today_entries": 1,
+    "today_kinds": ["scheduled"],
+    "today_location": "Salmiya Branch",
+    "today_recorded_status": "present",
+    "upcoming_count": 3,
+    "upcoming_dates": ["2026-08-10", "2026-08-12", "2026-08-14"],
+    "recent_count": 4,
+    "recent_statuses": ["present", "late", "absent", "present"],
+    "recent_late_minutes": [0, 12, 0, 0],
+    "summary": { "present": 3, "late": 1, "absent": 1 }
+  },
+  "protected_untouched": ["WATHEFNI-96550252254", "WATHEFNI-96599338566"]
+}

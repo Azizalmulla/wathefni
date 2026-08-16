@@ -1,0 +1,11 @@
+PASS  module_disabled maps
+PASS  bank allowlist maps to no_access
+PASS  feature_not_available maps to temporary
+PASS  unknown raw enum stays generic
+PASS  null reason is generic
+PASS  message keys are customer i18n, not raw codes
+PASS  temporary title variant
+PASS  EN+AR feature reason copy present and equal keysets for these keys
+PASS  customer copy does not echo backend reason tokens
+---
+PASS feature unavailable copy (9 checks)

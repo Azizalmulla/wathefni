@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_ar_digital_01",
+  "category": "arabic_digital_cv",
+  "language": "ar",
+  "layout": "single_column_rtl",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "نورة العتيبي",
+    "noura.otaibi@example.com",
+    "+96551112233",
+    "الخبرة العملية",
+    "المهارات"
+  ],
+  "expected_fields": {
+    "full_name": "نورة العتيبي",
+    "email": "noura.otaibi@example.com",
+    "phone": "+96551112233",
+    "title": "مهندسة برمجيات"
+  },
+  "notes": "Structurally valid Arabic CV with embedded Noto Kufi TrueType (shaped+bidi).",
+  "sha256": "79dc3f6977f6ae782622eea404f312de6b26f14c120c899c1f3a1224e7a80b6c",
+  "bytes": 45116
+}

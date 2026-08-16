@@ -1,0 +1,33 @@
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_EMPLOYEE_ESS_V5=on
+WATHEFNI_EMPLOYEE_ESS_V5_BANK_REAL_ALLOWLIST=
+WATHEFNI_EMPLOYEE_ESS_V5_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_ESS_V5_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_NAME_PREFIX=W5C-SYNTH|
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_PHONE_PREFIXES=965549
+APP_FLAG None
+REQUIRE_ALLOWLIST None
+REAL_ALLOWLIST None
+ESS_V5 None
+ESS_SYNTH None
+ESS_REAL None
+MODULES [{'module_key': 'attendance', 'enabled': True}, {'module_key': 'compliance', 'enabled': True}, {'module_key': 'employee_app', 'enabled': True}, {'module_key': 'leave', 'enabled': True}, {'module_key': 'onboarding', 'enabled': True}, {'module_key': 'shifts', 'enabled': True}]
+TALAL {'employee_key': 'WATHEFNI-96550252254', 'name': 'Talal Fadhli', 'employment_status': 'active'}
+ALLOWLIST_FN assert_employee_app_allowlisted
+RUN smoke-test-employee-app.py
+employee app harness — company EMPAPPTESTCO (env: /root/.openclaw/secrets/postgres.env)
+
+opt/wathefni/orchestrator/smoke-test-employee-app.py", line 312, in main
+    run_checks(checks)
+  File "/opt/wathefni/orchestrator/smoke-test-employee-app.py", line 222, in run_checks
+    activated = app.app_auth_activate(app.EmployeeAppActivateRequest(phone=PHONE_A, code=code3))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/app.py", line 65626, in app_auth_activate
+    assert_employee_app_allowlisted(invite_employee_key)
+  File "/opt/wathefni/orchestrator/app.py", line 610, in assert_employee_app_allowlisted
+    raise HTTPException(
+fastapi.exceptions.HTTPException: 403: {'error': 'employee_app_not_allowlisted', 'message': 'The employee app is in controlled rollout and is not enabled for this account.'}
+

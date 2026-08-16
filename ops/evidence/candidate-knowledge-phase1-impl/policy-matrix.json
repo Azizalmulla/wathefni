@@ -1,0 +1,577 @@
+{
+  "policy_version": "candidate-record-state-policy-v1",
+  "cases": [
+    {
+      "input": {
+        "status": "needs_role",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": "needs_role",
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": true,
+        "read_projection": "full",
+        "held_state": "needs_role",
+        "reason_codes": [
+          "intake_hold:needs_role",
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "held_readable_not_actionable"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "needs_role",
+        "governance_flags": []
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": "needs_role",
+        "reason_codes": [
+          "intake_hold:needs_role",
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "held_readable_not_actionable"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "import_review",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": "import_review",
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": true,
+        "read_projection": "full",
+        "held_state": "import_review",
+        "reason_codes": [
+          "intake_hold:import_review",
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "held_readable_not_actionable"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "import_review",
+        "governance_flags": []
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": "import_review",
+        "reason_codes": [
+          "intake_hold:import_review",
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "held_readable_not_actionable"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "import_archived",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": "import_archived",
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": true,
+        "read_projection": "redacted",
+        "held_state": "import_archived",
+        "reason_codes": [
+          "intake_hold:import_archived",
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "archived"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "import_archived",
+        "governance_flags": [
+          "archived"
+        ]
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": "import_archived",
+        "reason_codes": [
+          "intake_hold:import_archived",
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "archived"
+        ],
+        "read_projection": "redacted",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "review_pending",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": true,
+        "lifecycle_mutation_allowed": true,
+        "job_ranking_eligible": true,
+        "talent_pool_search_eligible": true,
+        "retention_blocked": true,
+        "read_projection": "full",
+        "held_state": null,
+        "reason_codes": [
+          "retention_blocked",
+          "review_pending_retention_held_only",
+          "review_pending"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "review_pending",
+        "governance_flags": []
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": true,
+        "lifecycle_mutation_allowed": true,
+        "job_ranking_allowed": true,
+        "held_state": null,
+        "reason_codes": [
+          "retention_blocked",
+          "review_pending_retention_held_only",
+          "review_pending"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": true,
+        "lifecycle_mutation_allowed": true,
+        "job_ranking_eligible": true,
+        "talent_pool_search_eligible": true,
+        "retention_blocked": false,
+        "read_projection": "full",
+        "held_state": null,
+        "reason_codes": [
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": []
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": true,
+        "lifecycle_mutation_allowed": true,
+        "job_ranking_allowed": true,
+        "held_state": null,
+        "reason_codes": [
+          "live_pipeline"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "hired",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": true,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": false,
+        "read_projection": "full",
+        "held_state": null,
+        "reason_codes": [
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "finalized:hired"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "hired",
+        "governance_flags": []
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": true,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": null,
+        "reason_codes": [
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "finalized:hired"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "rejected",
+        "governance": null
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": true,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": false,
+        "read_projection": "full",
+        "held_state": null,
+        "reason_codes": [
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "finalized:rejected"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "rejected",
+        "governance_flags": []
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": true,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": null,
+        "reason_codes": [
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "finalized:rejected"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": {
+          "archive_state": "archived"
+        }
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": false,
+        "read_projection": "redacted",
+        "held_state": "archived",
+        "reason_codes": [
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "archived",
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": [
+          "archived"
+        ]
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": "archived",
+        "reason_codes": [
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "archived",
+          "live_pipeline"
+        ],
+        "read_projection": "redacted",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": {
+          "restriction_state": "restricted"
+        }
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": false,
+        "read_projection": "metadata_only",
+        "held_state": "restricted",
+        "reason_codes": [
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "restricted",
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": [
+          "restricted"
+        ]
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": "restricted",
+        "reason_codes": [
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "lifecycle_mutation_blocked",
+          "restricted",
+          "live_pipeline"
+        ],
+        "read_projection": "metadata_only",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": {
+          "legal_hold_state": "active"
+        }
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": true,
+        "lifecycle_mutation_allowed": true,
+        "job_ranking_eligible": true,
+        "talent_pool_search_eligible": true,
+        "retention_blocked": true,
+        "read_projection": "full",
+        "held_state": null,
+        "reason_codes": [
+          "retention_blocked",
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": [
+          "legal_hold"
+        ]
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": true,
+        "lifecycle_mutation_allowed": true,
+        "job_ranking_allowed": true,
+        "held_state": null,
+        "reason_codes": [
+          "retention_blocked",
+          "live_pipeline"
+        ],
+        "read_projection": "full",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": {
+          "deletion_request_state": "requested"
+        }
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": true,
+        "talent_pool_search_eligible": true,
+        "retention_blocked": true,
+        "read_projection": "redacted",
+        "held_state": null,
+        "reason_codes": [
+          "communication_blocked",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "deletion_pending",
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": [
+          "deletion_requested",
+          "deletion_pending"
+        ]
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": true,
+        "held_state": null,
+        "reason_codes": [
+          "communication_blocked",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "deletion_pending",
+          "live_pipeline"
+        ],
+        "read_projection": "redacted",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": {
+          "deletion_request_state": "in_progress"
+        }
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": true,
+        "talent_pool_search_eligible": true,
+        "retention_blocked": true,
+        "read_projection": "redacted",
+        "held_state": null,
+        "reason_codes": [
+          "communication_blocked",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "deletion_pending",
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": [
+          "deletion_in_progress",
+          "deletion_pending"
+        ]
+      },
+      "actionability": {
+        "readable": true,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": true,
+        "held_state": null,
+        "reason_codes": [
+          "communication_blocked",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "deletion_pending",
+          "live_pipeline"
+        ],
+        "read_projection": "redacted",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    },
+    {
+      "input": {
+        "status": "shortlisted",
+        "governance": {
+          "deletion_request_state": "completed"
+        }
+      },
+      "decision": {
+        "intake_hold_state": null,
+        "communication_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_eligible": false,
+        "talent_pool_search_eligible": false,
+        "retention_blocked": true,
+        "read_projection": "denied",
+        "held_state": null,
+        "reason_codes": [
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "deletion_completed",
+          "live_pipeline"
+        ],
+        "policy_version": "candidate-record-state-policy-v1",
+        "application_status": "shortlisted",
+        "governance_flags": [
+          "deletion_completed"
+        ]
+      },
+      "actionability": {
+        "readable": false,
+        "contact_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "job_ranking_allowed": false,
+        "held_state": null,
+        "reason_codes": [
+          "communication_blocked",
+          "talent_pool_search_ineligible",
+          "job_ranking_ineligible",
+          "retention_blocked",
+          "lifecycle_mutation_blocked",
+          "deletion_completed",
+          "live_pipeline"
+        ],
+        "read_projection": "denied",
+        "policy_version": "candidate-record-state-policy-v1"
+      }
+    }
+  ]
+}

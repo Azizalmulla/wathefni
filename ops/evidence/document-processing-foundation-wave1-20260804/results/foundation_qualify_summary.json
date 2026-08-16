@@ -1,0 +1,347 @@
+{
+  "wave": "document_processing_foundation_wave1_qualify",
+  "created_at": "2026-08-03T23:26:50.463723+00:00",
+  "gates": {
+    "nine_fixtures_ran": true,
+    "zero_false_ocr_skips": true,
+    "zero_structured_regression": true,
+    "zero_evidence_regression": true,
+    "v2_completion_same_or_better": true,
+    "automatic_poppler_fallback_proven": true,
+    "gpt_auto_fallback_off": true,
+    "docx_reaches_v2": true,
+    "image_no_gpt_and_reaches_v2": true,
+    "route_matrix_loaded": true,
+    "hybrid_authority_accepted_majority": true,
+    "all_pass": true
+  },
+  "false_skips": 0,
+  "fallback_proof": {
+    "stop_file_triggered_fallback": true,
+    "method": "pdftotext"
+  },
+  "gpt_invocations": 0,
+  "docx_proof": {
+    "ran": true,
+    "chars": 184,
+    "arabic_chars": 8,
+    "table": true,
+    "v2_ok": true,
+    "v2_path": "ocr_document_annotation",
+    "reaches_v2": true,
+    "gpt_vision_invoked": false
+  },
+  "image_proof": {
+    "ran": true,
+    "method": "mistral-ocr-4-0",
+    "quality_ok": true,
+    "gpt_vision_invoked": false,
+    "reaches_v2": true,
+    "v2_ok": true,
+    "v2_path": "ocr_document_annotation"
+  },
+  "rows": [
+    {
+      "file": "wave0_cv_ar_digital_01.pdf",
+      "category": "arabic_digital_cv",
+      "wall_ms": 10521,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "syn_arabic_digital_cv_000.pdf",
+      "category": "arabic_digital_cv",
+      "wall_ms": 10127,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "wave0_cv_bilingual_01.pdf",
+      "category": "bilingual_cv",
+      "wall_ms": 11213,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "wave0_cv_multicolumn_01.pdf",
+      "category": "multicolumn_cv",
+      "wall_ms": 6551,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "wave0_cv_scanned_en_01.pdf",
+      "category": "scanned_image_only_cv",
+      "wall_ms": 5859,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "wave0_cv_mixed_01.pdf",
+      "category": "mixed_digital_scanned",
+      "wall_ms": 5450,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "wave0_cv_broken_encoding_01.pdf",
+      "category": "broken_encoding",
+      "wall_ms": 6311,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "syn_broken_encoding_000.pdf",
+      "category": "broken_encoding",
+      "wall_ms": 10731,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    },
+    {
+      "file": "wave0_cv_en_digital_01.pdf",
+      "category": "english_digital_cv",
+      "wall_ms": 6084,
+      "authority_method": "local_hybrid_pdf_engine",
+      "hybrid_accepted": true,
+      "envelope_ok": true,
+      "false_skip_pages": [],
+      "gpt_vision_invoked": false,
+      "v2_completion_ok": true,
+      "structured_regression": false,
+      "evidence_regression": false,
+      "fallback_meta": null
+    }
+  ],
+  "route_matrix": [
+    {
+      "document_class": "cv",
+      "file_types": [
+        "pdf"
+      ],
+      "reading_route": "local_hybrid_pdf_engine",
+      "fallback_reading": "poppler_mistral",
+      "structuring": "cv_extraction_v2",
+      "ocr_policy": "page_level_mistral_only_when_needed",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "hybrid_with_poppler_fallback"
+    },
+    {
+      "document_class": "cv",
+      "file_types": [
+        "docx"
+      ],
+      "reading_route": "native_docx_plus_selective_image_ocr",
+      "fallback_reading": null,
+      "structuring": "cv_extraction_v2",
+      "ocr_policy": "embedded_text_candidate_images_only",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "existing_docx_authority"
+    },
+    {
+      "document_class": "cv",
+      "file_types": [
+        "jpg",
+        "jpeg",
+        "png",
+        "tif",
+        "tiff",
+        "webp"
+      ],
+      "reading_route": "mistral_ocr",
+      "fallback_reading": "needs_review_or_extraction_failed",
+      "structuring": "cv_extraction_v2",
+      "ocr_policy": "full_image_mistral",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "mistral_image_authority_no_gpt"
+    },
+    {
+      "document_class": "generic_pdf",
+      "file_types": [
+        "pdf"
+      ],
+      "reading_route": "local_hybrid_native_first",
+      "fallback_reading": "needs_review",
+      "structuring": "document_specific_processor",
+      "ocr_policy": "mistral_only_scanned_corrupt_unusable",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "shared_reading_legacy_structuring"
+    },
+    {
+      "document_class": "identity",
+      "file_types": [
+        "jpg",
+        "jpeg",
+        "png",
+        "pdf"
+      ],
+      "reading_route": "shared_envelope_intake",
+      "fallback_reading": null,
+      "structuring": "identity_processor_current_gpt_vision",
+      "ocr_policy": "do_not_use_cv_v2",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "legacy_gpt_vision_until_replacement_qualified",
+      "notes": "Audit only this wave; do not preserve GPT as automatic OCR fallback for CV."
+    },
+    {
+      "document_class": "contract",
+      "file_types": [
+        "pdf"
+      ],
+      "reading_route": "shared_hybrid_reading",
+      "fallback_reading": "needs_review",
+      "structuring": "contract_compliance_processor",
+      "ocr_policy": "mistral_when_needed",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "shared_reading_legacy_structuring"
+    },
+    {
+      "document_class": "compliance",
+      "file_types": [
+        "pdf"
+      ],
+      "reading_route": "shared_hybrid_reading",
+      "fallback_reading": "needs_review",
+      "structuring": "contract_compliance_processor",
+      "ocr_policy": "mistral_when_needed",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "shared_reading_legacy_structuring"
+    },
+    {
+      "document_class": "spreadsheet",
+      "file_types": [
+        "csv",
+        "xlsx",
+        "xls"
+      ],
+      "reading_route": "structured_parser",
+      "fallback_reading": null,
+      "structuring": "schema_validation",
+      "ocr_policy": "never_ocr",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "structured_import"
+    },
+    {
+      "document_class": "generated_offer",
+      "file_types": [
+        "pdf"
+      ],
+      "reading_route": "generated",
+      "fallback_reading": null,
+      "structuring": "none",
+      "ocr_policy": "never_ocr",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "generated"
+    },
+    {
+      "document_class": "payslip",
+      "file_types": [
+        "pdf",
+        "json"
+      ],
+      "reading_route": "generated_or_mirror_only",
+      "fallback_reading": null,
+      "structuring": "none",
+      "ocr_policy": "never_ocr",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "mirror_or_generated"
+    },
+    {
+      "document_class": "payroll_mirror",
+      "file_types": [
+        "json",
+        "csv"
+      ],
+      "reading_route": "mirror_only",
+      "fallback_reading": null,
+      "structuring": "none",
+      "ocr_policy": "never_ocr",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "mirror_only"
+    }
+  ],
+  "hybrid_accepted_count": 9,
+  "identity_gpt_audit": {
+    "entry": "app.extract_compliance_document_metadata",
+    "types": [
+      "civil_id",
+      "passport",
+      "medical",
+      "residency",
+      "work_permit"
+    ],
+    "uses_cv_v2": false,
+    "replacement_plan": [
+      "shared envelope intake",
+      "qualify alternate identity reader",
+      "HR confirmation unchanged",
+      "owner GO"
+    ]
+  },
+  "legacy_authority_classes": [
+    "identity GPT vision",
+    "contract/compliance processors",
+    "payslip/generated/mirror never OCR",
+    "spreadsheet never OCR"
+  ],
+  "cloud_portability": {
+    "aws_deps": false,
+    "gcp_deps": false,
+    "envelope": "document_envelope@1"
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wathefni.local/schemas/candidate-knowledge-v1.json",
+  "title": "CandidateKnowledgeRecord",
+  "description": "Phase 0 contract only. Defines candidate-knowledge-v1 shape for future CandidateKnowledgeAuthority reads. No storage or indexing implied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "candidate_ref",
+    "company_code",
+    "as_of",
+    "knowledge_version",
+    "subject",
+    "governance",
+    "identity_state",
+    "canonical_cv",
+    "effective_facts",
+    "classifications",
+    "applications",
+    "screening_evidence",
+    "assessments",
+    "interviews",
+    "ranking_evaluations",
+    "notes",
+    "evidence_manifest",
+    "coverage",
+    "actionability"
+  ],
+  "properties": {
+    "schema": {
+      "const": "candidate-knowledge-v1"
+    },
+    "candidate_ref": {
+      "type": "string",
+      "pattern": "^app:.+"
+    },
+    "company_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "knowledge_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["display_name", "contact_email_present", "contact_phone_present", "source"],
+      "properties": {
+        "display_name": { "type": ["string", "null"] },
+        "contact_email_present": { "type": "boolean" },
+        "contact_phone_present": { "type": "boolean" },
+        "contact_email": { "type": ["string", "null"] },
+        "contact_phone": { "type": ["string", "null"] },
+        "source": { "type": "string" }
+      }
+    },
+    "governance": { "type": "object" },
+    "identity_state": { "type": "object" },
+    "canonical_cv": { "type": "object" },
+    "effective_facts": { "type": "object" },
+    "classifications": { "type": "object" },
+    "applications": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "screening_evidence": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "assessments": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "interviews": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "ranking_evaluations": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "evidence_manifest": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "source_kind",
+          "source_record_id",
+          "company_code",
+          "authority_level",
+          "review_state"
+        ],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "source_kind": { "type": "string" },
+          "source_record_id": { "type": "string" },
+          "company_code": { "type": "string" },
+          "app_key": { "type": ["string", "null"] },
+          "document_version_id": { "type": ["string", "null"] },
+          "extraction_version_id": { "type": ["string", "null"] },
+          "authority_level": {
+            "type": "string",
+            "enum": [
+              "canonical",
+              "hr_confirmed",
+              "ai_suggested",
+              "candidate_reply",
+              "cv_prefill",
+              "profile_projection_legacy",
+              "operational_mirror"
+            ]
+          },
+          "review_state": {
+            "type": "string",
+            "enum": [
+              "extracted",
+              "hr_confirmed",
+              "hr_corrected",
+              "rejected",
+              "unreviewed",
+              "not_applicable"
+            ]
+          },
+          "observed_at": { "type": ["string", "null"] },
+          "content_hash": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section", "state", "reason_codes"],
+        "properties": {
+          "section": { "type": "string" },
+          "state": {
+            "type": "string",
+            "enum": [
+              "available",
+              "partial",
+              "not_recorded",
+              "not_extracted",
+              "not_indexed",
+              "not_authorized",
+              "module_disabled",
+              "restricted",
+              "stale",
+              "invalidated",
+              "conflict",
+              "source_pipeline_incomplete"
+            ]
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "note": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "actionability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readable",
+        "contact_allowed",
+        "lifecycle_mutation_allowed",
+        "job_ranking_allowed",
+        "reason_codes"
+      ],
+      "properties": {
+        "readable": { "type": "boolean" },
+        "contact_allowed": { "type": "boolean" },
+        "lifecycle_mutation_allowed": { "type": "boolean" },
+        "job_ranking_allowed": { "type": "boolean" },
+        "held_state": { "type": ["string", "null"] },
+        "reason_codes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "source_revision": "40a4e2621f4818bf7c0f6ce3642032297bfbe7b2",
+  "qualified_combined_candidate_sha256": "4e156bcc736299fe9cfdd57c8e1fc7799b525fcf7cc50299c2baaebc1eb67089",
+  "orchestrator_manifest_sha256": "5a311772537ed49a86b1a5001cf672ddd68b8761ca1514573ab1de7a6d4b09af",
+  "dashboard_manifest_sha256": "ea282fce7c6c571843b1ff0691b4f09e677922af421a439642c3a499a9b1473f",
+  "dashboard_asset_tree_sha256": "ea282fce7c6c571843b1ff0691b4f09e677922af421a439642c3a499a9b1473f",
+  "final_production_composite_sha256": "fe655b9d0a4c4741bf30fa6723ebcc9cc583d85dd2db18faa9768d0c9710d0af",
+  "files": {
+    "app.py": "757a3ed75ece18edbc0371d197693f5f766acf238481ac153067fe96d8b365e5",
+    "talent_pool_classification.py": "4e091456d98f69b3dbf1537051d7de814db60238f22dd24ab97a4524665f3a30",
+    "talent_pool_classification_routes.py": "882bfb0e9088b46bc5dca1224c3fd4640d8fd987b88f3ed1fffb0edecb4e60c6",
+    "talent_pool_taxonomy_v1.json": "320d0a1f5eb19413f66337f81df955eadfe0e843d190b6048af313669c10fbb1",
+    "unified_candidates.py": "945feb810285e1ae14e78f68432cf7c64d00b506519b442fbbcd11f23f165421",
+    "candidate_communication_authority.py": "8a3949eac6d72c7f18514810171298615e1fded40e81afba2ee91239305aab53",
+    "dashboard_js": "997e5c18f70f346cc800bf3ac53b0ac59fefe346c46fc1f72de878fb2252d50f",
+    "dashboard_js_name": "dashboard-C0lgzkSg.js"
+  },
+  "classifier_version": "classifier.deterministic_v1.2"
+}

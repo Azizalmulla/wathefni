@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-08-05T22:18:26.333147+00:00",
+  "rows": 8491,
+  "status_counts": {
+    "unproven": 7972,
+    "pass": 427,
+    "broken": 92
+  },
+  "severity_counts": {
+    "P3": 7547,
+    "none": 357,
+    "P1": 495,
+    "P2": 92
+  },
+  "source_counts": {
+    "static-control": 1101,
+    "browser-postdeploy": 6036,
+    "browser-targeted-final": 804,
+    "employee-api": 17,
+    "dashboard-role-api": 191,
+    "static-mutation-route": 320,
+    "static-endpoint-match": 7,
+    "confirmed-fix": 14,
+    "regression-suite": 1
+  },
+  "matrix_json": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-interaction-dead-control-audit-20260805T195406Z/findings/interaction-control-matrix.json",
+  "matrix_csv": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-interaction-dead-control-audit-20260805T195406Z/findings/interaction-control-matrix.csv"
+}

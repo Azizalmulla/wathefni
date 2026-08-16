@@ -1,0 +1,1008 @@
+{
+  "contract": "anydoc_technical_audit_nonprod_20260804",
+  "anydoc_package": "firecrawl-anydoc==0.1.2",
+  "pdf_inspector_compare": "0.2.6 (Wathefni pin; AnyDoc Rust crate pins 0.1.7 internally)",
+  "summary": {
+    "corpus_files": 29,
+    "anydoc_ok": 21,
+    "anydoc_fail": 8,
+    "rss_max_mb_approx": 43.171875,
+    "rss_delta_mb_approx": 18.6875,
+    "median_ok_ms": 0.31908301752991974,
+    "p95_ok_ms": 7.500292005715892,
+    "max_ok_ms": 25.09958401788026
+  },
+  "by_extension": {
+    ".pdf": {
+      "n": 10,
+      "ok": 7,
+      "fail": 3,
+      "median_ms": 0.8362920198123902,
+      "errors": [
+        "ConvertError: unsupported input: PDF has no extractable text (ImageBased, 2 pages): OCR is required",
+        "ConvertError: unsupported input: PDF has no extractable text (Scanned, 1 pages): OCR is required",
+        "ConvertError: malformed document: invalid PDF structure"
+      ]
+    },
+    ".docx": {
+      "n": 3,
+      "ok": 2,
+      "fail": 1,
+      "median_ms": 7.500292005715892,
+      "errors": [
+        "ConvertError: malformed document: not a readable zip archive: invalid Zip archive: Could not find EOCD"
+      ]
+    },
+    ".pptx": {
+      "n": 2,
+      "ok": 2,
+      "fail": 0,
+      "median_ms": 0.7432920101564378,
+      "errors": []
+    },
+    ".doc": {
+      "n": 1,
+      "ok": 0,
+      "fail": 1,
+      "median_ms": null,
+      "errors": [
+        "ConvertError: malformed document: not an OLE2 compound file: Invalid CFB byte order mark (expected 0xFFFE, found 0x0000)"
+      ]
+    },
+    ".ppt": {
+      "n": 1,
+      "ok": 0,
+      "fail": 1,
+      "median_ms": null,
+      "errors": [
+        "ConvertError: malformed document: not an OLE2 compound file: Invalid CFB byte order mark (expected 0xFFFE, found 0x0000)"
+      ]
+    },
+    ".xls": {
+      "n": 1,
+      "ok": 0,
+      "fail": 1,
+      "median_ms": null,
+      "errors": [
+        "ConvertError: malformed document: unreadable workbook: Cannot detect file format"
+      ]
+    },
+    ".rtf": {
+      "n": 2,
+      "ok": 2,
+      "fail": 0,
+      "median_ms": 0.07166599971242249,
+      "errors": []
+    },
+    ".xlsx": {
+      "n": 3,
+      "ok": 2,
+      "fail": 1,
+      "median_ms": 0.231999991228804,
+      "errors": [
+        "ConvertError: malformed document: unreadable workbook: Cannot detect file format"
+      ]
+    },
+    ".odp": {
+      "n": 1,
+      "ok": 1,
+      "fail": 0,
+      "median_ms": 0.046792003558948636,
+      "errors": []
+    },
+    ".ods": {
+      "n": 1,
+      "ok": 1,
+      "fail": 0,
+      "median_ms": 0.060165999457240105,
+      "errors": []
+    },
+    ".odt": {
+      "n": 2,
+      "ok": 2,
+      "fail": 0,
+      "median_ms": 0.04429198452271521,
+      "errors": []
+    },
+    ".csv": {
+      "n": 2,
+      "ok": 2,
+      "fail": 0,
+      "median_ms": 0.12233300367370248,
+      "errors": []
+    }
+  },
+  "rows": [
+    {
+      "file": "from_prior_eval/anydoc_fixture_text.pdf",
+      "ext": ".pdf",
+      "case": "pdf_textish",
+      "bytes": 90060,
+      "content_sha256": "7d1fd0932634cffa80bf9fb1bd73a6871f82a2cb29b4d7bcfb689927bc5d84e7",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 25.09958401788026,
+        "error": null,
+        "chars": 1061,
+        "words": 161,
+        "arabic_chars": 7,
+        "lines": 42,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "4a755c90fd6fcb42ad44ef2b1199d0fa1de095bbd4d7786d623267e90a85b8ed"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 21.163416997296736,
+        "error": null,
+        "chars": 1061,
+        "words": 161,
+        "arabic_chars": 7,
+        "lines": 42,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "4a755c90fd6fcb42ad44ef2b1199d0fa1de095bbd4d7786d623267e90a85b8ed",
+        "pages_needing_ocr": [
+          2
+        ],
+        "pdf_type": "mixed"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 146.27195900538936,
+        "error": null,
+        "chars": 1251,
+        "words": 154,
+        "arabic_chars": 7,
+        "lines": 46,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "3f72d945e1267e3c709542a596a94193f14648313edf43f4c74b7bf5935a9be4"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "from_prior_eval/contract_kuwait_labor_law_real_01.pdf",
+      "ext": ".pdf",
+      "case": "pdf_textish",
+      "bytes": 104615,
+      "content_sha256": "3237ee7b6709de8ec4462ce81aebd63b0f7dc5dfed53fad5256f1d737bd97ad4",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 6.612208002479747,
+        "error": null,
+        "chars": 4300,
+        "words": 744,
+        "arabic_chars": 3321,
+        "lines": 83,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "1197c003d294b777c5d57ee930f583908cfb37c5018d4907da3dac31bd4a3a45"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 7.241542014526203,
+        "error": null,
+        "chars": 4300,
+        "words": 744,
+        "arabic_chars": 3321,
+        "lines": 83,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "1197c003d294b777c5d57ee930f583908cfb37c5018d4907da3dac31bd4a3a45",
+        "pages_needing_ocr": [],
+        "pdf_type": "text_based"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 19.434999994700775,
+        "error": null,
+        "chars": 7878,
+        "words": 759,
+        "arabic_chars": 3321,
+        "lines": 154,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "c48149454fdf9f90719706688bbbdba667c1e1f7c60126bd7b91c8bf97a40636"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "from_prior_eval/cv_mixed_02.pdf",
+      "ext": ".pdf",
+      "case": "mixed",
+      "bytes": 53998,
+      "content_sha256": "91b544e6bc06e504986b3205c03ddbf067efe5611f21c86483d1d17c416f8363",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.8341670036315918,
+        "error": null,
+        "chars": 120,
+        "words": 16,
+        "arabic_chars": 0,
+        "lines": 2,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "3ffd3264e7aefba21cf336fa3944d85f6531619a61ba985952545e5beb5acb18"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 0.9167919924948364,
+        "error": null,
+        "chars": 120,
+        "words": 16,
+        "arabic_chars": 0,
+        "lines": 2,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "3ffd3264e7aefba21cf336fa3944d85f6531619a61ba985952545e5beb5acb18",
+        "pages_needing_ocr": [
+          2
+        ],
+        "pdf_type": "mixed"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 16.5434580121655,
+        "error": null,
+        "chars": 122,
+        "words": 16,
+        "arabic_chars": 0,
+        "lines": 5,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "46ff9dc3b0fb078d2e5f0bb092673fa0327118391a5d3da3f4f3b08894c5ceea"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "from_prior_eval/cv_multicolumn_01.pdf",
+      "ext": ".pdf",
+      "case": "pdf_textish",
+      "bytes": 32364,
+      "content_sha256": "d8659d41472940b1cd3dd4265eb942f5a29df529cb312f9659a55d97fdd1f9c5",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.9929579973686486,
+        "error": null,
+        "chars": 310,
+        "words": 35,
+        "arabic_chars": 0,
+        "lines": 11,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "439766af108f28854b2b587fc7b18b2acf603f2be53b4c14c3cf155d48999367"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 1.0038750187959522,
+        "error": null,
+        "chars": 310,
+        "words": 35,
+        "arabic_chars": 0,
+        "lines": 11,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "439766af108f28854b2b587fc7b18b2acf603f2be53b4c14c3cf155d48999367",
+        "pages_needing_ocr": [],
+        "pdf_type": "text_based"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 16.651749989250675,
+        "error": null,
+        "chars": 361,
+        "words": 38,
+        "arabic_chars": 0,
+        "lines": 11,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "08be4e5a4224bbbf2076d068622918e96b6525edcbe6a49373a58b141184f5d3"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "from_prior_eval/table_compensation_01.pdf",
+      "ext": ".pdf",
+      "case": "pdf_textish",
+      "bytes": 32456,
+      "content_sha256": "a14385e68db39e24ca6e95af5235fd2b60078d050c00576ec5ed082ee0977cf0",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.8235830173362046,
+        "error": null,
+        "chars": 215,
+        "words": 18,
+        "arabic_chars": 0,
+        "lines": 12,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "1b3d86bd239814663a3c62c1aea9efdb7bbbd25927acb147ce002095325ab32a"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 1.1007919965777546,
+        "error": null,
+        "chars": 215,
+        "words": 18,
+        "arabic_chars": 0,
+        "lines": 12,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "1b3d86bd239814663a3c62c1aea9efdb7bbbd25927acb147ce002095325ab32a",
+        "pages_needing_ocr": [],
+        "pdf_type": "text_based"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 15.774250001413748,
+        "error": null,
+        "chars": 395,
+        "words": 26,
+        "arabic_chars": 0,
+        "lines": 8,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "1ef983e5dda469a0f3b23b0ba628b6bf4d3626399bd133705014a799a03d86a2"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/cv_ar_en.docx",
+      "ext": ".docx",
+      "case": "docx",
+      "bytes": 36770,
+      "content_sha256": "4cb6dd57210d5f3fafb116a2c7e0c9713faa307de2543a05164d78b11f820a2b",
+      "format_detect": "docx",
+      "anydoc": {
+        "ok": true,
+        "ms": 7.500292005715892,
+        "error": null,
+        "chars": 138,
+        "words": 22,
+        "arabic_chars": 62,
+        "lines": 10,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "5be43e14c1382b44693ff9106a0e23d31ad8a7b53c92ab959381586785ad9735"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/cv_en.docx",
+      "ext": ".docx",
+      "case": "docx",
+      "bytes": 36900,
+      "content_sha256": "707905c4eb28394f27b46e8997168edb4fe3a21462b62ed615de19705f5f4f3d",
+      "format_detect": "docx",
+      "anydoc": {
+        "ok": true,
+        "ms": 4.832375008845702,
+        "error": null,
+        "chars": 248,
+        "words": 48,
+        "arabic_chars": 0,
+        "lines": 16,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "a478d169e1be39eb35baa63f6ed334fef0586373899cf8e6df04c42bac78f380"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/cv_mixed_text_scan.pdf",
+      "ext": ".pdf",
+      "case": "scanned_or_image",
+      "bytes": 5855,
+      "content_sha256": "253101c11eab2a05eec70bd64c883cda933ebb48629d8596fba52535dac2ed4b",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.29054199694655836,
+        "error": "ConvertError: unsupported input: PDF has no extractable text (ImageBased, 2 pages): OCR is required",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": false,
+        "ms": 0.2776249893940985,
+        "error": "empty_or_ocr_required",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "pages_needing_ocr": [
+          1,
+          2
+        ],
+        "pdf_type": "image_based"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 15.707458020187914,
+        "error": null,
+        "chars": 59,
+        "words": 8,
+        "arabic_chars": 0,
+        "lines": 3,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "199cfec60e05d965037c545aa25269a34fb577fa9d3a79cb970ab16ff3c4bb96"
+      }
+    },
+    {
+      "file": "generated/cv_scanned_image_only.pdf",
+      "ext": ".pdf",
+      "case": "scanned_or_image",
+      "bytes": 5355,
+      "content_sha256": "177d748bedc19380e2315eba0f2cdede791990d1ade1ec50b8fbf9082c23db14",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.280875014141202,
+        "error": "ConvertError: unsupported input: PDF has no extractable text (Scanned, 1 pages): OCR is required",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": false,
+        "ms": 0.24379201931878924,
+        "error": "empty_or_ocr_required",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "pages_needing_ocr": [
+          1
+        ],
+        "pdf_type": "scanned"
+      },
+      "pdftotext": {
+        "ok": false,
+        "ms": 15.688417013734579,
+        "error": "empty",
+        "chars": 1,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 1,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "ef6cbd2161eaea7943ce8693b9824d23d1793ffb1c0fca05b600d3899b44c977"
+      }
+    },
+    {
+      "file": "generated/cv_text_ar_en.pdf",
+      "ext": ".pdf",
+      "case": "pdf_textish",
+      "bytes": 34780,
+      "content_sha256": "6c0780acbd3f8f3d841e820ada7f453f471aa46933ac6b5b069bd3a8618cbab4",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.8362920198123902,
+        "error": null,
+        "chars": 122,
+        "words": 21,
+        "arabic_chars": 39,
+        "lines": 6,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "6b6fe5a03b58811133a1442ab79d9406f1f9ff213af272891a09cdb2ee4506ac"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 0.9536659927107394,
+        "error": null,
+        "chars": 122,
+        "words": 21,
+        "arabic_chars": 39,
+        "lines": 6,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "6b6fe5a03b58811133a1442ab79d9406f1f9ff213af272891a09cdb2ee4506ac",
+        "pages_needing_ocr": [],
+        "pdf_type": "text_based"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 15.854291996220127,
+        "error": null,
+        "chars": 127,
+        "words": 19,
+        "arabic_chars": 39,
+        "lines": 6,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "e77ebc6ddd06be13fd71b98e93a4fcba69350d8c989b693a28ee4d6c0da4ec20"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/cv_text_en.pdf",
+      "ext": ".pdf",
+      "case": "pdf_textish",
+      "bytes": 1506,
+      "content_sha256": "f6f2557c020d73041458b1e066d8f9b1f307744b0249299288665d71f370032a",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.31908301752991974,
+        "error": null,
+        "chars": 135,
+        "words": 18,
+        "arabic_chars": 0,
+        "lines": 2,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "44daf39d9440be8634e819dc8319af1a90955fb2a959cdcbb0f60d0778b969cb"
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": true,
+        "ms": 0.39350002771243453,
+        "error": null,
+        "chars": 135,
+        "words": 18,
+        "arabic_chars": 0,
+        "lines": 2,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "44daf39d9440be8634e819dc8319af1a90955fb2a959cdcbb0f60d0778b969cb",
+        "pages_needing_ocr": [],
+        "pdf_type": "text_based"
+      },
+      "pdftotext": {
+        "ok": true,
+        "ms": 15.30349999666214,
+        "error": null,
+        "chars": 136,
+        "words": 18,
+        "arabic_chars": 0,
+        "lines": 6,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "d0fe2791135ad4026134f60484746513e80a63545337ac7636a6bb8413251a52"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/deck_ar.pptx",
+      "ext": ".pptx",
+      "case": "pptx",
+      "bytes": 28307,
+      "content_sha256": "ac55fef4461cdffae984473a1c67cb7c42bf1e78223db998cf3de71cbb4e390a",
+      "format_detect": "pptx",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.7432920101564378,
+        "error": null,
+        "chars": 53,
+        "words": 11,
+        "arabic_chars": 32,
+        "lines": 6,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "fdab4df5c99402c847b253d6169d181cd6d6ef96f3d468b34658837549b98eff"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/deck_en.pptx",
+      "ext": ".pptx",
+      "case": "pptx",
+      "bytes": 32932,
+      "content_sha256": "b9817081bcd294eb2509da76bcadff47575fdd3a0b1204442db1270aab2b570b",
+      "format_detect": "pptx",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.5203750042710453,
+        "error": null,
+        "chars": 103,
+        "words": 20,
+        "arabic_chars": 0,
+        "lines": 9,
+        "has_table_md": false,
+        "has_heading_md": true,
+        "sha256": "e4633e069574131a0fc69d746556e7e6385eaddb33a3968fbe8c106dcd2e1703"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/legacy_stub.doc",
+      "ext": ".doc",
+      "case": "malformed_or_stub",
+      "bytes": 520,
+      "content_sha256": "74a6e134d3dfb106c0e7ea80827a8f383323d270b533b4af086aa21d853aa725",
+      "format_detect": "doc",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.03341698902659118,
+        "error": "ConvertError: malformed document: not an OLE2 compound file: Invalid CFB byte order mark (expected 0xFFFE, found 0x0000)",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      }
+    },
+    {
+      "file": "generated/legacy_stub.ppt",
+      "ext": ".ppt",
+      "case": "malformed_or_stub",
+      "bytes": 1032,
+      "content_sha256": "002a195436d3718de2090328cdbc2adc04b4a63dae1c807d19cc472afb183378",
+      "format_detect": "ppt",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.0357080134563148,
+        "error": "ConvertError: malformed document: not an OLE2 compound file: Invalid CFB byte order mark (expected 0xFFFE, found 0x0000)",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      }
+    },
+    {
+      "file": "generated/legacy_stub.xls",
+      "ext": ".xls",
+      "case": "malformed_or_stub",
+      "bytes": 1032,
+      "content_sha256": "002a195436d3718de2090328cdbc2adc04b4a63dae1c807d19cc472afb183378",
+      "format_detect": "xlsx",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.0815840030554682,
+        "error": "ConvertError: malformed document: unreadable workbook: Cannot detect file format",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      }
+    },
+    {
+      "file": "generated/memo_ar.rtf",
+      "ext": ".rtf",
+      "case": "rtf",
+      "bytes": 145,
+      "content_sha256": "7484fd8f1c895fd3b0f5fce95c961182420186bc0500c4f91c992dab5a0443a0",
+      "format_detect": "rtf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.07166599971242249,
+        "error": null,
+        "chars": 15,
+        "words": 2,
+        "arabic_chars": 13,
+        "lines": 2,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "95f8dc5371883ef05ca2eb1e5c657d77ebd1431cf41c2c2aab6e9e672711e5d7"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/memo_en.rtf",
+      "ext": ".rtf",
+      "case": "rtf",
+      "bytes": 97,
+      "content_sha256": "96e2c23ac8fb89e6e4dbb5c0cd5a471bdd0e34aaece9a26de6312511d8f98802",
+      "format_detect": "rtf",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.02662499900907278,
+        "error": null,
+        "chars": 32,
+        "words": 5,
+        "arabic_chars": 0,
+        "lines": 4,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "048dae2cae6b7e127790d23f4b14cce64909b2c5e11ce5265dce7013a2bc3cb9"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/roster_ar.xlsx",
+      "ext": ".xlsx",
+      "case": "xlsx",
+      "bytes": 4922,
+      "content_sha256": "3c0869771786e0de6e3ac2de049301728514025260c607d7b1062278ebe7a28c",
+      "format_detect": "xlsx",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.231999991228804,
+        "error": null,
+        "chars": 82,
+        "words": 25,
+        "arabic_chars": 27,
+        "lines": 5,
+        "has_table_md": true,
+        "has_heading_md": false,
+        "sha256": "81280abb8833fb8c822b9a32556219698b9aaab41d60de08aedc4e6075ad229c"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/roster_en.xlsx",
+      "ext": ".xlsx",
+      "case": "xlsx",
+      "bytes": 4959,
+      "content_sha256": "0969a977a38542119fd05b33391256dcf4552d7edc5b8610d8b089d8a52f51c2",
+      "format_detect": "xlsx",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.12329098535701632,
+        "error": null,
+        "chars": 142,
+        "words": 39,
+        "arabic_chars": 0,
+        "lines": 7,
+        "has_table_md": true,
+        "has_heading_md": false,
+        "sha256": "003ba6f50d9d6d51d14f6f59ed57fb89c466220bc31e430218f02397ae7d970b"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/sample.odp",
+      "ext": ".odp",
+      "case": "odp",
+      "bytes": 1296,
+      "content_sha256": "0dfb68706f58be338764ebeaa1beca481fa6afea46f7c909cddbe1aec7104978",
+      "format_detect": "odp",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.046792003558948636,
+        "error": null,
+        "chars": 16,
+        "words": 3,
+        "arabic_chars": 0,
+        "lines": 2,
+        "has_table_md": false,
+        "has_heading_md": false,
+        "sha256": "807c12760ec56f79f7663713d897c977036598928e17302c7e1b64b5e92ecf1d"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/sample.ods",
+      "ext": ".ods",
+      "case": "ods",
+      "bytes": 1590,
+      "content_sha256": "1e978019aa57d6d966aa6495810f6575888acdcec00f71fcc8788e08eefbfa7b",
+      "format_detect": "ods",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.060165999457240105,
+        "error": null,
+        "chars": 52,
+        "words": 18,
+        "arabic_chars": 0,
+        "lines": 5,
+        "has_table_md": true,
+        "has_heading_md": false,
+        "sha256": "d85e8548eb00c76d15d175a736604525aa1ae5f659fdaaac24ca9ee16f2cb42d"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/sample_ar.odt",
+      "ext": ".odt",
+      "case": "odt",
+      "bytes": 1486,
+      "content_sha256": "08da6bf2dcaecf4ab66a535c43dc9a961c8714590d95f9cdef8ce71cb384c427",
+      "format_detect": "odt",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.04429198452271521,
+        "error": null,
+        "chars": 74,
+        "words": 20,
+        "arabic_chars": 23,
+        "lines": 8,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "6b069b0b9df075292b89f436b8656cf5bcd5ec0eccd2f7355c972ea7b2e68c33"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/sample_en.odt",
+      "ext": ".odt",
+      "case": "odt",
+      "bytes": 1474,
+      "content_sha256": "afced1a78d0c194b5800c106c6c547b5bd43dc74a738979e6fd23013e83cc121",
+      "format_detect": "odt",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.038416008464992046,
+        "error": null,
+        "chars": 85,
+        "words": 21,
+        "arabic_chars": 0,
+        "lines": 8,
+        "has_table_md": true,
+        "has_heading_md": true,
+        "sha256": "587cb18255fe86e2b458fc627b7c1cd2686b7da0747977ea946f50535137d136"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/table_ar.csv",
+      "ext": ".csv",
+      "case": "csv",
+      "bytes": 83,
+      "content_sha256": "ba1f3b1b84cef50e6d1afe4e3e4bc0760f5339d84c6fb1197bb5ba58fa2260c0",
+      "format_detect": "csv",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.12233300367370248,
+        "error": null,
+        "chars": 103,
+        "words": 32,
+        "arabic_chars": 35,
+        "lines": 6,
+        "has_table_md": true,
+        "has_heading_md": false,
+        "sha256": "7f42180666b66e87180ee8ad471836aa59ad93cc9529c388efe879d895e314cb"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "generated/table_en.csv",
+      "ext": ".csv",
+      "case": "csv",
+      "bytes": 44,
+      "content_sha256": "d44115483b771890aa5da127a815c117aba91b9e7cadb4bcc08223c3eba47a48",
+      "format_detect": "csv",
+      "anydoc": {
+        "ok": true,
+        "ms": 0.09849999332800508,
+        "error": null,
+        "chars": 99,
+        "words": 32,
+        "arabic_chars": 0,
+        "lines": 6,
+        "has_table_md": true,
+        "has_heading_md": false,
+        "sha256": "83fb08717192f44334309f2d590954e07a99d0d105527f58daf628e43ed4278b"
+      },
+      "anydoc_deterministic": true
+    },
+    {
+      "file": "malformed/not_a_docx.docx",
+      "ext": ".docx",
+      "case": "malformed_or_stub",
+      "bytes": 19,
+      "content_sha256": "a769e1c203d66ebd95e7589e24808e3649d756ca480914b7e3d8ded2208ef490",
+      "format_detect": "docx",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.03666698466986418,
+        "error": "ConvertError: malformed document: not a readable zip archive: invalid Zip archive: Could not find EOCD",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      }
+    },
+    {
+      "file": "malformed/truncated.pdf",
+      "ext": ".pdf",
+      "case": "malformed_or_stub",
+      "bytes": 51,
+      "content_sha256": "8d5c203e8228763cbab50d80b6cabf341c3e8e3c785bddd9a0e42b40d19367b2",
+      "format_detect": "pdf",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.025332992663607,
+        "error": "ConvertError: malformed document: invalid PDF structure",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      },
+      "pdf_inspector_0_2_6": {
+        "ok": false,
+        "ms": 0.037874997360631824,
+        "error": "ValueError: Invalid PDF structure",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      },
+      "pdftotext": {
+        "ok": false,
+        "ms": 14.079624990699813,
+        "error": "Syntax Error: Couldn't find trailer dictionary\nSyntax Error: Couldn't find trailer dictionary\nSyntax Error: Couldn't read xref table",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      }
+    },
+    {
+      "file": "malformed/zip_bomb_tiny.xlsx",
+      "ext": ".xlsx",
+      "case": "malformed_or_stub",
+      "bytes": 22,
+      "content_sha256": "8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85",
+      "format_detect": "xlsx",
+      "anydoc": {
+        "ok": false,
+        "ms": 0.05383300594985485,
+        "error": "ConvertError: malformed document: unreadable workbook: Cannot detect file format",
+        "chars": 0,
+        "words": 0,
+        "arabic_chars": 0,
+        "lines": 0,
+        "has_table_md": false,
+        "has_heading_md": false
+      }
+    }
+  ],
+  "arabic_bilingual_samples": {
+    "from_prior_eval/anydoc_fixture_text.pdf": {
+      "anydoc_snippet": "# Fixture Document\n\nPlain paragraph with **bold**, *italic*, and struck runs. **Style-bold paragraph with a** NotBold-styled span **inside.**\n\n## Lists\n\n1.First numbered\n2.Second numbered\na)Alpha sub one\nb)Alpha sub two\ni.Roman sub sub\n3.Third numbered Interrupting paragraph between lists.\n4.Fourth, continuing the count IV.Roman starting at four\nV.Roman five •Bullet one •Bullet two ◦Nested bullet\n## Table\n\nWide head End Tall B2 C2 B3 C3\n\n## Notes and special text\n\nMusic clef 𝄞 appears before thi",
+      "pdf_inspector_snippet": "# Fixture Document\n\nPlain paragraph with **bold**, *italic*, and struck runs. **Style-bold paragraph with a** NotBold-styled span **inside.**\n\n## Lists\n\n1.First numbered\n2.Second numbered\na)Alpha sub one\nb)Alpha sub two\ni.Roman sub sub\n3.Third numbered Interrupting paragraph between lists.\n4.Fourth, continuing the count IV.Roman starting at four\nV.Roman five •Bullet one •Bullet two ◦Nested bullet\n## Table\n\nWide head End Tall B2 C2 B3 C3\n\n## Notes and special text\n\nMusic clef 𝄞 appears before thi",
+      "pdftotext_snippet": "Fixture Document\nPlain paragraph with bold, italic, and struck runs.\nStyle-bold paragraph with a NotBold-styled span inside.\nLists\n1.First numbered\n2.Second numbered\na)Alpha sub one\nb)Alpha sub two\ni.Roman sub sub\n3.Third numbered\nInterrupting paragraph between lists.\n4.Fourth, continuing the count\nIV.Roman starting at four\nV.Roman five\n•Bullet one\n•Bullet two\n◦Nested bullet\nTable\nWide head                                                          End\nTall                                      B2 "
+    },
+    "from_prior_eval/contract_kuwait_labor_law_real_01.pdf": {
+      "anydoc_snippet": "## ىقر مًؼنا ٌىَاق حُظن\n\n## يههلأا عاطقنا يف مًؼنا ٌأش يف\n\n- ،هٞزٍلُا ٠ِػ ع٬ؿ٩ا لؼث\n- ْهه ٕٞٗبوُبث هكبظُا ءايغُا ٕٞٗبه ٠ِػٝ16 خَُ٘ 1960 ،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ\n- ْهه ٕٞٗبه ٠ِػٝ38 خَُ٘ 1964 ،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ ٢ِٛ٧ا عبـوُا ٢ك َٔؼُا ٕؤش ٢ك\n- ْهه ٕٞٗبوُا ٠ِػٝ28 خَُ٘ 1969 ،خ٤ـلُ٘ا ٍبٔػ٧ا عبـه ٢ك َٔؼُا ٕؤش ٢ك\n- ْهه ٕٞٗبوُبث ١و٤ٓ٧ا وٓ٧بث هكبظُا خ٤ػبٔزع٩ا دب٘٤ٓؤزُا ٕٞٗبه ٠ِػٝ61 خَُ٘ 1976\n،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ\n\n- ْهه ٕٞٗبوُبث ٍّٞؤُا ٠ِػٝ28 خَُ٘ 1980 خُلؼُٔا ٖ٤ٗاٞوُاٝ خ٣وؾجُا حهبغزُا ٕٞٗبه هالطبث\n،ُٚ\n\n-",
+      "pdf_inspector_snippet": "## ىقر مًؼنا ٌىَاق حُظن\n\n## يههلأا عاطقنا يف مًؼنا ٌأش يف\n\n- ،هٞزٍلُا ٠ِػ ع٬ؿ٩ا لؼث\n- ْهه ٕٞٗبوُبث هكبظُا ءايغُا ٕٞٗبه ٠ِػٝ16 خَُ٘ 1960 ،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ\n- ْهه ٕٞٗبه ٠ِػٝ38 خَُ٘ 1964 ،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ ٢ِٛ٧ا عبـوُا ٢ك َٔؼُا ٕؤش ٢ك\n- ْهه ٕٞٗبوُا ٠ِػٝ28 خَُ٘ 1969 ،خ٤ـلُ٘ا ٍبٔػ٧ا عبـه ٢ك َٔؼُا ٕؤش ٢ك\n- ْهه ٕٞٗبوُبث ١و٤ٓ٧ا وٓ٧بث هكبظُا خ٤ػبٔزع٩ا دب٘٤ٓؤزُا ٕٞٗبه ٠ِػٝ61 خَُ٘ 1976\n،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ\n\n- ْهه ٕٞٗبوُبث ٍّٞؤُا ٠ِػٝ28 خَُ٘ 1980 خُلؼُٔا ٖ٤ٗاٞوُاٝ خ٣وؾجُا حهبغزُا ٕٞٗبه هالطبث\n،ُٚ\n\n-",
+      "pdftotext_snippet": "                          ‫قاَىٌ انؼًم رقى ‪ 6‬نظُح ‪2010‬‬\n                         ‫في شأٌ انؼًم في انقطاع األههي‬\n\n\n\n                                                              ‫‪ -‬ثؼل ا‪٩‬ؿ‪٬‬ع ػِ‪ ٠‬اُلٍز‪ٞ‬ه‪،‬‬\n\n               ‫‪ٝ -‬ػِ‪ ٠‬هبٗ‪ ٕٞ‬اُغياء اُظبكه ثبُوبٗ‪ ٕٞ‬ههْ ‪َُ٘ 16‬خ ‪ٝ 1960‬اُو‪ٞ‬اٗ‪ ٖ٤‬أُؼلُخ ُ‪،ٚ‬‬\n\n ‫‪ٝ -‬ػِ‪ ٠‬هبٗ‪ ٕٞ‬ههْ ‪َُ٘ 38‬خ ‪ 1964‬ك‪ ٢‬شؤٕ اُؼَٔ ك‪ ٢‬اُوـبع ا‪ٝ ٢ِٛ٧‬اُو‪ٞ‬اٗ‪ ٖ٤‬أُؼلُخ ُ‪،ٚ‬‬\n\n            ‫‪ٝ -‬ػِ‪ ٠‬اُوبٗ‪ ٕٞ‬ههْ ‪َُ٘ 28‬خ ‪ 1969‬ك‪ ٢‬"
+    },
+    "generated/cv_ar_en.docx": {
+      "anydoc_snippet": "# **سيرة ذاتية**\n\nالمرشح: علي محمد\n\n## **الخبرة**\n\n- مهندس برمجيات في وظفني\n\nBilingual note: Senior Software Engineer / مهندس برمجيات أول\n"
+    },
+    "generated/cv_text_ar_en.pdf": {
+      "anydoc_snippet": "## سيرة ذاتية - Wathefni Bilingual CV\n\nالاسم: علي محمد / Name: Ali Mohammad\n\n## المسمى: مهندس برمجيات / Software Engineer\n",
+      "pdf_inspector_snippet": "## سيرة ذاتية - Wathefni Bilingual CV\n\nالاسم: علي محمد / Name: Ali Mohammad\n\n## المسمى: مهندس برمجيات / Software Engineer\n",
+      "pdftotext_snippet": "‫ ةيتاذ ةريس‬- Wathefni Bilingual CV\n\n‫مسالا‬: ‫ دمحم يلع‬/ Name: Ali Mohammad\n\n‫ىمسملا‬: ‫ تايجمرب سدنهم‬/ Software Engineer\n\f"
+    },
+    "generated/deck_ar.pptx": {
+      "anydoc_snippet": "## عرض التوظيف\n\n- النقاط\n- \\- الاستقبال\n- \\- الترتيب\n"
+    },
+    "generated/memo_ar.rtf": {
+      "anydoc_snippet": "مرحبا بالعربية\n"
+    },
+    "generated/roster_ar.xlsx": {
+      "anydoc_snippet": "|  |  |  |\n| --- | --- | --- |\n| الموظف | الفرع | الساعات |\n| علي | الكويت | 40 |\n"
+    },
+    "generated/sample_ar.odt": {
+      "anydoc_snippet": "# ODT Sample\n\nوثيقة عربية تجريبية لوظفني\n\n|  |  |\n| --- | --- |\n| A | B |\n"
+    },
+    "generated/table_ar.csv": {
+      "anydoc_snippet": "|  |  |  |\n| --- | --- | --- |\n| الاسم | الدور | الساعات |\n| علي | مهندس | 40 |\n| سارة | عمليات | 36 |\n"
+    }
+  }
+}

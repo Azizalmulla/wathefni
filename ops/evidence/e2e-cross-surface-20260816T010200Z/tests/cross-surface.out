@@ -1,0 +1,12 @@
+    E2E cross-surface leave convergence
+    tenant: R9E4C881F
+      PASS  HR login
+      PASS  employee request accepted or validated
+      PASS  employee leave list readable
+      PASS  HR sees company leave
+      PASS  HR leave payload stays on this tenant
+      PASS  employee attendance is tenant-scoped or fail-closed
+      PASS  HR Setup can disable leave
+      FAIL  employee leave fails closed after module disable :: (422, '{"detail":{"error":"leave_type_not_available","message":"Choose an available leave type.","available_types":["annual","sick"]}}')
+
+    CROSS_SURFACE_FAIL  7 passed, 1 failed

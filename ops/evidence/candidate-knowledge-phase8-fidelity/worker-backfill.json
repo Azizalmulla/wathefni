@@ -1,0 +1,360 @@
+{
+  "status": "PASS",
+  "tenant": "SYN_CK_P8F",
+  "jobs_enqueued": 3000,
+  "poison_jobs": 60,
+  "concurrency": 4,
+  "embeddings_mode": "mock_for_worker_backfill",
+  "enqueue": {
+    "enqueued": 3000,
+    "enqueue_seconds": 65.02
+  },
+  "phase1": {
+    "elapsed_s": 171.25,
+    "completed": 1148,
+    "throughput_jobs_per_s": 6.704,
+    "lag_p50_s": 139.998,
+    "lag_p95_s": 206.796,
+    "rss_mb_peak": 32.64,
+    "cpu_pct_peak": 37.7,
+    "final_counts": {
+      "pending": 1827,
+      "claimed": 1,
+      "completed": 1148,
+      "failed": 24,
+      "dead_letter": 24,
+      "chunks_current": 4596,
+      "dead_letter_jobs": 24
+    }
+  },
+  "phase1_samples": [
+    {
+      "t": 0.04,
+      "completed": 251,
+      "pending": 2742,
+      "failed": 6,
+      "claimed": 1,
+      "chunks": 1008,
+      "lag_s": 63.142,
+      "rss_mb": 32.39,
+      "cpu_pct": 37.7
+    },
+    {
+      "t": 8.6,
+      "completed": 294,
+      "pending": 2699,
+      "failed": 6,
+      "claimed": 1,
+      "chunks": 1176,
+      "lag_s": 70.979,
+      "rss_mb": 32.51,
+      "cpu_pct": 30.3
+    },
+    {
+      "t": 16.97,
+      "completed": 340,
+      "pending": 2652,
+      "failed": 7,
+      "claimed": 1,
+      "chunks": 1362,
+      "lag_s": 78.549,
+      "rss_mb": 32.53,
+      "cpu_pct": 31.9
+    },
+    {
+      "t": 25.41,
+      "completed": 389,
+      "pending": 2602,
+      "failed": 8,
+      "claimed": 1,
+      "chunks": 1560,
+      "lag_s": 85.844,
+      "rss_mb": 32.53,
+      "cpu_pct": 32.1
+    },
+    {
+      "t": 33.88,
+      "completed": 429,
+      "pending": 2561,
+      "failed": 9,
+      "claimed": 1,
+      "chunks": 1718,
+      "lag_s": 93.112,
+      "rss_mb": 32.56,
+      "cpu_pct": 31.8
+    },
+    {
+      "t": 42.39,
+      "completed": 469,
+      "pending": 2520,
+      "failed": 10,
+      "claimed": 1,
+      "chunks": 1878,
+      "lag_s": 100.757,
+      "rss_mb": 32.57,
+      "cpu_pct": 32.1
+    },
+    {
+      "t": 50.83,
+      "completed": 512,
+      "pending": 2476,
+      "failed": 11,
+      "claimed": 1,
+      "chunks": 2050,
+      "lag_s": 108.277,
+      "rss_mb": 32.57,
+      "cpu_pct": 32.3
+    },
+    {
+      "t": 59.22,
+      "completed": 558,
+      "pending": 2429,
+      "failed": 12,
+      "claimed": 1,
+      "chunks": 2236,
+      "lag_s": 115.808,
+      "rss_mb": 32.58,
+      "cpu_pct": 32.5
+    },
+    {
+      "t": 67.62,
+      "completed": 609,
+      "pending": 2377,
+      "failed": 13,
+      "claimed": 1,
+      "chunks": 2440,
+      "lag_s": 123.053,
+      "rss_mb": 32.59,
+      "cpu_pct": 32.6
+    },
+    {
+      "t": 76.14,
+      "completed": 654,
+      "pending": 2331,
+      "failed": 14,
+      "claimed": 1,
+      "chunks": 2620,
+      "lag_s": 130.57,
+      "rss_mb": 32.61,
+      "cpu_pct": 32.4
+    },
+    {
+      "t": 84.57,
+      "completed": 702,
+      "pending": 2282,
+      "failed": 15,
+      "claimed": 1,
+      "chunks": 2811,
+      "lag_s": 138.09,
+      "rss_mb": 32.62,
+      "cpu_pct": 32.4
+    },
+    {
+      "t": 93.07,
+      "completed": 743,
+      "pending": 2240,
+      "failed": 16,
+      "claimed": 1,
+      "chunks": 2976,
+      "lag_s": 145.861,
+      "rss_mb": 32.62,
+      "cpu_pct": 32.3
+    },
+    {
+      "t": 101.52,
+      "completed": 783,
+      "pending": 2200,
+      "failed": 16,
+      "claimed": 1,
+      "chunks": 3134,
+      "lag_s": 153.674,
+      "rss_mb": 32.62,
+      "cpu_pct": 32.2
+    },
+    {
+      "t": 109.92,
+      "completed": 823,
+      "pending": 2159,
+      "failed": 17,
+      "claimed": 1,
+      "chunks": 3296,
+      "lag_s": 161.352,
+      "rss_mb": 32.62,
+      "cpu_pct": 32.4
+    },
+    {
+      "t": 118.33,
+      "completed": 867,
+      "pending": 2114,
+      "failed": 18,
+      "claimed": 1,
+      "chunks": 3469,
+      "lag_s": 169.07,
+      "rss_mb": 32.63,
+      "cpu_pct": 32.4
+    },
+    {
+      "t": 126.77,
+      "completed": 918,
+      "pending": 2063,
+      "failed": 19,
+      "claimed": 0,
+      "chunks": 3672,
+      "lag_s": 176.569,
+      "rss_mb": 32.63,
+      "cpu_pct": 32.5
+    },
+    {
+      "t": 135.2,
+      "completed": 966,
+      "pending": 2013,
+      "failed": 20,
+      "claimed": 1,
+      "chunks": 3864,
+      "lag_s": 184.148,
+      "rss_mb": 32.63,
+      "cpu_pct": 32.5
+    },
+    {
+      "t": 143.62,
+      "completed": 1018,
+      "pending": 1961,
+      "failed": 21,
+      "claimed": 0,
+      "chunks": 4072,
+      "lag_s": 191.513,
+      "rss_mb": 32.63,
+      "cpu_pct": 32.6
+    },
+    {
+      "t": 152.08,
+      "completed": 1062,
+      "pending": 1915,
+      "failed": 22,
+      "claimed": 1,
+      "chunks": 4248,
+      "lag_s": 198.912,
+      "rss_mb": 32.63,
+      "cpu_pct": 32.6
+    },
+    {
+      "t": 160.59,
+      "completed": 1098,
+      "pending": 1879,
+      "failed": 23,
+      "claimed": 0,
+      "chunks": 4392,
+      "lag_s": 206.796,
+      "rss_mb": 32.63,
+      "cpu_pct": 32.6
+    },
+    {
+      "t": 169.1,
+      "completed": 1137,
+      "pending": 1839,
+      "failed": 24,
+      "claimed": 0,
+      "chunks": 4548,
+      "lag_s": 214.532,
+      "rss_mb": 32.64,
+      "cpu_pct": 32.6
+    }
+  ],
+  "phase2": {
+    "elapsed_s": 348.84,
+    "completed": 2940,
+    "throughput_jobs_per_s": 8.428,
+    "lag_p50_s": 383.106,
+    "lag_p95_s": 517.549,
+    "rss_mb_peak": 32.65,
+    "cpu_pct_peak": 36.6,
+    "final_counts": {
+      "pending": 0,
+      "claimed": 0,
+      "completed": 2940,
+      "failed": 60,
+      "dead_letter": 60,
+      "chunks_current": 11760,
+      "dead_letter_jobs": 60
+    }
+  },
+  "final_counts": {
+    "pending": 0,
+    "claimed": 0,
+    "completed": 2940,
+    "failed": 60,
+    "dead_letter": 60,
+    "chunks_current": 11760,
+    "dead_letter_jobs": 60
+  },
+  "voyage_estimate_if_enabled": {
+    "document_calls": 8820,
+    "approx_tokens": 352800,
+    "approx_cost_usd": 0.0423,
+    "note": "Estimate only; worker ran with WATHEFNI_CK_VOYAGE_ENABLED=0"
+  },
+  "throughput_jobs_per_s_effective": 5.653,
+  "lag_p95_s": 517.549,
+  "rss_mb_peak": 32.65,
+  "cpu_pct_peak": 37.7,
+  "projections": {
+    "wathefni_1k_minutes": 2.95,
+    "wathefni_5k_minutes": 14.74,
+    "wathefni_20k_hours": 0.98
+  },
+  "gates": [
+    {
+      "id": "worker_active_start",
+      "status": "PASS"
+    },
+    {
+      "id": "progress_to_40pct",
+      "status": "PASS",
+      "completed": 1148
+    },
+    {
+      "id": "pause_stops_progress",
+      "status": "PASS"
+    },
+    {
+      "id": "resume_active",
+      "status": "PASS"
+    },
+    {
+      "id": "restart_continues",
+      "status": "PASS",
+      "before": 1192,
+      "after": 2940
+    },
+    {
+      "id": "dead_letter_poison",
+      "status": "PASS",
+      "dead_letter_jobs": 60,
+      "poison_enqueued": 60
+    },
+    {
+      "id": "indexer_not_sql_bypass",
+      "status": "PASS",
+      "distinct_indexed_apps": 2940,
+      "expected_approx": 2940
+    },
+    {
+      "id": "live_tools_off",
+      "status": "PASS"
+    },
+    {
+      "id": "live_ranking_off",
+      "status": "PASS"
+    },
+    {
+      "id": "health",
+      "status": "PASS",
+      "health": {
+        "http_code": 200,
+        "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"staging\",\"database_environment\":\"staging\",\"database_environment_ma"
+      }
+    }
+  ],
+  "blockers": [],
+  "fails": []
+}

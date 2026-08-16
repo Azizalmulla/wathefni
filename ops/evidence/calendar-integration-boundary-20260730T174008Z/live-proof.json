@@ -1,0 +1,21 @@
+{
+  "calendar_chunk": "CalendarShell-Bkng-4pt.js",
+  "settings_chunk": "SettingsPage-D_fp3gw_.js",
+  "dashboard_chunk": "dashboard-CymfnsdK.js",
+  "no_external_sync": true,
+  "has_platform_integrations": true,
+  "has_synced": true,
+  "has_not_synced": true,
+  "has_ar_not_synced": true,
+  "has_meeting_ar": true,
+  "no_comes_later": true,
+  "no_open_external": true,
+  "owner_has_calendar_sync": true,
+  "hr_admin_lacks_calendar_sync": true,
+  "sanitizer_keys": [
+    "customer_status"
+  ],
+  "sanitizer_status": "unavailable",
+  "health": "200",
+  "verdict": "PASS"
+}

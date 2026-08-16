@@ -1,0 +1,17 @@
+PASS  normal projection 480  detail={'worked': 480}
+PASS  overnight projection 480  detail={'worked': 480}
+PASS  checkpoint resume  detail=['biotime:2301', 'biotime:2302']
+PASS  agent poll enqueue  detail={'enqueued': 6, 'pages': 1}
+PASS  agent offline queue  detail=None
+PASS  agent reconnect replay  detail={'ok': True, 'delivered': 7, 'pending': 0, 'errors': []}
+PASS  checkpoint durable  detail=biotime:2302
+PASS  connector health model  detail={'status': 'ok', 'checkpoint': 'biotime:2302', 'version': 'attendance_capture_wave2b_v1'}
+PASS  health tracks errors  detail=1
+PASS  unknown quarantined  detail=unknown_device_user
+PASS  mapped quarantine replay  detail={'created': True, 'duplicate': False}
+PASS  csv same content same ids  detail=None
+PASS  csv duplicate across files  detail={'r1': 2, 'r2_dup': 2}
+PASS  xlsx ingest  detail={'ok': True, 'accepted': 2, 'duplicates': 0, 'quarantined': 0, 'failed': 0, 'details': [{'source_event_id': 'csv:db1107c7c8d82667f00a7e2bb8932753a336b7722e1d08fb1979cf9ca5f87a10:898da816253b17baec420fda6a648ae03723cc9f094a8d229a14cc153ad66eec', 'result': {'ok': True, 'duplicate': False, 'quarantined': None, 'error': None}}, {'source_event_id': 'csv:db1107c7c8d82667f00a7e2bb8932753a336b7722e1d08fb1979cf9ca5f87a10:6a5f2fbd8e7d02573d8b396dce3db46e79cede3ce90d59f0befee6f1a54dbf6e', 'result': {'ok': True, 'duplicate': False, 'quarantined': None, 'error': None}}]}
+PASS  csv day projection 480  detail=None
+PASS  payroll reconcile exact  detail={'worked': 480, 'snapshot_id': '41ee89c4-9de8-4bca-ae01-4b9b68d658c3'}
+PASS  demo fingerprint unchanged  detail=None

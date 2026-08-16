@@ -1,0 +1,407 @@
+[
+  {
+    "name": "p3 version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preview only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode a sealed locked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "native pdf locked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss/eos not implemented",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payment disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no payment_date invent",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no formula scripts",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "counsel gated ot/sick/ph",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic only default",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "invariant locked inputs",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "invariant deterministic",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p1 preserved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p2 preserved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "native preview not pdf eligible",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external without seal id not pdf eligible",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "custom component upsert",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "custom assignment",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "one-off adjustment",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "reserved statutory cannot be custom",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "period",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "assemble inputs",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "assemble status lockable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "lock inputs",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has BASIC",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has ALLOWANCE.TRANSPORT",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has ALLOWANCE.PHONE",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has DEDUCTION.LATENESS",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has DEDUCTION.ABSENCE",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has OT_ORDINARY",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has CUSTOM.EARNING",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "catalog has PIFSS_EE",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "policy v1",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc1 ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc1 preview authority",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc1 fingerprints present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc1 policy fp",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc1 input fp",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "basic salary line",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "recurring allowance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "recurring deduction",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "one-off earning",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "basic full period ~600",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mid-period salary change",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mid-period hire proration",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mid-period leaver proration",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid absence deduction",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid leave deduction",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no double deduct unpaid+absence",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "paid leave no absence deduct",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "lateness off no money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot disabled no counsel block",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot disabled no OT money line",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "custom company component line",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "one-off deduction line",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overlapping compensation blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overlap blocker code",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "idempotent flag",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "idempotent same fingerprint",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "idempotent same calc_run_id",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "policy v2 lateness",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc2 ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "lateness on produces money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "policy version change new fingerprint",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "calc informational ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "informational no att money 815d95fd",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "informational no att money 815d95fd",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "informational no att money 815d95fd",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ignored mode no absence money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot policy calc returns",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot counsel fail closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "rest counsel fail closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ph counsel fail closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sick counsel fail closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot blocked employee",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no silent OT amount",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "policy for unlocked test",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "supersede for unlocked test",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unlocked input refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "counsel placeholders seeded",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no approved OT rate",
+    "ok": true,
+    "detail": null
+  }
+]

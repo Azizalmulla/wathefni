@@ -1,0 +1,10 @@
+OK P4 honesty
+OK missing≠zero + salary masked
+OK mapping profile with cutover fields
+OK preview cutover+onboarding batch=eab0221e-826d-4ae0-be8c-378122199290
+OK cutover domains applied
+OK idempotent recommit
+OK native Wathefni leave wins
+OK rollback ok status=rolled_back
+OK employee migration sync P4 cutover
+P4_EXIT=0

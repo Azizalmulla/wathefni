@@ -1,0 +1,99 @@
+    wave5 product acceptance — db
+      PASS  c7 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  acceptance only
+      PASS  no second evaluator
+      PASS  c6 stamp regression
+      PASS  c5 stamp regression
+      PASS  anti-duplication
+      PASS  product gate off
+      PASS  empty allowlist
+      PASS  product gate on
+      PASS  tenant gate
+      PASS  enable c1
+      PASS  enable c2
+      PASS  enable c3
+      PASS  enable c4
+      PASS  enable c5
+      PASS  enable c6
+      PASS  publish domain kpis
+      PASS  fte blocked on publish
+      PASS  platform spine publish
+      PASS  seed workforce P-A
+      PASS  seed workforce P-B
+      PASS  seed workforce P-C
+      PASS  seed workforce P-D
+      PASS  seed workforce P-E
+      PASS  draft payroll upsert
+      PASS  workforce headcount ok
+      PASS  headcount about bilingual
+      PASS  headcount drill match
+      PASS  headcount export parity
+      PASS  recruiting ttf ok
+      PASS  ttf drill reauthorized
+      PASS  leave utilization ok
+      FAIL  draft period filter does not invent money :: {'ok': True, 'status': 'ok', 'value': 500.0, 'unit': 'KWD', 'numerator_value': None, 'denominator_value': None, 'population_ids': ['W5P82513-A', 'W5P82513-B', 'W5P82513-C', 'W5P82513-D', 'W5P82513-E'], 'population_count': 5, 'kpi_definition_id': '50e9aeba-436f-434c-bc2d-9a4faa22a12a', 'semantic_key': 'payroll.workforce_cost', 'effective_version': 1, 'formula_snapshot': {'kind': 'payroll_workforce_cost', 'currency': 'KWD', 'fx_conversion': False, 'sensitive_aggregate': True}, 'permission_class': 'payroll_money', 'filters': {'period_key': 'PAY-DRAFT'}, 'time_window': {'period_start': '2026-07-13', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T10:37:23.996836+00:00', 'guaranteed_current': False}, 'name_en': 'Payroll workforce cost', 'name_ar': 'تكلفة القوى العاملة بالرواتب', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'currency': 'KWD', 'fx_conversion': False, 'sealed': True, 'money_authority': 'wathefni', 'period_key': 'PAY-C7', 'workforce_cost_basis': 'gross'}, 'evaluation_id': '63d38d5b-0935-497c-ab00-c274f780236e', 'evaluated_at': datetime.datetime(2026, 8, 12, 10, 37, 23, 274997, tzinfo=datetime.timezone.utc), 'status_label': 'Available', 'about_metric': {'semantic_key': 'payroll.workforce_cost', 'definition_id': '50e9aeba-436f-434c-bc2d-9a4faa22a12a', 'effective_version': 1, 'family': 'pay', 'name_en': 'Payroll workforce cost', 'name_ar': 'تكلفة القوى العاملة بالرواتب', 'description_en': 'Configured cost basis from the latest sealed Wathefni payroll period; KWD, no FX.', 'description_ar': 'أساس التكلفة المحدد من أحدث فترة رواتب مختومة من وظفني؛ د.ك بلا صرف.', 'business_meaning': 'Configured cost basis from the latest sealed Wathefni payroll period; KWD, no FX.', 'numerator': {'description': 'Configured cost basis from the latest sealed Wathefni payroll period; KWD, no FX.'}, 'denominator': None, 'inclusion_rules': {}, 'exclusion_rules': {}, 'unit': 'KWD', 'time_semantics': 'period_sum', 'supported_dimensions': ['department', 'manager', 'location', 'component_key'], 'permission_class': 'payroll_money', 'definition_status': 'published', 'status_honesty': {'ok': {'en': 'Available', 'ar': 'متاح'}, 'unavailable': {'en': 'Unavailable', 'ar': 'غير متاح'}, 'insufficient_data': {'en': 'Insufficient data', 'ar': 'بيانات غير كافية'}, 'not_applicable': {'en': 'Not applicable', 'ar': 'غير منطبق'}, 'suppressed': {'en': 'Suppressed', 'ar': 'محجوب'}, 'blocked': {'en': 'Blocked', 'ar': 'محظور'}, 'stale': {'en': 'May be stale', 'ar': 'قد يكون قديماً'}, 'refreshing': {'en': 'Refreshing', 'ar': 'جارٍ التحديث'}}}, 'family': 'pay', 'governed_by_c1': True}
+      PASS  payroll money sealed ok
+      PASS  payroll currency metadata
+      PASS  money uses sealed authority
+      PASS  goal attainment ok
+      PASS  succession coverage ok
+      PASS  succession drill reauthorized
+      PASS  platform spine ok
+      PASS  headcount monthly trend
+      PASS  demographic dimension rejected/hidden
+      PASS  unpublished unavailable
+      PASS  pinned view
+      PASS  pinned stores version
+      PASS  live re-evaluates
+      PASS  target correction preserves history
+      PASS  historical target versions retained
+      PASS  goal still governed after correction
+      PASS  attendance correction no audit rewrite
+      PASS  workforce hires governed
+      PASS  perf never becomes potential
+      PASS  time/payroll pop explainable
+      PASS  full overview has workforce
+      PASS  full overview no empty families only
+      PASS  module-off headcount omitted
+      PASS  stale publication module-off unavailable
+      PASS  talent without performance
+      PASS  performance without talent
+      PASS  sparse enable c1
+      PASS  sparse enable c2
+      PASS  sparse enable c6
+      PASS  sparse intentional composition
+      PASS  sparse no recruiting shell
+      PASS  analytics disabled fail closed
+      FAIL  genuine zero distinct :: {'ok': True, 'status': 'ok', 'value': 0.0, 'unit': 'count', 'numerator_value': None, 'denominator_value': None, 'population_ids': [], 'population_count': 0, 'kpi_definition_id': '08d157a8-e120-4f33-a6de-178a94d80f4f', 'semantic_key': 'workforce.hires.count', 'effective_version': 1, 'formula_snapshot': {'kind': 'workforce_hires', 'sensitive_aggregate': False}, 'permission_class': 'workforce_general', 'filters': {}, 'time_window': {'period_start': '2026-08-22', 'period_end': '2026-09-01'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T10:37:27.042213+00:00', 'guaranteed_current': False}, 'name_en': 'Hires', 'name_ar': 'التعيينات', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'period_start': '2026-08-22', 'period_end': '2026-09-01', 'members': [], 'rehire_distinct_periods': True}, 'evaluation_id': 'f2ecae58-dd2c-4b85-930e-8517e93b6a34', 'evaluated_at': datetime.datetime(2026, 8, 12, 10, 37, 23, 274997, tzinfo=datetime.timezone.utc), 'status_label': 'Available', 'about_metric': {'semantic_key': 'workforce.hires.count', 'definition_id': '08d157a8-e120-4f33-a6de-178a94d80f4f', 'effective_version': 1, 'family': 'workforce', 'name_en': 'Hires', 'name_ar': 'التعيينات', 'description_en': 'Employment hire events in period (distinct employment periods).', 'description_ar': 'أحداث التعيين خلال الفترة (فترات توظيف متميزة).', 'business_meaning': 'Count of hire events; rehire = new employment period.', 'numerator': {}, 'denominator': None, 'inclusion_rules': {}, 'exclusion_rules': {}, 'unit': 'count', 'time_semantics': 'event_count', 'supported_dimensions': [], 'permission_class': 'workforce_general', 'definition_status': 'published', 'status_honesty': {'ok': {'en': 'Available', 'ar': 'متاح'}, 'unavailable': {'en': 'Unavailable', 'ar': 'غير متاح'}, 'insufficient_data': {'en': 'Insufficient data', 'ar': 'بيانات غير كافية'}, 'not_applicable': {'en': 'Not applicable', 'ar': 'غير منطبق'}, 'suppressed': {'en': 'Suppressed', 'ar': 'محجوب'}, 'blocked': {'en': 'Blocked', 'ar': 'محظور'}, 'stale': {'en': 'May be stale', 'ar': 'قد يكون قديماً'}, 'refreshing': {'en': 'Refreshing', 'ar': 'جارٍ التحديث'}}}, 'family': 'workforce', 'governed_by_c1': True}
+      PASS  manager scope headcount
+      PASS  manager analytics policy
+      PASS  payroll manager without permission
+      PASS  talent sensitive without permission
+      PASS  employee no company intelligence
+      PASS  sensitive def
+      PASS  suppressed no value
+      PASS  suppressed no population leak
+      PASS  compare suppressed fail closed
+      PASS  suppressed export empty people
+      PASS  assistant respects suppression
+      PASS  fte unavailable blocked
+      PASS  fte not on surface as number
+      PASS  assistant no inferred fte
+      PASS  no AI HiPo inference
+      PASS  demographics default off
+      PASS  setup-owned manager analytics setting
+      PASS  env are gates only
+      PASS  overview AR composes
+      PASS  about AR name
+      PASS  drill pagination
+      PASS  no evaluate-all on overview families only
+      PASS  assistant refuses invented
+      PASS  assistant resolves published
+      PASS  saved view unpublished fail closed
+      PASS  deterministic movement inputs governed
+      PASS  product off after prove
+      PASS  all gates off
+
+    94 passed, 2 failed

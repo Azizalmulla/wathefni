@@ -1,0 +1,26 @@
+    leave enforcement c2 — prove
+      PASS  enforcement module
+      PASS  rollback guidance
+      PASS  EN/AR leave type canonicalize annual
+      PASS  EN/AR leave type canonicalize unpaid
+      PASS  EN/AR unpaid catalogue present
+      PASS  global enforcement off
+      PASS  empty allowlist denies
+      PASS  allowlisted still needs pack attestation
+      PASS  enable blocked without attestation
+      PASS  policy pack attested
+      PASS  attested but not enabled yet
+      PASS  enforcement enabled for canary
+      PASS  enforcement gate open
+      PASS  other company denied
+      PASS  sufficient annual reserve
+      PASS  insufficient annual rejected
+      PASS  direct reserve fail-closed under enforcement
+      PASS  unpaid skips balance
+      FAIL  override requires reason :: {'ok': False, 'error': 'insufficient_balance', 'reserved': False, 'days': 15.0, 'available_before': 4.0, 'balances_enforced': True, 'legal_reviewed': True, 'observe_only': False, 'phase': 'leave_enforcement_c2', 'insufficient_balance_observe': False}
+      FAIL  authorized override reserves :: {'ok': False, 'error': 'insufficient_balance', 'reserved': False, 'days': 15.0, 'available_before': 4.0, 'balances_enforced': True, 'legal_reviewed': True, 'observe_only': False, 'phase': 'leave_enforcement_c2', 'insufficient_balance_observe': False}
+FAIL exception: column "ledger_id" does not exist
+LINE 6:         RETURNING ledger_id, days, entry_kind
+                          ^
+HINT:  Perhaps you meant to reference the column "leave_ledger.leave_id".
+

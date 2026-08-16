@@ -1,0 +1,137 @@
+{
+  "fixture_id": "cv_ar_digital_01",
+  "category": "arabic_digital_cv",
+  "language": "ar",
+  "pdf_nature": "digital_text",
+  "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_ar_digital_01.pdf",
+  "page_count": 1,
+  "poppler": {
+    "elapsed_ms": 50,
+    "pages_needing_ocr_1idx": [
+      1
+    ],
+    "false_skips_vs_expected": [],
+    "unnecessary_vs_expected": [
+      1
+    ],
+    "needle_score": {
+      "mode": "native_should_hit",
+      "hit": 2,
+      "total": 5,
+      "ratio": 0.4,
+      "missing": [
+        "نورة العتيبي",
+        "الخبرة العملية",
+        "المهارات"
+      ]
+    },
+    "arabic_integrity": {
+      "applicable": true,
+      "hit": 0,
+      "total": 3,
+      "ratio": 0.0,
+      "missing": [
+        "نورة العتيبي",
+        "الخبرة العملية",
+        "المهارات"
+      ]
+    },
+    "field_score": {
+      "checks": {
+        "full_name": false,
+        "email": true,
+        "phone": true,
+        "title": false
+      },
+      "hit": 2,
+      "total": 4,
+      "ratio": 0.5
+    },
+    "encoding_signal": false
+  },
+  "pdf_inspector": {
+    "process_wall_ms": 1,
+    "library_processing_time_ms": 1,
+    "pdf_type": "text_based",
+    "confidence": 1.0,
+    "has_encoding_issues": false,
+    "is_complex_layout": false,
+    "pages_with_tables": [],
+    "pages_with_columns": [],
+    "pages_needing_ocr_1idx": [],
+    "false_skips_vs_expected": [],
+    "unnecessary_vs_expected": [],
+    "needle_score_markdown": {
+      "mode": "native_should_hit",
+      "hit": 5,
+      "total": 5,
+      "ratio": 1.0,
+      "missing": []
+    },
+    "needle_score_plain": {
+      "mode": "native_should_hit",
+      "hit": 2,
+      "total": 5,
+      "ratio": 0.4,
+      "missing": [
+        "نورة العتيبي",
+        "الخبرة العملية",
+        "المهارات"
+      ]
+    },
+    "arabic_integrity_markdown": {
+      "applicable": true,
+      "hit": 3,
+      "total": 3,
+      "ratio": 1.0,
+      "missing": []
+    },
+    "arabic_integrity_plain": {
+      "applicable": true,
+      "hit": 0,
+      "total": 3,
+      "ratio": 0.0,
+      "missing": [
+        "نورة العتيبي",
+        "الخبرة العملية",
+        "المهارات"
+      ]
+    },
+    "field_score": {
+      "checks": {
+        "full_name": true,
+        "email": true,
+        "phone": true,
+        "title": true
+      },
+      "hit": 4,
+      "total": 4,
+      "ratio": 1.0
+    },
+    "detect_pdf_type": "text_based",
+    "classify_confidence": 1.0
+  },
+  "routing_agreement_with_expected": {
+    "poppler_exact": false,
+    "inspector_exact": true,
+    "poppler_vs_inspector": false
+  },
+  "projected_cost": {
+    "pages_total": 1,
+    "ocr_pages_expected": [],
+    "ocr_pages_poppler": [
+      1
+    ],
+    "ocr_pages_inspector": [],
+    "cost_if_all_pages_usd": 0.004,
+    "cost_if_poppler_ocr_usd": 0.004,
+    "cost_if_inspector_ocr_usd": 0.0,
+    "cost_if_expected_ocr_usd": 0.0,
+    "inspector_vs_all_pages_savings_usd": 0.004,
+    "inspector_vs_poppler_delta_pages": -1
+  },
+  "mistral_reference": {
+    "called": false,
+    "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+  }
+}

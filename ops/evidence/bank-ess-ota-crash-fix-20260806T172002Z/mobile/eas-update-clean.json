@@ -1,0 +1,68 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] Android Bundled 3462ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (1269 modules)
+[expo-cli] iOS Bundled 5631ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (1318 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-82befdde2f83ee6c4af54a0b4ad2ea00.hbc (1.81 MB)
+[expo-cli] _expo/static/js/android/entry-82befdde2f83ee6c4af54a0b4ad2ea00.hbc.map (6.84 MB)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-3214dabf4bb4d1e241f8b86cbcb0d721.hbc (1.8 MB)
+[expo-cli] _expo/static/js/ios/entry-3214dabf4bb4d1e241f8b86cbcb0d721.hbc.map (6.82 MB)
+[expo-cli] 
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.76 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 7.6 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fd81a-629a-7922-95b0-f9a502cf1c4e",
+    "createdAt": "2026-08-06T17:23:55.674Z",
+    "group": "85f648c9-73a0-4b14-9d8e-838913496a4d",
+    "branch": "canary",
+    "message": "Fix Bank ESS OTA syncLayoutLocale clean 20260806T172002Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd81a-629a-7922-95b0-f9a502cf1c4e",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "5015fb8633af624dbf5bf38a821ba34f59567837"
+  },
+  {
+    "id": "019fd81a-629a-7289-82ce-6207924ecc10",
+    "createdAt": "2026-08-06T17:23:55.674Z",
+    "group": "85f648c9-73a0-4b14-9d8e-838913496a4d",
+    "branch": "canary",
+    "message": "Fix Bank ESS OTA syncLayoutLocale clean 20260806T172002Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd81a-629a-7289-82ce-6207924ecc10",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "5015fb8633af624dbf5bf38a821ba34f59567837"
+  }
+]

@@ -1,0 +1,64 @@
+PASS  secret contract version
+PASS  argv secret flag blocked
+PASS  argv without secrets ok
+PASS  environment file written
+PASS  environment file mode 600
+PASS  raw secrets file in pack blocks qualify
+PASS  clean evidence leak scan pass
+PASS  qualify_or_block allows clean pack
+PASS  simulated secret exposure detected
+PASS  simulated exposure blocks qualification
+PASS  safe_error redacts password
+PASS  leak finding excerpts redacted
+PASS  site registered
+PASS  cross-tenant device registration denied
+PASS  device registered for tenant
+PASS  wrong-tenant device claim fail-closed
+PASS  ownership verify wrong tenant fails
+PASS  ownership verify correct tenant
+PASS  connector registered without secret return
+PASS  cross-tenant connector registration denied
+PASS  connector activated
+PASS  credential rotate ok
+PASS  reconnect after rotate (no secret values)
+PASS  rotate optimistic concurrency stale denied
+PASS  connector revoke
+PASS  reconnect after revoke denied
+PASS  connector cross-tenant assert denied
+PASS  unknown mapping quarantines (not payroll)
+PASS  unknown enters remediation
+PASS  remediation enqueue idempotent
+PASS  mapping approve cross-tenant denied
+PASS  manager self-action denied
+PASS  manager scope denied for out-of-scope employee
+PASS  missing checkout enqueued
+PASS  ambiguous order enqueued
+PASS  missing/ambiguous payroll_excluded
+PASS  connector lag/offline remediation
+PASS  mapping approve+replay ok
+PASS  reject conflict ok
+PASS  reject idempotent
+PASS  accepted punch flowed Wave 1 authority
+PASS  health offline alert
+PASS  health lag critical alert
+PASS  health recovery clears offline/lag alerts
+PASS  health revoked status
+PASS  health contract schema present
+PASS  readonly compat ok
+PASS  readonly compat secrets redacted
+PASS  readonly compat does not set ingest flag
+PASS  secret runbook present
+PASS  pilot checklist present
+PASS  freeze skipped
+{
+  "pass": 52,
+  "fail": 0
+}
+LEAK_SCAN {"ok": true, "blocked": false, "files": 4}
+62735da6cf70f26d15cc2bcb5c5bbb333468453a38c70bb9bbadadcf56e3f5ec  /opt/wathefni/staging/orchestrator/attendance_capture_secrets.py
+9065410c612ab173668ce0c62f4a0e140ec6219c1776372c33b0b771bd18ec21  /opt/wathefni/staging/orchestrator/attendance_capture_registry.py
+fb1fdabb5b1810a979dcf9b67a1dbcfc720b962a24223f8337bfecfe5195fec9  /opt/wathefni/staging/orchestrator/attendance_capture_remediation.py
+f2ad9544b9b5f5d2d3d58a1150246ad589c2563e111024b1b83211b362df8eba  /opt/wathefni/staging/orchestrator/attendance_capture_health.py
+a491a5b1419d57e68b5d42646b9acbefeace1d8bf856148bc1986caee513d367  /opt/wathefni/staging/orchestrator/attendance_capture_compat.py
+6b06ccdd910da8a9547f1b2bb0f4dedfc0f7d45f1fde7a2c6889eed7796946ab  /opt/wathefni/staging/orchestrator/smoke-test-attendance-capture-wave2d.py
+REMOTE_EVID=/opt/wathefni/staging-evidence/attendance-wave2d-pilot-readiness-20260802T030554Z

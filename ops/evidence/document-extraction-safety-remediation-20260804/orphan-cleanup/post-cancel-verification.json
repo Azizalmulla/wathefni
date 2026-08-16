@@ -1,0 +1,15 @@
+{
+  "database": "wathefni",
+  "other_ats_export_by_status": {
+    "cancelled": 349
+  },
+  "other_ats_export_active": 0,
+  "cancelled_with_change_control_reason": 349,
+  "cancelled_jobs_now_linked_to_valid_doc_or_app": 0,
+  "email_inbound_by_status_untouched_current_snapshot": {
+    "cancelled": 28,
+    "completed": 23,
+    "dead_letter": 4
+  },
+  "verification": "PASS"
+}

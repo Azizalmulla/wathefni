@@ -1,0 +1,98 @@
+    shifts authority wave1a — lifecycle + overnight + swap + dashboard
+      PASS  version pinned 1.1.0
+      PASS  wave1 enabled
+      PASS  WATHEFNI company allowed
+      PASS  other company gated
+      PASS  allow_overnight default true
+      PASS  overnight windows equal Attendance
+      PASS  overnight ends next calendar day
+      PASS  ends_next_day_for 22-06
+      PASS  ends_next_day_for 09-17
+      PASS  same-day normalize
+      PASS  overnight normalize
+      PASS  overnight banned
+      PASS  split abut no overlap
+      PASS  split mid overlap
+      PASS  overnight vs next-morning overlap
+      PASS  future_start blocks before start date
+      PASS  future_start allows on start date
+      PASS  notice allows through last working day
+      PASS  notice blocks past employment end
+      PASS  garden leave blocks notice assignments
+      PASS  suspended blocks overlapping interval
+      PASS  suspended allows outside suspension window
+      PASS  terminated allows on last working day daytime
+      PASS  terminated blocks overnight past employment end
+      PASS  existing beyond-end requires ack (not silent delete)
+      PASS  notice label no longer blanket-blocks by default
+      PASS  self-swap approve banned
+      PASS  other actor swap ok
+      PASS  leave conflict block
+      PASS  leave conflict require_ack
+      PASS  leave conflict ack ok
+      PASS  honesty payroll_money false
+      PASS  honesty leave_balances_mutated false
+      PASS  rest_weekdays configurable default Fri
+      PASS  synthetic marker SHW1
+      PASS  synthetic phone prefix
+      PASS  create does not touch leave_balances
+      PASS  create does not calculate payment
+      PASS  create refuses empty employee
+      PASS  overnight allowed in extract
+      PASS  self swap wired
+      PASS  dashboard reschedule expects concurrency
+      PASS  create uses interval lifecycle
+      PASS  dashboard dist embeds expected_updated_at
+      PASS  unknown employee creation fails closed
+      PASS  same-day fixed create
+      PASS  break_minutes persisted
+      PASS  site_key persisted
+      PASS  ends_next_day false for day shift
+      PASS  duplicate create idempotent
+      PASS  split morning ok
+      PASS  split afternoon ok
+      PASS  split overlap detected
+      PASS  overnight 22-06 create
+      PASS  overnight ends_next_day true
+      PASS  overnight vs next-morning overlap
+      PASS  Attendance overnight interval matches Shifts
+      PASS  client payload includes expected_updated_at
+      PASS  dashboard overnight reschedule ok
+      PASS  dashboard overnight ends_next_day persisted
+      PASS  dashboard overnight start moved
+      PASS  dashboard stale concurrency denied
+      PASS  approved-leave conflict requires handling
+      PASS  leave conflict ack allows create
+      PASS  cancel ok
+      PASS  duplicate cancel idempotent
+      PASS  soft-cancel status cancelled
+      PASS  append-only cancel event
+      PASS  reschedule subject created
+      PASS  stale concurrent reschedule one winner
+      PASS  swap fixture requester shift
+      PASS  swap fixture target shift
+      PASS  swap request ok
+      PASS  swap self-decision denied
+      … rejecting scoped swap (decision path without assignment mutation)
+      … scoped reject ok=True err=None
+      PASS  swap scoped decision ok
+      … replay swap decision
+      PASS  swap idempotent replay
+      … approving assignment swap
+      … approve ok=True err=None
+      PASS  swap first decision wins
+      PASS  swap stale second decision denied or idempotent-reject
+      PASS  orphan quarantine ok
+      PASS  orphan quarantine audit event
+      PASS  orphan lifecycle flag open
+      PASS  restore blocked while still orphan
+      PASS  orphan quarantine reversible
+      PASS  restored shift scheduled again
+      PASS  orphan restore audit event
+      PASS  beyond-end flagged audited
+      PASS  beyond-end never silent-deleted
+      PASS  beyond-end soft-cancelled
+      PASS  lifecycle blocks terminated
+      PASS  tenant isolation company mismatch
+
+    90 passed, 0 failed

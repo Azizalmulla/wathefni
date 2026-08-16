@@ -6,6 +6,10 @@
 - Candidates: `data/candidates/{PHONE}/`
 - Employees: `data/companies/{{COMPANY_CODE}}/employees/{PHONE}/`
 - Positions: `data/companies/{{COMPANY_CODE}}/positions/{POSITION_CODE}.json`
+- Shifts: `data/companies/{{COMPANY_CODE}}/shifts/`
+- Attendance: `data/companies/{{COMPANY_CODE}}/attendance/`
+- Leave: `data/companies/{{COMPANY_CODE}}/leave/`
+- Payroll: `data/companies/{{COMPANY_CODE}}/payroll/`
 
 ## Current Setup
 - Company: {{COMPANY_NAME}} (code: {{COMPANY_CODE}})
@@ -13,9 +17,36 @@
 - Enabled modules: {{MODULES_LIST}}
 - Positions live in `data/companies/{{COMPANY_CODE}}/positions/*.json`
 - Current active openings must be read from the live position JSON files
+{{#MODULE_SHIFTS}}
+- Shift schedules are operational records keyed by employee and date
+- Employees may only ask about their own shifts
+- Availability and shift swap requests are operational records tied to employee phone identity and manager scope
+{{/MODULE_SHIFTS}}
+{{#MODULE_ATTENDANCE}}
+- Attendance records are operational records keyed by employee, date, and shift
+- Employees may only check in/out or ask about their own attendance
+- Vague attendance follow-ups require scoped pending operation state before changing records
+{{/MODULE_ATTENDANCE}}
+{{#MODULE_LEAVE}}
+- Leave requests are operational records keyed by employee and date range
+- Approved leave blocks unsafe absence marking for the same employee/date
+{{/MODULE_LEAVE}}
+{{#MODULE_PAYROLL}}
+- Payroll Hours is a read-only calculation layer over Shifts, Attendance, and approved Leave
+- Timesheet approvals freeze reviewed payroll-hour snapshots by employee and period
+- Payroll Policy controls previews for leave, overtime, deductions, and optional hourly rate
+- Payroll Export locks approved preview snapshots for explicit periods
+- Employees may only see their own payroll hours and timesheet status, bound by sender phone
+- Do not process payments, bank files, or transfers; payroll preview/export only
+{{/MODULE_PAYROLL}}
+{{#MODULE_ANALYTICS}}
+- Analytics is a read-only insight layer over Shifts, Attendance, Leave, Availability, Shift Swaps, Payroll Hours, and Timesheets
+- Analytics respects branch/team manager scope and updates dashboards only for company-wide HR views
+{{/MODULE_ANALYTICS}}
 
 ## Scope and Routing
 - Phone number in `hr-users.json` decides HR vs candidate/employee mode
+- Optional branch/team manager scopes restrict HR-mode users to assigned employees and operational records
 - Greeting-only candidate openers may get one onboarding reply asking for `APPLY-{{COMPANY_CODE}}-{POSITION_CODE}`
 - Out-of-scope candidate messages return `NO_REPLY`
 - Out-of-scope HR messages return `I can only help with HR-related tasks. 📋`

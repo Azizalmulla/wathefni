@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "host": "root@76.13.63.68",
+  "orchestrator_path": "/opt/wathefni/staging/orchestrator",
+  "worker_unit": "wathefni-ck-index-staging.service",
+  "flags_file": "/opt/wathefni/staging/var/ck-flags.env",
+  "drop_in": "/etc/systemd/system/wathefni-orchestrator-staging.service.d/candidate-knowledge.conf",
+  "backup": "/opt/wathefni/staging/backups/ck-phase8-20260726T203227Z",
+  "schema_tables": [
+    "candidate_knowledge_chunks",
+    "candidate_knowledge_index_jobs",
+    "candidate_knowledge_access_events"
+  ],
+  "action_registry_ck_tools": "absent",
+  "health": 200,
+  "worker_start_stop": "PASS",
+  "modules_deployed": [
+    "candidate_knowledge_*.py",
+    "ranking_evidence_*.py",
+    "candidate_knowledge_postgres_index_store.py",
+    "candidate_knowledge_index_worker.py"
+  ]
+}

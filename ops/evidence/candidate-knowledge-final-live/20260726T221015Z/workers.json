@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "worker_active": "active",
+  "connected_db": "wathefni",
+  "tenants": "WATHEFNI",
+  "health": {
+    "http_code": 200,
+    "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+  }
+}

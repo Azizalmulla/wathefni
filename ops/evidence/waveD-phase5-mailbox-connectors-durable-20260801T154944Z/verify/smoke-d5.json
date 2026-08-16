@@ -1,0 +1,117 @@
+{
+  "passed": 18,
+  "failed": 0,
+  "cases": {
+    "forwarding_default_flag_off": {
+      "ok": true,
+      "detail": {
+        "WATHEFNI_MAILBOX_SYNC": "off"
+      }
+    },
+    "feature_payload_premium_forwarding_default": {
+      "ok": true,
+      "detail": "{\"enabled\": false, \"premium\": true, \"default_product\": \"forwarding\", \"mailbox_sync_enabled\": false, \"encryption_ready\": true, \"gmail_oauth_ready\": true, \"m365_oauth_ready\": false, \"providers\": [{\"key\": \"gmail\", \"label\": \"Gmail / Google Workspace\", \"label_ar\": \"Gmail / Google Work"
+    },
+    "gmail_scopes_readonly": {
+      "ok": true,
+      "detail": [
+        "https://www.googleapis.com/auth/gmail.readonly"
+      ]
+    },
+    "m365_scopes_mail_read_least_privilege": {
+      "ok": true,
+      "detail": [
+        "Mail.Read",
+        "User.Read",
+        "offline_access"
+      ]
+    },
+    "status_labels_en_ar": {
+      "ok": true,
+      "detail": true
+    },
+    "envelope_maps_provider_message_id": {
+      "ok": true,
+      "detail": {
+        "MessageID": "gmail:gmail-msg-d5-1",
+        "atts": 1
+      }
+    },
+    "m365_provider_not_live_without_oauth": {
+      "ok": true,
+      "detail": true
+    },
+    "build_mailbox_provider_m365": {
+      "ok": true,
+      "detail": true
+    },
+    "local_db_available": {
+      "ok": true,
+      "detail": "127.0.0.1"
+    },
+    "live_sync_uses_durable_pipeline": {
+      "ok": true,
+      "detail": "{\"ok\": true, \"mode\": \"live_durable\", \"company_code\": \"WATHEFNI\", \"mailbox_id\": \"04fc0a04-4af4-4700-a644-14604be991f5\", \"provider\": \"gmail\", \"route_intake_id\": \"a4ea1b97-2dcd-4606-a0fa-32cd886ae2f9\", \"route_address\": \"wathefni-d5-d5-92566c04@inbound.wathefni.ai\", \"counts\": {\"durab"
+    },
+    "no_legacy_import_batch_in_live_result": {
+      "ok": true,
+      "detail": [
+        "ok",
+        "mode",
+        "company_code",
+        "mailbox_id",
+        "provider",
+        "route_intake_id",
+        "route_address",
+        "counts",
+        "results",
+        "next_cursor"
+      ]
+    },
+    "idempotent_no_duplicate_candidates": {
+      "ok": true,
+      "detail": {
+        "durable": 0,
+        "duplicate": 1,
+        "ignored": 0,
+        "failed": 0,
+        "messages": 1
+      }
+    },
+    "dry_run_reports_would_import": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "dry_run": true,
+        "mode": "manual",
+        "pipeline": "durable_email_ingress",
+        "messages": 1,
+        "would_import": 1,
+        "mailbox_id": "04fc0a04-4af4-4700-a644-14604be991f5"
+      }
+    },
+    "flag_off_skips_sync": {
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "skipped": "mailbox_sync_disabled"
+      }
+    },
+    "product_forwarding_default_in_source": {
+      "ok": true,
+      "detail": true
+    },
+    "external_tenants_not_enabled": {
+      "ok": true,
+      "detail": true
+    },
+    "d6_not_started": {
+      "ok": true,
+      "detail": "local D5 only"
+    },
+    "ga_not_enabled": {
+      "ok": true,
+      "detail": true
+    }
+  }
+}

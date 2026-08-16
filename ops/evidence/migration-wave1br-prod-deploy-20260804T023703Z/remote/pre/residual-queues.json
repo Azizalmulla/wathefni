@@ -1,0 +1,17 @@
+{
+  "probe_utc": "2026-08-04T02:37:20.846998+00:00",
+  "active_migration_extraction": 0,
+  "active_other_ats_export": 0,
+  "active_live_cv": 0,
+  "open_canary_batches": 0,
+  "iso_companies": 0,
+  "has_hr_turns": true,
+  "has_candidates": true,
+  "has_applications": true,
+  "has_intake_source_events": true,
+  "has_cv_versions": true,
+  "has_migration_batches": true,
+  "has_inbound_messages": true,
+  "has_intake_submissions": true
+}
+PREFLIGHT_OK

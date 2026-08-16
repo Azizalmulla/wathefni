@@ -1,0 +1,11 @@
+{
+  "blocker": false,
+  "category": "zero_mutation",
+  "detail": "Invalidated chunks immediately unsearchable; no production/lifecycle mutation",
+  "gate_id": "invalidation_zero_mutation",
+  "metrics": {
+    "before_current": 2,
+    "invalidated": 2
+  },
+  "status": "PASS"
+}

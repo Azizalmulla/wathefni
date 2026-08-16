@@ -1,0 +1,15 @@
+{
+  "prefix": "ATTW2GUI886D85",
+  "company": "WATHEFNI",
+  "store_mode": "postgres",
+  "shots": [
+    "capture-ops-ar-desktop.png",
+    "capture-ops-ar-mobile.png",
+    "capture-ops-en-desktop.png",
+    "capture-ops-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false,
+  "ingest_enabled": false,
+  "environment": "production"
+}

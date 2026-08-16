@@ -1,0 +1,18 @@
+{
+  "elapsed_1k_s": 3.92,
+  "core_replayed": 1,
+  "lane_1k": {
+    "committed": 191,
+    "duplicate": 9
+  },
+  "ungranted_locks_end": 0,
+  "active_migration_extraction_queue": 0,
+  "open_batches_after_cleanup": 0,
+  "schema_counters": {
+    "apply_calls": 0,
+    "require_calls": 1640,
+    "blocked_apply_attempts": 0
+  },
+  "max_ungranted_during": 2
+}
+CONCURRENCY_MIGRATION_OK

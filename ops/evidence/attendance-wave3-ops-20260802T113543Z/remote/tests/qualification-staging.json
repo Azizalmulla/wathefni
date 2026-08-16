@@ -1,0 +1,382 @@
+{
+  "wave": "attendance-wave3",
+  "passed": 55,
+  "failed": 0,
+  "total": 55,
+  "results": [
+    {
+      "name": "state model has exception kinds",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "state model separates apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "missing check-in exception opened",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exception assigned with owner/priority/due",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exception has due date",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "correction case requested",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "review approve does not apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "punches unchanged before apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "apply creates projection version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "before/after captured",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "idempotent apply replay",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lateness exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "early_leave exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "early leave high-risk dual required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dual approval first stage",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dual approval rejects same approver",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dual approval second completes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "early leave applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "absence exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "absence correction applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "missing checkout for reject path",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reject without apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dispute base applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee dispute raised",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager resolves dispute",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen after new evidence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale row_version fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager in-scope allowed (not outside_scope)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager out-of-scope denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "branch/team manager in-scope",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unconfigured manager denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager self-correction denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "locked payroll period denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "post-leave correction applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave reverse preserves correction",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "day approved for payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approved attendance reconciles to payroll snapshot",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "incomplete not payroll eligible before fix",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "disputed stays payroll-excluded or unapproved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "comment added",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attachment ref stored",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "secret storage_ref rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "audit events present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tenant isolation ATTW3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tenant isolation OTHERCO",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cross-tenant get denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "connector issue exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ambiguous kind supported",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "raw punch still present after corrections",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "correction punches are separate source",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze skipped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "app registers ops routes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "app ensures ops schema",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http module present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "postgres module present",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "state_model": {
+    "exception_kinds": [
+      "absence",
+      "ambiguous_punches",
+      "connector_issue",
+      "early_leave",
+      "incomplete_session",
+      "lateness",
+      "missing_check_in",
+      "missing_check_out"
+    ],
+    "exception_statuses": [
+      "assigned",
+      "closed",
+      "in_review",
+      "open",
+      "pending_dual_approval",
+      "rejected",
+      "reopened",
+      "resolved"
+    ],
+    "case_statuses": [
+      "applied",
+      "approved",
+      "cancelled",
+      "disputed",
+      "pending_dual_approval",
+      "rejected",
+      "reopened",
+      "requested",
+      "under_review"
+    ],
+    "dispute_statuses": [
+      "closed",
+      "open",
+      "overturned",
+      "under_review",
+      "upheld"
+    ],
+    "priorities": [
+      "critical",
+      "high",
+      "low",
+      "normal"
+    ],
+    "rules": {
+      "raw_punches_immutable": true,
+      "corrections_create_new_projection_versions": true,
+      "incomplete_or_disputed_excluded_from_payroll": true,
+      "locked_payroll_snapshots_immutable": true,
+      "leave_reversal_preserves_later_manual_corrections": true,
+      "no_manager_self_correction_or_approval": true,
+      "approve_reject_apply_separated": true,
+      "optimistic_concurrency": "row_version",
+      "idempotent_apply": "apply_idempotency_key"
+    },
+    "dual_approval_kinds": [
+      "absence",
+      "early_leave"
+    ]
+  },
+  "permission_matrix": {
+    "hr": [
+      "open",
+      "assign",
+      "review",
+      "apply",
+      "reopen",
+      "resolve_dispute",
+      "comment",
+      "attach"
+    ],
+    "manager_configured_in_scope": [
+      "open",
+      "assign",
+      "request",
+      "review",
+      "apply",
+      "resolve_dispute",
+      "comment"
+    ],
+    "manager_unconfigured": [
+      "denied"
+    ],
+    "manager_out_of_scope": [
+      "denied"
+    ],
+    "manager_self": [
+      "denied"
+    ],
+    "employee": [
+      "raise_dispute"
+    ]
+  },
+  "workflow": {
+    "exception": "open \u2192 assigned \u2192 in_review \u2192 (pending_dual_approval) \u2192 resolved|rejected|reopened \u2192 closed",
+    "correction": "request \u2192 review(approve|reject) \u2192 apply(idempotent)",
+    "dispute": "raise \u2192 under_review \u2192 upheld|overturned \u2192 optional reopen"
+  }
+}

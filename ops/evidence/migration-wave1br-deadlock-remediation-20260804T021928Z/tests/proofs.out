@@ -1,0 +1,46 @@
+{
+  "counters": {
+    "apply_calls": 0,
+    "require_calls": 7,
+    "blocked_apply_attempts": 0
+  },
+  "apply_allowed": false
+}
+NO_RUNTIME_DDL_OK
+{
+  "ok": true,
+  "error": "schema_not_migrated:fail_closed_probe:missing=wave1br_missing_relation_probe_zzz",
+  "missing": [
+    "wave1br_missing_relation_probe_zzz"
+  ]
+}
+FAIL_CLOSED_OK
+{
+  "elapsed_1k_s": 3.92,
+  "core_replayed": 1,
+  "lane_1k": {
+    "committed": 191,
+    "duplicate": 9
+  },
+  "ungranted_locks_end": 0,
+  "active_migration_extraction_queue": 0,
+  "open_batches_after_cleanup": 0,
+  "schema_counters": {
+    "apply_calls": 0,
+    "require_calls": 1640,
+    "blocked_apply_attempts": 0
+  },
+  "max_ungranted_during": 2
+}
+CONCURRENCY_MIGRATION_OK
+{
+  "probe_utc": "2026-08-04T02:21:44.446101+00:00",
+  "w1br_batches": 0,
+  "migration_apps": 0,
+  "deferred": 0,
+  "active_mig_ext": 0,
+  "iso": 0,
+  "residual_zero": true
+}
+RESIDUAL_ZERO_OK
+STAGING_PROOFS_DONE

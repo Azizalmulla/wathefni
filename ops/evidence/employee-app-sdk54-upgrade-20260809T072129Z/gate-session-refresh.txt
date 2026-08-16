@@ -1,0 +1,10 @@
+PASS  foreground resume soft-refreshes me + active queries
+PASS  soft refresh always refreshes /app/me before active queries
+PASS  post-PIN / Face ID unlock triggers the same soft refresh
+PASS  root layout mounts ForegroundQueryRefresh while signed in
+PASS  Home pull-to-refresh refreshes me + home projection
+PASS  app-access revoke / session errors map to AccessStateScreen
+PASS  feature-disabled API responses trigger refreshMe
+PASS  FeatureUnavailable reads server features.reason (no client entitlement invention)
+---
+PASS session/refresh static proof (8 checks)

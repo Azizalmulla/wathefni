@@ -1,0 +1,30 @@
+{
+  "swap": {
+    "swap_id": "a2226f83-b648-40e4-8bd3-cb8397b4c485",
+    "company_code": "WATHEFNI",
+    "requester_employee_key": "WATHEFNI-SHW2-d3ffcf98",
+    "requester_employee_phone": "965529398000",
+    "requester_employee_name": "SHW2 Synth d3ffcf98",
+    "target_employee_key": "WATHEFNI-SHW2B-d3ffcf98",
+    "target_employee_phone": "965529980008",
+    "target_employee_name": "SHW2B Synth d3ffcf98",
+    "requester_shift_id": "13b8fe1c-7021-4cbf-9fb3-ac6bdba7505d",
+    "target_shift_id": "0325f7f0-0de4-43b0-a207-b445dce46989",
+    "shift_date": "2026-08-29",
+    "status": "requested",
+    "reason": "hr-cfa2-20260810T183036Z disposable",
+    "decision_note": null,
+    "source_text": null,
+    "requested_by_phone": "96599338566",
+    "decided_by_phone": null,
+    "requested_at": "2026-08-10 18:30:39.308789+00:00",
+    "decided_at": null,
+    "metadata": {
+      "tag": "hr-cfa2-20260810T183036Z",
+      "disposable": true
+    },
+    "created_at": "2026-08-10 18:30:39.308791+00:00",
+    "updated_at": "2026-08-10 18:30:39.308792+00:00"
+  },
+  "created": true
+}

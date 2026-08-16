@@ -1,0 +1,10 @@
+Employees 360 Wave 5 (self-service request authority): PASS
+
+Staging smoke: 41/41 PASS
+Production deploy: NOT DONE
+Real lifecycle: NOT ENABLED
+UI redesign / Wave 6 / pre-hiring / Wave D: UNTOUCHED
+
+Stamp: 20260801T222932Z
+Schema: employees360-wave5-selfservice-v1
+Flags (staging): WATHEFNI_EMPLOYEE_ESS_V5=on, COMPANIES=WATHEFNI

@@ -1,0 +1,21 @@
+{
+  "rows": 12,
+  "counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  },
+  "seed_counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  }
+}

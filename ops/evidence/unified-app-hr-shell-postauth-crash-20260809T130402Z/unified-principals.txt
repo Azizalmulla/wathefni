@@ -1,0 +1,30 @@
+PASS resolveShell exported
+PASS no email/phone auto-link implementation
+PASS employee SecureStore key namespace
+PASS HR SecureStore key namespace
+PASS HR namespaces differ from employee
+PASS HR API allowlist
+PASS PushLifecycle not imported into HR layout
+PASS Employee shell still mounts PushLifecycle
+PASS HR workspace flag gate
+PASS HR workspace falls back to app.config extra
+PASS freeze allows one public binary
+PASS freeze forbids /app/me HR permissions
+PASS HR routes under /hr
+PASS ai.wathefni.hr retired marker
+PASS no startup principal chooser
+PASS app.config forces HR workspace on eas update
+PASS ModeRedirect mounts UnsignedEntry
+PASS HR shell waits for /hr before Slot
+PASS HR shell removed unsafe HrShellHost stack
+PASS Work email navigates to /hr before shell swap
+PASS no identity probe on sign-in
+PASS work email uses operator login only
+PASS employee-only → employee
+PASS hr-only → hr
+PASS neither → unsigned
+PASS both + no pref → employee default
+PASS both + pref hr → hr
+PASS no boot switcher state
+
+28/28 passed

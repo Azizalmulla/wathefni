@@ -1,0 +1,59 @@
+[PASS] p1 version
+[PASS] mode a seal locked
+[PASS] mode b seal unlocked
+[PASS] preview remains preview
+[PASS] period close not money seal
+[PASS] payment disabled
+[PASS] no statutory formulas
+[PASS] immutable invariant
+[PASS] period close helper false
+[PASS] pdf requires sealed
+[PASS] pdf accepts sealed id
+[PASS] component catalog seeded
+[PASS] contract draft
+[PASS] contract approve
+[PASS] period
+[PASS] export
+[PASS] import
+[PASS] seal external
+[PASS] money_authority external
+[PASS] source_mode mode_b
+[PASS] currency KWD
+[PASS] status sealed
+[PASS] payment disabled on snap
+[PASS] has source fingerprint
+[PASS] has content fingerprint
+[PASS] has component lines
+[PASS] seal idempotent
+[PASS] same snap id
+[PASS] mutate refused
+[PASS] fingerprint unchanged
+[PASS] payslip from sealed
+[PASS] payslip linked
+[PASS] official eligible
+[PASS] official pdf from sealed
+[PASS] preview ok
+[PASS] mode a seal refused
+[PASS] native payslip preview
+[PASS] native money preview
+[PASS] native not official eligible
+[PASS] native pdf refused
+[PASS] close draft ok
+[PASS] one current sealed
+[PASS] close does not create snap
+[PASS] export2
+[PASS] import2
+[PASS] stale overwrite refused
+[PASS] replace ok
+[PASS] new sealed id
+[PASS] new status sealed
+[PASS] prior replaced
+[PASS] history retains prior
+[PASS] only one current sealed
+[PASS] prior not deleted
+[PASS] peer has no sealed
+[PASS] audit events present
+[PASS] schema columns
+[PASS] cleanup
+
+VERDICT PASS  pass=57 fail=0  evidence=/opt/wathefni/ops/evidence/payroll-authority-p1-20260807T221337Z

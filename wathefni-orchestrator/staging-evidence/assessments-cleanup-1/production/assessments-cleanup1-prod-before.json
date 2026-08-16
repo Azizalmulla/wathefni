@@ -1,0 +1,24 @@
+{
+  "applications": 17,
+  "interviews": 4,
+  "offers": 0,
+  "employees": 4,
+  "outbound": 5,
+  "assessment_attempts": 4,
+  "assessment_attempts_wathefni": 4,
+  "assessment_responses": 22,
+  "assessment_scores": 1,
+  "assessment_reports": 1,
+  "assessment_items": 22,
+  "attempts_by_status": [
+    {
+      "status": "completed",
+      "n": 1
+    },
+    {
+      "status": "pending",
+      "n": 3
+    }
+  ],
+  "has_assessment_version_id": false
+}

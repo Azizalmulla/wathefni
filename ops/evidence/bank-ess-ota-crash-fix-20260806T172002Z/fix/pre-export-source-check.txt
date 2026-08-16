@@ -1,0 +1,5 @@
+root /tmp/wf-bank-ess-ota-fix-20260806T172002Z
+i18n has syncLayoutLocale True
+layout has typeof guard True
+bank exists True 9585
+Newsreader import True

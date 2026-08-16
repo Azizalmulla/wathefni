@@ -1,0 +1,115 @@
+ANYDOC_OFFICE_SHADOW_SMOKE_START
+ANYDOC_OFFICE_SHADOW_SMOKE_OK
+OK .docx 19 cv_ar_en.docx
+OK .docx 13 cv_en.docx
+OK .pptx 1 deck_ar.pptx
+OK .pptx 0 deck_en.pptx
+FAIL .doc 0 legacy_stub.doc
+FAIL .ppt 0 legacy_stub.ppt
+FAIL .xls 0 legacy_stub.xls
+OK .rtf 0 memo_ar.rtf
+OK .rtf 0 memo_en.rtf
+OK .xlsx 0 roster_ar.xlsx
+OK .xlsx 0 roster_en.xlsx
+OK .odp 0 sample.odp
+OK .ods 0 sample.ods
+OK .odt 0 sample_ar.odt
+OK .odt 0 sample_en.odt
+OK .csv 0 table_ar.csv
+OK .csv 0 table_en.csv
+{
+  "mode": "staging_shadow",
+  "host": "vps",
+  "files": 17,
+  "ok": 14,
+  "fail_open": 3,
+  "disagreements": 3,
+  "informational_anydoc_only": 6,
+  "deterministic_ok": 14,
+  "deterministic_checked": 14,
+  "by_extension": {
+    ".docx": {
+      "n": 2,
+      "ok": 2,
+      "fail_open": 0,
+      "disagreements": 0,
+      "median_ms": 19
+    },
+    ".pptx": {
+      "n": 2,
+      "ok": 2,
+      "fail_open": 0,
+      "disagreements": 0,
+      "median_ms": 1
+    },
+    ".doc": {
+      "n": 1,
+      "ok": 0,
+      "fail_open": 1,
+      "disagreements": 0,
+      "median_ms": null
+    },
+    ".ppt": {
+      "n": 1,
+      "ok": 0,
+      "fail_open": 1,
+      "disagreements": 0,
+      "median_ms": null
+    },
+    ".xls": {
+      "n": 1,
+      "ok": 0,
+      "fail_open": 1,
+      "disagreements": 0,
+      "median_ms": null
+    },
+    ".rtf": {
+      "n": 2,
+      "ok": 2,
+      "fail_open": 0,
+      "disagreements": 2,
+      "median_ms": 0
+    },
+    ".xlsx": {
+      "n": 2,
+      "ok": 2,
+      "fail_open": 0,
+      "disagreements": 0,
+      "median_ms": 0
+    },
+    ".odp": {
+      "n": 1,
+      "ok": 1,
+      "fail_open": 0,
+      "disagreements": 1,
+      "median_ms": 0
+    },
+    ".ods": {
+      "n": 1,
+      "ok": 1,
+      "fail_open": 0,
+      "disagreements": 0,
+      "median_ms": 0
+    },
+    ".odt": {
+      "n": 2,
+      "ok": 2,
+      "fail_open": 0,
+      "disagreements": 0,
+      "median_ms": 0
+    },
+    ".csv": {
+      "n": 2,
+      "ok": 2,
+      "fail_open": 0,
+      "disagreements": 0,
+      "median_ms": 0
+    }
+  },
+  "influences_routing_always_false": true,
+  "pdf_denied": "denied_extension_or_mime",
+  "identity_denied": "identity_document_denied",
+  "pinned_version": "0.1.2",
+  "engine_version": "0.1.2"
+}
+STAGING_CORPUS_QUALIFY_OK

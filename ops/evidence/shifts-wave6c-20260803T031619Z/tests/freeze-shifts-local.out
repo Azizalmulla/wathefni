@@ -1,0 +1,90 @@
+PASS  shifts freeze doc present
+PASS  freeze doc mentions NO-GO
+PASS  freeze doc mentions HR_ALLOWLIST
+PASS  freeze doc mentions MANAGER_ALLOWLIST
+PASS  freeze doc mentions NOTIFY_REAL_ALLOWLIST
+PASS  freeze doc mentions NOTIFY_KILL
+PASS  freeze doc mentions EXCLUDED_SUBJECTS
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions manual_submission_required
+PASS  freeze doc mentions Payroll
+PASS  freeze doc mentions Leave
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions published
+PASS  freeze doc mentions self
+PASS  wave1 module present
+PASS  wave2 module present
+PASS  wave3 module present
+PASS  wave4 module present
+PASS  wave5 module present
+PASS  wave6 module present
+PASS  notifications module present
+PASS  wave6c module present
+PASS  L0 authority helpers present
+PASS  published version immutability guarded
+PASS  lifecycle gate present
+PASS  leave conflict mode present
+PASS  manager scope enforced in app
+PASS  out of scope denial
+PASS  self decision banned in matrix
+PASS  wave6c manager self decision banned
+PASS  expected_updated_at concurrency token
+PASS  idempotency key honored
+PASS  overnight allowed flag
+PASS  ends_next_day semantics
+PASS  regen detach safety
+PASS  notification dedupe unique
+PASS  notification tenant isolation
+PASS  ack recorded once
+PASS  drafts do not notify
+PASS  real notify allowlist fail closed
+PASS  recipient allowlist enforced
+PASS  channel allowlist enforced
+PASS  consent required for external channels
+PASS  notify kill switch
+PASS  real delivery fail closed
+PASS  subject exclusions enforced
+PASS  manager real rollout hard no
+PASS  operator timers default off
+PASS  job advisory lock
+PASS  job batch bounded
+PASS  job no overlap status
+PASS  freeze invariants exposed
+PASS  real mutation gate present
+PASS  real mutation denial code
+PASS  audit reason required
+PASS  app wires real mutation gate
+PASS  wave6c no payroll money sql
+PASS  wave6c no leave balance sql
+PASS  wave6c no attendance authority sql
+PASS  notifications no payroll money sql
+PASS  notifications no leave balance sql
+PASS  notifications no attendance authority sql
+PASS  wave6 no payroll money sql
+PASS  wave6 no leave balance sql
+PASS  wave6 no attendance authority sql
+PASS  wave5 no payroll money sql
+PASS  wave5 no leave balance sql
+PASS  wave5 no attendance authority sql
+PASS  pam export only
+PASS  no automated pam submission
+PASS  cleanup contract >= 1.5
+PASS  production orphan allowlist intact
+PASS  wave6c cleanup scope present
+PASS  wave6c deploy template found
+PASS  deploy keeps capture ingest off
+PASS  deploy keeps manager allowlist empty
+PASS  deploy keeps operator timers off
+PASS  deploy keeps real reminders off
+PASS  deploy keeps integrity jobs off
+PASS  deploy keeps employee app allowlist to Talal
+PASS  deploy has rollback script
+PASS  shifts freeze cursor rule present
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+88 passed, 0 failed

@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_en_digital_multipage_01",
+  "category": "english_digital_cv",
+  "language": "en",
+  "layout": "single_column_multipage",
+  "pdf_nature": "digital_text",
+  "pages": 2,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Nora Blake",
+    "nora.blake@example.com",
+    "EXPERIENCE",
+    "EDUCATION",
+    "SKILLS"
+  ],
+  "expected_fields": {
+    "full_name": "Nora Blake",
+    "email": "nora.blake@example.com",
+    "phone": "+96557770011",
+    "title": "Staff Platform Engineer"
+  },
+  "notes": "Two-page digital English CV for multi-page routing/extraction stress.",
+  "sha256": "52b424cb6bcebf525c09065f0aea9132a4a8082dac8b1d1fa1bd733d1b8902b7",
+  "bytes": 32938
+}

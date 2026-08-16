@@ -1,11 +1,23 @@
 # Dependencies
 node_modules/
 **/node_modules/
+# Also exclude dependency symlinks named node_modules.
+node_modules
+**/node_modules
 
 # Build artifacts
 dist/
 build/
 *.tsbuildinfo
+.next/
+.expo/
+.gradle/
+.turbo/
+.vite/
+coverage/
+htmlcov/
+playwright-report/
+test-results/
 
 # Environment files (keep .env.example tracked)
 .env
@@ -23,6 +35,16 @@ build/
 *.log
 logs/
 tmp_*.log
+*.tmp
+*.swp
+*.tar.gz
+*.tgz
+*.ipa
+*.apk
+*.aab
+*.mobileprovision
+*.hbc
+*.hbc.map
 
 # macOS
 .DS_Store
@@ -40,3 +62,16 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# Generated deployment/build inspection trees
+**/dashboard-dist/
+**/dashboard-dist-live/
+**/dist-snapshot/
+**/ipa-inspect/
+/ops/evidence/**/cache/
+
+# Third-party research checkout; retain the surrounding Wathefni audit evidence.
+/ops/evidence/anydoc-technical-audit-20260804/research/anydoc/
+
+# Generated live report containing runtime credential material; keep local only.
+/ops/evidence/candidate-knowledge-final-live/20260726T221015Z/final-report.json

@@ -1,0 +1,18 @@
+prod_app_sha256 2a7f1e8fe66ca3a0fdcfa6b3af95721252768aeb6177fbf4ed4d4eada71ebe2a
+has_tombstone False
+has_queue_route False
+--- around attempt_id line 54051 ---
+54043:    return {
+54044:        "ok": True,
+54045:        "draft": json_safe(transitioned),
+54046:        "published": False,
+54047:        "live_bank_unchanged": True,
+54048:    }
+54049:
+54050:
+54051:@app.get("/dashboard/prehire/assessments/{attempt_id}")
+54052:def dashboard_prehire_assessment_report(attempt_id: str, context: dict[str, Any] = Depends(assessments_dashboard_context)):
+54053:    company = context["company_code"]
+54054:    return fetch_dashboard_assessment_report_payload(company, attempt_id)
+54055:
+54056:

@@ -1,0 +1,79 @@
+    performance calibration c4 — prove
+      PASS  c4 module
+      PASS  charter stamp
+      PASS  deterministic
+      PASS  missing explicit
+      PASS  no 1-5 assumption
+      PASS  cal separate layer
+      PASS  never erase
+      PASS  no forced dist
+      PASS  no talent
+      PASS  assistant out
+      PASS  EN locked
+      PASS  AR locked
+      PASS  rollback
+      PASS  weighted goal+comp agg
+      PASS  components preserved
+      PASS  deterministic replay identical
+      PASS  missing exclude rule
+      PASS  missing not zero/full silent
+      PASS  exclude recorded
+      PASS  missing blocks finalization
+      PASS  neutral default applied
+      PASS  custom labeled scale agg
+      PASS  360 aggregate component
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable company
+      PASS  forced dist false
+      PASS  create calc policy
+      PASS  store pre-cal
+      PASS  frozen replay identical
+      PASS  policy versioned
+      PASS  history raw unchanged
+      PASS  history policy version frozen
+      PASS  scale snapshot frozen
+      PASS  guidance session
+      PASS  guidance not forced
+      PASS  create session
+      PASS  cross-tenant denied
+      PASS  population freeze
+      PASS  population count
+      PASS  start in_session
+      PASS  unauthorized adj denied
+      PASS  sensitive required
+      PASS  authorized adjustment
+      PASS  pre-cal preserved on adj
+      PASS  submitted preserved on adj
+      PASS  final changed
+      PASS  pre-cal unchanged
+      PASS  frozen manager intact
+      PASS  frozen self intact
+      PASS  frozen 360 intact
+      PASS  stale adj denied
+      PASS  hard constraint blocks
+      PASS  audited distribution exception
+      PASS  employee provisional hidden
+      PASS  hr with sensitive ok
+      PASS  manager scope denied
+      PASS  population immune to reassignment
+      PASS  not silently rewritten
+      PASS  complete session
+      PASS  sod lock denied for facilitator
+      PASS  lock publish
+      PASS  post-lock adj denied
+      PASS  employee sees final after lock
+      PASS  audited amendment
+      PASS  amend keeps pre-cal
+      PASS  no talent writes honesty
+      PASS  disable preserves history
+      PASS  calibrated history remains
+      PASS  adjustment history remains
+      PASS  pre-cal history remains
+      PASS  module-off blocks writes
+
+    74 passed, 0 failed
+    PERFORMANCE_CALIBRATION_DEV_FULL_PASS
+STAGING_RC=0

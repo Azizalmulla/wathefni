@@ -1,0 +1,719 @@
+#!/usr/bin/env python3
+"""Payroll Wave 5 — PIFSS + EOS review worksheet smoke (local/staging).
+
+Proves:
+  honesty / freeze invariants
+  category separation (kuwaiti / gcc / expatriate)
+  counsel-gated effective-dated rule versioning
+  recalculate supersede + approved history retention
+  submit / self-approve forbidden / approve
+  EOS Art 51/53 + Law 17/2018 fail-closed blocks
+  dual-control manual override exception
+  residual cleanup to 0
+
+Does NOT remittance, filing, auto payable, bank/WPS, or payment_processing.
+"""
+from __future__ import annotations
+
+import copy
+import os
+import sys
+import uuid
+from datetime import date
+from pathlib import Path
+
+PASS = 0
+FAIL = 0
+SUFFIX = uuid.uuid4().hex[:8]
+TAG = f"PYW5-{SUFFIX}"
+EMP = f"WATHEFNI-PYW1-PYW5-{SUFFIX}"
+CREATOR = "965541100051"
+APPROVER = "965541100052"
+OVERRIDE2 = "965541100053"
+
+PERMS_APPROVE = ["payroll.read", "payroll.manage", "payroll.approve"]
+
+
+def check(label: str, condition: bool, detail: object = None) -> None:
+    global PASS, FAIL
+    if condition:
+        PASS += 1
+        print(f"      PASS  {label}")
+    else:
+        FAIL += 1
+        extra = f" :: {detail}" if detail is not None else ""
+        print(f"      FAIL  {label}{extra}")
+
+
+def main() -> int:
+    print("    payroll pifss eos wave5")
+    orch = Path(__file__).resolve().parent
+    sys.path.insert(0, str(orch))
+
+    for k, v in {
+        "WATHEFNI_PAYROLL_WAVE1": "1",
+        "WATHEFNI_PAYROLL_WAVE1_COMPANIES": "WATHEFNI",
+        "WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY": "1",
+        "WATHEFNI_PAYROLL_WAVE5": "1",
+        "WATHEFNI_PAYROLL_WAVE5_COMPANIES": "WATHEFNI",
+        "WATHEFNI_PAYROLL_WAVE5_SYNTHETIC_ONLY": "1",
+    }.items():
+        os.environ.setdefault(k, v)
+
+    import payroll_authority_wave1 as pyw1
+    import payroll_pifss_eos_wave5 as w5
+
+    h = w5.honesty_payload()
+    check("version", w5.PAYROLL_WAVE5_VERSION == "1.0.0")
+    check("payment disabled", h.get("payment_processing") == "disabled")
+    check("no posts payment", h.get("posts_payment") is False)
+    check("remittance false", h.get("remittance") is False)
+    check("pifss remittance false", h.get("pifss_remittance") is False)
+    check("eos_auto_payable false", h.get("eos_auto_payable") is False)
+    check("no auto compliance claim", h.get("automatic_legal_compliance_claim") is False)
+    check("pifss worksheets", h.get("pifss_worksheets") is True)
+    check("eos worksheets", h.get("eos_worksheets") is True)
+    check("native non-auth", h.get("native_results_authoritative") is False)
+    check("external authority", h.get("external_payroll_authority") == "external")
+
+    inv = w5.freeze_invariants()
+    check("freeze payment disabled", inv.get("payment_processing_hard_disabled") is True)
+    check("freeze category separation", inv.get("category_separation") is True)
+    check("freeze missing rule fail closed", inv.get("missing_rule_fail_closed") is True)
+    check("freeze effective dated", inv.get("effective_dated_rules") is True)
+    check("freeze dual override", inv.get("dual_approval_override") is True)
+    check("freeze approved immutable", inv.get("approved_history_immutable") is True)
+    check("freeze no remittance", inv.get("no_remittance") is True)
+    check("freeze no auto payable", inv.get("no_auto_payable") is True)
+    check("freeze native non-auth", inv.get("native_non_authoritative") is True)
+    check("freeze external authority", inv.get("external_authority_retained") is True)
+
+    dash_candidates = [
+        Path(__file__).resolve().parents[1] / "apps" / "wathefni-dashboard" / "src" / "posthire",
+        Path("/opt/wathefni/apps/wathefni-dashboard/src/posthire"),
+    ]
+    dash = next(
+        (
+            p
+            for p in dash_candidates
+            if (p / "payrollStatutoryUx.ts").exists() or (p / "StatutoryWorksheetWorkspace.tsx").exists()
+        ),
+        None,
+    )
+    if dash and (dash / "payrollStatutoryUx.ts").exists():
+        ux = (dash / "payrollStatutoryUx.ts").read_text(encoding="utf-8")
+        ws = (
+            (dash / "StatutoryWorksheetWorkspace.tsx").read_text(encoding="utf-8")
+            if (dash / "StatutoryWorksheetWorkspace.tsx").exists()
+            else ""
+        )
+        check("ux en title", "PIFSS & EOS review worksheets" in ux)
+        check("ux ar title", "أوراق مراجعة التأمينات ومكافأة نهاية الخدمة" in ux)
+        check(
+            "ux honesty",
+            "non-authoritative" in ux.lower() or "review" in ux.lower() or "غير ملزمة" in ux,
+        )
+        check("ux payment disabled", "disabled" in ux.lower() or "معطّلة" in ux)
+        check("ux no remittance", "remittance" in ux.lower() or "تحويل" in ux)
+        check("ux counsel", "counsel" in ux.lower() or "مستشار" in ux)
+        if ws:
+            check("ux mobile", "mobileHint" in ux and "md:hidden" in ws)
+            check("ux testid", 'data-testid="statutory-worksheet-workspace"' in ws)
+    else:
+        print("      SKIP  ux files not co-located (covered by smoke-test-payroll-pifss-eos-wave5-ux.py)")
+
+    try:
+        import app
+    except ModuleNotFoundError as exc:
+        if exc.name == "psycopg2":
+            print("SKIP DB: psycopg2 not available locally")
+            print(f"\n    {PASS} passed, {FAIL} failed (unit+ux)")
+            return 1 if FAIL else 0
+        raise
+
+    company = "WATHEFNI"
+    p_start = date(2033, 5, 1)
+    p_end = date(2033, 5, 31)
+    term_date = date(2033, 5, 15)
+    salary = 1000
+    salary_new = 1250
+    rule_code_pifss = f"SMOKE_PIFSS_KUWAITI_{SUFFIX}"
+    rule_code_eos = f"SMOKE_EOS_ART51_{SUFFIX}"
+
+    with app.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT current_database() AS db")
+            db = dict(cur.fetchone())["db"]
+            print("connected_db", db)
+            if db == "wathefni":
+                print("REFUSE production database in staging smoke")
+                return 2
+
+            pyw1.ensure_payroll_wave1_schema(cur, force=True)
+            w5.ensure_payroll_wave5_schema(cur, force=True)
+            check("schemas ensured", True)
+
+            # --- Category separation -------------------------------------------------
+            expat = w5.generate_pifss_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="expatriate",
+                period_start=p_start,
+                period_end=p_end,
+                contributory_salary=salary,
+                actor_phone=CREATOR,
+                reason=f"{TAG} pifss expat",
+            )
+            check("expat ok True", expat.get("ok") is True, expat)
+            check(
+                "expat status unsupported",
+                (expat.get("worksheet") or {}).get("status") == "unsupported",
+                expat,
+            )
+            check("expat error", expat.get("error") == "expatriate_no_pifss", expat)
+            # Clear active unique slot for subsequent category probes
+            cur.execute(
+                "UPDATE payroll_pifss_worksheets SET status='superseded', updated_at=now() "
+                "WHERE company_code=%s AND employee_key=%s AND status = ANY(%s)",
+                (company, EMP, list(w5.ACTIVE_WS_STATUSES)),
+            )
+
+            gcc = w5.generate_pifss_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="gcc_national",
+                period_start=p_start,
+                period_end=p_end,
+                contributory_salary=salary,
+                actor_phone=CREATOR,
+                reason=f"{TAG} pifss gcc no rule",
+            )
+            check("gcc ok False", gcc.get("ok") is False, gcc)
+            check("gcc error counsel", gcc.get("error") == "counsel_required_rule", gcc)
+            check(
+                "gcc status counsel_required",
+                (gcc.get("worksheet") or {}).get("status") == "counsel_required",
+                gcc,
+            )
+            cur.execute(
+                "UPDATE payroll_pifss_worksheets SET status='superseded', updated_at=now() "
+                "WHERE company_code=%s AND employee_key=%s AND status = ANY(%s)",
+                (company, EMP, list(w5.ACTIVE_WS_STATUSES)),
+            )
+
+            kuwaiti = w5.generate_pifss_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="kuwaiti_national",
+                period_start=p_start,
+                period_end=p_end,
+                contributory_salary=salary,
+                actor_phone=CREATOR,
+                reason=f"{TAG} pifss kuwaiti no rule",
+            )
+            check("kuwaiti ok False", kuwaiti.get("ok") is False, kuwaiti)
+            check("kuwaiti error counsel", kuwaiti.get("error") == "counsel_required_rule", kuwaiti)
+            check(
+                "kuwaiti status counsel_required",
+                (kuwaiti.get("worksheet") or {}).get("status") == "counsel_required",
+                kuwaiti,
+            )
+            kuwaiti_ws_id = str((kuwaiti.get("worksheet") or {}).get("worksheet_id") or "")
+            check("kuwaiti worksheet id", bool(kuwaiti_ws_id), kuwaiti)
+
+            # --- Effective-dated rule versioning -------------------------------------
+            upsert_v1 = w5.upsert_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="pifss",
+                rule_code=rule_code_pifss,
+                employee_category="kuwaiti_national",
+                version_label="v1",
+                effective_from=date(2026, 1, 1),
+                counsel_status="pending",
+                source_citation="smoke counsel KW PIFSS v1",
+                rule_payload=dict(w5.SMOKE_PIFSS_KUWAITI_PAYLOAD),
+                actor_phone=CREATOR,
+                reason=f"{TAG} upsert pifss v1",
+            )
+            check("upsert pifss v1", upsert_v1.get("ok") is True, upsert_v1)
+            v1_id = str((upsert_v1.get("rule_table") or {}).get("rule_table_id") or "")
+
+            pending_resolve = w5.resolve_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="pifss",
+                employee_category="kuwaiti_national",
+                as_of_date=date(2026, 6, 1),
+                rule_code=rule_code_pifss,
+            )
+            check("resolve pending None", pending_resolve is None, pending_resolve)
+
+            approve_v1 = w5.counsel_approve_rule_table(
+                cur,
+                company_code=company,
+                rule_table_id=v1_id,
+                actor_phone=APPROVER,
+                reason=f"{TAG} counsel approve pifss v1",
+                actor_permissions=PERMS_APPROVE,
+            )
+            check("counsel approve v1", approve_v1.get("ok") is True, approve_v1)
+
+            resolved_v1 = w5.resolve_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="pifss",
+                employee_category="kuwaiti_national",
+                as_of_date=date(2026, 6, 1),
+                rule_code=rule_code_pifss,
+            )
+            check("resolve returns v1", (resolved_v1 or {}).get("version_label") == "v1", resolved_v1)
+
+            payload_v2 = copy.deepcopy(w5.SMOKE_PIFSS_KUWAITI_PAYLOAD)
+            payload_v2["ceiling_kwd"] = 3000
+            upsert_v2 = w5.upsert_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="pifss",
+                rule_code=rule_code_pifss,
+                employee_category="kuwaiti_national",
+                version_label="v2",
+                effective_from=date(2030, 1, 1),
+                counsel_status="pending",
+                source_citation="smoke counsel KW PIFSS v2",
+                rule_payload=payload_v2,
+                actor_phone=CREATOR,
+                reason=f"{TAG} upsert pifss v2",
+            )
+            check("upsert pifss v2", upsert_v2.get("ok") is True, upsert_v2)
+            v2_id = str((upsert_v2.get("rule_table") or {}).get("rule_table_id") or "")
+            approve_v2 = w5.counsel_approve_rule_table(
+                cur,
+                company_code=company,
+                rule_table_id=v2_id,
+                actor_phone=APPROVER,
+                reason=f"{TAG} counsel approve pifss v2",
+                actor_permissions=PERMS_APPROVE,
+            )
+            check("counsel approve v2", approve_v2.get("ok") is True, approve_v2)
+
+            asof_2029 = w5.resolve_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="pifss",
+                employee_category="kuwaiti_national",
+                as_of_date=date(2029, 6, 1),
+                rule_code=rule_code_pifss,
+            )
+            check("as_of 2029 → v1", (asof_2029 or {}).get("version_label") == "v1", asof_2029)
+            asof_2030 = w5.resolve_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="pifss",
+                employee_category="kuwaiti_national",
+                as_of_date=date(2030, 6, 1),
+                rule_code=rule_code_pifss,
+            )
+            check("as_of 2030 → v2", (asof_2030 or {}).get("version_label") == "v2", asof_2030)
+
+            # --- Recalculate counsel_required → draft with rule ----------------------
+            recalc = w5.recalculate_pifss(
+                cur,
+                company_code=company,
+                worksheet_id=kuwaiti_ws_id,
+                contributory_salary=salary,
+                actor_phone=CREATOR,
+                reason=f"{TAG} recalc after counsel rule",
+            )
+            check("recalc after rule ok", recalc.get("ok") is True, recalc)
+            draft_ws = recalc.get("worksheet") or {}
+            check("recalc draft status", draft_ws.get("status") == "draft", draft_ws)
+            check("recalc has rule", bool(draft_ws.get("rule_table_id")), draft_ws)
+            draft_id = str(draft_ws.get("worksheet_id") or "")
+            check("recalc new worksheet", bool(draft_id) and draft_id != kuwaiti_ws_id, draft_id)
+            prior_kw = w5.get_worksheet(
+                cur, company_code=company, kind="pifss", worksheet_id=kuwaiti_ws_id
+            )
+            check(
+                "prior counsel superseded",
+                (prior_kw or {}).get("status") == "superseded",
+                prior_kw,
+            )
+
+            # --- Idempotent regenerate -----------------------------------------------
+            regen = w5.generate_pifss_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="kuwaiti_national",
+                period_start=p_start,
+                period_end=p_end,
+                contributory_salary=salary,
+                actor_phone=CREATOR,
+                reason=f"{TAG} pifss regen idem",
+                rule_code=rule_code_pifss,
+            )
+            check("idempotent regenerate", regen.get("idempotent") is True, regen)
+            check(
+                "idempotent same id",
+                str((regen.get("worksheet") or {}).get("worksheet_id") or "") == draft_id,
+                regen,
+            )
+
+            # --- submit → self approve forbidden → approve ok ------------------------
+            submitted = w5.submit_worksheet_for_review(
+                cur,
+                kind="pifss",
+                company_code=company,
+                worksheet_id=draft_id,
+                actor_phone=CREATOR,
+                reason=f"{TAG} submit pifss",
+                expected_row_version=int(draft_ws.get("row_version") or 1),
+            )
+            check("submit ok", submitted.get("ok") is True, submitted)
+            in_review = submitted.get("worksheet") or {}
+
+            self_appr = w5.approve_worksheet(
+                cur,
+                kind="pifss",
+                company_code=company,
+                worksheet_id=draft_id,
+                actor_phone=CREATOR,
+                reason=f"{TAG} self approve",
+                expected_row_version=int(in_review.get("row_version") or 1),
+                actor_permissions=PERMS_APPROVE,
+            )
+            check(
+                "self approve forbidden",
+                self_appr.get("error") == "self_approval_forbidden",
+                self_appr,
+            )
+
+            approved = w5.approve_worksheet(
+                cur,
+                kind="pifss",
+                company_code=company,
+                worksheet_id=draft_id,
+                actor_phone=APPROVER,
+                reason=f"{TAG} approve pifss",
+                expected_row_version=int(in_review.get("row_version") or 1),
+                actor_permissions=PERMS_APPROVE,
+            )
+            check("approve ok", approved.get("ok") is True, approved)
+            check(
+                "approved status",
+                (approved.get("worksheet") or {}).get("status") == "approved",
+                approved,
+            )
+
+            immut = w5.mutate_approved_forbidden(
+                cur, kind="pifss", company_code=company, worksheet_id=draft_id
+            )
+            check(
+                "mutate_approved_forbidden",
+                immut.get("error") == "approved_worksheet_immutable",
+                immut,
+            )
+
+            # --- Recalculate NEW salary after approve --------------------------------
+            recalc2 = w5.recalculate_pifss(
+                cur,
+                company_code=company,
+                worksheet_id=draft_id,
+                contributory_salary=salary_new,
+                actor_phone=CREATOR,
+                reason=f"{TAG} recalc new salary",
+            )
+            check("recalc new salary ok", recalc2.get("ok") is True, recalc2)
+            new_draft = recalc2.get("worksheet") or {}
+            check("new draft status", new_draft.get("status") == "draft", new_draft)
+            new_draft_id = str(new_draft.get("worksheet_id") or "")
+            check("new draft distinct", bool(new_draft_id) and new_draft_id != draft_id, new_draft_id)
+
+            prior_approved = w5.get_worksheet(
+                cur, company_code=company, kind="pifss", worksheet_id=draft_id
+            )
+            check(
+                "prior approved superseded",
+                (prior_approved or {}).get("status") == "superseded",
+                prior_approved,
+            )
+            hist = w5.list_pifss_worksheets(cur, company_code=company, employee_key=EMP, limit=50)
+            hist_ids = {str(r.get("worksheet_id")) for r in hist}
+            hist_statuses = {str(r.get("worksheet_id")): str(r.get("status")) for r in hist}
+            check("history includes superseded approved", draft_id in hist_ids, hist_statuses)
+            check(
+                "history superseded status",
+                hist_statuses.get(draft_id) == "superseded",
+                hist_statuses.get(draft_id),
+            )
+            check("history includes new draft", new_draft_id in hist_ids, hist_ids)
+
+            # --- EOS blocked ---------------------------------------------------------
+            eos_art = w5.generate_eos_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="expatriate",
+                termination_date=term_date,
+                termination_reason="employer_termination",
+                service_start=date(2020, 1, 1),
+                service_end=term_date,
+                monthly_wage=800,
+                art_51_53_status="unresolved_blocked",
+                law_17_2018_status="not_applicable",
+                actor_phone=CREATOR,
+                reason=f"{TAG} eos art unresolved",
+            )
+            check("eos art blocked ok False", eos_art.get("ok") is False, eos_art)
+            check(
+                "eos art blocked error",
+                eos_art.get("error") == "blocked_unresolved_eos_case",
+                eos_art,
+            )
+            cur.execute(
+                "UPDATE payroll_eos_worksheets SET status='superseded', updated_at=now() "
+                "WHERE company_code=%s AND employee_key=%s AND status = ANY(%s)",
+                (company, EMP, list(w5.ACTIVE_WS_STATUSES)),
+            )
+
+            eos_law17 = w5.generate_eos_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="kuwaiti_national",
+                termination_date=term_date,
+                termination_reason="employer_termination",
+                service_start=date(2020, 1, 1),
+                service_end=term_date,
+                monthly_wage=800,
+                art_51_53_status="resolved",
+                law_17_2018_status="unresolved_blocked",
+                actor_phone=CREATOR,
+                reason=f"{TAG} eos law17 unresolved",
+            )
+            check("eos law17 blocked ok False", eos_law17.get("ok") is False, eos_law17)
+            check(
+                "eos law17 blocked error",
+                eos_law17.get("error") == "blocked_unresolved_eos_case",
+                eos_law17,
+            )
+            cur.execute(
+                "UPDATE payroll_eos_worksheets SET status='superseded', updated_at=now() "
+                "WHERE company_code=%s AND employee_key=%s AND status = ANY(%s)",
+                (company, EMP, list(w5.ACTIVE_WS_STATUSES)),
+            )
+
+            # --- Seed EOS rule + successful expatriate worksheet ---------------------
+            eos_rule = w5.upsert_rule_table(
+                cur,
+                company_code=company,
+                rule_domain="eos",
+                rule_code=rule_code_eos,
+                employee_category="expatriate",
+                version_label="v1",
+                effective_from=date(2026, 1, 1),
+                counsel_status="pending",
+                source_citation="smoke counsel EOS Art51 monthly",
+                rule_payload=dict(w5.SMOKE_EOS_MONTHLY_ART51_PAYLOAD),
+                actor_phone=CREATOR,
+                reason=f"{TAG} upsert eos art51",
+            )
+            check("upsert eos rule", eos_rule.get("ok") is True, eos_rule)
+            eos_rule_id = str((eos_rule.get("rule_table") or {}).get("rule_table_id") or "")
+            eos_rule_appr = w5.counsel_approve_rule_table(
+                cur,
+                company_code=company,
+                rule_table_id=eos_rule_id,
+                actor_phone=APPROVER,
+                reason=f"{TAG} counsel approve eos",
+                actor_permissions=PERMS_APPROVE,
+            )
+            check("counsel approve eos", eos_rule_appr.get("ok") is True, eos_rule_appr)
+
+            eos_ok = w5.generate_eos_worksheet(
+                cur,
+                company_code=company,
+                employee_key=EMP,
+                employee_category="expatriate",
+                termination_date=term_date,
+                termination_reason="employer_termination",
+                service_start=date(2020, 1, 1),
+                service_end=term_date,
+                monthly_wage=800,
+                art_51_53_status="resolved",
+                law_17_2018_status="not_applicable",
+                actor_phone=CREATOR,
+                reason=f"{TAG} eos expat draft",
+                rule_code=rule_code_eos,
+            )
+            check("eos generate ok", eos_ok.get("ok") is True, eos_ok)
+            eos_ws = eos_ok.get("worksheet") or {}
+            check("eos draft status", eos_ws.get("status") == "draft", eos_ws)
+            check("eos review worksheet", eos_ws.get("authoritative_label") == "review_worksheet_only", eos_ws)
+            check("eos automatic_payable false", eos_ok.get("eos_auto_payable") is False, eos_ok)
+            eos_payload = eos_ws.get("worksheet_payload") or {}
+            if isinstance(eos_payload, str):
+                import json as _json
+
+                eos_payload = _json.loads(eos_payload)
+            check(
+                "eos not payable instruction",
+                eos_payload.get("automatic_payable_instruction") is False
+                or eos_payload.get("not_payable_instruction") is True,
+                eos_payload,
+            )
+            eos_ws_id = str(eos_ws.get("worksheet_id") or "")
+
+            # --- Dual override -------------------------------------------------------
+            init_ov = w5.initiate_manual_override(
+                cur,
+                kind="eos",
+                company_code=company,
+                worksheet_id=eos_ws_id,
+                actor_phone=APPROVER,
+                reason=f"{TAG} override initiate",
+                exception_code="smoke_manual_exception",
+                exception_evidence={"note": TAG},
+                actor_permissions=PERMS_APPROVE,
+            )
+            check("override initiate", init_ov.get("ok") is True, init_ov)
+            dual_id = str((init_ov.get("dual_control") or {}).get("action_id") or "")
+            check("dual action id", bool(dual_id), init_ov)
+
+            same_actor = w5.confirm_manual_override(
+                cur,
+                kind="eos",
+                company_code=company,
+                worksheet_id=eos_ws_id,
+                actor_phone=APPROVER,
+                reason=f"{TAG} override same actor",
+                dual_action_id=dual_id,
+                actor_permissions=PERMS_APPROVE,
+            )
+            check(
+                "override same actor deny",
+                same_actor.get("error") == "dual_control_same_actor",
+                same_actor,
+            )
+
+            confirmed = w5.confirm_manual_override(
+                cur,
+                kind="eos",
+                company_code=company,
+                worksheet_id=eos_ws_id,
+                actor_phone=OVERRIDE2,
+                reason=f"{TAG} override confirm",
+                dual_action_id=dual_id,
+                actor_permissions=PERMS_APPROVE,
+            )
+            check("override confirm ok", confirmed.get("ok") is True, confirmed)
+            check(
+                "override exception status",
+                (confirmed.get("worksheet") or {}).get("status") == "exception",
+                confirmed,
+            )
+            check("override no remittance", confirmed.get("remittance") is False, confirmed)
+
+            # --- Cleanup ------------------------------------------------------------
+            cur.execute(
+                """
+                DELETE FROM payroll_statutory_dual_control
+                WHERE company_code=%s AND worksheet_id IN (
+                  SELECT worksheet_id FROM payroll_pifss_worksheets WHERE employee_key=%s
+                  UNION
+                  SELECT worksheet_id FROM payroll_eos_worksheets WHERE employee_key=%s
+                )
+                """,
+                (company, EMP, EMP),
+            )
+            cur.execute(
+                """
+                DELETE FROM payroll_statutory_worksheet_events
+                WHERE company_code=%s AND (
+                  worksheet_id IN (
+                    SELECT worksheet_id FROM payroll_pifss_worksheets WHERE employee_key=%s
+                    UNION
+                    SELECT worksheet_id FROM payroll_eos_worksheets WHERE employee_key=%s
+                    UNION
+                    SELECT rule_table_id FROM payroll_statutory_rule_tables
+                      WHERE company_code=%s AND decision_note LIKE %s
+                  )
+                  OR payload::text LIKE %s
+                  OR payload::text LIKE %s
+                )
+                """,
+                (
+                    company,
+                    EMP,
+                    EMP,
+                    company,
+                    f"%{TAG}%",
+                    f"%{TAG}%",
+                    f"%{SUFFIX}%",
+                ),
+            )
+            cur.execute(
+                "DELETE FROM payroll_pifss_worksheets WHERE company_code=%s AND employee_key=%s",
+                (company, EMP),
+            )
+            cur.execute(
+                "DELETE FROM payroll_eos_worksheets WHERE company_code=%s AND employee_key=%s",
+                (company, EMP),
+            )
+            cur.execute(
+                "DELETE FROM payroll_statutory_rule_tables WHERE company_code=%s AND decision_note LIKE %s",
+                (company, f"%{TAG}%"),
+            )
+            # Sweep any leftover events for this tag/suffix
+            cur.execute(
+                "DELETE FROM payroll_statutory_worksheet_events WHERE company_code=%s AND payload::text LIKE %s",
+                (company, f"%{TAG}%"),
+            )
+            cur.execute(
+                "DELETE FROM payroll_statutory_worksheet_events WHERE company_code=%s AND payload::text LIKE %s",
+                (company, f"%{SUFFIX}%"),
+            )
+
+            residual = 0
+            cur.execute(
+                "SELECT count(*) AS c FROM payroll_pifss_worksheets WHERE employee_key=%s OR decision_note LIKE %s",
+                (EMP, f"%{TAG}%"),
+            )
+            residual += int(dict(cur.fetchone())["c"])
+            cur.execute(
+                "SELECT count(*) AS c FROM payroll_eos_worksheets WHERE employee_key=%s OR decision_note LIKE %s",
+                (EMP, f"%{TAG}%"),
+            )
+            residual += int(dict(cur.fetchone())["c"])
+            cur.execute(
+                "SELECT count(*) AS c FROM payroll_statutory_rule_tables WHERE company_code=%s AND decision_note LIKE %s",
+                (company, f"%{TAG}%"),
+            )
+            residual += int(dict(cur.fetchone())["c"])
+            cur.execute(
+                "SELECT count(*) AS c FROM payroll_statutory_worksheet_events WHERE company_code=%s AND payload::text LIKE %s",
+                (company, f"%{TAG}%"),
+            )
+            residual += int(dict(cur.fetchone())["c"])
+            cur.execute(
+                """
+                SELECT count(*) AS c FROM payroll_statutory_dual_control
+                WHERE company_code=%s AND payload::text LIKE %s
+                """,
+                (company, f"%{TAG}%"),
+            )
+            residual += int(dict(cur.fetchone())["c"])
+            check("residual zero", residual == 0, residual)
+
+        conn.commit()
+
+    print(f"\n    {PASS} passed, {FAIL} failed")
+    return 1 if FAIL else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

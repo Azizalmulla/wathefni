@@ -1,0 +1,11 @@
+{
+  "me": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users(id,userPrincipalName,displayName)/$entity",
+    "id": "dcb6b7dd-8509-4a20-8069-ec0de9445dd7",
+    "displayName": "ABDULAZIZ ALMULLA",
+    "userPrincipalName": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com"
+  },
+  "allowedOnlineMeetingProviders": [],
+  "defaultOnlineMeetingProvider": "unknown",
+  "create_error": "POST https://graph.microsoft.com/v1.0/me/events\r\nHTTP/1.1 403 Forbidden\r\nCache-Control: private\r\nTransfer-Encoding: chunked\r\nStrict-Transport-Security: max-age=31536000\r\nrequest-id: 6fe2cc8d-ac64-4fc4-8d26-027e5882f6f8\r\nclient-request-id: e79e61fa-0c79-42b0-9d61-aa9bc655f424\r\nx-ms-ags-diagnostic: {\"ServerInfo\":{\"DataCenter\":\"UAE North\",\"Slice\":\"E\",\"Ring\":\"2\",\"ScaleUnit\":\"002\",\"RoleInstance\":\"DX3PEPF000000B1\"}}\r\nDate: Thu, 30 Jul 2026 23:45:17 GMT\r\nContent-Type: application/json; odata.metadata=minimal; odata.streaming=true; IEEE754Compatible=false; charset=utf-8\r\n\r\n{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access is denied. Check credentials and try again.\"}}"
+}

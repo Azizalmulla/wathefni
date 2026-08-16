@@ -1,0 +1,258 @@
+token_source_file /root/.openclaw/secrets/postgres.env key WATHEFNI_POSTMARK_SERVER_TOKEN
+token_present True len 36
+
+=== https://api.postmarkapp.com/messages/outbound/7534a3d4-ff9f-4d3a-a796-da221944d246/details status=422 ===
+{
+  "ErrorCode": 701,
+  "Message": "This message was not found."
+}
+
+=== https://api.postmarkapp.com/messages/outbound/7534a3d4-ff9f-4d3a-a796-da221944d246 status=422 ===
+{
+  "ErrorCode": 701,
+  "Message": "This message was not found."
+}
+
+=== outbound stats 2026-08-08 === 200
+{
+  "Sent": 14,
+  "Bounced": 14,
+  "SMTPApiErrors": 0,
+  "BounceRate": 100,
+  "SpamComplaints": 0,
+  "SpamComplaintsRate": 0,
+  "Tracked": 0,
+  "Opens": 0,
+  "UniqueOpens": 0,
+  "TotalClicks": 0,
+  "UniqueLinksClicked": 0,
+  "WithClientRecorded": 0,
+  "WithPlatformRecorded": 0,
+  "WithReadTimeRecorded": 0,
+  "WithLinkTracking": 0,
+  "WithOpenTracking": 0,
+  "TotalTrackedLinksSent": 0
+}
+
+=== bounces for recipient === 200
+{
+  "TotalCount": 16,
+  "Bounces": [
+    {
+      "RecordType": "Bounce",
+      "ID": 2611688997,
+      "Type": "Transient",
+      "TypeCode": 2,
+      "Name": "Message delayed",
+      "Tag": "",
+      "MessageID": "6cb59c35-33c9-4ec7-8d21-80ec0e973e86",
+      "ServerID": 19430066,
+      "MessageStream": "outbound",
+      "Description": "The server could not temporarily deliver your message (ex: Message is delayed due to network troubles).",
+      "Details": "smtp;550 4.4.7 QUEUE.Expired; message expired",
+      "Email": "aziz+mobile-qa@wathefni.internal",
+      "From": "hr@wathefni.ai",
+      "BouncedAt": "2026-08-07T07:49:18Z",
+      "DumpAvailable": true,
+      "Inactive": false,
+      "CanActivate": true,
+      "Subject": "Your Wathefni app activation code"
+    },
+    {
+      "RecordType": "Bounce",
+      "ID": 2611685759,
+      "Type": "Transient",
+      "TypeCode": 2,
+      "Name": "Message delayed",
+      "Tag": "",
+      "MessageID": "74e7c9bf-d2ff-4415-b966-e869af5a4273",
+      "ServerID": 19430066,
+      "MessageStream": "outbound",
+      "Description": "The server could not temporarily deliver your message (ex: Message is delayed due to network troubles).",
+      "Details": "smtp;550 4.4.7 QUEUE.Expired; message expired",
+      "Email": "aziz+mobile-qa@wathefni.internal",
+      "From": "hr@wathefni.ai",
+      "BouncedAt": "2026-08-07T07:49:13Z",
+      "DumpAvailable": true,
+      "Inactive": false,
+      "CanActivate": true,
+      "Subject": "Your Wathefni app activation code"
+    },
+    {
+      "RecordType": "Bounce",
+      "ID": 2611658721,
+      "Type": "Transient",
+      "TypeCode": 2,
+      "Name": "Message delayed",
+      "Tag": "",
+      "MessageID": "72a07215-76a4-4b97-a780-3cb1c5dae16d",
+      "ServerID": 19430066,
+      "MessageStream": "outbound",
+      "Description": "The server could not temporarily deliver your message (ex: Message is delayed due to network troubles).",
+      "Details": "smtp;550 4.4.7 QUEUE.Expired; message expired",
+      "Email": "aziz+mobile-qa@wathefni.internal",
+      "From": "hr@wathefni.ai",
+      "BouncedAt": "2026-08-07T07:37:16Z",
+      "DumpAvailable": true,
+      "Inactive": false,
+      "CanActivate": true,
+      "Subject": "Your Wathefni app activation code"
+    },
+    {
+      "RecordType": "Bounce",
+      "ID": 2611657085,
+      "Type": "Transient",
+      "TypeCode": 2,
+      "Name": "Message delayed",
+      "Tag": "",
+      "MessageID": "d3dfe83e-32fd-44a4-9327-2ad5a0f50dd8",
+      "ServerID": 19430066,
+      "MessageStream": "outbound",
+      "Description": "The server could not temporarily deliver your message (ex: Message is delayed due to network troubles).",
+      "Details": "smtp;550 4.4.7 QUEUE.Expired; message expired",
+      "Email": "aziz+mobile-qa@wathefni.internal",
+      "From": "hr@wathefni.ai",
+      "BouncedAt": "2026-08-07T07:36:44Z",
+      "DumpAvailable": true,
+      "Inactive": false,
+      "CanActivate": true,
+      "Subject": "Your Wathefni app activation code"
+    },
+    {
+      "RecordType": "Bounce",
+      "ID": 2611655742,
+      "Type": "Transient",
+      "TypeCode": 2,
+      "Name": "Message delayed",
+      "Tag": "",
+      "MessageID": "27da0a75-3da4-4b58-8ab4-9f2728de279f",
+      "ServerID": 19430066,
+      "MessageStream": "outbound",
+      "Description": "The server could not temporarily deliver your message (ex: Message is delayed due to network troubles).",
+      "Details": "smtp;550 4.4.7 QUEUE.Expired; message expired",
+      "Email": "aziz+mobile-qa@wathefni.internal",
+      "From": "hr@wathefni.ai",
+      "BouncedAt": "2026-08-07T07:36:21Z",
+      "DumpAvailable": true,
+      "Inactive": false,
+      "CanActivate": true,
+      "Subject": "Your Wathefni app activation code"
+    },
+    {
+      "RecordType": "Bounce",
+      "ID": 2611654537,
+      "Type": "Transient",
+      "TypeCode": 2,
+      "Name": "Message delayed",
+      "Tag": "",
+      "MessageID": "8a8cc42a-a605-46f2-9ab7-d64f60fe9ecf",
+      "ServerID": 19430066,
+      "Messag
+
+=== recent outbound to recipient === 200
+{
+  "TotalCount": 16,
+  "messages": [
+    {
+      "MessageID": "74e7c9bf-d2ff-4415-b966-e869af5a4273",
+      "To": [
+        {
+          "Email": "aziz+mobile-qa@wathefni.internal",
+          "Name": ""
+        }
+      ],
+      "Recipient": [
+        "aziz+mobile-qa@wathefni.internal"
+      ],
+      "Subject": "Your Wathefni app activation code",
+      "Status": "Sent",
+      "ReceivedAt": "2026-08-07T02:49:05.0000000-04:00",
+      "Tag": null
+    },
+    {
+      "MessageID": "6cb59c35-33c9-4ec7-8d21-80ec0e973e86",
+      "To": [
+        {
+          "Email": "aziz+mobile-qa@wathefni.internal",
+          "Name": ""
+        }
+      ],
+      "Recipient": [
+        "aziz+mobile-qa@wathefni.internal"
+      ],
+      "Subject": "Your Wathefni app activation code",
+      "Status": "Sent",
+      "ReceivedAt": "2026-08-07T02:48:44.0000000-04:00",
+      "Tag": null
+    },
+    {
+      "MessageID": "72a07215-76a4-4b97-a780-3cb1c5dae16d",
+      "To": [
+        {
+          "Email": "aziz+mobile-qa@wathefni.internal",
+          "Name": ""
+        }
+      ],
+      "Recipient": [
+        "aziz+mobile-qa@wathefni.internal"
+      ],
+      "Subject": "Your Wathefni app activation code",
+      "Status": "Sent",
+      "ReceivedAt": "2026-08-07T02:36:38.0000000-04:00",
+      "Tag": null
+    },
+    {
+      "MessageID": "d3dfe83e-32fd-44a4-9327-2ad5a0f50dd8",
+      "To": [
+        {
+          "Email": "aziz+mobile-qa@wathefni.internal",
+          "Name": ""
+        }
+      ],
+      "Recipient": [
+        "aziz+mobile-qa@wathefni.internal"
+      ],
+      "Subject": "Your Wathefni app activation code",
+      "Status": "Sent",
+      "ReceivedAt": "2026-08-07T02:36:37.0000000-04:00",
+      "Tag": null
+    },
+    {
+      "MessageID": "8a8cc42a-a605-46f2-9ab7-d64f60fe9ecf",
+      "To": [
+        {
+          "Email": "aziz+mobile-qa@wathefni.internal",
+          "Name": ""
+        }
+      ],
+      "Recipient": [
+        "aziz+mobile-qa@wathefni.internal"
+      ],
+      "Subject": "Your Wathefni app activation code",
+      "Status": "Sent",
+      "ReceivedAt": "2026-08-07T02:36:37.0000000-04:00",
+      "Tag": null
+    }
+  ]
+}
+
+=== server === 200
+{
+  "Name": "My First Server",
+  "Color": "green",
+  "SmtpApiActivated": true,
+  "DeliveryType": "Live",
+  "ServerLink": "https://account.postmarkapp.com/servers/19430066/streams",
+  "InboundHookUrl": "https://wathefni:35e66e34229257071410a065d0f17dce0cc7ce9b55f99e27@api.wathefni.ai/webhook/postmark/inbound",
+  "BounceHookUrl": "https://api.wathefni.ai/webhook/postmark/outbound?token=WBNWL7F7sVxZobeu7HPDg3w0eBRb4lxUumpRIHtGUQc",
+  "OpenHookUrl": "",
+  "PostFirstOpenOnly": false,
+  "TrackOpens": true,
+  "TrackLinks": "None",
+  "IncludeBounceContentInOpenWebhook": null,
+  "ClickHookUrl": "",
+  "DeliveryHookUrl": "https://api.wathefni.ai/webhook/postmark/outbound?token=WBNWL7F7sVxZobeu7HPDg3w0eBRb4lxUumpRIHtGUQc",
+  "EnableSmtpApiErrorEmails": null,
+  "InboundDomain": "wathefni.ai",
+  "MessageStream": null
+}

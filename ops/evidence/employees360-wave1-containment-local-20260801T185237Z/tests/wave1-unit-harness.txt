@@ -1,0 +1,25 @@
+PASS  canary WATHEFNI+staging allowed
+PASS  canary WATHEFNI+production denied default
+PASS  canary production allowed when listed
+PASS  empty company allowlist fails closed
+PASS  external company denied
+PASS  canonical 8→965
+PASS  alias bidirectional
+PASS  create canonicalizes phone
+PASS  lookup local alias
+PASS  lookup 965 alias
+PASS  duplicate create blocked
+PASS  alias collision blocks create
+PASS  stale edit conflicts
+PASS  fresh edit updates
+PASS  phone alias edit duplicate
+PASS  scoped PATCH denied 404
+PASS  scoped PATCH denial audited
+PASS  integrity specs expanded
+PASS  hire uses canonical_employee_phone
+PASS  hire uses phone_identity_candidates
+PASS  canary gate present
+PASS  mutation scope helper present
+PASS  orphan doc restricted path present
+
+23 passed, 0 failed

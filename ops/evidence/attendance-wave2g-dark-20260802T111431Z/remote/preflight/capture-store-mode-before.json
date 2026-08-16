@@ -1,0 +1,5 @@
+{
+  "capture_store_env": null,
+  "process_local_expected": true,
+  "note": "pre-deploy: Wave 2E process-local memory (CAPTURE_STORE unset)"
+}

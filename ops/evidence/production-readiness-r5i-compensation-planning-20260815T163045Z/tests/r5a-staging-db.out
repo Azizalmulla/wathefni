@@ -1,0 +1,36 @@
+    PRODUCTION READINESS R5A — capability honesty (staging DB)
+    tenant: R5A864418
+      PASS  internal python patch still writes overlay
+      PASS  internal overlay stored enabled
+      PASS  internal JA enable still works
+      PASS  GET stored_enabled true
+      PASS  GET usable true after R5B
+      PASS  GET customer_enableable true after R5B
+      PASS  wave4 payload customer visible for performance
+      PASS  wave4 goals stored enabled preserved
+      PASS  wave4 goals usable after R5B
+      PASS  customer can enable performance after R5B
+      PASS  customer can enable talent after R5C
+      PASS  customer can enable job_architecture after R5D
+      PASS  customer can enable learning after R5E
+      PASS  customer can enable benefits after R5F
+      PASS  customer can enable employee_relations after R5G
+      PASS  customer can enable engagement after R5H
+      PASS  customer can enable comp_planning after R5I
+      PASS  customer cannot enable workforce_planning
+      PASS  performance overlay still enabled after refuse
+      PASS  JA settings row preserved
+      PASS  JA stored enabled does not open runtime
+      PASS  JA row still enabled after runtime off
+      PASS  leave still enabled for tenant
+      PASS  runtime gated off without env
+      PASS  internal env qualification still possible
+      PASS  env on is customer usable after R5B
+      PASS  JA runtime off without env
+      PASS  JA internal env qualification still possible
+      PASS  leave catalog enableable
+      PASS  analytics catalog enableable
+
+    30 passed, 0 failed
+R5A_CAPABILITY_HONESTY_DB_PASS
+STAGING_RC=0

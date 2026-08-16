@@ -1,0 +1,1 @@
+export { HRDocumentReviewDetailView as default } from '@hr/features/documents/HRDocumentReviewDetailView'

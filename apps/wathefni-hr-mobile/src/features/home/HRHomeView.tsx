@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
 
 const navKeys = {
   tasks: 'nav.tasks',
+  leave: 'nav.leave',
   onboarding: 'nav.onboarding',
   documents: 'nav.documents',
   attendance: 'nav.attendance',

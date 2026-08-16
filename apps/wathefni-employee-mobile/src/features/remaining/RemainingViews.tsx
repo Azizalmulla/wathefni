@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -22,18 +22,27 @@ import {
   IconBadge,
   PastelCard,
   PremiumButton,
-  WathefniBloom,
   Wordmark,
-  type PastelTone,
 } from '@/components/premium'
+import { keyboardSafeBehavior } from '@/components/keyboardSafe'
 import { PageScreen, PageScrollView } from '@/components/layout'
-import { ListRow, SectionHeader, ShowMoreButton, usePagedList } from '@/components/lists'
+import { ListRow, PageBackButton, QuietEmpty, SectionHeader, ShowMoreButton, usePagedList } from '@/components/lists'
+import {
+  InboxCalmNote,
+  InboxLedger,
+  InboxLedgerRow,
+  InboxLedgerSection,
+} from '@/components/inboxLedger'
 import {
   balanceForLeaveType,
   balancesAreInformational,
   type LeaveBalanceFact,
 } from '@/features/leave/leaveBalance'
-import { StatusChip } from '@/components/ui'
+import {
+  isLeaveCancellableStatus,
+  partitionLeaveRequests,
+} from '@/features/leave/leaveRequests'
+import { LeaveStatusMark } from '@/features/leave/leaveStatusPills'
 import {
   formatDate,
   formatDateRange,
@@ -41,9 +50,8 @@ import {
   formatNumber,
   formatRelativeTime,
   statusLabel,
-  statusTone,
 } from '@/lib/format'
-import { colors, font, layout, radius, shadows, spacing, typeScaling } from '@/theme'
+import { ambient, colors, font, layout, radius, spacing, typeScaling } from '@/theme'
 import type {
   LeaveDurationResponse,
   LeaveRequestRow,
@@ -70,29 +78,22 @@ function Page({
   onBack,
   refreshing,
   onRefresh,
+  keyboardInsets = false,
 }: BaseProps & {
   title: string
   subtitle?: string
   children: React.ReactNode
   refreshing?: boolean
   onRefresh?: () => void
+  keyboardInsets?: boolean
 }) {
   const { isRTL, t } = useI18n()
   const align = readingEdgeAlign(isRTL)
   return (
     <PageScreen>
-      <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
+      <PageScrollView refreshing={refreshing} onRefresh={onRefresh} keyboardInsets={keyboardInsets}>
         <View style={styles.nav}>
-          {onBack ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('common.back')}
-              onPress={onBack}
-              style={styles.backButton}
-            >
-              <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
-            </Pressable>
-          ) : null}
+          {onBack ? <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} /> : null}
           <Wordmark compact align={onBack ? 'center' : undefined} />
           {onBack ? <View style={styles.navSpacer} /> : null}
         </View>
@@ -107,27 +108,11 @@ function Page({
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  const { isRTL } = useI18n()
-  return (
-    <Text
-      accessibilityRole="header"
-      maxFontSizeMultiplier={typeScaling.heading}
-      style={[styles.sectionLabel, readingEdgeAlign(isRTL)]}
-    >
-      {children}
-    </Text>
-  )
+  return <SectionHeader title={String(children)} />
 }
 
-function EmptyCard({ icon, message, tone = 'cream' }: { icon: keyof typeof Ionicons.glyphMap; message: string; tone?: PastelTone }) {
-  const { isRTL } = useI18n()
-  return (
-    <PastelCard tone={tone} style={styles.emptyCard}>
-      <IconBadge name={icon} />
-      <Text style={[styles.emptyText, readingEdgeAlign(isRTL)]}>{message}</Text>
-      <WathefniBloom variant="watermark" />
-    </PastelCard>
-  )
+function EmptyCard({ icon, message }: { icon: keyof typeof Ionicons.glyphMap; message: string }) {
+  return <QuietEmpty icon={icon} message={message} />
 }
 
 /**
@@ -144,6 +129,8 @@ function EmptyCard({ icon, message, tone = 'cream' }: { icon: keyof typeof Ionic
 const SYSTEM_ACTIVITY_FLOWS = new Set([
   'activation',
   'activation_reminder',
+  // Backend activation-code delivery uses this flow name.
+  'app_activation',
   'auth',
   'device',
   'device_security',
@@ -172,7 +159,7 @@ export function NotificationsView({
   onRefresh?: () => void
   onBack?: () => void
 }) {
-  const { t, locale } = useI18n()
+  const { t, locale, isRTL } = useI18n()
   const [systemOpen, setSystemOpen] = useState(false)
   const unread = data.notifications.filter((item) => !item.read)
   const read = data.notifications.filter((item) => item.read)
@@ -196,31 +183,35 @@ export function NotificationsView({
       {data.notifications.length ? (
         <>
           {unread.length ? (
-            <View style={styles.list}>
+            <InboxLedgerSection>
               <SectionHeader title={t('notifications.unread')} count={unread.length} />
-              {unread.map((item) => (
-                <InboxRow key={item.id} item={item} onPress={() => onMarkRead(item)} />
-              ))}
-            </View>
+              <InboxLedger>
+                {unread.map((item) => (
+                  <NotificationInboxRow key={item.id} item={item} onPress={() => onMarkRead(item)} />
+                ))}
+              </InboxLedger>
+            </InboxLedgerSection>
           ) : null}
 
           {earlier.length ? (
-            <View style={styles.list}>
-              <SectionHeader title={t('notifications.earlier')} count={earlier.length} />
-              {earlierPage.visible.map((item) => (
-                <InboxRow key={item.id} item={item} onPress={() => onMarkRead(item)} />
-              ))}
+            <InboxLedgerSection>
+              <SectionHeader title={t('notifications.updates')} count={earlier.length} />
+              <InboxLedger>
+                {earlierPage.visible.map((item) => (
+                  <NotificationInboxRow key={item.id} item={item} onPress={() => onMarkRead(item)} />
+                ))}
+              </InboxLedger>
               {earlierPage.hidden ? (
                 <ShowMoreButton
                   label={t('common.showMore', { count: formatNumber(earlierPage.hidden, locale, 0) })}
                   onPress={earlierPage.showMore}
                 />
               ) : null}
-            </View>
+            </InboxLedgerSection>
           ) : null}
 
           {systemActivity.length ? (
-            <View style={styles.list}>
+            <InboxLedgerSection>
               <SectionHeader
                 title={t('notifications.systemActivity')}
                 count={systemActivity.length}
@@ -230,9 +221,16 @@ export function NotificationsView({
               />
               {systemOpen ? (
                 <>
-                  {systemPage.visible.map((item) => (
-                    <InboxRow key={item.id} item={item} onPress={() => onMarkRead(item)} />
-                  ))}
+                  <InboxLedger>
+                    {systemPage.visible.map((item) => (
+                      <NotificationInboxRow
+                        key={item.id}
+                        item={item}
+                        quiet
+                        onPress={() => onMarkRead(item)}
+                      />
+                    ))}
+                  </InboxLedger>
                   {systemPage.hidden ? (
                     <ShowMoreButton
                       label={t('common.showMore', { count: formatNumber(systemPage.hidden, locale, 0) })}
@@ -241,30 +239,38 @@ export function NotificationsView({
                   ) : null}
                 </>
               ) : null}
-            </View>
+            </InboxLedgerSection>
           ) : null}
         </>
       ) : (
-        <EmptyCard icon="mail-open-outline" message={t('notifications.empty')} />
+        <InboxCalmNote message={t('notifications.empty')} />
       )}
     </Page>
   )
 }
 
-function InboxRow({ item, onPress }: { item: NotificationItem; onPress: () => void }) {
+function NotificationInboxRow({
+  item,
+  onPress,
+  quiet = false,
+}: {
+  item: NotificationItem
+  onPress: () => void
+  quiet?: boolean
+}) {
   const { t, locale } = useI18n()
-  const state = item.read ? t('notifications.read') : t('notifications.unreadItem')
+  const unread = !item.read
+  const state = unread ? t('notifications.unreadItem') : t('notifications.read')
   const when = formatRelativeTime(item.created_at, locale, t)
-  // Relative time answers "is this new?" at a glance, but it rounds. The exact
-  // timestamp the server sent is still the fact, so it stays available to
-  // VoiceOver rather than being replaced by the approximation.
   const exact = formatDateTime(item.created_at, locale)
   return (
-    <ListRow
+    <InboxLedgerRow
       title={item.title}
-      subtitle={item.body}
-      meta={when}
-      marked={!item.read}
+      body={item.body}
+      when={when}
+      emphasized={unread}
+      quiet={quiet}
+      accentColor={unread ? ambient.onboarding.fill : undefined}
       onPress={onPress}
       accessibilityLabel={`${item.title}. ${state}. ${when}${exact ? ` (${exact})` : ''}. ${item.body || ''}`}
       accessibilityHint={item.deep_link?.path ? t('notifications.openHint') : undefined}
@@ -278,6 +284,7 @@ export function LeaveView({
   canCancel,
   onRequest,
   onCancel,
+  onViewAllHistory,
   cancelingId,
   refreshing,
   onRefresh,
@@ -287,31 +294,35 @@ export function LeaveView({
   canCancel: boolean
   onRequest: () => void
   onCancel: (leaveId: string) => void
+  onViewAllHistory: () => void
   cancelingId?: string | null
   refreshing?: boolean
   onRefresh?: () => void
 }) {
   const { t, locale, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
-  const requests = usePagedList(data.requests, LEAVE_PAGE)
-  const balanceFacts = (data.balances ?? [])
-    .map((balance) => balanceForLeaveType(data, balance.leave_type))
-    .filter((fact): fact is LeaveBalanceFact => fact !== null)
+  const balanceFacts = useMemo(
+    () =>
+      (data.balances ?? [])
+        .map((balance) => balanceForLeaveType(data, balance.leave_type))
+        .filter((fact): fact is LeaveBalanceFact => fact !== null),
+    [data],
+  )
+  const showBalances = Boolean(data.balances_enabled) && balanceFacts.length > 0
+  const partitioned = useMemo(() => partitionLeaveRequests(data.requests), [data.requests])
+  const currentPage = usePagedList(partitioned.current, LEAVE_PAGE)
+  const historyPage = usePagedList(partitioned.history, LEAVE_PAGE)
+  const totalRequests = data.requests?.length ?? 0
+  const subtitle = showBalances ? t('leave.subtitleWithBalances') : t('leave.subtitleRequestsOnly')
+
   return (
-    <Page
-      title={t('leave.title')}
-      subtitle={t('remaining.leaveSubtitle')}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-    >
-      {/* One olive surface for all balances, rather than one 130pt card each.
-          A type whose number the server did not send is left out entirely: this
-          list previously read every balance as `balance_days`, a field the API
-          has never sent, and printed a confident 0 for all of them. */}
-      {balanceFacts.length ? (
+    <Page title={t('leave.title')} subtitle={subtitle} refreshing={refreshing} onRefresh={onRefresh}>
+      {/* Balances only when the server enables them and supplies a usable number.
+          Never invent entitlement/accrual fields the payload did not send. */}
+      {showBalances ? (
         <View style={styles.list}>
           <SectionHeader title={t('leave.balance')} />
-          <PastelCard tone="olive" style={styles.balanceCard}>
+          <PastelCard tone="olive" style={[styles.balanceCard, styles.balanceAmbient]}>
             {balanceFacts.map((balance, index) => (
               <View
                 key={balance.leaveType}
@@ -336,36 +347,80 @@ export function LeaveView({
           ) : null}
         </View>
       ) : null}
+
       {canRequest ? <PremiumButton label={t('leave.request')} onPress={onRequest} showDirection /> : null}
+
+      {partitioned.current.length ? (
+        <View style={styles.list}>
+          <SectionHeader title={t('leave.currentRequests')} count={partitioned.current.length} />
+          {currentPage.visible.map((request) => (
+            <LeaveRequestRowItem
+              key={request.leave_id}
+              request={request}
+              canCancel={canCancel}
+              canceling={cancelingId === request.leave_id}
+              onCancel={onCancel}
+            />
+          ))}
+          {currentPage.hidden ? (
+            <ShowMoreButton
+              label={t('common.showMore', { count: formatNumber(currentPage.hidden, locale, 0) })}
+              onPress={currentPage.showMore}
+            />
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={styles.list}>
-        <SectionHeader title={t('leave.requests')} count={data.requests.length || undefined} />
-        {data.requests.length ? (
+        {partitioned.history.length ? (
           <>
-            {requests.visible.map((request) => (
+            <SectionHeader title={t('leave.history')} count={partitioned.history.length} />
+            {historyPage.visible.map((request) => (
               <LeaveRequestRowItem
                 key={request.leave_id}
                 request={request}
-                canCancel={canCancel}
-                canceling={cancelingId === request.leave_id}
+                canCancel={false}
+                canceling={false}
                 onCancel={onCancel}
               />
             ))}
-            {requests.hidden ? (
+            {historyPage.hidden ? (
               <ShowMoreButton
-                label={t('common.showMore', { count: formatNumber(requests.hidden, locale, 0) })}
-                onPress={requests.showMore}
+                label={t('common.showMore', { count: formatNumber(historyPage.hidden, locale, 0) })}
+                onPress={historyPage.showMore}
               />
             ) : null}
           </>
         ) : (
-          <EmptyCard icon="umbrella-outline" message={t('leave.empty')} />
+          <SectionHeader title={t('leave.history')} />
         )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('leave.historyAll.view')}
+          accessibilityHint={t('leave.historyAll.viewHint')}
+          onPress={onViewAllHistory}
+          style={({ pressed }) => [styles.historyLink, pressed && styles.pressed]}
+        >
+          <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.historyLinkText, align]}>
+            {t('leave.historyAll.view')}
+          </Text>
+          <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={16} color={colors.accent} />
+        </Pressable>
       </View>
+
+      {!totalRequests ? <CalmNote message={t('leave.empty')} /> : null}
+
+      {totalRequests >= LEAVE_API_WINDOW ? (
+        <Text style={[styles.footnote, align]}>{t('leave.listWindowNote')}</Text>
+      ) : null}
     </Page>
   )
 }
 
-const LEAVE_PAGE = 12
+/** Page size inside the fetched `/app/leave` window (~50). Not a deeper history API. */
+const LEAVE_PAGE = 8
+/** Server `_employee_leave_request_rows` default LIMIT — honest ceiling for this surface. */
+const LEAVE_API_WINDOW = 50
 
 /**
  * Type, dates, status — the three things an employee scans for. A one-day request
@@ -384,7 +439,8 @@ function LeaveRequestRowItem({
 }) {
   const { t, locale, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
-  const cancellable = canCancel && ['requested', 'approved'].includes(request.status.toLowerCase())
+  // Cancel rules match `/app/leave/{id}/cancel`: capability + requested|approved only.
+  const cancellable = canCancel && isLeaveCancellableStatus(request.status)
   const dates = formatDateRange(request.start_date, request.end_date, locale)
   const type = request.leave_type ? leaveTypeLabel(request.leave_type, t) : null
   const status = statusLabel(request.status, t)
@@ -393,7 +449,7 @@ function LeaveRequestRowItem({
       title={type || dates}
       subtitle={type ? dates : null}
       meta={request.reason}
-      trailing={<StatusChip label={status} tone={statusTone(request.status)} />}
+      trailing={<LeaveStatusMark status={request.status} label={status} />}
       accessibilityLabel={`${type ? `${type}. ` : ''}${dates}. ${status}`}
     >
       {cancellable ? (
@@ -470,8 +526,13 @@ export function LeaveRequestView({
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.safe}>
-      <Page onBack={onBack} title={t('leave.request')} subtitle={t('remaining.leaveRequestSubtitle')}>
+    <KeyboardAvoidingView behavior={keyboardSafeBehavior()} style={styles.safe}>
+      <Page
+        onBack={onBack}
+        title={t('leave.request')}
+        subtitle={t('remaining.leaveRequestSubtitle')}
+        keyboardInsets
+      >
         <View style={styles.formSection}>
           <Text style={[styles.fieldLabel, align]}>{t('leave.type')}</Text>
           <View style={styles.segment}>
@@ -575,10 +636,10 @@ export function LeaveRequestView({
             showDirection
           />
         </View>
-        <PastelCard tone="butter" style={styles.infoCard}>
-          <Ionicons name="information-circle-outline" size={22} color={colors.warning} />
+        <View style={styles.infoPanel}>
+          <Ionicons name="information-circle-outline" size={20} color={colors.subtle} />
           <Text style={[styles.supporting, styles.flex, align]}>{t('remaining.leaveAuthorityNote')}</Text>
-        </PastelCard>
+        </View>
       </Page>
     </KeyboardAvoidingView>
   )
@@ -817,7 +878,7 @@ export function SettingsView({
       {diag ? (
         <View style={styles.section}>
           <SectionLabel>{t('autoLock.diagnosticsTitle')}</SectionLabel>
-          <PastelCard tone="butter" style={styles.settingsCard}>
+          <View style={styles.settingsPanel}>
             <Text style={[styles.diagLine, align]}>{t('autoLock.diagMarker')}: {diag.buildMarker || '—'}</Text>
             <Text style={[styles.diagLine, align]}>{t('autoLock.diagUpdate')}: {diag.updateId || '—'}</Text>
             <Text style={[styles.diagLine, align]}>
@@ -844,11 +905,11 @@ export function SettingsView({
             <Text style={[styles.diagLine, align]}>{t('autoLock.diagDecision')}: {diag.lastDecision}</Text>
             <Text style={[styles.diagLine, align]}>{t('autoLock.diagNeedsUnlock')}: {diag.needsLocalUnlock ? 'yes' : 'no'}</Text>
             <Text style={[styles.diagLine, align]}>appState: {diag.lastAppState}</Text>
-          </PastelCard>
+          </View>
         </View>
       ) : null}
       {canManagePush ? (
-        <PastelCard tone="sky" style={styles.settingsCard}>
+        <View style={styles.settingsPanel}>
           <View style={styles.settingsRow}>
             <IconBadge name="notifications-outline" />
             <View style={styles.flex}>
@@ -863,10 +924,10 @@ export function SettingsView({
               disabled={pushBusy}
             />
           </View>
-        </PastelCard>
+        </View>
       ) : null}
       {canManageBiometric && onToggleBiometric ? (
-        <PastelCard tone="cream" style={styles.settingsCard}>
+        <View style={styles.settingsPanel}>
           <View style={styles.settingsRow}>
             <IconBadge name="scan-outline" />
             <View style={styles.flex}>
@@ -885,7 +946,7 @@ export function SettingsView({
               disabled={Boolean(biometricBusy)}
             />
           </View>
-        </PastelCard>
+        </View>
       ) : null}
       {canManageAutoLock && onAutoLockTimeout ? (
         <View style={styles.section}>
@@ -917,7 +978,7 @@ export function SettingsView({
       ) : null}
       <View style={styles.section}>
         <SectionLabel>{t('deviceSecurity.title')}</SectionLabel>
-        <PastelCard tone="butter" style={styles.settingsCard}>
+        <View style={styles.settingsPanel}>
           {deviceSecurityLoading && !deviceSecurity ? (
             <Text style={[styles.supporting, align]}>{t('common.loading')}</Text>
           ) : deviceSecurity ? (
@@ -946,7 +1007,7 @@ export function SettingsView({
               ) : null}
             </View>
           )}
-        </PastelCard>
+        </View>
         {onSignOutDevice ? (
           <MenuRow icon="log-out-outline" label={t('deviceSecurity.signOutDevice')} onPress={onSignOutDevice} danger />
         ) : null}
@@ -985,18 +1046,18 @@ export function PrivacySupportView({
   const align = readingEdgeAlign(isRTL)
   return (
     <Page onBack={onBack} title={t('remaining.privacySupportTitle')} subtitle={t('remaining.privacySupportSubtitle')}>
-      <PastelCard tone="cream" style={styles.helpCard}>
+      <View style={styles.helpPanel}>
         <IconBadge name="shield-checkmark-outline" />
         <Text style={[styles.itemTitle, align]}>{t('settings.privacy')}</Text>
         <Text style={[styles.supporting, align]}>{t('remaining.privacyCopy')}</Text>
         <PremiumButton label={t('remaining.readPrivacy')} onPress={onPrivacy} showDirection />
-      </PastelCard>
-      <PastelCard tone="butter" style={styles.helpCard}>
+      </View>
+      <View style={styles.helpPanel}>
         <IconBadge name="chatbubble-ellipses-outline" />
         <Text style={[styles.itemTitle, align]}>{t('remaining.supportTitle')}</Text>
         <Text style={[styles.supporting, align]}>{t('remaining.supportCopy')}</Text>
         <PremiumButton label={t('remaining.contactSupport')} onPress={onSupport} showDirection />
-      </PastelCard>
+      </View>
     </Page>
   )
 }
@@ -1008,13 +1069,12 @@ export function NotFoundView({ onHome }: { onHome: () => void }) {
     <SafeAreaView style={styles.stateSafe}>
       <View style={styles.stateWrap}>
         <Wordmark compact />
-        <PastelCard tone="lilac" style={styles.stateCard}>
+        <View style={styles.stateCard}>
           <View style={styles.stateIcon}><Ionicons name="compass-outline" size={34} color={colors.ink} /></View>
           <EditorialHeading size="medium">{t('notFound.title')}</EditorialHeading>
           <Text style={[styles.stateCopy, align]}>{t('notFound.message')}</Text>
           <PremiumButton label={t('feature.backHome')} onPress={onHome} showDirection />
-          <WathefniBloom variant="watermark" />
-        </PastelCard>
+        </View>
       </View>
     </SafeAreaView>
   )
@@ -1026,22 +1086,33 @@ function leaveTypeLabel(type: string, t: (key: string) => string): string {
   return t('leave.typeOther')
 }
 
+/** Cream-ground empty — no bordered white panel. */
+function CalmNote({ message }: { message: string }) {
+  const { isRTL } = useI18n()
+  return (
+    <Text
+      maxFontSizeMultiplier={typeScaling.body}
+      style={[styles.calmNote, readingEdgeAlign(isRTL)]}
+      accessibilityRole="summary"
+    >
+      {message}
+    </Text>
+  )
+}
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   screen: { flex: 1, backgroundColor: colors.bg },
 
   nav: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navSpacer: { width: 44 },
-  backButton: { width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', ...shadows.card },
+  backButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   hero: { gap: spacing.xs },
   subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20, maxWidth: 360 },
   flex: { flex: 1 },
   section: { gap: spacing.md },
   /** Compact list rhythm: rows sit closer together than top-level sections. */
   list: { gap: spacing.sm },
-  sectionLabel: { color: colors.subtle, fontSize: font.tiny, fontWeight: '800', letterSpacing: 0.65, textTransform: 'uppercase' },
-  emptyCard: { minHeight: 150, justifyContent: 'center', gap: spacing.md, overflow: 'hidden' },
-  emptyText: { color: colors.ink, fontSize: font.h3, fontWeight: '700', maxWidth: 230 },
   pressed: { opacity: 0.82 },
   disabled: { opacity: 0.5 },
   itemTitle: { color: colors.ink, fontSize: font.h3, fontWeight: '700', lineHeight: 22 },
@@ -1061,12 +1132,29 @@ const styles = StyleSheet.create({
   summaryLead: { color: colors.ink, fontSize: font.body, fontWeight: '800', lineHeight: 22 },
   summaryBalance: { color: colors.subtle, fontSize: font.small, lineHeight: 19 },
   balanceCard: { paddingVertical: spacing.sm },
+  balanceAmbient: { backgroundColor: ambient.leave.fill },
   balanceRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, paddingVertical: spacing.sm },
   balanceDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   balanceType: { color: colors.ink, fontSize: font.small, fontWeight: '700' },
   balanceValue: { color: colors.ink, fontSize: font.h2, fontWeight: '800', letterSpacing: -0.4 },
   balanceUnit: { color: colors.subtle, fontSize: font.tiny },
   footnote: { color: colors.subtle, fontSize: font.tiny, lineHeight: 18 },
+  calmNote: {
+    color: colors.subtle,
+    fontSize: font.body,
+    lineHeight: 22,
+    fontWeight: '600',
+    paddingVertical: spacing.sm,
+  },
+  historyLink: {
+    minHeight: layout.touchTarget,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  historyLinkText: { flex: 1, color: colors.accent, fontSize: font.small, fontWeight: '700' },
   textAction: { alignSelf: 'flex-start', paddingVertical: spacing.xs },
   dangerAction: { color: colors.danger, fontSize: font.small, fontWeight: '700' },
   formSection: { gap: spacing.lg },
@@ -1074,7 +1162,7 @@ const styles = StyleSheet.create({
   fieldLabel: { color: colors.subtle, fontSize: font.small, fontWeight: '700' },
   segment: { flexDirection: 'row', gap: 4, backgroundColor: colors.surfaceMuted, borderRadius: radius.lg, padding: 4 },
   segmentItem: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radius.md },
-  segmentActive: { backgroundColor: colors.surface, ...shadows.card },
+  segmentActive: { backgroundColor: colors.surface },
   segmentText: { color: colors.subtle, fontSize: font.small, fontWeight: '700' },
   segmentTextActive: { color: colors.ink },
   autoLockList: { gap: spacing.xs },
@@ -1088,7 +1176,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
-    ...shadows.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   autoLockRowActive: { backgroundColor: colors.surfaceMuted, borderColor: colors.ink },
   autoLockText: { flex: 1, color: colors.ink, fontSize: font.body, fontWeight: '600' },
@@ -1102,38 +1191,42 @@ const styles = StyleSheet.create({
   pickerDone: { minHeight: 44, alignItems: 'center', justifyContent: 'center', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   pickerDoneText: { color: colors.ink, fontSize: font.body, fontWeight: '700' },
   errorText: { color: colors.danger, fontSize: font.small },
-  infoCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
-  shiftCard: { minHeight: 144, justifyContent: 'space-between' },
-  shiftTime: { color: colors.ink, fontSize: 29, fontWeight: '800', letterSpacing: -0.6 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  attendanceSummary: { flexDirection: 'row', gap: spacing.sm },
-  summaryMetric: { flex: 1, minHeight: 96, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.sm },
-  summaryValue: { color: colors.ink, fontSize: font.h1, fontWeight: '800' },
-  summaryLabel: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700', textAlign: 'center' },
-  recordRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, ...shadows.card },
-  timelineDot: { width: 10, height: 10, borderRadius: 5 },
-  recordDate: { color: colors.ink, fontSize: font.body, fontWeight: '600' },
-  documentCard: { padding: spacing.lg, gap: spacing.md },
-  documentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  infoPanel: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
   roundAction: { width: layout.touchTarget, height: layout.touchTarget, borderRadius: radius.pill, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
-  documentProgress: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  documentProgressTrack: { flex: 1, height: 6, borderRadius: radius.pill, overflow: 'hidden', backgroundColor: colors.surfaceMuted },
-  documentProgressFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.accent },
-  profileHero: { minHeight: 160, justifyContent: 'center', overflow: 'hidden' },
-  profileTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
-  largeAvatar: { width: 72, height: 72, borderRadius: radius.pill, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
-  largeAvatarText: { color: colors.surface, fontSize: font.h1, fontWeight: '800' },
-  profileName: { color: colors.ink, fontSize: font.h1, fontWeight: '800', letterSpacing: -0.5 },
-  detailsCard: { backgroundColor: colors.surface, borderRadius: radius.xl, paddingHorizontal: spacing.lg, ...shadows.card },
   detailRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   detailIcon: { width: 34, height: 34, borderRadius: radius.md, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
   detailLabel: { flex: 1, color: colors.subtle, fontSize: font.small },
   detailValue: { flex: 1.2, color: colors.ink, fontSize: font.small, fontWeight: '700' },
-  menuRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, ...shadows.card },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
   menuIcon: { width: 38, height: 38, borderRadius: radius.md, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
   menuIconDanger: { backgroundColor: colors.surfaceMuted },
   menuLabel: { color: colors.ink, fontSize: font.body, fontWeight: '600' },
-  settingsCard: { padding: spacing.lg },
+  settingsPanel: {
+    gap: spacing.sm,
+    padding: spacing.lg,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
   settingsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   version: { color: colors.subtle, fontSize: font.tiny, textAlign: 'center' },
   retryChip: {
@@ -1146,10 +1239,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   retryText: { color: colors.surface, fontWeight: '700', fontSize: font.small },
-  helpCard: { gap: spacing.md, minHeight: 210, justifyContent: 'space-between' },
+  helpPanel: {
+    gap: spacing.md,
+    padding: spacing.lg,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
   stateSafe: { flex: 1, backgroundColor: colors.bg },
   stateWrap: { flex: 1, padding: spacing.xl, justifyContent: 'center', gap: spacing.xl },
-  stateCard: { minHeight: 310, justifyContent: 'center', gap: spacing.lg, overflow: 'hidden' },
+  stateCard: {
+    minHeight: 220,
+    justifyContent: 'center',
+    gap: spacing.lg,
+    padding: spacing.lg,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
   stateIcon: { width: 58, height: 58, borderRadius: radius.xl, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
   stateCopy: { color: colors.subtle, fontSize: font.body, lineHeight: 23 },
 })

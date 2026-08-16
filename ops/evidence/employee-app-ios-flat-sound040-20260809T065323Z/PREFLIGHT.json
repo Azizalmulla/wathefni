@@ -1,0 +1,14 @@
+{
+  "expo_account": "abdulazizalmullas-team",
+  "subscription": {
+    "name": "Starter",
+    "status": "active"
+  },
+  "ios_quota_preflight": "AVAILABLE (Starter active; prior Free quota block cleared by paid plan)",
+  "icon_sha256": "9066753bb2c5c6940b3a9074859b8f5258c15ec9d1431ba783dee6f2ae08c4b4",
+  "icon_path": "./assets/icon.png",
+  "sound_bundled": "./assets/sounds/push/wathefni_default.wav",
+  "defaultChannel": "wathefni_default_v2",
+  "wav_bytes": 189006,
+  "visuals_changed": false
+}

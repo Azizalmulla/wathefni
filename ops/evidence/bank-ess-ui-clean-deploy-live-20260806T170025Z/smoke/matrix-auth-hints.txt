@@ -1,0 +1,103 @@
+2:"""Live-HTTP production qualification matrix — Bank ESS + onboarding completion.
+52:    "WATHEFNI_BANK_ESS_V1": "on",
+53:    "WATHEFNI_BANK_ESS_V1_COMPANIES": COMPANY,
+54:    "WATHEFNI_BANK_ESS_V1_EMPLOYEE_ALLOWLIST": ",".join(CANARY_KEYS),
+74:if (os.environ.get("WATHEFNI_EMPLOYEE_ESS_V5_BANK_REAL_ALLOWLIST") or "").strip():
+81:    "onboarding_completion": [],
+121:        headers["Authorization"] = f"Bearer {token}"
+124:        headers["Authorization"] = f"Bearer {dashboard_token}"
+177:    """Disposable checklist rows for completion-state testing."""
+267:    code, body = http("GET", "/app/bank", token=token)
+273:    wcode, _ = http("POST", f"/app/bank/requests/{rid}/withdraw", token=token)
+277:def completion_of(app: Any, key: str) -> dict[str, Any]:
+278:    import onboarding_completion_contract as C
+291:        purge = app.purge_bank_evidence_bytes(company_code=COMPANY, employee_keys=keys)
+299:        ("employee_bank_notifications", "employee_key"),
+300:        ("employee_bank_evidence", "employee_key"),
+301:        ("employee_bank_effective", "employee_key"),
+302:        ("employee_bank_verified", "employee_key"),
+303:        ("employee_ess_bank_profiles", "employee_key"),
+306:        ("employee_onboarding_completion_events", "employee_key"),
+307:        ("employee_onboarding_completion", "employee_key"),
+357:    code, body = http("GET", "/app/bank", token=token)
+365:    code, body = http("POST", "/app/bank/requests", token=token, body={
+393:    code_dup, body_dup = http("POST", "/app/bank/requests", token=token, body={
+402:    code_re, body_re = http("POST", "/app/bank/requests", token=token, body={
+411:        code, body = http("POST", f"/app/bank/requests/{draft_id}/submit", token=token)
+418:    code_x, body_x = http("GET", "/app/bank", token=other_token)
+427:        code_w, body_w = http("POST", f"/app/bank/requests/{draft_id}/withdraw", token=other_token)
+433:        code, body = http("GET", f"/dashboard/posthire/employees/{key}/bank",
+460:            code, body = http("GET", "/app/bank", token=token)
+474:    code, body = http("POST", "/app/bank/requests", token=token, body={
+486:        code, body = http("POST", f"/app/bank/requests/{fix_id}/withdraw", token=token)
+496:    code, body = http("POST", "/app/bank/requests", token=token, body={
+564:                cur.execute("SELECT count(*) c FROM employee_bank_verified WHERE employee_key=%s", (key,))
+567:                    "SELECT count(*) c FROM employee_bank_effective WHERE employee_key=%s AND superseded_at IS NULL",
+571:                eff = bank.current_effective(cur, company_code=COMPANY, employee_key=key)
+583:                    "SELECT dedup_key, count(*) c FROM employee_bank_notifications WHERE employee_key=%s GROUP BY dedup_key",
+614:                    "SELECT status FROM onboarding_items WHERE employee_key=%s AND item_id='bank_details'",
+627:    code, body = http("POST", "/app/bank/requests", token=token, body={
+646:            eff2 = bank.current_effective(cur, company_code=COMPANY, employee_key=key)
+656:        code_own, _ = http("GET", f"/app/bank/evidence/{ev_id}", token=token)
+658:        code_other, _ = http("GET", f"/app/bank/evidence/{ev_id}", token=other_token)
+663:                              f"/dashboard/posthire/employees/{key}/bank/evidence/{ev_id}",
+668:    code_nohr, body_nohr = http("GET", f"/dashboard/posthire/employees/{key}/bank")
+675:                                f"/dashboard/posthire/employees/{other_key}-NOPE/bank",
+693:    code_ar, body_ar = http("GET", "/app/bank?locale=ar", token=token)
+700:        code_m, body_m = http("GET", f"/dashboard/posthire/employees/{key}/bank",
+738:        f"{BASE_URL}/app/bank/evidence",
+741:            "Authorization": f"Bearer {token}",
+757:# Onboarding completion matrix
+759:O = "onboarding_completion"
+763:    import onboarding_completion_contract as C
+768:    snap = completion_of(app, key)
+773:    snap = completion_of(app, key)
+781:    snap = completion_of(app, key)
+786:    snap = completion_of(app, key)
+792:    snap = completion_of(app, key)
+797:    snap = completion_of(app, key)
+803:    snap = completion_of(app, key)
+806:    # completion
+807:    check(O, "completion", snap["is_complete"] is True, snap["state"])
+810:            row = C.load_completion_row(cur, company_code=COMPANY, employee_key=key)
+812:    check(O, "completion_evidence_recorded",
+814:          and len((row or {}).get("completion_evidence") or []) >= 1,
+816:           "evidence": len((row or {}).get("completion_evidence") or [])})
+833:    # requirement added after completion → reopened
+837:    snap = completion_of(app, key)
+838:    check(O, "requirement_added_after_completion", snap["state"] == C.STATE_REOPENED, snap["state"])
+844:            row2 = C.load_completion_row(cur, company_code=COMPANY, employee_key=key)
+847:          len((row2 or {}).get("completion_evidence") or []) >= 1
+849:          {"evidence": len((row2 or {}).get("completion_evidence") or [])})
+857:    snap = completion_of(app, key)
+867:    snap = completion_of(app, key)
+873:    snap = completion_of(app, key)
+881:    snap = completion_of(app, key)
+894:    snap = completion_of(app, key)
+912:            cur.execute("DELETE FROM employee_onboarding_completion WHERE employee_key=%s", (lkey,))
+914:                "DELETE FROM employee_onboarding_completion_events WHERE employee_key=%s", (lkey,)
+917:            stamped = C.seed_legacy_completion_history(
+923:            restamped = C.seed_legacy_completion_history(
+928:            row_l = C.load_completion_row(cur, company_code=COMPANY, employee_key=lkey)
+941:    lsnap = completion_of(app, lkey)
+946:    lsnap = completion_of(app, lkey)
+952:    app_state = ((body_app or {}).get("completion") or {}).get("state") or (
+953:        ((body_app or {}).get("onboarding") or {}).get("completion") or {}
+958:                                f"/dashboard/posthire/employees/{key}/onboarding-completion",
+965:        hr_web_state = ((body_hw or {}).get("completion") or {}).get("state")
+966:    contract_state = completion_of(app, key)["state"]
+969:        "hr_completion_endpoint": hr_state,
+980:    import onboarding_completion_contract as C2
+983:    snap = completion_of(app, key)
+985:    r2 = C2.reminder_targets(completion_of(app, key))
+994:            before = len(C.completion_history(cur, employee_key=key, company_code=COMPANY))
+996:    s1 = completion_of(app, key)
+997:    s2 = completion_of(app, key)
+1000:            after = len(C.completion_history(cur, employee_key=key, company_code=COMPANY))
+1007:    code_np, body_np = http("GET", f"/dashboard/posthire/employees/{key}/onboarding-completion")
+1013:                          "/dashboard/posthire/employees/NOTMYTENANT-999/onboarding-completion",
+1018:    snap = completion_of(app, key)
+1124:        log("=== Onboarding completion matrix ===")
+1136:    for section in ("bank_ess", "onboarding_completion"):
+1149:    for section in ("bank_ess", "onboarding_completion"):
+1156:    failed = sum(RESULTS[f"{s}_summary"]["failed"] for s in ("bank_ess", "onboarding_completion"))

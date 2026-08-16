@@ -1,0 +1,267 @@
+[
+  {
+    "name": "wave a enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wathefni company allowed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external company denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "operator only honesty",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wathefni only honesty",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no external tenants",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no payroll money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no attendance ingest",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "capture ingest off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no AI",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no setup wave b",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "entitlements cannot bypass (honesty)",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "read only evaluate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ingest env off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "production db",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "evaluate ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "refuse non-wathefni",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overall state honest",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "six stages",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "stage keys",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "entitlements cannot bypass",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payroll money false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance ingest false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external tenants false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pause impact en",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pause impact ar",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pause says freezes hold",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "blockers have next actions",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "blockers have deep links",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "blockers have ar next actions",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "modules stage non-empty",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance purchased cannot bypass ingest off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance does not claim ingest on",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payroll purchased cannot claim money authority",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "shifts cannot bypass synthetic/allowlist/freeze",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "shifts not claiming unrestricted live",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave cannot bypass synthetic/allowlist/freeze",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave not claiming unrestricted live",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payroll cannot bypass synthetic/allowlist/freeze",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payroll not claiming unrestricted live",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance cannot bypass synthetic/allowlist/freeze",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance not claiming unrestricted live",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "launch UI present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI EN title",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI AR title",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI overall marker",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI blockers marker",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI pause marker",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI mobile wrap",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "UI rtl support",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dist has launch EN or AR",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dist mobile wrap token",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "residual scwab rows 0",
+    "ok": true,
+    "detail": null
+  }
+]

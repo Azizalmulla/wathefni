@@ -1,0 +1,307 @@
+[
+  {
+    "name": "p6 version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "entitlement model",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no global mode a",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payment disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode b supported",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preview remains preview",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle pack self-consistent residual=0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle fixture version present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle scenario A_normal_full_period",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle scenario A_mid_month_hire",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle scenario B_ot_rest_ph",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle scenario C_pifss_resolvable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle scenario C_gated_gcc_blocks",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "oracle scenario D_external_mode_b_mirror",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "gated scenario not authoritative",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "non-applicable statutory still eligible",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup schema version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup has required/optional/advanced",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup lists wathefni_owned",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "independent residual A_normal = 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "readiness returns actionable issues list",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "readiness ok after setup",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "set entitlement disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic still qual-allowed when disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "nonsynthetic blocked when disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "opt-in authoritative_allowlisted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "entitlement state allowlisted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "allowlisted state still blocks non-listed employee",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "add employee allowlist",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "allowlisted employee may seal",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "allowlisted nonsynthetic compensation approved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode a pipeline ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sealed snapshot present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "money_authority=wathefni",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "exception review ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "exception summary has ready bucket",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "variance advisory_only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "native payslip from sealed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "official PDF eligible",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unreleased invisible",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "release payslip",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sealed immutable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "correction period pipeline",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "replacement authority distinct",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p1 period_close not money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p4b baseline version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preview seal still refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "rollback to preview_only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "restore WATHEFNI allowlisted entitlement",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "statutory override refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "variance ack override allowed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 10 pipeline ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 100 pipeline ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 1000 assemble ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 1000 lock ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 1000 calc ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 1000 classify ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "scale 1000 batch oriented",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "remaining gaps listed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "gcc still gated in p4b",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "cleanup",
+    "ok": true,
+    "detail": null
+  }
+]

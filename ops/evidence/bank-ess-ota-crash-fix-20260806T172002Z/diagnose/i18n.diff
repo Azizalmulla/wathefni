@@ -1,0 +1,154 @@
+--- /tmp/wf-bank-ess-ota-clean-20260806T170025Z/src/i18n/index.tsx	2026-08-06 19:01:53
++++ /Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/src/i18n/index.tsx	2026-08-06 18:23:31
+@@ -1,5 +1,5 @@
+-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+-import { I18nManager, Platform } from 'react-native'
++import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
++import { Alert, DevSettings, I18nManager, Platform, StyleSheet, View } from 'react-native'
+ import { I18n } from 'i18n-js'
+ import * as Localization from 'expo-localization'
+ import AsyncStorage from '@react-native-async-storage/async-storage'
+@@ -41,14 +41,31 @@
+   return tag === 'ar' ? 'ar' : 'en'
+ }
+ 
+-type I18nContextValue = {
+-  locale: AppLocale
+-  isRTL: boolean
+-  t: (key: string, params?: Record<string, string | number>) => string
+-  setLocale: (next: AppLocale) => Promise<void>
++/** Keep Yoga / I18nManager aligned with the selected app locale (EN=LTR, AR=RTL). */
++export function syncNativeLayoutDirection(locale: AppLocale): boolean {
++  if (Platform.OS === 'web') return false
++  const rtl = locale === 'ar'
++  I18nManager.allowRTL(true)
++  I18nManager.swapLeftAndRightInRTL(true)
++  const needsFlip = I18nManager.isRTL !== rtl
++  if (needsFlip) {
++    I18nManager.forceRTL(rtl)
++  }
++  return needsFlip
+ }
+ 
+-const I18nContext = createContext<I18nContextValue | null>(null)
++function requestAppReload(): void {
++  try {
++    // Dev / some internal builds expose DevSettings.reload.
++    DevSettings.reload()
++    return
++  } catch {
++    // fall through
++  }
++  Alert.alert(i18n.t('access.rtlRestart.title'), i18n.t('access.rtlRestart.message'), [
++    { text: i18n.t('access.rtlRestart.ok') },
++  ])
++}
+ 
+ export async function loadInitialLocale(): Promise<AppLocale> {
+   try {
+@@ -60,45 +77,92 @@
+   return deviceLocale()
+ }
+ 
++/**
++ * Locale for signed-out / activation surfaces.
++ * Uses the user's explicit app language preference only — never an employee
++ * profile locale from a prior session.
++ */
++export async function resolveAuthLocale(): Promise<AppLocale> {
++  return loadInitialLocale()
++}
++
++type I18nContextValue = {
++  locale: AppLocale
++  isRTL: boolean
++  t: (key: string, params?: Record<string, string | number>) => string
++  setLocale: (next: AppLocale) => Promise<void>
++  /** Re-apply stored preference + native direction (logout, login, deep links). */
++  syncLayoutLocale: () => Promise<AppLocale>
++  /** @deprecated alias — prefer syncLayoutLocale */
++  syncAuthLocale: () => Promise<AppLocale>
++}
++
++const I18nContext = createContext<I18nContextValue | null>(null)
++
+ export function I18nProvider({ initialLocale, children }: { initialLocale: AppLocale; children: ReactNode }) {
+   const [locale, setLocaleState] = useState<AppLocale>(initialLocale)
+   i18n.locale = locale
++  const isRTL = locale === 'ar'
+ 
++  // Align native direction on first paint with the stored preference.
++  useEffect(() => {
++    syncNativeLayoutDirection(initialLocale)
++  }, [initialLocale])
++
+   const setLocale = useCallback(async (next: AppLocale) => {
+-    // Update in-memory locale first so interactive previews and settings switches
+-    // never stall behind AsyncStorage or native RTL bookkeeping.
++    const previous = i18n.locale as AppLocale
+     i18n.locale = next
+     setLocaleState(next)
+-    const rtl = next === 'ar'
+-    // Native RTL flips need a reload. Skip the native bridge on web — RN-web's
+-    // I18nManager is a no-op for isRTL, and calling it during preview remounts
+-    // has been a source of Safari instability.
+-    if (Platform.OS !== 'web' && I18nManager.isRTL !== rtl) {
+-      I18nManager.allowRTL(rtl)
+-      I18nManager.forceRTL(rtl)
+-    }
++    const needsNativeRtlFlip = syncNativeLayoutDirection(next)
+     try {
+       await AsyncStorage.setItem(LOCALE_KEY, next)
+     } catch {
+       // Persistence is best-effort; the active session still switches immediately.
+     }
++    if (needsNativeRtlFlip && previous !== next) {
++      // Native Yoga direction only fully applies after reload.
++      requestAppReload()
++    }
+   }, [])
+ 
++  const syncLayoutLocale = useCallback(async () => {
++    const next = await resolveAuthLocale()
++    i18n.locale = next
++    setLocaleState(next)
++    syncNativeLayoutDirection(next)
++    return next
++  }, [])
++
+   const value = useMemo<I18nContextValue>(
+     () => ({
+       locale,
+-      isRTL: locale === 'ar',
++      isRTL,
+       t: (key, params) => i18n.t(key, params),
+       setLocale,
++      syncLayoutLocale,
++      syncAuthLocale: syncLayoutLocale,
+     }),
+-    [locale, setLocale],
++    [locale, isRTL, setLocale, syncLayoutLocale],
+   )
+ 
+-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
++  return (
++    <I18nContext.Provider value={value}>
++      <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>{children}</View>
++    </I18nContext.Provider>
++  )
+ }
+ 
++const styles = StyleSheet.create({
++  root: { flex: 1 },
++})
++
+ export function useI18n(): I18nContextValue {
+   const ctx = useContext(I18nContext)
+   if (!ctx) throw new Error('useI18n must be used within I18nProvider')
+   return ctx
+ }
++
++/** Active app locale for non-React helpers (API error presentation). */
++export function activeAppLocale(): AppLocale {
++  return (i18n.locale === 'ar' ? 'ar' : 'en') as AppLocale
++}

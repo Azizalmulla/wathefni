@@ -1,0 +1,53 @@
+{
+  "stamp": "20260809T042111Z",
+  "ok": true,
+  "shape_ok": true,
+  "activations": {
+    "WATHEFNI-96550010001": {
+      "phone": "96550010001",
+      "activation_code": "135551",
+      "invite_expires_at": "2026-08-10 04:21:21.438599+00:00",
+      "bank_http": 200,
+      "submission_state": "pending_hr",
+      "has_verified_bank": true,
+      "has_payroll_effective_bank": true,
+      "next_step": "HR is reviewing your submission. Nothing else is needed from you."
+    },
+    "WATHEFNI-9655497001": {
+      "phone": "9655497001",
+      "activation_code": "703374",
+      "invite_expires_at": "2026-08-10 04:21:21.566832+00:00",
+      "bank_http": 200,
+      "submission_state": "pending_payroll",
+      "has_verified_bank": true,
+      "has_payroll_effective_bank": true,
+      "next_step": "HR verified your details. Payroll is reviewing them before they become effective."
+    },
+    "WATHEFNI-9655497002": {
+      "phone": "9655497002",
+      "activation_code": "529216",
+      "invite_expires_at": "2026-08-10 04:21:21.673785+00:00",
+      "bank_http": 200,
+      "submission_state": "needs_correction",
+      "has_verified_bank": false,
+      "has_payroll_effective_bank": false,
+      "next_step": "HR asked for a correction. Update the details and resubmit."
+    },
+    "WATHEFNI-9655497003": {
+      "phone": "9655497003",
+      "activation_code": "402183",
+      "invite_expires_at": "2026-08-10 04:21:21.768495+00:00",
+      "bank_http": 200,
+      "submission_state": "none",
+      "has_verified_bank": true,
+      "has_payroll_effective_bank": true,
+      "next_step": "Your bank details are verified. Submit a change if anything is different."
+    }
+  },
+  "roles": {
+    "noura": "applied_plus_pending_hr",
+    "7001": "pending_payroll",
+    "7002": "needs_correction",
+    "7003": "applied_clean"
+  }
+}

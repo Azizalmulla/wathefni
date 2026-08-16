@@ -1,0 +1,66 @@
+{
+  "probe_utc": "2026-08-04T02:38:58.827806+00:00",
+  "apply_allowed": false,
+  "counters": {
+    "apply_calls": 0,
+    "require_calls": 9,
+    "blocked_apply_attempts": 1
+  },
+  "fail_closed": {
+    "ok": true,
+    "error": "schema_not_migrated:prod_fail_closed:missing=wave1br_prod_missing_probe_zzz",
+    "missing": [
+      "wave1br_prod_missing_probe_zzz"
+    ]
+  },
+  "apply_blocked": true,
+  "hybrid_mode": "production_authority",
+  "gpt_auto_ocr_forbidden": true,
+  "contract": "wave1br-runtime-ddl-ban-v1",
+  "lock_id": 770911001
+}
+ZERO_DDL_OK
+{
+  "probe_utc": "2026-08-04T02:39:01.144297+00:00",
+  "active_migration_extraction": 0,
+  "active_other_ats_export": 0,
+  "active_live_cv": 0,
+  "active_email_inbound": 0,
+  "open_canary_batches": 0,
+  "iso_companies": 0,
+  "migration_apps": 0,
+  "deferred_docs": 0,
+  "has_schema_ledger": true,
+  "ledger_recent": [
+    {
+      "module": "wave1br.bundle",
+      "contract_version": "wave1br-runtime-ddl-ban-v1",
+      "mode": "apply",
+      "applied_at": "2026-08-04T02:38:20.856566+00:00"
+    }
+  ]
+}
+RESIDUAL_QUEUES_OK
+=== FREEZE employees360 ===
+57 passed, 0 failed
+=== FREEZE onboarding ===
+54 passed, 0 failed
+=== FREEZE attendance ===
+22 passed, 0 failed
+=== FREEZE leave ===
+34 passed, 0 failed
+=== FREEZE shifts ===
+96 passed, 0 failed
+=== FREEZE compliance ===
+36 passed, 0 failed
+=== FREEZE action-inbox ===
+47 passed, 0 failed
+SIBLING_FREEZES_GREEN
+#!/usr/bin/env bash
+set -euo pipefail
+BACKUP_DIR="${1:-$(cd "$(dirname "$0")" && pwd)}"
+ORCH=/opt/wathefni/orchestrator
+test -d "$BACKUP_DIR/modules"
+/opt/wathefni/backups/production-pre-migration-wave1br-20260804T023703Z
+ROLLBACK_PATH_OK
+ALL_PROOFS_OK

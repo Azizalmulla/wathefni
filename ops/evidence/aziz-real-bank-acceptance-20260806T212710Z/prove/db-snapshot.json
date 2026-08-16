@@ -1,0 +1,115 @@
+{
+  "requests": [
+    {
+      "request_id": "22ecca3c-3c73-4fd3-a140-96d4bef3091e",
+      "state": "applied",
+      "updated_at": "2026-08-06 21:25:06.551703+00:00",
+      "created_at": "2026-08-06 21:24:05.991688+00:00"
+    },
+    {
+      "request_id": "462ac1d6-2dd2-4f2d-986a-192bb341f947",
+      "state": "applied",
+      "updated_at": "2026-08-06 20:44:29.600011+00:00",
+      "created_at": "2026-08-06 20:44:26.945353+00:00"
+    },
+    {
+      "request_id": "46b10015-30c0-4aa1-bccc-b5cb82eea9f2",
+      "state": "applied",
+      "updated_at": "2026-08-06 20:36:14.619524+00:00",
+      "created_at": "2026-08-06 20:36:12.400481+00:00"
+    },
+    {
+      "request_id": "d36e6c3d-133f-4a75-8b10-328af242c7d6",
+      "state": "applied",
+      "updated_at": "2026-08-06 20:33:37.171748+00:00",
+      "created_at": "2026-08-06 20:33:35.609041+00:00"
+    },
+    {
+      "request_id": "49baff00-7b58-4adb-8cec-0cba7a4cd89f",
+      "state": "withdrawn",
+      "updated_at": "2026-08-06 20:33:35.284229+00:00",
+      "created_at": "2026-08-06 20:27:57.396511+00:00"
+    },
+    {
+      "request_id": "d65628a4-45c0-4e6a-9d42-7811f0f600ec",
+      "state": "applied",
+      "updated_at": "2026-08-06 19:41:56.476772+00:00",
+      "created_at": "2026-08-06 19:04:00.423764+00:00"
+    },
+    {
+      "request_id": "18a34456-b07f-4fe7-b96d-ca17e04b78a4",
+      "state": "rejected",
+      "updated_at": "2026-08-06 19:02:24.135534+00:00",
+      "created_at": "2026-08-06 18:31:08.528164+00:00"
+    }
+  ],
+  "effective": [
+    {
+      "request_id": "22ecca3c-3c73-4fd3-a140-96d4bef3091e",
+      "fingerprint": "0f349ce848ab5e4b",
+      "created_at": "2026-08-06 21:25:06.551703+00:00",
+      "live": true
+    },
+    {
+      "request_id": "462ac1d6-2dd2-4f2d-986a-192bb341f947",
+      "fingerprint": "c4e2fb083889b894",
+      "created_at": "2026-08-06 20:44:29.600011+00:00",
+      "live": false
+    },
+    {
+      "request_id": "46b10015-30c0-4aa1-bccc-b5cb82eea9f2",
+      "fingerprint": "c4e2fb083889b894",
+      "created_at": "2026-08-06 20:36:14.619524+00:00",
+      "live": false
+    },
+    {
+      "request_id": "d36e6c3d-133f-4a75-8b10-328af242c7d6",
+      "fingerprint": "c4e2fb083889b894",
+      "created_at": "2026-08-06 20:33:37.171748+00:00",
+      "live": false
+    },
+    {
+      "request_id": "d65628a4-45c0-4e6a-9d42-7811f0f600ec",
+      "fingerprint": "c4e2fb083889b894",
+      "created_at": "2026-08-06 19:41:56.476772+00:00",
+      "live": false
+    }
+  ],
+  "verified": [
+    {
+      "request_id": "22ecca3c-3c73-4fd3-a140-96d4bef3091e",
+      "fingerprint": "0f349ce848ab5e4b",
+      "verified_at": "2026-08-06 21:25:06.551703+00:00",
+      "revoked_at": null,
+      "verified_by_stage": "payroll"
+    },
+    {
+      "request_id": "462ac1d6-2dd2-4f2d-986a-192bb341f947",
+      "fingerprint": "c4e2fb083889b894",
+      "verified_at": "2026-08-06 20:44:29.600011+00:00",
+      "revoked_at": "2026-08-06 21:18:30.709391+00:00",
+      "verified_by_stage": "payroll"
+    },
+    {
+      "request_id": "46b10015-30c0-4aa1-bccc-b5cb82eea9f2",
+      "fingerprint": "c4e2fb083889b894",
+      "verified_at": "2026-08-06 20:36:14.619524+00:00",
+      "revoked_at": "2026-08-06 21:18:30.709391+00:00",
+      "verified_by_stage": "payroll"
+    },
+    {
+      "request_id": "d36e6c3d-133f-4a75-8b10-328af242c7d6",
+      "fingerprint": "c4e2fb083889b894",
+      "verified_at": "2026-08-06 20:33:37.171748+00:00",
+      "revoked_at": "2026-08-06 21:18:30.709391+00:00",
+      "verified_by_stage": "payroll"
+    },
+    {
+      "request_id": "d65628a4-45c0-4e6a-9d42-7811f0f600ec",
+      "fingerprint": "c4e2fb083889b894",
+      "verified_at": "2026-08-06 19:41:56.476772+00:00",
+      "revoked_at": "2026-08-06 21:18:30.709391+00:00",
+      "verified_by_stage": "payroll"
+    }
+  ]
+}

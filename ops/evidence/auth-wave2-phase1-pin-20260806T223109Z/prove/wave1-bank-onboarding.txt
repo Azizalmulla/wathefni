@@ -1,0 +1,33 @@
+PASS Aziz employee found :: {"key": "WATHEFNI-96599338566", "phone": "96599338566"}
+PASS Aziz activate via Kuwait local-8 :: {"http": 200, "employee_key": "WATHEFNI-96599338566"}
+PASS Aziz reopen /app/me :: {"http": 200, "employee_key": "WATHEFNI-96599338566"}
+PASS Aziz refresh rotates tokens :: {"http": 200}
+PASS Aziz old access dead after refresh :: {"http": 401}
+PASS Aziz new-device re-activate :: {"http": 200}
+PASS Aziz prior session revoked on new-device activate :: {"http": 401}
+PASS Aziz revoke reason reactivated_via_invite :: {"revoked_reason": "reactivated_via_invite"}
+PASS Aziz logout :: {"http": 200}
+PASS Aziz token dead after logout :: {"http": 401}
+PASS Aziz refresh dead after logout :: {"http": 401}
+PASS Aziz request-code generic ok :: {"http": 200, "message": "If your number is registered, you'll receive a code shortly."}
+PASS Aziz canary session restored :: {"http": 200}
+PASS Talal employee found :: {"key": "WATHEFNI-96550252254", "phone": "96550252254"}
+PASS Talal activate via Kuwait local-8 :: {"http": 200, "employee_key": "WATHEFNI-96550252254"}
+PASS Talal reopen /app/me :: {"http": 200, "employee_key": "WATHEFNI-96550252254"}
+PASS Talal refresh rotates tokens :: {"http": 200}
+PASS Talal old access dead after refresh :: {"http": 401}
+PASS Talal new-device re-activate :: {"http": 200}
+PASS Talal prior session revoked on new-device activate :: {"http": 401}
+PASS Talal revoke reason reactivated_via_invite :: {"revoked_reason": "reactivated_via_invite"}
+PASS Talal logout :: {"http": 200}
+PASS Talal token dead after logout :: {"http": 401}
+PASS Talal refresh dead after logout :: {"http": 401}
+PASS Talal request-code generic ok :: {"http": 200, "message": "If your number is registered, you'll receive a code shortly."}
+PASS Talal canary session restored :: {"http": 200}
+PASS Aziz Bank ESS snapshot unchanged :: {"before": {"http": 200, "has_verified_bank": true, "iban_last4": "9548", "bank_name": "Gulf bank", "submission_state": "none", "effective_fp": "0f349ce848ab5e4b", "payroll_effective_present": true, "denied": false}, "after": {"http": 200, "has_verified_bank": true, "iban_last4": "9548", "bank_name": "Gulf bank", "submission_state": "none", "effective_fp": "0f349ce848ab5e4b", "payroll_effective_pr
+PASS Aziz onboarding completion unchanged :: {"before": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}, "after": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}, "profile": ["completed", "completed"]}
+PASS Talal Bank ESS snapshot unchanged :: {"before": {"http": 403, "error": "bank_ess_not_allowlisted", "denied": true}, "after": {"http": 403, "error": "bank_ess_not_allowlisted", "denied": true}}
+PASS Talal onboarding completion unchanged :: {"before": {"state": "waiting_on_employee", "satisfied": 0, "required": 4, "owner": "employee"}, "after": {"state": "waiting_on_employee", "satisfied": 0, "required": 4, "owner": "employee"}, "profile": ["waiting_on_employee", "waiting_on_employee"]}
+AUTH_WAVE1_FREEZE_LIVE:PASS
+failed 0 of 30
+wrote /tmp/auth-wave1-seamless.json

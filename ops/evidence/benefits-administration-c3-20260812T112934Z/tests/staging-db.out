@@ -1,0 +1,86 @@
+    benefits administration c3 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  no dependent master
+      PASS  no payroll ownership
+      PASS  claims out
+      PASS  no claim tables
+      PASS  eligible not enrolled
+      PASS  election not coverage
+      PASS  contrib not deduction
+      PASS  payroll optional
+      PASS  works payroll off
+      PASS  ja optional
+      PASS  no invented KW statute
+      PASS  manager fail closed
+      PASS  assistant mutations out
+      PASS  facts not analytics
+      PASS  setup wave6 benefits
+      PASS  setup honesty claims
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  hr web primary
+      PASS  manager no private
+      PASS  employee my benefits
+      PASS  hr mobile thin
+      PASS  claims engine absent
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema plans
+      PASS  schema coverage
+      PASS  no claim ddl
+      PASS  no employee table
+      PASS  payroll rewrite check
+      PASS  disabled blocks ops
+      PASS  enable company
+      PASS  works payroll off settings
+      PASS  setup policy get
+      PASS  provider
+      PASS  plan created
+      PASS  stable id + version bump
+      PASS  eligibility rule
+      PASS  ineligible explainable
+      PASS  eligible not enrolled marker
+      PASS  eligible
+      PASS  not enrolled yet
+      PASS  enrollment window
+      PASS  start enrollment
+      PASS  historical plan version pinned
+      PASS  election pending evidence
+      PASS  evidence submitted via shared intake
+      PASS  now elected not active
+      PASS  internal confirm distinct from provider
+      PASS  coverage plan version historical
+      PASS  dependent coverage refs canonical
+      PASS  contribution versioned not payroll
+      PASS  payroll handoff off while benefits works
+      PASS  payroll handoff not applied
+      PASS  member ref not insurer proof
+      PASS  waiver
+      PASS  manager status only
+      PASS  employee self
+      PASS  assistant read
+      PASS  assistant mutation forbidden
+      PASS  historical reconstructable
+      PASS  eligibility rule revision
+      PASS  past eligibility snapshot intact
+      PASS  lifecycle consume only
+      PASS  notify first
+      PASS  notify dedupe
+      PASS  typed facts emitted
+      PASS  other company gated
+      PASS  employee self-service off
+      PASS  disable retains history
+      PASS  ops blocked when off
+      PASS  history retained after disable
+      PASS  modularity benefits without payroll
+      PASS  modularity ja optional
+      PASS  must not own payroll truth
+
+    81 passed, 0 failed
+BENEFITS_FULL_PASS
+STAGING_RC=0

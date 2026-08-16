@@ -1,0 +1,59 @@
+FAIL RTL single-source (58 problems)
+  - src/features/schedule/ScheduleView.tsx:619 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/features/schedule/ScheduleWeekStrip.tsx:326 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:150 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:151 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:165 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:213 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:268 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:275 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:318 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:327 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:332 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:360 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:367 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:468 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/components/primitives.tsx:95 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:116 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:124 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:167 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:218 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:220 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:222 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:269 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:272 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:273 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:319 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:323 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:328 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:370 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:451 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:456 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:457 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:463 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:501 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/components/primitives.tsx:502 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/assistant/HRAssistantView.tsx:565 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/assistant/HRAssistantView.tsx:614 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/assistant/HRAssistantView.tsx:261 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/auth/SignInView.tsx:50 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/auth/SignInView.tsx:55 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/auth/SignInView.tsx:86 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/auth/SignInView.tsx:95 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/home/HRHomeParityView.tsx:244 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/home/HRHomeView.tsx:69 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/home/HRHomeView.tsx:127 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/home/HRHomeView.tsx:128 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/leave/LeaveApprovalView.tsx:265 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/operations/OperationalViews.tsx:269 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/operations/OperationalViews.tsx:258 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/operations/OperationalViews.tsx:261 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/operations/OperationalViews.tsx:298 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/operations/OperationalViews.tsx:311 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/features/recruiting/CandidateReviewView.tsx:280 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/recruiting/CandidateReviewView.tsx:356 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/features/recruiting/InterviewDetailView.tsx:226 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/hr/shell/PrioritySectionList.tsx:53 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/hr/shell/PrioritySectionList.tsx:25 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/principals/UnifiedSignInView.tsx:270 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()
+  - src/principals/UnifiedSignInView.tsx:281 — manual RTL textAlign: iOS swaps left/right itself — use readingEdgeAlign()/trailingEdgeAlign()

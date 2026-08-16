@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>D5 Mailbox Connector UX</title>
+<style>
+:root{--bg:#f4efe6;--ink:#1c1917;--muted:#78716c;--line:#e7e0d5;--panel:#fffdf8;--ok:#166534;--warn:#92400e}
+*{box-sizing:border-box}body{margin:0;font-family:"Source Sans 3",system-ui,sans-serif;background:linear-gradient(160deg,#f7f1e6,#efe6d8);color:var(--ink)}
+.wrap{max-width:920px;margin:0 auto;padding:24px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px}
+h1{font-size:1.25rem;margin:0 0 6px}p{margin:0 0 12px;color:var(--muted);line-height:1.5}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}.ok{background:#ecfdf5;color:var(--ok)}.warn{background:#fff7ed;color:var(--warn)}
+.btn{border:0;border-radius:999px;padding:8px 14px;background:#1c1917;color:#fff;font-size:13px}.ghost{background:#efe8dc;color:#1c1917}
+[dir=rtl] body,.rtl{direction:rtl}
+</style></head><body>
+<script>
+const q=new URLSearchParams(location.search);const ar=q.get('locale')==='ar';
+document.documentElement.lang=ar?'ar':'en';document.documentElement.dir=ar?'rtl':'ltr';
+document.write(`<div class="wrap ${ar?'rtl':''}">
+  <div class="card">
+    <h1>${ar?'استقبال البريد والمستندات':'Email & document intake'}</h1>
+    <p>${ar?'المسار الافتراضي: حوّل بريد التوظيف إلى عنوان وظفني.':'Default path: forward recruitment mail to a Wathefni address.'}</p>
+    <div class="row"><span class="badge ok">${ar?'مفعّل':'Enabled'}</span><span class="badge warn">${ar?'تحتاج وظيفة':'Needs a job'}</span></div>
+  </div>
+  <div class="card" data-testid="mailbox-connector-card">
+    <h1>${ar?'ربط صندوق التوظيف (اختياري)':'Recruitment mailbox connector (optional)'}</h1>
+    <p>${ar?'مسار مميز للشركات التي لا تريد التحويل. كل رسالة تدخل مسار الحجر والفحص نفسه.':'Premium path when forwarding is not preferred. Every message enters the same quarantine and scan pipeline.'}</p>
+    <div class="row" style="justify-content:space-between">
+      <div><strong>${ar?'صندوق التوظيف':'Recruitment mailbox'}</strong><div style="color:var(--muted);font-size:13px">careers@company.com</div>
+      <div style="color:var(--muted);font-size:12px">${ar?'آخر مزامنة':'Last sync'}: 1 Aug 2026, 15:00</div></div>
+      <span class="badge ok">${ar?'متصل':'Connected'}</span>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn">${ar?'مزامنة الآن':'Sync now'}</button>
+      <button class="btn ghost">${ar?'إيقاف':'Pause'}</button>
+      <button class="btn ghost">${ar?'إعادة الربط':'Reconnect'}</button>
+      <button class="btn ghost">${ar?'قطع الاتصال':'Disconnect'}</button>
+    </div>
+    <p style="margin-top:12px;font-size:12px">${ar?'صلاحيات قراءة فقط · Gmail readonly / Microsoft Mail.Read':'Read-only · Gmail readonly / Microsoft Mail.Read'}</p>
+  </div>
+</div>`);
+</script></body></html>

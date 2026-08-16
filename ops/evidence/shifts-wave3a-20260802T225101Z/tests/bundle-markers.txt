@@ -1,0 +1,13 @@
+stamp=20260802T225101Z
+chunk=dist/assets/PostHire-DMvGsOiw.js
+FOUND shift-block
+FOUND fbf7ee
+FOUND f3ebe0
+FOUND shifts-board
+FOUND Bulk scheduling readiness
+FOUND الورديات
+CLEAN no:FullCalendar
+CLEAN no:react-big-calendar
+CLEAN no:Schedule-X
+CLEAN no:dhtmlx
+sha256_posthire=2732bec7e0a32e54129be1a380934884d7cfebe5e7fe7d432ccef04a1a20f069

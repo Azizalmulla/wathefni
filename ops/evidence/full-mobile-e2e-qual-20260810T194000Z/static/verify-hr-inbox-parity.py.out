@@ -1,0 +1,12 @@
+PASS Inbox tab uses parity view
+PASS Wordmark + EditorialHeading + FadeIn
+PASS shared InboxLedgerRow
+PASS Employee Notifications uses shared ledger
+PASS SectionHeader + ShowMoreButton
+PASS emphasized unread accent treatment
+PASS palette accent not ink/black
+PASS Inbox allowlist only
+PASS no ActionableCard / PrioritySectionList
+PASS no invented design system cards
+PASS hrInbox keys EN+AR
+hr-inbox-parity: GREEN

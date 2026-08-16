@@ -1,0 +1,6 @@
+prod_total=12
+prod_reals_in_queue=4
+prod_non_real_in_queue=8
+staging_wave6_count=10
+interpretation=environment_data_only; prod has 4 unclassified reals + leftover quarantined synthetics; staging has different synthetic residue
+logic_mismatch=false

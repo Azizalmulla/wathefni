@@ -1,0 +1,10 @@
+stamp=20260803T200430Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/platform-assistant-wave2-staging-20260803T200430Z
+company=WATHEFNI
+channel=hr_dashboard
+mutations=off
+capture_ingest=off
+wave3_started=false
+GATE=STAGING_PLATFORM_ASSISTANT_WAVE2_SAFE_OPS_READS_GO
+STAGING_WAVE2=GO
+PROD_SYNTHETIC=NO-GO

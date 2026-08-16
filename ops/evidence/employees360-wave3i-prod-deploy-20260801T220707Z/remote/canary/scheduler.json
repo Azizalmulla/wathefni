@@ -1,0 +1,113 @@
+{
+  "ok": true,
+  "run": {
+    "run_id": "f98bd23b-9cee-48ea-b220-831ca062ed69",
+    "company_code": "WATHEFNI",
+    "environment": "production",
+    "status": "succeeded",
+    "started_at": "2026-08-01T22:15:15.182656+00:00",
+    "finished_at": "2026-08-01T22:15:15.342589+00:00",
+    "terminations_executed": 1,
+    "revokes_executed": 1,
+    "lag_seconds": 0,
+    "error_text": null,
+    "evidence": {
+      "lag": {
+        "alert": false,
+        "as_of": "2026-08-02T01:15:15.317963+03:00",
+        "due_count": 0,
+        "lag_seconds": 0,
+        "company_code": "WATHEFNI"
+      },
+      "term": {
+        "ok": true,
+        "count": 1,
+        "skipped": [],
+        "executed": [
+          {
+            "reason": "scheduler path",
+            "case_id": null,
+            "payload": {
+              "scheduler": true
+            },
+            "event_id": "de591136-f062-459d-8500-5d6bb9f04165",
+            "to_state": "terminated",
+            "person_id": "afc458d2-b98e-5084-bc9c-c0aa9e936d53",
+            "created_at": "2026-08-01T22:15:15.204234+00:00",
+            "event_type": "termination_effective",
+            "from_state": "notice_period",
+            "request_id": null,
+            "company_code": "WATHEFNI",
+            "effective_on": "2026-08-01",
+            "employee_key": "WATHEFNI-96552263564",
+            "actor_user_id": null,
+            "employment_id": "ca5b0a5f-4405-58e4-a770-b93f36ebd50b",
+            "last_working_day": "2026-08-01",
+            "termination_type": "resignation"
+          }
+        ]
+      },
+      "revoke": {
+        "ok": true,
+        "as_of": "2026-08-02T01:15:15.264823+03:00",
+        "count": 1,
+        "revoked": [
+          {
+            "invites": 0,
+            "sessions": 1,
+            "employee_key": "WATHEFNI-96552263564"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  },
+  "terminations": {
+    "ok": true,
+    "executed": [
+      {
+        "event_id": "de591136-f062-459d-8500-5d6bb9f04165",
+        "company_code": "WATHEFNI",
+        "case_id": null,
+        "request_id": null,
+        "employee_key": "WATHEFNI-96552263564",
+        "person_id": "afc458d2-b98e-5084-bc9c-c0aa9e936d53",
+        "employment_id": "ca5b0a5f-4405-58e4-a770-b93f36ebd50b",
+        "from_state": "notice_period",
+        "to_state": "terminated",
+        "event_type": "termination_effective",
+        "effective_on": "2026-08-01",
+        "last_working_day": "2026-08-01",
+        "termination_type": "resignation",
+        "reason": "scheduler path",
+        "actor_user_id": null,
+        "payload": {
+          "scheduler": true
+        },
+        "created_at": "2026-08-01T22:15:15.204234+00:00"
+      }
+    ],
+    "count": 1,
+    "skipped": []
+  },
+  "revokes": {
+    "ok": true,
+    "revoked": [
+      {
+        "employee_key": "WATHEFNI-96552263564",
+        "sessions": 1,
+        "invites": 0
+      }
+    ],
+    "count": 1,
+    "skipped": [],
+    "as_of": "2026-08-02T01:15:15.264823+03:00"
+  },
+  "lag": {
+    "company_code": "WATHEFNI",
+    "due_count": 0,
+    "lag_seconds": 0,
+    "alert": false,
+    "as_of": "2026-08-02T01:15:15.317963+03:00"
+  }
+}

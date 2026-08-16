@@ -1,0 +1,22 @@
+{
+  "fixture_id": "table_experience_matrix_01",
+  "category": "table_heavy",
+  "language": "en",
+  "layout": "table",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Experience Matrix",
+    "Wathefni",
+    "Staff Engineer",
+    "table.annex@example.com"
+  ],
+  "expected_fields": {
+    "email": "table.annex@example.com",
+    "latest_employer": "Wathefni"
+  },
+  "notes": "Multi-row experience matrix table.",
+  "sha256": "76c89e4df60b4dd752b73f570acd279b8842924b950fd3168c18466d513ef67f",
+  "bytes": 32494
+}

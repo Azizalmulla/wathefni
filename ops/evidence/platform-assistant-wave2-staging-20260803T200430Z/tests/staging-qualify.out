@@ -1,0 +1,78 @@
+health_ok
+active
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2_COMPANIES=WATHEFNI
+CAPTURE_INGEST_OFF_OK
+WAVE2_FLAG_OK
+MUTATIONS_OFF_OK
+PASS  wave2 requires wave1
+PASS  wave2 company
+PASS  wave2 external denied
+PASS  mutations off
+PASS  honesty no payroll
+PASS  honesty ingest off
+PASS  honesty existing records
+PASS  contracts leave+attendance
+PASS  tool leave queue
+PASS  tool attendance exceptions
+PASS  mutations hidden
+PASS  whatsapp hide wave2
+PASS  catalog leave queue
+PASS  catalog attendance exceptions
+PASS  chips leave
+PASS  chips ar
+PASS  leave grounding
+PASS  leave citations
+PASS  leave groups
+PASS  leave deep links prepare-only
+PASS  leave no mutate
+PASS  attendance grounding
+PASS  attendance ingest-off label
+PASS  attendance citations
+PASS  attendance no mutate
+PASS  tenant isolation
+PASS  permission denial
+PASS  disabled module denial
+PASS  fallback missing en/ar
+PASS  fallback stale en/ar
+PASS  fallback partial en/ar
+PASS  fallback unavailable en/ar
+PASS  fallback blocked en/ar
+PASS  db leave envelope
+PASS  db attendance envelope
+PASS  db attendance ingest off
+PASS  audit event
+
+37 passed, 0 failed
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+PASS  E360 freeze doc present
+PASS  Onboarding freeze doc present
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+96 passed, 0 failed
+STAGING_WAVE2_EVAL_OK {"leave_authority": "live_controlled", "leave_total": 2, "attendance_authority": "synthetic", "attendance_total": 0, "mutations_allowed": false}
+STAGING_PLATFORM_ASSISTANT_WAVE2_OK

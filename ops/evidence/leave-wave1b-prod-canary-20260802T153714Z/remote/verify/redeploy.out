@@ -1,0 +1,102 @@
+stamp=20260802T153714Z-redeploy
+time_utc=2026-08-02T15:38:58Z
+active
+=== SHAs before ===
+040e2035890a6633cd4f68517b4e0c6f42013ca0302d6ff8a617e635c8fe505d  /opt/wathefni/orchestrator/app.py
+-rw-r--r-- 1 501 staff 18510 Aug  2 15:32 /opt/wathefni/orchestrator/leave_authority_wave1.py
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_ONBOARDING_SEED=off
+=== accrual timer ===
+enabled
+NextElapseUSecRealtime=Mon 2026-08-03 02:30:48 UTC
+ActiveState=active
+SubState=waiting
+{
+  "db": "wathefni",
+  "leave_requests": [
+    {
+      "leave_id": "51cd940f-a04b-4ad1-9a6a-43e3da59a222",
+      "employee_key": "WATHEFNI-96597727743",
+      "leave_type": "sick",
+      "status": "rejected",
+      "start_date": "2026-06-12",
+      "end_date": "2026-06-12",
+      "fp": "8f6d67e3cc4fbf5ee321af235ecbb20d"
+    },
+    {
+      "leave_id": "dbf82ecf-7ac4-451b-b41c-03de943f2161",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "annual",
+      "status": "requested",
+      "start_date": "2026-06-16",
+      "end_date": "2026-06-18",
+      "fp": "34c7cf18a4d758698bbf7cac6da70d1f"
+    },
+    {
+      "leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "sick",
+      "status": "approved",
+      "start_date": "2026-05-11",
+      "end_date": "2026-05-11",
+      "fp": "abf4cba7cb8702b2d7c067db795d0701"
+    }
+  ],
+  "leave_events": 10,
+  "leave_ledger": 28,
+  "leave_balances": 4,
+  "policies": [
+    {
+      "leave_type": "annual",
+      "enforced": false,
+      "legal_reviewed": false
+    },
+    {
+      "leave_type": "sick",
+      "enforced": false,
+      "legal_reviewed": false
+    }
+  ]
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[15:39:00] backing up orchestrator modules + leave fingerprints
+040e2035890a6633cd4f68517b4e0c6f42013ca0302d6ff8a617e635c8fe505d  app.py
+fc28283610933c56beca5bedd3329b38559e5002af47e12673b208173d27bb03  leave-requests-fingerprint.csv
+b2a592e9aa3859367c9db0f44202f1d433493ed74efe30dcac6aef3530f21cf6  leave-balances-fingerprint.csv
+ee3cd5a2f8ea1f4033bdaa48fb8d2ccf89795cdb3d316d094d478bc959e69961  leave-ledger-fingerprint.csv
+ad906eec780669b41b9ce26f75c91b3ba0e94e70ba91282b3eae1b46fba90aa2  modules/leave_authority_wave1.py
+d981624d0f641d7e2ec64e3f619d76cde383cb4ec1e5e1c8bf349dc2d8c4a7a8  modules/employee_lifecycle_wave3c.py
+[15:39:00] deploying leave authority modules
+[15:39:01] writing synthetic-only drop-in
+[15:39:01] migrate schema 1.0.0
+schema_version 1.0.0
+MIGRATE_OK leave_authority_wave1_prod
+health_ok
+=== SHAs after ===
+040e2035890a6633cd4f68517b4e0c6f42013ca0302d6ff8a617e635c8fe505d  /opt/wathefni/orchestrator/app.py
+ad906eec780669b41b9ce26f75c91b3ba0e94e70ba91282b3eae1b46fba90aa2  /opt/wathefni/orchestrator/leave_authority_wave1.py
+d981624d0f641d7e2ec64e3f619d76cde383cb4ec1e5e1c8bf349dc2d8c4a7a8  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,ATTW4B,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|,LVW1B,LVW1B-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524,965525
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525
+WATHEFNI_LEAVE_BALANCES=on
+LEAVE_AUTHORITY on
+SYNTHETIC_ONLY True
+enabled True
+companies ['WATHEFNI']
+flags_ok_synthetic=true
+enabled
+active
+DEPLOY_OK stamp=20260802T153714Z-redeploy backup=/opt/wathefni/backups/production-pre-leave-wave1b-20260802T153714Z-redeploy evid=/opt/wathefni/production-evidence/leave-wave1b-prod-canary/20260802T153714Z-redeploy

@@ -1,0 +1,8 @@
+{
+  "corpus_id": "kuwait-gcc-contracts-wave1-20260804",
+  "created_at": "2026-08-04T03:57:59.030821+00:00",
+  "count": 18,
+  "structuring_fixtures": 6,
+  "identity_delegate_refs": 12,
+  "note": "Synthetic anonymized Kuwait-style fixtures; not real customer documents."
+}

@@ -1,0 +1,849 @@
+{
+  "stamp": "20260801T031642Z",
+  "api": "https://api.wathefni.ai",
+  "passed": 46,
+  "failed": 1,
+  "total": 47,
+  "context": {
+    "sample_app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+    "sample_position": "OCCTST_044035",
+    "assessment_attempt": "e4350bf4-d104-4500-90db-6a0de4205325"
+  },
+  "modules_enabled": [
+    "analytics",
+    "assessments",
+    "attendance",
+    "calendar",
+    "compliance",
+    "employment_offers",
+    "interviews",
+    "leave",
+    "onboarding",
+    "payroll",
+    "pre_hiring",
+    "shifts",
+    "video_interviews"
+  ],
+  "results": [
+    {
+      "id": "X04",
+      "module": "cross",
+      "title": "Invalid token fail-closed",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 401
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:45.966024+00:00"
+    },
+    {
+      "id": "X02",
+      "module": "cross",
+      "title": "Bootstrap loads modules+access",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "modules": [
+          "analytics",
+          "assessments",
+          "attendance",
+          "calendar",
+          "compliance",
+          "employment_offers",
+          "interviews",
+          "leave",
+          "onboarding",
+          "payroll",
+          "pre_hiring",
+          "shifts",
+          "video_interviews"
+        ],
+        "role": "owner",
+        "perm_count": 59
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:46.519577+00:00"
+    },
+    {
+      "id": "OV01",
+      "module": "overview",
+      "title": "Summary loads",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "keys": [
+          "company_code",
+          "module",
+          "enabled_modules",
+          "access",
+          "features",
+          "totals",
+          "action_counts",
+          "next_action",
+          "assessment_cohorts",
+          "role_priority",
+          "role_next_steps",
+          "definitions",
+          "overview_as_of",
+          "status_counts",
+          "positions",
+          "recent_applications"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:47.541627+00:00"
+    },
+    {
+      "id": "OV02",
+      "module": "overview",
+      "title": "Work-queue mine",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:48.063147+00:00"
+    },
+    {
+      "id": "OV03",
+      "module": "overview",
+      "title": "Work-queue company (owner)",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:48.732380+00:00"
+    },
+    {
+      "id": "OV06",
+      "module": "overview",
+      "title": "Next-action",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:49.186374+00:00"
+    },
+    {
+      "id": "OV07",
+      "module": "overview",
+      "title": "Overview calendar mine",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:49.676616+00:00"
+    },
+    {
+      "id": "JB01",
+      "module": "jobs",
+      "title": "Positions list loads",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 12,
+        "summary_keys": [
+          "total_positions",
+          "open_positions",
+          "draft_positions",
+          "paused_positions",
+          "closed_positions",
+          "open_roles_with_apply_code",
+          "active_qr_codes",
+          "total_applications",
+          "unassigned_recruiter_positions",
+          "unassigned_hm_positions"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:50.505360+00:00"
+    },
+    {
+      "id": "JB03",
+      "module": "jobs",
+      "title": "Open jobs expose apply linkage",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "open_count": 9,
+        "has_link": true
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:50.505385+00:00"
+    },
+    {
+      "id": "IN01",
+      "module": "ingestion",
+      "title": "Mailbox connections readable",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "keys": [
+          "company_code",
+          "feature",
+          "connections"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:51.733251+00:00"
+    },
+    {
+      "id": "IN04",
+      "module": "ingestion",
+      "title": "Email sending settings surface",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:52.527619+00:00"
+    },
+    {
+      "id": "IN03",
+      "module": "ingestion",
+      "title": "Import batches readable",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:53.058220+00:00"
+    },
+    {
+      "id": "IN02",
+      "module": "ingestion",
+      "title": "Import intake readable",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:53.617470+00:00"
+    },
+    {
+      "id": "IN02b",
+      "module": "ingestion",
+      "title": "Import settings readable",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:54.355270+00:00"
+    },
+    {
+      "id": "CA02",
+      "module": "candidates",
+      "title": "Candidate feature flags reachable",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "unified": 200,
+        "classification": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:56.036644+00:00"
+    },
+    {
+      "id": "CA01",
+      "module": "candidates",
+      "title": "Applications list loads",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 11,
+        "total": null
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:57.131493+00:00"
+    },
+    {
+      "id": "CA05",
+      "module": "candidates",
+      "title": "Saved views list",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:57.656812+00:00"
+    },
+    {
+      "id": "CA06",
+      "module": "candidates",
+      "title": "Profile/person-profile for sample app",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "profile": 200,
+        "person": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:59.074953+00:00"
+    },
+    {
+      "id": "CA03",
+      "module": "candidates",
+      "title": "Follow-up filter accepted",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:59.787044+00:00"
+    },
+    {
+      "id": "RK01",
+      "module": "ranking",
+      "title": "Rank for position loads",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "position": "OCCTST_044035",
+        "keys": [
+          "company_code",
+          "evidence_health",
+          "ok",
+          "query",
+          "filters",
+          "position_title",
+          "ranking_basis",
+          "run_id",
+          "request_hash",
+          "pool_total",
+          "total_matching",
+          "matching_count",
+          "rankable_count",
+          "total_rankable",
+          "not_applicable_count",
+          "restricted_held_count",
+          "pool_scanned",
+          "shown_top_n",
+          "capped",
+          "eligible_count"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:01.054332+00:00"
+    },
+    {
+      "id": "RK05",
+      "module": "ranking",
+      "title": "Missing position neutral failure",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:01.694325+00:00"
+    },
+    {
+      "id": "AS01",
+      "module": "assessments",
+      "title": "Assessment config",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "modules_has_assessments": true
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:02.352206+00:00"
+    },
+    {
+      "id": "AS03",
+      "module": "assessments",
+      "title": "Attempts list",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 5
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:03.020058+00:00"
+    },
+    {
+      "id": "AS03b",
+      "module": "assessments",
+      "title": "Needs-review filter",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:03.504050+00:00"
+    },
+    {
+      "id": "AS05",
+      "module": "assessments",
+      "title": "Attempt detail/report payload",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "attempt": "e4350bf4-d104-4500-90db-6a0de4205325"
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:05.663231+00:00"
+    },
+    {
+      "id": "IV01",
+      "module": "interviews",
+      "title": "Upcoming interviews list",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 0
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:06.217525+00:00"
+    },
+    {
+      "id": "IV01_needs_feedback",
+      "module": "interviews",
+      "title": "Interviews tab needs_feedback",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:06.733745+00:00"
+    },
+    {
+      "id": "IV01_video_interviews",
+      "module": "interviews",
+      "title": "Interviews tab video_interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:07.496153+00:00"
+    },
+    {
+      "id": "IV01_completed",
+      "module": "interviews",
+      "title": "Interviews tab completed",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:08.014192+00:00"
+    },
+    {
+      "id": "IV01_cancelled",
+      "module": "interviews",
+      "title": "Interviews tab cancelled",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:08.540472+00:00"
+    },
+    {
+      "id": "IV02",
+      "module": "interviews",
+      "title": "video_interviews module flag observed",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "video_module": true,
+        "modules": [
+          "analytics",
+          "assessments",
+          "attendance",
+          "calendar",
+          "compliance",
+          "employment_offers",
+          "interviews",
+          "leave",
+          "onboarding",
+          "payroll",
+          "pre_hiring",
+          "shifts",
+          "video_interviews"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:08.540508+00:00"
+    },
+    {
+      "id": "CL02",
+      "module": "calendar",
+      "title": "Team scopes",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:10.254768+00:00"
+    },
+    {
+      "id": "CL04",
+      "module": "calendar",
+      "title": "Sync connections",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "keys": [
+          "ok",
+          "company_code",
+          "connections",
+          "count"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:10.791083+00:00"
+    },
+    {
+      "id": "RP01",
+      "module": "reports",
+      "title": "Reports EN",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "keys": [
+          "ok",
+          "company_code",
+          "metric_version",
+          "locale",
+          "partial",
+          "error",
+          "overview",
+          "metrics",
+          "breakdowns",
+          "exports",
+          "summary",
+          "assessments_enabled",
+          "interviews_enabled",
+          "advisory",
+          "hr_decides",
+          "prehire_visibility_policy",
+          "prehire_visibility_scope",
+          "prehire_visibility_summary_company_wide",
+          "prehire_visibility_oversight"
+        ]
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:11.877026+00:00"
+    },
+    {
+      "id": "RP02",
+      "module": "reports",
+      "title": "Reports AR",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:12.402004+00:00"
+    },
+    {
+      "id": "AI01",
+      "module": "assistant",
+      "title": "Capabilities EN",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "has_empty": true
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:12.906297+00:00"
+    },
+    {
+      "id": "AI02",
+      "module": "assistant",
+      "title": "Capabilities AR",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:13.432529+00:00"
+    },
+    {
+      "id": "AI03",
+      "module": "assistant",
+      "title": "Chat sessions list",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:13.939717+00:00"
+    },
+    {
+      "id": "TM00",
+      "module": "teams_email",
+      "title": "Platform/calendar sync integrations surface",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:14.878825+00:00"
+    },
+    {
+      "id": "X03",
+      "module": "cross",
+      "title": "Foreign company_code fail-closed",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 403,
+        "ok": false
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:15.736601+00:00"
+    },
+    {
+      "id": "TM01",
+      "module": "teams_email",
+      "title": "Teams matrix prior PASS accepted pending live recheck script",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "prior": "ops/evidence/m365-teams-matrix-20260730T235844Z",
+        "age_days_note": "recheck scheduled in harness appendix"
+      },
+      "evidence": "m365-teams-matrix-20260730T235844Z",
+      "ts": "2026-08-01T03:19:15.736615+00:00"
+    },
+    {
+      "id": "ML01",
+      "module": "teams_email",
+      "title": "Outbound mail prior FULL PASS accepted pending live recheck",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "prior": "ops/evidence/hybrid-email-m365-outbound-recheck-20260731T024000Z"
+      },
+      "evidence": "hybrid-email-m365-outbound-recheck-20260731T024000Z",
+      "ts": "2026-08-01T03:19:15.736618+00:00"
+    },
+    {
+      "id": "X01",
+      "module": "cross",
+      "title": "Orchestrator health via host :8010 (public /health not exposed)",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "note": "local health 200; public /health 404 expected behind edge",
+        "public_health": 404,
+        "local_health": 200
+      },
+      "ts": "2026-08-01T03:20:12.476019+00:00"
+    },
+    {
+      "id": "CL01",
+      "module": "calendar",
+      "title": "Calendar events mine with start/end",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 0
+      },
+      "ts": "2026-08-01T03:20:12.476279+00:00"
+    },
+    {
+      "id": "CL03",
+      "module": "calendar",
+      "title": "Company scope with start/end",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 0
+      },
+      "ts": "2026-08-01T03:20:12.476379+00:00"
+    },
+    {
+      "id": "AS02",
+      "module": "assessments",
+      "title": "Send cohort via applications overview_cohort (UI path)",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 2
+      },
+      "ts": "2026-08-01T03:20:12.476461+00:00"
+    },
+    {
+      "id": "AS02_orphan_route",
+      "module": "assessments",
+      "title": "Orphan /assessments/queue should 404 not 500",
+      "result": "FAIL",
+      "severity": "P3",
+      "detail": {
+        "status": 500,
+        "body": {
+          "raw": "Internal Server Error"
+        }
+      },
+      "ts": "2026-08-01T03:20:12.476547+00:00"
+    }
+  ],
+  "failures": [
+    {
+      "id": "X01",
+      "module": "cross",
+      "title": "API/orchestrator reachable",
+      "result": "FAIL",
+      "severity": "P2",
+      "detail": {
+        "ok": false,
+        "status": 404,
+        "ms": 692,
+        "payload": {
+          "raw": "Not Found"
+        },
+        "error": "HTTP Error 404: Not Found"
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:18:45.494977+00:00"
+    },
+    {
+      "id": "AS02",
+      "module": "assessments",
+      "title": "Send cohort queue/filter",
+      "result": "FAIL",
+      "severity": "P1",
+      "detail": {
+        "status": 500
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:04.316447+00:00"
+    },
+    {
+      "id": "CL01",
+      "module": "calendar",
+      "title": "Calendar events mine",
+      "result": "FAIL",
+      "severity": "P0",
+      "detail": {
+        "status": 422,
+        "count": 0
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:09.180004+00:00"
+    },
+    {
+      "id": "CL03",
+      "module": "calendar",
+      "title": "Company scope gated or allowed for owner",
+      "result": "FAIL",
+      "severity": "P2",
+      "detail": {
+        "status": 422
+      },
+      "evidence": null,
+      "ts": "2026-08-01T03:19:11.287989+00:00"
+    }
+  ],
+  "corrections": [
+    {
+      "id": "X01",
+      "module": "cross",
+      "title": "Orchestrator health via host :8010 (public /health not exposed)",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "note": "local health 200; public /health 404 expected behind edge",
+        "public_health": 404,
+        "local_health": 200
+      },
+      "ts": "2026-08-01T03:20:12.476019+00:00"
+    },
+    {
+      "id": "CL01",
+      "module": "calendar",
+      "title": "Calendar events mine with start/end",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 0
+      },
+      "ts": "2026-08-01T03:20:12.476279+00:00"
+    },
+    {
+      "id": "CL03",
+      "module": "calendar",
+      "title": "Company scope with start/end",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 0
+      },
+      "ts": "2026-08-01T03:20:12.476379+00:00"
+    },
+    {
+      "id": "AS02",
+      "module": "assessments",
+      "title": "Send cohort via applications overview_cohort (UI path)",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "status": 200,
+        "count": 2
+      },
+      "ts": "2026-08-01T03:20:12.476461+00:00"
+    },
+    {
+      "id": "AS02_orphan_route",
+      "module": "assessments",
+      "title": "Orphan /assessments/queue should 404 not 500",
+      "result": "FAIL",
+      "severity": "P3",
+      "detail": {
+        "status": 500,
+        "body": {
+          "raw": "Internal Server Error"
+        }
+      },
+      "ts": "2026-08-01T03:20:12.476547+00:00"
+    }
+  ]
+}

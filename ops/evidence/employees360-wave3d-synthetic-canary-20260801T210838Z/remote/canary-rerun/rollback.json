@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "status": "rolled_back",
+  "journal": {
+    "journal_id": "adc4a64b-411d-4aab-b7ca-3bf57f85d0a5",
+    "company_code": "WATHEFNI",
+    "action": "rollback_wave3",
+    "idempotency_key": "wave3d-prod-canary:WATHEFNI:2ac2b5b8:rb",
+    "before_json": {
+      "requests": 4
+    },
+    "after_json": {},
+    "evidence": {},
+    "status": "rolled_back",
+    "created_at": "2026-08-01T21:10:19.267048+00:00",
+    "rolled_back_at": null
+  },
+  "wave3c": true
+}

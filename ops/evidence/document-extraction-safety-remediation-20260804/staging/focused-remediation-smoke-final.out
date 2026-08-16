@@ -1,0 +1,54 @@
+MIGRATION_WAVE1_SMOKE_START
+{"core": 20, "1k": 0, "10k": 0, "stage_root": "/opt/wathefni/staging/workspace"}
+=== core contract ===
+inject_loop {"worker": {"ok": true, "worker_id": "smoke-inject", "processed": [{"job_id": "b073f6bb-b536-4792-8ca2-013094340777", "ok": false, "status": "failed", "error": "division by zero\n"}], "dead_letter": 0}, "jobs": {"failed": 1}}
+inject_loop {"worker": {"ok": true, "worker_id": "smoke-inject", "processed": [{"job_id": "b073f6bb-b536-4792-8ca2-013094340777", "ok": false, "status": "dead_letter", "error": "division by zero\n"}], "dead_letter": 1}, "jobs": {"dead_letter": 1}}
+{
+  "honesty": {
+    "contract": "migration_wave1_foundation_cv_chunked",
+    "version": "1.0.0",
+    "real_customer_data": false,
+    "millions_claim": false,
+    "migration_center_ui": false,
+    "employee_leave_compensation": false,
+    "payroll_money": false,
+    "attendance_ingest": false,
+    "ai_assistant": false,
+    "mobile": false,
+    "authority_default": "held",
+    "auto_admit": false,
+    "auto_merge": false,
+    "synthetic_only": true,
+    "allowed_companies": []
+  },
+  "core": {
+    "dry_run": {
+      "duplicate": 2,
+      "valid": 10
+    },
+    "core_batch": "3fab977a-d3b3-4327-bcba-ee7f9b2fb440",
+    "held": {
+      "apps": 19,
+      "with_external_id": 19,
+      "held_ok": true
+    },
+    "exception_queue": 1,
+    "audit_events": 3,
+    "retry_replayed": 1,
+    "tagged_extraction_jobs": 19,
+    "migration_queue_priority": 500,
+    "deferred_queue_jobs": 0,
+    "deferred_document_statuses": [
+      "deferred_migration"
+    ],
+    "rollback_cancelled_extraction_jobs": 19,
+    "rollback_queue_residual": 0,
+    "rollback_attempts": 1,
+    "residual": 0
+  },
+  "ok": true,
+  "verdict": "PASS"
+}
+MIGRATION_WAVE1_SMOKE_PASS
+MIGRATION_WAVE1_SMOKE_TEARDOWN_DONE
+FOCUSED_REMEDIATION_FINAL_OK

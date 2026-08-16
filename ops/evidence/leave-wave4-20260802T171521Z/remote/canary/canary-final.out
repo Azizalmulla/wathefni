@@ -1,0 +1,63 @@
+Leave Wave 4 prod canary tag=fe5d7401 phone=965527257401
+[PASS] wave4 version
+[PASS] wave4 enabled
+[PASS] wave3 enabled
+[PASS] real decision gate on
+[PASS] allowlist has HR1
+[PASS] allowlist has HR2
+[PASS] allowlist size >= 2
+[PASS] enforced=false
+[PASS] legal_reviewed=false
+[PASS] non-allowlisted real denied
+[PASS] synthetic bypasses allowlist
+[PASS] unpaid handoff no money
+[PASS] am vs pm no overlap
+[PASS] db is wathefni
+[PASS] preflight: frozen leave count 2
+[PASS] preflight: frozen fp 51cd940f
+[PASS] preflight: frozen fp e3217e0e
+[PASS] eligibility rows 4
+[PASS] eligibility all found
+[PASS] eligibility enforced false
+[PASS] holiday status present
+[PASS] holiday fail-closed when not approved
+[PASS] employee app require allowlist
+[PASS] employee app Talal-only or empty-fail-closed
+[PASS] stale already resolved (idempotent)
+[PASS] post-dual-control: frozen leave count 2
+[PASS] post-dual-control: frozen fp 51cd940f
+[PASS] post-dual-control: frozen fp e3217e0e
+[PASS] synthetic employee
+[PASS] accrual posted
+[PASS] annual half-day request
+[PASS] enrich next_action decide
+[PASS] enrich non-binding
+[PASS] synth self-approval denied
+[PASS] stale concurrency exercised
+[PASS] HR approve half-day
+[PASS] attendance derived or noted
+[PASS] hourly request
+[PASS] sick request
+[PASS] needs-info
+[PASS] resubmit
+[PASS] attachment upload
+[PASS] sensitive attachment masked for stranger
+[PASS] sensitive attachment visible to privileged HR
+[PASS] mask helper redacts
+[PASS] withdraw
+[PASS] unpaid request
+[PASS] unpaid no reservation money
+[PASS] unpaid approve
+[PASS] unpaid payroll handoff no money
+[PASS] cancel future approved
+[PASS] overlap or conflict surfaced
+[PASS] kill switch disables wave4
+[PASS] kill switch restored
+[PASS] post-cleanup: frozen leave count 2
+[PASS] post-cleanup: frozen fp 51cd940f
+[PASS] post-cleanup: frozen fp e3217e0e
+[PASS] residual synthetic employees 0
+[PASS] balances count unchanged vs preflight
+[PASS] ledger count unchanged vs preflight
+
+60 passed, 0 failed  evid=/opt/wathefni/production-evidence/leave-wave4/20260802T171521Z/canary-final

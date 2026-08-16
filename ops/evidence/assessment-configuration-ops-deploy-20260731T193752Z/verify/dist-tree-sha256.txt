@@ -1,0 +1,1 @@
+5b2a1f60a08cccb40bf8ec83183e13fa1b66b34470c6fcb3cf0b160d7467d232  /Users/azizalmulla/Desktop/claw/ops/evidence/assessment-configuration-ops-deploy-20260731T193752Z/verify/dist-manifest-sha256.txt

@@ -1,0 +1,9 @@
+ROW	FAIL	Attendance correction prepare→confirm	no request_correction exception available for Aziz
+ROW	FAIL	Shift swap approve/reject confirm	no requested swaps for Aziz
+ROW	FAIL	Onboarding Accept/Waive confirm	no reviewable item; detail_keys=[]
+ROW	FAIL	Document Mark reviewed confirm	no needs_review documents
+ROW	PASS	HR Task Mark done confirm	task=c66b52e2-4b80-46fb-a36d-76173b796cb8 keys=['ok', 'status', 'result', 'task']
+ROW	FAIL	Onboarding file preview	no preview_path on onboarding checklist items
+ROW	FAIL	Document file preview/download	no preview/download path on document details
+ROW	PASS	Candidate CV open	path_ok=/dashboard/mobile/candidates/96597485758-WATHEFNI-HR/cv/preview
+MATRIX_JSON [{"row": "Attendance correction prepare→confirm", "verdict": "FAIL", "detail": "no request_correction exception available for Aziz"}, {"row": "Shift swap approve/reject confirm", "verdict": "FAIL", "detail": "no requested swaps for Aziz"}, {"row": "Onboarding Accept/Waive confirm", "verdict": "FAIL", "detail": "no reviewable item; detail_keys=[]"}, {"row": "Document Mark reviewed confirm", "verdict": "FAIL", "detail": "no needs_review documents"}, {"row": "HR Task Mark done confirm", "verdict": "PASS", "detail": "task=c66b52e2-4b80-46fb-a36d-76173b796cb8 keys=['ok', 'status', 'result', 'task']"}, {"row": "Onboarding file preview", "verdict": "FAIL", "detail": "no preview_path on onboarding checklist items"}, {"row": "Document file preview/download", "verdict": "FAIL", "detail": "no preview/download path on document details"}, {"row": "Candidate CV open", "verdict": "PASS", "detail": "path_ok=/dashboard/mobile/candidates/96597485758-WATHEFNI-HR/cv/preview"}]

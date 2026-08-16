@@ -1,0 +1,3 @@
+health_ok
+PROD_BUNDLE_SMOKE {'bundle': 'CalendarShell-De7kPeKB.js', 'painted_view': True, 'updating_overlay': True, 'all_day_row': True, 'explicit_start': True, 'explicit_leave': True, 'priority_surface': True, 'short_padding': True, 'selected': True, 'portal': True, 'overlap_menu': True, 'no_layout_rail': True, 'no_half_hour_dashes': True, 'dashboard_entry': True}
+PROD_SMOKE_OK

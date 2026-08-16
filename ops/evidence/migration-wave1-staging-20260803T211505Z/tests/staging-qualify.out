@@ -1,0 +1,144 @@
+MIGRATION_WAVE1_SMOKE_START
+{"core": 50, "1k": 1000, "10k": 10000, "stage_root": "/opt/wathefni/staging/workspace"}
+=== core contract ===
+inject_loop {"worker": {"ok": true, "worker_id": "smoke-inject", "processed": [{"job_id": "02cd4b5f-1615-4d4d-8927-aa1553961052", "ok": false, "status": "failed", "error": "injected_migration_wave1_fail"}], "dead_letter": 0}, "jobs": {"failed": 1}}
+inject_loop {"worker": {"ok": true, "worker_id": "smoke-inject", "processed": [{"job_id": "02cd4b5f-1615-4d4d-8927-aa1553961052", "ok": false, "status": "dead_letter", "error": "injected_migration_wave1_fail"}], "dead_letter": 1}, "jobs": {"dead_letter": 1}}
+
+=== scale lane 1k count=1000 ===
+{
+  "label": "1k",
+  "count": 1000,
+  "batch_id": "9612b59d-ae4c-49df-b547-49f9784a6912",
+  "elapsed_s": 36.7,
+  "committed": 981,
+  "duplicates": 19,
+  "held": {
+    "apps": 981,
+    "with_external_id": 981,
+    "held_ok": true
+  },
+  "rollback": {
+    "applications": 981,
+    "documents": 981,
+    "files": 981,
+    "candidates": 981
+  },
+  "residual": 0
+}
+
+=== scale lane 10k count=10000 ===
+{
+  "label": "10k",
+  "count": 10000,
+  "batch_id": "71cc95cc-de60-4c23-a3d9-2b5c36aba85b",
+  "elapsed_s": 521.51,
+  "committed": 9981,
+  "duplicates": 19,
+  "held": {
+    "apps": 9981,
+    "with_external_id": 9981,
+    "held_ok": true
+  },
+  "rollback": {
+    "applications": 9981,
+    "documents": 9981,
+    "files": 9981,
+    "candidates": 9981
+  },
+  "residual": 0
+}
+{
+  "honesty": {
+    "contract": "migration_wave1_foundation_cv_chunked",
+    "version": "1.0.0",
+    "real_customer_data": false,
+    "millions_claim": false,
+    "migration_center_ui": false,
+    "employee_leave_compensation": false,
+    "payroll_money": false,
+    "attendance_ingest": false,
+    "ai_assistant": false,
+    "mobile": false,
+    "authority_default": "held",
+    "auto_admit": false,
+    "auto_merge": false
+  },
+  "core": {
+    "dry_run": {
+      "valid": 10,
+      "duplicate": 2
+    },
+    "core_batch": "24e3bbc0-9c1b-42ef-808e-9639ce96b88c",
+    "held": {
+      "apps": 46,
+      "with_external_id": 46,
+      "held_ok": true
+    },
+    "exception_queue": 4,
+    "audit_events": 6,
+    "retry_replayed": 1,
+    "residual": 0
+  },
+  "lane_1k": {
+    "label": "1k",
+    "count": 1000,
+    "batch_id": "9612b59d-ae4c-49df-b547-49f9784a6912",
+    "elapsed_s": 36.7,
+    "committed": 981,
+    "duplicates": 19,
+    "held": {
+      "apps": 981,
+      "with_external_id": 981,
+      "held_ok": true
+    },
+    "rollback": {
+      "applications": 981,
+      "documents": 981,
+      "files": 981,
+      "candidates": 981
+    },
+    "residual": 0
+  },
+  "lane_10k": {
+    "label": "10k",
+    "count": 10000,
+    "batch_id": "71cc95cc-de60-4c23-a3d9-2b5c36aba85b",
+    "elapsed_s": 521.51,
+    "committed": 9981,
+    "duplicates": 19,
+    "held": {
+      "apps": 9981,
+      "with_external_id": 9981,
+      "held_ok": true
+    },
+    "rollback": {
+      "applications": 9981,
+      "documents": 9981,
+      "files": 9981,
+      "candidates": 9981
+    },
+    "residual": 0
+  },
+  "ok": true,
+  "verdict": "PASS"
+}
+MIGRATION_WAVE1_SMOKE_PASS
+MIGRATION_WAVE1_SMOKE_TEARDOWN_DONE
+MIGW1_SMOKE_OK
+{
+  "db": "wathefni_staging",
+  "companies": {
+    "MIGW1ALPHA": {
+      "applications": 0,
+      "migration_batches": 0,
+      "company_row": 0
+    },
+    "MIGW1BRAVO": {
+      "applications": 0,
+      "migration_batches": 0,
+      "company_row": 0
+    }
+  },
+  "residual_total": 0
+}
+RESIDUAL_0_OK

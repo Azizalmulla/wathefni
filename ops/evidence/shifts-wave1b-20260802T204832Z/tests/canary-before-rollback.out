@@ -1,0 +1,61 @@
+shifts wave1b prod synthetic canary tag=8928b7bd
+[PASS] version 1.1.0
+[PASS] wave1 enabled
+[PASS] synthetic_only
+[PASS] company WATHEFNI
+[PASS] other company gated
+[PASS] SHW1B marker synthetic
+[PASS] real employee not synthetic
+[PASS] CAPTURE_INGEST off
+[PASS] future_start blocks before
+[PASS] future_start allows on start
+[PASS] notice allows through end
+[PASS] garden leave blocks notice
+[PASS] suspended overlap blocks
+[PASS] overnight past employment end fails closed
+[PASS] Attendance overnight parity
+[PASS] no leave_balances mutation
+[PASS] no payroll money calc
+[PASS] honesty payroll_money false
+[PASS] dashboard dist expected_updated_at
+[PASS] db is wathefni
+[PASS] orphan 0a6e73dd-9c6d-49a0-b253-39a9922ebd70 already cancelled
+[PASS] orphan 6a84a671-eb7f-43ea-870e-af859a440467 already cancelled
+[PASS] orphan f9ebecf3-8838-456a-8124-c34c3c7600ca already cancelled
+[PASS] no allowlist collision with valid employees
+[PASS] unknown employee fail-closed
+[PASS] same-day create
+[PASS] break_minutes
+[PASS] site_key
+[PASS] idempotent create
+[PASS] split morning
+[PASS] split afternoon
+[PASS] split overlap detected
+[PASS] overnight create
+[PASS] overnight ends_next_day
+[PASS] cross-midnight overlap
+[PASS] dashboard overnight reschedule
+[PASS] stale reschedule denied
+[PASS] concurrent reschedule one winner
+[PASS] leave require_ack
+[PASS] leave ack allows
+[PASS] leave block mode
+[PASS] leave cancel_shift mode requires ack
+[PASS] cancel ok
+[PASS] cancel idempotent
+[PASS] swap request
+[PASS] swap self-denial
+[PASS] swap scoped decision
+[PASS] swap idempotent replay
+[PASS] swap first wins
+[PASS] swap stale second
+[PASS] tenant isolation
+[PASS] lifecycle terminated blocks
+[PASS] residual synthetic zero
+[PASS] real assignment fingerprints unchanged except orphans
+[PASS] orphan 0a6e73dd-9c6d-49a0-b253-39a9922ebd70 soft-cancelled
+[PASS] orphan f9ebecf3-8838-456a-8124-c34c3c7600ca soft-cancelled
+[PASS] orphan 6a84a671-eb7f-43ea-870e-af859a440467 soft-cancelled
+
+57 passed, 0 failed
+CANARY1_EXIT:0

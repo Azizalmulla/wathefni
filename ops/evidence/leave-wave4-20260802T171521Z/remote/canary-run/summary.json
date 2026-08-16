@@ -1,0 +1,35 @@
+{
+  "pass": 62,
+  "fail": 1,
+  "tag": "66197b34",
+  "ids": {
+    "tag": "66197b34",
+    "phone": "965527266197",
+    "name": "LVW4-SYNTH| Emp 66197b34",
+    "leave_ids": [
+      "7a2751b3-28bf-41d7-8a2b-8153d6a26f76",
+      "ea19c9f0-4d17-4443-8493-27c828f4011f",
+      "b9e5d46c-2233-433b-a72e-6501b7c95f7f",
+      "f069e17b-5ac6-4146-84ba-1d9956641ab4",
+      "539b27c9-e501-42d8-abae-e52e58e8edeb"
+    ],
+    "stale_resolved": true,
+    "stale_after_status": "expired_stale",
+    "employee_key": "WATHEFNI-965527266197",
+    "cleanup": {
+      "leave_dual_control_actions": 0,
+      "leave_attachment_audit": 1,
+      "leave_request_attachments": 1,
+      "leave_payroll_handoff_events": 1,
+      "leave_events": 12,
+      "leave_ledger": 14,
+      "leave_requests": 5,
+      "leave_balances": 2,
+      "attendance_events": 2,
+      "attendance_records": 1,
+      "shift_assignments": 2,
+      "attendance_day_projections": 3,
+      "employees": 1
+    }
+  }
+}

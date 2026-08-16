@@ -3,13 +3,17 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { useI18n, readingEdgeAlign } from '@/i18n'
-import { EditorialHeading, FadeIn, IconBadge, PastelCard, WathefniBloom, Wordmark } from '@/components/premium'
+import { EditorialHeading, FadeIn, Wordmark } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
-import { ListRow, SectionHeader, ShowMoreButton, usePagedList } from '@/components/lists'
-import { StatusChip, type StatusTone } from '@/components/ui'
+import { PageBackButton, SectionHeader, ShowMoreButton, usePagedList } from '@/components/lists'
 import { formatDate, formatNumber } from '@/lib/format'
-import { colors, font, layout, radius, spacing, typeScaling } from '@/theme'
+import { ambient, colors, font, layout, radius, spacing, typeScaling } from '@/theme'
 import type { ComplianceJourneyItem, EmployeeDocument } from '@/api/types'
+import {
+  DocumentStatusMark,
+  QuietReviewedMark,
+  renewActionRelevant,
+} from './documentStatusPills'
 import {
   documentsHierarchy,
   groupHistoryByYear,
@@ -38,10 +42,9 @@ const HISTORY_PAGE = 10
  * mean genuinely different things:
  *
  *   Needs attention  something is expired, rejected or waiting on the employee.
- *                    Card treatment, semantic edge, actions on the card.
- *   Current          the live version of each document. Calm compact rows.
- *   History          superseded files, grouped by year and collapsed. Nothing an
- *                    employee acts on, so nothing that competes for their eye.
+ *                    Compact cream row + pink accent only — never a dashboard card.
+ *   Current          the live version of each document. Calm cream ledger rows.
+ *   History          superseded files, grouped by year and collapsed. Quieter type.
  *
  * The same current file is never rendered twice.
  */
@@ -75,7 +78,7 @@ export function DocumentsView({
     if (raw) {
       const key = `documents.status.${raw}`
       const translated = t(key)
-      if (translated !== key) return translated
+      if (translated !== key && !isMissingTranslation(translated)) return translated
     }
     return t('status.unknown')
   }
@@ -86,10 +89,10 @@ export function DocumentsView({
     if (type) {
       const key = `documents.item.${type}`
       const translated = t(key)
-      if (translated !== key) return translated
+      if (translated !== key && !isMissingTranslation(translated)) return translated
     }
     const label = String(apiLabel || '').trim()
-    if (label && !isBackendKey(label)) return label
+    if (label && !isBackendKey(label) && !isMissingTranslation(label)) return label
     return t('documents.item.other')
   }
   const docLabel = (item: ComplianceJourneyItem) => {
@@ -101,15 +104,7 @@ export function DocumentsView({
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
         <View style={styles.nav}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}
-            onPress={onBack}
-            style={styles.backButton}
-            hitSlop={8}
-          >
-            <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
-          </Pressable>
+          <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
           <Wordmark compact align="center" />
           <View style={styles.navSpacer} />
         </View>
@@ -120,55 +115,55 @@ export function DocumentsView({
         </FadeIn>
 
         {hierarchy.complianceUnavailable ? (
-          <View style={styles.noticeCard}>
-            <Text style={[styles.supporting, align]}>{t('documents.compliancePartial')}</Text>
-          </View>
+          <Text style={[styles.calmNote, align]}>{t('documents.compliancePartial')}</Text>
         ) : null}
 
         {hierarchy.attention.length ? (
-          <View style={styles.list}>
+          <View style={styles.section}>
             <SectionHeader title={t('documents.needsAttention')} count={hierarchy.attention.length} />
-            {hierarchy.attention.map((item, index) => (
-              <AttentionCard
-                key={`attention-${item.document_type}-${index}`}
-                item={item}
-                label={docLabel(item)}
-                status={statusLabel(item.review_status)}
-                statusTone={complianceTone(item)}
-                openingId={openingId}
-                downloadProgress={downloadProgress}
-                renewingType={renewingType}
-                onOpen={onOpen}
-                onCancel={onCancel}
-                onRenew={onRenew}
-              />
-            ))}
+            <View style={styles.ledger}>
+              {hierarchy.attention.map((item, index) => (
+                <AttentionRow
+                  key={`attention-${item.document_type}-${index}`}
+                  item={item}
+                  label={docLabel(item)}
+                  status={statusLabel(item.review_status)}
+                  openingId={openingId}
+                  downloadProgress={downloadProgress}
+                  renewingType={renewingType}
+                  onOpen={onOpen}
+                  onCancel={onCancel}
+                  onRenew={onRenew}
+                />
+              ))}
+            </View>
           </View>
         ) : null}
 
         {hierarchy.current.length ? (
-          <View style={styles.list}>
+          <View style={styles.section}>
             <SectionHeader title={t('documents.current')} count={hierarchy.current.length} />
-            {hierarchy.current.map((item, index) => (
-              <CurrentRow
-                key={`current-${item.document_type}-${index}`}
-                item={item}
-                label={docLabel(item)}
-                status={statusLabel(item.review_status)}
-                statusTone={complianceTone(item)}
-                openingId={openingId}
-                downloadProgress={downloadProgress}
-                renewingType={renewingType}
-                onOpen={onOpen}
-                onCancel={onCancel}
-                onRenew={onRenew}
-              />
-            ))}
+            <View style={styles.ledger}>
+              {hierarchy.current.map((item, index) => (
+                <CurrentRow
+                  key={`current-${item.document_type}-${index}`}
+                  item={item}
+                  label={docLabel(item)}
+                  status={statusLabel(item.review_status)}
+                  openingId={openingId}
+                  downloadProgress={downloadProgress}
+                  renewingType={renewingType}
+                  onOpen={onOpen}
+                  onCancel={onCancel}
+                  onRenew={onRenew}
+                />
+              ))}
+            </View>
           </View>
         ) : null}
 
         {historyYears.length ? (
-          <View style={styles.list}>
+          <View style={styles.section}>
             <SectionHeader title={t('documents.history')} count={hierarchy.history.length} />
             {historyYears.map((group, index, groups) => (
               <HistoryYear
@@ -179,11 +174,7 @@ export function DocumentsView({
                     : formatNumber(group.year, locale, 0)
                 }
                 entries={group.entries}
-                // Only the most recent year is laid out on arrival; older years
-                // stay closed so a decade of renewals cannot flood the screen.
                 initiallyOpen={index === 0}
-                // With one year there is nothing to collapse toward, so the
-                // heading keeps its context without offering an empty screen.
                 collapsible={groups.length > 1}
                 resolveLabel={resolveLabel}
                 openingId={openingId}
@@ -196,11 +187,9 @@ export function DocumentsView({
         ) : null}
 
         {empty ? (
-          <PastelCard tone="lilac" style={styles.emptyCard}>
-            <IconBadge name="documents-outline" />
-            <Text style={[styles.emptyText, align]}>{t('documents.empty')}</Text>
-            <WathefniBloom variant="watermark" />
-          </PastelCard>
+          <Text style={[styles.calmNote, align]} accessibilityRole="summary">
+            {t('documents.empty')}
+          </Text>
         ) : null}
 
         <Text style={[styles.footnote, align]}>{t('documents.legitimacyNote')}</Text>
@@ -214,24 +203,15 @@ function isBackendKey(value: string): boolean {
   return /^[a-z0-9]+([._-][a-z0-9]+)+$/.test(value)
 }
 
-/** Review status drives the semantic chip tone; ambient card colour never does. */
-function complianceTone(item: ComplianceJourneyItem): StatusTone {
-  const status = String(item.review_status || '').toLowerCase()
-  if (item.rejection_reason || status === 'rejected_reupload' || status === 'expired' || status === 'missing') {
-    return 'danger'
-  }
-  if (item.renewal_required || status === 'expiring_soon' || status === 'pending_hr_review' || status === 'replacement_required') {
-    return 'warning'
-  }
-  if (status === 'hr_reviewed' || status === 'accepted' || status === 'approved') return 'success'
-  return 'neutral'
+/** i18n-js missing-key sentinel — never show `[missing "en.…"]` as a document name. */
+function isMissingTranslation(value: string): boolean {
+  return /\[missing\s+"/i.test(value)
 }
 
 type ComplianceItemProps = {
   item: ComplianceJourneyItem
   label: string
   status: string
-  statusTone: StatusTone
   openingId: string | null
   downloadProgress: number
   renewingType?: string | null
@@ -241,14 +221,13 @@ type ComplianceItemProps = {
 }
 
 /**
- * Something is wrong or waiting on the employee. This is the one place in
- * Documents that earns a card, a semantic edge and inline actions.
+ * Action-required row: cream ledger + pink accent only.
+ * Status, expiry and renew stay; no white card stack.
  */
-function AttentionCard({
+function AttentionRow({
   item,
   label,
   status,
-  statusTone,
   openingId,
   downloadProgress,
   renewingType,
@@ -260,87 +239,120 @@ function AttentionCard({
   const align = readingEdgeAlign(isRTL)
   const fileId = item.current_file_id || null
   const opening = fileId != null && openingId === fileId
-  // HR sometimes stores a machine reason code; only show a reason a human wrote.
   const rawReason = String(item.rejection_reason || '').trim()
   const reason = rawReason && !isBackendKey(rawReason) ? rawReason : null
-  const edge = statusTone === 'danger' ? colors.danger : colors.warning
+  const expiry = item.expiry_date
+    ? `${t('documents.expiry')}: ${formatDate(item.expiry_date, locale)}`
+    : t('documents.noExpiry')
 
   return (
-    <View style={[styles.attentionCard, { borderColor: edge }]} accessibilityLabel={`${label}. ${status}`}>
-      <View style={styles.attentionHead}>
-        <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.itemTitle, styles.flex, align]}>
-          {label}
-        </Text>
-        <StatusChip label={status} tone={statusTone} />
+    <View style={styles.ledgerRow} accessibilityLabel={`${label}. ${status}. ${expiry}`}>
+      <View style={styles.attentionAccent} accessibilityElementsHidden />
+      <View style={styles.ledgerMain}>
+        <View style={styles.flex}>
+          <View style={styles.titleRow}>
+            <Text
+              maxFontSizeMultiplier={typeScaling.body}
+              numberOfLines={2}
+              style={[styles.title, styles.flex, align]}
+            >
+              {label}
+            </Text>
+            <DocumentStatusMark item={item} label={status} />
+          </View>
+          <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.meta, align]}>
+            {expiry}
+          </Text>
+          {item.renewal_required ? (
+            <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.metaAction, align]}>
+              {t('documents.renewalRequired')}
+            </Text>
+          ) : null}
+          {reason ? (
+            <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.meta, align]}>
+              {t('documents.rejectionReason')}: {reason}
+            </Text>
+          ) : null}
+          <DocumentActions
+            item={item}
+            label={label}
+            fileId={fileId}
+            opening={opening}
+            renewingType={renewingType}
+            onOpen={onOpen}
+            onCancel={onCancel}
+            onRenew={onRenew}
+          />
+          {opening ? <DownloadProgress progress={downloadProgress} labelled /> : null}
+        </View>
       </View>
-      <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.meta, align]}>
-        {item.expiry_date
-          ? `${t('documents.expiry')}: ${formatDate(item.expiry_date, locale)}`
-          : t('documents.noExpiry')}
-      </Text>
-      {item.renewal_required ? (
-        <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.meta, align, styles.metaWarning]}>
-          {t('documents.renewalRequired')}
-        </Text>
-      ) : null}
-      {reason ? (
-        <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.meta, align]}>
-          {t('documents.rejectionReason')}: {reason}
-        </Text>
-      ) : null}
-      <DocumentActions
-        item={item}
-        label={label}
-        fileId={fileId}
-        opening={opening}
-        renewingType={renewingType}
-        onOpen={onOpen}
-        onCancel={onCancel}
-        onRenew={onRenew}
-      />
-      {opening ? <DownloadProgress progress={downloadProgress} labelled /> : null}
     </View>
   )
 }
 
-/** A current document is calm: name, status, expiry, and the same two actions. */
+/** Current document: dense name → expiry → quiet Reviewed → chevron. Whole row opens. */
 function CurrentRow({
   item,
   label,
-  status,
-  statusTone,
   openingId,
   downloadProgress,
-  renewingType,
   onOpen,
   onCancel,
-  onRenew,
 }: ComplianceItemProps) {
-  const { t, locale } = useI18n()
+  const { t, locale, isRTL } = useI18n()
+  const align = readingEdgeAlign(isRTL)
   const fileId = item.current_file_id || null
   const opening = fileId != null && openingId === fileId
   const expiry = item.expiry_date
     ? `${t('documents.expiry')}: ${formatDate(item.expiry_date, locale)}`
     : t('documents.noExpiry')
+  const canOpen = Boolean(fileId)
+  const quietStatus = t('documents.reviewedQuiet')
+
   return (
-    <ListRow
-      title={label}
-      meta={expiry}
-      trailing={<StatusChip label={status} tone={statusTone} />}
-      accessibilityLabel={`${label}. ${status}. ${expiry}`}
+    <Pressable
+      accessibilityRole={canOpen ? 'button' : undefined}
+      accessibilityLabel={`${label}. ${quietStatus}. ${expiry}`}
+      accessibilityHint={canOpen ? t('documents.view') : undefined}
+      disabled={!canOpen && !opening}
+      onPress={() => {
+        if (!fileId) return
+        if (opening) onCancel?.()
+        else onOpen(fileId, label)
+      }}
+      style={({ pressed }) => [styles.currentRow, pressed && canOpen && styles.pressed]}
     >
-      <DocumentActions
-        item={item}
-        label={label}
-        fileId={fileId}
-        opening={opening}
-        renewingType={renewingType}
-        onOpen={onOpen}
-        onCancel={onCancel}
-        onRenew={onRenew}
-      />
-      {opening ? <DownloadProgress progress={downloadProgress} /> : null}
-    </ListRow>
+      <View style={styles.currentMain}>
+        <View style={styles.flex}>
+          <Text
+            maxFontSizeMultiplier={typeScaling.body}
+            numberOfLines={1}
+            style={[styles.currentTitle, align]}
+          >
+            {label}
+          </Text>
+          <Text maxFontSizeMultiplier={typeScaling.chip} numberOfLines={1} style={[styles.currentMeta, align]}>
+            {expiry}
+          </Text>
+          {opening ? <DownloadProgress progress={downloadProgress} /> : null}
+        </View>
+        <QuietReviewedMark label={quietStatus} />
+        {canOpen || opening ? (
+          opening ? (
+            <Text maxFontSizeMultiplier={typeScaling.chip} style={styles.cancelInline}>
+              {t('common.cancel')}
+            </Text>
+          ) : (
+            <Ionicons
+              name={isRTL ? 'chevron-back' : 'chevron-forward'}
+              size={16}
+              color={colors.navMuted}
+              accessibilityElementsHidden
+            />
+          )
+        ) : null}
+      </View>
+    </Pressable>
   )
 }
 
@@ -353,6 +365,7 @@ function DocumentActions({
   onOpen,
   onCancel,
   onRenew,
+  hideView = false,
 }: {
   item: ComplianceJourneyItem
   label: string
@@ -362,22 +375,36 @@ function DocumentActions({
   onOpen: (fileId: string, filename: string | null) => void
   onCancel?: () => void
   onRenew?: (documentType: string) => void
+  /** When the whole row opens the file, skip the duplicate View control. */
+  hideView?: boolean
 }) {
-  const { t, isRTL } = useI18n()
-  const canRenew = item.can_renew !== false && Boolean(onRenew)
-  if (!fileId && !canRenew) return null
+  const { t } = useI18n()
+  const canRenew = renewActionRelevant(item, onRenew)
+  const showView = Boolean(fileId) && !hideView
+  if (!showView && !canRenew && !(opening && hideView)) return null
   const renewing = renewingType === item.document_type
   return (
     <View style={styles.actionRow}>
-      {fileId ? (
+      {showView ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${opening ? t('common.cancel') : t('documents.view')}: ${label}`}
-          onPress={() => (opening ? onCancel?.() : onOpen(fileId, label))}
+          onPress={() => (opening ? onCancel?.() : onOpen(fileId!, label))}
           style={({ pressed }) => [styles.textAction, pressed && styles.pressed]}
           hitSlop={6}
         >
           <Text style={styles.textActionLabel}>{opening ? t('common.cancel') : t('documents.view')}</Text>
+        </Pressable>
+      ) : null}
+      {opening && hideView ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${t('common.cancel')}: ${label}`}
+          onPress={() => onCancel?.()}
+          style={({ pressed }) => [styles.textAction, pressed && styles.pressed]}
+          hitSlop={6}
+        >
+          <Text style={styles.textActionLabel}>{t('common.cancel')}</Text>
         </Pressable>
       ) : null}
       {canRenew ? (
@@ -439,7 +466,8 @@ function HistoryYear({
   onOpen: (fileId: string, filename: string | null) => void
   onCancel?: () => void
 }) {
-  const { t, locale } = useI18n()
+  const { t, locale, isRTL } = useI18n()
+  const align = readingEdgeAlign(isRTL)
   const [open, setOpen] = useState(initiallyOpen)
   const page = usePagedList(entries, HISTORY_PAGE)
   const expanded = open || !collapsible
@@ -453,29 +481,53 @@ function HistoryYear({
         onToggle={() => setOpen((value) => !value)}
       />
       {expanded ? (
-        <>
+        <View style={styles.ledger}>
           {page.visible.map((entry) => {
             const label = resolveLabel(entry.documentType, entry.label)
             const opening = entry.fileId != null && openingId === entry.fileId
+            const when = entry.date ? formatDate(entry.date, locale) : t('documents.previousVersion')
+            const canOpen = Boolean(entry.fileId)
             return (
-              <ListRow
+              <Pressable
                 key={entry.id}
-                title={label}
-                meta={entry.date ? formatDate(entry.date, locale) : t('documents.previousVersion')}
-                onPress={
-                  entry.fileId ? () => (opening ? onCancel?.() : onOpen(entry.fileId!, label)) : undefined
-                }
-                accessibilityLabel={`${label}. ${t('documents.previousVersion')}`}
-                trailing={
-                  entry.fileId ? (
-                    <Text style={styles.textActionLabel}>
-                      {opening ? t('common.cancel') : t('documents.view')}
-                    </Text>
-                  ) : null
-                }
+                accessibilityRole={canOpen ? 'button' : undefined}
+                accessibilityLabel={`${label}. ${t('documents.previousVersion')}. ${when}`}
+                disabled={!canOpen && !opening}
+                onPress={() => {
+                  if (!entry.fileId) return
+                  if (opening) onCancel?.()
+                  else onOpen(entry.fileId, label)
+                }}
+                style={({ pressed }) => [styles.historyRow, pressed && canOpen && styles.pressed]}
               >
-                {opening ? <DownloadProgress progress={downloadProgress} /> : null}
-              </ListRow>
+                <View style={styles.historyMain}>
+                  <View style={styles.flex}>
+                    <Text
+                      maxFontSizeMultiplier={typeScaling.body}
+                      numberOfLines={1}
+                      style={[styles.historyTitle, align]}
+                    >
+                      {label}
+                    </Text>
+                    <Text maxFontSizeMultiplier={typeScaling.chip} numberOfLines={1} style={[styles.historyMeta, align]}>
+                      {when}
+                    </Text>
+                    {opening ? <DownloadProgress progress={downloadProgress} /> : null}
+                  </View>
+                  {opening ? (
+                    <Text maxFontSizeMultiplier={typeScaling.chip} style={styles.cancelInline}>
+                      {t('common.cancel')}
+                    </Text>
+                  ) : canOpen ? (
+                    <Ionicons
+                      name={isRTL ? 'chevron-back' : 'chevron-forward'}
+                      size={15}
+                      color={colors.navMuted}
+                      accessibilityElementsHidden
+                    />
+                  ) : null}
+                </View>
+              </Pressable>
             )
           })}
           {page.hidden ? (
@@ -484,7 +536,7 @@ function HistoryYear({
               onPress={page.showMore}
             />
           ) : null}
-        </>
+        </View>
       ) : null}
     </View>
   )
@@ -492,37 +544,80 @@ function HistoryYear({
 
 const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  backButton: {
-    width: layout.touchTarget,
-    height: layout.touchTarget,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-  },
   navSpacer: { width: layout.touchTarget },
   hero: { gap: spacing.xs },
   subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20 },
-  list: { gap: spacing.sm },
-  historyGroup: { gap: spacing.sm },
-  attentionCard: {
-    gap: spacing.xs,
-    padding: spacing.md,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth * 2,
+  section: { gap: spacing.sm },
+  ledger: { gap: 0 },
+  ledgerRow: {
+    minHeight: layout.touchTarget,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
-  attentionHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  itemTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800' },
-  meta: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
-  metaWarning: { color: colors.warning, fontWeight: '700' },
-  supporting: { color: colors.subtle, fontSize: font.small, lineHeight: 19 },
+  currentRow: {
+    minHeight: 44,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  currentMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  currentTitle: { color: colors.ink, fontSize: font.body, fontWeight: '700', lineHeight: 19 },
+  currentMeta: { color: colors.subtle, fontSize: font.tiny, lineHeight: 15, marginTop: 1 },
+  historyRow: {
+    minHeight: 40,
+    paddingVertical: spacing.sm - 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  historyMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  historyTitle: { color: colors.subtle, fontSize: font.small, fontWeight: '600', lineHeight: 18 },
+  historyMeta: { color: colors.navMuted, fontSize: font.tiny, lineHeight: 14, marginTop: 1 },
+  cancelInline: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700' },
+  attentionAccent: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: radius.pill,
+    backgroundColor: ambient.schedule.fill,
+    marginEnd: spacing.xs,
+  },
+  accentSpacer: {
+    width: 3,
+    alignSelf: 'stretch',
+    marginEnd: spacing.xs,
+    opacity: 0,
+  },
+  ledgerMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  title: { color: colors.ink, fontSize: font.body, fontWeight: '800', lineHeight: 20 },
+  meta: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16, marginTop: 2 },
+  metaAction: { color: colors.ink, fontSize: font.tiny, lineHeight: 16, marginTop: 2, fontWeight: '700' },
   flex: { flex: 1 },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginTop: spacing.xs },
   textAction: { minHeight: layout.touchTarget, justifyContent: 'center' },
-  textActionLabel: { color: colors.accent, fontSize: font.small, fontWeight: '700' },
+  textActionLabel: { color: colors.ink, fontSize: font.small, fontWeight: '700' },
   pressed: { opacity: 0.85 },
-  documentProgress: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  documentProgress: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
   documentProgressTrack: {
     flex: 1,
     height: 6,
@@ -531,15 +626,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   documentProgressFill: { height: 6, backgroundColor: colors.ink },
-  noticeCard: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.xl,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+  historyGroup: { gap: spacing.xs },
+  calmNote: {
+    color: colors.subtle,
+    fontSize: font.body,
+    lineHeight: 22,
+    fontWeight: '600',
+    paddingVertical: spacing.sm,
   },
-  emptyCard: { gap: spacing.md, paddingVertical: spacing.xl, alignItems: 'flex-start' },
-  emptyText: { color: colors.ink, fontSize: font.body, fontWeight: '600' },
   footnote: { color: colors.subtle, fontSize: font.tiny, lineHeight: 17 },
 })

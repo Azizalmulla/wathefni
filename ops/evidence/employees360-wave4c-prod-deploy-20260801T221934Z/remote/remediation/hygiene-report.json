@@ -1,0 +1,211 @@
+{
+  "stamp": "2026-08-01T22:24:23.655958+00:00",
+  "dry_run": false,
+  "categories": {
+    "real_active_unclassified": [
+      {
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "employee_key": "WATHEFNI-96550252254",
+        "name": "Talal Fadhli",
+        "phone": "96550252254",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave2_backfill",
+        "reason": "real_employee_active_employment_left_unclassified"
+      },
+      {
+        "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+        "employee_key": "WATHEFNI-96566363363",
+        "name": "Fouad Burhamad",
+        "phone": "96566363363",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave2_backfill",
+        "reason": "real_employee_active_employment_left_unclassified"
+      },
+      {
+        "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+        "employee_key": "WATHEFNI-96597727743",
+        "name": "mohammad alqattan",
+        "phone": "96597727743",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave2_backfill",
+        "reason": "real_employee_active_employment_left_unclassified"
+      },
+      {
+        "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+        "employee_key": "WATHEFNI-96599411617",
+        "name": "Brian Saleh",
+        "phone": "96599411617",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave2_backfill",
+        "reason": "real_employee_active_employment_left_unclassified"
+      }
+    ],
+    "synthetic_test_leftover_quarantined": [
+      {
+        "employment_id": "068c496c-269d-59ba-8028-e183fd58eadf",
+        "employee_key": "WATHEFNI-96552202357",
+        "name": "W3D-SYNTH|Prod Canary 2ac2b5b8",
+        "phone": "96552202357",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave3c_same_key_rehire",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "a37f5f77-d3d2-5a8c-b07a-a2ec61dccf85",
+        "employee_key": "WATHEFNI-96552203-R318C",
+        "name": "W3D-SYNTH|Prod Canary 0bcf3270",
+        "phone": "96596552203",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "rehire",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "4ef972d9-8d19-5668-97f2-639bf2811d32",
+        "employee_key": "WATHEFNI-96552263564",
+        "name": "W3D-SYNTH|W3I Canary 31cc4cef",
+        "phone": "96552263564",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave3c_same_key_rehire",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "0b3824a7-20d2-52c2-a9a4-e9431959ae3e",
+        "employee_key": "WATHEFNI-96552263571",
+        "name": "W3D-SYNTH|W3I Canary 31cc4cef-B",
+        "phone": "96552263571",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave3d_synthetic_canary",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "c0012685-1deb-539e-954f-9b43b3626720",
+        "employee_key": "WATHEFNI-96552289913",
+        "name": "W3D-SYNTH|W3E Kill 015f3912",
+        "phone": "96552289913",
+        "employment_status": "active",
+        "lifecycle_state": "active",
+        "source": "wave3d_synthetic_canary",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "b1f47042-1b34-5049-aac2-65f3c2588b0e",
+        "employee_key": "WATHEFNI-96552295759",
+        "name": "W3D-SYNTH|W3E Timer 47a6cfcf",
+        "phone": "96552295759",
+        "employment_status": "left",
+        "lifecycle_state": "terminated",
+        "source": "wave3d_synthetic_canary",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "40a00ebc-a385-5e40-88da-596198f884cf",
+        "employee_key": "WATHEFNI-96596552203",
+        "name": "W3D-SYNTH|Prod Canary 0bcf3270",
+        "phone": "96596552203",
+        "employment_status": "left",
+        "lifecycle_state": "terminated",
+        "source": "wave3d_synthetic_canary",
+        "reason": "confirmed_synthetic_canary_leftover"
+      },
+      {
+        "employment_id": "c24d1604-7430-5183-97c4-64e80cd972d6",
+        "employee_key": null,
+        "name": "W3D-SYNTH|Prod Canary 2ac2b5b8",
+        "phone": "96552202357",
+        "employment_status": "left",
+        "lifecycle_state": "terminated",
+        "source": "wave3d_synthetic_canary",
+        "reason": "confirmed_synthetic_canary_leftover"
+      }
+    ],
+    "preserved_historical_non_synth": [],
+    "unknown_skipped": []
+  },
+  "actions": [
+    {
+      "employment_id": "068c496c-269d-59ba-8028-e183fd58eadf",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "a37f5f77-d3d2-5a8c-b07a-a2ec61dccf85",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "4ef972d9-8d19-5668-97f2-639bf2811d32",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "0b3824a7-20d2-52c2-a9a4-e9431959ae3e",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "c0012685-1deb-539e-954f-9b43b3626720",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "b1f47042-1b34-5049-aac2-65f3c2588b0e",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "40a00ebc-a385-5e40-88da-596198f884cf",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    },
+    {
+      "employment_id": "c24d1604-7430-5183-97c4-64e80cd972d6",
+      "action": "quarantine",
+      "new_status": "quarantined_synthetic_test"
+    }
+  ],
+  "final_status_counts": {
+    "quarantined_synthetic_test": 8,
+    "remediation": 4
+  },
+  "final_remediation_queue_count": 4,
+  "reals_after": [
+    {
+      "legacy_employee_key": "WATHEFNI-96550252254",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null
+    },
+    {
+      "legacy_employee_key": "WATHEFNI-96599411617",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null
+    },
+    {
+      "legacy_employee_key": "WATHEFNI-96566363363",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null
+    },
+    {
+      "legacy_employee_key": "WATHEFNI-96597727743",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null
+    }
+  ],
+  "category_counts": {
+    "real_active_unclassified": 4,
+    "synthetic_test_leftover_quarantined": 8,
+    "preserved_historical_non_synth": 0,
+    "unknown_skipped": 0
+  }
+}

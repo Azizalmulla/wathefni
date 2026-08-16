@@ -1,0 +1,15 @@
+source_commit=40a4e2621f4818bf7c0f6ce3642032297bfbe7b2
+artifact_sha=052743494cbc47efed07e999913e8b8ddbf509124ea3f17efac76c467a3fa973
+staging_backup=/opt/wathefni/backups/staging-pre-talent-pool-classification-20260725T203327Z
+db_dump_sha=16604dcb3fb6ae47c75cd1a8f68a56623b7b7a3ee5e2ae684d6b19753fd3546e
+app_pre_sha=f8c59f17deea7bf2732e650ff288bb55db5010bd203c79f48b06be0468c6c996
+taxonomy_version=taxonomy_v1.1.0
+classifier_version=classifier.deterministic_v1.1
+flags_final=master:off,tenants:WATHEFNI,workers:off,ui:on,manual:on,schema:on
+unified_candidates=master:on,tenants:WATHEFNI (independent drop-in)
+production_classification_module=absent
+external_tenants=off
+background_workers=off
+ocr_rerun=never
+qualify_evidence=qualify-r3
+verdict=GO_STAGING

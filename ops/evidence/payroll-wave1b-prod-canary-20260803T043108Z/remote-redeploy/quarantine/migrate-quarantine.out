@@ -1,0 +1,9 @@
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'money_authority': False, 'annual_leave_eligibility_months': 6}
+connected_db wathefni
+tables ['payroll_company_settings', 'payroll_compensation_components', 'payroll_compensation_contracts', 'payroll_compensation_events', 'payroll_period_events', 'payroll_periods']
+timesheet_cols ['quarantine_status', 'row_version']
+smoke_before [{'timesheet_id': '7950dafd-6cf7-44b1-9f92-26f685c34ab5', 'employee_key': 'WATHEFNI-96597727743', 'status': 'draft', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}, {'timesheet_id': 'cc68a9fb-df72-4e13-a0db-cc13a3805380', 'employee_key': 'WATHEFNI-96566363363', 'status': 'draft', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}]
+quarantine {'ok': True, 'count': 2, 'hard_deleted': False}
+smoke_after [{'timesheet_id': '7950dafd-6cf7-44b1-9f92-26f685c34ab5', 'employee_key': 'WATHEFNI-96597727743', 'status': 'draft', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}, {'timesheet_id': 'cc68a9fb-df72-4e13-a0db-cc13a3805380', 'employee_key': 'WATHEFNI-96566363363', 'status': 'draft', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}]
+MIGRATE_OK payroll_authority_wave1_prod

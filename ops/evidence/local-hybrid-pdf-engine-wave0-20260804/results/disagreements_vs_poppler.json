@@ -1,0 +1,810 @@
+[
+  {
+    "doc_id": "wave0_cv_ar_digital_01",
+    "category": "arabic_digital_cv",
+    "pages": 1,
+    "ok": true,
+    "error": null,
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [],
+    "hybrid_native_pages": [
+      1
+    ],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [],
+    "ocr_set_agreement_with_poppler": false,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "native",
+        "reason": "accepted_native_arabic",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": false
+      }
+    ],
+    "merged_preview": "# نورة العتيبي مهندسة برمجيات\n\nEmail: noura.otaibi@example.com Phone: +96551112233\n\nالخبرة العملية ٠٢٠٢-٦٢٠٢ شركة وطني — تطوير أنظمة الموارد البشرية التعليم بكالوريوس علوم حاسوب — جامعة الكويت المهارات بايثون، قواعد البيانات، معالجة الوثائق",
+    "arabic_chars_merged": 155,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "wave0_cv_ar_digital_02",
+    "category": "arabic_digital_cv",
+    "pages": 1,
+    "ok": true,
+    "error": null,
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [],
+    "hybrid_native_pages": [
+      1
+    ],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [],
+    "ocr_set_agreement_with_poppler": false,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "native",
+        "reason": "accepted_native_arabic",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": false
+      }
+    ],
+    "merged_preview": "# فهد الشمري أخصائي امتثال\n\nEmail: fahad.shamri@example.com Phone: +96557778899\n\nالخبرة العملية ٨١٠٢-٦٢٠٢ إدارة االلتزام — متابعة اإلقامات وتصاريح العمل التعليم ليسانس قانون — جامعة الكويت المهارات االمتثال، التدقيق، إدارة الوثائق",
+    "arabic_chars_merged": 147,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "wave0_cv_ar_digital_03",
+    "category": "arabic_digital_cv",
+    "pages": 1,
+    "ok": true,
+    "error": null,
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [],
+    "hybrid_native_pages": [
+      1
+    ],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [],
+    "ocr_set_agreement_with_poppler": false,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "native",
+        "reason": "accepted_native_arabic",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": false
+      }
+    ],
+    "merged_preview": "# مريم الصباح محللة موارد بشرية\n\nEmail: mariam.sabah@example.com Phone: +96553334455\n\nالخبرة العملية ١٢٠٢-٦٢٠٢ التوظيف والتأهيل — مقابالت وتقييم المرشحين التعليم ماجستير إدارة أعمال — الجامعة األمريكية المهارات التوظيف، المقابالت، أنظمة الت",
+    "arabic_chars_merged": 159,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "wave0_cv_broken_encoding_01",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": false,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_000",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_001",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_002",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_003",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_004",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_005",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_006",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_007",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_008",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_009",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_010",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_011",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_012",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_013",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_014",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_015",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_016",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 1,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_017",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_018",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 3,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_019",
+    "category": "broken_encoding",
+    "pages": 1,
+    "ok": true,
+    "error": "ocr_required_simulated",
+    "wall_ms": 2,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "hybrid_ocr_pages": [
+      1
+    ],
+    "hybrid_native_pages": [],
+    "hybrid_failed_pages": [],
+    "quality_forced_ocr_pages": [
+      1
+    ],
+    "ocr_set_agreement_with_poppler": true,
+    "false_skip_pages_vs_poppler_or_broken_gate": [],
+    "page_decisions": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "mojibake_native_text",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": true
+      }
+    ],
+    "merged_preview": "[OCR_SIMULATED page=1 reason=mojibake_native_text]",
+    "arabic_chars_merged": 0,
+    "envelope_contract": "document_envelope@1",
+    "cache_hit": false
+  }
+]

@@ -1,0 +1,112 @@
+=== ConfirmationSheet hosts ===
+-- src/hr/features/attendance/HRAttendanceDetailView.tsx
+8:import { useServerConfirmation } from '@hr/api/useServerConfirmation'
+23:import { ConfirmationSheet } from '@hr/components/primitives'
+58:  const confirmation = useServerConfirmation<{ status: CorrectionStatus }>({
+157:                    onPress={() => void confirmation.prepare({ status }).catch(() => undefined)}
+172:        <ConfirmationSheet
+177:          onConfirm={() => void confirmation.confirm().catch(() => undefined)}
+
+-- src/hr/features/shifts/HRShiftSwapDetailView.tsx
+9:import { useServerConfirmation } from '@hr/api/useServerConfirmation'
+19:import { ConfirmationSheet } from '@hr/components/primitives'
+52:  const confirmation = useServerConfirmation<{ action: 'approve' | 'reject' }>({
+152:                    onPress={() => void confirmation.prepare({ action: 'approve' }).catch(() => undefined)}
+163:                    onPress={() => void confirmation.prepare({ action: 'reject' }).catch(() => undefined)}
+178:        <ConfirmationSheet
+183:          onConfirm={() => void confirmation.confirm().catch(() => undefined)}
+
+-- src/hr/features/onboarding/HROnboardingDetailView.tsx
+10:import { useServerConfirmation } from '@hr/api/useServerConfirmation'
+22:import { ConfirmationSheet } from '@hr/components/primitives'
+56:  const confirmation = useServerConfirmation<{ itemId: string; outcome: Outcome }>({
+80:      Alert.alert(t('hrOnboarding.demoPreviewTitle'), t('hrOnboarding.demoPreviewBody'))
+151:                        .prepare({ itemId: checklistItem.item_id, outcome: 'accepted' })
+156:                        .prepare({ itemId: checklistItem.item_id, outcome: 'waived' })
+197:        <ConfirmationSheet
+202:          onConfirm={() => void confirmation.confirm().catch(() => undefined)}
+
+-- src/hr/features/documents/HRDocumentReviewDetailView.tsx
+22:  ConfirmationSheet,
+35: * No Send Reminder on mobile. Client confirm + expected_status stale protection.
+69:        expected_status: item?.status || 'needs_review',
+86:      Alert.alert(t('hrDocuments.demoPreviewTitle'), t('hrDocuments.demoPreviewBody'))
+271:        <ConfirmationSheet
+
+-- src/hr/features/tasks/HRTaskDetailView.tsx
+19:  ConfirmationSheet,
+60:        expected_status: item?.status || 'open',
+221:        <ConfirmationSheet
+
+-- src/hr/features/leave/LeaveApprovalView.tsx
+14:  ConfirmationSheet,
+140:        {state === 'stale' ? (
+142:            title={t('hrLeave.staleTitle')}
+143:            subtitle={t('hrLeave.staleBody')}
+245:                      onPress={() => void prepare('reject')}
+258:                      onPress={() => void prepare('approve')}
+275:        <ConfirmationSheet
+279:          onConfirm={() => void confirm()}
+
+-- src/hr/features/recruiting/CandidateReviewView.tsx
+21:  ConfirmationSheet,
+167:        {state === 'stale' ? (
+169:            title={t('hrCandidate.staleTitle')}
+170:            subtitle={t('hrCandidate.staleBody')}
+345:                    onPress={() => void prepare('shortlist')}
+359:                      onPress={() => void prepare('reject')}
+372:                      onPress={() => void prepare('hire')}
+405:        <ConfirmationSheet
+409:          onConfirm={() => void confirm()}
+
+=== openAuthenticatedFile callers ===
+src/hr/api/assistant.ts:78:    `${configuredBase}/dashboard/mobile/assistant/capabilities?locale=${locale}`,
+src/hr/api/assistant.ts:106:  const response = await expoFetch(`${configuredBase}/dashboard/mobile/assistant/chat`, {
+src/hr/api/assistant.ts:163:    const response = await expoFetch(`${configuredBase}/dashboard/mobile/assistant/chat/stream`, {
+src/hr/api/client.ts:32:  if (!path.startsWith('/dashboard/mobile/')) {
+src/hr/api/mobile.ts:30:    return normalized(request, `/dashboard/mobile/tasks?${params.toString()}`, normalize.tasks, {
+src/hr/api/mobile.ts:37:      `/dashboard/mobile/tasks/${segment(taskId)}`,
+src/hr/api/mobile.ts:42:    request(`/dashboard/mobile/tasks/${segment(taskId)}/resolve`, { method: 'POST', json }),
+src/hr/api/mobile.ts:44:    normalized(request, '/dashboard/mobile/onboarding', normalize.onboarding, { signal }),
+src/hr/api/mobile.ts:48:      `/dashboard/mobile/onboarding/${segment(employeeKey)}`,
+src/hr/api/mobile.ts:53:    request<DecisionResponse>(`/dashboard/mobile/onboarding/${segment(employeeKey)}/review`, {
+src/hr/api/mobile.ts:68:      `/dashboard/mobile/documents?${params.toString()}`,
+src/hr/api/mobile.ts:81:      `/dashboard/mobile/documents/${segment(employeeKey)}/${segment(documentType)}`,
+src/hr/api/mobile.ts:92:      `/dashboard/mobile/documents/${segment(employeeKey)}/${segment(documentType)}/review`,
+src/hr/api/mobile.ts:115:      `/dashboard/mobile/attendance${qs ? `?${qs}` : ''}`,
+src/hr/api/mobile.ts:123:      `/dashboard/mobile/attendance/${segment(attendanceId)}`,
+src/hr/api/mobile.ts:128:    request<DecisionResponse>(`/dashboard/mobile/attendance/${segment(exceptionId)}/resolve`, {
+src/hr/api/mobile.ts:135:      `/dashboard/mobile/shifts?date=${encodeURIComponent(date)}`,
+src/hr/api/mobile.ts:149:      `/dashboard/mobile/shift-swaps${qs ? `?${qs}` : ''}`,
+src/hr/api/mobile.ts:157:      `/dashboard/mobile/shift-swaps/${segment(swapId)}`,
+src/hr/api/mobile.ts:162:    request<DecisionResponse>(`/dashboard/mobile/shift-swaps/${segment(swapId)}/decision`, {
+src/hr/api/mobile.ts:178:      `/dashboard/mobile/employees${qs ? `?${qs}` : ''}`,
+src/hr/api/mobile.ts:186:      `/dashboard/mobile/employees/${segment(employeeKey)}`,
+src/hr/api/mobile.ts:191:    normalized(request, '/dashboard/mobile/delivery-alerts', normalize.alerts, { signal }),
+src/hr/api/mobile.ts:204:      `/dashboard/mobile/candidates${qs ? `?${qs}` : ''}`,
+src/hr/api/mobile.ts:220:      `/dashboard/mobile/positions?${params.toString()}`,
+src/hr/api/mobile.ts:226:    normalized(request, '/dashboard/mobile/interviews', normalize.interviews, { signal }),
+src/hr/api/mobile.ts:230:      `/dashboard/mobile/interviews/${segment(interviewId)}`,
+src/hr/api/mobile.ts:245:    request(`/dashboard/mobile/interviews/${segment(interviewId)}/notes`, { method: 'POST', json }),
+src/hr/features/inbox/HRInboxParityView.tsx:42:    queryFn: ({ signal }) => request<PrioritiesResponse>('/dashboard/mobile/priorities', { signal }),
+src/hr/features/home/HRHomeParityView.tsx:316:    queryFn: ({ signal }) => request<PrioritiesResponse>('/dashboard/mobile/priorities', { signal }),
+src/hr/features/onboarding/HROnboardingDetailView.tsx:7:import { openAuthenticatedFile } from '@hr/api/files'
+src/hr/features/onboarding/HROnboardingDetailView.tsx:85:    void openAuthenticatedFile({
+src/hr/features/documents/HRDocumentReviewDetailView.tsx:8:import { openAuthenticatedFile } from '@hr/api/files'
+src/hr/features/documents/HRDocumentReviewDetailView.tsx:91:    void openAuthenticatedFile({
+src/hr/auth/AuthProvider.tsx:243:    const rotating = rawRequest<AuthResponse>('/dashboard/mobile/auth/refresh', {
+src/hr/auth/AuthProvider.tsx:280:      const next = await rawRequest<MobileMe>('/dashboard/mobile/me', {
+src/hr/auth/AuthProvider.tsx:315:        const next = await rawRequest<MobileMe>('/dashboard/mobile/me', {
+src/hr/auth/AuthProvider.tsx:327:            const next = await rawRequest<MobileMe>('/dashboard/mobile/me', {
+src/hr/auth/AuthProvider.tsx:361:        const response = await rawRequest<AuthResponse>('/dashboard/mobile/auth/login', {
+src/hr/auth/AuthProvider.tsx:385:          await rawRequest('/dashboard/mobile/auth/logout', {
+=== files.ts gate ===
+30:  if (!path.startsWith('/dashboard/mobile/')) {
+31:    throw new Error('Unapproved file path')
+=== local-lock verify ===
+DOCS uses useServerConfirmation False
+DOCS ConfirmationSheet True
+TASKS uses useServerConfirmation False
+ATT uses useServerConfirmation True
+DOCS expected_status True
+files path gate present True

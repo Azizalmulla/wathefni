@@ -1,0 +1,169 @@
+{
+  "ok": true,
+  "onboarding": {
+    "employee_key": "WATHEFNI-9655237101",
+    "employee": {
+      "employee_key": "WATHEFNI-9655237101",
+      "name": "W2B-SYNTH| Onboarding Visual",
+      "department": null
+    },
+    "status": "in_progress",
+    "required_total": 4,
+    "received_count": 1,
+    "pending_count": 3,
+    "hr_actionable_count": 2,
+    "hr_actionable_items": [
+      {
+        "item_id": "passport",
+        "label": "Passport copy (if applicable)",
+        "item_type": "document",
+        "document_type": "passport",
+        "required": false,
+        "status": "processing",
+        "group": "being_reviewed",
+        "is_bank_ess": false,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": true,
+        "preview_path": "/dashboard/mobile/documents/files/786b0c82-d5e3-4cb1-832d-8fc4c2ff6d37",
+        "download_path": "/dashboard/mobile/documents/files/786b0c82-d5e3-4cb1-832d-8fc4c2ff6d37?disposition=attachment",
+        "allowed_actions": [
+          "preview",
+          "accept",
+          "waive"
+        ]
+      },
+      {
+        "item_id": "offer_letter",
+        "label": "Job offer / appointment letter",
+        "item_type": "document",
+        "document_type": "offer_letter",
+        "required": false,
+        "status": "processing",
+        "group": "being_reviewed",
+        "is_bank_ess": false,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": false,
+        "preview_path": null,
+        "download_path": null,
+        "allowed_actions": [
+          "accept",
+          "waive"
+        ]
+      }
+    ],
+    "waiting_on_employee_items": [
+      {
+        "item_id": "civil_id",
+        "label": "Civil ID (front and back)",
+        "item_type": "document",
+        "document_type": "civil_id",
+        "required": true,
+        "status": "replacement_required",
+        "group": "your_actions",
+        "is_bank_ess": false,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": true,
+        "preview_path": "/dashboard/mobile/documents/files/d73cddc5-9045-4af9-8e76-7c1e8c30b97f",
+        "download_path": "/dashboard/mobile/documents/files/d73cddc5-9045-4af9-8e76-7c1e8c30b97f?disposition=attachment",
+        "allowed_actions": [
+          "preview"
+        ]
+      },
+      {
+        "item_id": "personal_photo",
+        "label": "Personal photo",
+        "item_type": "document",
+        "document_type": "personal_photo",
+        "required": true,
+        "status": "pending",
+        "group": "your_actions",
+        "is_bank_ess": false,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": false,
+        "preview_path": null,
+        "download_path": null,
+        "allowed_actions": []
+      },
+      {
+        "item_id": "bank_details",
+        "label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "item_type": "task",
+        "document_type": null,
+        "required": true,
+        "status": "pending",
+        "group": "your_actions",
+        "is_bank_ess": true,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": false,
+        "preview_path": null,
+        "download_path": null,
+        "allowed_actions": []
+      }
+    ],
+    "items": [
+      {
+        "item_id": "passport",
+        "label": "Passport copy (if applicable)",
+        "item_type": "document",
+        "document_type": "passport",
+        "required": false,
+        "status": "processing",
+        "group": "being_reviewed",
+        "is_bank_ess": false,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": true,
+        "preview_path": "/dashboard/mobile/documents/files/786b0c82-d5e3-4cb1-832d-8fc4c2ff6d37",
+        "download_path": "/dashboard/mobile/documents/files/786b0c82-d5e3-4cb1-832d-8fc4c2ff6d37?disposition=attachment",
+        "allowed_actions": [
+          "preview",
+          "accept",
+          "waive"
+        ]
+      },
+      {
+        "item_id": "offer_letter",
+        "label": "Job offer / appointment letter",
+        "item_type": "document",
+        "document_type": "offer_letter",
+        "required": false,
+        "status": "processing",
+        "group": "being_reviewed",
+        "is_bank_ess": false,
+        "storage_status": null,
+        "reminder_count": 0,
+        "last_reminded_at": null,
+        "updated_at": "2026-08-09T04:53:43.464564+00:00",
+        "has_file": false,
+        "preview_path": null,
+        "download_path": null,
+        "allowed_actions": [
+          "accept",
+          "waive"
+        ]
+      }
+    ],
+    "hr_mutate_enabled": true,
+    "allowed_actions": [
+      "read",
+      "review"
+    ]
+  }
+}

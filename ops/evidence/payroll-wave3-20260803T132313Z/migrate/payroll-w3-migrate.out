@@ -1,0 +1,4 @@
+wave3 1.0.0
+connected_db wathefni_staging
+payslip_tables ['payroll_payslip_documents', 'payroll_payslip_events', 'payroll_payslip_lines']
+MIGRATE_OK payroll_payslip_wave3

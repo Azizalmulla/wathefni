@@ -1,0 +1,267 @@
+{
+  "verdict": "PASS",
+  "pass": 43,
+  "fail": 0,
+  "stamp": "20260807T213951Z",
+  "evidence": "/opt/wathefni/ops/evidence/payroll-authority-p2-20260807T213951Z",
+  "schema": {
+    "tables": [
+      "payroll_input_snapshots",
+      "payroll_input_snapshot_employees",
+      "payroll_input_snapshot_lines",
+      "payroll_input_snapshot_issues",
+      "payroll_input_snapshot_events"
+    ],
+    "status": [
+      "assembling",
+      "needs_review",
+      "ready",
+      "locked",
+      "superseded"
+    ],
+    "attendance_payroll_mode": [
+      "required",
+      "informational",
+      "ignored"
+    ]
+  },
+  "overlap_precedence": {
+    "only_approved_leave_affects_payroll": true,
+    "pending_rejected_cancelled_excluded": true,
+    "approved_unpaid_leave_suppresses_attendance_absence": true,
+    "paid_leave_not_treated_as_unpaid_absence": true,
+    "attendance_absence_plus_unpaid_leave_no_double_count": true,
+    "ot_rest_day_ph_work_distinct_facts": true,
+    "overnight_shift_anchored_to_shift_work_date": true,
+    "timezone_default": "Asia/Kuwait"
+  },
+  "readiness_locking": {
+    "assemble": "assembling\u2192needs_review|ready",
+    "lock": "ready\u2192locked (needs_review fail-closed unless force)",
+    "source_change": "locked refuse silent rewrite; supersede\u2192new version"
+  },
+  "results": [
+    {
+      "name": "p2 version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a locked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "locked immutable invariant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unpaid suppresses absence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p1 still exists",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf still needs seal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assemble ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "status needs_review or ready",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "money_calculated false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled on snap",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid-period hire flag",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid-period leaver flag",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approved unpaid leave line",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "absence suppressed by unpaid leave",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pending leave excluded info",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "paid leave present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot fact line",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "rest day work fact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ph work fact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight fact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot facts have no money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unresolved correction blocks",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance provenance id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave provenance id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assemble idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lock fail closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "info assemble ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "informational does not block",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lock informational ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "locked immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "locked refuse silent rewrite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "supersede creates new version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new version id differs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior preserved superseded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "audit events",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "schema columns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p1 bridge column",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p1 honesty external seal unlocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p1 mode a still locked",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "p3_blockers": [
+    "Component/time-pay rules not implemented (P3)",
+    "OT/sick/PH statutory money still counsel-gated",
+    "Mode A authoritative finalize still locked (P1/P5)",
+    "SYNTHETIC_ONLY remains",
+    "payment_processing disabled"
+  ]
+}

@@ -1,0 +1,281 @@
+{
+  "marker": "wave_d6a_prod_proof",
+  "company": "WATHEFNI",
+  "allowlist": "WATHEFNI",
+  "mailbox_sync": "off",
+  "runs": [
+    {
+      "run": 1,
+      "inbound_id": "59ab5974-bc44-5ab7-9aba-2bedf0e3349b",
+      "app_key": "imp-wathefni-bac5380512fff9fb-WATHEFNI-IMPORT",
+      "outcome": "new_candidate",
+      "materialization": "accepted",
+      "timing": {
+        "intake_validation": {
+          "processed": 1,
+          "elapsed_ms": 314
+        },
+        "file_safety_scan": {
+          "processed": 1,
+          "elapsed_ms": 117
+        },
+        "cv_identity_resolution": {
+          "processed": 1,
+          "elapsed_ms": 100
+        },
+        "accepted_intake_preparation": {
+          "processed": 1,
+          "elapsed_ms": 153
+        },
+        "held_intake_materialization": {
+          "processed": 0,
+          "elapsed_ms": 7
+        }
+      },
+      "duplicate_ok": true
+    }
+  ],
+  "passed": true,
+  "app_keys": [
+    "imp-wathefni-bac5380512fff9fb-WATHEFNI-IMPORT",
+    "imp-wathefni-f3ce65f33f718c31-WATHEFNI-IMPORT",
+    "imp-wathefni-6615e9fee6deddfb-WATHEFNI-IMPORT",
+    "imp-wathefni-78ed30f6b8abc582-WATHEFNI-IMPORT"
+  ],
+  "intake_ids": [
+    "2321a794-339c-47cc-baa1-47f85066f29f"
+  ],
+  "external_tenant_denied": {
+    "durable": true,
+    "ignored": "unknown_recipient",
+    "inbound_id": "a8282c7c-dc5e-59a8-a518-680e870c1303"
+  },
+  "address": "d6a-527b68eb@inbound.wathefni.ai",
+  "sterilized": 5,
+  "rich_path": {
+    "ok": true,
+    "mode": "accepted",
+    "row": {
+      "app_key": "imp-wathefni-f3ce65f33f718c31-WATHEFNI-IMPORT",
+      "metadata": {
+        "pdf_pages": 1,
+        "prepared_at": "2026-08-01T17:05:00Z",
+        "malware_scan": {
+          "state": "clean",
+          "engine": "clamav",
+          "evidence": {
+            "raw": "stream: OK",
+            "host": "127.0.0.1",
+            "port": 3311,
+            "bytes": 853,
+            "transport": "tcp",
+            "unix_socket": null
+          },
+          "scanned_at": "2026-08-01T17:04:59.776978+00:00",
+          "reason_code": null,
+          "signature_version": "ClamAV 1.5.3/28079/Sat Aug  1 06:24:25 2026"
+        },
+        "object_reused": false,
+        "import_item_id": "64db41a3-007a-40f0-b071-dd70aa163eb2",
+        "identity_outcome": "new_candidate",
+        "preparation_status": "imported",
+        "identity_resolved_at": "2026-08-01T17:05:00Z",
+        "identity_contact_only": false,
+        "identity_resolution_id": "0405ee00-da58-48d0-8184-530286d3f13e",
+        "provider_content_length": 1140
+      },
+      "outcome": "new_candidate",
+      "ownership_confirmed": true,
+      "app_status": "needs_role",
+      "app_phone": "imp-wathefni-f3ce65f33f718c31",
+      "candidate_email": "d6a.prod.rich.53623b2e@example.com",
+      "warned": false,
+      "terminal_reason": null,
+      "submission_status": "accepted"
+    },
+    "timing": {
+      "intake_validation": {
+        "processed": 1,
+        "elapsed_ms": 83
+      },
+      "file_safety_scan": {
+        "processed": 1,
+        "elapsed_ms": 125
+      },
+      "cv_identity_resolution": {
+        "processed": 1,
+        "elapsed_ms": 121
+      },
+      "accepted_intake_preparation": {
+        "processed": 1,
+        "elapsed_ms": 111
+      },
+      "held_intake_materialization": {
+        "processed": 0,
+        "elapsed_ms": 17
+      }
+    }
+  },
+  "conflict_path": {
+    "ok": true,
+    "row": {
+      "app_key": "imp-wathefni-6615e9fee6deddfb-WATHEFNI-IMPORT",
+      "metadata": {
+        "pdf_pages": 1,
+        "malware_scan": {
+          "state": "clean",
+          "engine": "clamav",
+          "evidence": {
+            "raw": "stream: OK",
+            "host": "127.0.0.1",
+            "port": 3311,
+            "bytes": 843,
+            "transport": "tcp",
+            "unix_socket": null
+          },
+          "scanned_at": "2026-08-01T17:05:00.687248+00:00",
+          "reason_code": null,
+          "signature_version": "ClamAV 1.5.3/28079/Sat Aug  1 06:24:25 2026"
+        },
+        "object_reused": false,
+        "import_item_id": "bea09085-3a72-446f-9eba-66ba6c90d6cb",
+        "identity_outcome": "conflict",
+        "held_materialized_at": "2026-08-01T17:05:01Z",
+        "held_terminal_reason": "conflicting_cv_name",
+        "identity_resolved_at": "2026-08-01T17:05:01Z",
+        "identity_contact_only": false,
+        "identity_resolution_id": "9558089d-7172-4861-b7a1-9e9c8cabf42d",
+        "provider_content_length": 1124,
+        "held_materialization_status": "imported"
+      },
+      "outcome": "conflict",
+      "ownership_confirmed": false,
+      "app_status": "needs_role",
+      "app_phone": "imp-wathefni-6615e9fee6deddfb",
+      "candidate_email": "d6a.prod.rich.53623b2e@example.com",
+      "warned": true,
+      "terminal_reason": "conflicting_cv_name",
+      "submission_status": "held_identity_review"
+    },
+    "timing": {
+      "intake_validation": {
+        "worker_id": "email-ingress-1780761-8987c7a6",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 143
+      },
+      "file_safety_scan": {
+        "worker_id": "email-ingress-1780761-a333dd5f",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 212
+      },
+      "cv_identity_resolution": {
+        "worker_id": "email-ingress-1780761-bc1d14fc",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 273
+      },
+      "accepted_intake_preparation": {
+        "worker_id": "email-ingress-1780761-d30475d6",
+        "processed": 0,
+        "outcomes": [],
+        "_elapsed_ms": 18
+      },
+      "held_intake_materialization": {
+        "worker_id": "email-ingress-1780761-fc174469",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 195
+      }
+    }
+  },
+  "opaque_path": {
+    "ok": true,
+    "row": {
+      "app_key": "imp-wathefni-78ed30f6b8abc582-WATHEFNI-IMPORT",
+      "metadata": {
+        "pdf_pages": 1,
+        "malware_scan": {
+          "state": "clean",
+          "engine": "clamav",
+          "evidence": {
+            "raw": "stream: OK",
+            "host": "127.0.0.1",
+            "port": 3311,
+            "bytes": 658,
+            "transport": "tcp",
+            "unix_socket": null
+          },
+          "scanned_at": "2026-08-01T17:05:02.274040+00:00",
+          "reason_code": null,
+          "signature_version": "ClamAV 1.5.3/28079/Sat Aug  1 06:24:25 2026"
+        },
+        "object_reused": false,
+        "import_item_id": "e13b4d81-39b0-4530-9694-2c7e92346574",
+        "identity_outcome": "possible_match",
+        "held_materialized_at": "2026-08-01T17:05:03Z",
+        "held_terminal_reason": "low_quality_text",
+        "identity_resolved_at": "2026-08-01T17:05:02Z",
+        "identity_contact_only": false,
+        "identity_resolution_id": "ec4e998b-3890-4e80-9ae0-9472c1a63197",
+        "provider_content_length": 880,
+        "held_materialization_status": "imported"
+      },
+      "outcome": "possible_match",
+      "ownership_confirmed": false,
+      "app_status": "needs_role",
+      "app_phone": "imp-wathefni-78ed30f6b8abc582",
+      "candidate_email": null,
+      "warned": true,
+      "terminal_reason": "low_quality_text",
+      "submission_status": "held_identity_review"
+    },
+    "timing": {
+      "intake_validation": {
+        "worker_id": "email-ingress-1780761-fa508d8a",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 208
+      },
+      "file_safety_scan": {
+        "worker_id": "email-ingress-1780761-08412b1c",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 433
+      },
+      "cv_identity_resolution": {
+        "worker_id": "email-ingress-1780761-ae766425",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 348
+      },
+      "accepted_intake_preparation": {
+        "worker_id": "email-ingress-1780761-8fd98830",
+        "processed": 0,
+        "outcomes": [],
+        "_elapsed_ms": 23
+      },
+      "held_intake_materialization": {
+        "worker_id": "email-ingress-1780761-d3646f04",
+        "processed": 1,
+        "outcomes": [],
+        "_elapsed_ms": 209
+      }
+    }
+  },
+  "posture": {
+    "inbound_email": "on",
+    "allowlist": "WATHEFNI",
+    "mailbox_sync": "off",
+    "held_job_type_registered": true,
+    "explicit_admit_required": true
+  },
+  "cleanup": {
+    "archived_apps": 4,
+    "active_intakes": 1,
+    "intake_ids": [
+      "2321a794-339c-47cc-baa1-47f85066f29f"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "validation": {
+    "scheme": "kw_iban",
+    "ok": true,
+    "problems": [],
+    "enforced": true
+  },
+  "before_state": "needs_information",
+  "before_request_id": "d65628a4-45c0-4e6a-9d42-7811f0f600ec",
+  "result_ok": true,
+  "replaced": true,
+  "after_request_id": "d65628a4-45c0-4e6a-9d42-7811f0f600ec",
+  "after_state": "pending_hr",
+  "same_request_id": true,
+  "status": {
+    "submission_state": "pending_review",
+    "workflow_state": "pending_hr",
+    "display": {
+      "iban": "**************************0000",
+      "swift": "NSBSHSHD",
+      "branch": "Snnsbs",
+      "bank_name": "Hsbshshsh",
+      "iban_last4": "0000",
+      "iban_masked": true,
+      "account_holder": "Snsnbsbsu",
+      "account_number": "******5454",
+      "account_number_last4": "5454",
+      "account_number_masked": true
+    }
+  },
+  "latest_events": [
+    {
+      "action": "correct_and_resubmit",
+      "from_state": "needs_information",
+      "to_state": "pending_hr",
+      "detail": {
+        "route": [
+          "hr",
+          "payroll"
+        ],
+        "replaced": true,
+        "request_type": "bank_detail_change"
+      },
+      "created_at": "2026-08-06 19:36:47.266306+00:00"
+    },
+    {
+      "action": "validation_return",
+      "from_state": "approved",
+      "to_state": "needs_information",
+      "detail": {
+        "reason": "The submitted IBAN format is invalid. Use a 30-character Kuwait IBAN beginning with KW, using letters and numbers only.",
+        "scheme": "kw_iban",
+        "source": "phase2_validation_enforcement",
+        "problems": [
+          "iban_length_invalid",
+          "iban_charset_invalid"
+        ]
+      },
+      "created_at": "2026-08-06 19:14:31.553708+00:00"
+    },
+    {
+      "action": "decide_approve",
+      "from_state": "pending_payroll",
+      "to_state": "approved",
+      "detail": {
+        "stage": "payroll"
+      },
+      "created_at": "2026-08-06 19:05:13.642950+00:00"
+    },
+    {
+      "action": "decide_approve",
+      "from_state": "pending_hr",
+      "to_state": "pending_payroll",
+      "detail": {
+        "stage": "hr"
+      },
+      "created_at": "2026-08-06 19:04:56.017820+00:00"
+    },
+    {
+      "action": "submit",
+      "from_state": null,
+      "to_state": "pending_hr",
+      "detail": {
+        "route": [
+          "hr",
+          "payroll"
+        ],
+        "request_type": "bank_detail_change"
+      },
+      "created_at": "2026-08-06 19:04:00.423764+00:00"
+    }
+  ]
+}
+RESUBMIT_REPLACE_PROOF_PASS

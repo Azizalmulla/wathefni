@@ -1,0 +1,21 @@
+{
+  "sent_count_sampled": 5,
+  "matching": [
+    {
+      "subject": "Canceled: Wathefni full matrix 20260730T235917Z RESCHEDULED",
+      "sentDateTime": "2026-07-30T23:59:19Z",
+      "preview": "Wathefni full matrix 20260730T235917Z RESCHEDULED\n\nMicrosoft Teams meeting:\nhttps://teams.microsoft.com/l/meetup-join/19"
+    },
+    {
+      "subject": "Wathefni full matrix 20260730T235917Z",
+      "sentDateTime": "2026-07-30T23:59:19Z",
+      "preview": "Interview invitation — please join via Teams\n\nMicrosoft Teams meeting:\nhttps://teams.microsoft.com/l/meetup-join/19%3ame"
+    },
+    {
+      "subject": "Canceled: Wathefni Teams authority 20260730T235912Z RESCHEDULED",
+      "sentDateTime": "2026-07-30T23:59:14Z",
+      "preview": "Wathefni Teams authority 20260730T235912Z RESCHEDULED\n\nMicrosoft Teams meeting:\nhttps://teams.microsoft.com/l/meetup-joi"
+    }
+  ],
+  "invitation_email_observed": true
+}

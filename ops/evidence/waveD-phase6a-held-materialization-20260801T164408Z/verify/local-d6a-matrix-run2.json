@@ -1,0 +1,138 @@
+{
+  "marker": "wave_d6a_held_materialization",
+  "runs": [
+    {
+      "run": 1,
+      "inbound_id": "839fce30-beb2-5560-87ca-51bc34e2261f",
+      "app_key": "imp-d6aalpha-7bd6fb5c6d3220fd-D6AALPHA-IMPORT",
+      "outcome": "new_candidate",
+      "materialization": "accepted",
+      "timing": {
+        "intake_validation": {
+          "processed": 1,
+          "elapsed_ms": 91
+        },
+        "file_safety_scan": {
+          "processed": 1,
+          "elapsed_ms": 13
+        },
+        "cv_identity_resolution": {
+          "processed": 1,
+          "elapsed_ms": 65
+        },
+        "accepted_intake_preparation": {
+          "processed": 1,
+          "elapsed_ms": 27
+        },
+        "held_intake_materialization": {
+          "processed": 0,
+          "elapsed_ms": 2
+        }
+      },
+      "duplicate_ok": true
+    },
+    {
+      "run": 2,
+      "inbound_id": "149488eb-5c49-5aec-b5f0-7a1251956dc7",
+      "app_key": "imp-d6aalpha-c36a7a98b026af46-D6AALPHA-IMPORT",
+      "outcome": "new_candidate",
+      "materialization": "accepted",
+      "timing": {
+        "intake_validation": {
+          "processed": 1,
+          "elapsed_ms": 14
+        },
+        "file_safety_scan": {
+          "processed": 1,
+          "elapsed_ms": 13
+        },
+        "cv_identity_resolution": {
+          "processed": 1,
+          "elapsed_ms": 67
+        },
+        "accepted_intake_preparation": {
+          "processed": 1,
+          "elapsed_ms": 26
+        },
+        "held_intake_materialization": {
+          "processed": 0,
+          "elapsed_ms": 2
+        }
+      },
+      "duplicate_ok": true
+    },
+    {
+      "run": 3,
+      "inbound_id": "d0b14a7e-6272-535e-b4f8-d96548ded779",
+      "app_key": "imp-d6aalpha-26b29a3a69536653-D6AALPHA-IMPORT",
+      "outcome": "new_candidate",
+      "materialization": "accepted",
+      "timing": {
+        "intake_validation": {
+          "processed": 1,
+          "elapsed_ms": 13
+        },
+        "file_safety_scan": {
+          "processed": 1,
+          "elapsed_ms": 12
+        },
+        "cv_identity_resolution": {
+          "processed": 1,
+          "elapsed_ms": 63
+        },
+        "accepted_intake_preparation": {
+          "processed": 1,
+          "elapsed_ms": 25
+        },
+        "held_intake_materialization": {
+          "processed": 0,
+          "elapsed_ms": 2
+        }
+      },
+      "duplicate_ok": true
+    }
+  ],
+  "passed": true,
+  "pre_cleanup": {
+    "archived_apps": 93,
+    "active_intakes": 0
+  },
+  "rich_path": {
+    "ok": true,
+    "row": {
+      "app_key": "imp-d6aalpha-ae0bf31a4a7669f7-D6AALPHA-IMPORT",
+      "status": "needs_role",
+      "email": "d6a.rich.f8c78184@example.com",
+      "outcome": "new_candidate",
+      "warned": false
+    },
+    "accepted_processed": 1
+  },
+  "conflict_path": {
+    "ok": true,
+    "row": {
+      "outcome": "conflict",
+      "ownership_confirmed": false,
+      "app_key": "imp-d6aalpha-2a0a5385b026edfd-D6AALPHA-IMPORT",
+      "status": "needs_role",
+      "warned": true
+    }
+  },
+  "opaque_path": {
+    "ok": true,
+    "row": {
+      "outcome": "possible_match",
+      "app_key": "imp-d6aalpha-1294cfd107f3e575-D6AALPHA-IMPORT",
+      "status": "needs_role",
+      "submission_status": "held_identity_review",
+      "warned": true,
+      "terminal_reason": "low_quality_text"
+    },
+    "held_processed": 1,
+    "held_ms": 17
+  },
+  "cleanup": {
+    "archived_apps": 99,
+    "active_intakes": 0
+  }
+}

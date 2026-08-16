@@ -1,0 +1,1797 @@
+{
+  "stamp": "20260727T004237Z",
+  "mode": "full",
+  "allowlist": [
+    "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+    "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+    "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+    "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+    "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+    "96597485758-WATHEFNI-HR",
+    "96598900677-WATHEFNI-ACCOUNTING",
+    "96598900677-WATHEFNI-FINANCE",
+    "96598900677-WATHEFNI-HR",
+    "96566363363-WATHEFNI-IT_MAINTENANCE",
+    "96597485758-WATHEFNI-ACCOUNTING_EXCEL"
+  ],
+  "exclude_smoke": [
+    "96555550132-WATHEFNI-ACCOUNTING",
+    "96555550133-WATHEFNI-ACCOUNTING",
+    "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+    "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+    "96555550136-WATHEFNI-ACCOUNTING_EXCEL"
+  ],
+  "exclude_held": [
+    "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+    "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT"
+  ],
+  "enforce_enabled": false,
+  "channel_cutover": false,
+  "database": "wathefni",
+  "before_counts": {
+    "applications": 18,
+    "candidates": 21
+  },
+  "shadow_before": {
+    "counts": {
+      "valid_legacy_application_needing_audited_backfill": 11,
+      "expected_missing_verified_binding": 7
+    },
+    "samples": [
+      {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "hired",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+        "status": "screening",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "status": "hired",
+        "position_code": "IT_MAINTENANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "screening_complete",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "awaiting_cv",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "status": "hired",
+        "position_code": "MARKETING_SPECIALIST",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "status": "review_pending",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "status": "screening",
+        "position_code": "FINANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "screening_complete",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "shortlisted",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      },
+      {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      }
+    ],
+    "by_app": {
+      "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER": {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "hired",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96555550132-WATHEFNI-ACCOUNTING": {
+        "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550133-WATHEFNI-ACCOUNTING": {
+        "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+        "status": "screening",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550134-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550135-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550136-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96566363363-WATHEFNI-IT_MAINTENANCE": {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "status": "hired",
+        "position_code": "IT_MAINTENANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597485758-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "screening_complete",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597485758-WATHEFNI-HR": {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597727743-WATHEFNI-FULLSTACK_DEVELOPER": {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "awaiting_cv",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597727743-WATHEFNI-MARKETING_SPECIALIST": {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "status": "hired",
+        "position_code": "MARKETING_SPECIALIST",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-ACCOUNTING": {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "status": "review_pending",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-FINANCE": {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "status": "screening",
+        "position_code": "FINANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-HR": {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96599338566-WATHEFNI-FULLSTACK_DEVELOPER": {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "screening_complete",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER": {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "shortlisted",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT": {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      },
+      "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT": {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      }
+    }
+  },
+  "backfill_pass1": {
+    "created": [
+      {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "consent_id": "1d7252ee-7c67-4d60-a21e-462ecf7a3d7c",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "6b19812f-a1d3-54af-9030-366d0b0da921",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "consent_id": "740f6e40-da2c-407f-aae7-63268ee974c4",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "7cb7d5ab-2cfc-5002-ad15-58e0c63d3f2a",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "consent_id": "8a153893-d397-4522-8b76-1375b38e6ac5",
+        "position_code": "MARKETING_SPECIALIST",
+        "job_id": "5cf8e5d9-4bb3-4645-a771-6b8367b0b395",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "ea855cac-1ea7-5865-8930-e393ad08c088",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "consent_id": "b3ac2476-d4a6-48bc-a1be-a0061f5c4ea7",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "consent_id": "51bb600a-14f1-41ee-b654-883debb9ce9c",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "86f5fc3b-6164-575f-b48a-254fe359b6f2",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "consent_id": "73d375e3-5a91-4911-828f-5cbf2b06179d",
+        "position_code": "HR",
+        "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "91ccd49e-7a17-5d1b-9015-560f5d64c216",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "consent_id": "5d45cfe6-55ea-444f-9bce-0ae5073f1c04",
+        "position_code": "ACCOUNTING",
+        "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "2e0c441f-20a2-5d41-b70d-9704d317917f",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "consent_id": "63f70a43-293d-4888-89f5-8d043c8b44a2",
+        "position_code": "FINANCE",
+        "job_id": "3ca7ad6a-9726-48d9-8b9c-3cab473bda90",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "ccb13bce-f9eb-5c40-a3ad-41c86f9f215c",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "consent_id": "f79a64c0-afd2-47b6-9899-3bbd0ede9fbc",
+        "position_code": "HR",
+        "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "7f3db0ed-d57a-56cd-a150-d6aaa576c86e",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "consent_id": "6c2c6504-88a2-4957-8c3c-bfe1849991ce",
+        "position_code": "IT_MAINTENANCE",
+        "job_id": "7821c69b-5ed1-4036-86eb-04512d79afee",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "9f4224a2-71ff-5e44-a28d-387fa9d2a578",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "consent_id": "aa22208c-5d42-46de-b2ab-b8030a6e0414",
+        "position_code": "ACCOUNTING_EXCEL",
+        "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "75e25227-470c-5dee-b7d9-65bb636988ba",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      }
+    ],
+    "skipped": [],
+    "rejected": [],
+    "allowlist_size": 11
+  },
+  "rollback_delete": {
+    "job_bindings_deleted": 11,
+    "cv_bindings_deleted": 0,
+    "consents_deleted": 11
+  },
+  "shadow_after_rollback": {
+    "counts": {
+      "valid_legacy_application_needing_audited_backfill": 11,
+      "expected_missing_verified_binding": 7
+    },
+    "samples": [
+      {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "hired",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+        "status": "screening",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "status": "hired",
+        "position_code": "IT_MAINTENANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "screening_complete",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "awaiting_cv",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "status": "hired",
+        "position_code": "MARKETING_SPECIALIST",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "status": "review_pending",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "status": "screening",
+        "position_code": "FINANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "screening_complete",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "shortlisted",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      },
+      {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      }
+    ],
+    "by_app": {
+      "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER": {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "hired",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96555550132-WATHEFNI-ACCOUNTING": {
+        "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550133-WATHEFNI-ACCOUNTING": {
+        "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+        "status": "screening",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550134-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550135-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550136-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96566363363-WATHEFNI-IT_MAINTENANCE": {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "status": "hired",
+        "position_code": "IT_MAINTENANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597485758-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "screening_complete",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597485758-WATHEFNI-HR": {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597727743-WATHEFNI-FULLSTACK_DEVELOPER": {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "awaiting_cv",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96597727743-WATHEFNI-MARKETING_SPECIALIST": {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "status": "hired",
+        "position_code": "MARKETING_SPECIALIST",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-ACCOUNTING": {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "status": "review_pending",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-FINANCE": {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "status": "screening",
+        "position_code": "FINANCE",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-HR": {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96599338566-WATHEFNI-FULLSTACK_DEVELOPER": {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "screening_complete",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER": {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "shortlisted",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "valid_legacy_application_needing_audited_backfill",
+        "bucket": "allowlist"
+      },
+      "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT": {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      },
+      "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT": {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      }
+    }
+  },
+  "backfill_pass2_final": {
+    "created": [
+      {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "consent_id": "e8ba64cd-63bd-469b-b43f-8c6e94a1514a",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "6b19812f-a1d3-54af-9030-366d0b0da921",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "consent_id": "2d0612b0-6f5e-48a3-af58-fcaf8b8d5599",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "7cb7d5ab-2cfc-5002-ad15-58e0c63d3f2a",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "consent_id": "c1ec7b3c-9bea-4d6d-866e-c9fce2335a86",
+        "position_code": "MARKETING_SPECIALIST",
+        "job_id": "5cf8e5d9-4bb3-4645-a771-6b8367b0b395",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "ea855cac-1ea7-5865-8930-e393ad08c088",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "consent_id": "2e9fcb57-b086-440e-a269-da91b17770ab",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "consent_id": "320258d2-e8bf-4e36-82ab-926cd682fe04",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "86f5fc3b-6164-575f-b48a-254fe359b6f2",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "consent_id": "fb392bf9-56b9-41d7-9c3d-aead919333ac",
+        "position_code": "HR",
+        "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "91ccd49e-7a17-5d1b-9015-560f5d64c216",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "consent_id": "9a9266fd-34d2-449e-995b-931e33de71c4",
+        "position_code": "ACCOUNTING",
+        "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "2e0c441f-20a2-5d41-b70d-9704d317917f",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "consent_id": "91056c8b-0e87-4143-a756-c833abc588b5",
+        "position_code": "FINANCE",
+        "job_id": "3ca7ad6a-9726-48d9-8b9c-3cab473bda90",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "ccb13bce-f9eb-5c40-a3ad-41c86f9f215c",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "consent_id": "17d3b98e-c659-467e-8a52-3fb7a694e5d3",
+        "position_code": "HR",
+        "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "7f3db0ed-d57a-56cd-a150-d6aaa576c86e",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "consent_id": "7fdf0a4c-3ce5-49fa-946f-5b7395e6ca46",
+        "position_code": "IT_MAINTENANCE",
+        "job_id": "7821c69b-5ed1-4036-86eb-04512d79afee",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "9f4224a2-71ff-5e44-a28d-387fa9d2a578",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "consent_id": "e2f19471-96e1-455d-a482-26a57ab2b156",
+        "position_code": "ACCOUNTING_EXCEL",
+        "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2",
+        "cv_version_id": null,
+        "cv_binding_created": false,
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "75e25227-470c-5dee-b7d9-65bb636988ba",
+            "verified": true
+          },
+          "cv_binding": null,
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      }
+    ],
+    "skipped": [],
+    "rejected": [],
+    "allowlist_size": 11
+  },
+  "shadow_after": {
+    "counts": {
+      "allow_verified_binding": 11,
+      "expected_missing_verified_binding": 7
+    },
+    "samples": [
+      {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "hired",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+        "status": "screening",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "status": "hired",
+        "position_code": "IT_MAINTENANCE",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "screening_complete",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "awaiting_cv",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "status": "hired",
+        "position_code": "MARKETING_SPECIALIST",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "status": "review_pending",
+        "position_code": "ACCOUNTING",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "status": "screening",
+        "position_code": "FINANCE",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "screening_complete",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "shortlisted",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      },
+      {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      }
+    ],
+    "by_app": {
+      "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER": {
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "hired",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96555550132-WATHEFNI-ACCOUNTING": {
+        "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550133-WATHEFNI-ACCOUNTING": {
+        "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+        "status": "screening",
+        "position_code": "ACCOUNTING",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550134-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550135-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96555550136-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "awaiting_cv",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "verified_job_binding_missing"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "smoke"
+      },
+      "96566363363-WATHEFNI-IT_MAINTENANCE": {
+        "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+        "status": "hired",
+        "position_code": "IT_MAINTENANCE",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96597485758-WATHEFNI-ACCOUNTING_EXCEL": {
+        "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+        "status": "screening_complete",
+        "position_code": "ACCOUNTING_EXCEL",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96597485758-WATHEFNI-HR": {
+        "app_key": "96597485758-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96597727743-WATHEFNI-FULLSTACK_DEVELOPER": {
+        "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "awaiting_cv",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96597727743-WATHEFNI-MARKETING_SPECIALIST": {
+        "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "status": "hired",
+        "position_code": "MARKETING_SPECIALIST",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-ACCOUNTING": {
+        "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+        "status": "review_pending",
+        "position_code": "ACCOUNTING",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-FINANCE": {
+        "app_key": "96598900677-WATHEFNI-FINANCE",
+        "status": "screening",
+        "position_code": "FINANCE",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96598900677-WATHEFNI-HR": {
+        "app_key": "96598900677-WATHEFNI-HR",
+        "status": "shortlisted",
+        "position_code": "HR",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96599338566-WATHEFNI-FULLSTACK_DEVELOPER": {
+        "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+        "status": "screening_complete",
+        "position_code": "FULLSTACK_DEVELOPER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER": {
+        "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "status": "shortlisted",
+        "position_code": "SOCIAL_MEDIA_MANAGER",
+        "mode": "allow",
+        "reason_codes": [
+          "verified_job_binding"
+        ],
+        "classification": "allow_verified_binding",
+        "bucket": "allowlist"
+      },
+      "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT": {
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      },
+      "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT": {
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "position_code": "",
+        "mode": "shadow_deny",
+        "reason_codes": [
+          "held_or_unassigned_talent_pool_record"
+        ],
+        "classification": "expected_missing_verified_binding",
+        "bucket": "held"
+      }
+    }
+  },
+  "after_counts": {
+    "applications": 18,
+    "candidates": 21
+  },
+  "final_job_bindings": [
+    {
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a"
+    },
+    {
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "position_code": "IT_MAINTENANCE",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-IT_MAINTENANCE",
+      "job_id": "7821c69b-5ed1-4036-86eb-04512d79afee"
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "position_code": "ACCOUNTING_EXCEL",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+      "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2"
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-HR",
+      "position_code": "HR",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-HR",
+      "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909"
+    },
+    {
+      "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+      "position_code": "FULLSTACK_DEVELOPER",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+      "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c"
+    },
+    {
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "position_code": "MARKETING_SPECIALIST",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-MARKETING_SPECIALIST",
+      "job_id": "5cf8e5d9-4bb3-4645-a771-6b8367b0b395"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "position_code": "ACCOUNTING",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+      "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-FINANCE",
+      "position_code": "FINANCE",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-FINANCE",
+      "job_id": "3ca7ad6a-9726-48d9-8b9c-3cab473bda90"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-HR",
+      "position_code": "HR",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-HR",
+      "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909"
+    },
+    {
+      "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+      "position_code": "FULLSTACK_DEVELOPER",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+      "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c"
+    },
+    {
+      "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "verified": true,
+      "legacy_backfill": "true",
+      "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a"
+    }
+  ],
+  "final_cv_bindings": [],
+  "assertions": {
+    "allowlist_all_allow": true,
+    "smoke_all_shadow_deny": true,
+    "held_all_shadow_deny": true,
+    "bugs": 0,
+    "unexplained": 0,
+    "zero_app_mutation": true,
+    "zero_candidate_mutation": true,
+    "job_bindings_created": 11,
+    "cv_bindings_created": 0
+  },
+  "ok": true
+}

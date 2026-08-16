@@ -1,0 +1,6 @@
+NO-GO
+
+Employees 360 Wave 3 counsel pack prepared — no code, no deploy.
+P0 blockers: CQ1, CQ2 (if hints on), CQ3 sign-off, CQ4 sign-off, CQ6 (if reinstate on), CQ9 if non-KW staff.
+Synthetic staging PASS; live WATHEFNI production lifecycle remains blocked.
+Wave 4 / redesign not started.

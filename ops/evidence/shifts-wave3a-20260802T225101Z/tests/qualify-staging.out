@@ -1,0 +1,126 @@
+staging dashboard updated: /opt/wathefni/staging/dashboard-dist
+health_ok
+active
+PYBIN=/opt/wathefni/orchestrator/.venv/bin/python
+PASS  version 3.0.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+40 passed, 0 failed
+SHW3A tag=9EFA6EFB key=WATHEFNI-SHW2B-W3A-9EFA6EFB evid=/opt/wathefni/staging-evidence/shifts-wave3a-20260802T225101Z/tests
+PASS  connected_db_is_staging
+PASS  db_name_wathefni_staging
+PASS  wave3_module_enabled
+PASS  honesty_payroll_false
+PASS  honesty_no_templates
+PASS  create_shift_ok
+PASS  create_has_shift_id
+PASS  overnight_create_ok
+PASS  overnight_ends_next_day
+PASS  list_wave3_enabled
+PASS  list_honesty_embedded
+FAIL  list_contains_created :: {'count': 0}
+PASS  history_versions
+PASS  history_has_current
+PASS  stale_rejected
+dashboard shift reschedule notification failed
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/app.py", line 70132, in dashboard_posthire_reschedule_shift
+    notification = notify_employee_shift_created(result={"employee": employee, "created": [updated]}, account_id=company, created_by_phone=actor_phone)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 21521, in notify_employee_shift_created
+    send_result = send_custom_employee_message(employee, account_id, message)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 34950, in send_custom_employee_message
+    result = send_octopus_whatsapp(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 30877, in send_octopus_whatsapp
+    record_outbound_delivery_event(
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31408, in record_outbound_delivery_event
+    company = _resolve_outbound_delivery_company_code(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31375, in _resolve_outbound_delivery_company_code
+    raise ValueError("company_code_required")
+ValueError: company_code_required
+PASS  reschedule_ok
+dashboard shift cancel notification failed
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/app.py", line 69927, in dashboard_posthire_cancel_shift
+    notification = notify_employee_shift_cancelled(result={"employee": employee, "cancelled": [cancelled]}, account_id=company, created_by_phone=actor_phone)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 21569, in notify_employee_shift_cancelled
+    send_result = send_custom_employee_message(employee, account_id, message)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 34950, in send_custom_employee_message
+    result = send_octopus_whatsapp(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 30877, in send_octopus_whatsapp
+    record_outbound_delivery_event(
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31408, in record_outbound_delivery_event
+    company = _resolve_outbound_delivery_company_code(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31375, in _resolve_outbound_delivery_company_code
+    raise ValueError("company_code_required")
+ValueError: company_code_required
+PASS  cancel_ok
+dashboard shift cancel notification failed
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/app.py", line 69927, in dashboard_posthire_cancel_shift
+    notification = notify_employee_shift_cancelled(result={"employee": employee, "cancelled": [cancelled]}, account_id=company, created_by_phone=actor_phone)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 21569, in notify_employee_shift_cancelled
+    send_result = send_custom_employee_message(employee, account_id, message)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 34950, in send_custom_employee_message
+    result = send_octopus_whatsapp(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 30877, in send_octopus_whatsapp
+    record_outbound_delivery_event(
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31408, in record_outbound_delivery_event
+    company = _resolve_outbound_delivery_company_code(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31375, in _resolve_outbound_delivery_company_code
+    raise ValueError("company_code_required")
+ValueError: company_code_required
+PASS  overnight_cancel_ok
+PASS  dashboard_dist_calendar_aligned
+PASS  residual_zero
+
+19 passed, 1 failed

@@ -1,0 +1,1 @@
+Mixed Digital Scan Email: mixed01@example.com DIGITAL PAGE — readable native text Skills: Python, Postgres, OCR routing

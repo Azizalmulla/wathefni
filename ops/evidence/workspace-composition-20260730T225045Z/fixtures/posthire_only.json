@@ -1,0 +1,34 @@
+{
+  "id": "posthire_only",
+  "label": "Post-hire only",
+  "modules": [
+    "onboarding",
+    "attendance",
+    "leave",
+    "payroll"
+  ],
+  "role": "owner",
+  "nav_groups": [
+    "posthire",
+    "settings"
+  ],
+  "nav_ids": [
+    "ai",
+    "employees",
+    "onboarding",
+    "attendance",
+    "leave",
+    "payroll",
+    "notifications",
+    "activity",
+    "settings"
+  ],
+  "overview_layout": "none",
+  "offerable_tabs": {
+    "video_interviews": false
+  },
+  "settings": {
+    "team": true,
+    "integrations": true
+  }
+}

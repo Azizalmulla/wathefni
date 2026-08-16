@@ -1,0 +1,156 @@
+{
+  "release_key": "wathefni_battery1_beta_v1",
+  "release_id": "c1f3b910-25e5-41c8-83b7-73ffd619b56a",
+  "started_at": "2026-07-18T22:52:22+00:00",
+  "environment": {
+    "application_environment": "production",
+    "database_environment": "production",
+    "database_environment_marker": "2646585bbedb",
+    "database_logical_name": "b1f1a54885f2",
+    "database_host": "aaf075b7b4bf",
+    "match": true
+  },
+  "company_code": "WATHEFNI",
+  "manifest_sha256": "035a12a2e35c487d3588f2d3be8952cd3350f30f2b030cdf3d863c5490e39c62",
+  "content_pack_sha256": "d0d617d5cbb5af4f5c64e15dd947ad2e78bd85fcb1ee5e8347832c033bc49d23",
+  "approver_a": "assessment_owner:aziz.almulla",
+  "approver_b": "bank_release_operator:cursor-agent",
+  "confirm": "production:wathefni:battery1_beta:035a12a2e35c487d3588f2d3be8952cd3350f30f2b030cdf3d863c5490e39c62",
+  "authoring_env": "false",
+  "idempotent_replay": false,
+  "existing_attempts_untouched": true,
+  "external_tenants_inserted": false,
+  "http_publish_route_used": false,
+  "ai_scoring": false,
+  "before_counts": {
+    "batteries": 1,
+    "items": 22,
+    "attempts": 4,
+    "versions": 1,
+    "wathefni_attempts": 4,
+    "external_attempts": 0,
+    "external_batteries": 0,
+    "ability_v1_items": 22
+  },
+  "global_ability_before": {
+    "battery_key": "wathefni_ability_v1",
+    "company_code": "GLOBAL",
+    "is_active": true,
+    "content_version": 1,
+    "fingerprint": "d1c4c44c43e600112d6975ade61a988a"
+  },
+  "status": "released",
+  "completed_at": "2026-07-18T22:52:22+00:00",
+  "after_counts": {
+    "batteries": 3,
+    "items": 72,
+    "attempts": 4,
+    "versions": 3,
+    "wathefni_attempts": 4,
+    "external_attempts": 0,
+    "external_batteries": 0,
+    "ability_v1_items": 22
+  },
+  "insertion": {
+    "en": {
+      "battery_key": "wathefni_gawj_v1_en_beta",
+      "assessment_version_id": "469a1067-2d36-4824-9e5e-d4cfbbad06b4",
+      "content_sha256": "caf19b2eaaf177f27bb50fdc351ad9691886d42778eea8e348d71c6c232ca976",
+      "item_count": 25
+    },
+    "ar": {
+      "battery_key": "wathefni_gawj_v1_ar_beta",
+      "assessment_version_id": "43330814-2987-411b-a120-6cb661d91393",
+      "content_sha256": "d9a267f3a40a0bfe53d5e8dfc04a4e12540b911e0b80c4bb40af49b53f5cb095",
+      "item_count": 25
+    }
+  },
+  "item7": {
+    "item_id": "b1beta_en_07",
+    "answer_key": "C",
+    "source_draft_revision_id": "58b443fb-dfa0-47b8-a947-4721f2be3ae7",
+    "prompt_prefix": "It is 11:00 a.m. HR needs your final interview panel names by noon. One supervisor\u2019s availabilit"
+  },
+  "release_row": {
+    "release_id": "c1f3b910-25e5-41c8-83b7-73ffd619b56a",
+    "release_key": "wathefni_battery1_beta_v1",
+    "company_code": "WATHEFNI",
+    "manifest_sha256": "035a12a2e35c487d3588f2d3be8952cd3350f30f2b030cdf3d863c5490e39c62",
+    "content_pack_sha256": "d0d617d5cbb5af4f5c64e15dd947ad2e78bd85fcb1ee5e8347832c033bc49d23",
+    "status": "released",
+    "approver_a": "assessment_owner:aziz.almulla",
+    "approver_b": "bank_release_operator:cursor-agent",
+    "battery_keys": [
+      "wathefni_gawj_v1_en_beta",
+      "wathefni_gawj_v1_ar_beta"
+    ],
+    "version_ids": {
+      "ar": "43330814-2987-411b-a120-6cb661d91393",
+      "en": "469a1067-2d36-4824-9e5e-d4cfbbad06b4"
+    },
+    "before_counts": {
+      "items": 22,
+      "attempts": 4,
+      "versions": 1,
+      "batteries": 1,
+      "ability_v1_items": 22,
+      "external_attempts": 0,
+      "wathefni_attempts": 4,
+      "external_batteries": 0
+    },
+    "after_counts": {
+      "items": 72,
+      "attempts": 4,
+      "versions": 3,
+      "batteries": 3,
+      "ability_v1_items": 22,
+      "external_attempts": 0,
+      "wathefni_attempts": 4,
+      "external_batteries": 0
+    },
+    "evidence_json": {
+      "item7": {
+        "item_id": "b1beta_en_07",
+        "answer_key": "C",
+        "prompt_prefix": "It is 11:00 a.m. HR needs your final interview panel names by noon. One supervisor\u2019s availabilit",
+        "source_draft_revision_id": "58b443fb-dfa0-47b8-a947-4721f2be3ae7"
+      },
+      "label": "Wathefni General Ability & Workplace Judgment \u2014 Beta",
+      "batteries": {
+        "ar": {
+          "item_count": 25,
+          "battery_key": "wathefni_gawj_v1_ar_beta",
+          "content_sha256": "d9a267f3a40a0bfe53d5e8dfc04a4e12540b911e0b80c4bb40af49b53f5cb095",
+          "assessment_version_id": "43330814-2987-411b-a120-6cb661d91393"
+        },
+        "en": {
+          "item_count": 25,
+          "battery_key": "wathefni_gawj_v1_en_beta",
+          "content_sha256": "caf19b2eaaf177f27bb50fdc351ad9691886d42778eea8e348d71c6c232ca976",
+          "assessment_version_id": "469a1067-2d36-4824-9e5e-d4cfbbad06b4"
+        }
+      },
+      "scoring_version": "wathefni_gawj_deterministic_v1",
+      "active_batteries": [
+        {
+          "is_active": true,
+          "battery_key": "wathefni_ability_v1",
+          "company_code": "GLOBAL"
+        }
+      ],
+      "monitoring_flags": {
+        "8": "difficulty_monitoring",
+        "22": "ceiling_effect_monitoring"
+      }
+    },
+    "created_at": "2026-07-18T22:52:22.474203+00:00"
+  },
+  "rollback": {
+    "method": "retire_beta_batteries_restore_global_default",
+    "commands": [
+      "UPDATE assessment_batteries SET is_active=FALSE, retired_at=now() WHERE battery_key IN ('wathefni_gawj_v1_en_beta','wathefni_gawj_v1_ar_beta') AND company_code='WATHEFNI'",
+      "UPDATE assessment_batteries SET is_active=TRUE, retired_at=NULL WHERE battery_key='wathefni_ability_v1'",
+      "Existing attempts remain pinned to their original assessment_version_id and are never rewritten."
+    ]
+  }
+}

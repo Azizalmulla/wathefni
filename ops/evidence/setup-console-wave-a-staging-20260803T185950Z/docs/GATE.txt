@@ -1,0 +1,10 @@
+stamp=20260803T185950Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/setup-console-wave-a-staging-20260803T185950Z
+company=WATHEFNI
+external_tenants=false
+payroll_money=false
+attendance_ingest=false
+wave_b_started=false
+GATE=STAGING_SETUP_CONSOLE_WAVE_A_GO
+STAGING_WAVE_A=GO
+PROD_SYNTHETIC=NO-GO

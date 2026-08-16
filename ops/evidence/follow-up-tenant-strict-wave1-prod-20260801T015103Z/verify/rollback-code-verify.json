@@ -1,0 +1,9 @@
+{
+  "pre_app": "16e08d766554e372fef88f96df61b8bd8a99cd1b7df667dd5170253d6f64d0a1",
+  "cur_app": "2a7f1e8fe66ca3a0fdcfa6b3af95721252768aeb6177fbf4ed4d4eada71ebe2a",
+  "pre_overview": "3cbca983ae8e6d1b0015a5cdc15e2621c6c03e7b8438a293237601b750afac85",
+  "cur_overview": "0c1e1afdd84fc225e0ae4705a9377c87fba78c5943e32b02fb038130ce1f0f41",
+  "apps_differ": true,
+  "overview_differ": true,
+  "code_rollback_available": true
+}

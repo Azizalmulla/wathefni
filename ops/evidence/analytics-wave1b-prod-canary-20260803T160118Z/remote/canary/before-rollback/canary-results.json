@@ -1,0 +1,292 @@
+{
+  "tag": "f0cf25f5",
+  "pass": 49,
+  "fail": 0,
+  "results": [
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_only enforced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "read_only honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no money authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no compliance metrics",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no payroll cost analytics",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hiring reports separate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ranked attention non-empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "severity rank high-first",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep link leave",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep link employees",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep link employee key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hours-above-schedule present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "non-payroll wording",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no scheduled-shifts attention",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "partial sources disclosed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance unavailable listed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no scheduled headline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pending review when leave available",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "best attendance removed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overtime risk removed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hours above schedule label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "definitions EN/AR present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live contract",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live as_of",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live timezone Kuwait",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live freshness",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live attention list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live definitions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live money_authority false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live no best attendance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live no overtime risk",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live no scheduled headline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dashboard viewer_user_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dashboard actor_role",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope probe returns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope object present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI Needs attention EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI Headcount gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI responsive grid",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canary ack deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic marker detection",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real subject not synthetic",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "live": {
+    "as_of": "2026-08-03T19:04:43.717377+03:00",
+    "attention_count": 0,
+    "headlines": [
+      "absences",
+      "late_records",
+      "pending_review"
+    ],
+    "contract": "analytics_attention_wave1"
+  },
+  "honesty": {
+    "wave": "analytics_wave1",
+    "version": "1.0.0",
+    "contract": "analytics_attention_wave1",
+    "read_only": true,
+    "money_authority": false,
+    "payroll_cost_analytics": false,
+    "compliance_metrics": false,
+    "ai": false,
+    "hiring_reports_separate": true,
+    "alerts_delivery_owns_communication": true,
+    "systems_of_action": [
+      "attendance",
+      "leave",
+      "shifts",
+      "employees"
+    ],
+    "synthetic_only": true,
+    "enabled": true,
+    "companies": [
+      "WATHEFNI"
+    ],
+    "synthetic_key_markers": [
+      "ANW1",
+      "ANW1-SYNTH|"
+    ],
+    "synthetic_phone_prefixes": [
+      "965540"
+    ]
+  }
+}

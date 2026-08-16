@@ -1,0 +1,107 @@
+health_ok after 3s
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+WATHEFNI_ONBOARDING_DOC_VALIDATION_SOFT=on
+WATHEFNI_ONBOARDING_DOC_VALIDATION_HARD=off
+WATHEFNI_ONBOARDING_DOC_VALIDATION_COMPANIES=WATHEFNI
+WATHEFNI_ONBOARDING_DOC_VALIDATION_EMPLOYEE_ALLOWLIST=WATHEFNI-96599338566,WATHEFNI-96550252254
+PASS off by default
+PASS aziz allowlisted
+PASS talal allowlisted
+PASS other employee denied
+PASS other company denied
+PASS civil_id wrong type blocks
+PASS reason wrong_media_item
+PASS has en correction
+PASS gpt_used false
+PASS identity mismatch blocks soft
+PASS reason identity_mismatch
+PASS semantic uncertain not blocked
+PASS decision allow_uncertain
+PASS hr review recommended
+PASS reason identity_unverified
+PASS hard blocks identity_unverified
+PASS photo that is ID blocks
+PASS looks_like_id_not_photo
+PASS personal photo allows
+PASS expired passport blocks
+PASS expired reason
+PASS tiny file blocks
+PASS file_too_small
+PASS route gpt false
+PASS docx anydoc flag
+PASS error code prefix
+PASS validation gpt false
+PASS fixture selfie blocks
+PASS fixture selfie reason
+PASS fixture selfie not uncertain
+PASS fixture person_holding_product blocks
+PASS fixture person_holding_product reason
+PASS fixture person_holding_product not uncertain
+PASS fixture food_product_photo blocks
+PASS fixture food_product_photo reason
+PASS fixture food_product_photo not uncertain
+PASS fixture game_screenshot blocks
+PASS fixture game_screenshot reason
+PASS fixture game_screenshot not uncertain
+PASS blurry civil_id blocks
+PASS blurry reason too_blurry
+PASS blurry has EN retake
+PASS blurry has AR copy
+PASS partial civil_id blocks
+PASS partial reason document_not_fully_visible
+PASS glare blocks
+PASS glare reason
+PASS missing back blocks
+PASS missing_side reason
+PASS missing_side EN
+PASS clear civil_id allow
+PASS clear civil_id not blocked
+PASS low-conf credible blocks
+PASS low-conf not uncertain
+PASS low-conf retake reason
+PASS oreo-style blocks
+PASS oreo-style not_a_document
+PASS oreo-style not uncertain
+PASS validator unavailable blocks
+PASS validator_unavailable reason
+OK onboarding doc validation parity local smoke
+e4c1375b1d06f695423d3f5abf3f7c500f03bf318d19b5857872c597c3403726  onboarding_doc_validation_parity.py
+ead6da24f73d7c61e3de2fb2b2806e6520e5531eb75a0f38c85b61e305b2bd66  identity_document_extraction.py
+{
+  "real_civil_id": {
+    "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id/civil_id-fe98f7d9d481-b6dd8343c46046e5a6e5d2105272c741.jpg",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "status": "accepted",
+    "mime_type": "image/jpeg",
+    "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+  },
+  "exists": true,
+  "reeval": {
+    "decision": "block",
+    "reason": "instruction_screenshot",
+    "should_block": true,
+    "gate": "soft",
+    "detected": "instruction_screenshot",
+    "confidence": 0.0,
+    "matches": false
+  }
+}
+{
+  "canary_present": true,
+  "canary_status": "pending",
+  "canary_document_type": "civil_id_canary_test",
+  "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+  "visible_in_employee_app": true,
+  "group": "your_actions",
+  "actions": [
+    "upload"
+  ],
+  "upload_enabled": true,
+  "required_canary": false,
+  "real_civil_id_status": "accepted",
+  "real_civil_id_required": true,
+  "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "required_item_count_excluding_canary": 4
+}
+VERIFY PASS
+

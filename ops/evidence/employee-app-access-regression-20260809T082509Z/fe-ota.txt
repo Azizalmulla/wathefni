@@ -1,0 +1,91 @@
+- Exporting...
+[expo-cli] --non-interactive is not supported, use $CI=1 instead
+[expo-cli] env: load .env
+[expo-cli] env: export EXPO_PUBLIC_API_BASE_URL
+[expo-cli] Starting Metro Bundler
+[expo-cli] | (node:72853) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:72854) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.4% (1461/1520)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 89.9% (1351/1425)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1831/1831)
+[expo-cli] Web Bundled 2781ms node_modules/expo-router/entry.js (1520 modules)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 89.9% (1351/1425)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1831/1831)
+[expo-cli] iOS Bundled 6192ms node_modules/expo-router/entry.js (1425 modules)
+[expo-cli] Android Bundled 9594ms node_modules/expo-router/entry.js (1831 modules)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1831/1831)
+[expo-cli] Creating asset map
+[expo-cli] 
+[expo-cli] › Assets (55):
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.20bce29dc5180892ce1fbf4a563737a0.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.cceb8828a5f1f7a53506cceb54937a6e.ttf (181 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.b4eb097d35f44ed943676fd56f6bdc51.ttf (390 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (390 kB)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.0a328cd9c1afd0afe8e3b1ec5165b1b4.png (653 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png (653 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon.35ba0eaec5a4f5ed12ca16fabeae451d.png (207 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon.png (8 variations | 359 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/clear-icon.c94f6478e7ae0cdd9f15de1fcb9e5e55.png (4 variations | 425 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png (4 variations | 425 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/close-icon.808e1b1b9b53114ec2838071a7e6daa7.png (4 variations | 235 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/close-icon.png (4 variations | 235 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/search-icon.286d67d3f74808a60a78d3ebf1a5fb57.png (928 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/search-icon.png (7 variations | 592 B)
+[expo-cli] node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png (9.46 kB)
+[expo-cli] node_modules/expo-router/assets/arrow_down.png (9.46 kB)
+[expo-cli] node_modules/expo-router/assets/error.d1ea1496f9057eb392d5bbf3732a61b7.png (469 B)
+[expo-cli] node_modules/expo-router/assets/error.png (469 B)
+[expo-cli] node_modules/expo-router/assets/file.19eeb73b9593a38f8e9f418337fc7d10.png (138 B)
+[expo-cli] node_modules/expo-router/assets/file.png (138 B)
+[expo-cli] node_modules/expo-router/assets/forward.d8b800c443b8972542883e0b9de2bdc6.png (188 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (188 B)
+[expo-cli] node_modules/expo-router/assets/pkg.ab19f4cbc543357183a20571f68380a3.png (364 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (364 B)
+[expo-cli] node_modules/expo-router/assets/sitemap.412dd9275b6b48ad28f5e3d81bb1f626.png (465 B)
+[expo-cli] node_modules/expo-router/assets/sitemap.png (465 B)
+[expo-cli] node_modules/expo-router/assets/unmatched.20e71bdf79e3a97bf55fd9e164041578.png (4.75 kB)
+[expo-cli] node_modules/expo-router/assets/unmatched.png (4.75 kB)
+[expo-cli] 
+[expo-cli] › web bundles (2):
+[expo-cli] _expo/static/js/web/entry-f7027cef7a72115df15139f8a26f52fe.js (2.73 MB)
+[expo-cli] _expo/static/js/web/entry-f7027cef7a72115df15139f8a26f52fe.js.map (9.02 MB)
+[expo-cli] 
+[expo-cli] › ios bundles (2):
+[expo-cli] _expo/static/js/ios/entry-4c63a0142c82fefdd9eb03b3318c0480.hbc (3.03 MB)
+[expo-cli] _expo/static/js/ios/entry-4c63a0142c82fefdd9eb03b3318c0480.hbc.map (10.1 MB)
+[expo-cli] 
+[expo-cli] › android bundles (2):
+[expo-cli] _expo/static/js/android/entry-1b43cb3d21283ca614c87805ac1701c6.hbc (3.04 MB)
+[expo-cli] _expo/static/js/android/entry-1b43cb3d21283ca614c87805ac1701c6.hbc.map (10.1 MB)
+[expo-cli] 
+[expo-cli] › Files (3):
+[expo-cli] assetmap.json (13.3 kB)
+[expo-cli] index.html (1.18 kB)
+[expo-cli] metadata.json (3.9 kB)
+[expo-cli] 
+[expo-cli] Exported: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 13.0 KB)
+✔ Uploaded assetmap.json 1s
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 30 iOS assets, 30 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Computing project fingerprints
+✔ Computed project fingerprints
+- Publishing...
+✔ Published!
+Branch             canary
+Runtime version    0.2.0
+Platform           android, ios
+Update group ID    754b9114-1b49-40db-93ce-127e33e65f09
+Android update ID  019fe5a4-3c94-70df-8149-36fde52c0b75
+iOS update ID      019fe5a4-3c94-704f-a5cf-a8962aad3b19
+Message            Fix: push register storm caused false App access unavailable (single-flight + soft API block)
+Commit             2fa16534c8846887472dabbd10cc164a6c788f3f*
+EAS Dashboard      https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/754b9114-1b49-40db-93ce-127e33e65f09
+

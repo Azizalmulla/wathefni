@@ -1,0 +1,50 @@
+{
+  "mode": "staging_provider_read_only_no_db_no_delivery",
+  "model": "gpt-5.4",
+  "provider": "openai-sse",
+  "api": "openai-responses",
+  "total": 16,
+  "correct": 15,
+  "accuracy": 0.9375,
+  "latency_ms": {
+    "p50": 1320.2,
+    "p95": 2419.4
+  },
+  "cost": {
+    "known": false,
+    "reason": "parse_public_role_selection_with_gpt discards provider usage and does not call record_llm_call"
+  },
+  "per_language": {
+    "en": {"correct": 4, "total": 4, "accuracy": 1.0},
+    "msa": {"correct": 4, "total": 4, "accuracy": 1.0},
+    "gulf": {"correct": 4, "total": 4, "accuracy": 1.0},
+    "arabizi": {"correct": 3, "total": 4, "accuracy": 0.75}
+  },
+  "failed_examples": [
+    {
+      "language": "arabizi",
+      "text": "tani wa7da",
+      "expected_selected_index": 2,
+      "selected_index": null,
+      "latency_ms": 1062.3
+    }
+  ],
+  "cases": [
+    {"language": "en", "text": "the first one", "expected": 1, "selected": 1, "latency_ms": 2419.4},
+    {"language": "en", "text": "finance analyst", "expected": 1, "selected": 1, "latency_ms": 1320.2},
+    {"language": "en", "text": "the HR role", "expected": 2, "selected": 2, "latency_ms": 1296.9},
+    {"language": "en", "text": "software engineering", "expected": 3, "selected": 3, "latency_ms": 1064.3},
+    {"language": "msa", "text": "الوظيفة الأولى", "expected": 1, "selected": 1, "latency_ms": 1539.6},
+    {"language": "msa", "text": "وظيفة المالية", "expected": 1, "selected": 1, "latency_ms": 1359.0},
+    {"language": "msa", "text": "الموارد البشرية", "expected": 2, "selected": 2, "latency_ms": 1127.7},
+    {"language": "msa", "text": "هندسة البرمجيات", "expected": 3, "selected": 3, "latency_ms": 1421.9},
+    {"language": "gulf", "text": "ابي المالية", "expected": 1, "selected": 1, "latency_ms": 1599.0},
+    {"language": "gulf", "text": "الثانية", "expected": 2, "selected": 2, "latency_ms": 1729.6},
+    {"language": "gulf", "text": "وظيفة البرمجة", "expected": 3, "selected": 3, "latency_ms": 1302.4},
+    {"language": "gulf", "text": "الموارد", "expected": 2, "selected": 2, "latency_ms": 1141.3},
+    {"language": "arabizi", "text": "finance", "expected": 1, "selected": 1, "latency_ms": 1193.7},
+    {"language": "arabizi", "text": "el hr role", "expected": 2, "selected": 2, "latency_ms": 1112.1},
+    {"language": "arabizi", "text": "tani wa7da", "expected": 2, "selected": null, "latency_ms": 1062.3},
+    {"language": "arabizi", "text": "software", "expected": 3, "selected": 3, "latency_ms": 1347.5}
+  ]
+}

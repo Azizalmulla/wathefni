@@ -15,6 +15,12 @@ Skills define _how_ tools work. This file is for workspace specifics — the loc
 
 {{HR_USERS_BLOCK}}
 
+### Manager and Branch Scope
+
+- Optional org data lives in `company.json` under `org_structure.branches`, `org_structure.teams`, `org_structure.managers`, and `org_structure.employee_assignments`
+- Branch/team manager access is enforced by backend scope tables, not by chat memory
+- Scoped manager reads must not overwrite company-wide Google Sheet dashboards
+
 ### Google Accounts and Targets
 
 - Google account: `{{GOOGLE_ACCOUNT}}`
@@ -27,6 +33,9 @@ Skills define _how_ tools work. This file is for workspace specifics — the loc
 - Outbound media folder: `~/.openclaw/media/outbound`
 - Candidate data root: `data/candidates/`
 - Employee data root: `data/companies/{{COMPANY_CODE}}/employees/`
+- Shift data root: `data/companies/{{COMPANY_CODE}}/shifts/`
+- Attendance data root: `data/companies/{{COMPANY_CODE}}/attendance/`
+- Analytics data root: `data/companies/{{COMPANY_CODE}}/analytics/`
 - Company data root: `data/companies/`
 - Sync queue root: `data/companies/{{COMPANY_CODE}}/sync-queue/`
 
@@ -40,6 +49,34 @@ Skills define _how_ tools work. This file is for workspace specifics — the loc
 - Preserve `APPKEY:{APP_KEY}` markers in sheet notes
 - Candidate/employee-facing errors must stay plain and never expose tool or auth details
 - Generated QR codes and exported PDFs may be written only to the outbound media folder
+{{#MODULE_SHIFTS}}
+- Shifts are stored in backend shift tables; Sheets are dashboard/export only
+- Availability and shift swaps are stored in backend workforce tables; Sheets are dashboard/export only
+- Shifts use `Asia/Kuwait` unless a company-specific setting overrides it
+{{/MODULE_SHIFTS}}
+{{#MODULE_ATTENDANCE}}
+- Attendance is stored in backend attendance tables; Sheets are dashboard/export only
+- Attendance mutations require explicit employee/date/shift context or scoped pending operation state
+- Do not infer attendance targets from vague pronouns such as "him", "her", "this", or "do it"
+{{/MODULE_ATTENDANCE}}
+{{#MODULE_LEAVE}}
+- Leave is stored in backend leave tables; Sheets are dashboard/export only
+- Leave approvals must use exact employee/request context and check shift conflicts
+{{/MODULE_LEAVE}}
+{{#MODULE_PAYROLL}}
+- Payroll Hours is calculated from backend Shifts, Attendance, and Leave records
+- Payroll Sheets are dashboard/export only; do not invent salaries or pay rates
+- Timesheet approval freezes reviewed hours for a period before any future payroll policy calculation
+- Payroll Preview uses approved timesheets and configured policy only; payment processing is disabled
+- Payroll Export locks a preview snapshot for an explicit approved period; it does not create bank files or transfers
+- Employee payroll self-service is phone-bound and must not expose other employees, salary amounts, exports, bank files, or payment status
+- Branch/team managers may view scoped payroll hours and timesheets only; payroll policy/export remains company-wide HR admin scope
+{{/MODULE_PAYROLL}}
+{{#MODULE_ANALYTICS}}
+- Analytics is calculated from backend operational tables; Sheets are dashboard/export only
+- Analytics manager reads are scoped and must not overwrite company-wide dashboard tabs
+- Analytics is read-only and must not mutate shifts, attendance, leave, timesheets, or payroll policy
+{{/MODULE_ANALYTICS}}
 
 ## Why Separate?
 

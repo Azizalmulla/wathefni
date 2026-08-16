@@ -1,0 +1,477 @@
+{
+  "tag": "152c5db1",
+  "pass": 75,
+  "fail": 0,
+  "results": [
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exclude payroll on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "read-only honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "alerts owns notifications",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "analytics freeze intact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance freeze intact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "viewer allowlist configured",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "subject allowlist configured",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real canary enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approved boundary",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "viewer is Aziz phone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "subject is Talal only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nav offerable for Aziz",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nav hidden for Fouad",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "Aziz API access",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "Talal only subjects",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item subject Talal::compliance:missing:WATHEFNI-96550252254:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item not payroll::compliance:missing:WATHEFNI-96550252254:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page present::compliance:missing:WATHEFNI-96550252254:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page safe::compliance:missing:WATHEFNI-96550252254:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item subject Talal::compliance:missing:WATHEFNI-96550252254:medical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item not payroll::compliance:missing:WATHEFNI-96550252254:medical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page present::compliance:missing:WATHEFNI-96550252254:medical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page safe::compliance:missing:WATHEFNI-96550252254:medical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:medical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:medical",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item subject Talal::compliance:missing:WATHEFNI-96550252254:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item not payroll::compliance:missing:WATHEFNI-96550252254:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page present::compliance:missing:WATHEFNI-96550252254:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page safe::compliance:missing:WATHEFNI-96550252254:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item subject Talal::compliance:missing:WATHEFNI-96550252254:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item not payroll::compliance:missing:WATHEFNI-96550252254:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page present::compliance:missing:WATHEFNI-96550252254:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page safe::compliance:missing:WATHEFNI-96550252254:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item subject Talal::compliance:missing:WATHEFNI-96550252254:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item not payroll::compliance:missing:WATHEFNI-96550252254:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page present::compliance:missing:WATHEFNI-96550252254:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page safe::compliance:missing:WATHEFNI-96550252254:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item subject Talal::employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item not payroll::employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page present::employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link page safe::employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link employee Talal::employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep_link not payroll page::employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lean perms still Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lean perms no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fouad denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "viewer_no_phone denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "random_manager denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill viewer empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill viewer API denial",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill subject empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill subject removes items",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill subject canary off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "WAVE1=0 kill switch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restored Aziz access",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restored Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restored real canary on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gate fail-closed viewer",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payload composes via build_action_inbox",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payload has no mutating SQL",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty mutates_records false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canary ack deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual 0",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "residual": 0,
+  "allowlists": {
+    "viewer": [
+      "96599338566"
+    ],
+    "subject": [
+      "WATHEFNI-96550252254"
+    ],
+    "within_boundary": true
+  },
+  "aziz_items": {
+    "total": 6,
+    "by_source": {
+      "compliance": 5,
+      "onboarding": 1
+    },
+    "by_system_of_action": {
+      "onboarding": 6
+    },
+    "items": [
+      {
+        "id": "compliance:missing:WATHEFNI-96550252254:civil_id",
+        "source": "compliance",
+        "system_of_action": "onboarding",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "severity": "medium",
+        "what_en": "Talal Fadhli's Civil ID is missing",
+        "deep_link_page": "onboarding",
+        "deep_link_employee": "WATHEFNI-96550252254"
+      },
+      {
+        "id": "compliance:missing:WATHEFNI-96550252254:medical",
+        "source": "compliance",
+        "system_of_action": "onboarding",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "severity": "medium",
+        "what_en": "Talal Fadhli's Medical certificate is missing",
+        "deep_link_page": "onboarding",
+        "deep_link_employee": "WATHEFNI-96550252254"
+      },
+      {
+        "id": "compliance:missing:WATHEFNI-96550252254:passport",
+        "source": "compliance",
+        "system_of_action": "onboarding",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "severity": "medium",
+        "what_en": "Talal Fadhli's Passport is missing",
+        "deep_link_page": "onboarding",
+        "deep_link_employee": "WATHEFNI-96550252254"
+      },
+      {
+        "id": "compliance:missing:WATHEFNI-96550252254:residence",
+        "source": "compliance",
+        "system_of_action": "onboarding",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "severity": "medium",
+        "what_en": "Talal Fadhli's Residence is missing",
+        "deep_link_page": "onboarding",
+        "deep_link_employee": "WATHEFNI-96550252254"
+      },
+      {
+        "id": "compliance:missing:WATHEFNI-96550252254:work_permit",
+        "source": "compliance",
+        "system_of_action": "onboarding",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "severity": "medium",
+        "what_en": "Talal Fadhli's Work permit is missing",
+        "deep_link_page": "onboarding",
+        "deep_link_employee": "WATHEFNI-96550252254"
+      },
+      {
+        "id": "employees:WATHEFNI-96550252254:onboarding:incomplete",
+        "source": "onboarding",
+        "system_of_action": "onboarding",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "severity": "medium",
+        "what_en": "Onboarding incomplete",
+        "deep_link_page": "onboarding",
+        "deep_link_employee": "WATHEFNI-96550252254"
+      }
+    ]
+  },
+  "privacy": {
+    "fouad_denied": true,
+    "other_viewers_denied": true,
+    "talal_only": true,
+    "payroll_excluded": true,
+    "exclude_payroll_flag": true
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "verdict": "PASS",
+  "pass": 43,
+  "fail": 0,
+  "checks": [
+    {
+      "label": "payroll reconciles exactly",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "reconcile matched at least one",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "ATTW1B",
+        "start_date": "2026-08-20",
+        "end_date": "2026-08-21",
+        "projection_count": 2,
+        "legacy_count": 2,
+        "matched": 1,
+        "drift_count": 1,
+        "orphan_authority_count": 0,
+        "orphan_legacy_count": 0,
+        "quarantined": 1,
+        "drifts": [
+          {
+            "kind": "field_mismatch",
+            "projection_id": "8b92d6ff-b6df-4b9a-82d0-1a87e59cb22a",
+            "attendance_id": "f0ef585b-c85e-409c-b30a-9dd04057118e",
+            "employee_key": "ATTW1B-9655800c4d5",
+            "work_date": "2026-08-21",
+            "shift_key": "",
+            "mismatches": {
+              "status": {
+                "authority": "completed",
+                "legacy": "absent"
+              },
+              "check_in_at": {
+                "authority": "2026-08-21T09:00:00+03:00",
+                "legacy": null
+              },
+              "check_out_at": {
+                "authority": "2026-08-21T17:00:00+03:00",
+                "legacy": null
+              }
+            }
+          }
+        ],
+        "orphan_authority": [],
+        "orphan_legacy": [],
+        "silent_overwrite": false
+      }
+    },
+    {
+      "label": "drift detected",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "ATTW1B",
+        "start_date": "2026-08-20",
+        "end_date": "2026-08-21",
+        "projection_count": 2,
+        "legacy_count": 2,
+        "matched": 1,
+        "drift_count": 1,
+        "orphan_authority_count": 0,
+        "orphan_legacy_count": 0,
+        "quarantined": 1,
+        "drifts": [
+          {
+            "kind": "field_mismatch",
+            "projection_id": "8b92d6ff-b6df-4b9a-82d0-1a87e59cb22a",
+            "attendance_id": "f0ef585b-c85e-409c-b30a-9dd04057118e",
+            "employee_key": "ATTW1B-9655800c4d5",
+            "work_date": "2026-08-21",
+            "shift_key": "",
+            "mismatches": {
+              "status": {
+                "authority": "completed",
+                "legacy": "absent"
+              },
+              "check_in_at": {
+                "authority": "2026-08-21T09:00:00+03:00",
+                "legacy": null
+              },
+              "check_out_at": {
+                "authority": "2026-08-21T17:00:00+03:00",
+                "legacy": null
+              }
+            }
+          }
+        ],
+        "orphan_authority": [],
+        "orphan_legacy": [],
+        "silent_overwrite": false
+      }
+    },
+    {
+      "label": "never silent overwrite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "drift quarantined",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "conflicting legacy preserved",
+      "ok": true,
+      "detail": "absent"
+    }
+  ]
+}

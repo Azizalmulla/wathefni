@@ -1,0 +1,14 @@
+---
+description: Freeze Calendar Wave 1b UX closure; block new post-hire calendar emitters and hex/opacity regressions
+globs: apps/wathefni-dashboard/src/components/CalendarShell.tsx,apps/wathefni-dashboard/src/lib/query/freshness.ts,apps/wathefni-dashboard/src/lib/query/hooks.ts,ops/CALENDAR_WAVE1B*.md,ops/evidence/calendar-wave1b-*/**
+alwaysApply: false
+---
+
+# Calendar Wave 1b freeze
+
+See `ops/CALENDAR_WAVE1B_UX_CLOSURE_FREEZE.md`.
+
+- Sticky drawer, scroll restore, token colors, category≠status, visibility-paused freshness are frozen.
+- Do not add post-hiring calendar event sources without Wave 2 owner change-control.
+- Do not weaken Interview authority or `calendar.sync` owner-only.
+- Do not reintroduce category hex fills or opacity-flash refresh chrome.

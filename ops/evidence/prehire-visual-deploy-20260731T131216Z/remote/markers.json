@@ -1,0 +1,12 @@
+{
+  "chunks": [
+    "dashboard--cPiPiYu.js"
+  ],
+  "markers": {
+    "mobile-active-route-chip": true,
+    "mobile-prehire-rail": true,
+    "mobile-prehire-nav": true,
+    "mobile-nav-more": true
+  },
+  "all_pass": true
+}

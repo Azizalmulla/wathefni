@@ -1,0 +1,11 @@
+{
+  "connector_optional": true,
+  "connector_ar": true,
+  "gmail_readonly_copy": true,
+  "forwarding_default": true,
+  "no_intake_ops": true,
+  "job_alias": true,
+  "held": true,
+  "settings_chunk": "SettingsPage-DBF5JtBV.js",
+  "settings_sha": "87c8d7b374c8349b210023d0cbd56ff83d059c00ab4306f0eabfe5c4af54df94"
+}

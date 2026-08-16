@@ -1,0 +1,8 @@
+    STORE RELEASE — clean Setup canary
+    tenant: QA8E4E10 base: http://127.0.0.1:8011
+      PASS  operator credentials present
+      FAIL  Setup operator login :: (500, 'Internal Server Error')
+      FAIL  operator access token issued
+
+    CLEAN_CANARY_FAIL
+    1 passed, 2 failed

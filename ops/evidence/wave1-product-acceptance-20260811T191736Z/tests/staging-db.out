@@ -1,0 +1,10 @@
+    wave1 product acceptance — db
+      FAIL  HR Web requisitions :: /opt/wathefni/staging/apps/wathefni-dashboard/src/prehire/RequisitionsWorkspace.tsx
+      FAIL  HR Web preboarding :: /opt/wathefni/staging/apps/wathefni-dashboard/src/posthire/PreboardingWorkspace.tsx
+      FAIL  HR Web probation :: /opt/wathefni/staging/apps/wathefni-dashboard/src/posthire/ProbationWorkspace.tsx
+      FAIL  Setup Wave1 policies :: /opt/wathefni/staging/apps/wathefni-dashboard/src/setup-console/Wave1HireReadyPoliciesCard.tsx
+      FAIL  HR mobile requisitions queue :: /opt/wathefni/staging/apps/wathefni-employee-mobile/src/hr/features/requisitions/HRRequisitionsQueueView.tsx
+      FAIL  HR mobile probation queue :: /opt/wathefni/staging/apps/wathefni-employee-mobile/src/hr/features/probation/HRProbationQueueView.tsx
+      FAIL  Employee preboarding :: /opt/wathefni/staging/apps/wathefni-employee-mobile/app/preboarding.tsx
+      FAIL  Employee probation :: /opt/wathefni/staging/apps/wathefni-employee-mobile/app/probation.tsx
+      FAIL  nav capability requisitions :: /opt/wathefni/staging/apps/wathefni-dashboard/src/lib/workspaceCapability.ts

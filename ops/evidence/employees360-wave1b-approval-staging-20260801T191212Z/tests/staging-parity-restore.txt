@@ -1,0 +1,13 @@
+synced tenant_control_service.py
+synced tenant_control_decision.py
+synced tenant_control_lifecycle.py
+synced tenant_control_surfaces.py
+missing=tenant_control_catalog
+missing=tenant_control_schema
+missing=tenant_control_wave2_schema
+missing=cv_extraction_v2
+missing=cv_extraction_v2_internal
+missing=cv_extraction_v2_schema
+missing=talent_pool_auto_email_classification
+IMPORT_OK
+stg_health=000

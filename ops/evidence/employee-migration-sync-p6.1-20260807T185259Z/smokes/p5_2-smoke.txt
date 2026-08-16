@@ -1,0 +1,15 @@
+Socket exception: Connection reset by peer (104)
+OK P5.2 honesty
+OK encryption key available
+OK remediation scanned=0 resealed=0 reentry=0
+OK no insecure connector secrets remain
+OK missing key → create fails closed, nothing persisted
+OK invalid key → fails closed
+OK plainhex encrypt result rejected
+OK valid key → secret stored as fernet
+OK fernet-sealed connector sync works
+OK scheduler/sync rejects insecure secret without apply
+OK credential re-entry reseals with fernet
+OK API list redacts credentials
+OK P5.2 smoke PASS
+P5_2_EXIT=0

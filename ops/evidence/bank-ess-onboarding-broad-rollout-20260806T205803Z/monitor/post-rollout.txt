@@ -1,0 +1,12 @@
+health=200
+active=active
+journal_errors_15m=0
+permission_denial_lines_15m=0
+duplicate_stale_lines_15m=0
+http_bank_onboarding_15m:
+     78 HTTP/1.1" 200
+     10 HTTP/1.1" 401
+      9 HTTP/1.1" 403
+edge_dashboard=200
+edge_posthire=200
+edge_healthz=200

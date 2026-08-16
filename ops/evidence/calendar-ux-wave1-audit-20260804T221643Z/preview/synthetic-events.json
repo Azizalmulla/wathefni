@@ -1,0 +1,163 @@
+{
+  "contract": "calendar_ux_wave1_populated_preview",
+  "review_only": true,
+  "not_deployed": true,
+  "anchor_week_start": "2026-08-02",
+  "timezone": "Asia/Kuwait",
+  "events": [
+    {
+      "event_id": "syn-interview-1",
+      "title": "Interview · Sara · Product Designer",
+      "category": "interview",
+      "status": "confirmed",
+      "source": "live",
+      "module_owner": "interviews",
+      "start_at": "2026-08-03T10:00:00+03:00",
+      "end_at": "2026-08-03T11:00:00+03:00",
+      "preview_only": false
+    },
+    {
+      "event_id": "syn-interview-2",
+      "title": "Interview · Omar · Ops Lead",
+      "category": "interview",
+      "status": "tentative",
+      "source": "live",
+      "module_owner": "interviews",
+      "start_at": "2026-08-04T14:00:00+03:00",
+      "end_at": "2026-08-04T15:00:00+03:00",
+      "preview_only": false
+    },
+    {
+      "event_id": "syn-video-1",
+      "title": "Video interview (async) · Lina",
+      "category": "video_interview",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "interviews",
+      "start_at": "2026-08-05T09:00:00+03:00",
+      "end_at": "2026-08-05T09:45:00+03:00",
+      "preview_only": true,
+      "note": "Live product skips async_video; shown only for Wave 1 review."
+    },
+    {
+      "event_id": "syn-followup-1",
+      "title": "Candidate follow-up · Sara",
+      "category": "candidate_followup",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "candidates",
+      "start_at": "2026-08-06T11:30:00+03:00",
+      "end_at": "2026-08-06T12:00:00+03:00",
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-start-1",
+      "title": "Employee start · Khaled",
+      "category": "employee_start",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "employees360",
+      "start_at": "2026-08-03T00:00:00+03:00",
+      "end_at": "2026-08-03T23:59:00+03:00",
+      "all_day": true,
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-onboard-1",
+      "title": "Onboarding deadline · docs due",
+      "category": "onboarding_deadline",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "onboarding",
+      "start_at": "2026-08-07T17:00:00+03:00",
+      "end_at": "2026-08-07T17:30:00+03:00",
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-leave-1",
+      "title": "Approved leave · Nour",
+      "category": "approved_leave",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "leave",
+      "start_at": "2026-08-05T00:00:00+03:00",
+      "end_at": "2026-08-06T23:59:00+03:00",
+      "all_day": true,
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-compliance-1",
+      "title": "Compliance expiry · Civil ID",
+      "category": "compliance_expiry",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "compliance",
+      "start_at": "2026-08-08T09:00:00+03:00",
+      "end_at": "2026-08-08T09:30:00+03:00",
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-payroll-1",
+      "title": "Payroll cutoff",
+      "category": "payroll_cutoff",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "payroll",
+      "start_at": "2026-08-04T16:00:00+03:00",
+      "end_at": "2026-08-04T16:30:00+03:00",
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-training-1",
+      "title": "Company training · Safety",
+      "category": "training_company",
+      "status": "confirmed",
+      "source": "preview",
+      "module_owner": "calendar_manual",
+      "start_at": "2026-08-06T13:00:00+03:00",
+      "end_at": "2026-08-06T15:00:00+03:00",
+      "preview_only": true
+    },
+    {
+      "event_id": "syn-meeting-1",
+      "title": "Hiring sync",
+      "category": "meeting",
+      "status": "confirmed",
+      "source": "live",
+      "module_owner": "calendar",
+      "start_at": "2026-08-03T10:30:00+03:00",
+      "end_at": "2026-08-03T11:30:00+03:00",
+      "preview_only": false,
+      "note": "Overlaps interview to exercise lane layout."
+    },
+    {
+      "event_id": "syn-cancelled-1",
+      "title": "Interview · cancelled slot",
+      "category": "interview",
+      "status": "cancelled",
+      "source": "live",
+      "module_owner": "interviews",
+      "start_at": "2026-08-07T11:00:00+03:00",
+      "end_at": "2026-08-07T12:00:00+03:00",
+      "preview_only": false
+    }
+  ],
+  "proposed_category_colors": {
+    "interview": { "token": "wf-accent-follow", "hex_today": "#b9cde8", "note": "Live CalendarShell interview blue" },
+    "video_interview": { "token": "wf-accent-follow-soft", "hex_proposed": "#c9d8ec", "preview_only": true },
+    "candidate_followup": { "token": "wf-accent-review", "hex_proposed": "#f3d85f" },
+    "meeting": { "token": "wf-frame", "hex_today": "#e9e4d9" },
+    "employee_start": { "token": "wf-accent-priority", "hex_proposed": "#d4c4a8", "preview_only": true },
+    "onboarding_deadline": { "token": "wf-accent-assess", "hex_proposed": "#e8d4a8", "preview_only": true },
+    "approved_leave": { "token": "stone", "hex_today_ooo": "#e4ded2", "preview_only": true },
+    "compliance_expiry": { "token": "wf-accent-review", "hex_proposed": "#f3d85f", "preview_only": true },
+    "payroll_cutoff": { "token": "ink-soft", "hex_proposed": "#d9d2c6", "preview_only": true },
+    "training_company": { "token": "wf-frame", "hex_proposed": "#e9e4d9", "preview_only": true }
+  },
+  "status_overlays_separate": {
+    "cancelled": "#ddd7cc",
+    "tentative": "#efbdd7",
+    "confirmed": "none — category fill wins",
+    "completed": "none — category fill wins"
+  }
+}

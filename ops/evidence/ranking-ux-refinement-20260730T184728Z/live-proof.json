@@ -1,0 +1,19 @@
+{
+  "ranking_page_chunk": "RankingPage-Bm2jdD3O.js",
+  "dashboard_chunk": "dashboard-CyJ83Ezy.js",
+  "has_in_review_order": true,
+  "has_job_matches": true,
+  "has_meets_all_requirements": true,
+  "has_eligible_helper": true,
+  "has_ar_in_review": true,
+  "has_ar_job_matches": true,
+  "has_state_none_rankable": true,
+  "has_excluded_note": true,
+  "has_profiler_marks": true,
+  "has_back_to_ranking": true,
+  "has_cv_evidence_label": true,
+  "no_matching_rankable_jargon_badges": true,
+  "health": "200",
+  "verdict": "PASS",
+  "fail_keys": []
+}

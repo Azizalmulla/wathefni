@@ -1,0 +1,116 @@
+[
+  {
+    "name": "cv_en.docx",
+    "kind": "cv",
+    "lang": "en",
+    "sha256": "71c863c63cc3cad8ff11f26cf915003ac8fbc11985178fc7ef7c84ee449fcc0e"
+  },
+  {
+    "name": "cv_ar_en.docx",
+    "kind": "cv",
+    "lang": "ar_en",
+    "sha256": "c1fa90225087c9c5f6850d79f6f53c06c2acf28fc37d927b345b3313b9037577"
+  },
+  {
+    "name": "contract_offer_ar_en.docx",
+    "kind": "contract_letter",
+    "lang": "ar_en",
+    "sha256": "d23b98acbc9dd7ec05cc3a21de5a7018ad90d2800399063b61225e6b3051de0f"
+  },
+  {
+    "name": "hr_letter_en.docx",
+    "kind": "contract_letter",
+    "lang": "en",
+    "sha256": "a2d5f4f6e8a15309ff3ae648d69e77699d7caf3fcafd921e99685defb4850f96"
+  },
+  {
+    "name": "deck_onboarding_en.pptx",
+    "kind": "deck",
+    "lang": "en",
+    "sha256": "5d230837012a266a88715e14d9d41dccea33116e55785e6d8941ebf2ef7d4696"
+  },
+  {
+    "name": "deck_ar.pptx",
+    "kind": "deck",
+    "lang": "ar_en",
+    "sha256": "4356af3803603a72befc332d6bdbbc0d211ca87fe36335e6b3d2afdf9130c36a"
+  },
+  {
+    "name": "employee_list_ar_en.xlsx",
+    "kind": "employee_list",
+    "lang": "ar_en",
+    "sha256": "969e96907ccd0195901dcca9995013d219203884e3ca04aa2a5927a59384c0af"
+  },
+  {
+    "name": "payroll_aug2026.xlsx",
+    "kind": "payroll",
+    "lang": "en",
+    "sha256": "00e582f13b86f03066acfd341149275112a61cc25ee48b2430a738e6581e5b3f"
+  },
+  {
+    "name": "payroll_aug2026.csv",
+    "kind": "payroll",
+    "lang": "ar_en",
+    "sha256": "adb74ee4f3b648002839552e8aae25f70e2e5f70e39e897a1a7cca39456aa47b"
+  },
+  {
+    "name": "gov_notice_ar.odt",
+    "kind": "gov_odf",
+    "lang": "ar_en",
+    "sha256": "6a5463cbd0fe8a35f60485170d61b832b0602ac8c02a1be8d3cd431577e271d3"
+  },
+  {
+    "name": "gov_roster.ods",
+    "kind": "gov_odf",
+    "lang": "ar_en",
+    "sha256": "c277274a893574f3863114f1327abd2534a557c73ecdc61ba7ad7131b95618bf"
+  },
+  {
+    "name": "prior_cv_ar_en.docx",
+    "kind": "prior_fixture",
+    "lang": "ar_en",
+    "sha256": "4cb6dd57210d5f3fafb116a2c7e0c9713faa307de2543a05164d78b11f820a2b"
+  },
+  {
+    "name": "prior_deck_ar.pptx",
+    "kind": "prior_fixture",
+    "lang": "ar_en",
+    "sha256": "ac55fef4461cdffae984473a1c67cb7c42bf1e78223db998cf3de71cbb4e390a"
+  },
+  {
+    "name": "prior_roster_ar.xlsx",
+    "kind": "prior_fixture",
+    "lang": "ar_en",
+    "sha256": "3c0869771786e0de6e3ac2de049301728514025260c607d7b1062278ebe7a28c"
+  },
+  {
+    "name": "prior_table_ar.csv",
+    "kind": "prior_fixture",
+    "lang": "ar_en",
+    "sha256": "ba1f3b1b84cef50e6d1afe4e3e4bc0760f5339d84c6fb1197bb5ba58fa2260c0"
+  },
+  {
+    "name": "prior_sample_ar.odt",
+    "kind": "prior_fixture",
+    "lang": "ar_en",
+    "sha256": "08da6bf2dcaecf4ab66a535c43dc9a961c8714590d95f9cdef8ce71cb384c427"
+  },
+  {
+    "name": "prior_sample.ods",
+    "kind": "prior_fixture",
+    "lang": "ar_en",
+    "sha256": "1e978019aa57d6d966aa6495810f6575888acdcec00f71fcc8788e08eefbfa7b"
+  },
+  {
+    "name": "memo_ar.rtf",
+    "kind": "legacy_shadow",
+    "lang": "ar",
+    "sha256": "7484fd8f1c895fd3b0f5fce95c961182420186bc0500c4f91c992dab5a0443a0"
+  },
+  {
+    "name": "legacy_stub.doc",
+    "kind": "legacy_shadow",
+    "lang": "en",
+    "sha256": "74a6e134d3dfb106c0e7ea80827a8f383323d270b533b4af086aa21d853aa725"
+  }
+]

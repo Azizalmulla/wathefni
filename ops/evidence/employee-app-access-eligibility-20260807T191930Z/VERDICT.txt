@@ -1,0 +1,5 @@
+PASS
+
+Employee App access eligibility + invite trigger — WATHEFNI canary.
+Create/migration never invite. Enable access triggers delivery.
+Matrix + invitation smoke PASS. Auth Wave 2 Phase 6 not started.

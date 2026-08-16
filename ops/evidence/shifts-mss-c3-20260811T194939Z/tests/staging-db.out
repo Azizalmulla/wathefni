@@ -1,0 +1,51 @@
+    shifts mss c3 — prove
+      PASS  mss module
+      PASS  rollback guidance
+      PASS  EN status scheduled
+      PASS  AR status scheduled
+      PASS  EN status open
+      PASS  AR status open
+      PASS  self_decision false in honesty
+      PASS  attendance not required
+      PASS  global mss off
+      PASS  empty company allowlist denies
+      PASS  empty manager allowlist denies
+      PASS  canary company entitled
+      PASS  other company denied
+      PASS  global MANAGER_ALLOWLIST still empty
+      PASS  wave6c boundary still holds
+      PASS  legacy manager_real_rollout remains False
+      PASS  C3 manager unlock recognized
+      PASS  non-allowlisted denied by real_mutation
+      PASS  C3 manager allowed by real_mutation
+      PASS  manager has real scope
+      PASS  mss manager ready
+      PASS  allowlisted without scope fails when required
+      PASS  mss manager without scope denied
+      PASS  manager rosters scoped report
+      FAIL  manager cannot mutate out-of-scope :: {'ok': False, 'error': 'employee_not_found', 'action': {'employee_key': 'MSS4225203B-OUT-4225203b', 'date': '2026-09-01', 'start_time': '09:00', 'end_time': '17:00', 'reason': 'c3 mss out of scope attempt', 'idempotency_key': 'mss-c3-roster-out-4225203b', 'company_code': 'MSS4225203B', 'viewer_phone': '965540142252', '_employee_resolution': {'status': 'resolved', 'choices': [], 'searched': {}}}, 'unresolved': [{'action': {'employee_key': 'MSS4225203B-OUT-4225203b', 'date': '2026-09-01', 'start_time': '09:00', 'end_time': '17:00', 'reason': 'c3 mss out of scope attempt', 'idempotency_key': 'mss-c3-roster-out-4225203b', 'company_code': 'MSS4225203B', 'viewer_phone': '965540142252', '_employee_resolution': {'status': 'resolved', 'choices': [], 'searched': {}}}, 'error': 'employee_not_found'}]}
+      PASS  manager rosters second report
+      PASS  employee sees only own key
+      PASS  employee cannot see other key
+      PASS  employee own shift data scoped
+      PASS  open shift publish
+      PASS  open shift claim
+      PASS  open-shift self-approval denied
+      PASS  open-shift claim approved by manager
+      PASS  stale/duplicate open-shift decision fails safely
+      PASS  swap requested
+      PASS  manager/employee cannot approve own swap
+      PASS  requested swap reject works
+      PASS  requested swap approve works
+      PASS  stale concurrent swap decision fails safely
+      PASS  module-off is read-only
+      PASS  module-off manager mutation denied
+      PASS  empty-allowlist read-only
+      PASS  tenant isolation other company
+      PASS  leave not mutated
+      PASS  payroll money false
+      PASS  attendance authority not mutated
+      PASS  shifts independent of attendance module
+      PASS  global manager allowlist still empty after prove
+
+    47 passed, 1 failed

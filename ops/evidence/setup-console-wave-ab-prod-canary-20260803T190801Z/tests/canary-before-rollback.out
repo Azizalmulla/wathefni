@@ -1,0 +1,58 @@
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SETUP_CONSOLE_WAVE_A=1
+WATHEFNI_SETUP_CONSOLE_WAVE_A_COMPANIES=WATHEFNI
+CAPTURE_INGEST_OFF_OK
+[PASS] wave a enabled
+[PASS] wathefni company allowed
+[PASS] external company denied
+[PASS] operator only honesty
+[PASS] wathefni only honesty
+[PASS] no external tenants
+[PASS] no payroll money
+[PASS] no attendance ingest
+[PASS] capture ingest off
+[PASS] no AI
+[PASS] no setup wave b
+[PASS] entitlements cannot bypass (honesty)
+[PASS] read only evaluate
+[PASS] ingest env off
+[PASS] production db
+[PASS] evaluate ok
+[PASS] refuse non-wathefni
+[PASS] overall state honest
+[PASS] six stages
+[PASS] stage keys
+[PASS] entitlements cannot bypass
+[PASS] payroll money false
+[PASS] attendance ingest false
+[PASS] external tenants false
+[PASS] pause impact en
+[PASS] pause impact ar
+[PASS] pause says freezes hold
+[PASS] blockers have next actions
+[PASS] blockers have deep links
+[PASS] blockers have ar next actions
+[PASS] modules stage non-empty
+[PASS] attendance purchased cannot bypass ingest off
+[PASS] attendance does not claim ingest on
+[PASS] payroll purchased cannot claim money authority
+[PASS] shifts cannot bypass synthetic/allowlist/freeze
+[PASS] shifts not claiming unrestricted live
+[PASS] leave cannot bypass synthetic/allowlist/freeze
+[PASS] leave not claiming unrestricted live
+[PASS] payroll cannot bypass synthetic/allowlist/freeze
+[PASS] payroll not claiming unrestricted live
+[PASS] attendance cannot bypass synthetic/allowlist/freeze
+[PASS] attendance not claiming unrestricted live
+[PASS] launch UI present
+[PASS] UI EN title
+[PASS] UI AR title
+[PASS] UI overall marker
+[PASS] UI blockers marker
+[PASS] UI pause marker
+[PASS] UI mobile wrap
+[PASS] UI rtl support
+[PASS] dist has launch EN or AR
+[PASS] dist mobile wrap token
+[PASS] residual scwab rows 0
+{"pass": 53, "fail": 0, "tag": "e95eba58", "overall_state": "live_controlled", "blockers": 5, "residual": 0}

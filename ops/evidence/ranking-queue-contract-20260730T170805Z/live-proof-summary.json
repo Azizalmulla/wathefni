@@ -1,0 +1,57 @@
+{
+  "verdict": "PASS",
+  "checks": {
+    "fullstack_missing_cv_excluded": true,
+    "fullstack_matching_eq_active_pipeline": true,
+    "hr_not_applicable_rankable_not_eligible": true,
+    "accounting_not_applicable_rankable": true,
+    "all_reconcile": true,
+    "all_top_n_rankable_only": true,
+    "empty_visibility_matching_zero": true,
+    "assessment_default_unused": true,
+    "assessment_lateral_wired": true,
+    "owner_matching_eq_candidates_pipeline": true,
+    "recruiter_empty_assignment_matching_zero": true
+  },
+  "fullstack": {
+    "position": "FULLSTACK_DEVELOPER",
+    "matching": 1,
+    "rankable": 0,
+    "eligible": 0,
+    "not_applicable": 0,
+    "not_met": 0,
+    "unknown": 1,
+    "restricted_held": 0,
+    "reconciles": true,
+    "jobs_active_pipeline": 1,
+    "matching_eq_active_pipeline": true,
+    "missing_cv_outside_matching": 0,
+    "shown": 0,
+    "shown_buckets": [],
+    "top_n_only_rankable": true,
+    "no_unrankable_in_top_n": true,
+    "terminals_present": {}
+  },
+  "hr": {
+    "position": "HR",
+    "matching": 2,
+    "rankable": 2,
+    "eligible": 0,
+    "not_applicable": 2,
+    "not_met": 0,
+    "unknown": 0,
+    "restricted_held": 0,
+    "reconciles": true,
+    "jobs_active_pipeline": 2,
+    "matching_eq_active_pipeline": true,
+    "missing_cv_outside_matching": 0,
+    "shown": 2,
+    "shown_buckets": [
+      "not_applicable",
+      "not_applicable"
+    ],
+    "top_n_only_rankable": true,
+    "no_unrankable_in_top_n": true,
+    "terminals_present": {}
+  }
+}

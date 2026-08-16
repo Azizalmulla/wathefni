@@ -1,0 +1,6 @@
+
+> wathefni-dashboard@0.0.0 build
+> tsc -b && vite build
+
+src/posthire/PostHire.tsx(33,25): error TS2300: Duplicate identifier 'useEmployees360Locale'.
+src/posthire/PostHire.tsx(82,10): error TS2300: Duplicate identifier 'useEmployees360Locale'.

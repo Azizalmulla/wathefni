@@ -1,0 +1,55 @@
+    pt1 okr evidence — db journeys
+      PASS  enable performance
+      PASS  enable talent
+      PASS  okr consume starts off
+      PASS  A create okr cycle
+      PASS  A cycle authority exists
+      PASS  A not a review cycle id
+      PASS  A activate cycle
+      PASS  A C2 table unused
+      PASS  A perf_okr_cycles exists
+      PASS  A company objective
+      PASS  A company KR
+      PASS  A department objective
+      PASS  A department KR
+      PASS  A team objective
+      PASS  A team KR
+      PASS  A individual objective
+      PASS  A individual KR
+      PASS  A objective has multiple KRs
+      PASS  A alignments
+      PASS  A alignment does not inherit
+      PASS  A tree ok
+      PASS  A company root
+      PASS  A company→dept→team→individual
+      PASS  A alignment is not a permission bypass
+      PASS  A private individual hidden from other employee
+      PASS  B child progress recorded
+      PASS  B child rollup moved
+      PASS  B parent unchanged by alignment
+      PASS  B parent not forced to 70
+      PASS  C update recorded
+      PASS  C check-in did not change progress
+      PASS  C thread has update
+      PASS  C confidence disabled by default
+      PASS  C optional confidence stored
+      PASS  C confidence is not progress
+      PASS  C confidence did not change progress
+      PASS  D target versioned
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-pt1-okr-evidence-db.py", line 741, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-pt1-okr-evidence-db.py", line 427, in main
+    hist = pt1.objective_operating_history(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/okr_operating_pt1.py", line 1234, in objective_operating_history
+    cur.execute(
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedFunction: operator does not exist: uuid = text
+LINE 3:          WHERE company_code='PT193059' AND subject_id IN (
+                                                              ^
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+

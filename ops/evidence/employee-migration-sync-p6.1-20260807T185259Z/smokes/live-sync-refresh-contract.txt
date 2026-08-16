@@ -1,0 +1,40 @@
+{
+  "ok": true,
+  "connection_id": "db7eb885-9837-4656-ae79-bc1c5895169c",
+  "before_review_count": 1,
+  "after_review_count": 1,
+  "sync_ok": true,
+  "batch_id": "94cd2e8d-926b-49f6-982b-e09ef8664b39",
+  "matched_status": "active",
+  "matched_last_sync_at": "2026-08-07T18:55:45.775733+00:00",
+  "checks": [
+    [
+      "PASS",
+      "connection_visible_after_create"
+    ],
+    [
+      "PASS",
+      "last_sync_fields_present"
+    ],
+    [
+      "PASS",
+      "sync_run_for_connection"
+    ],
+    [
+      "PASS",
+      "sync_completed_ok"
+    ],
+    [
+      "PASS",
+      "review_list_refreshable"
+    ],
+    [
+      "PASS",
+      "ui_soft_refresh_sources"
+    ],
+    [
+      "PASS",
+      "cleanup_disconnect"
+    ]
+  ]
+}

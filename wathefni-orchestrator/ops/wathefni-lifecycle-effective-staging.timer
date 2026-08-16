@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly Wathefni Wave 3C lifecycle effective scheduler (staging only)
+
+[Timer]
+OnBootSec=3min
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=90
+
+[Install]
+WantedBy=timers.target

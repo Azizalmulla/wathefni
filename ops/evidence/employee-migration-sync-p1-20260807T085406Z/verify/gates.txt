@@ -1,0 +1,11 @@
+{
+  "contract": "employee_migration_sync_p1_foundation_only",
+  "version": "1.2.0",
+  "production_path_foundation_only": true,
+  "legacy_import_disabled": true,
+  "no_invites": true,
+  "no_auto_onboarding": true,
+  "no_auto_compliance_seed_on_import": true
+}
+ONBOARDING_REJECT 422 migration_onboarding_forbidden
+FOUNDATION_GATE 503 migration_foundation_required

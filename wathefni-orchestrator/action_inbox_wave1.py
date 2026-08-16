@@ -1,0 +1,961 @@
+"""Post-Hire Differentiation Wave 1 — Unified Action Inbox.
+
+Read-only composition of:
+  - Analytics attention[]
+  - Compliance findings[]
+  - Employees 360 next actions
+
+Inbox ranks and displays; frozen modules remain systems of action.
+No mutations, no AI, no Hiring Reports, no Payroll money, no Compliance/Analytics Wave 2.
+Alerts & Delivery owns notification delivery.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from datetime import datetime
+from typing import Any
+from zoneinfo import ZoneInfo
+
+
+ACTION_INBOX_WAVE1_VERSION = "1.0.2"
+ACTION_INBOX_WAVE1_CONTRACT = "action_inbox_wave1"
+ACTION_INBOX_SYNTHETIC_MARKERS_DEFAULT = ("AIW1", "AIW1-SYNTH|")
+ACTION_INBOX_SYNTHETIC_PHONE_PREFIX_DEFAULT = ("965542",)
+
+# Phase 0 approved real-canary boundary (fail-closed). Env allowlists may only
+# select within this set — never widen beyond owner-approved Aziz / Talal.
+APPROVED_REAL_VIEWER_PHONES = frozenset({"96599338566"})
+APPROVED_REAL_VIEWER_USER_IDS = frozenset({"88b17ca9-aff4-4721-a553-c1b5514ef95f"})
+APPROVED_REAL_VIEWER_EMAILS = frozenset({"azizalmulla16@gmail.com"})
+APPROVED_REAL_SUBJECT_KEYS = frozenset({"WATHEFNI-96550252254"})
+
+SEVERITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+SOURCE_PRIORITY = {"compliance": 0, "analytics": 1, "employees": 2}
+
+KUWAIT_TZ = ZoneInfo("Asia/Kuwait")
+
+DEFAULT_HR_OWNER = {
+    "owner_role": "hr_ops",
+    "owner_label_en": "Company HR",
+    "owner_label_ar": "الموارد البشرية",
+}
+
+_PAYROLL_SOA = frozenset({"payroll"})
+_PAYROLL_MODULES = frozenset({"payroll"})
+
+
+def _digits(value: str | None) -> str:
+    return "".join(ch for ch in str(value or "") if ch.isdigit())
+
+
+def _truthy(value: str | None) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def action_inbox_wave1_enabled() -> bool:
+    raw = os.environ.get("WATHEFNI_ACTION_INBOX_WAVE1")
+    if raw is None or str(raw).strip() == "":
+        return True
+    return _truthy(raw)
+
+
+def action_inbox_wave1_synthetic_only() -> bool:
+    raw = os.environ.get("WATHEFNI_ACTION_INBOX_WAVE1_SYNTHETIC_ONLY")
+    if raw is None or str(raw).strip() == "":
+        return True
+    return _truthy(raw)
+
+
+def action_inbox_wave1_companies() -> set[str]:
+    raw = str(os.environ.get("WATHEFNI_ACTION_INBOX_WAVE1_COMPANIES") or "WATHEFNI").strip()
+    return {part.strip().upper() for part in raw.split(",") if part.strip()}
+
+
+def action_inbox_wave1_enabled_for_company(company_code: str | None) -> bool:
+    if not action_inbox_wave1_enabled():
+        return False
+    company = (company_code or "WATHEFNI").upper()
+    allowed = action_inbox_wave1_companies()
+    return not allowed or company in allowed
+
+
+def exclude_payroll_stream() -> bool:
+    """Payroll/timesheet SoA rows never appear in inbox (Phase 0 default on)."""
+    raw = os.environ.get("WATHEFNI_ACTION_INBOX_EXCLUDE_PAYROLL")
+    if raw is None or str(raw).strip() == "":
+        return True
+    return _truthy(raw)
+
+
+def real_viewer_allowlist_raw() -> set[str]:
+    """Configured viewer tokens (phones digits / user ids / emails). Empty = soft-kill."""
+    raw = str(os.environ.get("WATHEFNI_ACTION_INBOX_REAL_VIEWER_ALLOWLIST") or "").strip()
+    if not raw:
+        return set()
+    out: set[str] = set()
+    for part in raw.split(","):
+        token = str(part or "").strip()
+        if not token:
+            continue
+        digits = _digits(token)
+        if digits and len(digits) >= 8:
+            out.add(digits)
+        out.add(token.lower())
+        out.add(token)
+    return out
+
+
+def real_viewer_allowlist() -> set[str]:
+    """Viewer allowlist intersected with approved Aziz boundary. Empty = deny all."""
+    configured = real_viewer_allowlist_raw()
+    if not configured:
+        return set()
+    approved = set(APPROVED_REAL_VIEWER_PHONES) | {u.lower() for u in APPROVED_REAL_VIEWER_USER_IDS} | {
+        e.lower() for e in APPROVED_REAL_VIEWER_EMAILS
+    } | set(APPROVED_REAL_VIEWER_USER_IDS) | set(APPROVED_REAL_VIEWER_EMAILS)
+    return {token for token in configured if token in approved or _digits(token) in APPROVED_REAL_VIEWER_PHONES}
+
+
+def real_subject_allowlist_raw() -> set[str]:
+    raw = str(os.environ.get("WATHEFNI_ACTION_INBOX_REAL_SUBJECT_ALLOWLIST") or "").strip()
+    if not raw:
+        return set()
+    return {part.strip().upper() for part in raw.split(",") if part.strip()}
+
+
+def real_subject_allowlist() -> set[str]:
+    """Subject allowlist intersected with approved Talal boundary. Empty = no person items."""
+    configured = real_subject_allowlist_raw()
+    if not configured:
+        return set()
+    return {key for key in configured if key in APPROVED_REAL_SUBJECT_KEYS}
+
+
+def allowlists_within_approved_boundary() -> bool:
+    """True when configured allowlists do not attempt to widen past Aziz/Talal."""
+    viewers = real_viewer_allowlist_raw()
+    subjects = real_subject_allowlist_raw()
+    if not viewers and not subjects:
+        return True
+    for token in viewers:
+        digits = _digits(token)
+        ok = (
+            digits in APPROVED_REAL_VIEWER_PHONES
+            or token in APPROVED_REAL_VIEWER_USER_IDS
+            or token.lower() in {e.lower() for e in APPROVED_REAL_VIEWER_EMAILS}
+            or token.lower() in {u.lower() for u in APPROVED_REAL_VIEWER_USER_IDS}
+        )
+        if not ok:
+            return False
+    for key in subjects:
+        if key not in APPROVED_REAL_SUBJECT_KEYS:
+            return False
+    return True
+
+
+def viewer_is_allowlisted(
+    *,
+    phone: str | None = None,
+    user_id: str | None = None,
+    email: str | None = None,
+) -> bool:
+    """Fail-closed: empty allowlist denies everyone."""
+    allow = real_viewer_allowlist()
+    if not allow:
+        return False
+    phone_d = _digits(phone)
+    if phone_d and phone_d in allow:
+        return True
+    uid = str(user_id or "").strip()
+    if uid and (uid in allow or uid.lower() in allow):
+        return True
+    em = str(email or "").strip().lower()
+    if em and em in allow:
+        return True
+    return False
+
+
+def subject_is_allowlisted(employee_key: str | None) -> bool:
+    """Fail-closed: empty subject allowlist denies all person-scoped items."""
+    allow = real_subject_allowlist()
+    if not allow:
+        return False
+    key = str(employee_key or "").strip().upper()
+    return bool(key) and key in allow
+
+
+def is_payroll_inbox_item(item: dict[str, Any]) -> bool:
+    soa = str(item.get("system_of_action") or "").strip().lower()
+    module = str(item.get("source_module") or "").strip().lower()
+    page = ""
+    deep = item.get("deep_link") if isinstance(item.get("deep_link"), dict) else {}
+    page = str(deep.get("page") or "").strip().lower()
+    what = str(item.get("what_en") or item.get("title") or "").strip().lower()
+    if soa in _PAYROLL_SOA or module in _PAYROLL_MODULES or page == "payroll":
+        return True
+    if "timesheet" in what:
+        return True
+    return False
+
+
+def filter_inbox_items_phase0(items: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Apply subject allowlist + payroll exclusion. Company-level (no employee) items dropped."""
+    dropped_payroll = 0
+    dropped_subject = 0
+    dropped_unscoped = 0
+    kept: list[dict[str, Any]] = []
+    subjects = real_subject_allowlist()
+    drop_payroll = exclude_payroll_stream()
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        if drop_payroll and is_payroll_inbox_item(item):
+            dropped_payroll += 1
+            continue
+        emp = str(item.get("employee_key") or "").strip()
+        if not emp:
+            # Fail-closed canary posture: no company-wide rows until a later wave.
+            dropped_unscoped += 1
+            continue
+        if not subjects or emp.upper() not in subjects:
+            dropped_subject += 1
+            continue
+        kept.append(item)
+    return kept, {
+        "dropped_payroll": dropped_payroll,
+        "dropped_subject": dropped_subject,
+        "dropped_unscoped": dropped_unscoped,
+    }
+
+
+def synthetic_key_markers() -> tuple[str, ...]:
+    raw = str(
+        os.environ.get("WATHEFNI_ACTION_INBOX_WAVE1_SYNTHETIC_KEY_MARKERS")
+        or ",".join(ACTION_INBOX_SYNTHETIC_MARKERS_DEFAULT)
+    )
+    parts = tuple(part.strip() for part in raw.split(",") if part.strip())
+    return parts or ACTION_INBOX_SYNTHETIC_MARKERS_DEFAULT
+
+
+def synthetic_phone_prefixes() -> tuple[str, ...]:
+    raw = str(
+        os.environ.get("WATHEFNI_ACTION_INBOX_WAVE1_SYNTHETIC_PHONE_PREFIXES")
+        or ",".join(ACTION_INBOX_SYNTHETIC_PHONE_PREFIX_DEFAULT)
+    )
+    parts = tuple(part.strip() for part in raw.split(",") if part.strip())
+    return parts or ACTION_INBOX_SYNTHETIC_PHONE_PREFIX_DEFAULT
+
+
+def is_synthetic_subject(*, employee_key: str | None = None, phone: str | None = None) -> bool:
+    key = str(employee_key or "")
+    if any(marker in key for marker in synthetic_key_markers()):
+        return True
+    phone_s = str(phone or "")
+    return any(phone_s.startswith(prefix) for prefix in synthetic_phone_prefixes())
+
+
+def honesty_payload() -> dict[str, Any]:
+    return {
+        "wave": "action_inbox_wave1",
+        "version": ACTION_INBOX_WAVE1_VERSION,
+        "contract": ACTION_INBOX_WAVE1_CONTRACT,
+        "read_only": True,
+        "composes_only": True,
+        "mutates_records": False,
+        "ai": False,
+        "hiring_reports_separate": True,
+        "alerts_delivery_owns_notifications": True,
+        "compliance_wave2": False,
+        "analytics_wave2": False,
+        "payroll_money": False,
+        "attendance_ingest": False,
+        "shifts_manager_expansion": False,
+        "phase0_viewer_allowlist_fail_closed": True,
+        "phase0_subject_allowlist_fail_closed": True,
+        "phase0_exclude_payroll": exclude_payroll_stream(),
+        "real_viewer_allowlist_configured": bool(real_viewer_allowlist_raw()),
+        "real_subject_allowlist_configured": bool(real_subject_allowlist_raw()),
+        "real_canary_enabled": bool(real_viewer_allowlist()) and bool(real_subject_allowlist()),
+        "systems_of_action": [
+            "analytics",
+            "compliance",
+            "employees",
+            "onboarding",
+            "attendance",
+            "leave",
+            "shifts",
+            "payroll",
+        ],
+        "synthetic_only": action_inbox_wave1_synthetic_only(),
+        "enabled": action_inbox_wave1_enabled(),
+        "companies": sorted(action_inbox_wave1_companies()),
+        "synthetic_key_markers": list(synthetic_key_markers()),
+        "synthetic_phone_prefixes": list(synthetic_phone_prefixes()),
+    }
+
+
+def nav_offerable_for_viewer(
+    *,
+    company_code: str | None,
+    phone: str | None = None,
+    user_id: str | None = None,
+    email: str | None = None,
+) -> bool:
+    """Bootstrap/nav gate: wave on + company + fail-closed viewer allowlist."""
+    if not action_inbox_wave1_enabled_for_company(company_code):
+        return False
+    return viewer_is_allowlisted(phone=phone, user_id=user_id, email=email)
+
+
+def ensure_action_inbox_wave1_schema(cur: Any, *, force: bool = False) -> None:
+    """Additive ACK / wave-audit table only. No frozen-module schema changes."""
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS action_inbox_wave_acks (
+          ack_id bigserial PRIMARY KEY,
+          company_code text NOT NULL,
+          wave text NOT NULL,
+          contract text NOT NULL,
+          environment text NOT NULL,
+          synthetic_only boolean NOT NULL DEFAULT true,
+          details jsonb NOT NULL DEFAULT '{}'::jsonb,
+          canary_tag text,
+          acknowledged_at timestamptz NOT NULL DEFAULT now()
+        )
+        """
+    )
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS action_inbox_wave_acks_company_wave_idx
+          ON action_inbox_wave_acks (company_code, wave, acknowledged_at DESC)
+        """
+    )
+    if force:
+        cur.execute("SELECT to_regclass('public.action_inbox_wave_acks') AS reg")
+        row = dict(cur.fetchone() or {})
+        if not row.get("reg"):
+            raise RuntimeError("action_inbox_wave_acks missing after ensure")
+
+
+def record_action_inbox_wave_ack(
+    cur: Any,
+    *,
+    company_code: str,
+    environment: str,
+    details: dict[str, Any] | None = None,
+    canary_tag: str | None = None,
+) -> dict[str, Any]:
+    cur.execute(
+        """
+        INSERT INTO action_inbox_wave_acks (
+          company_code, wave, contract, environment, synthetic_only, details, canary_tag
+        ) VALUES (%s,%s,%s,%s,%s,%s::jsonb,%s)
+        RETURNING ack_id, company_code, wave, contract, environment, synthetic_only, canary_tag, acknowledged_at
+        """,
+        (
+            (company_code or "WATHEFNI").upper(),
+            "action_inbox_wave1",
+            ACTION_INBOX_WAVE1_CONTRACT,
+            environment,
+            action_inbox_wave1_synthetic_only(),
+            json.dumps(details or honesty_payload()),
+            canary_tag,
+        ),
+    )
+    return dict(cur.fetchone() or {})
+
+
+def residual_synthetic_acks(cur: Any, *, company_code: str, tag: str) -> int:
+    cur.execute(
+        """
+        SELECT COUNT(*) AS n
+        FROM action_inbox_wave_acks
+        WHERE company_code=%s
+          AND canary_tag=%s
+          AND wave='action_inbox_wave1'
+        """,
+        ((company_code or "WATHEFNI").upper(), tag),
+    )
+    return int(dict(cur.fetchone() or {}).get("n") or 0)
+
+
+def cleanup_canary_acks(cur: Any, *, company_code: str, tag: str) -> int:
+    cur.execute(
+        """
+        DELETE FROM action_inbox_wave_acks
+        WHERE company_code=%s
+          AND canary_tag=%s
+          AND wave='action_inbox_wave1'
+        """,
+        ((company_code or "WATHEFNI").upper(), tag),
+    )
+    return int(cur.rowcount or 0)
+
+
+def kuwait_window_payload() -> dict[str, Any]:
+    now = datetime.now(KUWAIT_TZ)
+    today = now.date()
+    as_of = now.isoformat()
+    return {
+        "as_of": as_of,
+        "timezone": "Asia/Kuwait",
+        "kuwait_date": today.isoformat(),
+        "window": {
+            "kind": "kuwait_calendar_day",
+            "label_en": "Kuwait calendar day (Asia/Kuwait)",
+            "label_ar": "اليوم حسب تقويم الكويت (آسيا/الكويت)",
+            "as_of_date": today.isoformat(),
+        },
+        "freshness": {
+            "as_of": as_of,
+            "max_age_seconds": 300,
+            "stale_after_seconds": 300,
+        },
+    }
+
+
+def _map_severity(raw: str | None) -> str:
+    s = str(raw or "medium").strip().lower()
+    if s in SEVERITY_RANK:
+        return s
+    if s == "critical":
+        return "critical"
+    return "medium"
+
+
+def normalize_analytics_item(item: dict[str, Any]) -> dict[str, Any]:
+    severity = _map_severity(item.get("severity"))
+    # Analytics uses high/medium/low — promote high→high, keep
+    deep = item.get("deep_link") if isinstance(item.get("deep_link"), dict) else {}
+    page = str(deep.get("page") or item.get("source_module") or "analytics")
+    soa = str(item.get("source_module") or page)
+    return {
+        "id": f"analytics:{item.get('id') or page}",
+        "severity": severity if severity != "critical" else "high",
+        "what_en": str(item.get("reason_en") or item.get("reason") or item.get("subject") or "Needs attention"),
+        "what_ar": str(item.get("reason_ar") or item.get("reason_en") or item.get("reason") or "يحتاج انتباهاً"),
+        "why_en": str(
+            item.get("reason_en")
+            or "Ranked workforce attention from Analytics (read-only)."
+        ),
+        "why_ar": str(
+            item.get("reason_ar")
+            or "انتباه مرتّب من التحليلات (قراءة فقط)."
+        ),
+        "employee_key": item.get("subject_key") or deep.get("employee"),
+        "employee_name": item.get("subject"),
+        "team": item.get("team"),
+        "location": item.get("location"),
+        "owner_role": DEFAULT_HR_OWNER["owner_role"],
+        "owner_label_en": DEFAULT_HR_OWNER["owner_label_en"],
+        "owner_label_ar": DEFAULT_HR_OWNER["owner_label_ar"],
+        "deadline": None,
+        "deadline_label_en": "Act from the system of action",
+        "deadline_label_ar": "اتخذ إجراءً من نظام التنفيذ",
+        "escalation_step": "open_system_of_action",
+        "escalation_label_en": "Open the producing module — Analytics does not mutate records",
+        "escalation_label_ar": "افتح الوحدة المنتجة — التحليلات لا تعدّل السجلات",
+        "source_stream": "analytics",
+        "source_module": soa,
+        "system_of_action": soa,
+        "evidence_status": "operational_signal",
+        "evidence_status_label_en": "Operational attention signal (not money authority)",
+        "evidence_status_label_ar": "إشارة تشغيلية (ليست سلطة دفع)",
+        "authority_status": "read_projection",
+        "authority_status_label_en": "Analytics read projection — frozen module remains authority",
+        "authority_status_label_ar": "إسقاط قراءة من التحليلات — الوحدة المجمّدة تبقى السلطة",
+        "government_verified": False,
+        "deep_link": {
+            "page": page,
+            **({"employee": deep["employee"]} if deep.get("employee") else {}),
+        },
+        "clears_when": "source_attention_resolved",
+        "alerts_delivery_owns_notifications": True,
+    }
+
+
+def normalize_compliance_finding(item: dict[str, Any]) -> dict[str, Any]:
+    severity = _map_severity(item.get("severity"))
+    deep = item.get("deep_link") if isinstance(item.get("deep_link"), dict) else {}
+    page = str(deep.get("page") or item.get("system_of_action") or "compliance")
+    doc_type = str(item.get("document_type_canonical") or item.get("document_type") or "")
+    emp = str(item.get("employee_key") or item.get("subject_key") or "")
+    bucket = str(item.get("bucket") or item.get("evidence_status") or "").strip().lower()
+    if not bucket:
+        # Fallback from finding id prefix: missing:EMP:doc
+        id_prefix = str(item.get("id") or "").split(":", 1)[0].strip().lower()
+        if id_prefix in {"expired", "expiring_soon", "missing", "needs_review"}:
+            bucket = id_prefix
+    return {
+        "id": f"compliance:{item.get('id') or f'{emp}:{doc_type}'}",
+        "severity": severity,
+        "what_en": str(item.get("reason_en") or item.get("reason") or "Document finding"),
+        "what_ar": str(item.get("reason_ar") or item.get("reason_en") or "نتيجة مستند"),
+        "why_en": str(item.get("why_it_matters_en") or item.get("rule_label_en") or "Document compliance finding (guidance only)."),
+        "why_ar": str(item.get("why_it_matters_ar") or item.get("rule_label_ar") or "نتيجة امتثال مستندي (إرشاد فقط)."),
+        "employee_key": emp or None,
+        "employee_name": item.get("employee_name") or item.get("subject"),
+        "team": item.get("team"),
+        "location": item.get("location"),
+        "owner_role": item.get("owner_role") or "hr_compliance",
+        "owner_label_en": item.get("owner_label_en") or "Company HR / Compliance",
+        "owner_label_ar": item.get("owner_label_ar") or "الموارد البشرية / الامتثال",
+        "deadline": item.get("deadline"),
+        "deadline_label_en": item.get("deadline_label_en"),
+        "deadline_label_ar": item.get("deadline_label_ar"),
+        "escalation_step": item.get("escalation_step"),
+        "escalation_label_en": item.get("escalation_label_en"),
+        "escalation_label_ar": item.get("escalation_label_ar"),
+        "source_stream": "compliance",
+        "source_module": "compliance",
+        "system_of_action": item.get("system_of_action") or page,
+        "document_type": item.get("document_type"),
+        "document_type_canonical": doc_type or None,
+        "bucket": bucket or None,
+        "evidence_status": item.get("evidence_status"),
+        "evidence_status_label_en": item.get("evidence_status_label_en"),
+        "evidence_status_label_ar": item.get("evidence_status_label_ar"),
+        "authority_status": "document_findings",
+        "authority_status_label_en": "Document findings — never government verified",
+        "authority_status_label_ar": "نتائج مستندات — ليست تحققاً حكومياً",
+        "government_verified": False,
+        "guidance_only": True,
+        "deep_link": {
+            "page": page,
+            **({"employee": deep["employee"]} if deep.get("employee") else {}),
+            **({"document_type": deep["document_type"]} if deep.get("document_type") else {}),
+        },
+        "secondary_links": item.get("secondary_links") or [],
+        "clears_when": "compliance_finding_resolved",
+        "alerts_delivery_owns_notifications": True,
+    }
+
+
+def normalize_e360_next_action(
+    item: dict[str, Any],
+    *,
+    employee_key: str | None,
+    employee_name: str | None,
+    team: str | None = None,
+    location: str | None = None,
+) -> dict[str, Any]:
+    severity_raw = str(item.get("severity") or "medium").lower()
+    # E360 uses critical/high/medium/low
+    severity = _map_severity("high" if severity_raw == "critical" else severity_raw)
+    if severity_raw == "critical":
+        severity = "critical"
+    target = item.get("target") if isinstance(item.get("target"), dict) else {}
+    page = str(target.get("page") or item.get("page") or item.get("module") or "employees")
+    module = str(item.get("module") or page)
+    title = str(item.get("title") or item.get("label") or "Next action")
+    reason = str(item.get("reason") or title)
+    meta = item.get("meta") if isinstance(item.get("meta"), dict) else {}
+    doc_type = meta.get("document_type")
+    return {
+        "id": f"employees:{employee_key or 'unknown'}:{item.get('id') or title}",
+        "severity": severity,
+        "what_en": title,
+        "what_ar": title,  # E360 next actions are EN today; UI can fall back
+        "why_en": reason,
+        "why_ar": reason,
+        "employee_key": employee_key,
+        "employee_name": employee_name,
+        "team": team,
+        "location": location,
+        "owner_role": DEFAULT_HR_OWNER["owner_role"],
+        "owner_label_en": DEFAULT_HR_OWNER["owner_label_en"],
+        "owner_label_ar": DEFAULT_HR_OWNER["owner_label_ar"],
+        "deadline": str(item.get("source_at"))[:10] if item.get("source_at") else None,
+        "deadline_label_en": "See person profile / module",
+        "deadline_label_ar": "راجع ملف الشخص / الوحدة",
+        "escalation_step": "open_employees_or_module",
+        "escalation_label_en": "Open Employees or the source module — inbox does not mutate",
+        "escalation_label_ar": "افتح الموظفين أو وحدة المصدر — الصندوق لا يعدّل",
+        "source_stream": "employees",
+        "source_module": module,
+        "system_of_action": page if page != "employees" else module,
+        "document_type": doc_type,
+        "evidence_status": "person_next_action",
+        "evidence_status_label_en": "Employees 360 next action (composed from module reads)",
+        "evidence_status_label_ar": "إجراء تالي من ملف 360 (مركّب من قراءات الوحدات)",
+        "authority_status": "person_projection",
+        "authority_status_label_en": "Person projection — frozen module remains authority",
+        "authority_status_label_ar": "إسقاط شخص — الوحدة المجمّدة تبقى السلطة",
+        "government_verified": False,
+        "deep_link": {
+            "page": "employees" if page in {"employees", "workforce"} else page,
+            **({"employee": employee_key} if employee_key else {}),
+        },
+        "clears_when": "e360_next_action_cleared",
+        "alerts_delivery_owns_notifications": True,
+        "executable_in_source": bool(item.get("executable")),
+    }
+
+
+def compliance_dedupe_key(item: dict[str, Any]) -> tuple[str, str] | None:
+    emp = str(item.get("employee_key") or "").strip()
+    doc = str(
+        item.get("document_type_canonical")
+        or item.get("document_type")
+        or ""
+    ).strip().lower()
+    if not emp or not doc:
+        return None
+    if doc in {"residency", "residency_iqama"}:
+        doc = "residence"
+    return (emp, doc)
+
+
+def rank_inbox_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def sort_key(row: dict[str, Any]) -> tuple:
+        sev = SEVERITY_RANK.get(str(row.get("severity") or "low"), 9)
+        src = SOURCE_PRIORITY.get(str(row.get("source_stream") or ""), 9)
+        deadline = str(row.get("deadline") or "9999-99-99")
+        return (sev, src, deadline, str(row.get("what_en") or ""))
+
+    return sorted(items, key=sort_key)
+
+
+def resolution_workflow(row: dict[str, Any]) -> str | None:
+    """Shared resolution workflow for grouping. None = do not group this row."""
+    stream = str(row.get("source_stream") or "").strip().lower()
+    if stream != "compliance":
+        # Analytics/E360 rows are already person- or queue-scoped; only compliance
+        # document findings flood the inbox one-per-document.
+        return None
+    bucket = str(row.get("bucket") or row.get("evidence_status") or "").strip().lower()
+    if bucket in {"missing"}:
+        return "missing_documents"
+    if bucket in {"expired", "expiring_soon"}:
+        return "document_renewal"
+    if bucket in {"needs_review"}:
+        return "document_review"
+    id_l = str(row.get("id") or "").lower()
+    if "missing" in id_l:
+        return "missing_documents"
+    if "expir" in id_l:
+        return "document_renewal"
+    if "needs_review" in id_l or "review" in id_l:
+        return "document_review"
+    return "compliance_other"
+
+
+def inbox_group_key(row: dict[str, Any]) -> tuple[str, str, str, str] | None:
+    """Group when employee + destination + owner + workflow match."""
+    emp = str(row.get("employee_key") or "").strip().upper()
+    workflow = resolution_workflow(row)
+    if not emp or not workflow:
+        return None
+    deep = row.get("deep_link") if isinstance(row.get("deep_link"), dict) else {}
+    page = str(deep.get("page") or row.get("system_of_action") or "").strip().lower()
+    owner = str(row.get("owner_role") or "").strip().lower()
+    if not page:
+        return None
+    return (emp, page, owner, workflow)
+
+
+def merge_grouped_inbox_items(members: list[dict[str, Any]]) -> dict[str, Any]:
+    """Collapse same-workflow findings for one employee into one ranked case."""
+    if len(members) == 1:
+        return members[0]
+    worst = min(
+        members,
+        key=lambda r: SEVERITY_RANK.get(str(r.get("severity") or "low"), 9),
+    )
+    dated = [r for r in members if r.get("deadline")]
+    earliest_row = min(dated, key=lambda r: str(r.get("deadline"))) if dated else worst
+    docs: list[str] = []
+    for r in members:
+        label = str(r.get("document_type_canonical") or r.get("document_type") or "").strip()
+        if label and label not in docs:
+            docs.append(label)
+    name = str(worst.get("employee_name") or worst.get("employee_key") or "Employee")
+    n = len(members)
+    workflow = resolution_workflow(worst) or "compliance_other"
+    if workflow == "missing_documents":
+        what_en = f"{name} is missing {n} required documents"
+        what_ar = f"{name} ينقصه {n} مستندات مطلوبة"
+        why_en = "Several required documents are still missing. Open Onboarding to collect them in one place."
+        why_ar = "عدة مستندات مطلوبة ما زالت ناقصة. افتح التهيئة لجمعها في مكان واحد."
+    elif workflow == "document_renewal":
+        what_en = f"{name} has {n} documents to renew"
+        what_ar = f"{name} لديه {n} مستندات تحتاج تجديداً"
+        why_en = "Expired or expiring documents share one renewal workflow in Compliance."
+        why_ar = "المستندات المنتهية أو القريبة من الانتهاء تشترك في مسار تجديد واحد في الامتثال."
+    elif workflow == "document_review":
+        what_en = f"{name} has {n} documents needing review"
+        what_ar = f"{name} لديه {n} مستندات تحتاج مراجعة"
+        why_en = "Documents awaiting HR review share one Compliance review workflow."
+        why_ar = "المستندات بانتظار مراجعة الموارد البشرية تشترك في مسار امتثال واحد."
+    else:
+        what_en = f"{name} has {n} related document findings"
+        what_ar = f"{name} لديه {n} نتائج مستندات مرتبطة"
+        why_en = "Related document findings share the same owner and destination."
+        why_ar = "نتائج المستندات المرتبطة تشترك في المالك والوجهة نفسها."
+
+    deep = dict(worst.get("deep_link") or {})
+    # Group opens the person/module context, not a single document type.
+    deep.pop("document_type", None)
+    if worst.get("employee_key") and not deep.get("employee"):
+        deep["employee"] = worst.get("employee_key")
+
+    merged = dict(worst)
+    merged.update(
+        {
+            "id": f"group:{workflow}:{worst.get('employee_key')}:{deep.get('page')}",
+            "severity": worst.get("severity"),
+            "what_en": what_en,
+            "what_ar": what_ar,
+            "why_en": why_en,
+            "why_ar": why_ar,
+            "deadline": earliest_row.get("deadline"),
+            "deadline_label_en": earliest_row.get("deadline_label_en") or worst.get("deadline_label_en"),
+            "deadline_label_ar": earliest_row.get("deadline_label_ar") or worst.get("deadline_label_ar"),
+            "document_type": None,
+            "document_type_canonical": None,
+            "grouped": True,
+            "grouped_count": n,
+            "grouped_document_types": docs[:12],
+            "grouped_member_ids": [str(m.get("id") or "") for m in members],
+            "deep_link": deep,
+            "clears_when": "all_grouped_source_findings_resolved",
+        }
+    )
+    return merged
+
+
+def group_similar_inbox_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Prevent one employee/workflow from flooding the ranked list."""
+    from collections import OrderedDict
+
+    buckets: "OrderedDict[tuple[str, str, str, str] | tuple[str, int], list[dict[str, Any]]]" = OrderedDict()
+    for idx, row in enumerate(items):
+        key = inbox_group_key(row)
+        bucket_key: tuple[str, str, str, str] | tuple[str, int] = key if key is not None else ("__solo__", idx)
+        buckets.setdefault(bucket_key, []).append(row)
+
+    out: list[dict[str, Any]] = []
+    for members in buckets.values():
+        if len(members) == 1:
+            out.append(members[0])
+            continue
+        out.append(merge_grouped_inbox_items(members))
+    return out
+
+
+def build_action_inbox(
+    *,
+    analytics_attention: list[dict[str, Any]] | None = None,
+    compliance_findings: list[dict[str, Any]] | None = None,
+    e360_next_actions: list[dict[str, Any]] | None = None,
+    sources_meta: dict[str, Any] | None = None,
+    apply_phase0_filters: bool = True,
+) -> dict[str, Any]:
+    """Compose and rank inbox items. Dedupes E360 compliance rows covered by findings."""
+    normalized: list[dict[str, Any]] = []
+    for item in analytics_attention or []:
+        if isinstance(item, dict):
+            normalized.append(normalize_analytics_item(item))
+
+    finding_keys: set[tuple[str, str]] = set()
+    for item in compliance_findings or []:
+        if not isinstance(item, dict):
+            continue
+        row = normalize_compliance_finding(item)
+        normalized.append(row)
+        key = compliance_dedupe_key(row)
+        if key:
+            finding_keys.add(key)
+
+    skipped_e360_dupes = 0
+    for item in e360_next_actions or []:
+        if not isinstance(item, dict):
+            continue
+        # Pre-normalized E360 rows already have source_stream=employees
+        if item.get("source_stream") == "employees":
+            row = item
+        else:
+            row = normalize_e360_next_action(
+                item,
+                employee_key=item.get("employee_key"),
+                employee_name=item.get("employee_name"),
+                team=item.get("team"),
+                location=item.get("location"),
+            )
+        if str(row.get("source_module") or "") == "compliance":
+            key = compliance_dedupe_key(row)
+            if key and key in finding_keys:
+                skipped_e360_dupes += 1
+                continue
+        # Drop payroll/timesheet at normalize time when exclusion is on
+        if exclude_payroll_stream() and is_payroll_inbox_item(row):
+            continue
+        normalized.append(row)
+
+    # Collapse same-employee/same-workflow compliance floods before ranking.
+    before_group = len(normalized)
+    normalized = group_similar_inbox_items(normalized)
+    grouped_cases = sum(1 for r in normalized if r.get("grouped"))
+    collapsed_members = sum(int(r.get("grouped_count") or 0) for r in normalized if r.get("grouped"))
+
+    ranked = rank_inbox_items(normalized)
+    phase0_drops = {"dropped_payroll": 0, "dropped_subject": 0, "dropped_unscoped": 0}
+    if apply_phase0_filters:
+        ranked, phase0_drops = filter_inbox_items_phase0(ranked)
+    window = kuwait_window_payload()
+    by_stream = {"analytics": 0, "compliance": 0, "employees": 0}
+    by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    for row in ranked:
+        stream = str(row.get("source_stream") or "")
+        if stream in by_stream:
+            by_stream[stream] += 1
+        sev = str(row.get("severity") or "low")
+        if sev in by_severity:
+            by_severity[sev] += 1
+
+    meta = sources_meta if isinstance(sources_meta, dict) else {}
+    return {
+        **window,
+        "contract": ACTION_INBOX_WAVE1_CONTRACT,
+        "contract_version": ACTION_INBOX_WAVE1_VERSION,
+        "items": ranked,
+        "summary": {
+            "total": len(ranked),
+            "by_stream": by_stream,
+            "by_severity": by_severity,
+            "deduped_e360_compliance": skipped_e360_dupes,
+            "grouped_compliance_cases": grouped_cases,
+            "grouped_collapsed_members": collapsed_members,
+            "pre_group_total": before_group,
+            "phase0_drops": phase0_drops,
+        },
+        "sources": meta,
+        "honesty": honesty_payload(),
+        "authority": {
+            "read_only": True,
+            "composes_only": True,
+            "mutates_records": False,
+            "alerts_delivery_owns_notifications": True,
+            "hiring_reports_separate": True,
+            "ai": False,
+            "payroll_money": False,
+            "exclude_payroll_stream": exclude_payroll_stream(),
+            "systems_of_action_frozen": True,
+            "wave1_enabled": action_inbox_wave1_enabled(),
+            "synthetic_only": action_inbox_wave1_synthetic_only(),
+            "viewer_allowlist_fail_closed": True,
+            "subject_allowlist_fail_closed": True,
+            "real_viewer_allowlist_empty": not bool(real_viewer_allowlist()),
+            "real_subject_allowlist_empty": not bool(real_subject_allowlist()),
+            "real_canary_enabled": bool(real_viewer_allowlist()) and bool(real_subject_allowlist()),
+            "allowlists_within_approved_boundary": allowlists_within_approved_boundary(),
+            "phase0_filters_applied": apply_phase0_filters,
+        },
+        "definitions": [
+            {
+                "key": "authority",
+                "label_en": "Authority",
+                "label_ar": "السلطة",
+                "definition_en": (
+                    "Needs Attention only composes and ranks. Analytics, Compliance, Employees, "
+                    "Onboarding, Attendance, Leave, Shifts, and Payroll remain systems of action. "
+                    "Alerts & Delivery owns notifications. Hiring Reports stay separate. "
+                    "Same-employee document findings that share owner, destination, and workflow are grouped."
+                ),
+                "definition_ar": (
+                    "يحتاج متابعة يركّب ويرتّب فقط. التحليلات والامتثال والموظفون والتهيئة "
+                    "والحضور والإجازات والورديات والرواتب تبقى أنظمة التنفيذ. التنبيهات تملك الإشعارات. "
+                    "نتائج المستندات لنفس الموظف التي تشترك في المالك والوجهة ومسار الحل تُجمَّع معاً."
+                ),
+            },
+            {
+                "key": "clears",
+                "label_en": "Clearing",
+                "label_ar": "الإزالة",
+                "definition_en": "Items disappear when the source module no longer reports them — complete the action in the system of action. Grouped cases clear when every member finding is resolved.",
+                "definition_ar": "تختفي العناصر عندما تتوقف وحدة المصدر عن الإبلاغ عنها — أكمل الإجراء في نظام التنفيذ. تُزال الحالات المجمّعة عند حل كل النتائج الأعضاء.",
+            },
+        ],
+    }
+
+
+def prove_item_clears_when_source_resolves() -> dict[str, Any]:
+    """Offline proof: inbox shrinks when source lists shrink."""
+    attention = [
+        {
+            "id": "pending_leave",
+            "severity": "high",
+            "reason_en": "1 leave request awaits a decision",
+            "reason_ar": "طلب إجازة بانتظار القرار",
+            "subject": "Leave queue",
+            "source_module": "leave",
+            "deep_link": {"page": "leave"},
+        }
+    ]
+    findings = [
+        {
+            "id": "expired:E1:residence",
+            "severity": "high",
+            "reason_en": "Alice residence expired",
+            "reason_ar": "إقامة Alice منتهية",
+            "employee_key": "E1",
+            "employee_name": "Alice",
+            "document_type": "residence",
+            "document_type_canonical": "residence",
+            "system_of_action": "compliance",
+            "deep_link": {"page": "compliance", "employee": "E1"},
+            "evidence_status": "expired",
+            "owner_role": "hr_compliance",
+            "government_verified": False,
+            "guidance_only": True,
+        }
+    ]
+    e360 = [
+        normalize_e360_next_action(
+            {
+                "id": "compliance:expired:residence",
+                "severity": "critical",
+                "module": "compliance",
+                "title": "Residence expired",
+                "reason": "Document has expired",
+                "target": {"page": "compliance", "section": "compliance"},
+                "meta": {"document_type": "residence"},
+            },
+            employee_key="E1",
+            employee_name="Alice",
+        ),
+        normalize_e360_next_action(
+            {
+                "id": "onboarding:incomplete",
+                "severity": "medium",
+                "module": "onboarding",
+                "title": "Onboarding incomplete",
+                "reason": "2 required items still open",
+                "target": {"page": "onboarding", "section": "onboarding"},
+            },
+            employee_key="E1",
+            employee_name="Alice",
+        ),
+    ]
+    before = build_action_inbox(
+        analytics_attention=attention,
+        compliance_findings=findings,
+        e360_next_actions=e360,
+        apply_phase0_filters=False,
+    )
+    # Resolve sources: leave decided, residence renewed, onboarding still open
+    after = build_action_inbox(
+        analytics_attention=[],
+        compliance_findings=[],
+        e360_next_actions=[e360[1]],
+        apply_phase0_filters=False,
+    )
+    return {
+        "before_total": before["summary"]["total"],
+        "after_total": after["summary"]["total"],
+        "deduped": before["summary"]["deduped_e360_compliance"],
+        "cleared": before["summary"]["total"] > after["summary"]["total"],
+        "remaining_ids": [i["id"] for i in after["items"]],
+    }

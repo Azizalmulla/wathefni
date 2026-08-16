@@ -1,0 +1,6 @@
+WAVE1_AUTHORITY=PASS
+PASS=78
+FAIL=0
+DEPLOYED=false
+AUTHORITY_DEFAULT=off
+EVIDENCE=/Users/azizalmulla/Desktop/claw/ops/evidence/attendance-wave1-authority-20260802T021604Z

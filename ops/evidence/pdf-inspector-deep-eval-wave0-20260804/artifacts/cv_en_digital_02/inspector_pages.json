@@ -1,0 +1,14 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "James Carter HR Operations Analyst Email: james.carter@example.com Phone: +96555223344\n\nEXPERIENCE 2019-2026 Gulf Staffing — compliance renewals and onboarding. EDUCATION BA Business Administration — AUK SKILLS Excel, policy drafting, Civil ID tracking\n",
+      "markdown_len": 253
+    }
+  ]
+}

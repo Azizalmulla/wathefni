@@ -42,10 +42,10 @@ const navItems = [
 describe('moduleWorkspace', () => {
   test('canonical fallbacks match module_catalog post-hire sets', () => {
     expect([...CANONICAL_POSTHIRE_MODULES].sort()).toEqual(
-      ['analytics', 'attendance', 'compliance', 'leave', 'onboarding', 'payroll', 'shifts'].sort(),
+      ['analytics', 'attendance', 'benefits', 'comp_planning', 'compliance', 'employee_relations', 'engagement', 'learning', 'leave', 'onboarding', 'payroll', 'performance', 'shifts', 'talent', 'workforce_planning'].sort(),
     )
     expect([...CANONICAL_POSTHIRE_PEOPLE_MODULES].sort()).toEqual(
-      ['attendance', 'compliance', 'leave', 'onboarding', 'payroll', 'shifts'].sort(),
+      ['attendance', 'compliance', 'learning', 'leave', 'onboarding', 'payroll', 'performance', 'shifts', 'talent'].sort(),
     )
     expect(CANONICAL_POSTHIRE_MODULES).not.toContain('employee_app')
     expect(isHrNavExcludedModule('employee_app')).toBe(true)
@@ -112,6 +112,7 @@ describe('moduleWorkspace', () => {
 
   test('isPostHireNavPage recognizes people and module pages', () => {
     expect(isPostHireNavPage('employees')).toBe(true)
+    expect(isPostHireNavPage('workforce')).toBe(true)
     expect(isPostHireNavPage('compliance')).toBe(true)
     expect(isPostHireNavPage('notifications')).toBe(false)
     expect(isPostHireNavPage('overview')).toBe(false)

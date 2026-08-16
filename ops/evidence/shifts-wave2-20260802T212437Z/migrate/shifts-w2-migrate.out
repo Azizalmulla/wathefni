@@ -1,0 +1,11 @@
+env staging
+schema_version 2.0.0
+expected_db wathefni_staging
+connected_db wathefni_staging
+shift_integrity_settings shift_integrity_settings
+shift_assignment_versions shift_assignment_versions
+shift_reminder_queue shift_reminder_queue
+shift_seasonal_policies shift_seasonal_policies
+shift_reconciliation_flags shift_reconciliation_flags
+shift_assignment_wave2_cols ['current_version_no', 'lineage_json', 'schedule_reason_code']
+SHIFTS_W2_MIGRATE_OK

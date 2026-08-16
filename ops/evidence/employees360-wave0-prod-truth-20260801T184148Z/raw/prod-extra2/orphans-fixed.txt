@@ -1,0 +1,49 @@
+            t             | count 
+--------------------------+-------
+ attendance_records       |     0
+ leave_requests           |     0
+ shift_assignments        |     0
+ payroll_timesheets       |     0
+ compliance_documents     |     0
+ onboarding_items         |     0
+ file_registry_employee   |     0
+ employee_sessions        |     0
+ employee_push_tokens     |     0
+ employee_app_invites     |     0
+ employee_status_changes  |     0
+ employee_org_assignments |     0
+ employee_messages        |     3
+ employee_documents       |     0
+ manager_scope_members    |     0
+(15 rows)
+
+          t           | count 
+----------------------+-------
+ employees            |     4
+ attendance_records   |    42
+ leave_requests       |     3
+ shift_assignments    |    20
+ payroll_timesheets   |     2
+ onboarding_items     |    19
+ compliance_documents |    18
+ file_registry        |    82
+ employee_messages    |    37
+ hire_operations      |     0
+(10 rows)
+
+ status | count 
+--------+-------
+(0 rows)
+
+ company_code | count 
+--------------+-------
+(0 rows)
+
+ company_code |  role  | status |     email_redacted     | has_employees_read 
+--------------+--------+--------+------------------------+--------------------
+ WATHEFNI     | owner  | active | a***@gmail.com         | t
+ WATHEFNI     | owner  | active | f***@disruptv.tech     | t
+ WATHEFNI     | viewer | active | f***@gmail.com         | t
+ WATHEFNI     | viewer | active | h***@almulla-media.com | t
+(4 rows)
+

@@ -1,0 +1,7 @@
+cal ['CalendarShell-McJD9Ux2.js']
+dash ['dashboard-Btr3JHJY.js']
+has_stone False
+has_old_greenish True
+has_join_ar False
+health=200
+dashboard=200

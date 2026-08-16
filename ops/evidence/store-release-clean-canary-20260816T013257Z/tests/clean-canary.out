@@ -1,0 +1,24 @@
+    STORE RELEASE — clean Setup canary
+    tenant: QAC9C8EC base: http://127.0.0.1:8011
+      PASS  operator credentials present
+      PASS  Setup operator login
+      PASS  operator access token issued
+      PASS  Setup creates company
+      PASS  new company bootstrap is not pre-staffed
+      PASS  Setup enables catalog modules
+      PASS  Setup seeds owner invite
+      PASS  owner invite token returned
+      PASS  owner accepts invite through Setup/auth
+      PASS  owner dashboard login
+      PASS  owner session issued
+      PASS  owner session includes employees.read from bootstrap
+      PASS  owner session includes employees.manage from bootstrap
+      FAIL  bootstrap did not grant payroll.export
+      FAIL  bootstrap did not grant er.sensitive
+      PASS  owner can open company Setup
+      PASS  owner enables Leave through Setup
+      PASS  owner creates employee through HR API
+      FAIL  HR leave action is a real domain result :: (404, 'unknown_action')
+      CLEANUP  QAC9C8EC
+
+    CLEAN_CANARY_FAIL  16 passed, 3 failed

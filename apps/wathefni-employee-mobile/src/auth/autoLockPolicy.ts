@@ -9,32 +9,41 @@ import { isLocalPinEnabledFor, isLocalPinMasterEnabled } from './pinPolicy'
 export const AUTO_LOCK_BUILD_MARKER = `al-overlay-v3:${String(process.env.EXPO_PUBLIC_LOCAL_AUTO_LOCK || 'unset')}`
 
 /**
- * Explicit `1` required. Default off until overlay architecture is proven.
- * Does not inherit PIN master (avoids accidental enable on canary PIN builds).
+ * Auto-lock master.
+ * Explicit `0` disables. Explicit `1` enables.
+ * Unset/empty defaults ON so missed OTA env cannot silently disable auto-lock.
  */
 export function isLocalAutoLockMasterEnabled(): boolean {
-  return String(process.env.EXPO_PUBLIC_LOCAL_AUTO_LOCK || '').trim() === '1'
+  const raw = String(process.env.EXPO_PUBLIC_LOCAL_AUTO_LOCK ?? '').trim()
+  if (raw === '0') return false
+  if (raw === '1') return true
+  return true
+}
+
+/** Contiguous HBC marker — effective auto-lock master after defaults. */
+export const AUTO_LOCK_ON_BUILD_MARKER = isLocalAutoLockMasterEnabled()
+  ? 'al-lock-effective:on'
+  : 'al-lock-effective:off'
+
+/**
+ * Face ID on the overlay.
+ * Explicit `0` disables. Explicit `1` enables. Unset defaults ON with auto-lock.
+ */
+export function isLocalAutoLockBiometricEnabled(): boolean {
+  const raw = String(process.env.EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC ?? '').trim()
+  if (raw === '0') return false
+  if (raw === '1') return true
+  return isLocalAutoLockMasterEnabled()
 }
 
 /**
- * Face ID on the overlay — separate gate from auto-lock master.
- * Requires explicit `1` after PIN-only overlay is proven crash-free.
+ * Auto-lock when masters are on and the session has an employee key.
+ * No employee-key allowlist — device/session eligibility only.
  */
-export function isLocalAutoLockBiometricEnabled(): boolean {
-  return String(process.env.EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC || '').trim() === '1'
-}
-
-export const LOCAL_AUTO_LOCK_CANARY_EMPLOYEE_KEYS = new Set([
-  'WATHEFNI-96599338566',
-  'WATHEFNI-96550252254',
-])
-
 export function isLocalAutoLockEnabledFor(employeeKey: string | null | undefined): boolean {
   if (!isLocalAutoLockMasterEnabled()) return false
   if (!isLocalPinMasterEnabled()) return false
-  const key = String(employeeKey || '').trim()
-  if (!key || !LOCAL_AUTO_LOCK_CANARY_EMPLOYEE_KEYS.has(key)) return false
-  return isLocalPinEnabledFor(key)
+  return isLocalPinEnabledFor(employeeKey)
 }
 
 /** Timeout options in milliseconds. `null` = Never (time-based lock off). */

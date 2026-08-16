@@ -1,0 +1,1052 @@
+{
+  "id": "civil_id_front_bilingual_01",
+  "document_type": "civil_id",
+  "side": "front",
+  "classify": {
+    "detected_item": "civil_id",
+    "confidence": 0.97,
+    "reason": "extracted",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "side": "front",
+    "extraction_status": "extracted",
+    "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+    "identity_result": {
+      "ok": true,
+      "extraction_status": "extracted",
+      "authoritative": false,
+      "hr_confirmation_required": true,
+      "confidence": 0.97,
+      "detected_item": "civil_id",
+      "matches_expected_item": null,
+      "reason": "extracted",
+      "side": "front",
+      "fields": {
+        "document_type": {
+          "value": "civil_id",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "side": {
+          "value": "front",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_relationship": {
+          "value": "standalone",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_ar": {
+          "value": "أحمد عبدالله محمد الكندري",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_en": {
+          "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_number": {
+          "value": "289123456789",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "nationality": {
+          "value": "Kuwaiti",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "date_of_birth": {
+          "value": "1989-03-14",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issue_date": {
+          "value": "2022-01-10",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "expiry_date": {
+          "value": "2032-01-09",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "employer_or_sponsor": {
+          "value": null,
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name": {
+          "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issued_date": {
+          "value": "2022-01-10",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        }
+      },
+      "validation": {
+        "ok": true,
+        "issues": [],
+        "has_issue_date": true,
+        "has_expiry_date": true,
+        "has_dob": true
+      },
+      "envelope": {
+        "contract": "document_envelope@1",
+        "foundation_id": "wathefni_document_processing_foundation_wave1",
+        "foundation_version": "1.0.0",
+        "company_code": "WATHEFNI",
+        "subject_type": "employee_identity",
+        "subject_key": "civil_id_front_bilingual_01",
+        "file_id": null,
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "source_channel": "identity_wave2_classify",
+        "migration_batch_id": null,
+        "document_class": "identity",
+        "file_type": "png",
+        "authority_label": "needs_hr_confirmation",
+        "route_policy": {
+          "reading_route": "shared_envelope_intake",
+          "structuring": "identity_processor_current_gpt_vision",
+          "ocr_policy": "do_not_use_cv_v2",
+          "gpt_auto_ocr_fallback": false
+        },
+        "processing": {
+          "status": "extracted",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "expected_item": null,
+          "detected_item": "civil_id",
+          "gpt_auto_fallback": false,
+          "cv_v2_forbidden": true,
+          "validation": {
+            "ok": true,
+            "issues": [],
+            "has_issue_date": true,
+            "has_expiry_date": true,
+            "has_dob": true
+          },
+          "confidence": 0.97
+        },
+        "text_ref": null,
+        "structured_ref": null,
+        "retention_class": "identity_document",
+        "error": null,
+        "created_at": "2026-08-04T03:28:31.290897+00:00",
+        "cloud_portability": {
+          "domain_contract_cloud_agnostic": true,
+          "aws_specific_deps": false,
+          "gcp_specific_deps": false,
+          "worker_shape": "container_ready_async"
+        }
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "latency_ms": 2459
+        }
+      ],
+      "engine": {
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "latency_ms": 2459,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "error": null
+      },
+      "cost_usd": 0.004,
+      "latency_ms": 2459,
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+      "gpt_used": false,
+      "company_code": "WATHEFNI",
+      "duplicate_keys": {
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "identifier_key": "civil_id:289123456789"
+      },
+      "legacy_compat": {
+        "document_type": "civil_id",
+        "document_number": "289123456789",
+        "issued_date": "2022-01-10",
+        "expiry_date": "2032-01-09",
+        "nationality": "Kuwaiti",
+        "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+        "full_name_ar": "أحمد عبدالله محمد الكندري",
+        "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+        "date_of_birth": "1989-03-14",
+        "employer_or_sponsor": null,
+        "side": "front",
+        "confidence": 0.97,
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "issued_date_parsed": "2022-01-10",
+        "expiry_date_parsed": "2032-01-09",
+        "date_of_birth_parsed": "1989-03-14",
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "gpt_used": false,
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "front",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "أحمد عبدالله محمد الكندري",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "289123456789",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1989-03-14",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2022-01-10",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2032-01-09",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2022-01-10",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "envelope": {
+          "contract": "document_envelope@1",
+          "foundation_id": "wathefni_document_processing_foundation_wave1",
+          "foundation_version": "1.0.0",
+          "company_code": "WATHEFNI",
+          "subject_type": "employee_identity",
+          "subject_key": "civil_id_front_bilingual_01",
+          "file_id": null,
+          "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+          "source_channel": "identity_wave2_classify",
+          "migration_batch_id": null,
+          "document_class": "identity",
+          "file_type": "png",
+          "authority_label": "needs_hr_confirmation",
+          "route_policy": {
+            "reading_route": "shared_envelope_intake",
+            "structuring": "identity_processor_current_gpt_vision",
+            "ocr_policy": "do_not_use_cv_v2",
+            "gpt_auto_ocr_fallback": false
+          },
+          "processing": {
+            "status": "extracted",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "expected_item": null,
+            "detected_item": "civil_id",
+            "gpt_auto_fallback": false,
+            "cv_v2_forbidden": true,
+            "validation": {
+              "ok": true,
+              "issues": [],
+              "has_issue_date": true,
+              "has_expiry_date": true,
+              "has_dob": true
+            },
+            "confidence": 0.97
+          },
+          "text_ref": null,
+          "structured_ref": null,
+          "retention_class": "identity_document",
+          "error": null,
+          "created_at": "2026-08-04T03:28:31.290897+00:00",
+          "cloud_portability": {
+            "domain_contract_cloud_agnostic": true,
+            "aws_specific_deps": false,
+            "gcp_specific_deps": false,
+            "worker_shape": "container_ready_async"
+          }
+        },
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        }
+      }
+    }
+  },
+  "verify": {
+    "matches_expected_item": true,
+    "detected_item": "civil_id",
+    "confidence": 0.96,
+    "reason": "Document matches expected civil_id format and content.",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "side": "front",
+    "extraction_status": "extracted",
+    "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+    "identity_result": {
+      "ok": true,
+      "extraction_status": "extracted",
+      "authoritative": false,
+      "hr_confirmation_required": true,
+      "confidence": 0.96,
+      "detected_item": "civil_id",
+      "matches_expected_item": true,
+      "reason": "Document matches expected civil_id format and content.",
+      "side": "front",
+      "fields": {
+        "document_type": {
+          "value": "civil_id",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "side": {
+          "value": "front",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_relationship": {
+          "value": "standalone",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_ar": {
+          "value": "أحمد عبدالله محمد الكندري",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_en": {
+          "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_number": {
+          "value": "289123456789",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "nationality": {
+          "value": "Kuwaiti",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "date_of_birth": {
+          "value": "1989-03-14",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issue_date": {
+          "value": "2022-01-10",
+          "confidence": 0.94,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "expiry_date": {
+          "value": "2032-01-09",
+          "confidence": 0.93,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "employer_or_sponsor": {
+          "value": null,
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name": {
+          "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issued_date": {
+          "value": "2022-01-10",
+          "confidence": 0.94,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        }
+      },
+      "validation": {
+        "ok": true,
+        "issues": [],
+        "has_issue_date": true,
+        "has_expiry_date": true,
+        "has_dob": true
+      },
+      "envelope": {
+        "contract": "document_envelope@1",
+        "foundation_id": "wathefni_document_processing_foundation_wave1",
+        "foundation_version": "1.0.0",
+        "company_code": "WATHEFNI",
+        "subject_type": "employee_identity",
+        "subject_key": "civil_id_front_bilingual_01",
+        "file_id": null,
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "source_channel": "identity_wave2_verify",
+        "migration_batch_id": null,
+        "document_class": "identity",
+        "file_type": "png",
+        "authority_label": "needs_hr_confirmation",
+        "route_policy": {
+          "reading_route": "shared_envelope_intake",
+          "structuring": "identity_processor_current_gpt_vision",
+          "ocr_policy": "do_not_use_cv_v2",
+          "gpt_auto_ocr_fallback": false
+        },
+        "processing": {
+          "status": "extracted",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "expected_item": "civil_id",
+          "detected_item": "civil_id",
+          "gpt_auto_fallback": false,
+          "cv_v2_forbidden": true,
+          "validation": {
+            "ok": true,
+            "issues": [],
+            "has_issue_date": true,
+            "has_expiry_date": true,
+            "has_dob": true
+          },
+          "confidence": 0.96
+        },
+        "text_ref": null,
+        "structured_ref": null,
+        "retention_class": "identity_document",
+        "error": null,
+        "created_at": "2026-08-04T03:28:34.108723+00:00",
+        "cloud_portability": {
+          "domain_contract_cloud_agnostic": true,
+          "aws_specific_deps": false,
+          "gcp_specific_deps": false,
+          "worker_shape": "container_ready_async"
+        }
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "latency_ms": 2816
+        }
+      ],
+      "engine": {
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "latency_ms": 2816,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "error": null
+      },
+      "cost_usd": 0.004,
+      "latency_ms": 2816,
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+      "gpt_used": false,
+      "company_code": "WATHEFNI",
+      "duplicate_keys": {
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "identifier_key": "civil_id:289123456789"
+      },
+      "legacy_compat": {
+        "document_type": "civil_id",
+        "document_number": "289123456789",
+        "issued_date": "2022-01-10",
+        "expiry_date": "2032-01-09",
+        "nationality": "Kuwaiti",
+        "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+        "full_name_ar": "أحمد عبدالله محمد الكندري",
+        "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+        "date_of_birth": "1989-03-14",
+        "employer_or_sponsor": null,
+        "side": "front",
+        "confidence": 0.96,
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "issued_date_parsed": "2022-01-10",
+        "expiry_date_parsed": "2032-01-09",
+        "date_of_birth_parsed": "1989-03-14",
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "gpt_used": false,
+        "fields": {
+          "document_type": {
+            "value": "civil_id",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "front",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "أحمد عبدالله محمد الكندري",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "289123456789",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Kuwaiti",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1989-03-14",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2022-01-10",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2032-01-09",
+            "confidence": 0.93,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2022-01-10",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "envelope": {
+          "contract": "document_envelope@1",
+          "foundation_id": "wathefni_document_processing_foundation_wave1",
+          "foundation_version": "1.0.0",
+          "company_code": "WATHEFNI",
+          "subject_type": "employee_identity",
+          "subject_key": "civil_id_front_bilingual_01",
+          "file_id": null,
+          "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+          "source_channel": "identity_wave2_verify",
+          "migration_batch_id": null,
+          "document_class": "identity",
+          "file_type": "png",
+          "authority_label": "needs_hr_confirmation",
+          "route_policy": {
+            "reading_route": "shared_envelope_intake",
+            "structuring": "identity_processor_current_gpt_vision",
+            "ocr_policy": "do_not_use_cv_v2",
+            "gpt_auto_ocr_fallback": false
+          },
+          "processing": {
+            "status": "extracted",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "expected_item": "civil_id",
+            "detected_item": "civil_id",
+            "gpt_auto_fallback": false,
+            "cv_v2_forbidden": true,
+            "validation": {
+              "ok": true,
+              "issues": [],
+              "has_issue_date": true,
+              "has_expiry_date": true,
+              "has_dob": true
+            },
+            "confidence": 0.96
+          },
+          "text_ref": null,
+          "structured_ref": null,
+          "retention_class": "identity_document",
+          "error": null,
+          "created_at": "2026-08-04T03:28:34.108723+00:00",
+          "cloud_portability": {
+            "domain_contract_cloud_agnostic": true,
+            "aws_specific_deps": false,
+            "gcp_specific_deps": false,
+            "worker_shape": "container_ready_async"
+          }
+        },
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        }
+      }
+    }
+  },
+  "extract": {
+    "extraction_status": "extracted",
+    "document_type": "civil_id",
+    "document_number": "289123456789",
+    "full_name": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+    "full_name_ar": "أحمد عبدالله محمد الكندري",
+    "full_name_en": "AHMAD ABDULLAH MOHAMMAD ALKANDARI",
+    "issued_date": "2022-01-10",
+    "expiry_date": "2032-01-09",
+    "nationality": "Kuwaiti",
+    "date_of_birth": "1989-03-14",
+    "confidence": 0.97,
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "side": "front",
+    "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+    "extraction_error": null
+  },
+  "auth_false": true,
+  "gpt_free": true,
+  "validation": {
+    "ok": true,
+    "issues": [],
+    "has_issue_date": true,
+    "has_expiry_date": true,
+    "has_dob": true
+  },
+  "duplicate_keys": {
+    "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+    "identifier_key": "civil_id:289123456789"
+  },
+  "duplicate_of": null,
+  "hr_correction_example": {
+    "document_number": "289123456789",
+    "authoritative": true,
+    "hr_confirmed": true,
+    "corrected_from": "289123456789"
+  },
+  "verify_match": true,
+  "classify_ok": true,
+  "extract_ok": true
+}

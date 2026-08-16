@@ -1,0 +1,4 @@
+error: pathspec 'apps/wathefni-dashboard/components.json' did not match any file(s) known to git
+    2001 apps/wathefni-dashboard/src/types.ts
+    3365 /tmp/wf-vps-types.ts
+    5366 total

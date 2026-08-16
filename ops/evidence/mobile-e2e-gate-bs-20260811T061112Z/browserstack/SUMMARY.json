@@ -1,0 +1,82 @@
+{
+  "build_id": "f4c9eb771dd01934f11423082cab99e8d71777fa",
+  "status": "failed",
+  "passed_sessions": 0,
+  "failed_sessions": 1,
+  "error_sessions": 0,
+  "sessions": [
+    {
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "c03923c31e3fdb3f015e3667829ea2e6331d1008",
+      "status": "failed",
+      "duration": 513,
+      "testcases": {
+        "count": 5,
+        "status": {
+          "passed": 1,
+          "failed": 4,
+          "skipped": 0,
+          "timedout": 0,
+          "error": 0,
+          "running": 0,
+          "queued": 0
+        }
+      }
+    }
+  ],
+  "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/f4c9eb771dd01934f11423082cab99e8d71777fa",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786428678",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://4d377a277327b3e6e329171b969a36377bd04f20",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml",
+      "bs-smoke/01-hr-login.yaml",
+      "bs-smoke/02-hr-tabs.yaml",
+      "bs-smoke/03-hr-leave-approve.yaml",
+      "bs-smoke/04-hr-leave-reject.yaml"
+    ],
+    "setEnvVariables": {
+      "MAESTRO_HR_COMPANY": "WATHEFNI",
+      "MAESTRO_HR_EMAIL": "e2e-hr+mobile@wathefni.internal",
+      "MAESTRO_HR_PASSWORD": "***REDACTED***",
+      "MAESTRO_LEAVE_ID": "60822864-fff9-4f22-a8c3-077a90907128",
+      "MAESTRO_LEAVE_REJECT_ID": "d42c4045-f96e-4b34-b338-c5480846d75f",
+      "MAESTRO_PIN": "246810"
+    }
+  },
+  "poll_timeout": false,
+  "raw_status": "failed",
+  "execute": [
+    "bs-smoke/00-launch-unsigned.yaml",
+    "bs-smoke/01-hr-login.yaml",
+    "bs-smoke/02-hr-tabs.yaml",
+    "bs-smoke/03-hr-leave-approve.yaml",
+    "bs-smoke/04-hr-leave-reject.yaml"
+  ],
+  "app_url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+  "test_suite_url": "bs://4d377a277327b3e6e329171b969a36377bd04f20",
+  "evidence": "ops/evidence/mobile-e2e-gate-bs-20260811T061112Z",
+  "MOBILE_PASS": 0,
+  "ui_runtime": "browserstack_real_device",
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "passed=0 failed=1 error=0 status=failed",
+  "rule": "API PASS \u2260 MOBILE PASS \u2014 BrowserStack real-device execution required"
+}

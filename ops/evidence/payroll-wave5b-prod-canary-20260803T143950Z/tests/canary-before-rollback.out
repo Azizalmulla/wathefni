@@ -1,0 +1,87 @@
+payroll pifss eos wave5b production synthetic canary
+tag eadd2162 employee WATHEFNI-PYW1-PYW5-W5B-eadd2162
+[PASS] version
+[PASS] wave5 enabled
+[PASS] synthetic_only
+[PASS] payment disabled
+[PASS] no posts payment
+[PASS] remittance false
+[PASS] statutory filing false
+[PASS] pifss remittance false
+[PASS] eos_auto_payable false
+[PASS] no auto compliance claim
+[PASS] pifss worksheets
+[PASS] eos worksheets
+[PASS] bank false
+[PASS] wps false
+[PASS] ashal false
+[PASS] ai false
+[PASS] native non-auth
+[PASS] external authority
+[PASS] freeze category separation
+[PASS] freeze missing rule fail closed
+[PASS] freeze effective dated
+[PASS] freeze dual override
+[PASS] freeze approved immutable
+[PASS] freeze no remittance
+[PASS] freeze no auto payable
+connected_db wathefni
+[PASS] production db
+[FAIL] nonsynthetic refused :: {'ok': False, 'worksheet': {'worksheet_id': '4b5337ae-b7da-4cf3-889a-e4ce98ae0567', 'company_code': 'WATHEFNI', 'employee_key': 'WATHEFNI-REAL-EMPLOYEE-NOT-SYNTH', 'employee_category': 'kuwaiti_national', 'period_start': '2034-05-01', 'period_end': '2034-05-31', 'status': 'counsel_required', 'rule_table_id': None, 'rule_version_label': None, 'input_fingerprint': '67c791c452fb4d311da6684ae8c6f3f09d1413d14f6bffc0bf3b01f50dda130c', 'content_fingerprint': '376480392636c3bfb78dc807934cf76b5ffb464da97b4fe9f2a5c6c16eed3c35', 'source_provenance': {'inputs': {'period_end': '2034-05-31', 'employee_key': 'WATHEFNI-REAL-EMPLOYEE-NOT-SYNTH', 'period_start': '2034-05-01', 'employee_category': 'kuwaiti_national', 'contributory_salary': '1000.000'}, 'honesty': {'wps': False, 'ashal': False, 'bank_files': False, 'remittance': False, 'posts_payment': False, 'eos_worksheets': True, 'synthetic_only': True, 'ai_calculations': False, 'eos_auto_payable': False, 'pifss_remittance': False, 'pifss_worksheets': True, 'statutory_filing': False, 'payment_processing': 'disabled', 'eos_worksheet_schema': 'payroll_eos_worksheet@1.0.0', 'payroll_wave5_version': '1.0.0', 'wave1_flows_unchanged': True, 'wave3_flows_unchanged': True, 'wave4_flows_unchanged': True, 'pifss_worksheet_schema': 'payroll_pifss_worksheet@1.0.0', 'wave2a_flows_unchanged': True, 'wave2b_flows_unchanged': True, 'external_payroll_authority': 'external', 'native_results_authoritative': False, 'automatic_legal_compliance_claim': False}, 'missing_rule': True, 'caller_provenance': {}, 'input_fingerprint': '67c791c452fb4d311da6684ae8c6f3f09d1413d14f6bffc0bf3b01f50dda130c'}, 'worksheet_payload': {'schema': 'payroll_pifss_worksheet@1.0.0', 'posture': 'review_only', 'explanation': 'Kuwaiti PIFSS rates require counsel-approved effective-dated rule table.', 'not_remittance': True, 'counsel_required': True, 'pifss_applicable': True, 'employee_category': 'kuwaiti_national', 'not_compliance_claim': True}, 'money_authority': 'review_non_authoritative', 'payment_processing': 'disabled', 'posts_payment': False, 'remittance': False, 'statutory_filing': False, 'automatic_legal_compliance_claim': False, 'authoritative_label': 'review_worksheet_only', 'exception_code': None, 'exception_evidence': {}, 'supersedes_worksheet_id': None, 'superseded_by': None, 'created_by_phone': '965541121620', 'submitted_by_phone': None, 'submitted_at': None, 'approved_by_phone': None, 'approved_at': None, 'decision_note': 'w5b_refuse_eadd2162', 'created_at': '2026-08-03T14:40:52.909141+00:00', 'updated_at': '2026-08-03T14:40:52.909141+00:00', 'row_version': 1}, 'payroll_wave5_version': '1.0.0', 'pifss_worksheet_schema': 'payroll_pifss_worksheet@1.0.0', 'eos_worksheet_schema': 'payroll_eos_worksheet@1.0.0', 'payment_processing': 'disabled', 'posts_payment': False, 'remittance': False, 'statutory_filing': False, 'automatic_legal_compliance_claim': False, 'pifss_worksheets': True, 'pifss_remittance': False, 'eos_worksheets': True, 'eos_auto_payable': False, 'bank_files': False, 'wps': False, 'ashal': False, 'ai_calculations': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'wave1_flows_unchanged': True, 'wave2a_flows_unchanged': True, 'wave2b_flows_unchanged': True, 'wave3_flows_unchanged': True, 'wave4_flows_unchanged': True, 'synthetic_only': True, 'error': 'counsel_required_rule'}
+[PASS] expat ok True
+[PASS] expat status unsupported
+[PASS] expat error
+[PASS] gcc ok False
+[PASS] gcc error counsel
+[PASS] gcc status counsel_required
+[PASS] kuwaiti ok False
+[PASS] kuwaiti error counsel
+[PASS] kuwaiti status counsel_required
+[PASS] kuwaiti worksheet id
+[PASS] upsert pifss v1
+[PASS] resolve pending None
+[PASS] counsel approve v1
+[PASS] resolve returns v1
+[PASS] upsert pifss v2
+[PASS] counsel approve v2
+[PASS] as_of 2029 → v1
+[PASS] as_of 2030 → v2
+[PASS] recalc after rule ok
+[PASS] recalc draft status
+[PASS] recalc has rule
+[PASS] recalc new worksheet
+[PASS] prior counsel superseded
+[PASS] submit ok
+[PASS] self approve forbidden
+[PASS] approve ok
+[PASS] approved status
+[PASS] mutate_approved_forbidden
+[PASS] recalc new salary ok
+[PASS] new draft status
+[PASS] new draft distinct
+[PASS] prior approved superseded
+[PASS] history includes superseded approved
+[PASS] history superseded status
+[PASS] history includes new draft
+[PASS] eos art blocked ok False
+[PASS] eos art blocked error
+[PASS] eos law17 blocked ok False
+[PASS] eos law17 blocked error
+[PASS] upsert eos rule
+[PASS] counsel approve eos
+[PASS] eos generate ok
+[PASS] eos draft status
+[PASS] eos review worksheet
+[PASS] eos automatic_payable false
+[PASS] eos not payable instruction
+[PASS] eos termination reason preserved
+[PASS] override initiate
+[PASS] dual action id
+[PASS] override same actor deny
+[PASS] override confirm ok
+[PASS] override exception status
+[PASS] override no remittance
+[FAIL] residual zero :: {'residual': 1, 'deleted': {'dual_control': 1, 'events': 21, 'pifss': 5, 'eos': 3, 'rules': 3, 'events_sweep': 0}}
+
+79 passed, 2 failed
+QUALIFICATION_JSON /opt/wathefni/production-evidence/payroll-wave5b-prod-canary/20260803T143950Z/canary/before-rollback/qualification.json

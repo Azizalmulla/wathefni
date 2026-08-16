@@ -1,0 +1,10 @@
+{
+  "expected_chunk": "dashboard-CsSPSgK4.js",
+  "chunk_present": true,
+  "index_refs_chunk": true,
+  "assess_full_card_fill": true,
+  "overflow_y_auto_shell": true,
+  "health_after": "200",
+  "dashboard_after": "200",
+  "all_pass": true
+}

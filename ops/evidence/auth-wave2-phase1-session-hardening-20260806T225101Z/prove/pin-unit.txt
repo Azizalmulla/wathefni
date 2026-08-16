@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/wathefni-orchestrator/smoke-test-auth-wave2-phase1-pin-unit.py': [Errno 2] No such file or directory

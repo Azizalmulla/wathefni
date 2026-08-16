@@ -1,0 +1,54 @@
+    wave5 product acceptance — unit
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  acceptance only
+      PASS  no new kpi families
+      PASS  no new domain math
+      PASS  no second evaluator
+      PASS  no talent inference
+      PASS  fte blocked honesty
+      PASS  demographics off default
+      PASS  scheduled safe debt
+      PASS  assistant mutations out
+      PASS  setup owns policy
+      PASS  trace matrix >= 6
+      PASS  modularity cells >= 12
+      PASS  surface rules web primary
+      PASS  surface rules mobile thin
+      PASS  employee no company intel
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  acceptance return sections
+      PASS  stop before wave6
+      PASS  anti-duplication scan clean
+      PASS  single evaluator named
+      PASS  c1 stamp
+      PASS  c2 stamp
+      PASS  c3 stamp
+      PASS  c4 stamp
+      PASS  c5 stamp
+      PASS  c6 stamp
+      PASS  c7 gate off
+      PASS  c1 gate off
+      PASS  c6 gate off
+      PASS  c7 empty allowlist
+      PASS  c7 canary gate
+      PASS  c7 tenant isolation
+      PASS  no turnover formula in hr_intelligence_product_c7.py
+      PASS  no evaluate_kpi def in hr_intelligence_product_c7.py
+      PASS  no turnover formula in hr_intelligence_surfaces_c6.py
+      PASS  c6 uses c1 eval
+      PASS  c7 has no evaluate_kpi
+      PASS  frontend no turnover formula
+      PASS  frontend calls intelligence api
+      PASS  attention distinct mention
+      PASS  no forbidden talent authority in hr_intelligence_perf_talent_c5.py
+      PASS  no forbidden talent authority in hr_intelligence_surfaces_c6.py
+      PASS  no forbidden talent authority in hr_intelligence_product_c7.py
+      PASS  c1 fte blocked
+      PASS  c1 demographics off
+      PASS  c6 evaluator only
+      PASS  c6 attention separate
+
+    50 passed, 0 failed
+WAVE5_PRODUCT_UNIT_PASS

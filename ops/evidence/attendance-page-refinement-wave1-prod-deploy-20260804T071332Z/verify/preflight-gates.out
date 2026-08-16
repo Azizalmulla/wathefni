@@ -1,0 +1,10 @@
+PASS resolve_sets_focus
+PASS focus_matches_employee_and_date
+PASS absence_request_sets_completed
+PASS approve_confirm_separate_from_apply
+PASS payroll_locked_surfaces
+PASS stale_row_surfaces
+PASS operations_default_collapsed
+PASS no_board_mutations
+PASS mobile_rtl_dir
+PREFLIGHT_GATES_OK

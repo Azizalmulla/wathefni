@@ -1,0 +1,58 @@
+=== freeze regression ===
+PASS  wave2 module present
+PASS  wave2 authority map referenced
+PASS  wave2 no silent map drop helper named bypass
+PASS  wave4 overlap guard present
+PASS  wave4 apply_assignment_change present
+PASS  wave4 history list present
+PASS  wave4 no unqualified assignment-history wipe SQL
+PASS  only KW verified pack
+PASS  KW pack enabled
+PASS  KW version 1.0.0
+PASS  payroll owns monetary calculations
+PASS  monetary owner payroll (overlay/default)
+PASS  exceptional manual only default
+PASS  resolve KW private
+PASS  SA fail closed
+PASS  AE fail closed
+PASS  incomplete classification fail closed
+PASS  dual-control create_classification_request
+PASS  classification self_approval_forbidden
+PASS  remediation excludes quarantined synthetics
+PASS  lifecycle synthetic gate fn
+PASS  lifecycle real allowlist fn
+PASS  lifecycle allowlist env wired
+PASS  lifecycle self_approval_forbidden
+PASS  lifecycle synthetic_only_gate error retained
+PASS  ess synthetic assert
+PASS  ess real allowlist
+PASS  ess bank real allowlist
+PASS  ess bank encryption helper
+PASS  ess bind identity
+PASS  ess revoke sessions
+PASS  ess synthetic-only error retained
+PASS  ess bank not allowlisted error
+PASS  ess plaintext bank forbidden
+PASS  ess self_approval_forbidden
+PASS  ess own_data_only
+PASS  ess real allowlist empty by default in test
+PASS  ess bank allowlist empty by default in test
+PASS  app require allowlist helper
+PASS  app assert allowlisted
+PASS  app session_epoch stale revoke
+PASS  app create_employee_session calls allowlist
+FAIL  completion freeze doc present :: None
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/smoke-test-employees360-freeze-regression.py", line 175, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/orchestrator/smoke-test-employees360-freeze-regression.py", line 146, in main
+    freeze_txt = freeze_doc.read_text(encoding="utf-8")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/opt/wathefni/ops/EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md'

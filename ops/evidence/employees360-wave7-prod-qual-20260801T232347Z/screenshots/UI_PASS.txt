@@ -1,0 +1,6 @@
+ui_capture_pass=true
+rtlOk=true
+workforceOk=true
+refreshPreserved=true
+medianLoadMs=4077
+maxLoadMs=7717

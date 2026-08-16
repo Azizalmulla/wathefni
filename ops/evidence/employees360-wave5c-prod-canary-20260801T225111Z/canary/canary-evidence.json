@@ -1,0 +1,383 @@
+{
+  "checks": [
+    {
+      "label": "schema wave5b",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ess enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank encryption available",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lifecycle synthetic-only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "identity binds",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bind matches person/employment",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "session stamped with epoch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "session auth works pre-revoke",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "session revoke ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale /app token rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "revoked reason ess_session_epoch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "employee own view",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager sees in-scope reports",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "personal apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "emergency apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank pending_hr",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank after hr \u2192 payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank approved separate from apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank apply idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank encrypted at rest",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank masked by default",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "plaintext bank rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authorized unmask",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unmask audited",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "key rotation/re-wrap",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "document versions preserved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "transfer applied via wave4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager-change applied via wave4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "wave4 history grew",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale conflict fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale enters needs_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "duplicate phone bind fails",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "terminated session denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "suspended bank blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "self-approval denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cross-tenant denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager-scope denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real employee ess blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 50252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 66363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 97727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 99411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "employees": {
+      "e": "WATHEFNI-96554919301",
+      "m": "WATHEFNI-96554919302",
+      "r": "WATHEFNI-96554919303",
+      "dup": "WATHEFNI-96554919304",
+      "term": "WATHEFNI-96554919305",
+      "susp": "WATHEFNI-96554919306"
+    }
+  },
+  "reals": {
+    "before": {
+      "WATHEFNI-96550252254": {
+        "hub": {
+          "employee_key": "WATHEFNI-96550252254",
+          "name": "Talal Fadhli",
+          "phone": "96550252254"
+        },
+        "employment": {
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96566363363": {
+        "hub": {
+          "employee_key": "WATHEFNI-96566363363",
+          "name": "Fouad Burhamad",
+          "phone": "96566363363"
+        },
+        "employment": {
+          "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96597727743": {
+        "hub": {
+          "employee_key": "WATHEFNI-96597727743",
+          "name": "mohammad alqattan",
+          "phone": "96597727743"
+        },
+        "employment": {
+          "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96599411617": {
+        "hub": {
+          "employee_key": "WATHEFNI-96599411617",
+          "name": "Brian Saleh",
+          "phone": "96599411617"
+        },
+        "employment": {
+          "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      }
+    },
+    "after": {
+      "WATHEFNI-96550252254": {
+        "hub": {
+          "employee_key": "WATHEFNI-96550252254",
+          "name": "Talal Fadhli",
+          "phone": "96550252254"
+        },
+        "employment": {
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96566363363": {
+        "hub": {
+          "employee_key": "WATHEFNI-96566363363",
+          "name": "Fouad Burhamad",
+          "phone": "96566363363"
+        },
+        "employment": {
+          "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96597727743": {
+        "hub": {
+          "employee_key": "WATHEFNI-96597727743",
+          "name": "mohammad alqattan",
+          "phone": "96597727743"
+        },
+        "employment": {
+          "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96599411617": {
+        "hub": {
+          "employee_key": "WATHEFNI-96599411617",
+          "name": "Brian Saleh",
+          "phone": "96599411617"
+        },
+        "employment": {
+          "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active"
+        },
+        "ess_requests": 0
+      }
+    }
+  },
+  "encryption": {
+    "fingerprint": "5425959aa0fc0391",
+    "schema": "ess_bank_v1",
+    "has_ciphertext": true,
+    "rotated_version": 2
+  },
+  "session": {
+    "binding": {
+      "employee_key": "WATHEFNI-96554919301",
+      "session_epoch": 1,
+      "person_ok": true
+    },
+    "revoke": {
+      "app_sessions_revoked": 1,
+      "reason": "ess_session_epoch_bump"
+    }
+  },
+  "cleanup": {
+    "remaining": 0
+  },
+  "summary": {
+    "pass": 45,
+    "fail": 0,
+    "tag": "6b3adb25",
+    "phone_prefix": "965549"
+  }
+}

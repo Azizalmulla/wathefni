@@ -1,0 +1,45 @@
+    payroll external adapter wave2a — export/import/reconcile
+      PASS  version pinned
+      PASS  payment disabled
+      PASS  money authority external
+      PASS  wathefni not money authority
+      PASS  no posts_payment
+      PASS  no bank files
+      PASS  no native g2n
+      PASS  vendor unclaimed
+      PASS  wave1 contracts unchanged flag
+      PASS  uses input schema 1.0.0
+      PASS  uses result schema 1.0.0
+      PASS  freeze mirror only
+      PASS  freeze wave1 ddl untouched
+      PASS  malformed csv rejected
+connected_db wathefni_staging
+      PASS  wave1 draft still works
+      PASS  wave1 approve still works
+      PASS  period create
+      PASS  clean export
+      PASS  export fingerprint present
+      PASS  export money authority external
+      PASS  export payment disabled
+      PASS  export posts_payment false
+      PASS  idempotent export replay
+      PASS  clean import
+      PASS  import mirror_only
+      PASS  import external authority
+      PASS  import matched
+      PASS  idempotent import replay
+      PASS  reconcile clean
+      PASS  unmatched import accepted/partial
+      PASS  unmatched quarantined count
+      PASS  malformed quarantined
+      PASS  malformed has quarantine row
+      PASS  fingerprint change blocks import
+      PASS  changed fingerprint detected
+      PASS  new export not idempotent
+      PASS  diff import ok
+      PASS  reconcile differences flagged
+      PASS  component diffs present
+      PASS  export rollback
+      PASS  quarantine soft only
+
+    41 passed, 0 failed

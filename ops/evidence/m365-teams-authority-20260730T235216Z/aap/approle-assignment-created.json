@@ -1,0 +1,12 @@
+{
+  "principalType": "ServicePrincipal",
+  "resourceDisplayName": "Microsoft Graph",
+  "deletedDateTime": null,
+  "principalDisplayName": "Wathefni Platform Integration",
+  "resourceId": "d56ff723-dc12-4139-a5be-cc65fba22268",
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#appRoleAssignments/$entity",
+  "createdDateTime": "2026-07-30T23:48:48.9722852Z",
+  "id": "nVT1RoJD-kicIK_y8TRR1ebhMqBFvGdPlZy-DUS-Ll0",
+  "principalId": "46f5549d-4382-48fa-9c20-aff2f13451d5",
+  "appRoleId": "b8bb2037-6e08-44ac-a4ea-4674e010e2a4"
+}

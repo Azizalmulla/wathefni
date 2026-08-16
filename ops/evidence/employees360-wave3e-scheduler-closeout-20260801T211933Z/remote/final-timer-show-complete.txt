@@ -1,0 +1,5 @@
+NextElapseUSecRealtime=Sat 2026-08-01 22:01:02 UTC
+LastTriggerUSec=Sat 2026-08-01 21:23:31 UTC
+Persistent=yes
+ActiveState=active
+UnitFileState=enabled

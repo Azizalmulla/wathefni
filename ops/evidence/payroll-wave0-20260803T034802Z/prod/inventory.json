@@ -1,0 +1,77 @@
+{
+  "stamp": "20260803T034802Z",
+  "mode": "read_only",
+  "company": "WATHEFNI",
+  "module_enabled": true,
+  "tables": [
+    "payroll_timesheets",
+    "payroll_timesheet_events",
+    "payroll_policies",
+    "payroll_policy_events",
+    "payroll_exports",
+    "payroll_export_events"
+  ],
+  "timesheets": {
+    "total": 2,
+    "by_status": {"draft": 2},
+    "approved": 0,
+    "rejected": 0,
+    "recalculation_required": 0,
+    "exports": 0,
+    "periods": [
+      {
+        "period_start": "2026-05-11",
+        "period_end": "2026-05-17",
+        "status": "draft",
+        "count": 2,
+        "employees": ["WATHEFNI-96566363363", "WATHEFNI-96597727743"],
+        "note": "May 2026 smoke residue; approved briefly then restored to draft"
+      }
+    ]
+  },
+  "policy": {
+    "company_code": "WATHEFNI",
+    "employee_pay_type": "monthly",
+    "leave_policy": "paid",
+    "overtime_policy": "review_only",
+    "absence_deduction_enabled": true,
+    "late_deduction_enabled": false,
+    "early_leave_deduction_enabled": false,
+    "default_hourly_rate_kwd": null,
+    "currency": "KWD",
+    "payment_processing": "disabled",
+    "updated_by_phone": "96599338566",
+    "updated_at": "2026-05-10T23:06:43Z"
+  },
+  "adjacent": {
+    "employees_total": 76,
+    "employees_activeish": 66,
+    "attendance_records": 42,
+    "attendance_payroll_snapshots": 0,
+    "attendance_day_projections": 2,
+    "attendance_day_projections_payroll_eligible": 0,
+    "shift_assignments_scheduled_last_90d": 81,
+    "leave_requests_approved": 3,
+    "leave_requests_with_payroll_handoff": 0,
+    "employment_offers": 1,
+    "employment_offers_with_base_salary": 1,
+    "sample_offer_base_salary_kwd": "9000.000",
+    "employees_with_salary_in_raw_json": 0,
+    "employee_ess_bank_profiles": 0,
+    "employee_lifecycle_settlement_packets": 0
+  },
+  "dashboard_users_wathefni": [
+    {"phone": "66363363", "role": "owner", "status": "active"},
+    {"phone": "96599338566", "role": "owner", "status": "active"},
+    {"phone": null, "role": "viewer", "status": "active"},
+    {"phone": null, "role": "viewer", "status": "active"}
+  ],
+  "explicit_payroll_permission_grants": [],
+  "attendance_authority_env": {
+    "WATHEFNI_ATTENDANCE_AUTHORITY": "on",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES": "WATHEFNI",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY": "on"
+  },
+  "self_decide_same_creator_count": 0,
+  "self_decide_same_employee_phone_count": 0
+}

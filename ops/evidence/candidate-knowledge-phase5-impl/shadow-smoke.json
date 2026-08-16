@@ -1,0 +1,27 @@
+{
+  "shadow_registry_tools": [
+    "compare_candidates",
+    "get_candidate_knowledge",
+    "search_candidates"
+  ],
+  "production_registry_unchanged": true,
+  "production_has_search_candidates": false,
+  "search": {
+    "ok": true,
+    "mode": "shadow",
+    "retrieval_mode": "lexical_only",
+    "count": 1
+  },
+  "get": {
+    "ok": true,
+    "text_omitted": true,
+    "chunks": 1
+  },
+  "compare": {
+    "ok": true,
+    "best": null,
+    "n": 2
+  },
+  "audit_events": 4,
+  "audit_content_free": true
+}

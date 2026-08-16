@@ -1,0 +1,8 @@
+OK P2/P3 honesty
+OK reserved canonical cannot be custom
+OK mapping profile saved
+OK source payload retains unmapped column
+OK deep fields applied with authority gates
+OK field-model rollback
+OK employee migration sync P2 field model
+P2_EXIT=0

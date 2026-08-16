@@ -1,0 +1,2 @@
+/var/www/wathefni-dashboard/assets/dashboard-CSc180V5.js
+/var/www/wathefni-dashboard/assets/dashboard-D19huS0N.js

@@ -1,0 +1,34 @@
+{
+  "prefix": "TPCSHOT05A8CF",
+  "shots": [
+    "01-table-chip.png",
+    "02-filter-career_area.png",
+    "02-filter-experience_band.png",
+    "02-filter-industry.png",
+    "02-filter-likely_role.png",
+    "02-filter-seniority.png",
+    "02-filter-skill.png",
+    "03-combined-filters.png",
+    "04-saved-view.png",
+    "05-profile-current.png",
+    "06-immutable-run-history.png",
+    "07-hr-confirm-dialog.png",
+    "08-hr-confirm-done.png",
+    "09-hr-add-dialog.png",
+    "10-hr-reject-dialog.png",
+    "11-feature-off.png"
+  ],
+  "checks": {
+    "table_chip_visible": true,
+    "filter_bar_visible": true,
+    "filter_career_area": true,
+    "filter_likely_role": true,
+    "filter_skill": true,
+    "filter_industry": true,
+    "filter_seniority": true,
+    "filter_experience_band": true,
+    "profile_section": true,
+    "feature_off_hides_bar": true
+  },
+  "residue": 0
+}

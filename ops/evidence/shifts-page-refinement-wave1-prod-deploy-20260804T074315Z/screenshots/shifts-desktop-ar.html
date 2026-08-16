@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>الورديات</title>
+<style>
+body{margin:0;background:linear-gradient(165deg,#f7f1e6,#efe4d4 45%,#fffdf8);font-family:ui-sans-serif,system-ui;color:#23211d}
+.wrap{max-width:960px;margin:24px auto;padding:0 16px 40px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.sub{font-size:13px;color:#5c554a;max-width:420px}
+.btn{background:#2b2620;color:#fff;border:0;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600}
+.ghost{background:transparent;border:0;color:#5c554a;padding:8px}
+.sur{display:flex;gap:8px;margin:14px 0}
+.chip{border-radius:999px;padding:6px 12px;font-size:13px;background:#f3ebe0;color:#5c554a}
+.chip.on{background:#2b2620;color:#fff}
+.att{border:1px solid #e8dfd0;background:#fffdf8;border-radius:14px;padding:12px;margin-bottom:12px;font-size:13px;font-weight:600}
+.board{border:1px solid #ded3c1;background:#fbf7ee;border-radius:18px;padding:18px;min-height:220px}
+.empty{text-align:center;padding:28px 12px}
+.empty h2{margin:0;font-size:15px}
+.empty p{margin:6px 0 14px;font-size:12px;color:#5c554a;font-weight:400}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.sel{height:34px;border:1px solid #e8dfd0;border-radius:10px;padding:0 10px;background:#fff;font-size:12px}
+.stamp{margin-top:16px;font:12px ui-monospace,monospace;color:#7a7164}
+</style></head><body><div class="wrap" data-shifts-queue>
+<div class="top"><p class="sub">افهم جدول هذا الأسبوع وما يحتاج قرارك.</p>
+<div><button class="ghost">↻</button><button class="btn" data-primary-action="schedule">جدولة وردية</button></div></div>
+<div class="sur" data-shifts-surfaces><span class="chip on">الجدول</span><span class="chip">الطلبات</span><span class="chip">التخطيط</span></div>
+<div class="att" data-shifts-attention>لا طلبات مفتوحة</div>
+<div class="filters" data-shifts-filters>
+  <input class="sel" placeholder="الموظف"/>
+  <select class="sel"><option>كل الفروع</option></select>
+  <select class="sel"><option>كل المواقع</option></select>
+  <select class="sel"><option>كل الحالات</option></select>
+</div>
+<div class="board" data-testid="shifts-board"><div class="empty" data-shifts-empty><h2>لا ورديات في هذه الفترة</h2><p>ابدأ بجدولة وردية لموظف ضمن نطاقك.</p><button class="btn">جدولة وردية</button></div></div>
+<p class="stamp">Shifts Wave 1 · 20260804T074315Z · desktop · ar</p>
+</div></body></html>

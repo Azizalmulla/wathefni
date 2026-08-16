@@ -1,0 +1,16 @@
+PASS  pre-clean residual zero
+PASS  created synthetic employee
+PASS  synthetic phone prefix
+PASS  synthetic name marker
+PASS  cleanup refuses empty markers
+PASS  refuse non-WATHEFNI non-IAX company
+PASS  create upsert idempotent
+PASS  audit breadcrumb optional
+PASS  post-clean residual zero
+PASS  post-clean deleted synthetic employee
+PASS  cleanup idempotent residual zero
+{
+  "pass": 11,
+  "fail": 0,
+  "evidence": "/opt/wathefni/production-evidence/interaction-assurance/20260805T224005Z/canary"
+}

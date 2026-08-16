@@ -1,0 +1,903 @@
+{
+  "pass": 77,
+  "fail": 0,
+  "results": [
+    {
+      "label": "authority default off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority company gated off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority on for allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority off for other tenant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "overnight window spans midnight",
+      "ok": true,
+      "detail": [
+        "2026-08-01 22:00:00+03:00",
+        "2026-08-02 06:00:00+03:00"
+      ]
+    },
+    {
+      "label": "scheduled minutes overnight=480",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "legacy minutes_between_times bug avoided",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "normal day completed",
+      "ok": true,
+      "detail": "completed"
+    },
+    {
+      "label": "normal worked 480",
+      "ok": true,
+      "detail": 480
+    },
+    {
+      "label": "normal no exception",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "label": "normal version >= 2",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "overnight status completed/late",
+      "ok": true,
+      "detail": "late"
+    },
+    {
+      "label": "overnight worked ~477",
+      "ok": true,
+      "detail": 477
+    },
+    {
+      "label": "overnight work_date preserved",
+      "ok": true,
+      "detail": "2026-08-04"
+    },
+    {
+      "label": "post-midnight punch attributes to shift date",
+      "ok": true,
+      "detail": "2026-08-04"
+    },
+    {
+      "label": "multi sessions count=2",
+      "ok": true,
+      "detail": [
+        {
+          "session_index": 1,
+          "check_in_at": "2026-08-05T09:00:00+03:00",
+          "check_out_at": "2026-08-05T13:00:00+03:00",
+          "worked_minutes": 240,
+          "open": false
+        },
+        {
+          "session_index": 2,
+          "check_in_at": "2026-08-05T14:00:00+03:00",
+          "check_out_at": "2026-08-05T17:00:00+03:00",
+          "worked_minutes": 180,
+          "open": false
+        }
+      ]
+    },
+    {
+      "label": "breaks count=2",
+      "ok": true,
+      "detail": [
+        {
+          "break_index": 1,
+          "start_at": "2026-08-05T12:00:00+03:00",
+          "end_at": "2026-08-05T12:30:00+03:00",
+          "paid": false,
+          "minutes": 30,
+          "open": false
+        },
+        {
+          "break_index": 2,
+          "start_at": "2026-08-05T15:00:00+03:00",
+          "end_at": "2026-08-05T15:15:00+03:00",
+          "paid": true,
+          "minutes": 15,
+          "open": false
+        }
+      ]
+    },
+    {
+      "label": "unpaid break 30",
+      "ok": true,
+      "detail": 30
+    },
+    {
+      "label": "paid break 15",
+      "ok": true,
+      "detail": 15
+    },
+    {
+      "label": "worked excludes unpaid break",
+      "ok": true,
+      "detail": 390
+    },
+    {
+      "label": "duplicate retry not created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "duplicate same punch_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "concurrent no errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "concurrent single punch id",
+      "ok": true,
+      "detail": {
+        "ids": [
+          "abf41121-bf6d-4167-8f07-afd57a79a08c"
+        ],
+        "created": 1,
+        "n": 8
+      }
+    },
+    {
+      "label": "absence loses to prior check-in",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "check_in_already_exists",
+        "race": "absence_vs_check_in",
+        "punches": [
+          {
+            "company_code": "ATTW1",
+            "employee_key": "ATTW1-E1",
+            "employee_phone": "96550000001",
+            "employee_name": "Wave1 Emp",
+            "punched_at": "2026-08-07 09:40:00+03:00",
+            "direction": "in",
+            "source": "whatsapp",
+            "source_event_id": "race-in",
+            "shift_id": "55555555-5555-5555-5555-555555555555",
+            "shift_key": "55555555-5555-5555-5555-555555555555",
+            "work_date": "2026-08-07",
+            "break_paid": null,
+            "metadata": {},
+            "created_by_phone": "",
+            "punch_id": "e832fff8-1b20-4a2b-9bdb-18adb13780bd",
+            "created_at": "2026-08-02 05:24:49.604395+03:00"
+          }
+        ]
+      }
+    },
+    {
+      "label": "absence first ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "late check-in supersedes absence",
+      "ok": true,
+      "detail": "late"
+    },
+    {
+      "label": "late minutes > 0",
+      "ok": true,
+      "detail": 50
+    },
+    {
+      "label": "missing check-in exception",
+      "ok": true,
+      "detail": "missing_check_in"
+    },
+    {
+      "label": "missing checkout exception",
+      "ok": true,
+      "detail": "missing_check_out"
+    },
+    {
+      "label": "incomplete cannot approve/payroll",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "incomplete_or_exception_not_approvable",
+        "projection": {
+          "company_code": "ATTW1",
+          "employee_key": "ATTW1-E1",
+          "employee_phone": "96550000001",
+          "employee_name": "Wave1 Emp",
+          "work_date": "2026-08-08",
+          "shift_id": "66666666-6666-6666-6666-666666666666",
+          "shift_key": "66666666-6666-6666-6666-666666666666",
+          "status": "present",
+          "exception_state": "missing_check_out",
+          "approval_status": "unapproved",
+          "payroll_eligible": false,
+          "check_in_at": "2026-08-08 09:00:00+03:00",
+          "check_out_at": null,
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 0,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-08T09:00:00+03:00",
+              "check_out_at": null,
+              "worked_minutes": 0,
+              "open": true
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "hr": 1
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {},
+          "created_by_phone": "",
+          "version": 1,
+          "is_current": true,
+          "projection_id": "56d1c8f4-50ee-4ce8-8798-e3c03a90a829",
+          "created_at": "2026-08-02 05:24:49.605297+03:00",
+          "updated_at": "2026-08-02 05:24:49.605297+03:00"
+        }
+      }
+    },
+    {
+      "label": "correction requested",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction disputed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction approved new version",
+      "ok": true,
+      "detail": {
+        "before": 4,
+        "after": 5
+      }
+    },
+    {
+      "label": "correction preserves history (manual flag)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "old projection not current",
+      "ok": true,
+      "detail": {
+        "company_code": "ATTW1",
+        "employee_key": "ATTW1-E1",
+        "employee_phone": "96550000001",
+        "employee_name": "Wave1 Emp",
+        "work_date": "2026-08-09",
+        "shift_id": "77777777-7777-7777-7777-777777777777",
+        "shift_key": "77777777-7777-7777-7777-777777777777",
+        "status": "completed",
+        "exception_state": "none",
+        "approval_status": "disputed",
+        "payroll_eligible": false,
+        "check_in_at": "2026-08-09 09:00:00+03:00",
+        "check_out_at": "2026-08-09 16:00:00+03:00",
+        "scheduled_start": "09:00:00",
+        "scheduled_end": "17:00:00",
+        "late_minutes": 0,
+        "early_leave_minutes": 60,
+        "worked_minutes": 420,
+        "unpaid_break_minutes": 0,
+        "paid_break_minutes": 0,
+        "sessions": [
+          {
+            "session_index": 1,
+            "check_in_at": "2026-08-09T09:00:00+03:00",
+            "check_out_at": "2026-08-09T16:00:00+03:00",
+            "worked_minutes": 420,
+            "open": false
+          }
+        ],
+        "breaks": [],
+        "source_counts": {
+          "whatsapp": 2
+        },
+        "authority": "attendance_authority_wave1_v1",
+        "leave_id": null,
+        "derived_from_leave": false,
+        "manual_correction": false,
+        "metadata": {
+          "correction_id": "7504d647-19af-4bb9-9edb-d1226b52b162",
+          "decision": "disputed"
+        },
+        "created_by_phone": "96557777777",
+        "version": 4,
+        "is_current": false,
+        "projection_id": "19b72860-041a-4c68-94a3-0335b5dc57d8",
+        "created_at": "2026-08-02 05:24:49.606413+03:00",
+        "updated_at": "2026-08-02 05:24:49.606772+03:00",
+        "superseded_by": "f5c290d7-68b0-4c16-9fd5-0dc52a54df85"
+      }
+    },
+    {
+      "label": "version history retained",
+      "ok": true,
+      "detail": 5
+    },
+    {
+      "label": "manager self-correction denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "manager_self_correction_denied",
+        "employee_key": "ATTW1-E1"
+      }
+    },
+    {
+      "label": "approved leave status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-leave manual correction applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "leave reverse preserves manual correction",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "reversed": false,
+        "reason": "manual_correction_preserved",
+        "projection": {
+          "company_code": "ATTW1",
+          "employee_key": "ATTW1-E1",
+          "employee_phone": "96550000001",
+          "employee_name": "Wave1 Emp",
+          "work_date": "2026-08-10",
+          "shift_id": "88888888-8888-8888-8888-888888888888",
+          "shift_key": "88888888-8888-8888-8888-888888888888",
+          "status": "completed",
+          "exception_state": "none",
+          "approval_status": "unapproved",
+          "payroll_eligible": false,
+          "check_in_at": "2026-08-10 09:00:00+03:00",
+          "check_out_at": "2026-08-10 17:00:00+03:00",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 480,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-10T09:00:00+03:00",
+              "check_out_at": "2026-08-10T17:00:00+03:00",
+              "worked_minutes": 480,
+              "open": false
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "correction": 2
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": true,
+          "metadata": {
+            "correction_id": "438cc22a-9b0e-4e05-a901-6ece052e3192",
+            "source": "correction"
+          },
+          "created_by_phone": "96557777777",
+          "version": 2,
+          "is_current": true,
+          "projection_id": "1af6555f-2c1a-42ff-8d62-7307a14c97cd",
+          "created_at": "2026-08-02 05:24:49.607277+03:00",
+          "updated_at": "2026-08-02 05:24:49.607277+03:00"
+        }
+      }
+    },
+    {
+      "label": "leave reverse without correction proceeds",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "null shift_key single current",
+      "ok": true,
+      "detail": [
+        {
+          "company_code": "ATTW1",
+          "employee_key": "ATTW1-E1",
+          "employee_phone": "96550000001",
+          "employee_name": "Wave1 Emp",
+          "work_date": "2026-08-11",
+          "shift_id": null,
+          "shift_key": "",
+          "status": "completed",
+          "exception_state": "none",
+          "approval_status": "unapproved",
+          "payroll_eligible": false,
+          "check_in_at": "2026-08-11 09:00:00+03:00",
+          "check_out_at": "2026-08-11 17:00:00+03:00",
+          "scheduled_start": null,
+          "scheduled_end": null,
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 480,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-11T09:00:00+03:00",
+              "check_out_at": "2026-08-11T17:00:00+03:00",
+              "worked_minutes": 480,
+              "open": false
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "hr": 2
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {},
+          "created_by_phone": "",
+          "version": 2,
+          "is_current": true,
+          "projection_id": "93709202-d929-4bf7-b5bf-dd5b6f010b76",
+          "created_at": "2026-08-02 05:24:49.607877+03:00",
+          "updated_at": "2026-08-02 05:24:49.607877+03:00"
+        }
+      ]
+    },
+    {
+      "label": "null-shift day completed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unapproved excluded from payroll",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "ATTW1",
+        "start_date": "2026-08-12",
+        "end_date": "2026-08-12",
+        "summaries": [
+          {
+            "employee_key": "ATTW1-E1",
+            "employee_name": "Wave1 Emp",
+            "employee_phone": "96550000001",
+            "scheduled_minutes": 480,
+            "worked_minutes": 0,
+            "approved_leave_minutes": 0,
+            "absent_minutes": 0,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "overtime_minutes": 0,
+            "shift_count": 1,
+            "attendance_count": 0,
+            "approved_leave_days": 0,
+            "snapshot_count": 0,
+            "payroll_status": "Ready"
+          }
+        ],
+        "count": 1,
+        "source_counts": {
+          "approved_snapshots": 0,
+          "shifts": 1,
+          "approved_leave": 0
+        },
+        "authority": "approved_attendance_snapshots",
+        "label": "approved_attendance",
+        "money_authority": "approved_timesheets",
+        "unapproved_excluded": true
+      }
+    },
+    {
+      "label": "day approved payroll_eligible",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "projection": {
+          "company_code": "ATTW1",
+          "employee_key": "ATTW1-E1",
+          "employee_phone": "96550000001",
+          "employee_name": "Wave1 Emp",
+          "work_date": "2026-08-12",
+          "shift_id": "99999999-9999-9999-9999-999999999999",
+          "shift_key": "99999999-9999-9999-9999-999999999999",
+          "status": "completed",
+          "exception_state": "none",
+          "approval_status": "approved",
+          "payroll_eligible": true,
+          "check_in_at": "2026-08-12 09:00:00+03:00",
+          "check_out_at": "2026-08-12 17:00:00+03:00",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 480,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-12T09:00:00+03:00",
+              "check_out_at": "2026-08-12T17:00:00+03:00",
+              "worked_minutes": 480,
+              "open": false
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "whatsapp": 2
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {
+            "approved_by": "96557777777"
+          },
+          "created_by_phone": "96557777777",
+          "version": 3,
+          "is_current": true,
+          "projection_id": "8812791e-e039-4254-bdc6-5126008c57cc",
+          "created_at": "2026-08-02 05:24:49.608497+03:00",
+          "updated_at": "2026-08-02 05:24:49.608497+03:00"
+        },
+        "snapshot": {
+          "company_code": "ATTW1",
+          "employee_key": "ATTW1-E1",
+          "employee_phone": "96550000001",
+          "employee_name": "Wave1 Emp",
+          "work_date": "2026-08-12",
+          "shift_id": "99999999-9999-9999-9999-999999999999",
+          "shift_key": "99999999-9999-9999-9999-999999999999",
+          "projection_id": "8812791e-e039-4254-bdc6-5126008c57cc",
+          "projection_version": 3,
+          "approved_by_phone": "96557777777",
+          "payload": {
+            "status": "completed",
+            "check_in_at": "2026-08-12T09:00:00+03:00",
+            "check_out_at": "2026-08-12T17:00:00+03:00",
+            "scheduled_start": "09:00:00",
+            "scheduled_end": "17:00:00",
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "worked_minutes": 480,
+            "unpaid_break_minutes": 0,
+            "paid_break_minutes": 0,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-12T09:00:00+03:00",
+                "check_out_at": "2026-08-12T17:00:00+03:00",
+                "worked_minutes": 480,
+                "open": false
+              }
+            ],
+            "breaks": [],
+            "exception_state": "none",
+            "authority": "attendance_authority_wave1_v1"
+          },
+          "snapshot_id": "e1baebc9-e41c-4dc2-a9ca-f7533990b221",
+          "approved_at": "2026-08-02 05:24:49.608610+03:00"
+        },
+        "compat": {
+          "attendance_id": "8812791e-e039-4254-bdc6-5126008c57cc",
+          "company_code": "ATTW1",
+          "employee_key": "ATTW1-E1",
+          "employee_phone": "96550000001",
+          "employee_name": "Wave1 Emp",
+          "shift_id": "99999999-9999-9999-9999-999999999999",
+          "attendance_date": "2026-08-12",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "check_in_at": "2026-08-12 09:00:00+03:00",
+          "check_out_at": "2026-08-12 17:00:00+03:00",
+          "status": "completed",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "notes": null,
+          "source_text": null,
+          "metadata": {
+            "approved_by": "96557777777",
+            "authority": "attendance_authority_wave1_v1",
+            "projection_version": 3,
+            "exception_state": "none",
+            "approval_status": "approved",
+            "payroll_eligible": true,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-12T09:00:00+03:00",
+                "check_out_at": "2026-08-12T17:00:00+03:00",
+                "worked_minutes": 480,
+                "open": false
+              }
+            ],
+            "breaks": [],
+            "worked_minutes": 480,
+            "shift_key": "99999999-9999-9999-9999-999999999999"
+          },
+          "created_by_phone": "96557777777",
+          "created_at": "2026-08-02 05:24:49.608497+03:00",
+          "updated_at": "2026-08-02 05:24:49.608497+03:00"
+        }
+      }
+    },
+    {
+      "label": "approved snapshot reaches payroll",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "ATTW1",
+        "start_date": "2026-08-12",
+        "end_date": "2026-08-12",
+        "summaries": [
+          {
+            "employee_key": "ATTW1-E1",
+            "employee_name": "Wave1 Emp",
+            "employee_phone": "96550000001",
+            "scheduled_minutes": 480,
+            "worked_minutes": 480,
+            "approved_leave_minutes": 0,
+            "absent_minutes": 0,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "overtime_minutes": 0,
+            "shift_count": 1,
+            "attendance_count": 1,
+            "approved_leave_days": 0,
+            "snapshot_count": 1,
+            "payroll_status": "Ready"
+          }
+        ],
+        "count": 1,
+        "source_counts": {
+          "approved_snapshots": 1,
+          "shifts": 1,
+          "approved_leave": 0
+        },
+        "authority": "approved_attendance_snapshots",
+        "label": "approved_attendance",
+        "money_authority": "approved_timesheets",
+        "unapproved_excluded": true
+      }
+    },
+    {
+      "label": "payroll worked reconciles to snapshot",
+      "ok": true,
+      "detail": {
+        "summary": 480,
+        "snap": 480
+      }
+    },
+    {
+      "label": "payroll authority label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "tenant services isolated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "tenant A does not see B",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "tenant B only own rows",
+      "ok": true,
+      "detail": [
+        {
+          "attendance_id": "ed0205e9-3fa7-4de6-883a-c52a5fa975ad",
+          "company_code": "OTHERCO",
+          "employee_key": "OTHER-1",
+          "employee_phone": "96551111111",
+          "employee_name": "Wave1 Emp",
+          "shift_id": null,
+          "attendance_date": "2026-08-12",
+          "scheduled_start": null,
+          "scheduled_end": null,
+          "check_in_at": "2026-08-12 09:00:00+03:00",
+          "check_out_at": null,
+          "status": "present",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "notes": null,
+          "source_text": null,
+          "metadata": {
+            "authority": "attendance_authority_wave1_v1",
+            "projection_version": 1,
+            "exception_state": "missing_check_out",
+            "approval_status": "unapproved",
+            "payroll_eligible": false,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-12T09:00:00+03:00",
+                "check_out_at": null,
+                "worked_minutes": 0,
+                "open": true
+              }
+            ],
+            "breaks": [],
+            "worked_minutes": 0,
+            "shift_key": ""
+          },
+          "created_by_phone": "",
+          "created_at": "2026-08-02 05:24:49.638483+03:00",
+          "updated_at": "2026-08-02 05:24:49.638483+03:00"
+        }
+      ]
+    },
+    {
+      "label": "compat has attendance_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has company_code",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has employee_key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has attendance_date",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has check_in_at",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has check_out_at",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has late_minutes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has early_leave_minutes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "compat has metadata",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "raw punches retained",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "idempotent retry keeps original punched_at",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema has attendance_punches",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema unique source_event",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema shift_key current unique",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema payroll snapshots",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "schema corrections",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "app imports authority module",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "app ensures authority schema",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "app flag helper",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "check_in branches on authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "payroll approved snapshots branch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "leave reverse preserves manual",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "freeze skipped by ATTW1_SKIP_FREEZE",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "verdict": "PASS"
+}

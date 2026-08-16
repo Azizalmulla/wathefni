@@ -1,0 +1,25 @@
+PASS  schema version wave3d
+PASS  cancel_scheduled in cases
+PASS  reinstate in cases
+PASS  no self approval default
+PASS  kuwait tz default
+PASS  warn first default
+PASS  notice hints hidden by default
+PASS  reinstate disabled by default
+PASS  require LWD default
+PASS  kuwait only jurisdiction
+PASS  retain documents default
+PASS  no auto cancel shifts
+PASS  no auto decline leave
+PASS  payroll owns money
+PASS  counsel questions 10
+PASS  revoke at end of LWD
+PASS  alt revoke at effective 00:00
+PASS  impact hash stable
+PASS  normalize hides notice UI
+PASS  normalize reinstate off
+PASS  normalize show hints false
+PASS  normalize can expose labeled hints
+PASS  exposed hints labeled configurable
+
+23 passed, 0 failed

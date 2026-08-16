@@ -1,0 +1,59 @@
+auth wave2 phase3b overlay + Face ID unit
+  PASS  EN/AR autoLock key parity
+  PASS  master requires explicit 1
+  PASS  no PIN-master inherit for auto-lock
+  PASS  biometric overlay gate separate
+  PASS  timeout-only decision
+  PASS  no device-lock reason
+  PASS  canary keys
+  PASS  AuthProvider has no AppState auto-lock
+  PASS  AuthProvider never seals from autolock
+  PASS  overlay comment in AuthProvider
+  PASS  cold-start locked status still exists
+  PASS  needsLocalUnlock flag
+  PASS  never setStatus locked
+  PASS  never signedOut from overlay
+  PASS  arms on true background
+  PASS  inactive ignored for lock
+  PASS  privacy cover
+  PASS  shell patches diagnostics
+  PASS  build marker exported
+  PASS  shell does not own Face ID prompt
+  PASS  overlay uses Modal above native-stack
+  PASS  overlay reuses UnlockWithBiometricGate
+  PASS  overlay waits for Modal onShow
+  PASS  overlay Face ID gated by AUTO_LOCK_BIOMETRIC
+  PASS  overlay Face ID success dismisses only
+  PASS  overlay never wipes session on lockout
+  PASS  privacy cover component
+  PASS  no direct LocalAuthentication in overlay
+  PASS  gate single-attempt refs
+  PASS  gate waits for active AppState
+  PASS  gate rising-edge reset
+  PASS  gate AppState retry listener
+  PASS  gate does not depend on t in effect
+  PASS  gate PIN always visible
+  PASS  gate settle delay before Face ID
+  PASS  gate patches bio diagnostics
+  PASS  shouldAttempt returns preferred
+  PASS  no wipe preference on transient !usable
+  PASS  settings shows diag fields
+  PASS  settings shows bio gate diag
+  PASS  diagnostics module
+  PASS  diagnostics overlay bio flag
+  PASS  diagnostics bio gate reason
+  PASS  settings wires diagnostics
+  PASS  al-overlay build marker
+  PASS  LocalUnlockShell wraps AuthGate
+  PASS  cold-start biometric gate still for status locked
+  PASS  production auto-lock on
+  PASS  overlay Face ID on for Phase 3B
+  PASS  inactive-only none
+  PASS  short bg none
+  PASS  40s timeout
+  PASS  never none
+  PASS  immediate
+  PASS  shell does not import deviceLock
+  PASS  mobile tsc --noEmit
+
+56 passed, 0 failed

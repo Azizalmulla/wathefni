@@ -1,0 +1,160 @@
+{
+  "marker": "luna_channel_canary_v1",
+  "started_at": "2026-07-19T20:48:00+00:00",
+  "luna_commit": "a15fe3c72b0d401d73317049b4de9fccf457e594",
+  "luna_artifact_sha": "f2d54ffde8cec2af3dae4f9a62f15a8e8a5c31ca2fe2ecba93c93679f492f25b",
+  "model": "gpt-5.6-luna",
+  "prompt_version": "candidate_intent_prompt_v1",
+  "schema_version": "candidate_intent_v1",
+  "environment": {
+    "application_environment": "staging",
+    "database_environment": "staging",
+    "database_environment_marker": "65aede205f95",
+    "database_logical_name": "15cab0f44aae",
+    "database_host": "aaf075b7b4bf",
+    "match": true
+  },
+  "authoring_off": true,
+  "production_untouched": true,
+  "authorization": {
+    "recipient_name": "Aziz Almulla",
+    "recipient_phone_redacted": "965****8566",
+    "recipient_phone_sha256": "492c7b867e94619fab58426d4c938b86f06983f8c4d6ded0fd29bb16e854c437",
+    "company": "WATHEFNI",
+    "battery_key": "wathefni_ability_v1",
+    "locale": "en",
+    "expires_days": 2,
+    "approval": "user_authorized_staging_channel_canary"
+  },
+  "before_counters": {
+    "wathefni_attempts": 4,
+    "external_attempts": 16,
+    "employees_phone": 0
+  },
+  "process_reload": {
+    "before_pid": "2130319",
+    "after_pid": "2130498",
+    "before_start": "Sun Jul 19 20:46:18 2026",
+    "after_start": "Sun Jul 19 20:48:00 2026",
+    "pid_changed": true,
+    "restart_rc": 0,
+    "orchestrator_url_env": "http://127.0.0.1:8011/orchestrator/whatsapp-turn",
+    "points_at_staging": true,
+    "active": "active",
+    "extension": {
+      "path": "/root/.openclaw/extensions/octopus-channel.ts",
+      "mtime_utc": "2026-07-19T20:04:17.272842+00:00",
+      "sha256": "ac1cf9e6606b46a9175db524527d171284b81441f316de7bb96256c47e54ad78",
+      "has_provider_message_id_forwarding": true,
+      "has_missing_id_gate": true,
+      "has_authoritative_fail_closed": true
+    }
+  },
+  "live_delivery_probe": {
+    "tried": [
+      {
+        "conversation_id": "1594",
+        "success": false,
+        "error": "Invalid conversation_id provided"
+      },
+      {
+        "conversation_id": "1606",
+        "success": false,
+        "error": "Invalid conversation_id provided"
+      },
+      {
+        "conversation_id": "1555",
+        "success": false,
+        "error": "Invalid conversation_id provided"
+      },
+      {
+        "conversation_id": "1594",
+        "success": false,
+        "error": "Invalid conversation_id provided"
+      }
+    ],
+    "delivered": false,
+    "provider_message_id": null,
+    "working_conversation_id": null
+  },
+  "attempt": {
+    "ok": true,
+    "attempt_id": "3e6b17cd-e9d9-4a37-a86a-4027c93ada27",
+    "app_key": "luna-canary-366be16b23",
+    "company_code": "WATHEFNI",
+    "battery_key": "wathefni_ability_v1",
+    "assessment_version_id": "4bfa5a53-77bf-4102-9a6c-ffa079a90c3e",
+    "locale": null,
+    "expires_at": "2026-07-21T20:48:06.969345+00:00",
+    "delivery_status_dry_run_create": "intentionally_skipped",
+    "link_redacted": "http://127.0.0.1:8011/assessment/3e6b17cd-e9d9-4a37-a86a-4027c93ada27?token=***"
+  },
+  "secure_link": {
+    "http_status": 200,
+    "html_ok": true,
+    "attempt_id_in_page": false,
+    "company": "WATHEFNI",
+    "battery_key": "wathefni_ability_v1",
+    "expires_at": "2026-07-21T20:48:06.969345+00:00",
+    "staging_local_link": true
+  },
+  "dedupe": {
+    "provider_message_id": "luna_channel_canary_v1.wamid.beb8e21bad1647bc9b7e43115782d966",
+    "ledger_row_count": 1,
+    "ledger_rows_redacted": [
+      {
+        "provider_message_id": "luna_channel_canary_v1.wamid.beb8e21bad1647bc9b7e43115782d966",
+        "status": "completed",
+        "sender_phone": "965****8566",
+        "conversation_id": "1594"
+      }
+    ],
+    "first_intent": "candidate_application_status",
+    "first_source": "candidate_status_handler",
+    "replay_intent": "candidate_application_status",
+    "replay_source": "candidate_status_handler",
+    "replay_duplicate": true,
+    "path": "octopus_shaped_metadata_into_staging_orchestrator"
+  },
+  "mutation_guards": {
+    "stage_before": "screening_complete",
+    "stage_after": "screening_complete",
+    "stage_unchanged": true,
+    "employees_unchanged": true,
+    "external_attempts_unchanged": true
+  },
+  "process_restore": {
+    "dropin_removed": true,
+    "restart_rc": 0,
+    "before_pid": "2130498",
+    "after_pid": "2130527",
+    "pid_changed": true,
+    "orchestrator_url_env": null,
+    "restored": true
+  },
+  "cleanup": {
+    "tokens_revoked": 1,
+    "assessment_responses": 0,
+    "assessment_scores": 0,
+    "assessment_reports": 0,
+    "assessment_events": 4,
+    "assessment_invitations": 2,
+    "assessment_tokens": 1,
+    "attempts": 1,
+    "bindings": 0,
+    "applications": 1,
+    "inbound": 1
+  },
+  "after_counters": {
+    "applications_marker": 0,
+    "attempts_marker": 0,
+    "inbound_canary": 0,
+    "external_attempts": 16
+  },
+  "cleanup_zero_synthetic": true,
+  "ended_at": "2026-07-19T20:48:11+00:00",
+  "pass": false,
+  "partial_pass": true,
+  "remaining_blocker": "No active Octopus WhatsApp conversation for the authorized recipient; all known conversation_ids return Invalid conversation_id. Recipient must message the Wathefni WhatsApp business number once to open a live conversation, then rerun this canary.",
+  "production_recommendation": "NO-GO for production. Staging channel reload, secure-link binding, and inbound dedupe proofs succeeded, but live invitation delivery remains blocked until an active WhatsApp conversation exists."
+}

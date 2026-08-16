@@ -1,0 +1,2 @@
+a87e5bfb44f5a896c25f9efc4d2d0e28addf5bcfcf85d97ee5519a8cb4417016  /opt/wathefni/orchestrator/action_registry.py
+f5c86cb1caef8a8a4d53463c2367bbe143592dba2d2ac3034531895322abac3f  /var/www/wathefni-dashboard/assets/dashboard-CmztGRNg.js

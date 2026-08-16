@@ -1,0 +1,11 @@
+{
+  "blocker": false,
+  "category": "audit",
+  "detail": "restricted/deletion denied correctly; audit failure blocks model-facing evidence",
+  "gate_id": "audit_fail_closed",
+  "metrics": {
+    "deletion_code": "candidate_restricted",
+    "restriction_readable": true
+  },
+  "status": "PASS"
+}

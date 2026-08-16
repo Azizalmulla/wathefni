@@ -1,0 +1,46 @@
+    PRODUCTION READINESS R6 — setup self-service (staging DB)
+    tenants: R6A59B5D8 / R6B59B5D8
+      PASS  A leave setup write
+      PASS  A attendance setup write
+      PASS  A onboarding setup write
+      PASS  A notification preset via Setup
+      PASS  D leave enforced write-through
+      PASS  D wave2 reads canonical enforced
+      PASS  D onboarding cards share auto_start
+      PASS  D attendance grace from Setup overlay
+      PASS  B kill switch not usable
+      PASS  B kill switch state unavailable_deployment
+      PASS  B does not say Enabled
+      PASS  B unblock resolves deployment
+      PASS  E Intelligence enable via Setup
+      PASS  E min_cohort from Setup
+      PASS  E fiscal month from Setup
+      PASS  E no env edit required
+      PASS  E cohort downward forbidden
+      FAIL  C Comp without JA governed :: {'ok': False, 'module_key': 'comp_planning', 'result': {'ok': False, 'error': 'ja_must_be_enabled', 'ja_is_hard': True}, 'policy': {'ok': True, 'module_key': 'comp_planning', 'label_en': 'Compensation Planning', 'label_ar': 'تخطيط التعويضات', 'policy': {'enabled': False, 'default_currency': 'KWD', 'budget_overrun_mode': 'hard_block', 'sod_required': True, 'performance_input_enabled': False, 'talent_input_enabled': False, 'payroll_handoff_enabled': False, 'commercial_sku': True}, 'runtime_gate': {'ok': False, 'enabled': False, 'error': 'ja_must_be_enabled', 'ja_is_hard': True, 'phase': 'compensation_planning_c6'}, 'platform_capability': False, 'commercial_sku': True, 'honesty': {'phase': 'compensation_planning_c6', 'contract_version': 'compensation_planning_c6_v1', 'pass_stamp': 'COMPENSATION_PLANNING_FULL_PASS', 'commercial_module_key': 'comp_planning', 'does_not_own_employee_employment': True, 'does_not_own_ja_grades': True, 'ja_is_hard': True, 'no_duplicate_grade_hierarchy': True, 'not_payroll': True, 'plan_approved_not_salary_changed': True, 'finalized_not_applied': True, 'change_package_not_payroll_paid': True, 'performance_optional': True, 'rating_not_automatic_increase': True, 'talent_optional': True, 'hipo_not_automatic_pay': True, 'works_payroll_off': True, 'midpoint_not_recommended_salary': True, 'promotion_plan_not_role_mutation': True, 'approved_bonus_not_paid': True, 'currency_explicit': True, 'assistant_mutations': False, 'no_second_analytics_engine': True, 'employee_cannot_see_draft_recommendations': True, 'company_code': 'R6A59B5D8'}}}
+      PASS  C Comp enable after JA
+      PASS  C WFP without JA governed
+      PASS  F history exists before disable
+      PASS  F disable ok
+      PASS  F disable preserves history flag
+      PASS  F historical cohort retained
+      PASS  F re-enable restores
+      PASS  F re-enable keeps raised cohort
+      PASS  ordinary HR Setup 403
+      PASS  ordinary HR not_permitted
+      PASS  company admin Setup 200
+      PASS  A/E wave5 present in Setup payload
+      PASS  delivery present
+      PASS  effective state present
+      PASS  G company-scoped write uses session tenant
+      PASS  G company admin cannot write tenant B via operator Setup
+      PASS  G tenant B reads own Setup
+      PASS  G tenant B does not inherit A preset
+      PASS  G header did not write tenant B
+      PASS  failed save without reason is not 200-success
+      PASS  failed save does not look enabled
+      PASS  JA platform foundation not SKU
+      PASS  one effective state honesty
+
+    40 passed, 1 failed
+R6_SETUP_SELF_SERVICE_DB_FAIL

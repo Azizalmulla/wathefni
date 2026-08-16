@@ -1,0 +1,16 @@
+{
+  "create_ok": true,
+  "event_id_suffix": "eozuAAAAY0k0AAA=",
+  "has_join": true,
+  "cancel": {
+    "ok": true,
+    "status": 204,
+    "error": null
+  },
+  "get_after_cancel": {
+    "status": 404,
+    "ok": true,
+    "body_prefix": "{\"error\":{\"code\":\"ErrorItemNotFound\",\"message\":\"The specified object was not found in the store.\"}}"
+  },
+  "verdict": "PASS"
+}

@@ -1,0 +1,26 @@
+{
+  "final_combined_candidate_sha256": "4e156bcc736299fe9cfdd57c8e1fc7799b525fcf7cc50299c2baaebc1eb67089",
+  "source_revision": "40a4e2621f4818bf7c0f6ce3642032297bfbe7b2",
+  "classifier_version": "classifier.deterministic_v1.2",
+  "orchestrator_manifest_sha256": "bf5674acae8c47932185810a919142936fa10f14af6467f41b79c505ff7caca5",
+  "dashboard_manifest_sha256": "ea282fce7c6c571843b1ff0691b4f09e677922af421a439642c3a499a9b1473f",
+  "dashboard_asset_tree_sha256": "ea282fce7c6c571843b1ff0691b4f09e677922af421a439642c3a499a9b1473f",
+  "dashboard_main_js": {
+    "name": "dashboard-C0lgzkSg.js",
+    "sha256": "997e5c18f70f346cc800bf3ac53b0ac59fefe346c46fc1f72de878fb2252d50f"
+  },
+  "runtime_changed_file_allowlist": {
+    "talent_pool_classification.py": "4e091456d98f69b3dbf1537051d7de814db60238f22dd24ab97a4524665f3a30",
+    "talent_pool_classification_routes.py": "882bfb0e9088b46bc5dca1224c3fd4640d8fd987b88f3ed1fffb0edecb4e60c6",
+    "talent_pool_taxonomy_v1.json": "320d0a1f5eb19413f66337f81df955eadfe0e843d190b6048af313669c10fbb1",
+    "unified_candidates.py": "945feb810285e1ae14e78f68432cf7c64d00b506519b442fbbcd11f23f165421",
+    "candidate_communication_authority.py": "8a3949eac6d72c7f18514810171298615e1fded40e81afba2ee91239305aab53"
+  },
+  "test_only_changed_file_allowlist": {
+    "ops/unified-candidates-staging-qualify.py": "00dc3862b866f2d8a05e1663f1b06e56f2069cbcf19aa6115bb4e8bd1f0c14fd",
+    "note": "Synced canonical local harness to staging; excluded from runtime promotion"
+  },
+  "uc_qualify_evidence": "/opt/wathefni/staging/staging-evidence/unified-candidates/20260726T003000Z",
+  "drift_closure_evidence": "/opt/wathefni/staging/staging-evidence/uc-drift-closure-20260726T002914Z",
+  "complete_ui_evidence": "/opt/wathefni/staging/staging-evidence/talent-pool-classification-complete-ui/20260726T001509Z"
+}

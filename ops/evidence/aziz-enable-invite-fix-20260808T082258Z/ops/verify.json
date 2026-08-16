@@ -1,0 +1,78 @@
+{
+  "started_at": "2026-08-08T08:24:26.698185+00:00",
+  "checks": {
+    "email_is_gmail": {
+      "ok": true,
+      "detail": "azizalmulla16@gmail.com"
+    },
+    "aziz_in_selected_employees": {
+      "ok": true,
+      "detail": [
+        "WATHEFNI-96599338566"
+      ]
+    },
+    "enable_ok": {
+      "ok": true,
+      "detail": null
+    },
+    "invite_minted": {
+      "ok": false,
+      "detail": {
+        "ok": false,
+        "skipped": true,
+        "reason": "auto_invite_disabled"
+      }
+    },
+    "invite_delivered_flag": {
+      "ok": false,
+      "detail": null
+    },
+    "app_access_enabled_true": {
+      "ok": true,
+      "detail": {
+        "app_access_enabled": true,
+        "email": "azizalmulla16@gmail.com"
+      }
+    },
+    "email_unchanged_gmail": {
+      "ok": true,
+      "detail": "azizalmulla16@gmail.com"
+    }
+  },
+  "pass": false,
+  "policy_before": {
+    "ux_mode": "employees",
+    "access_mode": "selected",
+    "selection_scope": "employees",
+    "selected_employee_keys": [],
+    "module_enabled": true
+  },
+  "policy_after_add": {
+    "ok": true,
+    "selected_employee_keys": [
+      "WATHEFNI-96599338566"
+    ],
+    "raw_keys": [
+      "WATHEFNI-96599338566"
+    ]
+  },
+  "idempotency_rows_before": [
+    {
+      "invite_id": "0a5d2f40-2a73-457a-857a-40f0461013fa",
+      "status": "superseded",
+      "idempotency_key": "access_enabled:WATHEFNI-96599338566:WATHEFNI:WATHEFNI-96599338566"
+    }
+  ],
+  "enable_result": {
+    "ok": true,
+    "changed": true,
+    "enabled": true,
+    "invitation": {
+      "ok": false,
+      "skipped": true,
+      "reason": "auto_invite_disabled"
+    }
+  },
+  "exception": "InvalidTextRepresentation: invalid input syntax for type uuid: \"\"\nLINE 4:                 FROM employee_app_invites WHERE invite_id=''\n                                                                  ^\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/tmp/aziz_fix_verify.py\", line 135, in <module>\n    cur.execute(\n  File \"/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py\", line 236, in execute\n    return super().execute(query, vars)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npsycopg2.errors.InvalidTextRepresentation: invalid input syntax for type uuid: \"\"\nLINE 4:                 FROM employee_app_invites WHERE invite_id=''\n                                                                  ^\n\n"
+}

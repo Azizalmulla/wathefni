@@ -1,0 +1,1 @@
+export { EmployeesRoute as default } from '@hr/features/operations/routes'

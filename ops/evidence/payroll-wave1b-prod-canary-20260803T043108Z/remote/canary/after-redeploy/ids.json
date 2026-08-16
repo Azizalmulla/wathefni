@@ -1,0 +1,25 @@
+{
+  "tag": "dc9c8e33",
+  "employee_key": "WATHEFNI-PYW1-dc9c8e33",
+  "phones": {
+    "creator": "965539198330",
+    "approver": "965539298330",
+    "subject": "965539398330"
+  },
+  "contract_ids": [
+    "fb62f5e3-5b75-4f59-9def-468e18ed7077",
+    "f58ce904-ddc2-4fe6-9225-10e4c703d32f",
+    "805932f8-a0e6-4232-bdd6-c5b6912675eb",
+    "36bf2c46-86dc-4415-b46c-5a39e0f0f3c1"
+  ],
+  "period_ids": [
+    "504bace5-93a6-4887-a0d1-ce27aa0e68ce"
+  ],
+  "cleanup": {
+    "contracts": 4,
+    "periods": 1,
+    "components": 4,
+    "events": 10
+  },
+  "residual_total": 0
+}

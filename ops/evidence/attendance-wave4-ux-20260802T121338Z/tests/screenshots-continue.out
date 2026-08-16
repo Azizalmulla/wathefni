@@ -1,0 +1,75 @@
+[PASS] audit events present
+[PASS] tenant isolation ATTW3
+[PASS] tenant isolation OTHERCO
+[PASS] cross-tenant get denied
+[PASS] connector issue exception
+[PASS] ambiguous kind supported
+[PASS] raw punch still present after corrections
+[PASS] correction punches are separate source
+[PASS] freeze skipped
+[PASS] app registers ops routes
+[PASS] app ensures ops schema
+[PASS] http module present
+[PASS] postgres module present
+
+Wave 3 smoke: 55/55 passed, 0 failed
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AttributeError: module 'playwright' has no attribute '__version__'
+SEED_NOTES {"prefix": "ATTW4UI620656", "capture_ops": {"status": 200, "ok": true}, "capture_seed": {"status": 200, "ok": true}, "ops_list": {"status": 200, "ok": true, "count": 1, "case_count": 0, "has_cases_key": true}, "attendance_sample": {"status": 200, "rows": 0}}
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-ar-mobile.png
+{
+  "prefix": "ATTW4UI620656",
+  "company": "WATHEFNI",
+  "shots": [
+    "attendance-ops-ar-desktop.png",
+    "attendance-ops-ar-mobile.png",
+    "attendance-ops-en-desktop.png",
+    "attendance-ops-en-mobile.png",
+    "attendance-overview-ar-desktop.png",
+    "attendance-overview-ar-mobile.png",
+    "attendance-overview-en-desktop.png",
+    "attendance-overview-en-mobile.png",
+    "connector-health-ar-desktop.png",
+    "connector-health-ar-mobile.png",
+    "connector-health-en-desktop.png",
+    "connector-health-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false,
+  "jargon_scan_note": "UI copy audited in source; screenshots are visual evidence",
+  "ingest_enabled": false
+}
+total 1152
+drwxr-xr-x 2 root root   4096 Aug  2 12:16 .
+drwxr-xr-x 6 root root   4096 Aug  2 12:13 ..
+-rw-r--r-- 1 root root 117166 Aug  2 12:15 attendance-ops-ar-desktop.png
+-rw-r--r-- 1 root root  44278 Aug  2 12:16 attendance-ops-ar-mobile.png
+-rw-r--r-- 1 root root 141895 Aug  2 12:14 attendance-ops-en-desktop.png
+-rw-r--r-- 1 root root  52438 Aug  2 12:15 attendance-ops-en-mobile.png
+-rw-r--r-- 1 root root 119654 Aug  2 12:15 attendance-overview-ar-desktop.png
+-rw-r--r-- 1 root root  45654 Aug  2 12:16 attendance-overview-ar-mobile.png
+-rw-r--r-- 1 root root 145693 Aug  2 12:14 attendance-overview-en-desktop.png
+-rw-r--r-- 1 root root  55143 Aug  2 12:15 attendance-overview-en-mobile.png
+-rw-r--r-- 1 root root 146134 Aug  2 12:15 connector-health-ar-desktop.png
+-rw-r--r-- 1 root root  46761 Aug  2 12:16 connector-health-ar-mobile.png
+-rw-r--r-- 1 root root 171998 Aug  2 12:14 connector-health-en-desktop.png
+-rw-r--r-- 1 root root  53997 Aug  2 12:15 connector-health-en-mobile.png
+-rw-r--r-- 1 root root   1097 Aug  2 12:16 manifest.json
+-rw-r--r-- 1 root root    330 Aug  2 12:14 seed-notes.json

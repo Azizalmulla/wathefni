@@ -1,0 +1,1448 @@
+{
+  "checks": [
+    {
+      "label": "dual actors distinct",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "unsupported jurisdiction fail-closed",
+      "ok": true,
+      "detail": "pack_not_implemented"
+    },
+    {
+      "label": "classification self-approval denied",
+      "ok": true,
+      "detail": "self_approval_forbidden"
+    },
+    {
+      "label": "classified 50252254",
+      "ok": true,
+      "detail": "already_resolved"
+    },
+    {
+      "label": "classified 66363363",
+      "ok": true,
+      "detail": "already_resolved"
+    },
+    {
+      "label": "classified 97727743",
+      "ok": true,
+      "detail": "already_resolved"
+    },
+    {
+      "label": "classified 99411617",
+      "ok": true,
+      "detail": "already_resolved"
+    },
+    {
+      "label": "pack KW_PRIVATE_SECTOR@1.0 50252254",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96550252254",
+        "phone": "96550252254",
+        "name": "Talal Fadhli",
+        "email": "talalabdalla89@gmail.com",
+        "updated_at": "2026-08-01 20:03:20.703316+00",
+        "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+        "policy_pack_code": "KW_PRIVATE_SECTOR",
+        "policy_pack_version": "1.0.0",
+        "policy_pack_status": "resolved",
+        "jurisdiction_code": "KW",
+        "worker_category": "private_sector",
+        "contract_type": "unlimited",
+        "pay_frequency": "monthly",
+        "probation_status": "completed",
+        "employment_status": "active"
+      }
+    },
+    {
+      "label": "pack KW_PRIVATE_SECTOR@1.0 66363363",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96566363363",
+        "phone": "96566363363",
+        "name": "Fouad Burhamad",
+        "email": "fb-urhama@gmail.com",
+        "updated_at": "2026-07-12 15:46:31.905837+00",
+        "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+        "policy_pack_code": "KW_PRIVATE_SECTOR",
+        "policy_pack_version": "1.0.0",
+        "policy_pack_status": "resolved",
+        "jurisdiction_code": "KW",
+        "worker_category": "private_sector",
+        "contract_type": "unlimited",
+        "pay_frequency": "monthly",
+        "probation_status": "completed",
+        "employment_status": "active"
+      }
+    },
+    {
+      "label": "pack KW_PRIVATE_SECTOR@1.0 97727743",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96597727743",
+        "phone": "96597727743",
+        "name": "mohammad alqattan",
+        "email": "",
+        "updated_at": "2026-08-01 20:03:20.680449+00",
+        "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+        "policy_pack_code": "KW_PRIVATE_SECTOR",
+        "policy_pack_version": "1.0.0",
+        "policy_pack_status": "resolved",
+        "jurisdiction_code": "KW",
+        "worker_category": "private_sector",
+        "contract_type": "unlimited",
+        "pay_frequency": "monthly",
+        "probation_status": "completed",
+        "employment_status": "active"
+      }
+    },
+    {
+      "label": "pack KW_PRIVATE_SECTOR@1.0 99411617",
+      "ok": true,
+      "detail": {
+        "employee_key": "WATHEFNI-96599411617",
+        "phone": "96599411617",
+        "name": "Brian Saleh",
+        "email": "briansaleh92@gmail.com",
+        "updated_at": "2026-07-13 19:22:41.486318+00",
+        "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+        "policy_pack_code": "KW_PRIVATE_SECTOR",
+        "policy_pack_version": "1.0.0",
+        "policy_pack_status": "resolved",
+        "jurisdiction_code": "KW",
+        "worker_category": "private_sector",
+        "contract_type": "unlimited",
+        "pay_frequency": "monthly",
+        "probation_status": "completed",
+        "employment_status": "active"
+      }
+    },
+    {
+      "label": "reals cleared from remediation queue",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "quarantined synthetics excluded from queue",
+      "ok": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "label": "synthetic employment history preserved",
+      "ok": true,
+      "detail": 8
+    },
+    {
+      "label": "canary identity bind",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "binding": {
+          "binding_id": "806182f6-234c-4e58-b001-e077aeb14f79",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "phone_fingerprint": "e1cdde78bb2740d2105df6dc3708e47c16a40b710c60409a6e54d48a7267388c",
+          "email_fingerprint": "be39790e2c2761a7763e8b240b697ccf9543aac4e7daeb888a72e4d80bd8c4d6",
+          "session_epoch": 6,
+          "status": "active",
+          "bound_at": "2026-08-01T23:43:42.634307+00:00",
+          "revoked_at": null,
+          "revoke_reason": null,
+          "metadata": {
+            "at": "2026-08-01T23:44:39.165246+00:00",
+            "bound_by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+            "last_revoke_reason": "final_rollout_end_cleanup"
+          }
+        },
+        "reused": true,
+        "access_policy": {
+          "eligibility": "active",
+          "session_allowed": true,
+          "view": "full_masked",
+          "allowed_request_types": [
+            "assignment_correction",
+            "bank_detail_change",
+            "document_change",
+            "emergency_contact_change",
+            "employment_letter",
+            "manager_change",
+            "personal_detail_change",
+            "service_certificate",
+            "transfer"
+          ],
+          "ess_mutations": true
+        }
+      }
+    },
+    {
+      "label": "canary session live",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "session bound to canary only",
+      "ok": true,
+      "detail": {
+        "session_id": "a0cddf48-a655-4297-9c78-082a88b2c6be",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee": {
+          "employee_key": "WATHEFNI-96550252254",
+          "phone": "96550252254",
+          "company_code": "WATHEFNI",
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "name": "Talal Fadhli",
+          "email": "talalabdalla89@gmail.com",
+          "position_title": "Social Media Manager",
+          "hire_date": "2026-05-12",
+          "start_date": null,
+          "onboarding_status": "in_progress",
+          "documents_pending": 4,
+          "documents_complete": 0,
+          "compliance_status": "pending",
+          "profile": {
+            "name": "Talal Fadhli",
+            "email": "talalabdalla89@gmail.com",
+            "phone": "96550252254",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "hire_date": "2026-05-12",
+            "start_date": null,
+            "updated_at": "2026-05-12T21:41:35Z",
+            "company_code": "WATHEFNI",
+            "created_from": "hired_application",
+            "employee_key": "WATHEFNI-96550252254",
+            "position_title": "Social Media Manager",
+            "compliance_status": "pending",
+            "documents_pending": 4,
+            "onboarding_status": "not_started",
+            "documents_complete": 0
+          },
+          "raw_json": {
+            "name": "Talal Fadhli",
+            "email": "talalabdalla89@gmail.com",
+            "phone": "96550252254",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "hire_date": "2026-05-12",
+            "start_date": null,
+            "updated_at": "2026-05-12T21:41:35Z",
+            "company_code": "WATHEFNI",
+            "created_from": "hired_application",
+            "employee_key": "WATHEFNI-96550252254",
+            "position_title": "Social Media Manager",
+            "compliance_status": "pending",
+            "documents_pending": 4,
+            "onboarding_status": "not_started",
+            "documents_complete": 0
+          },
+          "created_at": "2026-05-12 20:43:01.670538+00:00",
+          "updated_at": "2026-08-01 20:03:20.703316+00:00",
+          "employment_status": "active",
+          "device_user_id": null,
+          "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3"
+        },
+        "ess_session_epoch": 6
+      }
+    },
+    {
+      "label": "other real ESS bind blocked",
+      "ok": true,
+      "detail": "ess_synthetic_only"
+    },
+    {
+      "label": "canary bind idempotent reuse",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "binding": {
+          "binding_id": "806182f6-234c-4e58-b001-e077aeb14f79",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "phone_fingerprint": "e1cdde78bb2740d2105df6dc3708e47c16a40b710c60409a6e54d48a7267388c",
+          "email_fingerprint": "be39790e2c2761a7763e8b240b697ccf9543aac4e7daeb888a72e4d80bd8c4d6",
+          "session_epoch": 6,
+          "status": "active",
+          "bound_at": "2026-08-01T23:43:42.634307+00:00",
+          "revoked_at": null,
+          "revoke_reason": null,
+          "metadata": {
+            "at": "2026-08-01T23:44:39.165246+00:00",
+            "bound_by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+            "last_revoke_reason": "final_rollout_end_cleanup"
+          }
+        },
+        "reused": true,
+        "access_policy": {
+          "eligibility": "active",
+          "session_allowed": true,
+          "view": "full_masked",
+          "allowed_request_types": [
+            "assignment_correction",
+            "bank_detail_change",
+            "document_change",
+            "emergency_contact_change",
+            "employment_letter",
+            "manager_change",
+            "personal_detail_change",
+            "service_certificate",
+            "transfer"
+          ],
+          "ess_mutations": true
+        }
+      }
+    },
+    {
+      "label": "session revoke ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "binding": {
+          "binding_id": "806182f6-234c-4e58-b001-e077aeb14f79",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "phone_fingerprint": "e1cdde78bb2740d2105df6dc3708e47c16a40b710c60409a6e54d48a7267388c",
+          "email_fingerprint": "be39790e2c2761a7763e8b240b697ccf9543aac4e7daeb888a72e4d80bd8c4d6",
+          "session_epoch": 7,
+          "status": "active",
+          "bound_at": "2026-08-01T23:43:42.634307+00:00",
+          "revoked_at": null,
+          "revoke_reason": null,
+          "metadata": {
+            "at": "2026-08-01T23:45:09.206287+00:00",
+            "bound_by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+            "last_revoke_reason": "final_rollout_revoke_proof"
+          }
+        },
+        "sessions_revoked": true,
+        "app_sessions_revoked": 1
+      }
+    },
+    {
+      "label": "revoked session dead",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "re-login after revoke",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "epoch advanced",
+      "ok": true,
+      "detail": {
+        "old": 6,
+        "new": 7
+      }
+    },
+    {
+      "label": "own profile readable",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "employee_key": "WATHEFNI-96550252254",
+        "profile": {
+          "name": "Talal Fadhli",
+          "email": "talalabdalla89@gmail.com",
+          "phone": "96550252254",
+          "position_title": "Social Media Manager",
+          "department": null
+        },
+        "personal": {
+          "city": "Kuwait City",
+          "preferred_name": "Talal"
+        },
+        "emergency": {},
+        "bank": {},
+        "employment": {
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "employment_status": "active",
+          "lifecycle_state": "active",
+          "start_date": "2026-05-12",
+          "end_date": null,
+          "jurisdiction_code": "KW",
+          "worker_category": "private_sector",
+          "policy_pack_status": "resolved",
+          "eligibility": "active",
+          "suspended_on": null,
+          "access_policy": {
+            "eligibility": "active",
+            "session_allowed": true,
+            "view": "full_masked",
+            "allowed_request_types": [
+              "assignment_correction",
+              "bank_detail_change",
+              "document_change",
+              "emergency_contact_change",
+              "employment_letter",
+              "manager_change",
+              "personal_detail_change",
+              "service_certificate",
+              "transfer"
+            ],
+            "ess_mutations": true
+          }
+        },
+        "assignment": {
+          "ok": true,
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "as_of": "2026-08-01",
+          "assignment": null,
+          "scheduled_next": null,
+          "wave2": {
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-96550252254",
+            "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+            "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+            "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+            "mapping_status": "active",
+            "provenance": {
+              "source": "wave2_backfill",
+              "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+              "person_seed": "person:WATHEFNI:phone:96550252254",
+              "legacy_employee_key": "WATHEFNI-96550252254"
+            },
+            "created_at": "2026-08-01T20:28:14.226791+00:00",
+            "updated_at": "2026-08-01T20:28:14.226791+00:00",
+            "employee_number": "EMP-0003",
+            "person_name": "Talal Fadhli",
+            "authority_employment_status": "active",
+            "employment_start_date": "2026-05-12",
+            "employment_end_date": null,
+            "assignment_position_title": "Social Media Manager",
+            "assignment_department": null
+          },
+          "manager_employee_key": null,
+          "department": null,
+          "location": null,
+          "position_title": null
+        },
+        "assignment_history": [],
+        "documents": [],
+        "masking": {
+          "bank_masked": true,
+          "sensitive_policy": "permission_gated"
+        }
+      }
+    },
+    {
+      "label": "bank masked or absent",
+      "ok": true,
+      "detail": {}
+    },
+    {
+      "label": "personal request created",
+      "ok": true,
+      "detail": "pending_hr"
+    },
+    {
+      "label": "ess self-approval denied",
+      "ok": true,
+      "detail": "self_approval_forbidden"
+    },
+    {
+      "label": "hr approve personal",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "request": {
+          "request_id": "cd6f84bb-0241-4e48-b9d1-a83b32c38208",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "request_type": "personal_detail_change",
+          "state": "approved",
+          "requester_kind": "employee",
+          "requester_user_id": null,
+          "requester_employee_key": "WATHEFNI-96550252254",
+          "proposed_values": {
+            "city": "Kuwait City",
+            "preferred_name": "Talal"
+          },
+          "old_value_snapshot": {
+            "hub": {
+              "name": "Talal Fadhli",
+              "email": "talalabdalla89@gmail.com",
+              "phone": "96550252254",
+              "updated_at": "2026-08-01 20:03:20.703316+00:00"
+            },
+            "personal": {
+              "city": "Kuwait City",
+              "preferred_name": "Talal"
+            },
+            "emergency": {},
+            "employment": {
+              "end_date": null,
+              "start_date": "2026-05-12",
+              "eligibility": "active",
+              "suspended_on": null,
+              "access_policy": {
+                "view": "full_masked",
+                "eligibility": "active",
+                "ess_mutations": true,
+                "session_allowed": true,
+                "allowed_request_types": [
+                  "assignment_correction",
+                  "bank_detail_change",
+                  "document_change",
+                  "emergency_contact_change",
+                  "employment_letter",
+                  "manager_change",
+                  "personal_detail_change",
+                  "service_certificate",
+                  "transfer"
+                ]
+              },
+              "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+              "lifecycle_state": "active",
+              "worker_category": "private_sector",
+              "employment_status": "active",
+              "jurisdiction_code": "KW",
+              "policy_pack_status": "resolved"
+            },
+            "captured_at": "2026-08-01T23:45:09.271325+00:00",
+            "employee_key": "WATHEFNI-96550252254",
+            "personal_version": 2
+          },
+          "approval_route": [
+            "hr"
+          ],
+          "approval_cursor": 1,
+          "comments": [],
+          "evidence": {},
+          "concurrency_version": 2,
+          "expected_hub_updated_at": "2026-08-01T20:03:20.703316+00:00",
+          "expected_assignment_version": null,
+          "idempotency_key": "final-rollout-pers-ab6e46cb",
+          "request_hash": "9a0b4b72b6dc052aa472cd2e969a9eeebf0921708aef39f940c5e17ac488723f",
+          "designated_approver_user_id": null,
+          "applied_authority_ref": null,
+          "applied_at": null,
+          "applied_by_user_id": null,
+          "fail_reason": null,
+          "created_at": "2026-08-01T23:45:09.282683+00:00",
+          "updated_at": "2026-08-01T23:45:09.351717+00:00",
+          "expected_personal_version": 2,
+          "expected_bank_version": 0
+        },
+        "applied": false
+      }
+    },
+    {
+      "label": "hr apply personal",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "request": {
+          "request_id": "cd6f84bb-0241-4e48-b9d1-a83b32c38208",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "request_type": "personal_detail_change",
+          "state": "applied",
+          "requester_kind": "employee",
+          "requester_user_id": null,
+          "requester_employee_key": "WATHEFNI-96550252254",
+          "proposed_values": {
+            "city": "Kuwait City",
+            "preferred_name": "Talal"
+          },
+          "old_value_snapshot": {
+            "hub": {
+              "name": "Talal Fadhli",
+              "email": "talalabdalla89@gmail.com",
+              "phone": "96550252254",
+              "updated_at": "2026-08-01 20:03:20.703316+00:00"
+            },
+            "personal": {
+              "city": "Kuwait City",
+              "preferred_name": "Talal"
+            },
+            "emergency": {},
+            "employment": {
+              "end_date": null,
+              "start_date": "2026-05-12",
+              "eligibility": "active",
+              "suspended_on": null,
+              "access_policy": {
+                "view": "full_masked",
+                "eligibility": "active",
+                "ess_mutations": true,
+                "session_allowed": true,
+                "allowed_request_types": [
+                  "assignment_correction",
+                  "bank_detail_change",
+                  "document_change",
+                  "emergency_contact_change",
+                  "employment_letter",
+                  "manager_change",
+                  "personal_detail_change",
+                  "service_certificate",
+                  "transfer"
+                ]
+              },
+              "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+              "lifecycle_state": "active",
+              "worker_category": "private_sector",
+              "employment_status": "active",
+              "jurisdiction_code": "KW",
+              "policy_pack_status": "resolved"
+            },
+            "captured_at": "2026-08-01T23:45:09.271325+00:00",
+            "employee_key": "WATHEFNI-96550252254",
+            "personal_version": 2
+          },
+          "approval_route": [
+            "hr"
+          ],
+          "approval_cursor": 1,
+          "comments": [],
+          "evidence": {},
+          "concurrency_version": 3,
+          "expected_hub_updated_at": "2026-08-01T20:03:20.703316+00:00",
+          "expected_assignment_version": null,
+          "idempotency_key": "final-rollout-pers-ab6e46cb",
+          "request_hash": "9a0b4b72b6dc052aa472cd2e969a9eeebf0921708aef39f940c5e17ac488723f",
+          "designated_approver_user_id": null,
+          "applied_authority_ref": {
+            "overlay": "employee_ess_personal_profiles",
+            "request_id": "cd6f84bb-0241-4e48-b9d1-a83b32c38208",
+            "request_type": "personal_detail_change",
+            "personal_profile_version": 3
+          },
+          "applied_at": "2026-08-01T23:45:09.370177+00:00",
+          "applied_by_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+          "fail_reason": null,
+          "created_at": "2026-08-01T23:45:09.282683+00:00",
+          "updated_at": "2026-08-01T23:45:09.370177+00:00",
+          "expected_personal_version": 2,
+          "expected_bank_version": 0
+        },
+        "authority_ref": {
+          "request_id": "cd6f84bb-0241-4e48-b9d1-a83b32c38208",
+          "request_type": "personal_detail_change",
+          "personal_profile_version": 3,
+          "overlay": "employee_ess_personal_profiles"
+        }
+      }
+    },
+    {
+      "label": "document/letter request created",
+      "ok": true,
+      "detail": "pending_hr"
+    },
+    {
+      "label": "request tracking visible",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "requests": [
+          {
+            "request_id": "bbda0abc-e474-4ce8-a776-46f925a3dd94",
+            "employee_key": "WATHEFNI-96550252254",
+            "request_type": "employment_letter",
+            "state": "pending_hr",
+            "requester_kind": "employee",
+            "approval_route": [
+              "hr"
+            ],
+            "approval_cursor": 0,
+            "concurrency_version": 1,
+            "created_at": "2026-08-01T23:45:09.432743+00:00",
+            "updated_at": "2026-08-01T23:45:09.432743+00:00"
+          },
+          {
+            "request_id": "cd6f84bb-0241-4e48-b9d1-a83b32c38208",
+            "employee_key": "WATHEFNI-96550252254",
+            "request_type": "personal_detail_change",
+            "state": "applied",
+            "requester_kind": "employee",
+            "approval_route": [
+              "hr"
+            ],
+            "approval_cursor": 1,
+            "concurrency_version": 3,
+            "created_at": "2026-08-01T23:45:09.282683+00:00",
+            "updated_at": "2026-08-01T23:45:09.370177+00:00"
+          },
+          {
+            "request_id": "726cff17-7646-4680-bb7d-075e08ed4d1e",
+            "employee_key": "WATHEFNI-96550252254",
+            "request_type": "employment_letter",
+            "state": "pending_hr",
+            "requester_kind": "employee",
+            "approval_route": [
+              "hr"
+            ],
+            "approval_cursor": 0,
+            "concurrency_version": 1,
+            "created_at": "2026-08-01T23:44:39.012840+00:00",
+            "updated_at": "2026-08-01T23:44:39.012840+00:00"
+          },
+          {
+            "request_id": "50383d62-21f8-4ca7-928b-36fd26ba47ee",
+            "employee_key": "WATHEFNI-96550252254",
+            "request_type": "personal_detail_change",
+            "state": "applied",
+            "requester_kind": "employee",
+            "approval_route": [
+              "hr"
+            ],
+            "approval_cursor": 1,
+            "concurrency_version": 3,
+            "created_at": "2026-08-01T23:44:38.912775+00:00",
+            "updated_at": "2026-08-01T23:44:38.985749+00:00"
+          },
+          {
+            "request_id": "eee16518-08b1-478e-942a-3559bf1ece76",
+            "employee_key": "WATHEFNI-96550252254",
+            "request_type": "employment_letter",
+            "state": "pending_hr",
+            "requester_kind": "employee",
+            "approval_route": [
+              "hr"
+            ],
+            "approval_cursor": 0,
+            "concurrency_version": 1,
+            "created_at": "2026-08-01T23:43:42.918802+00:00",
+            "updated_at": "2026-08-01T23:43:42.918802+00:00"
+          },
+          {
+            "request_id": "88541e44-8e07-4727-aaa5-fd460dd05966",
+            "employee_key": "WATHEFNI-96550252254",
+            "request_type": "personal_detail_change",
+            "state": "applied",
+            "requester_kind": "employee",
+            "approval_route": [
+              "hr"
+            ],
+            "approval_cursor": 1,
+            "concurrency_version": 3,
+            "created_at": "2026-08-01T23:43:42.737347+00:00",
+            "updated_at": "2026-08-01T23:43:42.851115+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "label": "real bank change denied",
+      "ok": true,
+      "detail": "ess_bank_not_allowlisted"
+    },
+    {
+      "label": "canary cannot read other 66363363",
+      "ok": true,
+      "detail": "permission_denied"
+    },
+    {
+      "label": "canary cannot read other 97727743",
+      "ok": true,
+      "detail": "permission_denied"
+    },
+    {
+      "label": "canary cannot read other 99411617",
+      "ok": true,
+      "detail": "permission_denied"
+    },
+    {
+      "label": "app session denied other 66363363",
+      "ok": true,
+      "detail": "employee_app_not_allowlisted"
+    },
+    {
+      "label": "app session denied other 97727743",
+      "ok": true,
+      "detail": "employee_app_not_allowlisted"
+    },
+    {
+      "label": "app session denied other 99411617",
+      "ok": true,
+      "detail": "employee_app_not_allowlisted"
+    },
+    {
+      "label": "lifecycle allowlist admits canary",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "lifecycle policy readable",
+      "ok": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "tier": "small",
+        "timezone": "Asia/Kuwait",
+        "notice_hint_monthly_days": 90,
+        "notice_hint_other_days": 30,
+        "revoke_mode": "end_of_last_working_day",
+        "effective_time_mode": "start_of_effective_date",
+        "downstream_mode": "warn_first",
+        "require_impact_ack": true,
+        "require_counsel_gate": false,
+        "allow_self_approval": false,
+        "rehire_same_employee_key": true,
+        "scheduler_cadence": "hourly",
+        "lag_alert_seconds": 60,
+        "policy_json": {
+          "show_notice_hints": false,
+          "notice_hint_label": "Configurable policy guidance only (not a legal determination). When enabled, monthly/other day hints mirror Law No. 6 of 2010 Art. 44 for unlimited contracts (3 months / 1 month) as published in Official Gazette Issue 963 (21 Feb 2010). Fixed-term, probation, and summary-dismissal cases are not covered by these hints. HR must enter effective date and last working day.",
+          "require_last_working_day": true,
+          "require_employment_classification": true,
+          "require_termination_case_class": true,
+          "allow_reinstate_after_effective": false,
+          "jurisdiction_mode": "policy_pack",
+          "default_policy_pack": "KW_PRIVATE_SECTOR",
+          "document_retention_mode": "retain",
+          "document_retention_floor_days": 365,
+          "auto_cancel_shifts": false,
+          "auto_decline_leave": false,
+          "monetary_calculations_owner": "payroll",
+          "settlement_packet_mode": "inputs_only",
+          "service_certificate_default": true,
+          "exceptional_cases_manual_only": true,
+          "require_counsel_gate": false,
+          "disclaimer": "Configurable policy only. Not legal advice. Wathefni records, validates and orchestrates HR decisions. Wathefni does not determine whether a specific termination is legally justified. Employees 360 never calculates EOSB, notice pay, garden leave, damages or leave encashment \u2014 Payroll owns monetary calculations from an inputs-only settlement packet.",
+          "ui_copy": {
+            "retention": "Personnel file contents (Art. 80) are retained. No automatic purge. Conservative floor aligns with the one-year lawsuit horizon (Art. 144).",
+            "notice_hint_hidden": "Notice-period guidance is hidden until unlimited contract, non-probation status and pay frequency are complete, and the case is not exceptional.",
+            "settlement_handoff": "Settlement packet is inputs-only. Payroll calculates EOSB, notice compensation, garden-leave pay and leave encashment outside Employees 360.",
+            "termination_banner": "Enter contract type, pay frequency, probation status, case classification, effective date and last working day. Missing or conflicting fields go to manual review.",
+            "rehire_vs_reinstate": "Post-effective reinstatement is disabled by default. Use true rehire (new employment) unless policy explicitly enables reinstate.",
+            "service_certificate": "On end of service the worker is entitled to a service certificate (Art. 54) stating duration, position and last remuneration, without harmful expressions. Track issuance in Wathefni.",
+            "exceptional_case_banner": "Exceptional / high-risk case. Wathefni will not decide lawfulness. Complete evidence, escalate for human legal judgment, and keep dates/approvals manual."
+          },
+          "wave": "wave3h"
+        },
+        "updated_by_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+        "updated_at": "2026-08-01T22:15:10.466218+00:00",
+        "created_at": "2026-08-01T21:09:29.620001+00:00",
+        "show_notice_hints": false,
+        "notice_hint_label": "Configurable policy guidance only (not a legal determination). When enabled, monthly/other day hints mirror Law No. 6 of 2010 Art. 44 for unlimited contracts (3 months / 1 month) as published in Official Gazette Issue 963 (21 Feb 2010). Fixed-term, probation, and summary-dismissal cases are not covered by these hints. HR must enter effective date and last working day.",
+        "require_last_working_day": true,
+        "require_employment_classification": true,
+        "require_termination_case_class": true,
+        "allow_reinstate_after_effective": false,
+        "jurisdiction_mode": "policy_pack",
+        "default_policy_pack": "KW_PRIVATE_SECTOR",
+        "document_retention_mode": "retain",
+        "document_retention_floor_days": 365,
+        "auto_cancel_shifts": false,
+        "auto_decline_leave": false,
+        "monetary_calculations_owner": "payroll",
+        "settlement_packet_mode": "inputs_only",
+        "service_certificate_default": true,
+        "exceptional_cases_manual_only": true,
+        "disclaimer": "Configurable policy only. Not legal advice. Wathefni records, validates and orchestrates HR decisions. Wathefni does not determine whether a specific termination is legally justified. Employees 360 never calculates EOSB, notice pay, garden leave, damages or leave encashment \u2014 Payroll owns monetary calculations from an inputs-only settlement packet.",
+        "ui_copy": {
+          "retention": "Personnel file contents (Art. 80) are retained. No automatic purge. Conservative floor aligns with the one-year lawsuit horizon (Art. 144).",
+          "notice_hint_hidden": "Notice-period guidance is hidden until unlimited contract, non-probation status and pay frequency are complete, and the case is not exceptional.",
+          "settlement_handoff": "Settlement packet is inputs-only. Payroll calculates EOSB, notice compensation, garden-leave pay and leave encashment outside Employees 360.",
+          "termination_banner": "Enter contract type, pay frequency, probation status, case classification, effective date and last working day. Missing or conflicting fields go to manual review.",
+          "rehire_vs_reinstate": "Post-effective reinstatement is disabled by default. Use true rehire (new employment) unless policy explicitly enables reinstate.",
+          "service_certificate": "On end of service the worker is entitled to a service certificate (Art. 54) stating duration, position and last remuneration, without harmful expressions. Track issuance in Wathefni.",
+          "exceptional_case_banner": "Exceptional / high-risk case. Wathefni will not decide lawfulness. Complete evidence, escalate for human legal judgment, and keep dates/approvals manual."
+        },
+        "notice_hints_ui": null,
+        "notice_hint_monthly_days_exposed": null,
+        "notice_hint_other_days_exposed": null
+      }
+    },
+    {
+      "label": "monetary calculations remain payroll-owned",
+      "ok": true,
+      "detail": "payroll"
+    },
+    {
+      "label": "exceptional cases manual-only",
+      "ok": true,
+      "detail": true
+    },
+    {
+      "label": "exceptional high-risk fail-closed",
+      "ok": true,
+      "detail": "exceptional_case_manual_escalation_required"
+    },
+    {
+      "label": "lifecycle impact preview readable",
+      "ok": true,
+      "detail": {
+        "as_of_date": "2026-08-15",
+        "employee_key": "WATHEFNI-96550252254",
+        "company_code": "WATHEFNI",
+        "disclaimer": "Preview only. No automatic legal or payroll decisions are made.",
+        "domains": {
+          "future_shifts": {
+            "count": 0,
+            "recommended_action": "none",
+            "automatic": false
+          },
+          "open_leave_requests": {
+            "count": 0,
+            "recommended_action": "none",
+            "automatic": false
+          },
+          "leave_balances": {
+            "count": 1,
+            "recommended_action": "manual_final_settlement_input",
+            "automatic": false,
+            "note": "Balances are inputs only; no settlement is computed here."
+          },
+          "attendance_exceptions": {
+            "count": 0,
+            "recommended_action": "none",
+            "automatic": false
+          },
+          "payroll_timesheets": {
+            "count": 0,
+            "recommended_action": "none",
+            "automatic": false,
+            "note": "No payroll decision is automated."
+          },
+          "onboarding_obligations": {
+            "count": 6,
+            "recommended_action": "close_or_waive_open_items",
+            "automatic": false
+          },
+          "compliance_obligations": {
+            "count": 5,
+            "recommended_action": "review_missing_or_expired_docs",
+            "automatic": false
+          },
+          "documents": {
+            "count": 0,
+            "recommended_action": "retain_per_policy",
+            "automatic": false
+          },
+          "employee_app_access": {
+            "active_sessions": 1,
+            "open_invites": 0,
+            "recommended_action": "revoke_sessions_and_invites_on_effective_termination",
+            "automatic": false
+          }
+        },
+        "snapshot_id": "677e5751-037c-4252-9975-91515628dedf"
+      }
+    },
+    {
+      "label": "lifecycle self-approval denied",
+      "ok": true,
+      "detail": "self_approval_forbidden"
+    },
+    {
+      "label": "KW_PRIVATE_SECTOR resolve ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "pack_code": "KW_PRIVATE_SECTOR",
+        "policy_version": "1.0.0",
+        "content_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8",
+        "pack": {
+          "pack_code": "KW_PRIVATE_SECTOR",
+          "jurisdiction_code": "KW",
+          "worker_category": "private_sector",
+          "policy_version": "1.0.0",
+          "effective_from": "2010-02-21",
+          "effective_to": null,
+          "status": "verified",
+          "enabled": true,
+          "timezone_default": "Asia/Kuwait",
+          "source_refs": [
+            {
+              "role": "primary_arabic",
+              "title": "Kuwait Labour Law No. 6 of 2010 (e.gov / MOJ PDF)",
+              "sha256": "20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326",
+              "evidence": "ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/sources/"
+            },
+            {
+              "role": "english_gazette_reading_aid",
+              "title": "Official Gazette Issue 963 extract (21 Feb 2010)",
+              "sha256": "aaed5c6e02a03df4bfdcf035ba1befb9ece3c96d635c5a947f0c5ae929a70fe0"
+            },
+            {
+              "role": "wave3f_closure",
+              "title": "Employees 360 Wave 3F public-law closure pack",
+              "evidence": "ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/"
+            }
+          ],
+          "required_employment_fields": [
+            "contract_type",
+            "pay_frequency",
+            "probation_status",
+            "termination_case_class",
+            "termination_effective_on",
+            "last_working_day"
+          ],
+          "contract_types": [
+            "unlimited",
+            "fixed_term"
+          ],
+          "pay_frequencies": [
+            "monthly",
+            "other"
+          ],
+          "probation_statuses": [
+            "none",
+            "active",
+            "completed"
+          ],
+          "probation_rules": {
+            "max_working_days": 100,
+            "terminate_without_notice_during_probation": true,
+            "hide_notice_hints_when_active": true,
+            "require_dates_when_active": true,
+            "once_per_employer": true,
+            "article_refs": [
+              "32"
+            ]
+          },
+          "notice_rules": {
+            "applies_to_contract_types": [
+              "unlimited"
+            ],
+            "blocked_when_probation_active": true,
+            "blocked_for_exceptional_cases": true,
+            "show_hints_default": false,
+            "monthly_hint_days": 90,
+            "other_hint_days": 30,
+            "article_refs": [
+              "44"
+            ],
+            "label": "Optional labeled guidance only \u2014 not a legal determination. Shown only when contract_type=unlimited, probation is not active, pay_frequency is known, and the case is not an exceptional/summary path. Mirrors Law No. 6/2010 Art. 44 (Official Gazette Issue 963, 21 Feb 2010): 3 months (monthly) / 1 month (other). HR must still enter effective date and last working day."
+          },
+          "fixed_term_rules": {
+            "notice_hints_apply": false,
+            "damages_owned_by": "payroll",
+            "article_refs": [
+              "30",
+              "31",
+              "47"
+            ]
+          },
+          "termination_case_classes": [
+            "resignation",
+            "dismissal_ordinary",
+            "summary_dismissal_41a",
+            "summary_dismissal_41b",
+            "end_of_fixed_term",
+            "mutual",
+            "abandonment_42",
+            "worker_summary_exit_48",
+            "death_disability_49",
+            "employer_status_50",
+            "other_exceptional"
+          ],
+          "exceptional_case_classes": [
+            "summary_dismissal_41a",
+            "summary_dismissal_41b",
+            "abandonment_42",
+            "worker_summary_exit_48",
+            "death_disability_49",
+            "employer_status_50",
+            "other_exceptional"
+          ],
+          "exceptional_case_escalation": {
+            "manual_only": true,
+            "require_escalation_note": true,
+            "software_decides_lawfulness": false
+          },
+          "settlement_ownership": {
+            "owner": "payroll",
+            "mode": "inputs_only",
+            "forbidden_in_employees360": [
+              "eosb",
+              "notice_pay",
+              "garden_leave_pay",
+              "damages",
+              "leave_encashment"
+            ]
+          },
+          "service_certificate": {
+            "required_default": true,
+            "article_refs": [
+              "54"
+            ],
+            "fields": [
+              "duration",
+              "position",
+              "last_remuneration"
+            ],
+            "forbid_harmful_expressions": true
+          },
+          "retention": {
+            "mode": "retain",
+            "floor_days": 365,
+            "auto_purge": false,
+            "article_refs": [
+              "80",
+              "144"
+            ]
+          },
+          "allowed_lifecycle_actions": [
+            "termination",
+            "cancel_scheduled",
+            "rehire",
+            "notice",
+            "suspension",
+            "unsuspend",
+            "activate_start",
+            "downstream_action",
+            "reinstate"
+          ],
+          "disabled_fallbacks": {
+            "allow_reinstate_after_effective": false,
+            "show_notice_hints": false,
+            "auto_cancel_shifts": false,
+            "auto_decline_leave": false,
+            "allow_self_approval": false,
+            "unsupported_jurisdiction": "fail_closed",
+            "missing_worker_category": "fail_closed",
+            "missing_classification": "manual_review_missing_classification"
+          },
+          "mandatory_rules": {
+            "require_last_working_day": true,
+            "require_employment_classification": true,
+            "require_termination_case_class": true,
+            "require_impact_ack": true,
+            "exceptional_cases_manual_only": true,
+            "monetary_calculations_owner": "payroll",
+            "settlement_packet_mode": "inputs_only",
+            "service_certificate_default": true,
+            "document_retention_mode": "retain",
+            "document_retention_floor_days": 365,
+            "allow_self_approval": false
+          },
+          "ui_copy": {
+            "termination_banner": "Enter contract type, pay frequency, probation status, case classification, effective date and last working day. Missing or conflicting fields go to manual review.",
+            "notice_hint_hidden": "Notice-period guidance is hidden until unlimited contract, non-probation status and pay frequency are complete, and the case is not exceptional.",
+            "exceptional_case_banner": "Exceptional / high-risk case. Wathefni will not decide lawfulness. Complete evidence, escalate for human legal judgment, and keep dates/approvals manual.",
+            "settlement_handoff": "Settlement packet is inputs-only. Payroll calculates EOSB, notice compensation, garden-leave pay and leave encashment outside Employees 360.",
+            "service_certificate": "On end of service the worker is entitled to a service certificate (Art. 54) stating duration, position and last remuneration, without harmful expressions. Track issuance in Wathefni.",
+            "rehire_vs_reinstate": "Post-effective reinstatement is disabled by default. Use true rehire (new employment) unless policy explicitly enables reinstate.",
+            "retention": "Personnel file contents (Art. 80) are retained. No automatic purge. Conservative floor aligns with the one-year lawsuit horizon (Art. 144).",
+            "unsupported_pack": "This employment jurisdiction/worker category has no verified Employees 360 policy pack. Lifecycle actions are blocked until a verified pack exists or the record is remediated.",
+            "remediation_required": "Jurisdiction or worker category is uncertain. Complete remediation before lifecycle actions."
+          },
+          "disclaimer": "Configurable policy only. Not legal advice. Wathefni records, validates and orchestrates HR decisions. Wathefni does not determine whether a specific termination is legally justified. Employees 360 never calculates EOSB, notice pay, garden leave, damages or leave encashment \u2014 Payroll owns monetary calculations from an inputs-only settlement packet.",
+          "wave": "wave3h",
+          "wave3f_compatible": true,
+          "content_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8"
+        },
+        "jurisdiction_code": "KW",
+        "worker_category": "private_sector"
+      }
+    },
+    {
+      "label": "assert_pack_resolved",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "ESS kill-switch deny",
+      "ok": true,
+      "detail": "ess_synthetic_only"
+    },
+    {
+      "label": "APP kill-switch deny",
+      "ok": true,
+      "detail": "employee_app_not_allowlisted"
+    },
+    {
+      "label": "allowlist restore works",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "final session cleanup revoke",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "label": "audit has no unmasked bank probe IBAN",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "label": "still active 50252254",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "label": "still active 66363363",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "label": "still active 97727743",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "label": "still active 99411617",
+      "ok": true,
+      "detail": "active"
+    }
+  ],
+  "ids": {
+    "canary": "WATHEFNI-96550252254",
+    "classified": [
+      "WATHEFNI-96550252254",
+      "WATHEFNI-96566363363",
+      "WATHEFNI-96597727743",
+      "WATHEFNI-96599411617"
+    ]
+  },
+  "cleanup": {},
+  "kill_switch": {},
+  "audit_scan": {
+    "iban_leaks": 0
+  },
+  "reals_before": {
+    "WATHEFNI-96550252254": {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "name": "Talal Fadhli",
+      "email": "talalabdalla89@gmail.com",
+      "updated_at": "2026-08-01 20:03:20.703316+00",
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96566363363": {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "name": "Fouad Burhamad",
+      "email": "fb-urhama@gmail.com",
+      "updated_at": "2026-07-12 15:46:31.905837+00",
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96597727743": {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "name": "mohammad alqattan",
+      "email": "",
+      "updated_at": "2026-08-01 20:03:20.680449+00",
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96599411617": {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "name": "Brian Saleh",
+      "email": "briansaleh92@gmail.com",
+      "updated_at": "2026-07-13 19:22:41.486318+00",
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    }
+  },
+  "classification": {
+    "WATHEFNI-96550252254": {
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "already_resolved": true
+    },
+    "WATHEFNI-96566363363": {
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "already_resolved": true
+    },
+    "WATHEFNI-96597727743": {
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "already_resolved": true
+    },
+    "WATHEFNI-96599411617": {
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "already_resolved": true
+    }
+  },
+  "reals_after_class": {
+    "WATHEFNI-96550252254": {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "name": "Talal Fadhli",
+      "email": "talalabdalla89@gmail.com",
+      "updated_at": "2026-08-01 20:03:20.703316+00",
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96566363363": {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "name": "Fouad Burhamad",
+      "email": "fb-urhama@gmail.com",
+      "updated_at": "2026-07-12 15:46:31.905837+00",
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96597727743": {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "name": "mohammad alqattan",
+      "email": "",
+      "updated_at": "2026-08-01 20:03:20.680449+00",
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96599411617": {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "name": "Brian Saleh",
+      "email": "briansaleh92@gmail.com",
+      "updated_at": "2026-07-13 19:22:41.486318+00",
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    }
+  },
+  "remediation_after": {
+    "count": 0,
+    "note": "Read-only. Explicit dual-controlled classification required. No auto-classify. No lifecycle execution."
+  },
+  "quarantined_synthetic_employments": 8,
+  "reals_final": {
+    "WATHEFNI-96550252254": {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "name": "Talal Fadhli",
+      "email": "talalabdalla89@gmail.com",
+      "updated_at": "2026-08-01 20:03:20.703316+00",
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96566363363": {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "name": "Fouad Burhamad",
+      "email": "fb-urhama@gmail.com",
+      "updated_at": "2026-07-12 15:46:31.905837+00",
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96597727743": {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "name": "mohammad alqattan",
+      "email": "",
+      "updated_at": "2026-08-01 20:03:20.680449+00",
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    "WATHEFNI-96599411617": {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "name": "Brian Saleh",
+      "email": "briansaleh92@gmail.com",
+      "updated_at": "2026-07-13 19:22:41.486318+00",
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    }
+  },
+  "summary": {
+    "pass": 56,
+    "fail": 0,
+    "canary": "WATHEFNI-96550252254"
+  }
+}

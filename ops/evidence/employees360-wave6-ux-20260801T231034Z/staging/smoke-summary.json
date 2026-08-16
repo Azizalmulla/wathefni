@@ -1,0 +1,7 @@
+{
+  "remediation_count": 10,
+  "org_units": 4,
+  "ess_enabled": true,
+  "production_deploy": false,
+  "staging_dashboard_dist": true
+}

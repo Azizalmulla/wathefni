@@ -1,0 +1,37 @@
+    workflow_task_sla phase A slice 2 — DB prove
+      PASS  migration idempotent
+      PASS  catalogue seeded
+      PASS  tasks default disabled
+      PASS  sla default disabled
+      PASS  tasks runtime gate
+      PASS  tasks allowlist gate
+      PASS  sla runtime gate
+      PASS  tasks gate open
+      PASS  sla gate open
+      PASS  task create
+      PASS  task idempotent replay
+      PASS  task on hr_tasks SoT
+      PASS  subject_type from catalogue
+      PASS  task stale row_version
+      PASS  task resolve
+      PASS  cross-tenant task read denial
+      PASS  unknown task_type denied
+      PASS  sla policy upsert
+      PASS  sla clock start
+      PASS  sla clock idempotent
+      PASS  sla reminder audit
+      PASS  sla breach
+      PASS  breach creates sla_breach hr_task
+      PASS  sla satisfy
+      PASS  sla cancel
+      PASS  SLA without tasks still breaches clock
+      PASS  cross-tenant clock read denial
+      PASS  disable tasks blocks create
+      PASS  disable sla blocks clock
+      PASS  audit events present
+      PASS  legacy hr_task type still insertable
+      PASS  synthetic cleanup
+
+    32 passed, 0 failed
+    PHASE_A_SLICE2_DB_FULL_PASS
+STAGING_DB_RC=0

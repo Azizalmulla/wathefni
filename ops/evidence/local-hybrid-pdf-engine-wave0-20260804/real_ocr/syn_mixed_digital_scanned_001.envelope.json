@@ -1,0 +1,104 @@
+{
+  "contract": "document_envelope@1",
+  "company_code": "WATHEFNI",
+  "subject_type": "other",
+  "subject_key": "syn_mixed_digital_scanned_001",
+  "file_id": null,
+  "content_sha256": "56a2013777256d5bb1c8291e03ff828c7303c2e2053a5ed6dddeb6b57029296c",
+  "source_channel": "real_ocr_proof_wave0",
+  "migration_batch_id": null,
+  "document_class": "cv",
+  "authority_label": "machine_extracted",
+  "filename": "syn_mixed_digital_scanned_001.pdf",
+  "processing": {
+    "route": "local_hybrid_pdf_engine",
+    "engine_id": "local_hybrid_pdf_engine_wave0",
+    "engine_version": "0.1.0",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "inspector_version": "0.2.6",
+    "inspector_extension_sha256": "f1613e52d611e9d7fc0382327120c0afe06d5af9910b9dfd0606b50f27f53a1d",
+    "request_id": null,
+    "pages_local": [
+      1
+    ],
+    "pages_ocr": [
+      2
+    ],
+    "pages_failed": [],
+    "page_methods": [
+      {
+        "page": 1,
+        "method": "native",
+        "reason": "accepted_native",
+        "inspector_needs_ocr": false,
+        "quality_forced_ocr": false,
+        "error": null,
+        "text_sha256": "fde02307ea46e63444b84c70986dcee7dd182d606212c728a6ee474836a30b84",
+        "char_count": 469
+      },
+      {
+        "page": 2,
+        "method": "ocr",
+        "reason": "inspector_needs_ocr",
+        "inspector_needs_ocr": true,
+        "quality_forced_ocr": false,
+        "error": null,
+        "text_sha256": "3aebdc5c31aa9767c25d7cf3544820b355d582d4661ba0a9014aadabcb89c92d",
+        "char_count": 176
+      }
+    ],
+    "quality_ok": true,
+    "confidence": null,
+    "estimated_cost_usd": 0.004,
+    "projected_cost_usd_if_ocr_executed": 0.004,
+    "billable_pages": 1,
+    "simulated_ocr": false,
+    "cache_hit": false,
+    "wall_ms": 987,
+    "limits": {
+      "max_pages": 15,
+      "max_bytes": 20971520,
+      "timeout_s": 180.0,
+      "max_retries": 2,
+      "max_projected_cost_usd": 0.12,
+      "allow_paid_ocr": true,
+      "cache_dir": "/opt/wathefni/evidence/local-hybrid-pdf-engine-wave0-20260804/cache/real"
+    },
+    "inspector": {
+      "pages_needing_ocr_raw": [
+        2
+      ],
+      "pages_with_tables": [],
+      "pages_with_columns": [],
+      "is_complex": false,
+      "ocr_reasons_by_page": []
+    },
+    "ocr": {
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "simulated": false,
+      "pages_requested_1idx": [
+        2
+      ],
+      "pages_requested_0idx": [
+        1
+      ],
+      "projected_cost_usd": 0.004,
+      "retries": 0,
+      "error": null,
+      "request_id": null,
+      "latency_ms": 985,
+      "billable_pages": 1,
+      "estimated_cost_usd": 0.004
+    },
+    "job_id": null,
+    "shadow": null
+  },
+  "text_ref": "inline:merged_markdown",
+  "structured_ref": null,
+  "retention_class": "ephemeral_synthetic",
+  "merged_markdown": "# Sara AlOtaibi\n\nSecurity Engineer Email: sara.alotaibi.6156@synthetic-eval.example Phone: +96559254345\n\nEXPERIENCE 2018-2020 Evalcorp Gulf — Security Engineer Delivered synthetic project 1 with measurable outcomes.\n\n2019-2021 Evalcorp Gulf — Security Engineer Delivered synthetic project 2 with measurable outcomes.\n\n2020-2022 Evalcorp Gulf — Security Engineer Delivered synthetic project 3 with measurable outcomes.\n\n## SKILLS: Python, Kubernetes, TypeScript, Docker\n\n\n# Noor AlQahtani\n\nHR Analyst\n\nEmail: noor.alqahtani.1757@synthetic-eval.example\n\nPhone: +96555318888\n\nSkills: Python, Kubernetes, Airflow, Arabic NLP\n\nScanned synthetic CV page",
+  "error": null,
+  "created_at": "2026-08-03T22:54:14.303794+00:00"
+}

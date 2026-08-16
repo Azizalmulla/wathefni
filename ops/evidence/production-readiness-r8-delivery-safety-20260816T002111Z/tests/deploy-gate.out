@@ -1,0 +1,346 @@
+{"ts":"2026-08-16T00:21:11.891658+00:00","event":"client_or_server_error","contract":"r8-delivery-safety-v1","severity":"error","event_id":"48cc1f6e-c8bf-4a5d-be95-ee488dc45315","surface":"hr_web","message":"unit password=hunter2 [redacted-email]","detail":{"token":"[redacted]"}}
+{"ts":"2026-08-16T00:21:11.891956+00:00","event":"error_event_persist_failed","contract":"r8-delivery-safety-v1","severity":"warning","surface":"hr_web"}
+    PRODUCTION READINESS R8 — delivery safety unit contracts
+
+    P1-23 — structured / redacted logging
+      PASS  R2 safe_detail still redacts password
+      PASS  R2 safe_detail still redacts token
+      PASS  R2 safe_detail still redacts nested operator_token
+      PASS  R8 keeps R2 secret redaction
+      PASS  R8 redacts email in remaining strings
+      PASS  R8 redacts phone in remaining strings
+      PASS  R8 does not weaken diagnostic keys
+      PASS  unknown surface normalizes
+      PASS  known surface kept
+      PASS  record_error_event does not collide on level
+      PASS  record_error_event redacts before persist attempt
+      PASS  record_error_event marks persist failure
+      PASS  event_id is not treated as a phone number
+
+    migrations — versioned forward ledger
+      PASS  at least one numbered SQL file exists
+      PASS  first file is 0001
+      PASS  file sequence is contiguous from 1
+      PASS  0001 creates error events table
+      PASS  0001 does not invent down SQL
+      PASS  runtime apply is forbidden by default
+      PASS  apply_pending refuses without WATHEFNI_SCHEMA_APPLY
+      PASS  rollback is restore-from-backup
+      PASS  rollback points at RESTORE_RUNBOOK
+      PASS  runbook documents R8 forward-only restore
+
+    health / ingest / failed-job visibility
+      PASS  health is liveness-only (no ensure_schema)
+      PASS  health does not leak legacy auth flags
+      PASS  ready includes delivery snapshot
+      PASS  ready returns 503 when migrations are not ok
+      PASS  ready still carries R2 link_signing
+      PASS  ingest/ops route registered: /dashboard/telemetry/error
+      PASS  ingest/ops route registered: /dashboard/mobile/telemetry/error
+      PASS  ingest/ops route registered: /app/telemetry/error
+      PASS  ingest/ops route registered: /dashboard/ops/delivery
+      PASS  client ingest is rate-limited
+      PASS  R2 denial hook is wired
+      PASS  backend exception ingest exists
+      PASS  client_error_report policy is additive
+      PASS  R2 login policy still present
+
+    P1-23/P1-24 — clients, CI, deploy gate
+      PASS  dashboard helper redacts before POST
+      PASS  dashboard boundary reports
+      PASS  setup console boundary reports
+      PASS  HR mobile uses allowlisted telemetry path
+      PASS  HR mobile boundary reports redacted payload
+      PASS  employee helper uses /app/telemetry/error
+      PASS  employee boundary still logs and reports
+      PASS  employee HR helper uses mobile telemetry path
+      PASS  employee HR boundary reports
+      PASS  CI workflow exists
+      PASS  CI runs R8 unit
+      PASS  CI runs R7 unit
+      PASS  CI runs R2 unit
+      PASS  CI does not SSH to the VPS
+      PASS  deploy gate script exists
+      PASS  deploy gate runs R8 unit
+      PASS  deploy gate runs R7 unit
+
+    R8_DELIVERY_SAFETY_UNIT_PASS
+    54 passed, 0 failed
+
+R7 mobile native safety — source contracts
+
+    PH-1…PH-4 — shared keyboard contract
+      PASS  hr-mobile helper uses padding on every platform
+      PASS  hr-mobile helper never hardcodes offset 0 for iOS
+      PASS  employee-mobile helper uses padding on every platform
+      PASS  employee-mobile helper never hardcodes offset 0 for iOS
+      PASS  standalone HR Screen wraps KeyboardAvoidingView + Android insets
+      PASS  employee HR Screen uses the same keyboard-safe primitive
+      PASS  employee PageScrollView enables keyboard insets on Android when opted in
+      PASS  PIN uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  HR Assistant uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  employee leave request uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  activation uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  unified sign-in uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  employee leave request opts into keyboardInsets
+      PASS  HR leave rejection and interview notes sit inside keyboard-safe Screen
+
+    P1-4 / P1-5 — leave queue and task actions
+      PASS  leave is a capability-gated workspace route
+      PASS  leave list and detail destinations are admitted
+      PASS  attendance/document prefix destinations are admitted
+      PASS  Home nav includes leave
+      PASS  leave index is registered
+      PASS  leave queue route file exists
+      PASS  LeaveQueueRoute loads GET /dashboard/mobile/leave
+      PASS  mobileApi.leave exists
+      PASS  TasksRoute wires resolve actions
+      PASS  taskResolve posts to backend resolve
+
+    P1-6 / P1-7 / P1-8 — dead chevrons, interview honesty, ranking
+      PASS  OperationalListView gates chevrons with canOpen
+      PASS  documents hide Review unless compliance + keys exist
+      PASS  today's shifts do not open unless they are swaps
+      PASS  alerts open only with a real destination
+      PASS  schedule interview is honest View interviews
+      PASS  candidates expose ranking note and stage filter
+
+    P1-9 — preboarding / probation reachability
+      PASS  MODULE_SURFACES still omits preboarding/probation tiles
+      PASS  composition exposes journey flags, not Home tiles
+      PASS  push defaults include preboarding and probation
+      PASS  Profile can open both journeys
+      PASS  Profile route gates journeys on features
+      PASS  Home journey cards are not destination tiles
+
+    EN/AR key parity
+      PASS  HR Mobile exact key parity
+      PASS  HR key present EN+AR: nav.leave
+      PASS  HR key present EN+AR: leave.queueEyebrow
+      PASS  HR key present EN+AR: leave.queueTitle
+      PASS  HR key present EN+AR: tasks.complete
+      PASS  HR key present EN+AR: candidates.rankingNote
+      PASS  HR key present EN+AR: candidate.viewInterviews
+      PASS  HR key present EN+AR: candidate.scheduleOnWeb
+      PASS  Employee App exact key parity
+      PASS  Employee key present EN+AR: home.preboarding
+      PASS  Employee key present EN+AR: home.probation
+      PASS  Employee key present EN+AR: profile.journeys
+      PASS  Employee key present EN+AR: profile.preboarding
+      PASS  Employee key present EN+AR: profile.probation
+
+    R7_MOBILE_NATIVE_SAFETY_UNIT PASS  50 passed, 0 failed
+R7_MOBILE_NATIVE_SAFETY_UNIT_PASS
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=missing
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=missing
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=missing
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+link signing secret unusable purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET reason=banned_known_value
+retired link secret ignored purpose=assessment var=WATHEFNI_ASSESSMENT_LINK_SECRET_PREVIOUS reason=banned_known_value
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+internal tenant token rejected company=WEAKCO reason=weak_or_missing
+break-glass token rejected reason=too_short
+break-glass token rejected reason=same_as_internal_token
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+{"ts":"2026-08-16T00:21:13.983281+00:00","event":"security_denial","contract":"r8-delivery-safety-v1","severity":"warning","route":"/internal/video-interviews/process-transcripts","denial_class":"internal_worker_forbidden","policy":null,"dimension":null,"principal_digest":"12ca17b49af2289436f303e0166030a2","company_code":null,"detail":{"secret_configured":"[redacted]"}}
+security denial not persisted route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+{"ts":"2026-08-16T00:21:13.983701+00:00","event":"security_denial","contract":"r8-delivery-safety-v1","severity":"warning","route":"/internal/video-interviews/process-transcripts","denial_class":"internal_worker_forbidden","policy":null,"dimension":null,"principal_digest":"12ca17b49af2289436f303e0166030a2","company_code":null,"detail":{"secret_configured":"[redacted]"}}
+security denial not persisted route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+{"ts":"2026-08-16T00:21:13.983818+00:00","event":"security_denial","contract":"r8-delivery-safety-v1","severity":"warning","route":"/internal/video-interviews/process-transcripts","denial_class":"internal_worker_forbidden","policy":null,"dimension":null,"principal_digest":"12ca17b49af2289436f303e0166030a2","company_code":null,"detail":{"secret_configured":"[redacted]"}}
+security denial not persisted route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden
+    PRODUCTION READINESS R2 — security hardening unit contracts
+
+    P0-2 — link signing secrets fail closed
+      PASS  assessment: committed dev constant rejected
+      PASS  video_interview: committed dev constant rejected
+      PASS  database URL rejected as signing key
+      PASS  dashboard token cannot be reused as signing key
+      PASS  short secret rejected
+      PASS  low-entropy secret rejected
+      PASS  missing secret rejected
+      PASS  dedicated strong secret accepted
+      PASS  assessment unavailable while unset
+      PASS  signing without a secret raises LinkSecretUnavailable
+      PASS  readiness reports link signing not ok
+      PASS  readiness never returns secret material
+      PASS  banned constant in env still fails closed
+      PASS  valid dedicated secret makes capability available
+      PASS  fingerprint is a short digest, not the secret
+      PASS  rotation accepts one retired key
+      PASS  retired banned constant is dropped
+
+    P0-2 — forged tokens from the removed fallbacks
+      PASS  assessment token forged with the old constant is rejected
+      PASS  video token forged with the old constant is rejected
+      PASS  token forged with the database URL is rejected
+      PASS  token signed by the dedicated secret verifies
+      PASS  token bound to its subject
+      PASS  tampered token rejected
+      PASS  expired token rejected
+      PASS  link issued before rotation still verifies
+      PASS  link stops verifying once the retired key is removed
+      PASS  capability unavailable with no secret
+      PASS  verification fails closed with no secret
+
+    P0-5 — internal endpoint classification and principals
+      PASS  every internal route in scope is classified
+      PASS  no ambiguous classification
+      PASS  destructive routes are break-glass, never tenant-routine
+      PASS  tenant-scoped routes all declare a company scope
+      PASS  classified: /orchestrator/audit/turns
+      PASS  classified: /orchestrator/audit/pending-actions
+      PASS  classified: /orchestrator/audit/action-results
+      PASS  classified: /orchestrator/posthire/documents/email-intake
+      PASS  classified: /orchestrator/debug/intake-quarantine/sweep
+      PASS  classified: /orchestrator/debug/intake-worker/run
+      PASS  no configuration means no principal
+      PASS  platform token resolves to a platform principal
+      PASS  tenant token resolves to its own company
+      PASS  unknown token resolves to nothing
+      PASS  weak tenant token is refused
+
+    P0-5 — break-glass credential separation
+      PASS  break-glass disabled by default
+      PASS  break-glass unconfigured by default
+      PASS  short break-glass token refused
+      PASS  break-glass token equal to the internal token is refused
+      PASS  distinct strong break-glass token accepted
+
+    P0-4 — internal worker channel
+      PASS  shared token is not a worker token by default
+      PASS  no worker secret + localhost is denied
+      PASS  shared internal token alone is denied
+      PASS  wrong worker token denied
+      PASS  correct dedicated worker token accepted
+      PASS  no localhost allowlist remains in the worker gate
+
+    P0-3 / P1-22 — rate-limit policy framework
+      PASS  policy registered: dashboard_login
+      PASS  policy registered: setup_operator_login
+      PASS  policy registered: calendar_guest_token
+      PASS  policy registered: internal_break_glass
+      PASS  every policy has a positive limit and window
+      PASS  every policy names its dimensions
+      PASS  login policies count failures, public token policies count requests
+      PASS  setup operator lock is at least as strict as dashboard
+      PASS  policies are tunable without a code change
+      PASS  override removal restores the default
+      PASS  identity digests are not reversible
+      PASS  empty principal is labelled, not hashed
+      PASS  passwords never reach the audit record
+      PASS  operator tokens never reach the audit record
+      PASS  bearer tokens never reach the audit record
+      PASS  signing secrets never reach the audit record
+      PASS  nested credentials are redacted too
+      PASS  diagnostic context survives redaction
+
+    P0-3 — the source dimension cannot be spoofed by the caller
+      PASS  a direct caller's X-Forwarded-For is ignored
+      PASS  behind the edge proxy the appended hop wins, not the caller's claim
+      PASS  a single trusted hop is still honoured
+      PASS  a peer with no header is used as-is
+      PASS  an unknown peer is labelled
+      PASS  the trusted proxy set is configurable for other topologies
+
+    R2 — source-level regressions that must not come back
+      PASS  no committed assessment dev secret in app.py
+      PASS  no committed video-interview dev secret in app.py
+      PASS  signing no longer falls back to the database URL
+      PASS  audit reads are company scoped
+      PASS  web_dashboard metadata alone is no longer tenant authority
+      PASS  dashboard turn authority marker exists
+
+    R2_SECURITY_UNIT_PASS
+    84 passed, 0 failed
+
+
+ RUN  v4.1.10 /Users/azizalmulla/Desktop/claw/apps/wathefni-hr-mobile
+
+
+ Test Files  11 passed (11)
+      Tests  45 passed (45)
+   Start at  03:21:14
+   Duration  254ms (transform 618ms, setup 0ms, import 788ms, tests 51ms, environment 1ms)
+
+PASS  zero-module Home has no entitlement tiles
+PASS  zero-module Home lays out wide
+PASS  zero-module keeps core surfaces
+PASS  zero-module hides optional tabs
+PASS  no separate compliance tab ever
+PASS  zero-module has no Schedule surface
+PASS  one-module Home shows exactly one tile
+PASS  one-module Home stays wide
+PASS  one-module shows only its tab
+PASS  shifts + attendance collapse into one Schedule tile
+PASS  a single Schedule tile lays out wide
+PASS  Schedule reports both contributing authorities
+PASS  shifts alone opens Schedule
+PASS  attendance alone opens Schedule
+PASS  four-module Home keeps canonical tile order
+PASS  four-module Home switches to the grid
+PASS  full-suite Home shows one tile per destination
+PASS  Inbox is never a Home module tile
+PASS  Bank is never a Home module tile
+PASS  performance-only Home shows the Performance tile
+PASS  performance is a Home destination, not a tab
+PASS  talent-only Home shows the Talent tile
+PASS  talent is a Home destination, not a tab
+PASS  learning-only Home shows the Learning tile
+PASS  learning is a Home destination, not a tab
+PASS  benefits-only Home shows the Benefits tile
+PASS  benefits is a Home destination, not a tab
+PASS  engagement-only Home shows the Engagement tile
+PASS  engagement is a Home destination, not a tab
+PASS  onboarding in progress shows the journey
+PASS  onboarding in progress is not demoted
+PASS  completed onboarding hides the journey
+PASS  completed onboarding is demoted
+PASS  disabled onboarding is demoted, not shown
+PASS  unloaded onboarding counts do not claim completion
+PASS  preboarding/probation are journeys, not Home destinations
+PASS  preboarding journey is entitled without becoming a tile
+PASS  probation journey is entitled without becoming a tile
+PASS  preboarding deep link opens when entitled
+PASS  probation deep link is refused when unentitled
+PASS  Home destinations are the entitled modules with no tab
+PASS  no destination duplicates a bottom tab
+PASS  a tabbed module is still an entitlement tile, just not a Home route
+PASS  every destination points at a registry route
+PASS  zero-module Home offers no destinations
+PASS  a documents-only company still gets its one destination
+PASS  a leave-only company has a tab and therefore no Home destination
+PASS  leave request action is the only primary action, and only when granted
+PASS  entitled deep link opens
+PASS  unentitled deep link is refused
+PASS  core deep link always opens
+PASS  the pre-bell Inbox path still opens the Inbox
+PASS  Inbox is reachable without any entitlement, from Home rather than a tab
+PASS  Payslips takes the freed tab slot only when entitled
+PASS  unknown deep link is refused
+PASS  empty deep link is refused
+PASS  Schedule opens on shifts alone and on attendance alone
+PASS  Schedule is refused without either authority
+PASS  the pre-Schedule paths still land on the combined surface
+PASS  an old attendance link is refused when neither authority is entitled
+PASS  Schedule declares no query parameters
+PASS  registry resolves an explicit alias
+PASS  registry canonicalizes the root path
+PASS  registry tolerates a trailing slash
+PASS  a path that merely contains a known word is refused
+PASS  absolute and scheme URLs are refused
+PASS  traversal is refused
+PASS  declared parameters are accepted and re-encoded
+PASS  undeclared or malformed parameters invalidate the link
+PASS  openableHref returns null instead of a dead route
+PASS  zero-entitlement client drops every server task
+PASS  full-suite client keeps the server task order and counts
+PASS  a task kind the client does not know is ignored, not guessed
+PASS  a revoked entitlement drops its task before it can be tapped
+PASS  every presented task points at a path the employee may open
+PASS  missing server tasks yield no tasks
+---
+PASS employee app composition shapes (76 checks)
+WATHEFNI_DEPLOY_GATE_OK

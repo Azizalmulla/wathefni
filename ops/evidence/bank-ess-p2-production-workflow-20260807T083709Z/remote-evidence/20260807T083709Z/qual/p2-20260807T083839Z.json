@@ -1,0 +1,216 @@
+{
+  "run_tag": "20260807T083839Z",
+  "unit": [
+    {
+      "case": "contract_version_p2",
+      "verdict": "PASS",
+      "detail": "bank_ess_v1_p2_production_workflow"
+    },
+    {
+      "case": "p1_mime_sniff_frozen",
+      "verdict": "PASS",
+      "detail": null
+    },
+    {
+      "case": "wrong_document_type_flag",
+      "verdict": "PASS",
+      "detail": {
+        "status": "extracted",
+        "confidence": 0.7,
+        "field_confidence": {},
+        "proposed": {
+          "bank_name": "X"
+        },
+        "warnings": [
+          "wrong_document_type"
+        ],
+        "unreadable_reason": null,
+        "needs_manual_fallback": false,
+        "uncertain": false,
+        "missing_iban": true,
+        "wrong_document_type": true,
+        "authoritative": false,
+        "provider": null,
+        "model": null,
+        "document_type": "passport",
+        "masked": false
+      }
+    },
+    {
+      "case": "p1_hr_masking_frozen",
+      "verdict": "PASS",
+      "detail": {
+        "iban": "**************************9548",
+        "bank_name": "Gulf Bank"
+      }
+    }
+  ],
+  "live": [
+    {
+      "case": "seed_request",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "case": "seed_effective",
+      "verdict": "PASS",
+      "detail": {
+        "fp": "5425959aa0fc0391"
+      }
+    },
+    {
+      "case": "upload_extract_rich",
+      "verdict": "PASS",
+      "detail": {
+        "bank": "Gulf Bank",
+        "iban": "KW35\u20269548",
+        "status": "extracted",
+        "confidence": 1.0,
+        "authoritative": false
+      }
+    },
+    {
+      "case": "extract_non_authoritative",
+      "verdict": "PASS",
+      "detail": null
+    },
+    {
+      "case": "kw_iban_valid",
+      "verdict": "PASS",
+      "detail": {
+        "iban": "KW35\u20269548"
+      }
+    },
+    {
+      "case": "confirm_correct_submit",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200,
+        "state": "pending_hr",
+        "request_id": "a303616f-b62e-4b16-8e0e-92b76a788804"
+      }
+    },
+    {
+      "case": "duplicate_submit_blocked",
+      "verdict": "PASS",
+      "detail": {
+        "code": 409,
+        "error": "bank_request_already_active"
+      }
+    },
+    {
+      "case": "idempotent_resubmit",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200,
+        "idempotent": true
+      }
+    },
+    {
+      "case": "invalid_kw_iban_rejected",
+      "verdict": "PASS",
+      "detail": {
+        "code": 422,
+        "error": "bank_account_invalid"
+      }
+    },
+    {
+      "case": "resubmit_with_evidence",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200,
+        "request_id": "de88f30b-ee3a-4ebe-9479-f68905fd1306"
+      }
+    },
+    {
+      "case": "effective_unchanged_until_apply",
+      "verdict": "PASS",
+      "detail": {
+        "seed": "5425959aa0fc0391",
+        "mid": "5425959aa0fc0391"
+      }
+    },
+    {
+      "case": "submit_did_not_write_verified",
+      "verdict": "PASS",
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "case": "evidence_private",
+      "verdict": "PASS",
+      "detail": null
+    },
+    {
+      "case": "hr_current_vs_proposed_vs_extracted",
+      "verdict": "PASS",
+      "detail": {
+        "changed": [
+          "account_holder",
+          "account_number",
+          "bank_name",
+          "branch",
+          "iban",
+          "swift"
+        ],
+        "extract_status": "extracted",
+        "extract_iban": "**************************9548"
+      }
+    },
+    {
+      "case": "hr_extraction_masked",
+      "verdict": "PASS",
+      "detail": {
+        "leaked": false,
+        "extract_iban": "**************************9548"
+      }
+    },
+    {
+      "case": "hr_verify_not_effective",
+      "verdict": "PASS",
+      "detail": {
+        "state": "pending_payroll",
+        "fp": "5425959aa0fc0391"
+      }
+    },
+    {
+      "case": "apply_writes_effective",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200,
+        "fp": "0f349ce848ab5e4b",
+        "expected": "0f349ce848ab5e4b"
+      }
+    },
+    {
+      "case": "aziz_effective_unchanged",
+      "verdict": "PASS",
+      "detail": {
+        "before": "0f349ce848ab5e4b",
+        "after": "0f349ce848ab5e4b"
+      }
+    },
+    {
+      "case": "ar_next_step",
+      "verdict": "PASS",
+      "detail": {
+        "msg": "\u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u0628\u0646\u0643\u064a\u0629 \u0645\u0648\u062b\u0651\u0642\u0629. \u0623\u0631\u0633\u0644 \u062a\u063a\u064a\u064a\u0631\u064b\u0627 \u0625\u0630\u0627 \u0627\u062e\u062a\u0644\u0641 \u0634\u064a\u0621."
+      }
+    }
+  ],
+  "errors": [],
+  "fixture": {
+    "path": "/tmp/kw-bank-cert-realdoc.pdf",
+    "sha256": "3fdcda9ff90e5b995ff51eaa7adcd2e3d75f2c9fa0789cf47d567ebaf3f8b1b4",
+    "bytes": 553403
+  },
+  "summary": {
+    "unit": "4/4",
+    "live": "19/19",
+    "verdict": "PASS",
+    "errors": []
+  }
+}

@@ -1,0 +1,98 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5F — benefits surface (unit)
+      PASS  benefits customer enableable
+      PASS  benefits customer visible
+      PASS  learning still enableable
+      PASS  JA still enableable
+      PASS  talent still enableable
+      PASS  performance still enableable
+      PASS  ER now enableable after R5G
+      PASS  engagement now enableable after R5H
+      PASS  comp planning now enableable after R5I
+      PASS  workforce planning now enableable after R5J
+      PASS  benefits is catalog SKU
+      PASS  benefits people_surface off
+      PASS  benefits domain_authority_ready
+      PASS  benefits http_ready
+      PASS  benefits hr_web_ready
+      PASS  benefits employee_surface_ready
+      PASS  benefits manager not required
+      PASS  benefits manager not ready
+      PASS  benefits mobile not required
+      PASS  fail-closed skips Benefits namespaces
+      PASS  fail-closed skips ER namespaces
+      PASS  eligible ≠ enrolled
+      PASS  election ≠ coverage
+      PASS  waiver ≠ ineligibility
+      PASS  dependent exists ≠ covered
+      PASS  coverage ≠ provider confirmed
+      PASS  contribution ≠ deduction
+      PASS  handoff ≠ payroll execution
+      PASS  payroll optional
+      PASS  claims out
+      PASS  no invented Kuwait formulas
+      PASS  no manager private default
+      PASS  no duplicate dependent authority
+      PASS  C3 remains canonical
+      PASS  Setup remounts Benefits
+      PASS  Setup still remounts Learning
+      PASS  Setup still remounts JA
+      PASS  Setup remounts ER after R5G
+      PASS  Setup remounts Comp Planning after R5I
+      PASS  PostHire mounts Benefits workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace names eligibility boundary
+      PASS  workspace names contribution boundary
+      PASS  workspace does not invent claims
+      PASS  Page includes benefits
+      PASS  nav.benefits registered
+      PASS  nav.benefits has module key
+      PASS  benefits is a canonical posthire SKU
+      PASS  benefits is not a people-360 module
+      PASS  app registers Benefits HTTP
+      PASS  benefits.read permission exists
+      PASS  benefits.manage permission exists
+      PASS  benefits.eligibility permission exists
+      PASS  benefits.enroll permission exists
+      PASS  benefits.sensitive permission exists
+      PASS  employee feature benefits
+      PASS  notification flow benefits
+      PASS  manager fixture has no benefits perms
+      PASS  HTTP mentions /dashboard/benefits
+      PASS  HTTP mentions /app/benefits
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /plans
+      PASS  HTTP mentions /versions
+      PASS  HTTP mentions /eligibility
+      PASS  HTTP mentions /enrollments
+      PASS  HTTP mentions /waivers
+      PASS  HTTP mentions /dependents
+      PASS  HTTP mentions /coverage
+      PASS  HTTP mentions /contributions
+      PASS  HTTP mentions /handoffs
+      PASS  HTTP mentions /members
+      PASS  HTTP mentions /history
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP uses employee_app_context
+      PASS  HTTP refuses manager workspace
+      PASS  employee elect never confirms coverage
+      PASS  employee elect adapter never confirms
+      PASS  no second dependent master
+      PASS  no claims engine
+      PASS  no frontend financial authority in surfaces
+      PASS  employee composition has benefits
+      PASS  employee hub exists
+      PASS  employee plan exists
+      PASS  employee history exists
+      PASS  no HR mobile benefits admin
+      PASS  employee EN copy
+      PASS  employee AR copy
+      PASS  employee error is not empty copy
+      PASS  fail-closed no longer steals Benefits
+      PASS  fail-closed no longer steals ER
+
+    92 passed, 0 failed
+R5F_BENEFITS_SURFACE_UNIT_PASS

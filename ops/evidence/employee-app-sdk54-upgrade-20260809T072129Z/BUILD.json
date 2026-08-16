@@ -1,0 +1,16 @@
+{
+  "id": "25ec18f7-a4fc-459f-ab11-184b83d1b17c",
+  "status": "ERRORED",
+  "resolvedImage": "macos-sequoia-15.6-xcode-26.2",
+  "sdkVersion": "54.0.0",
+  "appVersion": "0.2.0",
+  "appBuildVersion": "21",
+  "error": {
+    "errorCode": "UNKNOWN_ERROR",
+    "message": "Unknown error. See logs of the Bundle JavaScript build phase for more information.",
+    "docsUrl": null
+  },
+  "logFileUrls": [
+    "https://storage.googleapis.com/eas-workflows-production/logs/e381fb7c-bf1b-4ff6-b9ac-6c2d904f67e8/25ec18f7-a4fc-459f-ab11-184b83d1b17c/2026-08-09T07%3A26%3A38Z-5c171b9e-bc85-4668-821a-cd955eec166a.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260809%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260809T072842Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=3445dd743f2919d7077e55e643c7d6c0e0e30562abb8e500e4abe803df98d543926bb9a3495f9c5b3b68ddace674871fffe6085cede547190bf3aedae4d752bc132ff140eec07ec7270dfa0fc52af8ce3a97f4bb46fff525b7dbb31044c84a38bbfae795c3e8ebc462f0e3bc5a440b74a38ad0cfa0a38a498c5bed851926aab6f9a8dc42d59dc612cddb14ea9e7841b43e6a69c85abbba1c6c66a10f4cf7247d6b8a043e9384128f2de1714d6b841a897bb536badafdf02afb71bd4f6d6fefca1777b0fcfe0dc1ad49b3417cf94760ab1cd0b888b046bd6316194883af2a31ccf835cce1dbf1803c00e261ad2725a1e17641cfcd6ca4063960c1cab4a77f7266"
+  ]
+}

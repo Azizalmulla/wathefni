@@ -1,0 +1,25 @@
+{
+  "health": "200",
+  "classifier_sha": "d97bae99e9d181daaadd384e070951902fa35243d14c92776bd20b712de0505b",
+  "classifier_version": "classifier.deterministic_v1.2",
+  "held_authority_sha": "8a3949eac6d72c7f18514810171298615e1fded40e81afba2ee91239305aab53",
+  "worker": "inactive",
+  "classification_conf": "[Service]\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_TENANTS=\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_SCHEMA=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_MANUAL=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_WORKERS=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_UI=off\n",
+  "unified_conf": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n",
+  "sidecars_and_synthetic": {
+    "candidate_classification_runs": 0,
+    "candidate_classification_suggestions": 0,
+    "candidate_classification_review_events": 0,
+    "talent_pool_classification_jobs": 0,
+    "taxonomy_tenant_nodes": 0,
+    "synthetic_applications": 0,
+    "synthetic_candidates": 0
+  },
+  "dashboard_marker_hits": [],
+  "dashboard_tree_sha_method2": "c7b8b954a48f14c2c3c03d4c7e330772259a4527a53fe6c612524868dbc91e02",
+  "dashboard_previous_accepted_tree_sha": "c7b8b954a48f14c2c3c03d4c7e330772259a4527a53fe6c612524868dbc91e02",
+  "backup_db_sha": "20db4f8c37706cf638145a9e0c2942559c465ba723141a77f1a2a8ace5fbcd14",
+  "rollback_sha": "7f0ab80cfdc3d1e5310a2b9ab0b4dc437a7fe289a5c4f7f63d07aeaf11e10ea1",
+  "final_governance_verdict": "NO_GO_UI_ARTIFACT_NOT_DEPLOYED",
+  "leave_state": "FULLY_OFF"
+}

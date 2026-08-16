@@ -1,0 +1,25 @@
+EXCEPTION (inferred from AppErrorBoundary + source mismatch; no Sentry DSN in app):
+  TypeError: syncLayoutLocale is not a function
+  (or equivalent call of undefined)
+
+USER-VISIBLE:
+  error.fatalTitle = "The app needs a fresh start" via AppErrorBoundary
+
+WHERE:
+  app/_layout.tsx AuthGate:
+    const { t, syncLayoutLocale } = useI18n()
+    useEffect(() => {
+      if (status === 'loading') return
+      void syncLayoutLocale()   // <-- crashes when undefined
+    }, [status, syncLayoutLocale])
+
+WHY OTA 326e2040 crashed:
+  Release tip _layout (expects syncLayoutLocale) was published on top of an
+  incomplete recovered mobile baseline whose src/i18n/index.tsx predates
+  syncLayoutLocale / syncAuthLocale. Bundle linked, then failed on first
+  post-loading auth paint.
+
+PROOF:
+  - broken OTA _layout === SRC _layout (calls syncLayoutLocale)
+  - broken OTA i18n/index.tsx !== SRC (missing syncLayoutLocale on context)
+  - AppErrorBoundary swallows the error and shows fatalTitle

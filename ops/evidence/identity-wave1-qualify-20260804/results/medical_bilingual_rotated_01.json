@@ -1,0 +1,375 @@
+{
+  "id": "medical_bilingual_rotated_01",
+  "label": {
+    "document_type": "medical",
+    "document_number": "MED-2023-4411",
+    "full_name_ar": "خالد فهد العازمي",
+    "full_name_en": "KHALED FAHAD ALAZEMI",
+    "nationality": "Kuwaiti",
+    "date_of_birth": "1983-05-19",
+    "issue_date": "2023-10-10",
+    "expiry_date": "2024-10-09",
+    "employer_or_sponsor": null,
+    "side": "single",
+    "lang": "bilingual",
+    "variant": "rotated",
+    "document_relationship": "standalone"
+  },
+  "mistral": {
+    "extraction_status": "extracted",
+    "extraction_error": null,
+    "confidence": 0.97,
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "cost_usd": 0.004,
+    "latency_ms": 2346,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "validation": {
+      "ok": true,
+      "issues": [],
+      "has_issue_date": true,
+      "has_expiry_date": true,
+      "has_dob": true
+    },
+    "duplicate_keys": {
+      "content_sha256": "a068c90ef22a8ee53137a985a78972f0e21a7504246799c8e1864d3f6d02a67f",
+      "identifier_key": "medical:med-2023-4411"
+    },
+    "fields": {
+      "document_type": {
+        "value": "medical",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "side": {
+        "value": "single",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_relationship": {
+        "value": "standalone",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_ar": {
+        "value": "خالد فهد العازمي",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_en": {
+        "value": "KHALED FAHAD ALAZEMI",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_number": {
+        "value": "MED-2023-4411",
+        "confidence": 0.99,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "nationality": {
+        "value": "Kuwaiti",
+        "confidence": 0.95,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "date_of_birth": {
+        "value": "1983-05-19",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issue_date": {
+        "value": "2023-10-10",
+        "confidence": 0.96,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "expiry_date": {
+        "value": "2024-10-09",
+        "confidence": 0.96,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employer_or_sponsor": {
+        "value": null,
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name": {
+        "value": "KHALED FAHAD ALAZEMI",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issued_date": {
+        "value": "2023-10-10",
+        "confidence": 0.96,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      }
+    },
+    "flat_fields": {
+      "document_type": "medical",
+      "document_number": "MED-2023-4411",
+      "full_name_ar": "خالد فهد العازمي",
+      "full_name_en": "KHALED FAHAD ALAZEMI",
+      "nationality": "Kuwaiti",
+      "date_of_birth": "1983-05-19",
+      "issue_date": "2023-10-10",
+      "expiry_date": "2024-10-09",
+      "employer_or_sponsor": null,
+      "side": "single",
+      "full_name": "KHALED FAHAD ALAZEMI"
+    },
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 9,
+      "scored": 9,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": true,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "arabic"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    },
+    "envelope_contract": "document_envelope@1",
+    "attempts": [
+      {
+        "attempt": 1,
+        "ok": true,
+        "latency_ms": 2346
+      }
+    ]
+  },
+  "gpt": {
+    "ok": true,
+    "extraction_status": "extracted",
+    "confidence": 0.99,
+    "provider": "gpt",
+    "model": "gpt-5.6-terra",
+    "cost_usd": 0.004812,
+    "latency_ms": 1756,
+    "fields": {
+      "document_type": "medical",
+      "document_number": "MED-2023-4411",
+      "full_name_ar": "خالد فهد العازمي",
+      "full_name_en": "KHALED FAHAD ALAZEMI",
+      "nationality": "Kuwaiti",
+      "date_of_birth": "1983-05-19",
+      "issue_date": "2023-10-10",
+      "expiry_date": "2024-10-09",
+      "employer_or_sponsor": null,
+      "side": "single",
+      "full_name": "KHALED FAHAD ALAZEMI"
+    },
+    "authoritative": false,
+    "raw": {
+      "document_type": "medical",
+      "document_number": "MED-2023-4411",
+      "issued_date": "2023-10-10",
+      "expiry_date": "2024-10-09",
+      "nationality": "Kuwaiti",
+      "full_name": "KHALED FAHAD ALAZEMI",
+      "full_name_ar": "خالد فهد العازمي",
+      "full_name_en": "KHALED FAHAD ALAZEMI",
+      "side": "single",
+      "employer_or_sponsor": null,
+      "date_of_birth": "1983-05-19",
+      "confidence": 0.99,
+      "reason": "Medical certificate; all primary identity and validity fields are visible."
+    },
+    "usage": {
+      "input_tokens": 1385,
+      "input_tokens_details": {
+        "cache_write_tokens": 1382,
+        "cached_tokens": 0
+      },
+      "output_tokens": 135,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "total_tokens": 1520
+    },
+    "api": "openai-responses",
+    "temperature_omitted_for_terra": true,
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 9,
+      "scored": 9,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": true,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "arabic"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    }
+  }
+}

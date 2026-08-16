@@ -1,0 +1,27 @@
+PASS off by default
+PASS aziz allowlisted
+PASS talal allowlisted
+PASS other employee denied
+PASS other company denied
+PASS civil_id wrong type blocks
+PASS reason wrong_media_item
+PASS has en correction
+PASS gpt_used false
+PASS identity mismatch blocks soft
+PASS reason identity_mismatch
+PASS soft uncertain not blocked
+PASS decision allow_uncertain
+PASS hr review recommended
+PASS hard blocks needs_review
+PASS photo that is ID blocks
+PASS looks_like_id_not_photo
+PASS personal photo allows
+PASS expired passport blocks
+PASS expired reason
+PASS tiny file blocks
+PASS file_too_small
+PASS route gpt false
+PASS docx anydoc flag
+PASS error code prefix
+PASS validation gpt false
+OK onboarding doc validation parity local smoke

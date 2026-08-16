@@ -1,0 +1,14 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-D7arwIkG.js
+BACKUP=/opt/wathefni/backups/production-pre-attendance-page-refinement-wave1-20260804T071332Z
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+PASS attendance-board
+PASS attendance-operations
+PASS attendance-exception-row
+PASS Show Operations
+PASS Request correction
+PASS Approve confirms
+PASS lockedDenied
+PASS stale
+PASS no_CorrectionRow
+PASS ar_hint
+STATIC_GATES_OK

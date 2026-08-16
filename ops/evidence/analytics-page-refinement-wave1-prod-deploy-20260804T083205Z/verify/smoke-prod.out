@@ -1,0 +1,19 @@
+PASS posthire_bundle_present — PostHire-CoNDfF7D.js
+PASS insights_marker
+PASS snapshot_marker
+PASS narrative_marker
+PASS patterns_marker
+PASS period_marker
+PASS comparison_marker
+PASS methodology_marker
+PASS triage_deeplink
+PASS no_analytics_attention_card
+PASS purpose_copy
+PASS arabic_surface
+PASS payroll_still_present
+PASS shifts_still_present
+PASS inbox_still_present
+ANALYTICS_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ANALYTICS_PAGE_WAVE1_SMOKE_OK
+SMOKE_OK

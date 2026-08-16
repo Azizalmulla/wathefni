@@ -1,0 +1,10 @@
+{
+  "en_suggested": true,
+  "en_open_followups": true,
+  "en_no_failed_delivery_phrase": true,
+  "ar_title": true,
+  "ar_role_arabic": true,
+  "ar_active": true,
+  "ar_no_plan_interviews_en": true,
+  "en_caught_up_absent_when_work": true
+}

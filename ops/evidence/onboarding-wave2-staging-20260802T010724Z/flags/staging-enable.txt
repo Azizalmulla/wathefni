@@ -1,0 +1,10 @@
+## PROD flags before (must stay off)
+WATHEFNI_ONBOARDING_SEED=off
+SYNTAX_OK
+active
+## STAGING process flags
+WATHEFNI_ONBOARDING_HR_MUTATE=on
+WATHEFNI_ONBOARDING_SEED=on
+## PROD after staging enable
+WATHEFNI_ONBOARDING_SEED=off
+active

@@ -1,0 +1,543 @@
+{
+  "marker": "unified_candidates_staging_v1",
+  "prefix": "UCSTG62CC7568",
+  "company": "WATHEFNI",
+  "results": [
+    {
+      "name": "feature_endpoint_reachable",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "feature": {
+          "ok": true,
+          "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+          "master_enabled": false,
+          "allowed_tenants": [],
+          "company_code": "WATHEFNI",
+          "enabled_for_company": false
+        }
+      }
+    },
+    {
+      "name": "flag_off_disables_company",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false
+      }
+    },
+    {
+      "name": "legacy_list_healthy_flag_off",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "total": 31,
+        "unified": false
+      }
+    },
+    {
+      "name": "profile_404_when_flag_off",
+      "pass": true,
+      "detail": 404
+    },
+    {
+      "name": "flag_on_for_wathefni",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": true,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true
+      }
+    },
+    {
+      "name": "view_all",
+      "pass": true,
+      "detail": {
+        "total": 6,
+        "keys": [
+          "UCSTG62CC7568-ACTIVE",
+          "UCSTG62CC7568-FAIL",
+          "UCSTG62CC7568-HELD-IR",
+          "UCSTG62CC7568-HELD-NR",
+          "UCSTG62CC7568-HIRED",
+          "UCSTG62CC7568-MULTICV"
+        ]
+      }
+    },
+    {
+      "name": "view_active",
+      "pass": true,
+      "detail": {
+        "total": 1,
+        "keys": [
+          "UCSTG62CC7568-ACTIVE"
+        ]
+      }
+    },
+    {
+      "name": "view_talent_pool",
+      "pass": true,
+      "detail": {
+        "total": 4,
+        "keys": [
+          "UCSTG62CC7568-FAIL",
+          "UCSTG62CC7568-HELD-IR",
+          "UCSTG62CC7568-HELD-NR",
+          "UCSTG62CC7568-MULTICV"
+        ]
+      }
+    },
+    {
+      "name": "view_hired",
+      "pass": true,
+      "detail": {
+        "total": 1,
+        "keys": [
+          "UCSTG62CC7568-HIRED"
+        ]
+      }
+    },
+    {
+      "name": "view_archived",
+      "pass": true,
+      "detail": {
+        "total": 1,
+        "keys": [
+          "UCSTG62CC7568-ARCH"
+        ]
+      }
+    },
+    {
+      "name": "view_restricted",
+      "pass": true,
+      "detail": {
+        "total": 1,
+        "keys": [
+          "UCSTG62CC7568-REST"
+        ]
+      }
+    },
+    {
+      "name": "held_job_not_linked",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "held_status_talent_pool",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "held_assessment_dash",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "held_comm_no_outreach",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "held_hides_imp",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "live_keeps_job",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no_duplicate_held",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "held_gate_shortlist",
+      "pass": true,
+      "detail": 422
+    },
+    {
+      "name": "held_gate_reject",
+      "pass": true,
+      "detail": 422
+    },
+    {
+      "name": "held_gate_hire",
+      "pass": true,
+      "detail": 422
+    },
+    {
+      "name": "held_gate_notify",
+      "pass": true,
+      "detail": 409
+    },
+    {
+      "name": "held_gate_evaluation",
+      "pass": true,
+      "detail": 409
+    },
+    {
+      "name": "held_gate_assessment",
+      "pass": true,
+      "detail": 409
+    },
+    {
+      "name": "profile_loaded",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "snapshot_immutable_flag",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "sender_provenance_separate",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "link_to_job_disabled",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "no_negative_missing_facts",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "fact_preview",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "preview": true,
+        "company_code": "WATHEFNI",
+        "app_key": "UCSTG62CC7568-HELD-NR",
+        "action": "correct",
+        "fact_path": "languages",
+        "new_value": [
+          "English"
+        ],
+        "previous_value": null,
+        "note": null,
+        "confirmation_required": true,
+        "message": "Confirm to append an immutable HR fact-review event. Extraction snapshots are never overwritten."
+      }
+    },
+    {
+      "name": "fact_commit",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "app_key": "UCSTG62CC7568-HELD-NR",
+        "event": {
+          "event_id": "c117d916-8d1e-45c9-a056-14a4c64d5afa",
+          "company_code": "WATHEFNI",
+          "app_key": "UCSTG62CC7568-HELD-NR",
+          "document_version_id": null,
+          "extraction_version_id": null,
+          "fact_path": "languages",
+          "action": "correct",
+          "previous_value": null,
+          "new_value": [
+            "English"
+          ],
+          "evidence_refs": [],
+          "note": "unified_candidates_staging_v1",
+          "actor_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+          "actor_email": "r1d-owner@wathefni.staging.invalid",
+          "supersedes_event_id": null,
+          "created_at": "2026-07-25T14:39:25.247943+00:00"
+        },
+        "preview": false
+      }
+    },
+    {
+      "name": "fact_append_only",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "fact_supersede",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "body": {
+          "ok": true,
+          "company_code": "WATHEFNI",
+          "app_key": "UCSTG62CC7568-HELD-NR",
+          "event": {
+            "event_id": "3747094c-712c-4ba5-82ff-d3228be2dd34",
+            "company_code": "WATHEFNI",
+            "app_key": "UCSTG62CC7568-HELD-NR",
+            "document_version_id": null,
+            "extraction_version_id": null,
+            "fact_path": "skills",
+            "action": "supersede",
+            "previous_value": null,
+            "new_value": [
+              "Excel"
+            ],
+            "evidence_refs": [],
+            "note": "unified_candidates_staging_v1",
+            "actor_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+            "actor_email": "r1d-owner@wathefni.staging.invalid",
+            "supersedes_event_id": "845badbd-98e5-4b0a-8462-d977b1a4f956",
+            "created_at": "2026-07-25T14:39:25.298112+00:00"
+          },
+          "preview": false
+        }
+      }
+    },
+    {
+      "name": "saved_view_create",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "view": {
+          "view_id": "7e9fdb82-10ba-422a-ace6-9e4a043154b3",
+          "company_code": "WATHEFNI",
+          "actor_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+          "name": "UCSTG62CC7568-talent",
+          "filters": {
+            "view": "talent_pool",
+            "marker": "unified_candidates_staging_v1"
+          },
+          "created_at": "2026-07-25T14:39:25.313571+00:00",
+          "updated_at": "2026-07-25T14:39:25.313571+00:00"
+        }
+      }
+    },
+    {
+      "name": "saved_view_list",
+      "pass": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "views": [
+          {
+            "view_id": "7e9fdb82-10ba-422a-ace6-9e4a043154b3",
+            "company_code": "WATHEFNI",
+            "actor_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+            "name": "UCSTG62CC7568-talent",
+            "filters": {
+              "view": "talent_pool",
+              "marker": "unified_candidates_staging_v1"
+            },
+            "created_at": "2026-07-25T14:39:25.313571+00:00",
+            "updated_at": "2026-07-25T14:39:25.313571+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "saved_view_delete",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "view_id": "7e9fdb82-10ba-422a-ace6-9e4a043154b3"
+      }
+    },
+    {
+      "name": "search_reasons_present",
+      "pass": true,
+      "detail": [
+        "Matched extracted fact"
+      ]
+    },
+    {
+      "name": "intake_operations",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "keys": [
+          "company_code",
+          "buckets",
+          "attention_count",
+          "banner",
+          "malware_release_forbidden",
+          "note"
+        ]
+      }
+    },
+    {
+      "name": "intake_attention",
+      "pass": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "attention_count": 3,
+        "banner": "3 CVs need processing attention",
+        "link": "/intake-operations"
+      }
+    },
+    {
+      "name": "rollback_legacy_healthy",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "unified": false
+      }
+    },
+    {
+      "name": "rollback_preserves_fact_events",
+      "pass": true,
+      "detail": {
+        "before": 3,
+        "after": 3
+      }
+    },
+    {
+      "name": "rollback_no_job_binding",
+      "pass": true,
+      "detail": {
+        "status": "needs_role",
+        "position_code": ""
+      }
+    },
+    {
+      "name": "flag_reenable",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": true,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true
+      }
+    },
+    {
+      "name": "pack_smoke-test-canonical-recruiting-lifecycle.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-offer-lifecycle.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-prehire-overview-unit.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-prehire-assistant-parity.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_test_unified_candidates.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_local-qualify-unified-candidates.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "zero_residue",
+      "pass": true,
+      "detail": {
+        "applications": 0,
+        "facts": 0,
+        "views": 0,
+        "removed": {
+          "fact_review_events": 3,
+          "saved_views": 0,
+          "governance": 1,
+          "semantic": 0,
+          "files": 2,
+          "documents": 0,
+          "applications": 8,
+          "candidates": 2,
+          "outbound": 0,
+          "rank_evals": 0,
+          "lifecycle": 0,
+          "assessments": 0
+        }
+      }
+    }
+  ],
+  "failed": [],
+  "packs": [
+    {
+      "pack": "smoke-test-canonical-recruiting-lifecycle.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-offer-lifecycle.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-prehire-overview-unit.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-prehire-assistant-parity.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "test_unified_candidates.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "local-qualify-unified-candidates.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "ops/candidates-c01-staging-matrix.py",
+      "status": "present_not_auto_run",
+      "reason": "Requires dedicated staging matrix credentials/runtime; recorded as present for manual/CI gate"
+    },
+    {
+      "pack": "smoke-test-bulk-cv-import.py",
+      "status": "present_not_auto_run",
+      "reason": "Requires dedicated staging matrix credentials/runtime; recorded as present for manual/CI gate"
+    },
+    {
+      "pack": "smoke-test-tiered-intake.py",
+      "status": "present_not_auto_run",
+      "reason": "Requires dedicated staging matrix credentials/runtime; recorded as present for manual/CI gate"
+    },
+    {
+      "pack": "smoke-test-interview-workflow.py",
+      "status": "present_not_auto_run",
+      "reason": "Requires dedicated staging matrix credentials/runtime; recorded as present for manual/CI gate"
+    },
+    {
+      "pack": "smoke-test-summary-counts.py",
+      "status": "present_not_auto_run",
+      "reason": "Requires dedicated staging matrix credentials/runtime; recorded as present for manual/CI gate"
+    }
+  ],
+  "flag_final": {
+    "master": "on",
+    "tenants": "WATHEFNI"
+  },
+  "pass_count": 50,
+  "fail_count": 0,
+  "verdict": "GO_STAGING_QUALIFIED"
+}

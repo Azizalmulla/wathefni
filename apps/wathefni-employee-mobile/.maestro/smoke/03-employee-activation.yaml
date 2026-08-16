@@ -1,0 +1,33 @@
+# Smoke: Employee phone + activation code → employee home.
+# Requires env: MAESTRO_EMPLOYEE_PHONE (local 8 digits), MAESTRO_EMPLOYEE_CODE
+# Prefer a freshly provisioned QA invite (Aziz/Talal canary tooling) — codes expire.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - employee
+  - auth
+  - requires_credentials
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.method.phone"
+    timeout: 45000
+- tapOn:
+    id: "e2e.auth.method.phone"
+- tapOn:
+    id: "e2e.auth.employee.phone"
+- inputText: ${MAESTRO_EMPLOYEE_PHONE}
+- tapOn:
+    id: "e2e.auth.employee.code"
+- inputText: ${MAESTRO_EMPLOYEE_CODE}
+- tapOn:
+    id: "e2e.auth.employee.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.employee.home"
+    timeout: 60000
+- assertVisible:
+    id: "e2e.tab.employee.home"
+- takeScreenshot: employee-home-after-activation

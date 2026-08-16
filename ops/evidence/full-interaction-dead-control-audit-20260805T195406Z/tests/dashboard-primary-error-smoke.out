@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/lib/apiErrorContract.test.ts
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  23:55:08
+   Duration  884ms (transform 91ms, setup 129ms, import 82ms, tests 7ms, environment 567ms)
+

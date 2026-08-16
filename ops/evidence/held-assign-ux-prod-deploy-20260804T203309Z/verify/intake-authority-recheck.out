@@ -1,0 +1,9 @@
+{
+  "held_status_counts": [
+    {
+      "status": "needs_role",
+      "n": 2
+    }
+  ]
+}
+INTAKE_HELD_ROWS_PRESERVED

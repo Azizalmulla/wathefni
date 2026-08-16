@@ -1,0 +1,103 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5H — engagement surface (unit)
+      PASS  engagement customer enableable
+      PASS  engagement customer visible
+      PASS  ER still enableable
+      PASS  benefits still enableable
+      PASS  learning still enableable
+      PASS  comp planning now enableable after R5I
+      PASS  workforce planning now enableable after R5J
+      PASS  engagement is catalog SKU
+      PASS  engagement people_surface off
+      PASS  engagement audience is employee
+      PASS  engagement domain_authority_ready
+      PASS  engagement http_ready
+      PASS  engagement hr_web_ready
+      PASS  engagement employee_surface_ready
+      PASS  engagement manager_surface_ready
+      PASS  engagement mobile not required
+      PASS  engagement mobile not ready
+      PASS  fail-closed skips engagement namespaces
+      PASS  fail-closed skips comp planning after R5I
+      PASS  anonymous ≠ identified
+      PASS  participation ≠ answer mapping
+      PASS  suppressed ≠ zero
+      PASS  result ≠ action plan
+      PASS  action plan ≠ ER
+      PASS  no auto ER
+      PASS  no engagement AI
+      PASS  no universal score
+      PASS  recognition out
+      PASS  empty manager ≠ company-wide
+      PASS  export obeys suppression
+      PASS  assistant mutations out
+      PASS  C5 remains canonical
+      PASS  min_n default 5
+      PASS  threshold upward only
+      PASS  complementary suppression
+      PASS  enps explicit only
+      PASS  Setup remounts Engagement
+      PASS  Setup still remounts ER
+      PASS  Setup still remounts Benefits
+      PASS  Setup remounts Comp Planning after R5I
+      PASS  Setup remounts Workforce Planning after R5J
+      PASS  PostHire mounts Engagement workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace names suppression
+      PASS  workspace names action-plan boundary
+      PASS  403 is not empty-surveys copy
+      PASS  Page includes engagement
+      PASS  nav.engagement registered
+      PASS  nav allows manager or read
+      PASS  engagement is a canonical posthire SKU
+      PASS  engagement is not a people-360 module
+      PASS  app registers Engagement HTTP
+      PASS  engagement.read permission exists
+      PASS  engagement.manage permission exists
+      PASS  engagement.launch permission exists
+      PASS  engagement.results permission exists
+      PASS  engagement.manager permission exists
+      PASS  engagement.actions permission exists
+      PASS  engagement.export permission exists
+      PASS  notification flow engagement
+      PASS  manager fixture has engagement.manager
+      PASS  manager fixture has no engagement.manage
+      PASS  viewer fixture has no engagement admin
+      PASS  HR full has engagement.read
+      PASS  HTTP mentions /dashboard/engagement
+      PASS  HTTP mentions /app/engagement
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /surveys
+      PASS  HTTP mentions /versions
+      PASS  HTTP mentions /campaigns
+      PASS  HTTP mentions /launch
+      PASS  HTTP mentions /results
+      PASS  HTTP mentions /segments
+      PASS  HTTP mentions /action-plans
+      PASS  HTTP mentions /history
+      PASS  HTTP mentions /export
+      PASS  HTTP mentions /manager
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP uses employee_app_context
+      PASS  HTTP refuses manager admin workspace
+      PASS  no HR Mobile engagement namespace
+      PASS  no second survey engine
+      PASS  no recognition
+      PASS  no AI scoring
+      PASS  export wraps suppression
+      PASS  assistant wrapper exists
+      PASS  employee hub exists
+      PASS  employee survey exists
+      PASS  no HR mobile engagement dir
+      PASS  employee EN copy
+      PASS  employee AR copy
+      PASS  employee composition has engagement
+      PASS  fail-closed no longer steals Engagement
+      PASS  fail-closed no longer steals employee Engagement
+      PASS  fail-closed no longer steals Compensation Planning
+
+    97 passed, 0 failed
+R5H_ENGAGEMENT_SURFACE_UNIT_PASS

@@ -1,0 +1,661 @@
+{
+  "mode": "apply",
+  "database": "wathefni",
+  "generated_at": "2026-08-01T01:52:42.987377+00:00",
+  "null_total": 722,
+  "class_counts": {
+    "quarantine_orphan_no_application": 690,
+    "backfill_unambiguous_application": 32
+  },
+  "follow_up_class_counts": {
+    "quarantine_orphan_no_application": 448,
+    "backfill_unambiguous_application": 13
+  },
+  "backfill_count": 32,
+  "ambiguous_count": 0,
+  "orphan_count": 690,
+  "backfill_sample": [
+    {
+      "delivery_id": "backfill-aziz-finance-questions-20260505",
+      "subject_key": "96598900677-WATHEFNI-FINANCE",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-12504d96-8b69-401e-922c-d2c4339140a6",
+      "subject_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-4411e886-e612-4eb4-b0fb-3bdfbab710cf",
+      "subject_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-82d25271-5046-4302-b3aa-f5bfbc6a6522",
+      "subject_key": "96597485758-WATHEFNI-HR",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-9bf6fdf0-f803-43e7-93e5-2068738ab815",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-4cfb0222-da95-47c2-8d65-207aeac1b27f",
+      "subject_key": "96555550133-WATHEFNI-ACCOUNTING",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-abd3b217-8c56-48f0-b1c8-13561543dd41",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-1088aaa4-32a1-46b0-89e3-6a06d0ef0612",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-6babc06b-ce89-4419-b650-525030e42489",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-d276f398-a1a0-4206-9dd6-a988434c9241",
+      "subject_key": "96598900677-WATHEFNI-HR",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-6162046b-6ba9-47f8-99ad-033f6c44c447",
+      "subject_key": "96598900677-WATHEFNI-HR",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-731d743e-1641-4e50-b746-c1cae54e922f",
+      "subject_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-ebab11c6-d1fc-4f71-9221-ff0e89f438de",
+      "subject_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-fa446853-8650-480d-ab57-a75942d4cbd0",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-539a544e-1f4b-4c1a-9491-b0219809f23a",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-0620bb7d-8150-4566-b4b7-b6570166a497",
+      "subject_key": "96597485758-WATHEFNI-HR",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-a5e92172-2e00-4fdc-911b-f403e3203a7c",
+      "subject_key": "96597485758-WATHEFNI-HR",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-5d6112d9-7170-45c3-9d55-499ad1f8c620",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-75474408-62e0-47ea-9416-ddb141c0aa2d",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-2cc1ea2e-158f-4371-9a45-382c2f85061f",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-520a2b5a-c3a8-48f5-a980-d023bef5d03b",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-7c58ec04-91e5-4afe-b925-12279c78dfc5",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-5ae06cd2-5ca7-430e-88e9-899f008e7baa",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-7f361e4e-84f1-4e56-b545-be697364f18c",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-6e0f6639-aae5-43e8-bede-a627ea4617aa",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-7c597f9b-5a21-443e-87b2-47939ae1f931",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-8808453f-b1a1-4178-8679-73dc0318a8cb",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-2e69ecc6-8de1-42ea-bca7-1342df57a3b9",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-d50db332-1644-4bb3-a5fc-382d7692ff83",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-fcd90de4-4e8e-432d-9990-169dfe390516",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    },
+    {
+      "delivery_id": "orchestrator-2f037019-2973-4d72-a198-7c44d311e460",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-90fbaf15-b9a7-434a-9f94-c79a14be7bb8",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "owner_company_code": "WATHEFNI",
+      "follow_up_relevant": false
+    }
+  ],
+  "ambiguous_rows": [],
+  "orphan_follow_up_sample": [
+    {
+      "delivery_id": "octopus-1777995034296-y3uh4r4v",
+      "subject_key": null,
+      "status": "failed",
+      "last_error": "AI Octopus request failed: 200 {\"success\":false,\"msg\":\"\",\"errors\":{\"message\":\"Invalid conversation_id provided\"}}",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null
+      }
+    },
+    {
+      "delivery_id": "orchestrator-4dc5ebe6-e3ce-42a1-820c-1d11712d7685",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-2866248b-c144-4cda-9735-39b195ff686a",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-e055f3e7-ea49-4e3d-9cc4-3088458a0a78",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-da667cba-d6cb-4ed3-9f94-caa58c91dcfc",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-acdccb35-5f54-436b-a149-ea281a32b046",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-5d626f66-94e9-4c46-8e53-11dddef90133",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-bdb0b637-c91e-4bf4-8ef0-b4fe0dbd55e6",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "ai_octopus_send_rejected",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-84195544-c7af-4479-8068-f2c362ee59f1",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-f123f7a1-7768-407c-982a-19e2179c4a1b",
+      "subject_key": "posthire-smoke",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null
+      }
+    },
+    {
+      "delivery_id": "orchestrator-e513e092-aa5d-4d26-b942-5f8b4fa4dc4c",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-15d870b9-9236-49b2-ae5e-af45322be8eb",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-ce73cab4-a77b-41a8-bbbc-ff8905c5efc4",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-c4fc18f9-37c7-4783-ace9-0afa303a60ec",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-0544bb19-759e-448a-b0a7-0a57c2ff7a70",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-c1cb3d62-b241-4a3d-9ae8-fd5c0a9a53a1",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-eeb1e8df-550e-4d12-933b-a64ab9c2b6c0",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-56c418f4-8ea1-4774-8b22-9beafeba4ab4",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-907930fc-141e-4e5b-8126-db7084aa9ddf",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-c0e8f2a7-fa50-4f9e-ab24-80d9d3ba8dcb",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-b1121273-f9c1-4252-bbee-beb1b0047dcd",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-7331be72-65d9-47d1-bce3-a5df653e18b1",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-252277e1-cd43-426a-8501-8bb82bde22e0",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-9891ce7b-0a14-4684-a97b-45e0361f240e",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-7897dbd9-ce02-40c8-bcb3-ff0913445003",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-633b5161-c3b1-4304-abb7-b4518510901f",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-3eaaec04-d788-44d1-9f1a-6dca3efc8d2a",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-0ee077fd-1e78-478b-a9ef-91733bc39adc",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-7e098df2-bd91-4f55-9155-d588ef1be64a",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-49909364-8934-432b-aa45-b92b6accf062",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-e5727095-cf7e-4d33-b30d-8f7c9d14de4e",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-5fb1bd55-8487-460a-ba60-d0c53a461a5c",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-5fb5c50d-6f85-4657-a060-70f4e5c3e0b0",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-f8e77b12-9921-420d-add6-55313efccf86",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-08e091a7-2eb5-4fda-9174-ac5eb6ce8e48",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_closed",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-5e1e9e39-83b4-4cdd-b5df-c1be45b883da",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-8ec522e7-f3d0-4e07-ac1b-30b59ae42347",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-d5d3e048-9375-4edc-8c10-af8bbea0cd8a",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-8ed87794-9f42-4b16-96d8-ed7df528adb3",
+      "subject_key": "WATHEFNI-96566363363",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    },
+    {
+      "delivery_id": "orchestrator-9b716162-fe86-4fd1-b251-0e3a544b4e3f",
+      "subject_key": "WATHEFNI-96597727743",
+      "status": "failed",
+      "last_error": "conversation_inactive",
+      "signals": {
+        "account_id_is_company": false,
+        "payload_company_code": null,
+        "subject_key_embeds_wathefni": true
+      }
+    }
+  ],
+  "applied": {
+    "backfilled": 32,
+    "quarantined": 690
+  },
+  "wathefni_strict_after": {
+    "apps": 4,
+    "people": 2,
+    "apps_with_null_followup_events": 0
+  }
+}

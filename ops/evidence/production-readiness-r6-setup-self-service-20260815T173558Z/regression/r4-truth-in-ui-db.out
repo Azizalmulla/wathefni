@@ -1,0 +1,15 @@
+    PRODUCTION READINESS R4 — notification suppression (staging DB)
+    tenants: R4ONF89C6C / R4OFFF89C6C
+      PASS  enabled module is not suppressed
+      PASS  enabled module does not return source_module_disabled
+      PASS  disabled module suppresses new notification
+      PASS  disabled module ok is false
+      PASS  disabled module delivery_status is module_disabled
+      PASS  disabled module created no new employee_messages row
+      PASS  historical notification row preserved
+      PASS  re-enabled module is not suppressed
+      PASS  re-enabled module can emit again
+
+    9 passed, 0 failed
+    R4_TRUTH_IN_UI_DB_PASS
+STAGING_RC=0

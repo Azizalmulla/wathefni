@@ -1,0 +1,8 @@
+SHW3B prod browser canary tag=19316FC5
+PASS  prod_db_wathefni
+PASS  unsupported_actions_plural_405
+PASS  canonical_create_post_ok
+FATAL Page.wait_for_selector: Timeout 20000ms exceeded.
+Call log:
+  - waiting for locator("[data-testid='shifts-workspace']") to be visible
+

@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-08-05T22:02:56Z",
+  "base_url": "https://api.wathefni.ai",
+  "rows": [
+    {
+      "role": "owner",
+      "control": "state-model read",
+      "status_code": 200,
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "role": "owner",
+      "control": "assign mutation permission",
+      "status_code": 400,
+      "result": "pass",
+      "detail": {
+        "ok": false,
+        "error": "exception_not_found"
+      }
+    },
+    {
+      "role": "hr_manager",
+      "control": "state-model read",
+      "status_code": 200,
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "role": "hr_manager",
+      "control": "assign mutation permission",
+      "status_code": 400,
+      "result": "pass",
+      "detail": {
+        "ok": false,
+        "error": "exception_not_found"
+      }
+    },
+    {
+      "role": "viewer",
+      "control": "state-model read",
+      "status_code": 200,
+      "result": "pass",
+      "detail": null
+    },
+    {
+      "role": "viewer",
+      "control": "assign mutation permission",
+      "status_code": 403,
+      "result": "pass",
+      "detail": {
+        "error": "permission_denied",
+        "message": "You do not have permission to do this action.",
+        "company_code": "WATHEFNI",
+        "required_module": "attendance",
+        "required_permission": "attendance.manage",
+        "role": "viewer"
+      }
+    }
+  ]
+}

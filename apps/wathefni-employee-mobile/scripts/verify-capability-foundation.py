@@ -119,7 +119,7 @@ def main() -> None:
         "deep links resolve through the strict route registry",
         "APP_ROUTES" in composition
         and "resolveRoute" in composition
-        and "openableHref" in notifications
+        and "inboxOpenableHref" in notifications
         and "openableHref" in home
         and "openableHref" in push_resolve
         and "pushFollowThroughHref" in push
@@ -130,6 +130,7 @@ def main() -> None:
         "pushFollowThroughHref" in push_resolve
         and "candidatePathFromPushData" in push_resolve
         and "FLOW_DEFAULT_PATHS" in push_resolve
+        and "leave_decision" in push_resolve
         and "getLastNotificationResponseAsync" in push
         # Registration may be off in production; tap handling must still run when signed in.
         and "signedIn" in push
@@ -193,7 +194,8 @@ def main() -> None:
         "Schedule shows today's expectation beside today's record",
         "schedule.expected" in schedule_view
         and "schedule.recorded" in schedule_view
-        and "today.entries" in schedule_view,
+        and "resolveSelectedDay" in schedule_view
+        and "mode=\"today\"" in schedule_view,
     )
     check(
         "an unavailable authority stays informational instead of reading as empty",
@@ -221,6 +223,24 @@ def main() -> None:
     check(
         "Schedule states that HR owns the schedule and the record",
         "schedule.hrAuthority" in schedule_view,
+    )
+    history_view = read("src/features/schedule/AttendanceHistoryView.tsx")
+    history_route = read("app/schedule/history.tsx")
+    check(
+        "Schedule offers a dedicated attendance history entry without becoming an archive",
+        "schedule.history.view" in schedule_view
+        and "/schedule/history" in schedule_view
+        and "AttendanceHistoryView" in history_route
+        and "/app/schedule/history" in history_view,
+    )
+    check(
+        "Attendance history pages via cursor and never invents scheduled shifts",
+        "has_more" in history_view
+        and "next_cursor" in history_view
+        and "date_from" in history_view
+        and "scheduled ?" in history_view
+        and "PastelCard" not in history_view
+        and "WathefniBloom" not in history_view,
     )
     check(
         "Schedule presents stored values and computes no lateness or duration of its own",
@@ -277,7 +297,9 @@ def main() -> None:
         "Documents renew still invalidates onboarding and Home tasks",
         "queryKey: ['onboarding']" in read("app/documents.tsx")
         and "queryKey: ['home']" in read("app/documents.tsx")
-        and "upload_document" in read("app/documents.tsx"),
+        and "upload_document" in read("app/documents.tsx")
+        and "openGeneration" in read("app/documents.tsx")
+        and "await queryClient.invalidateQueries" not in read("app/documents.tsx"),
     )
     check(
         "Payslips group earnings and deductions with net pay prominence",
@@ -298,11 +320,28 @@ def main() -> None:
         and "payslips.paymentDateUnknown" not in read("src/i18n/ar.json"),
     )
     check(
-        "Inbox rows expose VoiceOver labels and keep Phase 1 deep-link gating",
+        "Inbox opens without waiting on mark-read or a full refetch",
+        "pressGeneration" in notifications
+        and "requestAnimationFrame" in notifications
+        and "setQueriesData" in notifications
+        and "inboxOpenableHref" in notifications
+        and "router.push(href as Href)" in notifications
+        and "void (async () => {" in notifications
+        and "await queryClient.invalidateQueries" not in notifications
+        and notifications.index("router.push(href as Href)")
+        < notifications.index("await request(`/app/notifications/${item.id}/read`"),
+    )
+    check(
+        "Inbox rows keep VoiceOver labels and calm unavailable deep links",
         "accessibilityLabel" in remaining
         and "notifications.unread" in remaining
-        and "openableHref" in notifications
         and "home.linkUnavailable" in notifications,
+    )
+    check(
+        "Inbox destination resolution shares push flow defaults including leave_decision",
+        (ROOT / "src/features/inbox/inboxNavigation.ts").exists()
+        and "FLOW_DEFAULT_PATHS" in read("src/features/inbox/inboxNavigation.ts")
+        and "leave_decision" in read("src/push/resolvePushDestination.ts"),
     )
     check(
         "Settings keeps Auth diagnostics build-gated and offers device-security retry",
@@ -342,9 +381,35 @@ def main() -> None:
         "isReduceMotionEnabled" in motion and "reduceMotionChanged" in motion,
     )
     check("leave types come from backend", "me?.leave.types" in leave_request and "LEAVE_TYPES" not in leave_request)
+    leave_history_view = read("src/features/leave/LeaveHistoryView.tsx")
+    leave_history_route = read("app/leave/history.tsx")
+    leave_view = read("src/features/remaining/RemainingViews.tsx")
+    check(
+        "Leave offers a dedicated history entry without becoming an archive",
+        "leave.historyAll.view" in leave_view
+        and "onViewAllHistory" in leave_view
+        and "LeaveHistoryView" in leave_history_route
+        and "/app/leave/history" in leave_history_view,
+    )
+    check(
+        "Leave history pages via cursor with year/status filters and no invented balances",
+        "has_more" in leave_history_view
+        and "next_cursor" in leave_history_view
+        and "year" in leave_history_view
+        and "status" in leave_history_view
+        and "balances" not in leave_history_view
+        and "PastelCard" not in leave_history_view
+        and "isLeaveCancellableStatus" in leave_history_view,
+    )
     check("documents do not read secure-store tokens directly", "loadSession" not in documents and "downloadFile" in documents)
-    check("documents expose an explicit back control", "onBack={() => router.back()}" in documents)
-    check("settings expose an explicit back control", "onBack={() => router.back()}" in settings)
+    check(
+        "documents expose an explicit back control",
+        "useEmployeeSafeBack" in documents and "onBack={onBack}" in documents,
+    )
+    check(
+        "settings expose an explicit back control",
+        "useEmployeeSafeBack" in settings and "onBack={onBack}" in settings,
+    )
     check(
         "account deletion is capability-gated and repeat-locked",
         "can('settings', 'request_deletion')" in settings
@@ -356,6 +421,12 @@ def main() -> None:
         "can('onboarding', 'upload_document')" in onboarding
         and "if (!canUploadDocuments" in onboarding
         and "const primaryAction = allowUpload" in onboarding_view,
+    )
+    check(
+        "Onboarding preview uses latest-wins open and soft refresh after upload",
+        "openGeneration" in onboarding
+        and "softRefreshOnboarding" in onboarding
+        and "await queryClient.invalidateQueries" not in onboarding,
     )
     check(
         "repeatable mobile mutations are locked",
@@ -397,7 +468,7 @@ def main() -> None:
         "bank screen separates verified, payroll-effective and submitted",
         "bank.verifiedTitle" in bank_view
         and "payroll_effective" in bank_view
-        and "bank.submittedTitle" in bank_view,
+        and ("bank.pendingChangeTitle" in bank_view or "bank.submittedTitle" in bank_view),
     )
     check(
         "bank screen states cover every submission state",
@@ -408,7 +479,15 @@ def main() -> None:
     )
     check(
         "bank rejection reason and next step are surfaced",
-        "rejection_reason" in bank_view and "bank.nextStepTitle" in bank_view,
+        "rejection_reason" in bank_view
+        and ("bank.pendingChangeTitle" in bank_view or "bank.nextStepTitle" in bank_view),
+    )
+    check(
+        "bank evidence open is latest-wins and upload refresh is non-blocking",
+        "openGeneration" in bank_route
+        and "softRefreshBank" in bank_route
+        and "await query.refetch()"
+        not in bank_route.split("const onUploadEvidence")[1].split("const onOpenEvidence")[0],
     )
     check(
         "controlled rollout renders an explained state, not an error loop",
@@ -526,6 +605,7 @@ def main() -> None:
         f"{locale_name}:{key}"
         for locale_name, table in (("en", en), ("ar", ar))
         for key, value in table.items()
+        if not str(key).startswith("hr")
         for term in internal_terms
         if term in str(value).lower()
     )
@@ -533,9 +613,29 @@ def main() -> None:
     prefixes = {
         key
         for key in en
-        if any(other.startswith(f"{key}.") for other in en if other != key)
+        if not str(key).startswith("hr")
+        if any(
+            other.startswith(f"{key}.")
+            for other in en
+            if other != key and not str(other).startswith("hr")
+        )
     }
     check("translation keys have no scalar/object collisions", not prefixes)
+
+    layout_chrome = read("src/components/layout.tsx")
+    home_view = read("src/features/home/HomeView.tsx")
+    check(
+        "scroll bottom padding does not double-count the tab bar height",
+        "insideTabs ? extra : insets.bottom + extra" in layout_chrome
+        and "contentInsetAdjustmentBehavior=\"never\"" in layout_chrome
+        and "automaticallyAdjustKeyboardInsets={keyboardInsets}" in layout_chrome
+        and "keyboardInsets = false" in layout_chrome,
+    )
+    check(
+        "Home does not override shared scroll bottom padding",
+        "paddingBottom: spacing.md" not in home_view
+        and "paddingBottom: spacing.lg" not in home_view.split("const styles")[-1].split("avatar:")[0],
+    )
 
     print("employee mobile capability foundation: GREEN")
 

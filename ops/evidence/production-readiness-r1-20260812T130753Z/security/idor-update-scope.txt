@@ -1,0 +1,55 @@
+== UPDATE without company_code (employee_key/document_id) ==
+23311:            UPDATE employees
+23312:            SET documents_pending=%s, documents_complete=%s, onboarding_status=%s
+23313:            WHERE employee_key=%s
+30693:        UPDATE employees
+30694:        SET name=%s, raw_json=%s, profile=%s, updated_at=now()
+30695:        WHERE employee_key=%s
+35612:                        UPDATE onboarding_items
+35613:                        SET required=FALSE, row_version=row_version+1
+35614:                        WHERE employee_key=%s AND item_id=%s
+35622:                        UPDATE onboarding_items
+35623:                        SET row_version=row_version+1
+35624:                        WHERE employee_key=%s AND item_id=%s
+35691:                        UPDATE employee_onboarding_assignments
+35692:                        SET status='completed', completed_at=now(), version=version+1, updated_at=now()
+35693:                        WHERE employee_key=%s
+37887:                    "UPDATE employees SET raw_json=%s, updated_at=now() WHERE employee_key=%s",
+40559:                    UPDATE onboarding_items
+40560:                    SET last_reminded_at=now(),
+40561:                        updated_at=now()
+40562:                    WHERE employee_key=%s
+40600:                    UPDATE onboarding_items
+40601:                    SET reminder_count=reminder_count + 1,
+40602:                        last_reminded_at=now(),
+40603:                        updated_at=now()
+40604:                    WHERE employee_key=%s
+40636:                UPDATE onboarding_items
+40637:                SET escalated_at=COALESCE(escalated_at, now()), updated_at=now()
+40638:                WHERE employee_key=%s
+41008:                        UPDATE compliance_documents
+41009:                        SET status=%s,
+41010:                            severity=%s,
+41011:                            warning_days=COALESCE(warning_days, %s),
+41012:                            days_until_expiry=%s,
+41013:                            last_checked_at=now(),
+41014:                            updated_at=now()
+41015:                        WHERE employee_key=%s AND document_type=%s
+41066:                                UPDATE compliance_documents
+41067:                                SET last_alerted_at=now(), reminder_count=reminder_count + 1, last_reminded=CURRENT_DATE, updated_at=now()
+41068:                                WHERE employee_key=%s AND document_type=%s
+41779:        UPDATE compliance_documents
+41780:        SET last_alerted_at=now(), last_reminded=CURRENT_DATE,
+41781:            reminder_count=COALESCE(reminder_count, 0) + 1, updated_at=now()
+41782:        WHERE employee_key=%s
+41898:                    UPDATE compliance_documents
+41899:                    SET status='valid', renewal_status='reviewed', notes=%s,
+41900:                        last_checked_at=now(), updated_at=now()
+41901:                    WHERE employee_key=%s AND document_type = ANY(%s)
+41909:                    UPDATE compliance_documents
+41910:                    SET status='valid', renewal_status='reviewed',
+41911:                        last_checked_at=now(), updated_at=now()
+41912:                    WHERE employee_key=%s AND document_type = ANY(%s)
+71822:                        "UPDATE onboarding_items SET status='received', updated_at=now() WHERE employee_key=%s AND item_id=%s",
+73532:                f"UPDATE employees SET {set_clause} WHERE employee_key=%s AND company_code=%s{where_version} RETURNING *",
+73605:                    "UPDATE employees SET employment_status=%s, updated_at=now() WHERE employee_key=%s AND company_code=%s RETURNING *",

@@ -1,0 +1,375 @@
+{
+  "id": "passport_en_01",
+  "label": {
+    "document_type": "passport",
+    "document_number": "P1234567",
+    "full_name_ar": null,
+    "full_name_en": "MOHAMMED RASHID ALHAJRI",
+    "nationality": "KUWAITI",
+    "date_of_birth": "1985-06-18",
+    "issue_date": "2018-08-01",
+    "expiry_date": "2028-07-31",
+    "employer_or_sponsor": null,
+    "side": "single",
+    "lang": "english",
+    "variant": "scan",
+    "document_relationship": "standalone"
+  },
+  "mistral": {
+    "extraction_status": "extracted",
+    "extraction_error": null,
+    "confidence": 0.985,
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "cost_usd": 0.004,
+    "latency_ms": 2252,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "validation": {
+      "ok": true,
+      "issues": [],
+      "has_issue_date": true,
+      "has_expiry_date": true,
+      "has_dob": true
+    },
+    "duplicate_keys": {
+      "content_sha256": "9e72b0472c3ac1788bcfeb63e4e703acbb4ceae033c995d74aca23ef6fafbd72",
+      "identifier_key": "passport:p1234567"
+    },
+    "fields": {
+      "document_type": {
+        "value": "passport",
+        "confidence": 0.985,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "side": {
+        "value": "single",
+        "confidence": 0.985,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_relationship": {
+        "value": "standalone",
+        "confidence": 0.985,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_ar": {
+        "value": null,
+        "confidence": 0.985,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_en": {
+        "value": "MOHAMMED RASHID ALHAJRI",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_number": {
+        "value": "P1234567",
+        "confidence": 0.99,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "nationality": {
+        "value": "KUWAITI",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "date_of_birth": {
+        "value": "1985-06-18",
+        "confidence": 0.99,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issue_date": {
+        "value": "2018-08-01",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "expiry_date": {
+        "value": "2028-07-31",
+        "confidence": 0.99,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employer_or_sponsor": {
+        "value": null,
+        "confidence": 0.985,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name": {
+        "value": "MOHAMMED RASHID ALHAJRI",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issued_date": {
+        "value": "2018-08-01",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      }
+    },
+    "flat_fields": {
+      "document_type": "passport",
+      "document_number": "P1234567",
+      "full_name_ar": null,
+      "full_name_en": "MOHAMMED RASHID ALHAJRI",
+      "nationality": "KUWAITI",
+      "date_of_birth": "1985-06-18",
+      "issue_date": "2018-08-01",
+      "expiry_date": "2028-07-31",
+      "employer_or_sponsor": null,
+      "side": "single",
+      "full_name": "MOHAMMED RASHID ALHAJRI"
+    },
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 8,
+      "scored": 8,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": null,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    },
+    "envelope_contract": "document_envelope@1",
+    "attempts": [
+      {
+        "attempt": 1,
+        "ok": true,
+        "latency_ms": 2252
+      }
+    ]
+  },
+  "gpt": {
+    "ok": true,
+    "extraction_status": "extracted",
+    "confidence": 0.99,
+    "provider": "gpt",
+    "model": "gpt-5.6-terra",
+    "cost_usd": 0.003717,
+    "latency_ms": 1822,
+    "fields": {
+      "document_type": "passport",
+      "document_number": "P1234567",
+      "full_name_ar": null,
+      "full_name_en": "MOHAMMED RASHID ALHAJRI",
+      "nationality": "KUWAITI",
+      "date_of_birth": "1985-06-18",
+      "issue_date": "2018-08-01",
+      "expiry_date": "2028-07-31",
+      "employer_or_sponsor": null,
+      "side": "single",
+      "full_name": "MOHAMMED RASHID ALHAJRI"
+    },
+    "authoritative": false,
+    "raw": {
+      "document_type": "passport",
+      "document_number": "P1234567",
+      "issued_date": "2018-08-01",
+      "expiry_date": "2028-07-31",
+      "nationality": "KUWAITI",
+      "full_name": "MOHAMMED RASHID ALHAJRI",
+      "full_name_ar": null,
+      "full_name_en": "MOHAMMED RASHID ALHAJRI",
+      "side": "single",
+      "employer_or_sponsor": null,
+      "date_of_birth": "1985-06-18",
+      "confidence": 0.99,
+      "reason": "Passport details clearly visible."
+    },
+    "usage": {
+      "input_tokens": 1019,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 117,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "total_tokens": 1136
+    },
+    "api": "openai-responses",
+    "temperature_omitted_for_terra": true,
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 8,
+      "scored": 8,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": null,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    }
+  }
+}

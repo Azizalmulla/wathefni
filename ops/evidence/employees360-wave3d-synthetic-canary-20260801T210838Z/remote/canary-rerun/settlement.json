@@ -1,0 +1,23 @@
+{
+  "status": "handed_to_payroll",
+  "packet": {
+    "inputs": {
+      "leave_balance_refs": "see_impact_snapshot",
+      "open_timesheet_refs": "see_impact_snapshot",
+      "attendance_exception_refs": "see_impact_snapshot"
+    },
+    "person_id": "cca60e2f-f88e-572b-9055-ab7e1e1f1382",
+    "disclaimer": "Inputs only. No EOSB, notice pay, garden leave, or leave encashment calculated in Employees 360. Payroll owns monetary calculations.",
+    "company_code": "WATHEFNI",
+    "employee_key": "WATHEFNI-96552202357",
+    "employment_id": "c24d1604-7430-5183-97c4-64e80cd972d6",
+    "last_working_day": "2026-08-01",
+    "termination_type": "resignation",
+    "impact_snapshot_id": "bbae5640-1eba-48db-83ea-3a43b8826118",
+    "termination_reason": "scheduler path",
+    "impact_snapshot_hash": "a9777c6cae759db2c98b79e7e32506f42e77697fac408ff04740e208834a520a",
+    "document_retention_mode": "retain",
+    "termination_effective_on": "2026-08-02",
+    "monetary_calculations_owner": "payroll"
+  }
+}

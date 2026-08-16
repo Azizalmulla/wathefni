@@ -1,0 +1,11 @@
+{
+  "has_configuration_label": true,
+  "has_ar_label": true,
+  "has_summary_testid": true,
+  "has_details_testid": true,
+  "no_old_label": true,
+  "has_refresh_setup": true,
+  "has_content_source": true,
+  "no_open_attr": true,
+  "all_pass": true
+}

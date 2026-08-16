@@ -1,0 +1,5 @@
+# Wathefni unified mobile (Employee + HR) — Maestro project config
+# App identity: ai.wathefni.employee (scheme wathefni)
+# Rule: flows only produce MOBILE_PASS when a real device/simulator executed them.
+appId: ai.wathefni.employee
+name: Wathefni Mobile E2E

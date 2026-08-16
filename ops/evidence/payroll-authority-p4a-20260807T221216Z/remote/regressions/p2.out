@@ -1,0 +1,45 @@
+[PASS] p2 version
+[PASS] no money
+[PASS] mode a locked
+[PASS] payment disabled
+[PASS] locked immutable invariant
+[PASS] unpaid suppresses absence
+[PASS] p1 still exists
+[PASS] pdf still needs seal
+[PASS] period
+[PASS] assemble ok
+[PASS] status needs_review or ready
+[PASS] money_calculated false
+[PASS] payment disabled on snap
+[PASS] mid-period hire flag
+[PASS] mid-period leaver flag
+[PASS] approved unpaid leave line
+[PASS] absence suppressed by unpaid leave
+[PASS] pending leave excluded info
+[PASS] paid leave present
+[PASS] ot fact line
+[PASS] rest day work fact
+[PASS] ph work fact
+[PASS] overnight fact
+[PASS] ot facts have no money
+[PASS] unresolved correction blocks
+[PASS] attendance provenance id
+[PASS] leave provenance id
+[PASS] assemble idempotent
+[PASS] lock fail closed
+[PASS] info assemble ok
+[PASS] informational does not block
+[PASS] lock informational ok
+[PASS] locked immutable
+[PASS] locked refuse silent rewrite
+[PASS] supersede creates new version
+[PASS] new version id differs
+[PASS] prior preserved superseded
+[PASS] audit events
+[PASS] schema columns
+[PASS] p1 bridge column
+[PASS] cleanup
+[PASS] p1 honesty external seal unlocked
+[PASS] p1 mode a still locked
+
+VERDICT PASS  pass=43 fail=0  evidence=/opt/wathefni/ops/evidence/payroll-authority-p2-20260807T221339Z

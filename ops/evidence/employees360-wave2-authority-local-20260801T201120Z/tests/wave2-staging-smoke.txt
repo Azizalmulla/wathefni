@@ -1,0 +1,29 @@
+PASS  create A
+PASS  create B
+PASS  create returned keys
+PASS  card has employee_key
+PASS  card has name/phone/status
+PASS  backfill applied
+PASS  backfill idempotent rerun
+PASS  no duplicate persons
+PASS  projection present
+PASS  employee number minted
+PASS  edit ok
+PASS  edit synced assignment title
+PASS  edit synced person name
+PASS  rehire ok
+PASS  rehire reuses person
+PASS  rehire new employment
+PASS  prior service history retained
+PASS  same tenant access ok
+PASS  cross tenant fail closed
+PASS  compatible card fields
+PASS  approved map optional skip
+PASS  rollback reported
+PASS  hub employee survives rollback
+PASS  hub authority pointers cleared
+PASS  scoped mapping removed
+PASS  restore-new backfill
+PASS  restore-new projection
+
+27 passed, 0 failed

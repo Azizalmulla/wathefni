@@ -1,0 +1,4 @@
+Poll window: 2026-07-30T22:17:16Z → 22:38:24Z (~22 min, 15 attempts @ 90s)
+Result: PROPAGATION_STILL_FAIL
+All attempts: Graph POST /users/{evidence}/events → HTTP 403 ErrorAccessDenied
+RBAC assign (EXO Test-ServicePrincipalAuthorization) was previously PASS; Graph create still denied after propagation wait.

@@ -1,0 +1,8 @@
+WAVE1 1
+VIEWER_RAW ''
+SUBJECT_RAW ''
+EXCLUDE_PAYROLL True
+viewer_allowlist []
+subject_allowlist []
+real_canary_enabled False
+flags_ok_empty_allowlists=true

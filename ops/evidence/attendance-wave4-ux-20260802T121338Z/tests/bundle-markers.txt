@@ -1,0 +1,14 @@
+stamp=20260802T121338Z
+chunk=dist/assets/PostHire-D8YjEnpm.js
+FOUND Attendance operations
+FOUND عمليات الحضور
+FOUND Connector health
+FOUND صحة الموصلات
+FOUND Day detail
+FOUND تفاصيل اليوم
+FOUND Approved — ready to apply
+FOUND Payroll excluded
+CLEAN no:authority mode
+CLEAN no:dark mode (no real
+NOTE employees360_may_contain_legacy_Wave4_strings
+sha256_posthire=2f4cfd5303727e59839a180d7bac2d4a227b01703c25e3c102e0546e547ae5f6

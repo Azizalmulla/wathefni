@@ -1,0 +1,303 @@
+{
+  "checks": [
+    {
+      "label": "schema wave3h",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "packs schema",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "lifecycle enabled WATHEFNI",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "lifecycle disabled OTHERCO",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic only on",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "packs enabled",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "KW pack verified",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96550252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96566363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96597727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96599411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "actors distinct",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "counsel gate optional",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "policy wave3h",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "policy reinstate off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "tenant cannot weaken mandatory",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "remediation queue readable",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "migration no silent resolve-only path",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "real employees listed for remediation or already incomplete",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "create synthetic employee",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "missing worker category fails closed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "unsupported jurisdiction fails closed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "classification request created",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "classification self-approve forbidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "classification dual-approved",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "classified pack KW 1.0.0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "incomplete record fail-closed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "create KW pack term",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "pack version 1.0.0 on request",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "approve freezes pack",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "freeze KW_PRIVATE_SECTOR@1.0.0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "freeze hash matches catalog",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "historical freeze unchanged after mutation attempt",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "notice period",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cancel-before-effective",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "fixed-term request",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "fixed-term notice hidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "probation request",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "exceptional requires note",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "exceptional with note",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "tenant isolation",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "manager scope deny",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "scheduler execution ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "scheduler retry idempotent",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "terminated via scheduler",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "session revoked after cutoff",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "settlement handed off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "settlement inputs only",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "service certificate pending",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire new employment",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire new assignment",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire same person",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cleanup rollback ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "real employees still active",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup zero",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "remediation queue still available",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "kw_pack_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8",
+    "tag": "31cc4cef",
+    "phone": "96552263564",
+    "employee_key": "WATHEFNI-96552263564",
+    "idempotency_prefix": "wave3i-prod-canary:WATHEFNI:31cc4cef",
+    "requester_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+    "approver_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+    "remediation_count_before": 10,
+    "person_id": "afc458d2-b98e-5084-bc9c-c0aa9e936d53",
+    "employment_id": "ca5b0a5f-4405-58e4-a770-b93f36ebd50b",
+    "assignment_id": "a4574b2b-720a-5180-bcb5-917837a4de74",
+    "frozen_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8",
+    "synthetic_hub_rows_after_cleanup": 0
+  },
+  "summary": {
+    "passed": 56,
+    "failed": 0
+  }
+}

@@ -1,0 +1,38 @@
+PASS  compliance wave1 freeze doc present
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions document compliance
+PASS  freeze doc mentions government_verified
+PASS  freeze doc mentions legal-compliance
+PASS  freeze doc mentions Alerts
+PASS  freeze doc mentions NO-GO
+PASS  freeze doc mentions CFW1
+PASS  freeze doc mentions Analytics
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions Employees
+PASS  freeze doc mentions fine
+PASS  freeze doc mentions money_authority
+PASS  findings module present
+PASS  contract constant
+PASS  synthetic_only helper
+PASS  honesty never gov
+PASS  honesty no legal claims
+PASS  honesty no fines
+PASS  honesty no AI
+PASS  alerts own reminders
+PASS  analytics excludes compliance flag
+PASS  canonical residence
+PASS  dashboard findings wired
+PASS  seed never iqama
+PASS  prod canary present
+PASS  canary residual cleanup
+PASS  canary synthetic_only assert
+PASS  analytics still excludes compliance metrics
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact SHIFTS_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact PAYROLL_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ANALYTICS_WAVE1_ATTENTION_FREEZE.md
+
+36 passed, 0 failed

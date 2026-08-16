@@ -1,0 +1,27 @@
+captured_at=20260801T181253Z
+=== SHAs ===
+27c7e2f0d8fe110b2683a0173b29122c5293411a64a71fcb865cdab8d079e790  /opt/wathefni/orchestrator/app.py
+8cf1759371a2a3d4f1f42125e1ba960ae34db23f6c173f657aa1532cd95a4fab  /opt/wathefni/orchestrator/inbound_cv_authority.py
+5807b200bd1f22e3e4d6512be485b73595b1e4b5c89915e14dc2d0177fa59a16  /opt/wathefni/orchestrator/durable_email_ingress.py
+fdca2310231bb78e3fd1aeb1ae3107880b56ce3e6244d91e985aa58d4e409294  /opt/wathefni/orchestrator/inbound_intake_product.py
+d028be75e4417b1ecf22336528ed773722c15b9f8bd95e8a34639d8ea27e9bbd  /opt/wathefni/orchestrator/inbound_enterprise_hardening.py
+=== FLAGS ===
+Environment=WATHEFNI_INBOUND_ALLOWED_COMPANIES=WATHEFNI
+Environment=WATHEFNI_INBOUND_EMAIL=on
+Environment=WATHEFNI_INTAKE_RETENTION_EXECUTE=off
+Environment=WATHEFNI_MAILBOX_SYNC=off
+Environment=WATHEFNI_POSTMARK_INBOUND_ENV=production
+Environment=WATHEFNI_POSTMARK_INBOUND_ENV_PIN=production
+=== HEALTH ===
+orch=200
+dash=200
+=== TIMERS ===
+active
+active
+=== BACKUPS ===
+/opt/wathefni/backups/production-pre-waveD-phase2-inbound-20260801T045628Z
+/opt/wathefni/backups/production-pre-waveD-phase3-enterprise-20260801T132649Z
+/opt/wathefni/backups/production-pre-waveD-phase4-alias-admit-20260801T152150Z
+/opt/wathefni/backups/production-pre-waveD-phase5-mailbox-20260801T155854Z
+/opt/wathefni/backups/production-pre-waveD-phase6a-held-20260801T165754Z
+/opt/wathefni/backups/production-pre-waveD-phase6b-cv-extraction-20260801T174712Z

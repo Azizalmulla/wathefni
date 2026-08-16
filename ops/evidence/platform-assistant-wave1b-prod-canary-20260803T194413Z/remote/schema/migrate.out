@@ -1,0 +1,8 @@
+wave1_version 1.0.0
+contract platform_assistant_spine_wave1
+honesty_ok {'wathefni_only': True, 'hr_dashboard_only': True, 'mutates_records': False, 'payroll_money': False, 'attendance_ingest': False, 'whatsapp_widening': False, 'default_posthire_entry': 'action_inbox'}
+connected_db wathefni
+ack_event_id b92fc042-1ef5-43ec-b9d4-4aadae60780c
+ACK_PRODUCTION_PLATFORM_ASSISTANT_W1B=YES
+residual_policy=canary_tagged_cleaned_ack_retained
+MIGRATE_OK

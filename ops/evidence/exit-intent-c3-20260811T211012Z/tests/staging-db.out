@@ -1,0 +1,69 @@
+    exit intent c3 — prove
+      PASS  c3 module
+      PASS  charter stamp name
+      PASS  rollback guidance
+      PASS  EN resignation
+      PASS  AR notice
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  offboarding not required
+      PASS  clearance not in c3
+      PASS  real termination dark
+      PASS  real canary off
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  real canary blocked in C3
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  resignation visible
+      PASS  employee resignation submit draft
+      PASS  resignation pending_approval
+      PASS  submit does not mark left
+      PASS  resignation SoD self-approve forbidden
+      PASS  stale/concurrent decision
+      PASS  resignation approve
+      PASS  resignation reject
+      PASS  permitted withdrawal
+      PASS  notice period entered
+      PASS  employment still active in notice
+      PASS  withdraw blocked after notice
+      PASS  notice dates/change audit
+      PASS  notice versions retained
+      PASS  ready_for_offboarding
+      PASS  no premature employment=left
+      PASS  handoff without Offboarding
+      PASS  handoff deferred when Offboarding absent
+      PASS  not clearance/paid
+      PASS  employee sees canonical status
+      PASS  employer termination initiation
+      PASS  termination SoD
+      PASS  termination approve
+      PASS  termination reject
+      PASS  termination cancel
+      PASS  termination requires HR auth
+      PASS  EOC case + task
+      PASS  EOC renewal
+      PASS  EOC renewal keeps employment active
+      PASS  EOC not silent termination
+      PASS  EOC non-renewal
+      PASS  EOC non-renewal notice
+      PASS  EOC ready_for_offboarding
+      PASS  still not employment=left after EOC ready
+      PASS  non-synthetic blocked
+      PASS  no invented legal pack notice
+      PASS  independent of payroll module
+      PASS  independent of offboarding module
+      PASS  EN/AR contracts present
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  history intact after rollback
+      PASS  notice history intact
+      PASS  global real-termination gate remains OFF
+      PASS  employment truth active after full path
+
+    63 passed, 0 failed
+RESIGNATION_TERMINATION_UNIT_PASS
+RESIGNATION_TERMINATION_FULL_PASS
+STAGING_RC=0

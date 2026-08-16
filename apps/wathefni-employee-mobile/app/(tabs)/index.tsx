@@ -1,11 +1,12 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, type Href } from 'expo-router'
 
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
 import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
-import { HomeErrorView, HomeLoadingView, HomeView } from '@/features/home/HomeView'
+import { LoadingState } from '@/components/States'
+import { HomeErrorView, HomeView } from '@/features/home/HomeView'
 import {
   HOME_ROUTE,
   compositionFromMe,
@@ -13,6 +14,7 @@ import {
   openableHref,
 } from '@/composition/employeeAppComposition'
 import type { HomeResponse } from '@/api/types'
+import { syncInboxBadge } from '@/push/syncInboxBadge'
 
 export default function HomeScreen() {
   const { me, profile, refreshMe } = useAuth()
@@ -28,6 +30,11 @@ export default function HomeScreen() {
     { staleTime: HIGH_CHURN_STALE_MS },
   )
   const data = home.data
+
+  useEffect(() => {
+    if (data?.inbox?.unread == null) return
+    void syncInboxBadge(data.inbox.unread)
+  }, [data?.inbox?.unread])
 
   const composition = useMemo(
     () =>
@@ -68,9 +75,9 @@ export default function HomeScreen() {
     [me, router],
   )
 
-  if (!data && home.isLoading) return <HomeLoadingView />
+  if (!data && home.isLoading) return <LoadingState />
   if (!data && home.isError) return <HomeErrorView onRetry={() => void home.refetch()} />
-  if (!data) return <HomeLoadingView />
+  if (!data) return <LoadingState />
 
   return (
     <HomeView

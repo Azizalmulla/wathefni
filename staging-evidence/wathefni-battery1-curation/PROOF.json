@@ -1,0 +1,105 @@
+{
+  "operation": "Wathefni Battery-1 Curation",
+  "battery_name": "Wathefni General Ability & Workplace Judgment v1",
+  "environment": "staging",
+  "company_code": "WATHEFNI",
+  "session": {
+    "session_id": "2ac99020-4b50-4761-808a-fe78ca25eb4f",
+    "operator_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+    "started_at": "2026-07-18T18:54:33.430399+00:00",
+    "finished_at": "2026-07-18T18:54:44.348157+00:00",
+    "active_after": false
+  },
+  "approved_draft_inventory": {
+    "numerical_reasoning": {
+      "available": 0,
+      "selected": 0,
+      "rejected_items": 0,
+      "additional_required": 5
+    },
+    "verbal_reasoning": {
+      "available": 0,
+      "selected": 0,
+      "rejected_items": 0,
+      "additional_required": 5
+    },
+    "logical_reasoning": {
+      "available": 0,
+      "selected": 0,
+      "rejected_items": 0,
+      "additional_required": 5
+    },
+    "situational_judgment": {
+      "available": 0,
+      "selected": 0,
+      "rejected_items": 0,
+      "additional_required": 5
+    },
+    "prioritization": {
+      "available": 0,
+      "selected": 0,
+      "rejected_items": 0,
+      "additional_required": 5
+    }
+  },
+  "generation": {
+    "requested_missing_items": 25,
+    "generated_drafts": 0,
+    "approved_items": 0,
+    "rewrite_items": 0,
+    "rejected_items": 0,
+    "failed_generation_operations": 55,
+    "initial_provider_failures": 5,
+    "circuit_open_followups": 50,
+    "provider_error_code": "insufficient_quota",
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "estimated_cost_usd": 0.0,
+    "fallback_model_used": false,
+    "model_activation_changed": false
+  },
+  "curation": {
+    "final_selected_items": 0,
+    "english_complete": 0,
+    "arabic_complete": 0,
+    "answer_keys_human_verified": 0,
+    "immutable_human_rewrites": 0,
+    "unresolved_defects": [
+      "No approved-draft inventory exists.",
+      "The staging model account returned insufficient_quota before any item was produced.",
+      "Human English review, separate Arabic review, and independent key verification cannot begin without drafts."
+    ]
+  },
+  "battery": {
+    "status": "blocked_generation_quota",
+    "ready_for_pilot": false,
+    "approved_for_use": false,
+    "live_bank_inserted": false,
+    "manifest_sha256": "16bf9e707629f7630fb6e22102283b4e38cb39a92f17938456de9ebd0cec2c2d",
+    "expected_duration_minutes_if_completed": 40,
+    "rollback_predecessor": null
+  },
+  "safety": {
+    "global_authoring_flag_after": false,
+    "production_touched": false,
+    "production_process_start_utc": "2026-07-18T10:24:09Z",
+    "live_table_deltas": {
+      "assessment_items": 0,
+      "assessment_batteries": 0,
+      "assessment_content_versions": 0,
+      "assessment_attempts": 0,
+      "assessment_responses": 0,
+      "assessment_scores": 0,
+      "assessment_reports": 0,
+      "applications": 0,
+      "employees": 0
+    },
+    "publish_route_added_or_used": false,
+    "candidate_hiring_consequences": false,
+    "qualification_cohort_run": false,
+    "ai_human_approval_recorded": false
+  },
+  "full_staging_evidence_path": "/tmp/wathefni-battery1-curation.json",
+  "staging_manifest_path": "/tmp/wathefni-battery1-manifest.json",
+  "recommendation": "blocked: restore staging model quota, then resume only the 25 missing drafts; human EN/AR and independent key approvals remain mandatory"
+}

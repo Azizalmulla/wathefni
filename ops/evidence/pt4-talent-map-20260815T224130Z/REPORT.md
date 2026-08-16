@@ -1,0 +1,12 @@
+# pt4 qualification
+- Stamp: 20260815T224130Z
+- Dashboard: YES
+- Mobile: YES
+- Unit: YES
+- Predecessor: YES
+- Wave contracts: YES
+- Staging DB: NO
+- Live: NO
+- Deploy: YES
+- Comprehensive predecessors: YES
+- Verdict: **FAIL**

@@ -1,0 +1,8 @@
+live_sha256 406b9dca3d05926dcaf0c3390c960e72c42d58bf5883b3d8f47b209be935dab1
+baseline_build_bytes 517486
+live_bytes 517486
+byte_length_equal True
+method: dirty-lineage PostHire with BankReview/CompletionStrip reverted to EssBankMaskPanel
+OCR preserved: Extraction & validation, never overwrite, data-document-extraction-summary
+EssBank preserved: Bank details, masked by default
+Bank review absent: Currently verified / bank-review / data-completion-state = 0

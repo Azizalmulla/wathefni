@@ -140,6 +140,8 @@ def main() -> int:
                 "shifts",
                 "payroll",
                 "pre_hiring",
+                "interviews",
+                "assessments",
             }
 
         @staticmethod

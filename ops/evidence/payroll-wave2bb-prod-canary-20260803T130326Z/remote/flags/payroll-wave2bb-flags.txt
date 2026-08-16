@@ -1,0 +1,9 @@
+PAYROLL_WAVE2B 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW2B', 'PYW2B-SYNTH|', 'PYW1', 'PYW1-SYNTH|', 'W2BB')
+prefixes ('965541', '965539')
+honesty {'payment_processing': 'disabled', 'authoritative': False, 'preview_only': True, 'ai_calculations': False, 'external_flows_unchanged': True, 'bank_files': False, 'pifss': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK

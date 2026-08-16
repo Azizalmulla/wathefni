@@ -1,0 +1,57 @@
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_MIGRATION_WAVE1=1
+WATHEFNI_MIGRATION_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_MIGRATION_WAVE1_SYNTHETIC_ONLY=1
+CAPTURE_INGEST_OFF_OK
+MIGRATION_WAVE1_ON_OK
+MIGRATION_WAVE1B_CANARY_START
+{"core": 50, "1k": 1000, "10k": 10000, "stage_root": "/root/.openclaw/workspaces/company-wathefni", "evid": "/opt/wathefni/production-evidence/migration-wave1b-prod-canary/20260803T213240Z/canary/before-rollback", "db_expected": "wathefni"}
+=== core contract (prod synthetic) ===
+
+=== scale lane 1k count=1000 company=WATHEFNI ===
+{
+  "honesty": {
+    "contract": "migration_wave1_foundation_cv_chunked",
+    "version": "1.0.0",
+    "real_customer_data": false,
+    "millions_claim": false,
+    "migration_center_ui": false,
+    "employee_leave_compensation": false,
+    "payroll_money": false,
+    "attendance_ingest": false,
+    "ai_assistant": false,
+    "mobile": false,
+    "authority_default": "held",
+    "auto_admit": false,
+    "auto_merge": false,
+    "synthetic_only": true,
+    "allowed_companies": [
+      "MIGW1ALPHA",
+      "MIGW1BRAVO",
+      "WATHEFNI"
+    ]
+  },
+  "fail": 1,
+  "pass": 1,
+  "core": {
+    "dry_run": {
+      "duplicate": 2,
+      "valid": 10
+    },
+    "core_batch": "2180d198-e538-4c0c-9d95-2b64409fa5b4",
+    "held": {
+      "apps": 46,
+      "with_external_id": 46,
+      "held_ok": true
+    },
+    "exception_queue": 4,
+    "audit_events": 6,
+    "retry_replayed": 1
+  },
+  "ok": false,
+  "verdict": "FAIL",
+  "error": "current transaction is aborted, commands ignored until end of transaction block\n"
+}
+MIGRATION_WAVE1B_CANARY_FAIL: current transaction is aborted, commands ignored until end of transaction block
+

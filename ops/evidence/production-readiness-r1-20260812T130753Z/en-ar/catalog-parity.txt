@@ -1,0 +1,48 @@
+employee-mobile: en=1300 ar=1300 missing_ar=0 missing_en=0
+employee-mobile-hr: en=222 ar=222 missing_ar=0 missing_en=0
+hr-mobile: en=196 ar=196 missing_ar=0 missing_en=0
+
+dashboard: no en.json/ar.json catalog present -> False
+== dashboard i18n mechanism ==
+apps/wathefni-dashboard/src/posthire/PostHire.tsx:562
+apps/wathefni-dashboard/src/pages/SettingsPage.tsx:192
+apps/wathefni-dashboard/src/components/CalendarShell.tsx:160
+apps/wathefni-dashboard/src/posthire/shiftsUx.ts:149
+apps/wathefni-dashboard/src/posthire/employees360/WorkforcePage.tsx:128
+apps/wathefni-dashboard/src/pages/NotificationsPage.tsx:125
+apps/wathefni-dashboard/src/setup-console/PayrollSetupCard.tsx:90
+apps/wathefni-dashboard/src/pages/OverviewPage.tsx:71
+apps/wathefni-dashboard/src/components/ActivityLog.tsx:69
+apps/wathefni-dashboard/src/posthire/employees360/BankReviewPanel.tsx:64
+apps/wathefni-dashboard/src/components/PlatformIntegrationsPanel.tsx:62
+apps/wathefni-dashboard/src/setup-console/ModuleCompanyPoliciesCard.tsx:58
+apps/wathefni-dashboard/src/posthire/leaveUx.ts:57
+apps/wathefni-dashboard/src/posthire/DocumentExtractionSummary.tsx:56
+apps/wathefni-dashboard/src/pages/AssessmentsPage.tsx:50
+apps/wathefni-dashboard/src/posthire/LeaveWorkspace.tsx:47
+apps/wathefni-dashboard/src/components/assessments/AssessmentReportPage.tsx:46
+apps/wathefni-dashboard/src/setup-console/EmployeeAppAccessPolicyCard.tsx:45
+apps/wathefni-dashboard/src/pages/InterviewsPage.tsx:37
+apps/wathefni-dashboard/src/posthire/ShiftsWorkspace.tsx:34
+
+== dashboard dir=rtl usage ==
+apps/wathefni-dashboard/src/pages/AssessmentsPage.tsx:1
+apps/wathefni-dashboard/src/pages/RankingPage.tsx:1
+apps/wathefni-dashboard/src/pages/AdminAIPage.tsx:3
+apps/wathefni-dashboard/src/pages/CandidatesPage.tsx:2
+apps/wathefni-dashboard/src/pages/InterviewsPage.tsx:2
+apps/wathefni-dashboard/src/pages/NotificationsPage.tsx:1
+apps/wathefni-dashboard/src/pages/OverviewPage.tsx:1
+apps/wathefni-dashboard/src/pages/ReportsPage.tsx:3
+apps/wathefni-dashboard/src/pages/SettingsPage.tsx:4
+apps/wathefni-dashboard/src/pages/JobsPage.tsx:1
+apps/wathefni-dashboard/src/App.tsx:3
+apps/wathefni-dashboard/src/prehire/RequisitionsWorkspace.tsx:2
+apps/wathefni-dashboard/src/posthire/DocumentExtractionSummary.tsx:1
+apps/wathefni-dashboard/src/posthire/AttendanceOpsPanel.tsx:3
+apps/wathefni-dashboard/src/posthire/ProbationWorkspace.tsx:2
+apps/wathefni-dashboard/src/components/JobsForm.tsx:1
+apps/wathefni-dashboard/src/posthire/PostHire.tsx:15
+apps/wathefni-dashboard/src/posthire/LeaveWorkspace.tsx:3
+apps/wathefni-dashboard/src/posthire/ShiftsWorkspace.tsx:1
+apps/wathefni-dashboard/src/posthire/PayrollComponentsPolicyPanel.tsx:1

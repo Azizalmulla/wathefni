@@ -1,0 +1,23 @@
+Starting Metro Bundler
+transform[stderr]: (node:51682) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+iOS Bundled 1885ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (794 modules)
+Preparing additional debugging files
+
+Exporting 10 assets:
+../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon.png (5 variations | 528 B)
+../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/error.png (516 B)
+../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/file.png (158 B)
+../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/forward.png (250 B)
+../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/pkg.png (429 B)
+
+Exporting 2 bundles for ios:
+_expo/static/js/ios/entry-3912335e3d9c3611cec73af07268f229.hbc (1.16 MB)
+_expo/static/js/ios/entry-3912335e3d9c3611cec73af07268f229.hbc.map (4.82 MB)
+
+Exporting 2 files:
+debug.html (293 B)
+metadata.json (771 B)
+
+App exported to: dist-ios-smoke

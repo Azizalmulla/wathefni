@@ -121,7 +121,7 @@ def _purge() -> None:
     with app.db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM shift_events WHERE company_code=%s", (COMPANY,))
-            for table in ("employee_messages", "hr_tasks", "leave_requests", "compliance_documents", "employees", "outbound_delivery_events"):
+            for table in ("employee_messages", "hr_tasks", "leave_requests", "compliance_documents", "employees", "outbound_delivery_events", "company_modules"):
                 cur.execute(f"DELETE FROM {table} WHERE company_code=%s", (COMPANY,))
             cur.execute("DELETE FROM companies WHERE company_code=%s", (COMPANY,))
         conn.commit()
@@ -156,6 +156,12 @@ def setup() -> None:
                 "company_code": COMPANY, "employee_key": EMP, "document_type": "civil_id",
                 "label": "Civil ID", "status": "missing", "metadata": Json({"smoke": MARKER}),
             })
+            for module in ("leave", "onboarding", "compliance", "shifts"):
+                cur.execute(
+                    "INSERT INTO company_modules (company_code, module_key, enabled) VALUES (%s,%s,true) "
+                    "ON CONFLICT (company_code, module_key) DO UPDATE SET enabled=true",
+                    (COMPANY, module),
+                )
         conn.commit()
 
 

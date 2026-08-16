@@ -1,0 +1,147 @@
+=== SLICE2_DB ===
+    workflow_task_sla phase A slice 2 — DB prove
+      PASS  migration idempotent
+      PASS  catalogue seeded
+      PASS  tasks default disabled
+      PASS  sla default disabled
+      PASS  tasks runtime gate
+      PASS  tasks allowlist gate
+      PASS  sla runtime gate
+      PASS  tasks gate open
+      PASS  sla gate open
+      PASS  task create
+      PASS  task idempotent replay
+      PASS  one open task per subject/action
+      PASS  subject required fail-closed
+      PASS  approval→task linkage preserved
+      PASS  task on hr_tasks SoT
+      PASS  subject_type from catalogue
+      PASS  task stale row_version
+      PASS  task resolve
+      PASS  resolve does not mutate subject
+      PASS  cross-tenant task read denial
+      PASS  unknown task_type denied
+      PASS  sla policy upsert
+      PASS  sla clock start
+      PASS  sla clock idempotent
+      PASS  sla reminder audit
+      PASS  sla breach
+      PASS  breach creates sla_breach hr_task
+      PASS  repeated breach evaluation idempotent
+      PASS  no duplicate sla_breach tasks
+      PASS  satisfy after breach deterministic
+      PASS  sla satisfy
+      PASS  sla cancel
+      PASS  SLA without tasks still breaches clock
+      PASS  cross-tenant clock read denial
+      PASS  disable tasks blocks create
+      PASS  disable sla blocks clock
+      PASS  audit events present
+      PASS  legacy hr_task type still insertable
+      PASS  synthetic cleanup
+
+    39 passed, 0 failed
+    PHASE_A_SLICE2_DB_FULL_PASS
+=== CATALOG ===
+    module catalog — canonical sets + effective entitlements + workspace boot
+      PASS  catalog module keys are unique
+      PASS  catalog contains exactly the 17 canonical product modules
+      PASS  requisitions has no HARD module dependency
+      PASS  preboarding has no HARD module dependency
+      PASS  probation has no HARD module dependency
+      PASS  requisitions alias maps
+      PASS  preboard alias maps
+      PASS  calendar module is opt-in pre_hire hr suite
+      PASS  calendar is not legacy-implied from pre_hiring
+      PASS  live interviews is independent of video_interviews
+      PASS  setup save protects currently-enabled interviews
+      PASS  apply_legacy_module_implications grants interviews from pre_hiring seed
+      PASS  employee_app is a post-hire employee module
+      PASS  employee_app retains the platform master flag
+      PASS  people modules include Wave 1 hire-ready surfaces
+      PASS  post-hire dashboard modules include Wave 1 + analytics
+      PASS  tool-call gated includes Wave 1 + post-hire operational modules
+      PASS  Setup Console catalog includes employee_app
+      PASS  legacy post_hiring alias remains backward compatible
+      PASS  assessments hard-depends on pre_hiring only
+      PASS  video_interviews hard-depends on pre_hiring only
+      PASS  employment_offers hard-depends on pre_hiring only
+      PASS  offers alias maps to employment_offers
+      PASS  workforce ops modules remain independently selectable
+      PASS  expand auto-includes pre_hiring for assessments
+      PASS  missing deps reports assessments without pre_hiring
+      PASS  payroll soft-recommends attendance and leave without requiring them
+      PASS  payroll has no employee-app surface in V1
+      PASS  bundles include hire-ready suite
+      PASS  hiring assessment bundle expands with pre_hiring
+      PASS  app surfaces require employee_app selection
+      PASS  app surface preview derives from selected modules and excludes payroll
+      PASS  GCC setup defaults are canonical
+      PASS  app Setup Console uses canonical catalog
+      PASS  app post-hire dashboard set derives from catalog
+      PASS  app people surfaces derive from catalog
+      PASS  tool orchestrator imports canonical gated set
+      PASS  compliance actions are now module-mapped
+      PASS  compliance audit category is explicit
+      PASS  workspace boot flag defaults to fail-safe OFF semantics
+      PASS  Setup Console V2 defaults OFF
+      PASS  company channel accounts default OFF
+      PASS  bootstrap is hidden while flag OFF
+      PASS  flag OFF preserves historical pre_hiring gate
+      PASS  team route remains pre_hiring-protected while flag OFF
+      PASS  post-hire-only tenant enters workspace when flag ON
+      PASS  workspace mutation uses permission, not pre_hiring module
+      PASS  post-hire-only tenant can load team route when flag ON
+      PASS  workspace mutation fails closed without permission
+      PASS  bootstrap reports configured tenant entitlements
+      PASS  master-disabled employee_app is not effective
+      PASS  bootstrap explains configured-but-platform-disabled state
+      PASS  employee_app becomes effective only when both gates are on
+      PASS  disabled product module remains server-protected
+
+    54 passed, 0 failed
+    MODULE CATALOG: ALL CHECKS PASSED
+=== CONTRACTS ===
+    capability contracts + catalog — HARD/OPTIONAL/ENHANCEMENT
+      PASS  contracts non-empty
+      PASS  has HARD
+      PASS  has OPTIONAL
+      PASS  has ENHANCEMENT
+      PASS  optional inactive without both modules
+      PASS  optional active when both modules
+      PASS  setting off deactivates
+      PASS  joining contract active
+      PASS  joining writers dark by default
+      PASS  catalog has requisitions
+      PASS  catalog has preboarding
+      PASS  catalog has probation
+      PASS  HARD deps empty for Wave 1 commercial modules
+      PASS  recommended_with preserved (OPTIONAL/ENHANCEMENT hints)
+
+    14 passed, 0 failed
+=== TRUTH_SYNC ===
+    employment truth-sync — dry-run foundation
+      PASS  writers default off
+      PASS  assert writers dark
+      PASS  version pinned
+      PASS  P1–P9 listed
+      PASS  pending_start hub active warning
+      PASS  pending_start payroll fail
+      PASS  joining missing flagged
+      PASS  joining write blocked while dark
+      PASS  joining mismatch does not suggest overwrite
+      PASS  probation missing flagged
+      PASS  expected probation end
+      PASS  duplicate employment detected
+      PASS  module-off: joining sync inactive without offers
+      PASS  module-off note present
+      PASS  rollback keeps writers off
+      PASS  dry-run ok
+      PASS  dry-run writers still off
+      PASS  dry-run mode
+      PASS  counts present
+    dry-run company=WATHEFNI findings=1
+
+    19 passed, 0 failed
+    PHASE_A_SLICE3_TRUTH_SYNC_DRY_RUN_PASS
+STAGING_SLICE3_DONE

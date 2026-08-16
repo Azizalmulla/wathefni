@@ -1,0 +1,46 @@
+{
+  "reals": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "name": "Talal Fadhli",
+      "employment_status": "active",
+      "updated_at": "2026-08-01 20:03:20.703316+00"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "name": "Fouad Burhamad",
+      "employment_status": "active",
+      "updated_at": "2026-07-12 15:46:31.905837+00"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "name": "mohammad alqattan",
+      "employment_status": "active",
+      "updated_at": "2026-08-01 20:03:20.680449+00"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "name": "Brian Saleh",
+      "employment_status": "active",
+      "updated_at": "2026-07-13 19:22:41.486318+00"
+    }
+  ],
+  "synthetic_employees_remaining": 0,
+  "synthetic_ess_requests_remaining": 0,
+  "shas": {
+    "app.py": "915467b126f42203d16b07c98c1407258b76e99c9add984585a22f5541a7752e",
+    "employee_org_wave4.py": "8c7a00567596299945dc60502ca3aa0fbb332e2f18186f4ec919fa46382acccf",
+    "employee_selfservice_wave5.py": "942a440a404284cbac0bd7e3193db205150e878ee63a35ab87d135b2157fc7ca",
+    "PostHire": "a42a8689c00449a366aa9d5a83d5a9b1eb869642fb858458a1bdcf079fb2f135",
+    "dashboard": "1a5fb63464f3f075fb72b13053e7931b07976fe825263c9b7441f8aa08011146"
+  },
+  "flags_sample": {
+    "ESS_SYNTHETIC_ONLY": null,
+    "LIFECYCLE_SYNTHETIC_ONLY": null,
+    "EMPLOYEE_APP": null
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "allPass": true,
+  "rows": [
+    {
+      "name": "priority ink on soft",
+      "fg": "#2f3a22",
+      "bg": "#dfe8c8",
+      "min": 4.5,
+      "ratio": 9.44,
+      "pass": true
+    },
+    {
+      "name": "priority ink on base",
+      "fg": "#2f3a22",
+      "bg": "#a9ba7d",
+      "min": 4.5,
+      "ratio": 5.72,
+      "pass": true
+    },
+    {
+      "name": "review ink on soft",
+      "fg": "#3d3410",
+      "bg": "#f7e89a",
+      "min": 4.5,
+      "ratio": 10,
+      "pass": true
+    },
+    {
+      "name": "review ink on base",
+      "fg": "#3d3410",
+      "bg": "#f1d96f",
+      "min": 4.5,
+      "ratio": 8.78,
+      "pass": true
+    },
+    {
+      "name": "assess ink on soft",
+      "fg": "#4a2438",
+      "bg": "#f0c4de",
+      "min": 4.5,
+      "ratio": 8.53,
+      "pass": true
+    },
+    {
+      "name": "assess ink on base",
+      "fg": "#4a2438",
+      "bg": "#e8acd0",
+      "min": 4.5,
+      "ratio": 7.02,
+      "pass": true
+    },
+    {
+      "name": "follow ink on soft",
+      "fg": "#243044",
+      "bg": "#c9d8ef",
+      "min": 4.5,
+      "ratio": 9.2,
+      "pass": true
+    },
+    {
+      "name": "follow ink on base",
+      "fg": "#243044",
+      "bg": "#b4c9e5",
+      "min": 4.5,
+      "ratio": 7.86,
+      "pass": true
+    },
+    {
+      "name": "paused ink on soft",
+      "fg": "#4a4338",
+      "bg": "#efe8dc",
+      "min": 4.5,
+      "ratio": 8.02,
+      "pass": true
+    },
+    {
+      "name": "active ink on soft",
+      "fg": "#6b221c",
+      "bg": "#f5ddd7",
+      "min": 4.5,
+      "ratio": 8.66,
+      "pass": true
+    },
+    {
+      "name": "white on black pill",
+      "fg": "#ffffff",
+      "bg": "#23211d",
+      "min": 4.5,
+      "ratio": 16.07,
+      "pass": true
+    },
+    {
+      "name": "ink on cream surface",
+      "fg": "#23211d",
+      "bg": "#fffaf0",
+      "min": 4.5,
+      "ratio": 15.45,
+      "pass": true
+    }
+  ]
+}

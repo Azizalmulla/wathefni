@@ -1,0 +1,438 @@
+{
+  "tag": "f035ce94",
+  "pass": 61,
+  "fail": 0,
+  "results": [
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_only enforced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "document compliance only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "never government verified",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no government APIs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no filing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no fine calculations",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no legal-compliance claims",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "analytics excludes compliance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "alerts own reminders",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "analytics freeze no compliance metrics",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residence/work-permit integrity",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "findings omit valid",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "severity high-first",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "owner default hr_compliance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "escalation overdue_daily",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deadline present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "location from profile",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep link compliance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reason AR present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "evidence honesty expired",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "never gov verified on finding",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "guidance_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "legacy iqama \u2192 residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "missing deep link onboarding",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employees secondary link",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "work_permit critical escalation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "needs_review evidence uploaded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "as_of present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "timezone Kuwait",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freshness stale_after",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "definitions EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "partial sources disclosed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "alerts delivery-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "owner override",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live contract",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live as_of",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live timezone Kuwait",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live kuwait_date",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live findings list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live freshness",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live honesty never gov",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live no legal claims",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live alerts own reminders",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live document_compliance_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope payload returns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dashboard compliance actor_role",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dashboard compliance user_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI Findings EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI never government verified",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI responsive grid",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI Open SoA EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canary ack deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic marker detection",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real subject not synthetic",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "live": {
+    "as_of": "2026-08-03T19:35:26.197207+03:00",
+    "findings_count": 17,
+    "contract": "compliance_findings_wave1",
+    "employees_total": 76
+  },
+  "honesty": {
+    "wave": "compliance_wave1",
+    "version": "1.0.0",
+    "contract": "compliance_findings_wave1",
+    "document_compliance_only": true,
+    "government_verified": false,
+    "government_apis": false,
+    "filing": false,
+    "fine_calculations": false,
+    "legal_compliance_claims": false,
+    "ai": false,
+    "analytics_excludes_compliance": true,
+    "alerts_delivery_owns_reminders": true,
+    "systems_of_action": [
+      "compliance",
+      "onboarding",
+      "employees"
+    ],
+    "synthetic_only": true,
+    "enabled": true,
+    "companies": [
+      "WATHEFNI"
+    ],
+    "evidence_classes": [
+      "missing",
+      "uploaded",
+      "hr_reviewed",
+      "expired",
+      "expiring"
+    ],
+    "never_government_verified": true
+  },
+  "integrity": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "canon_residency_iqama",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "canon_residency",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "canon_residence",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "canon_work_permit",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "dual_write_residence",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "dual_write_work_permit",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "dual_write_residency_iqama",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "journey_canon_iqama",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "name": "expat_seed_has_residence",
+        "ok": true,
+        "detail": [
+          "civil_id",
+          "passport",
+          "residence",
+          "work_permit"
+        ]
+      },
+      {
+        "name": "expat_seed_has_work_permit",
+        "ok": true,
+        "detail": [
+          "civil_id",
+          "passport",
+          "residence",
+          "work_permit"
+        ]
+      },
+      {
+        "name": "national_seed_no_residence",
+        "ok": true,
+        "detail": [
+          "civil_id"
+        ]
+      },
+      {
+        "name": "national_seed_no_work_permit",
+        "ok": true,
+        "detail": [
+          "civil_id"
+        ]
+      },
+      {
+        "name": "default_owner_hr",
+        "ok": true,
+        "detail": {
+          "owner_role": "hr_compliance",
+          "owner_label_en": "Company HR / Compliance",
+          "owner_label_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 / \u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644"
+        }
+      }
+    ]
+  }
+}

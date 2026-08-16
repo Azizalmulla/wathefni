@@ -1,0 +1,73 @@
+{
+  "ok": true,
+  "status": "completed",
+  "message": "Marked Noura Almutairi's Work permit as reviewed.",
+  "confirmation": null,
+  "result": {
+    "ok": true,
+    "reviewed": [
+      {
+        "document_type": "work_permit",
+        "label": "Work permit",
+        "status": "valid",
+        "renewal_status": "reviewed"
+      }
+    ],
+    "document_label": "Work permit",
+    "employee": {
+      "employee_key": "WATHEFNI-96550010001",
+      "phone": "96550010001",
+      "company_code": "WATHEFNI",
+      "app_key": null,
+      "name": "Noura Almutairi",
+      "email": "noura.almutairi@example.com",
+      "position_title": "HR Coordinator",
+      "hire_date": null,
+      "start_date": "2024-01-15",
+      "onboarding_status": "not_started",
+      "documents_pending": 0,
+      "documents_complete": 0,
+      "compliance_status": "pending",
+      "profile": {
+        "department": "Human Resources"
+      },
+      "raw_json": {
+        "source": "dashboard_roster",
+        "department": "Human Resources",
+        "source_system": "test_erp",
+        "employee_migration_row_id": "8ceed8a0-f39d-4946-bc2f-23bf7d4ce7e1",
+        "employee_migration_batch_id": "5f09ba60-b9a7-4df1-a129-701e5f1ece34",
+        "employee_migration_hub_created": true
+      },
+      "created_at": "2026-08-05T15:14:18.340432+00:00",
+      "updated_at": "2026-08-08T05:34:22.806642+00:00",
+      "employment_status": null,
+      "device_user_id": null,
+      "person_id": "95420b42-496e-5a75-9509-3e5bdd8b1354",
+      "employment_id": "5f1037e5-e321-5bb6-a355-63621c96a983",
+      "assignment_id": "98724230-e77f-5cd1-ad4b-e689fcae0302",
+      "onboarding_template_version": null,
+      "app_access_enabled": true
+    },
+    "legitimacy": "hr_reviewed_only_not_government_verified",
+    "action_type": "compliance_mark_reviewed",
+    "success": true,
+    "status": "completed",
+    "message": "Marked Noura Almutairi's Work permit as reviewed.",
+    "safe_user_message": "Marked Noura Almutairi's Work permit as reviewed.",
+    "employee_notification": null,
+    "hr_notification": null,
+    "attendance": null,
+    "shift": null,
+    "created": null,
+    "cancelled": null,
+    "conflicts": null,
+    "swap": null,
+    "timesheet": null,
+    "timesheets": null,
+    "policy": null,
+    "export": null,
+    "summaries": null,
+    "analytics": null
+  }
+}

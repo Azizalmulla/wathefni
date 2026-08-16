@@ -1,0 +1,114 @@
+{
+  "marker": "kuwait-first-client-foundation-local-v1",
+  "gates": [
+    {
+      "gate": "normalize_residence_from_residency_iqama",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "normalize_residence_from_residency",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "normalize_residence_canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "no_iqama_canonical_token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "gov_attachments_blocked_as_master",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "national_seed_no_residence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "expat_seed_has_residence_and_work_permit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_core_tables_country_neutral_names",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_sql_default_kw_on_legal_entities",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_kw_profile_scoped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_saudi_uae_country_profiles_enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_leave_eos_pifss_enforcement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_gov_filing_or_api_verify",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_article_18_not_universal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_pam_not_universal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_sa_currency_bootstrap_only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "default_legal_entity_exactly_one",
+      "ok": true,
+      "detail": "['8235c370-411f-4eab-b086-9c6538946c80']"
+    },
+    {
+      "gate": "arabic_and_english_legal_names",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "multiple_legal_entities_allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "default_entity_uniqueness_after_switch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "matrix_uncaught_exception",
+      "ok": false,
+      "detail": "UndefinedColumn: column \"country_of_employment\" of relation \"employment_offers\" does not exist\nLINE 4:                   country_of_employment, employing_legal_ent...\n                          ^\n\nTraceback (most recent call last):\n  File \"/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/ops/kuwait-first-client-foundation-local-matrix.py\", line 434, in main\n    offer_n = _insert_accepted_offer(legacy, company=company, app_key=app_n, legal_name=e1[\"registered_name_en\"])\n  File \"/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/ops/kuwait-first-client-foundation-local-matrix.py\", line 271, in _insert_accepted_offer\n    cur.execute(\n    ~~~~~~~~~~~^\n        \"\"\"\n        ^^^\n    ...<15 lines>...\n        (offer_id, company, app_key, legal_name, date.today() + timedelta(days=14)),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/azizalmulla/Desktop/claw/ai-recruiter/venv/lib/python3.13/site-packages/psycopg2/extras.py\", line 236, in execute\n    return super().execute(query, vars)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^\npsycopg2.errors.UndefinedColumn: column \"country_of_employment\" of relation \"employment_offers\" does "
+    }
+  ],
+  "started_at": "2026-07-25T04:06:22.517623+00:00",
+  "passed": 20,
+  "failed": 1,
+  "finished_at": "2026-07-25T04:06:22.646929+00:00"
+}

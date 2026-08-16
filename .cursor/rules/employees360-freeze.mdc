@@ -1,0 +1,42 @@
+---
+description: Freeze Employees 360 controlled-rollout invariants; block unsafe post-hire changes
+globs: wathefni-orchestrator/employee_*.py,wathefni-orchestrator/app.py,wathefni-orchestrator/canary-prod-employees360*.py,apps/wathefni-dashboard/src/posthire/**,ops/EMPLOYEES360*.md
+alwaysApply: false
+---
+
+# Employees 360 freeze
+
+Employees 360 is **production-qualified under controlled rollout** and **frozen** for feature/redesign work. See `ops/EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- HR / manager production use: GO
+- Employee app: Talal (`WATHEFNI-96550252254`) allowlist canary only
+- Normal lifecycle: controlled readiness; no broad real terminations
+- Exceptional/high-risk lifecycle: manual only
+- Payroll owns monetary calculations
+- Unsupported jurisdictions fail closed
+- `*_SYNTHETIC_ONLY=on` plus named real allowlists remain active
+
+## Hard bans for future post-hiring PRs
+
+1. **Do not bypass Wave 2 authority** — hub mutations must respect `employee_key_authority_map` and scope helpers.
+2. **Do not overwrite Wave 4 assignment history** — history is append/close-slice; no silent rewrite of past rows outside audited rollback.
+3. **Do not bypass Wave 3 policy packs** — terminations/lifecycle require resolved `KW_PRIVATE_SECTOR` (or explicit remediation). Never enable reserved packs.
+4. **Do not weaken ESS identity or bank encryption** — keep bind uniqueness, `session_epoch` revoke, Fernet-at-rest, mask-by-default.
+5. **Do not remove dual-control** — classification, status, and lifecycle self-approval stay forbidden.
+6. **Do not expose unsupported jurisdictions** — only `KW_PRIVATE_SECTOR` is verified/enabled.
+7. **Do not change frozen pre-hiring / Wave D** to unblock Employees 360 work.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Explicit allowlist edits documented in evidence
+- Running `smoke-test-employees360-freeze-regression.py`
+
+## Not allowed without owner change-control
+
+- Turning `ESS`/`LIFECYCLE` synthetic-only **off**
+- Broad employee-app onboard
+- Real bank allowlist expansion
+- Employees/Workforce redesign or new E360 feature surface

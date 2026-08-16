@@ -1,0 +1,37 @@
+    employee relations c4 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  case-level need-to-know
+      PASS  ordinary hr not er
+      PASS  manager not er
+      PASS  submission not finding
+      PASS  investigation not outcome
+      PASS  outcome not employment
+      PASS  no invented KW legal
+      PASS  wave5 excludes free text
+      PASS  assistant mutations out
+      PASS  works without engagement
+      PASS  works without payroll
+      PASS  works without talent/perf
+      PASS  setup wave6 er
+      PASS  setup honesty er
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  hr web sealed
+      PASS  manager no er by line
+      PASS  employee safe only
+      PASS  assistant no narrative dump
+      PASS  gate off
+      PASS  empty allowlist admits after R5G
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema cases
+      PASS  schema access grants
+      PASS  employment mutate check
+      PASS  no employee table
+      PASS  payload safe notify
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    33 passed, 0 failed (unit-only)

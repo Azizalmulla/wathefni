@@ -1,0 +1,97 @@
+hygiene ['SHW5B', 'SHW5B-SYNTH|'] residual 0
+hygiene ['SHW4B', 'SHW4B-SYNTH|'] residual 0
+hygiene ['SHW3B', 'SHW3B-SYNTH|'] residual 0
+hygiene ['SHW2B', 'SHW2B-SYNTH|'] residual 0
+hygiene ['SHW1B', 'SHW1B-SYNTH|'] residual 0
+hygiene ['SHW2', 'SHW2-SYNTH|', 'SHW2C'] residual 0
+=== W1B ===
+[PASS] lifecycle terminated blocks
+[PASS] residual synthetic zero
+[PASS] real assignment fingerprints unchanged except orphans
+[PASS] orphan 0a6e73dd-9c6d-49a0-b253-39a9922ebd70 soft-cancelled
+[PASS] orphan 6a84a671-eb7f-43ea-870e-af859a440467 soft-cancelled
+[PASS] orphan f9ebecf3-8838-456a-8124-c34c3c7600ca soft-cancelled
+
+57 passed, 0 failed
+W1B_RC=0
+=== W2B ===
+[PASS] jobs re-enabled after kill switch
+[PASS] operator job resumes after kill switch cleared
+[PASS] reminder scan dry_run ok
+[PASS] reminder scan exposes terminal_failures
+[PASS] tenant isolation
+[PASS] residual synthetic zero
+[PASS] real assignment fingerprints unchanged
+[PASS] no leftover assignment rows beyond baseline
+
+108 passed, 0 failed
+W2B_RC=0
+=== W3B ===
+PASS  swap_scoped_decision_attempted
+PASS  recon_acknowledge
+PASS  recon_audited_cancel
+PASS  terminal_reminders_key_present
+PASS  cleanup_residual_zero
+PASS  real_fps_unchanged
+
+31 passed, 0 failed
+W3B_RC=0
+=== W4B ===
+PASS  real_version_fps_unchanged
+PASS  real_event_count_unchanged
+PASS  cleanup_residual_zero
+PASS  cleanup_contract
+PASS  real_fps_unchanged
+PASS  residual_total_zero
+
+75 passed, 0 failed
+W4B_RC=0
+=== W3 UX ===
+PASS  bulk readiness note
+
+43 passed, 0 failed
+W3UX_RC=0
+=== W1 ===
+      PASS  beyond-end soft-cancelled
+      PASS  lifecycle blocks terminated
+      PASS  tenant isolation company mismatch
+
+    90 passed, 0 failed
+W1_RC=0
+=== W2 ===
+      PASS  recon cancel is audited soft-cancel
+      PASS  recon cancel sets cancelled
+      PASS  recon cancel reason code
+      PASS  wave2 honesty denies leave balance mutation
+      PASS  wave2 module no leave balance SQL
+      PASS  wave2 module no payroll money calc
+
+    82 passed, 0 failed
+W2_RC=0
+=== E360 ===
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+E360_RC=0
+=== ONB ===
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+ONB_RC=0
+=== ATT ===
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+ATT_RC=0
+=== LEAVE ===
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+LEAVE_RC=0
+WATHEFNI_SHIFTS_INTEGRITY_JOBS=0
+WATHEFNI_SHIFTS_WAVE5=1
+WATHEFNI_SHIFTS_WAVE5_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_WAVE5_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_WAVE5_SYNTHETIC_KEY_MARKERS=SHW5B,SHW5B-SYNTH|
+WATHEFNI_SHIFTS_WAVE5_SYNTHETIC_PHONE_PREFIXES=965535
+COEXIST_DONE

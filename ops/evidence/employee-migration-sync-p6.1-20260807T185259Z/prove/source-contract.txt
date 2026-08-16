@@ -1,0 +1,11 @@
+PASS emit_helper
+PASS broadcast_channel
+PASS soft_poll_const
+PASS connected_emits_sync
+PASS connected_soft_refresh
+PASS review_live_hook
+PASS dirty_guard_name
+PASS employees_live_hook
+PASS profile_live_hook
+PASS skip_while_edit
+VERDICT PASS

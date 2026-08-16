@@ -11,14 +11,23 @@ import * as Updates from 'expo-updates'
 import { useAuth } from '@/auth/AuthProvider'
 import {
   AUTO_LOCK_BUILD_MARKER,
+  AUTO_LOCK_ON_BUILD_MARKER,
   decideLocalUnlockOnResume,
   isLocalAutoLockBiometricEnabled,
   isLocalAutoLockEnabledFor,
   isLocalAutoLockMasterEnabled,
 } from '@/auth/autoLockPolicy'
+import { BIOMETRIC_UNLOCK_BUILD_MARKER } from '@/auth/biometricPolicy'
+import { PIN_UNLOCK_BUILD_MARKER } from '@/auth/pinPolicy'
 import { patchAutoLockDiagnostics } from '@/auth/autoLockDiagnostics'
 import { LocalUnlockOverlay, PrivacyCover } from '@/features/pin/LocalUnlockOverlay'
 import { softRefreshEmployeeSurfaces } from '@/lib/employeeSoftRefresh'
+
+// Keep Auth Wave 2 bake markers reachable so HBC inspection can prove OTA flags.
+void PIN_UNLOCK_BUILD_MARKER
+void BIOMETRIC_UNLOCK_BUILD_MARKER
+void AUTO_LOCK_ON_BUILD_MARKER
+void AUTO_LOCK_BUILD_MARKER
 
 type Props = { children: ReactNode }
 

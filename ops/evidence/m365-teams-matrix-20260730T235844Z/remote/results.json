@@ -1,0 +1,58 @@
+{
+  "stamp": "20260730T235912Z",
+  "proofs": {
+    "cert_token_mint": {
+      "ok": true
+    },
+    "teams_create_join_url": {
+      "ok": true,
+      "has_join_url": true,
+      "join_host": "teams.microsoft.com",
+      "online_meeting_id": true,
+      "error": null,
+      "status": null,
+      "detail": ""
+    },
+    "calendar_event_linked": {
+      "ok": true,
+      "has_event_id": true,
+      "has_web_link": true
+    },
+    "attendees_on_invite": {
+      "ok": true,
+      "attendee_count": 2
+    },
+    "timezone_consistency": {
+      "ok": true,
+      "timeZone": "Asia/Kuwait",
+      "dateTime": "2026-07-31T08:59:12.0000000"
+    },
+    "reschedule_same_event_no_duplicate": {
+      "ok": true,
+      "same_event_id": true,
+      "error": null
+    },
+    "cancel": {
+      "ok": true,
+      "status": 204
+    },
+    "outside_aap_online_meeting_denied": {
+      "ok": true,
+      "status": 403,
+      "error": "graph_http_403",
+      "detail": "{\"error\":{\"code\":\"forbidden\",\"message\":\"No application access policy found for this app 16f7135a-b7e8-4ac8-adfe-2d2b13de3131 on the user\",\"innerError\":{\"date\":\"2026-07-30T23:59:16\""
+    },
+    "outside_au_calendar_still_denied": {
+      "ok": true,
+      "status": 403
+    },
+    "assistant_schedule_executor_wired": {
+      "ok": true
+    }
+  },
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "verdict": "PASS"
+  }
+}

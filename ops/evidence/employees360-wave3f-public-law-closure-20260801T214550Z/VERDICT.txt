@@ -1,0 +1,8 @@
+PASS — Wave 3F public-law policy closure (staging)
+
+Normal Kuwait private-sector lifecycle: GO (public-law contract closed)
+Exceptional terminations: NO-GO for software decision (intentional manual judgment)
+Payroll monetary math: NO-GO in E360 (Payroll owns)
+Synthetic prod Wave 3F canary: NO-GO until deploy auth (staging 42+22+56+51 PASS)
+
+Evidence: ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/

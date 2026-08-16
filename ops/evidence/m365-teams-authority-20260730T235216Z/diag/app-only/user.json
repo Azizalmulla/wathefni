@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "status": 403,
+  "error": "{\"error\":{\"code\":\"Authorization_RequestDenied\",\"message\":\"Insufficient privileges to complete the operation.\",\"innerError\":{\"date\":\"2026-07-30T23:39:50\",\"request-id\":\"a86d4e0f-3726-4739-b6fc-f64f6394d7de\",\"client-request-id\":\"a86d4e0f-3726-4739-b6fc-f64f6394d7de\"}}}"
+}

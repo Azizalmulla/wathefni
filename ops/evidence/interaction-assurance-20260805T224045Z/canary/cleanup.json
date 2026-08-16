@@ -1,0 +1,25 @@
+{
+  "contract_version": "iax-cleanup-1.0.0",
+  "company_code": "WATHEFNI",
+  "tag": "b4187515",
+  "markers": [
+    "IAX",
+    "IAX-SYNTH|"
+  ],
+  "phone_prefixes": [
+    "965542"
+  ],
+  "deleted": {
+    "hr_tasks": 0,
+    "leave_requests": 0,
+    "onboarding_items": 0,
+    "employee_onboarding_assignments": 0,
+    "employees": 1
+  },
+  "residual": {
+    "employees": 0,
+    "hr_tasks": 0,
+    "total": 0
+  },
+  "residual_total": 0
+}

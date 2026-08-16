@@ -1,0 +1,18 @@
+{
+  "cal_chunk": "CalendarShell-DunoP2L4.js",
+  "dash_chunk": "dashboard-Bznlhxsn.js",
+  "cal_sha256": "0de0e2233755ba5857f7e575de391daf8220eda70f9a159ecbfe4aff4e089866",
+  "dash_sha256": "d610dfeb0f08bd07b04f0ba4b6d37f457a37df7878eb01c006bc38d2189f8697",
+  "html_refs_dash": true,
+  "dash_refs_cal": true,
+  "stone": true,
+  "yellow": true,
+  "blue": true,
+  "pink": true,
+  "join_en": true,
+  "join_ar": true,
+  "plus1d": true,
+  "plus_day_ar": true,
+  "data_density": true,
+  "overview_mine": true
+}

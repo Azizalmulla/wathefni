@@ -1,0 +1,54 @@
+PASS posthire_bundle_present — PostHire-Cjhqi0Um.js
+PASS visual_wave3_marker
+PASS board_hero_marker
+PASS shared_priority_token
+PASS shared_review_token
+PASS no_legacy_scheduled_hex
+PASS no_legacy_conflict_hex
+PASS iq_wave2_marker
+PASS updating_overlay
+PASS filters_preserved
+PASS surfaces_preserved
+PASS mutation_concurrency
+PASS swap_actions
+PASS leave_still_present
+PASS iq_shell_still
+SHIFTS_WAVE3_DB {"db": "wathefni", "bundle": "PostHire-Cjhqi0Um.js"}
+PASS db_readable — wathefni
+SHIFTS_WAVE3_VISUAL_SMOKE_OK
+PASS posthire_bundle_present — PostHire-Cjhqi0Um.js
+PASS iq_wave2_marker
+PASS updating_overlay
+PASS updating_copy
+PASS surfaces_preserved
+PASS board_preserved
+PASS filters_preserved
+PASS mutation_concurrency
+PASS swap_actions
+PASS confirm_continue
+PASS wave1_primary
+PASS leave_still_present
+PASS iq_shell_still
+SHIFTS_WAVE2_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+SHIFTS_WAVE2_IQ_SMOKE_OK
+PASS posthire_bundle_present — PostHire-Cjhqi0Um.js
+PASS surfaces_marker
+PASS planning_marker
+PASS planning_hr
+PASS advanced_ops
+PASS composer_org
+PASS advanced_ops_copy
+PASS shared_reason_modal
+PASS hr_cancel_impact
+PASS hr_copy_no_real_mutation
+PASS hr_copy_no_allowlist_jargon
+PASS hr_copy_no_concurrency_token
+PASS mutation_concurrency
+PASS primary_schedule
+PASS arabic_surface
+PASS payroll_still_present
+PASS leave_still_present
+SHIFT_STATUS_COUNTS [{"status": "scheduled", "c": 81}, {"status": "cancelled", "c": 73}]
+PASS shifts_table_readable — statuses=2
+SHIFTS_WAVE1_UX_CLOSURE_SMOKE_OK

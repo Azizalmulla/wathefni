@@ -1,0 +1,14 @@
+{
+  "employee_key": "WATHEFNI-96599338566",
+  "has_verified_bank": true,
+  "has_payroll_effective_bank": true,
+  "verified_stage": "payroll",
+  "verified_fp": "0f349ce848ab5e4b",
+  "effective_fp": "0f349ce848ab5e4b",
+  "iban_display": "**************************9548",
+  "bank_name": "Gulf bank",
+  "submission_state": "none",
+  "contract_version": "bank_ess_v1_p0_verified_at_hr",
+  "next_step_en": "Your bank details are verified. Submit a change if anything is different."
+}
+AZIZ_EFFECTIVE_UNCHANGED_PASS

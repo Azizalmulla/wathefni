@@ -1,0 +1,12 @@
+stamp=20260803T204936Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/module-aware-shell-wave0b-prod-canary-20260803T204936Z
+company=WATHEFNI
+channel=hr_dashboard
+mutations=off
+capture_ingest=off
+assistant_wave3=false
+further_shell_wave=false
+residual=0
+GATE=PROD_SYNTHETIC_MODULE_AWARE_SHELL_WAVE0_GO
+PROD_SYNTHETIC_SHELL_WAVE0=GO
+FURTHER_SHELL_WAVE=NO-GO

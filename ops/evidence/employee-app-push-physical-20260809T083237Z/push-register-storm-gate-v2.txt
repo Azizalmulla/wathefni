@@ -1,0 +1,9 @@
+[PASS] requestRef avoids unstable request dep
+[PASS] registration effect does not depend on request
+[PASS] single-flight / lastHandledToken present
+[PASS] token claimed before server POST
+[PASS] listener uses knownToken without getExpoPushTokenAsync loop
+[PASS] token listener never re-asks permission
+[PASS] askedPermission gates OS prompt once
+[PASS] soft access codes do not blockApp on api phase
+GREEN push-register-storm gate

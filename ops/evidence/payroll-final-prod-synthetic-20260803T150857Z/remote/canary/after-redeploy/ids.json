@@ -1,0 +1,53 @@
+{
+  "tag": "57f48d88",
+  "employee_key": "WATHEFNI-PYW1-PYWF-FINAL-57f48d88",
+  "phones": {
+    "creator": "965541157488",
+    "approver": "965541257488",
+    "closer": "965541357488",
+    "exporter": "965541457488",
+    "exporter2": "965541557488"
+  },
+  "prior_mode": "external",
+  "period": {
+    "start": "2041-05-01",
+    "end": "2041-05-31"
+  },
+  "preview_run_id": "69651b5c-4471-48a4-a6ed-8db06cc10bfd",
+  "cleanup": {
+    "deleted": {
+      "w5_dual": 0,
+      "w5_events": 3,
+      "w5_pifss": 2,
+      "w5_eos": 1,
+      "w5_rules": 0,
+      "finance_exports": 1,
+      "journal_lines": 3,
+      "journal_drafts": 1,
+      "bank_drafts": 1,
+      "close_dual": 1,
+      "close_events": 10,
+      "close_runs": 2,
+      "mappings": 3,
+      "payslip_lines": 4,
+      "payslip_events": 2,
+      "payslips": 2,
+      "preview_lines": 5,
+      "preview_employees": 2,
+      "preview_events": 2,
+      "preview_runs": 2,
+      "import_lines": 2,
+      "import_recons": 1,
+      "imports": 1,
+      "quarantine_by_export": 2,
+      "adapter_exports": 1,
+      "quarantine": 0,
+      "contract_events": 2,
+      "contract_components": 2,
+      "contracts": 1,
+      "period_events": 4,
+      "periods": 1
+    },
+    "residual_total": 0
+  }
+}

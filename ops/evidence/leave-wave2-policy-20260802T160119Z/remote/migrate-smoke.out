@@ -1,0 +1,16 @@
+MIGRATE_OK leave_policy_wave2 2.0.0
+    leave policy wave2 — holidays, reservations, reconcile, sick tiers, Kuwait TZ
+      PASS  version
+      PASS  carryover disabled
+      PASS  eligibility conflict noted
+      PASS  weekends excluded
+      PASS  holiday excluded
+      PASS  span year+holiday
+      PASS  sick tiers 15+5
+      PASS  kuwait date near midnight
+      PASS  employee seeded
+      PASS  accrual posted
+      PASS  balance exists
+      PASS  available > 0
+      PASS  national+liberation seeded
+      PASS  feb week chargeable=3

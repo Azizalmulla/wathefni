@@ -73,9 +73,10 @@ describe('canonical recruiting lifecycle labels', () => {
   })
 
   test('web action visibility comes from backend allowed_actions', () => {
-    const source = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
-    expect(source).toContain("const allowedActions = new Set(candidate.allowed_actions || [])")
-    expect(source).toContain("const allowedActions = new Set(interview.allowed_actions || [])")
+    const appSource = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
+    const interviewsSource = readFileSync(resolve(__dirname, '../pages/InterviewsPage.tsx'), 'utf8')
+    expect(appSource).toContain("const allowedActions = new Set(candidate.allowed_actions || [])")
+    expect(interviewsSource).toContain("const allowedActions = new Set(interview.allowed_actions || [])")
   })
 
   test('shortlist, reject and hire keep explicit confirmation', () => {

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/canary-prod-interaction-assurance.py", line 193, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/canary-prod-interaction-assurance.py", line 59, in main
+    with app.db_connect() as conn:
+         ~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 252, in __enter__
+    self._conn = _get_db_pool().getconn()
+                 ~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 229, in _get_db_pool
+    binding = runtime_binding()
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 218, in runtime_binding
+    assert_runtime_environment_binding()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 196, in assert_runtime_environment_binding
+    binding = _runtime_environment.resolve_runtime_binding(os.environ)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/runtime_environment.py", line 101, in resolve_runtime_binding
+    raise RuntimeEnvironmentError("application_environment_missing_or_invalid")
+runtime_environment.RuntimeEnvironmentError: application_environment_missing_or_invalid

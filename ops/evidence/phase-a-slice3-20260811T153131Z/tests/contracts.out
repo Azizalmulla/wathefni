@@ -1,0 +1,17 @@
+    capability contracts + catalog — HARD/OPTIONAL/ENHANCEMENT
+      PASS  contracts non-empty
+      PASS  has HARD
+      PASS  has OPTIONAL
+      PASS  has ENHANCEMENT
+      PASS  optional inactive without both modules
+      PASS  optional active when both modules
+      PASS  setting off deactivates
+      PASS  joining contract active
+      PASS  joining writers dark by default
+      PASS  catalog has requisitions
+      PASS  catalog has preboarding
+      PASS  catalog has probation
+      PASS  HARD deps empty for Wave 1 commercial modules
+      PASS  recommended_with preserved (OPTIONAL/ENHANCEMENT hints)
+
+    14 passed, 0 failed

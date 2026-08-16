@@ -80,12 +80,19 @@ export type EmployeeFeatureKey =
   | 'inbox'
   | 'settings'
   | 'onboarding'
+  | 'preboarding'
+  | 'probation'
   | 'documents'
   | 'attendance'
   | 'shifts'
   | 'leave'
   | 'bank'
   | 'payslips'
+  | 'performance'
+  | 'talent'
+  | 'learning'
+  | 'benefits'
+  | 'engagement'
   | 'compliance_actions'
 
 export type EmployeeFeatureCapability = {
@@ -402,6 +409,28 @@ export type LeaveResponse = {
 }
 
 /**
+ * `/app/leave/history` — paginated leave requests beyond the `/app/leave` ~50 window.
+ * Same request fields as the Leave root; no invented balance/policy facts.
+ */
+export type LeaveHistoryResponse = {
+  ok: boolean
+  locale: 'en' | 'ar'
+  kind: 'leave_history'
+  requests: LeaveRequestRow[]
+  count: number
+  has_more: boolean
+  next_cursor: string | null
+  limit: number
+  ordering: 'start_date_desc'
+  filters: {
+    status: string | null
+    date_from: string | null
+    date_to: string | null
+    year: number | null
+  }
+}
+
+/**
  * `/app/leave/duration` — what a date range would actually charge.
  *
  * The company's rest days and public holidays decide this, and the app has
@@ -498,6 +527,42 @@ export type WorkdayResponse = {
   upcoming: WorkdayScheduled[] | null
   recent: WorkdayRecorded[] | null
   window: { days: number; summary: { present: number; late: number; absent: number } } | null
+  read_only: {
+    employee_clocking: boolean
+    attendance_correction: boolean
+    payroll_effect: boolean
+    authority: string
+    authority_ar: string
+  }
+}
+
+/**
+ * `/app/schedule/history` — paginated recorded attendance beyond the workday window.
+ * `scheduled` is present only when the API resolved a canonical shift_id; never invent it.
+ */
+export type ScheduleHistoryRecord = {
+  recorded: WorkdayRecorded
+  scheduled: WorkdayScheduled | null
+}
+
+export type ScheduleHistoryResponse = {
+  ok: boolean
+  locale: 'en' | 'ar'
+  kind: 'attendance_history'
+  authority: {
+    attendance: HomeModuleReadState
+    shifts: HomeModuleReadState
+  }
+  records: ScheduleHistoryRecord[] | null
+  count: number | null
+  has_more: boolean
+  next_cursor: string | null
+  limit: number
+  ordering: 'attendance_date_desc'
+  bounds: {
+    date_from: string | null
+    date_to: string
+  }
   read_only: {
     employee_clocking: boolean
     attendance_correction: boolean
@@ -626,6 +691,11 @@ export type PayslipsResponse = {
   ok: boolean
   count: number
   payslips: PayslipListItem[]
+  /** True when another keyset page exists beyond this response. */
+  has_more?: boolean
+  /** Opaque cursor for the next page; omit or null on the last page. */
+  next_cursor?: string | null
+  limit?: number
   honesty?: { en?: string; ar?: string }
   locale?: string
 }

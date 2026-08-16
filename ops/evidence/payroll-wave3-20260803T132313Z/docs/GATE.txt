@@ -1,0 +1,11 @@
+# Payroll Wave 3 staging qualify
+stamp=20260803T132313Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave3-20260803T132313Z
+payment_processing=disabled
+payslips_as_money=false
+native_payslips_authoritative=false
+external_payslips_authority=external
+ai_calculations=false
+bank_files=false
+production_deploy=false
+prod_synthetic_gate=NO-GO (staging-only wave; requires Wave 3-B prod synthetic path)

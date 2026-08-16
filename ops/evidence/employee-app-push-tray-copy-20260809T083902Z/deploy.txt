@@ -1,0 +1,126 @@
+PASS activation never push-allowed
+PASS leave push-allowed
+PASS bank template in catalog
+
+=== EN tray examples ===
+leave_request_approved: Leave approved — Your leave from 23–25 Aug has been approved.
+PASS en:leave_request_approved:title — got='Leave approved'
+PASS en:leave_request_approved:body — got='Your leave from 23–25 Aug has been approved.'
+PASS en:leave_request_approved:no-iso
+PASS en:leave_request_approved:no-iso-date
+leave_request_rejected: Leave rejected — Your leave request for 23–25 Aug was not approved.
+PASS en:leave_request_rejected:title — got='Leave rejected'
+PASS en:leave_request_rejected:body — got='Your leave request for 23–25 Aug was not approved.'
+PASS en:leave_request_rejected:no-iso
+PASS en:leave_request_rejected:no-iso-date
+shift_rescheduled: Shift updated — Your shift on 12 Aug is now 9:00 AM–5:00 PM.
+PASS en:shift_rescheduled:title — got='Shift updated'
+PASS en:shift_rescheduled:body — got='Your shift on 12 Aug is now 9:00 AM–5:00 PM.'
+PASS en:shift_rescheduled:no-iso
+PASS en:shift_rescheduled:no-iso-date
+shift_assigned: New shift — Your shift on 12 Aug is 9:00 AM–5:00 PM.
+PASS en:shift_assigned:title — got='New shift'
+PASS en:shift_assigned:body — got='Your shift on 12 Aug is 9:00 AM–5:00 PM.'
+PASS en:shift_assigned:no-iso
+PASS en:shift_assigned:no-iso-date
+shift_reminder: Shift reminder — Your shift starts at 9:00 AM today.
+PASS en:shift_reminder:title — got='Shift reminder'
+PASS en:shift_reminder:body — got='Your shift starts at 9:00 AM today.'
+PASS en:shift_reminder:no-iso
+PASS en:shift_reminder:no-iso-date
+shift_cancelled: Shift cancelled — Your shift on 12 Aug was cancelled.
+PASS en:shift_cancelled:title — got='Shift cancelled'
+PASS en:shift_cancelled:body — got='Your shift on 12 Aug was cancelled.'
+PASS en:shift_cancelled:no-iso
+PASS en:shift_cancelled:no-iso-date
+compliance_document_expiring: Document expiring — Your Civil ID expires on 27 Aug.
+PASS en:compliance_document_expiring:title — got='Document expiring'
+PASS en:compliance_document_expiring:body — got='Your Civil ID expires on 27 Aug.'
+PASS en:compliance_document_expiring:no-iso
+PASS en:compliance_document_expiring:no-iso-date
+compliance_document_required: Document action needed — Please update your Civil ID.
+PASS en:compliance_document_required:title — got='Document action needed'
+PASS en:compliance_document_required:body — got='Please update your Civil ID.'
+PASS en:compliance_document_required:no-iso
+PASS en:compliance_document_required:no-iso-date
+payslip_ready: Payslip ready — Your August 2026 payslip is ready.
+PASS en:payslip_ready:title — got='Payslip ready'
+PASS en:payslip_ready:body — got='Your August 2026 payslip is ready.'
+PASS en:payslip_ready:no-iso
+onboarding_reminder: Onboarding action needed — You have an onboarding item waiting for you.
+PASS en:onboarding_reminder:title — got='Onboarding action needed'
+PASS en:onboarding_reminder:body — got='You have an onboarding item waiting for you.'
+PASS en:onboarding_reminder:no-iso
+PASS en:onboarding_reminder:no-iso-date
+employee_onboarding_welcome: Onboarding started — You have onboarding steps waiting for you.
+PASS en:employee_onboarding_welcome:title — got='Onboarding started'
+PASS en:employee_onboarding_welcome:body — got='You have onboarding steps waiting for you.'
+PASS en:employee_onboarding_welcome:no-iso
+PASS en:employee_onboarding_welcome:no-iso-date
+bank_correction_required: Bank details need attention — Please update your bank details.
+PASS en:bank_correction_required:title — got='Bank details need attention'
+PASS en:bank_correction_required:body — got='Please update your bank details.'
+PASS en:bank_correction_required:no-iso
+PASS en:bank_correction_required:no-iso-date
+
+=== AR tray examples ===
+leave_request_approved: تمت الموافقة على الإجازة — تمت الموافقة على إجازتك من 23–25 أغسطس.
+PASS ar:leave_request_approved:present
+PASS ar:leave_request_approved:no-iso-date
+PASS ar:leave_request_approved:no-open-cta
+leave_request_rejected: رُفض طلب الإجازة — لم تتم الموافقة على طلب إجازتك لـ 23–25 أغسطس.
+PASS ar:leave_request_rejected:present
+PASS ar:leave_request_rejected:no-iso-date
+PASS ar:leave_request_rejected:no-open-cta
+shift_rescheduled: تم تحديث المناوبة — مناوبتك يوم 12 أغسطس أصبحتًا 9:00–17:00.
+PASS ar:shift_rescheduled:present
+PASS ar:shift_rescheduled:no-iso-date
+PASS ar:shift_rescheduled:no-open-cta
+shift_reminder: تذكير بالمناوبة — تبدأ مناوبتك اليوم الساعة 9:00.
+PASS ar:shift_reminder:present
+PASS ar:shift_reminder:no-iso-date
+PASS ar:shift_reminder:no-open-cta
+compliance_document_expiring: مستند ينتهي قريباً — ينتهي البطاقة المدنية في 27 أغسطس.
+PASS ar:compliance_document_expiring:present
+PASS ar:compliance_document_expiring:no-iso-date
+PASS ar:compliance_document_expiring:no-open-cta
+compliance_document_required: مطلوب تحديث مستند — يرجى تحديث البطاقة المدنية.
+PASS ar:compliance_document_required:present
+PASS ar:compliance_document_required:no-iso-date
+PASS ar:compliance_document_required:no-open-cta
+payslip_ready: كشف الراتب جاهز — كشف راتبك لـ أغسطس 2026 جاهز.
+PASS ar:payslip_ready:present
+PASS ar:payslip_ready:no-iso-date
+PASS ar:payslip_ready:no-open-cta
+onboarding_reminder: إجراء انضمام مطلوب — لديك خطوة انضمام بانتظارك.
+PASS ar:onboarding_reminder:present
+PASS ar:onboarding_reminder:no-iso-date
+PASS ar:onboarding_reminder:no-open-cta
+bank_correction_required: تفاصيل البنك تحتاج تصحيحاً — يرجى تحديث بياناتك البنكية.
+PASS ar:bank_correction_required:present
+PASS ar:bank_correction_required:no-iso-date
+PASS ar:bank_correction_required:no-open-cta
+shift_cancelled: تم إلغاء المناوبة — أُلغيت مناوبتك يوم 12 أغسطس.
+PASS ar:shift_cancelled:present
+PASS ar:shift_cancelled:no-iso-date
+PASS ar:shift_cancelled:no-open-cta
+shift_assigned: مناوبة جديدة — مناوبتك يوم 12 أغسطس هي 9:00.
+PASS ar:shift_assigned:present
+PASS ar:shift_assigned:no-iso-date
+PASS ar:shift_assigned:no-open-cta
+employee_onboarding_welcome: بدأ الانضمام — لديك خطوات انضمام بانتظارك.
+PASS ar:employee_onboarding_welcome:present
+PASS ar:employee_onboarding_welcome:no-iso-date
+PASS ar:employee_onboarding_welcome:no-open-cta
+PASS iso date_text humanized — Your leave from 23–25 Aug has been approved.
+PASS tray ar present
+PASS collapse stable
+PASS reminder time-sensitive
+PASS future cancel not time-sensitive
+PASS same-day cancel time-sensitive
+PASS ladder skips inbox-only push
+PASS ladder uses tray_copy
+
+0 failed
+active
+docs=000

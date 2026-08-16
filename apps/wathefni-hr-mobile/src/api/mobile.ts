@@ -19,6 +19,15 @@ async function normalized<T>(
 const segment = (value: string) => encodeURIComponent(value)
 
 export const mobileApi = {
+  leave: (request: MobileRequester, status = 'requested', signal?: AbortSignal) =>
+    normalized(
+      request,
+      `/dashboard/mobile/leave?status=${encodeURIComponent(status)}`,
+      normalize.leave,
+      { signal },
+    ),
+  taskResolve: (request: MobileRequester, taskId: string, json: unknown) =>
+    request(`/dashboard/mobile/tasks/${segment(taskId)}/resolve`, { method: 'POST', json }),
   tasks: (request: MobileRequester, signal?: AbortSignal) =>
     normalized(request, '/dashboard/mobile/tasks', normalize.tasks, { signal }),
   onboarding: (request: MobileRequester, signal?: AbortSignal) =>

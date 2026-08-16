@@ -1,0 +1,82 @@
+Traceback (most recent call last):
+  File "/tmp/attw2b-stage/smoke-test-attendance-capture-wave2b.py", line 484, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/tmp/attw2b-stage/smoke-test-attendance-capture-wave2b.py", line 478, in main
+    Path(out, "qualification.json").write_text(json.dumps({"summary": summary, "results": RESULTS}, indent=2), encoding="utf-8")
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/usr/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/lib/python3.12/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type CanonicalPunch is not JSON serializable
+PASS  privacy hard-fail biotime
+PASS  privacy hard-fail csv
+PASS  biotime pagination pages
+PASS  biotime pulled 4
+PASS  capture methods card+face+biometric
+PASS  no biometric payloads in raw_ref
+PASS  authority ingest biotime
+PASS  duplicate pull idempotent
+PASS  normal day projection 480
+PASS  overnight projection
+PASS  checkpoint skips old ids
+PASS  agent poll enqueue
+PASS  agent offline enqueue
+PASS  agent flush delivered
+PASS  credentials persisted sealed
+PASS  restart outbox empty
+PASS  checkpoint durable
+PASS  invalid credentials fail
+PASS  credential rotation recovers
+PASS  connector health present
+PASS  unknown maps to canonical
+PASS  unknown quarantined
+PASS  mapping replay accepted
+PASS  csv same content same event ids
+PASS  csv duplicate across files idempotent
+PASS  xlsx parsed
+PASS  xlsx ingest
+PASS  sftp batch files
+PASS  interrupted import resume skips file
+PASS  csv day projection
+PASS  day approved
+PASS  payroll reconcile exact
+PASS  payroll eligible after approve
+PASS  correction requested after snapshot
+PASS  safe reversal/reimport still idempotent
+PASS  punches immutable count
+PASS  locked payroll snapshot unchanged
+PASS  other tenant ingest
+PASS  tenant isolation company punches
+PASS  other tenant has punch
+PASS  canonical has capture_method
+PASS  canonical has no zkteco fields
+PASS  freeze skipped
+{
+  "summary": {
+    "pass": 43,
+    "fail": 0,
+    "tag": "a85c5e56",
+    "company": "ATTW2B",
+    "employee_key": "ATTW2B-ATTW2B-a85c5e56"
+  }
+}
+SUMMARY pass=43 fail=0

@@ -1,0 +1,217 @@
+{
+  "run_tag": "20260807T080435Z",
+  "unit": [
+    {
+      "case": "contract_version_p1",
+      "verdict": "proven",
+      "detail": "bank_ess_v1_p1_document_first"
+    },
+    {
+      "case": "bank_certificate_in_structuring",
+      "verdict": "proven",
+      "detail": null
+    },
+    {
+      "case": "iban_letter_alias",
+      "verdict": "proven",
+      "detail": null
+    },
+    {
+      "case": "extraction_schema_has_kw_fields",
+      "verdict": "proven",
+      "detail": [
+        "account_holder",
+        "account_number",
+        "bank_name",
+        "branch",
+        "country_code",
+        "currency",
+        "document_type",
+        "field_confidence",
+        "iban",
+        "overall_confidence",
+        "swift",
+        "unreadable_reason",
+        "warnings"
+      ]
+    },
+    {
+      "case": "sanitize_good_certificate",
+      "verdict": "proven",
+      "detail": {
+        "proposed": {
+          "iban": "KW81CBKU0000000000001234560101",
+          "account_number": "1234560101",
+          "bank_name": "National Bank of Kuwait",
+          "account_holder": "Aziz Al Mulla"
+        },
+        "status": "extracted"
+      }
+    },
+    {
+      "case": "sanitize_uncertain_partial",
+      "verdict": "proven",
+      "detail": {
+        "status": "partial",
+        "confidence": 0.4,
+        "field_confidence": {
+          "iban": 0.4
+        },
+        "proposed": {
+          "iban": "KW81CBKU0000000000001234560101"
+        },
+        "warnings": [
+          "low_confidence_iban"
+        ],
+        "unreadable_reason": null,
+        "needs_manual_fallback": false,
+        "uncertain": true,
+        "authoritative": false,
+        "provider": null,
+        "model": null,
+        "document_type": "bank_certificate"
+      }
+    },
+    {
+      "case": "sanitize_failed_manual_fallback",
+      "verdict": "proven",
+      "detail": {
+        "status": "failed",
+        "confidence": 0.0,
+        "field_confidence": {},
+        "proposed": {},
+        "warnings": [
+          "unreadable"
+        ],
+        "unreadable_reason": null,
+        "needs_manual_fallback": true,
+        "uncertain": false,
+        "authoritative": false,
+        "provider": null,
+        "model": null,
+        "document_type": "bank_certificate"
+      }
+    },
+    {
+      "case": "bank_ocr_default_on",
+      "verdict": "proven",
+      "detail": null
+    }
+  ],
+  "live": [
+    {
+      "case": "pdf_upload_extraction_shape",
+      "verdict": "proven",
+      "detail": {
+        "evidence_id": "39810d1d-f707-49e8-82e2-d2ebfa823f5e",
+        "status": "needs_review",
+        "fallback": true,
+        "proposed": {}
+      }
+    },
+    {
+      "case": "image_upload_manual_fallback_ok",
+      "verdict": "proven",
+      "detail": {
+        "evidence_id": "7b76b137-e368-475e-8645-9d90ea7cab73",
+        "status": "needs_review",
+        "fallback": true
+      }
+    },
+    {
+      "case": "ocr_upload_leaves_verified_effective_untouched",
+      "verdict": "proven",
+      "detail": {
+        "v0": 0,
+        "v1": 0,
+        "e0": 0,
+        "e1": 0
+      }
+    },
+    {
+      "case": "document_first_submit_proposed",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "state": "pending_hr",
+        "request_id": "96d8b82d-81c1-4078-883c-97642f884f04"
+      }
+    },
+    {
+      "case": "evidence_linked_to_request",
+      "verdict": "proven",
+      "detail": {
+        "linked": 2,
+        "expected": 2
+      }
+    },
+    {
+      "case": "invalid_kw_iban_rejected",
+      "verdict": "proven",
+      "detail": {
+        "code": 422,
+        "error": "bank_account_invalid"
+      }
+    },
+    {
+      "case": "replacement_resubmit_with_new_evidence",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "request_id": "db0b6d28-1fd8-4625-a9d6-f62a465d1cb9",
+        "evidence_id": "26ffd4f7-26c3-4a15-8e8d-c8be2446b690"
+      }
+    },
+    {
+      "case": "hr_verify_approve",
+      "verdict": "proven",
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "case": "hr_approve_stamps_verified_not_effective",
+      "verdict": "proven",
+      "detail": {
+        "verified_by_stage": "hr",
+        "eff_changed": false
+      }
+    },
+    {
+      "case": "payroll_apply_writes_effective",
+      "verdict": "proven",
+      "detail": {
+        "apply_code": 200,
+        "eff_fp": "f7201f9b127f155a",
+        "expected_fp": "f7201f9b127f155a",
+        "error": ""
+      }
+    },
+    {
+      "case": "en_ar_bank_status",
+      "verdict": "proven",
+      "detail": {
+        "en": 200,
+        "ar": 200,
+        "ar_msg": "\u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u0628\u0646\u0643\u064a\u0629 \u0645\u0648\u062b\u0651\u0642\u0629. \u0623\u0631\u0633\u0644 \u062a\u063a\u064a\u064a\u0631\u064b\u0627 \u0625\u0630\u0627 \u0627\u062e\u062a\u0644\u0641 \u0634\u064a\u0621."
+      }
+    },
+    {
+      "case": "evidence_isolated",
+      "verdict": "proven",
+      "detail": {
+        "code": 404
+      }
+    }
+  ],
+  "errors": [],
+  "created_canaries": [
+    "WATHEFNI-9655497001",
+    "WATHEFNI-9655497002"
+  ],
+  "summary": {
+    "unit": "8/8",
+    "live": "12/12",
+    "errors": []
+  }
+}

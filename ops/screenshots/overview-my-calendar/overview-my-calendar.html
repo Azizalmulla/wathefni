@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Overview My calendar</title>
+  <style>
+    body { margin: 0; background: #f3ebe0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; padding: 32px; }
+    .wrap { max-width: 360px; }
+    section { border-radius: 1.55rem; background: #fffaf0; padding: 20px; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px 12px; }
+    .title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; letter-spacing: -0.025em; color: #23211d; }
+    .cta { border: 0; background: transparent; font-size: 12px; font-weight: 600; color: #716a5e; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+    .month { border-radius: 1.1rem; background: rgba(255,255,255,0.7); padding: 12px; }
+    .month-label { text-align: center; font-size: 12px; font-weight: 600; color: #716a5e; margin-bottom: 8px; }
+    .dow, .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .dow { font-size: 10px; color: #8a8274; }
+    .day { position: relative; height: 32px; border: 0; border-radius: 999px; background: transparent; color: #23211d; font-size: 11px; cursor: pointer; }
+    .day.selected { background: #23211d; color: #fff; }
+    .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 999px; background: #c89445; }
+    .day.selected .dot { background: #fff; }
+    .events { margin-top: 12px; }
+    .events-h { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 12px; font-weight: 600; color: #716a5e; }
+    .add { border: 0; background: transparent; font-size: 12px; font-weight: 600; color: #716a5e; cursor: pointer; }
+    .row { margin-top: 8px; width: 100%; display: flex; justify-content: space-between; gap: 8px; border: 1px solid #e8dfd0; background: #f8f3e9; border-radius: 1rem; padding: 8px 12px; text-align: left; cursor: pointer; }
+    .row span:first-child { font-size: 14px; font-weight: 600; color: #23211d; }
+    .row span:last-child { font-size: 11px; color: #8a8274; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section data-testid="overview-my-calendar">
+      <div class="header">
+        <div class="title">My calendar</div>
+        <button class="cta" type="button">View full calendar</button>
+      </div>
+      <div class="month">
+        <div class="month-label">July 2026</div>
+        <div class="dow"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div>
+        <div class="grid" style="margin-top:4px">
+          <div></div><div></div><div></div>
+          <button class="day" type="button">1</button><button class="day" type="button">2</button><button class="day" type="button">3</button><button class="day" type="button">4</button><button class="day" type="button">5</button><button class="day" type="button">6</button><button class="day" type="button">7</button>
+          <button class="day" type="button">8</button><button class="day" type="button">9</button><button class="day" type="button">10</button><button class="day" type="button">11</button><button class="day" type="button">12</button><button class="day" type="button">13</button><button class="day" type="button">14</button>
+          <button class="day" type="button">15</button><button class="day" type="button">16</button><button class="day" type="button">17</button><button class="day" type="button">18</button><button class="day" type="button">19</button><button class="day" type="button">20</button><button class="day" type="button">21</button>
+          <button class="day" type="button">22</button><button class="day" type="button">23</button><button class="day" type="button">24</button><button class="day" type="button">25</button><button class="day" type="button">26</button><button class="day" type="button">27</button>
+          <button class="day selected" type="button">28<span class="dot"></span></button>
+          <button class="day" type="button">29</button>
+          <button class="day" type="button">30<span class="dot"></span></button>
+          <button class="day" type="button">31</button>
+        </div>
+      </div>
+      <div class="events">
+        <div class="events-h"><span>Day events</span><button class="add" type="button">+ Add</button></div>
+        <button class="row" type="button"><span>1:1 with recruiter</span><span>10:00 AM</span></button>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

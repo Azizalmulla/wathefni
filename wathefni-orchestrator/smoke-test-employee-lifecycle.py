@@ -20,6 +20,7 @@ Run against a DB (staging): python3 smoke-test-employee-lifecycle.py
 
 from __future__ import annotations
 
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -40,6 +41,9 @@ def check(label: str, condition: bool) -> None:
 
 def main() -> int:
     print("    employee lifecycle — edit + mark as left + reactivate, RBAC + scope + audit")
+    # Wave 1 canary is fail-closed outside allowlisted envs; default local smoke
+    # to a non-production env so status self-approval still exercises the path.
+    os.environ.setdefault("WATHEFNI_ENV", "test")
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     try:
         import app
@@ -194,11 +198,27 @@ def main() -> int:
 
         # --- PATCH endpoint: audit + RBAC --------------------------------
         audits.clear()
-        resp = app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="Lead"), context=owner)
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
+                patch_version = dict(cur.fetchone())["updated_at"]
+        resp = app.dashboard_posthire_update_employee(
+            employee_key=key_a,
+            request=app.DashboardEmployeeUpdate(position_title="Lead", expected_updated_at=patch_version),
+            context=owner,
+        )
         check("PATCH endpoint returns ok", bool(resp.get("ok")))
         check("edit recorded an 'employee_updated' audit", any(a["action_type"] == "employee_updated" for a in audits))
         try:
-            app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="X"), context=ctx(["attendance.read"], role="viewer"))
+            with app.db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
+                    denied_version = dict(cur.fetchone())["updated_at"]
+            app.dashboard_posthire_update_employee(
+                employee_key=key_a,
+                request=app.DashboardEmployeeUpdate(position_title="X", expected_updated_at=denied_version),
+                context=ctx(["attendance.read"], role="viewer"),
+            )
             check("role without employees.manage cannot edit", False)
         except app.HTTPException as exc:
             check("role without employees.manage cannot edit", exc.status_code in (401, 403))

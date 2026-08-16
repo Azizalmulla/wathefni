@@ -1,0 +1,4 @@
+SEED 200 True
+BEFORE postgres {'sites': 1, 'connectors': 1, 'open_remediation': 4, 'payroll_excluded': 5, 'by_kind': {'duplicate_conflict': 1, 'ambiguous_punch_order': 1, 'missing_check_out': 1, 'unknown_employee': 1}, 'online': 1, 'offline': 0, 'degraded': 0}
+AFTER postgres {'sites': 1, 'connectors': 1, 'open_remediation': 4, 'payroll_excluded': 5, 'by_kind': {'duplicate_conflict': 1, 'ambiguous_punch_order': 1, 'missing_check_out': 1, 'unknown_employee': 1}, 'online': 1, 'offline': 0, 'degraded': 0}
+RESTART_HTTP_PROOF_OK

@@ -1,0 +1,61 @@
+stamp=20260802T115801Z
+time_utc=2026-08-02T11:58:16Z
+active
+=== SHAs before ===
+c472087acbe5d02ca1cab4adc6d7c910e5ef0047f210a373a6f546fca6fbb44d  /opt/wathefni/orchestrator/app.py
+834f5220b5ca6b0443794af8ab5db5d072c9a4d45a52589b64b3df28ba41260f  /opt/wathefni/orchestrator/attendance_authority_hooks.py
+28fd2cde37d7f4751589839a0a4e4fc20887fb4386ec129c019bea9ec1332203  /opt/wathefni/orchestrator/attendance_authority_postgres.py
+f285bc1da763878d3fc429d26ae43eda3a44432c69aa262476a6a4072c8f487d  /opt/wathefni/orchestrator/attendance_authority_wave1.py
+=== flags before ===
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_CAPTURE_CREDENTIAL_KEY=[REDACTED]
+{
+  "db": "wathefni",
+  "wathefni_rows": 42,
+  "demo_seed": 42,
+  "four_reals": 4
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[11:58:19] backing up
+c472087acbe5d02ca1cab4adc6d7c910e5ef0047f210a373a6f546fca6fbb44d  /opt/wathefni/backups/production-pre-attendance-wave3-20260802T115801Z/app.py
+bfbdb6020e5afea84cbd3c4a54dd9a52e5d1d1672ea40eceda37214bff5f2fbc  /opt/wathefni/backups/production-pre-attendance-wave3-20260802T115801Z/attendance-records-fingerprint.csv
+[11:58:19] deploying modules
+APP_PATCHED_WAVE3_SCHEMA
+APP_PATCHED_WAVE3_ROUTES
+app.py wave3 hooks ok
+wrote /etc/systemd/system/wathefni-orchestrator.service.d/zz-attendance-wave3-ops-synthetic.conf
+env production
+expected_db wathefni
+connected_db wathefni
+tables ['attendance_ops_attachments', 'attendance_ops_audit_events', 'attendance_ops_cases', 'attendance_ops_comments', 'attendance_ops_disputes', 'attendance_ops_exceptions', 'attendance_ops_idempotency']
+triggers ['trg_att_ops_audit_immutable']
+OK wave3 prod schema
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}=== flags after ===
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_ATTENDANCE_OPS=on
+WATHEFNI_ATTENDANCE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS=absence,early_leave
+WATHEFNI_ATTENDANCE_OPS_STORE=postgres
+WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY=on
+WATHEFNI_CAPTURE_CREDENTIAL_KEY=[REDACTED]
+DEPLOY_OK stamp=20260802T115801Z

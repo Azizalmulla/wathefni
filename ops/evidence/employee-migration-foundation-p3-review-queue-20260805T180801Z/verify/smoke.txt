@@ -1,0 +1,8 @@
+OK preview retry 1: one active identity card
+OK preview retry 2: one active identity card
+OK preview retry 3: one active identity card
+OK history/ledger retains repeated conflict rows
+OK approve clears active queue for that identity
+OK approve preserves older ledger conflict rows
+OK history/batch detail retains review rows
+OK employee migration foundation P3 review queue smoke

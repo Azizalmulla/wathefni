@@ -1,0 +1,84 @@
+{
+  "stamp": "2026-08-01T20:03:20.496169+00:00",
+  "employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "employment_status": null,
+      "updated_at": "2026-06-09 19:17:43.087577+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "employment_status": "active",
+      "updated_at": "2026-07-12 15:46:31.905837+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "employment_status": null,
+      "updated_at": "2026-06-09 14:40:54.108887+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "employment_status": "active",
+      "updated_at": "2026-07-13 19:22:41.486318+00:00"
+    }
+  ],
+  "status_by_key": {
+    "WATHEFNI-96550252254": null,
+    "WATHEFNI-96566363363": "active",
+    "WATHEFNI-96597727743": null,
+    "WATHEFNI-96599411617": "active"
+  },
+  "target_null_statuses": {
+    "WATHEFNI-96597727743": null,
+    "WATHEFNI-96550252254": null
+  },
+  "other_statuses": {
+    "WATHEFNI-96566363363": "active",
+    "WATHEFNI-96599411617": "active"
+  },
+  "orphan_live_count": 3,
+  "orphan_live": [
+    {
+      "message_id": "9131f0be-0330-4527-856d-6d254e494faa",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "flow": "shift",
+      "template_key": "shift_assigned",
+      "status": "failed",
+      "created_at": "2026-07-20 02:26:04.682894+00:00"
+    },
+    {
+      "message_id": "593f8836-3a12-43d4-aec2-17c79b9416b6",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "flow": "shift",
+      "template_key": "shift_assigned",
+      "status": "delivered_whatsapp",
+      "created_at": "2026-07-20 03:57:01.857205+00:00"
+    },
+    {
+      "message_id": "35be03eb-bae6-4cc5-9153-e9e4291f064e",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "flow": "leave_decision",
+      "template_key": "leave_request_approved",
+      "status": "delivered_whatsapp",
+      "created_at": "2026-07-20 03:57:02.025021+00:00"
+    }
+  ],
+  "quarantine_count_active": 0,
+  "quarantine": [],
+  "journal": [],
+  "integrity": {
+    "total_orphans": 3,
+    "ok": false,
+    "employee_messages": {
+      "present": true,
+      "orphans": 3,
+      "samples": [
+        {
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-P0-DUP-1"
+        }
+      ],
+      "mode": "company_employee"
+    }
+  }
+}

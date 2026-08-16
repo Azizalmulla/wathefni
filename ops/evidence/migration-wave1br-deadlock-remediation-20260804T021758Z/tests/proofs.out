@@ -1,0 +1,17 @@
+{
+  "counters": {
+    "apply_calls": 0,
+    "require_calls": 7,
+    "blocked_apply_attempts": 0
+  },
+  "apply_allowed": false
+}
+NO_RUNTIME_DDL_OK
+{
+  "ok": true,
+  "error": "schema_not_migrated:fail_closed_probe:missing=wave1br_missing_relation_probe_zzz",
+  "missing": [
+    "wave1br_missing_relation_probe_zzz"
+  ]
+}
+FAIL_CLOSED_OK

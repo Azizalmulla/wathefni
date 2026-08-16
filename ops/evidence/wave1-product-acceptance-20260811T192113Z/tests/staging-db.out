@@ -1,0 +1,50 @@
+    wave1 product acceptance — db
+      PASS  surface wiring (monorepo apps absent here — covered by unit smoke)
+    --- setup console policies ---
+      PASS  setup get_all ok
+      PASS  setup has requisitions policy
+      PASS  setup has preboarding policy
+      PASS  setup has probation policy
+      PASS  setup has onboarding_auto_start
+      PASS  setup patch requisitions gate off
+      PASS  setup gate persisted false
+      PASS  setup patch preboarding
+      PASS  setup offer→preboard contract off
+      PASS  setup patch probation
+      PASS  setup probation days 60
+      PASS  setup patch hire→onboarding auto-start
+      PASS  setup onboarding auto-start off
+      PASS  setup probation inactive when module off
+    --- modularity matrix ---
+      PASS  M1 requisitions+hiring create
+      PASS  M1 preboarding cleanly off
+      PASS  M1 probation cleanly off
+      PASS  M2 hiring+offers preboarding off
+      PASS  M2 offers module present
+      PASS  M3 preboarding without recruiting
+      PASS  M3 requisitions cleanly off
+      PASS  M4 preboard+onboarding handoff flag
+      PASS  M5 probation without onboarding
+      PASS  M6 requisitions on
+      PASS  M6 preboarding on
+      PASS  M6 probation on
+      PASS  M6 hire_ready on_offer_accepted
+      PASS  M6 hire_ready writers gate
+    --- task sync + fail-closed ---
+      PASS  task-sync requisition create
+      PASS  task-sync requisition_approval emitted
+      PASS  canonical hr_tasks row for requisition
+      PASS  task-sync probation case
+      PASS  task-sync probation_decision emitted
+      PASS  disabled requisitions fail closed
+    --- visual canary WATHEFNI ---
+      PASS  visual canary seed ok
+      PASS  visual canary has pending req
+      PASS  visual canary has open req
+      PASS  visual canary has preboard
+      PASS  visual canary has probation
+      PASS  visual canary left for owner review
+
+    41 passed, 0 failed
+WAVE1_PRODUCT_FULL_PASS
+STAGING_DB_RC=0

@@ -1,0 +1,187 @@
+--- backups/onboarding-next-item-20260806T200247Z/app.py	2026-08-06 20:32:21.321174836 +0000
++++ orchestrator/app.py	2026-08-06 20:32:59.815952124 +0000
+@@ -34757,18 +34757,9 @@
+                 overdue.append(item)
+         except Exception:
+             pass
+-    # Pick the next item in the same order compute_completion resolves state, so
+-    # "next action" on the queue, the drawer and the app always name one item.
+-    next_item = None
+-    for _cls in (
+-        _completion.ITEM_WAITING_EMPLOYEE,
+-        _completion.ITEM_WAITING_HR,
+-        _completion.ITEM_WAITING_OTHER,
+-        _completion.ITEM_BLOCKED,
+-    ):
+-        next_item = next((i for i in pending if _completion.classify_item(i) == _cls), None)
+-        if next_item is not None:
+-            break
++    # Selected from every item, not just `pending`, and by the contract's own
++    # rule: the queue, the drawer and the app must name the same one item.
++    next_item = _completion.select_next_item(items)
+ 
+     # Canonical completion — the single value every surface must render.
+     completion = _completion.compute_completion(
+@@ -34920,18 +34911,9 @@
+     import onboarding_lifecycle_wave2a as _lc
+ 
+     closed = set(_completion.CLOSED_STATUSES)
+-    # Same order compute_completion resolves state in, so the row's owner and the
+-    # drawer's next action always name the same actor.
+-    next_item_priority = (
+-        _completion.ITEM_WAITING_EMPLOYEE,
+-        _completion.ITEM_WAITING_HR,
+-        _completion.ITEM_WAITING_OTHER,
+-        _completion.ITEM_BLOCKED,
+-    )
+     for key, items in by_emp.items():
+         by_id = {str(i["item_id"]): i for i in items}
+         overdue = 0
+-        open_by_class: dict[str, list[dict[str, Any]]] = {}
+         for item in items:
+             st = str(item.get("status") or "").lower()
+             blockers = _onboarding_wave2.dependency_blockers(item, by_id)
+@@ -34947,14 +34929,8 @@
+                         overdue += 1
+             except Exception:
+                 pass
+-            open_by_class.setdefault(_completion.classify_item(item), []).append(item)
+ 
+-        next_item = None
+-        for cls in next_item_priority:
+-            bucket = open_by_class.get(cls) or []
+-            if bucket:
+-                next_item = bucket[0]
+-                break
++        next_item = _completion.select_next_item(items)
+ 
+         out.setdefault(key, {})
+         out[key]["overdue_count"] = overdue
+--- backups/onboarding-next-item-20260806T200247Z/onboarding_completion_contract.py	2026-08-06 20:32:21.321174836 +0000
++++ orchestrator/onboarding_completion_contract.py	2026-08-06 20:35:55.748935895 +0000
+@@ -344,10 +344,113 @@
+     }
+ 
+ 
++# Order in which an open item becomes "the next action". Mirrors the state
++# precedence in compute_completion, so the named item always explains the state.
++NEXT_ITEM_CLASS_PRIORITY = (
++    ITEM_WAITING_EMPLOYEE,
++    ITEM_WAITING_HR,
++    ITEM_WAITING_OTHER,
++    ITEM_BLOCKED,
++)
++
++
++def _next_item_sort_key(item: Mapping[str, Any]) -> tuple[Any, ...]:
++    """Deterministic order inside one class: actionable, then soonest due."""
++    due = item.get("due_date")
++    due_key = str(due)[:10] if due is not None else "9999-12-31"
++    try:
++        order = int(item.get("sort_order") or 0)
++    except Exception:
++        order = 0
++    return (1 if item_is_blocked(item) else 0, due_key, order, str(item.get("item_id") or ""))
++
++
++def select_next_item(items: Iterable[Mapping[str, Any]]) -> dict[str, Any] | None:
++    """The one open item every surface must name as "what happens next".
++
++    Selection has to be derived from the same rows and the same filter as
++    `compute_completion`, or the queue names one item while the drawer and the
++    app name another. Required-only, because an optional item cannot be what a
++    required-item state such as `waiting_on_hr` is waiting for.
++    """
++    rows = [dict(i) for i in items or []]
++    _enrich_responsible_party(rows)
++    buckets: dict[str, list[dict[str, Any]]] = {}
++    for item in rows:
++        if not item_is_required(item):
++            continue
++        cls = classify_item(item)
++        if cls in SATISFIED_CLASSES:
++            continue
++        buckets.setdefault(cls, []).append(item)
++    for cls in NEXT_ITEM_CLASS_PRIORITY:
++        bucket = buckets.get(cls) or []
++        if bucket:
++            return sorted(bucket, key=_next_item_sort_key)[0]
++    return None
++
++
++def current_actor(snapshot: Mapping[str, Any]) -> str:
++    """Who holds the open work, in the same priority `select_next_item` uses.
++
++    Derived from the snapshot's own buckets so the owner named by `next_action`
++    and the owner of the named next item can never disagree.
++    """
++    counts = snapshot.get("counts") or {}
++
++    def _n(name: str) -> int:
++        try:
++            return int(counts.get(name) or 0)
++        except Exception:
++            return 0
++
++    if _n("waiting_employee"):
++        return "employee"
++    if _n("waiting_hr"):
++        return "hr"
++    if _n("waiting_other"):
++        return "system"
++    if _n("blocked"):
++        return "hr"
++    return "none"
++
++
++# What each actor is expected to do, reused wherever a state does not by itself
++# name an owner (`reopened` is a history fact, not an ownership fact).
++_ACTOR_ASK = {
++    "employee": (
++        "Complete the remaining items assigned to you.",
++        "أكمل البنود المتبقية المطلوبة منك.",
++    ),
++    "hr": (
++        "HR needs to review what has been submitted.",
++        "الموارد البشرية بحاجة لمراجعة ما تم إرساله.",
++    ),
++    "system": (
++        "Payroll or HR is finishing the remaining items — nothing is needed from you.",
++        "الرواتب أو الموارد البشرية تُكمل البنود المتبقية — لا يلزم إجراء منك.",
++    ),
++    "none": (
++        "Nothing further is required.",
++        "لا يلزم شيء إضافي.",
++    ),
++}
++
++
+ def next_action(snapshot: Mapping[str, Any], *, locale: str = "en") -> dict[str, Any]:
+     """One unambiguous "what happens next" for every surface. No dead ends."""
+     state = _norm(snapshot.get("state")) or STATE_NOT_STARTED
+     is_ar = str(locale).lower().startswith("ar")
++    if state == STATE_REOPENED:
++        # Reopened says when the work appeared, not who owns it: ask the buckets.
++        actor = current_actor(snapshot)
++        ask_en, ask_ar = _ACTOR_ASK.get(actor, _ACTOR_ASK["none"])
++        return {
++            "owner": actor,
++            "message": (f"تم إعادة فتح الالتحاق — {ask_ar}" if is_ar else f"Onboarding reopened — {ask_en}"),
++            "message_en": f"Onboarding reopened — {ask_en}",
++            "message_ar": f"تم إعادة فتح الالتحاق — {ask_ar}",
++        }
+     table = {
+         STATE_NOT_STARTED: (
+             "employee",
+@@ -379,11 +482,6 @@
+             "Onboarding is complete. Nothing further is required.",
+             "تم إكمال الالتحاق. لا يلزم شيء إضافي.",
+         ),
+-        STATE_REOPENED: (
+-            "employee",
+-            "Onboarding reopened — new or corrected items are required.",
+-            "تم إعادة فتح الالتحاق — يلزم بنود جديدة أو مصححة.",
+-        ),
+     }
+     owner, en, ar = table.get(state, table[STATE_IN_PROGRESS])
+     return {"owner": owner, "message": ar if is_ar else en, "message_en": en, "message_ar": ar}

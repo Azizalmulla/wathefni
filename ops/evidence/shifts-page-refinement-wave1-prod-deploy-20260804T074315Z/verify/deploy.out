@@ -1,0 +1,25 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-YNtC8Unb.js
+BACKUP=/opt/wathefni/backups/production-pre-shifts-page-refinement-wave1-20260804T074315Z
+PASS data-shifts-surfaces
+PASS data-shifts-attention
+PASS data-primary-action
+PASS Schedule a shift
+PASS data-shifts-operations
+PASS All branches
+PASS الجدول
+PASS data-leave-queue
+PASS attendance-board
+STATIC_GATES_OK
+file PostHire-YNtC8Unb.js
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+PASS posthire_bundle_present — PostHire-YNtC8Unb.js
+PASS surfaces_marker
+PASS schedule_default_marker
+PASS attention_strip
+PASS primary_schedule
+PASS board_marker
+PASS operations_collapsed
+PASS no_inner_h1_pattern
+PASS governed_filters
+PASS empty_cta
+FAIL mutation_create

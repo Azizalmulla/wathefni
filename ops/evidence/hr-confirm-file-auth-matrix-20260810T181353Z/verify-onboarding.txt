@@ -1,0 +1,14 @@
+PASS queue route
+PASS detail route
+PASS no invented current_step UI
+PASS Accept + Waive
+PASS no Remind
+PASS bank handoff
+PASS file preview
+PASS demo filter proof includes waiting-only
+PASS demo gated
+PASS people deep-link onboarding
+PASS app.config onboardingDemo
+PASS normalize drops start_date/current_step
+PASS hrOnboarding keys EN+AR
+hr-onboarding-review: GREEN

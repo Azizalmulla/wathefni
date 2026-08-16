@@ -1,0 +1,565 @@
+{
+  "run_at": "20260727T110053Z",
+  "schema_version": "tenant-control-schema-v3",
+  "canary_domain": "company_profile",
+  "health_before": {
+    "http_status": 200,
+    "body": {
+      "status": "ok",
+      "runtime": "toolcall_fastapi",
+      "environment_binding": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      },
+      "permission_authority": "backend_current_required",
+      "legacy_dashboard_token_auth": false,
+      "legacy_untrusted_auth_usable": false
+    }
+  },
+  "delivery_sweep": {
+    "unit": "wathefni-delivery-sweep.service",
+    "timer": "wathefni-delivery-sweep.timer",
+    "service": {
+      "is_active": "error:Command '['systemctl', 'is-active', 'wathefni-delivery-sweep.service']' returned non-zero exit status 3.",
+      "is_enabled": "static",
+      "is_failed": "failed"
+    },
+    "timer_status": {
+      "is_active": "active",
+      "is_enabled": "enabled",
+      "is_failed": "error:Command '['systemctl', 'is-failed', 'wathefni-delivery-sweep.timer']' returned non-zero exit status 1."
+    },
+    "classification": "required_misconfigured_missing_WATHEFNI_APPLICATION_ENVIRONMENT",
+    "silently_enabled": false,
+    "note": "Unit name is wathefni-delivery-sweep (not *-worker). Timer active; service fails every run. Do not silently fix in Wave 3."
+  },
+  "schema": {
+    "ok": true,
+    "schema_version": "tenant-control-schema-v3",
+    "wave2": {
+      "ok": true,
+      "schema_version": "tenant-control-schema-v2",
+      "wave1": {
+        "ok": true,
+        "schema_version": "tenant-control-schema-v1"
+      }
+    }
+  },
+  "seeded_configs": [
+    {
+      "domain": "company_profile",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "org_structure",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "module_policies",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "notification_policies",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "retention_policies",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "quotas",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "custom_fields",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "document_requirements",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "workflows",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "prehire",
+      "publish": true,
+      "version": 1
+    },
+    {
+      "domain": "posthire",
+      "publish": true,
+      "version": 1
+    }
+  ],
+  "seeded_integrations": {
+    "ok": true,
+    "count": 12,
+    "states": [
+      {
+        "provider_key": "octopus_whatsapp",
+        "state": "live",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "postmark_inbound",
+        "state": "live",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "postmark_outbound",
+        "state": "live",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "gmail_gog",
+        "state": "setup_required",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "google_calendar",
+        "state": "setup_required",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "microsoft_365",
+        "state": "not_selected",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "microsoft_teams",
+        "state": "not_selected",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "imap",
+        "state": "not_selected",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "sms",
+        "state": "not_selected",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "push",
+        "state": "setup_required",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "mistral_ocr",
+        "state": "live",
+        "ok": true,
+        "error": null
+      },
+      {
+        "provider_key": "candidate_indexing",
+        "state": "live",
+        "ok": true,
+        "error": null
+      }
+    ]
+  },
+  "canary_a_config_lifecycle": {
+    "ok": true,
+    "before_version": 1,
+    "published_version": 2,
+    "rollback": {
+      "ok": true,
+      "document_id": "7110ee4d-acda-49ac-af17-69f54067d3ef",
+      "version_number": 3,
+      "status": "published",
+      "domain": "company_profile",
+      "company_code": "WATHEFNI",
+      "diff": {
+        "added": {},
+        "removed": {},
+        "changed": {
+          "display_name": {
+            "before": "Wathefni Wave3 Canary 20260727T110053Z",
+            "after": "Wathefni"
+          }
+        }
+      },
+      "rollback_target": 2,
+      "correlation_id": "396f6eacf4f446f2ba9968ed5664bfd7"
+    },
+    "after_version": 3,
+    "diff_present": true
+  },
+  "canary_b_supported_integration_test": {
+    "ok": true,
+    "test_kind": "health",
+    "provider_key": "postmark_inbound",
+    "passed": true,
+    "evidence": {
+      "support_tier": "supported",
+      "secret_ref_present": true,
+      "account_ref_verified_ownership": true
+    },
+    "actor": "wave3_canary"
+  },
+  "canary_c_unsupported_provider": {
+    "upsert": {
+      "ok": false,
+      "error": "provider_not_selectable",
+      "message": "Microsoft 365 / Outlook is unsupported and cannot be selected as ready.",
+      "support_tier": "unsupported",
+      "available": false
+    },
+    "microsoft_365": {
+      "provider_key": "microsoft_365",
+      "channel_key": "outlook",
+      "label": "Microsoft 365 / Outlook",
+      "support_tier": "unsupported",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Future \u2014 not end-to-end implemented."
+    },
+    "sms": {
+      "provider_key": "sms",
+      "channel_key": "sms",
+      "label": "SMS",
+      "support_tier": "future",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Appears in vocabulary only; no live SMS provider."
+    },
+    "imap": {
+      "provider_key": "imap",
+      "channel_key": "imap_mailbox",
+      "label": "IMAP mailbox",
+      "support_tier": "unsupported",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Future \u2014 not end-to-end implemented."
+    },
+    "teams": {
+      "provider_key": "microsoft_teams",
+      "channel_key": "teams",
+      "label": "Microsoft Teams",
+      "support_tier": "unsupported",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Future \u2014 not end-to-end implemented."
+    }
+  },
+  "canary_d_readiness": {
+    "forced_missing_domain_fail": true,
+    "forced": {
+      "ready": false,
+      "blocker_count": 1
+    },
+    "retest_pass": true,
+    "retest_ready": true,
+    "selected_only_insufficient": true,
+    "employee_app_probe": {
+      "ready": false,
+      "blocker_count": 1
+    }
+  },
+  "canary_e_stale_epoch": {
+    "ok": true,
+    "enqueued_epoch": 5,
+    "live_epoch": 7,
+    "stale_allowed": false,
+    "stale_reason": "activation_epoch_mismatch",
+    "stale_mode": "authoritative",
+    "fresh_allowed": true,
+    "fresh_reason": "allow"
+  },
+  "canary_f_integration_degrade_restore": {
+    "ok": true,
+    "degraded": "degraded",
+    "blocked_while_degraded": true,
+    "restored_state": "live",
+    "blocked_after_restore": false
+  },
+  "canary_g_no_false_denial": {
+    "ok": true,
+    "enabled_modules": [
+      "analytics",
+      "assessments",
+      "attendance",
+      "compliance",
+      "employment_offers",
+      "interviews",
+      "leave",
+      "onboarding",
+      "payroll",
+      "pre_hiring",
+      "shifts",
+      "video_interviews"
+    ],
+    "false_denials": []
+  },
+  "reconstruction": {
+    "ok": true,
+    "completeness_score": 1.0,
+    "gaps": [],
+    "snapshot_id": "13e6d3c8-35db-4272-97be-d2d5265d86bd",
+    "modules": 13,
+    "integrations": 12,
+    "global_authority": false
+  },
+  "reconstruction_after_seed": {
+    "ok": true,
+    "gaps": [],
+    "completeness_score": 1.0
+  },
+  "safety": {
+    "companies_count": 1,
+    "orphan_settings": 12,
+    "global_authoritative": false,
+    "wave1_authoritative": false,
+    "secret_leaks_in_recent_audit": [],
+    "kill_switches": {
+      "plane": "on",
+      "decision": "on",
+      "epoch": "on"
+    }
+  },
+  "provider_matrix": [
+    {
+      "provider_key": "octopus_whatsapp",
+      "channel_key": "whatsapp_business",
+      "label": "WhatsApp Business (Octopus)",
+      "support_tier": "platform_global",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Platform-global today; company channel accounts flag OFF. Ownership verification required before treating as tenant-owned."
+    },
+    {
+      "provider_key": "postmark_inbound",
+      "channel_key": "inbound_email",
+      "label": "Inbound Email (Postmark)",
+      "support_tier": "supported",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Unified inbound CV email path for allowlisted tenants."
+    },
+    {
+      "provider_key": "postmark_outbound",
+      "channel_key": "outbound_email",
+      "label": "Outbound Email (Postmark)",
+      "support_tier": "supported",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": ""
+    },
+    {
+      "provider_key": "gmail_gog",
+      "channel_key": "gmail_mailbox",
+      "label": "Gmail mailbox (gog)",
+      "support_tier": "partial",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Mailbox connect exists; live import blocked pending durable scan/identity authority."
+    },
+    {
+      "provider_key": "google_calendar",
+      "channel_key": "calendar_meet",
+      "label": "Google Calendar / Meet",
+      "support_tier": "partial",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Interview calendar sync partial; not full tenant self-serve."
+    },
+    {
+      "provider_key": "microsoft_365",
+      "channel_key": "outlook",
+      "label": "Microsoft 365 / Outlook",
+      "support_tier": "unsupported",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Future \u2014 not end-to-end implemented."
+    },
+    {
+      "provider_key": "microsoft_teams",
+      "channel_key": "teams",
+      "label": "Microsoft Teams",
+      "support_tier": "unsupported",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Future \u2014 not end-to-end implemented."
+    },
+    {
+      "provider_key": "imap",
+      "channel_key": "imap_mailbox",
+      "label": "IMAP mailbox",
+      "support_tier": "unsupported",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Future \u2014 not end-to-end implemented."
+    },
+    {
+      "provider_key": "sms",
+      "channel_key": "sms",
+      "label": "SMS",
+      "support_tier": "future",
+      "selectable": false,
+      "required_scopes": [],
+      "notes": "Appears in vocabulary only; no live SMS provider."
+    },
+    {
+      "provider_key": "push",
+      "channel_key": "push_notifications",
+      "label": "Push notifications",
+      "support_tier": "partial",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Employee-app dependent; platform employee app flag currently OFF."
+    },
+    {
+      "provider_key": "mistral_ocr",
+      "channel_key": "ocr_ai",
+      "label": "OCR / AI (Mistral)",
+      "support_tier": "platform_global",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Platform secrets via env; not tenant-owned credentials."
+    },
+    {
+      "provider_key": "candidate_indexing",
+      "channel_key": "candidate_knowledge_index",
+      "label": "Candidate indexing",
+      "support_tier": "supported",
+      "selectable": true,
+      "required_scopes": [],
+      "notes": "Backend capability under Candidates; production-dark worker."
+    }
+  ],
+  "worker_coverage": [
+    {
+      "path": "durable_email_ingress.claim_next_job",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "durable_email_ingress.enqueue_job",
+      "stamp": true,
+      "gate": false
+    },
+    {
+      "path": "inbound_cv_adapters.adapt_manual_import",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "inbound_cv_adapters.adapt_whatsapp_unsolicited",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "candidate_knowledge_index_worker",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "process_pending_video_interview_transcripts",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "assessment_ai_service.process_queued_run",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "outbound_delivery.run_delivery_sweep",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "outbound_delivery.deliver_to_employee",
+      "stamp": false,
+      "gate": true,
+      "integration_kill": true
+    },
+    {
+      "path": "run_mailbox_sync",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "run_onboarding_reminder_scan",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "run_compliance_scan",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "run_shift_reminder_scan",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "run_leave_accrual_sweep",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "candidate_identity.export_person_package",
+      "stamp": true,
+      "gate": true
+    },
+    {
+      "path": "candidate_identity.enqueue_document_privacy_job",
+      "stamp": true,
+      "gate": false
+    },
+    {
+      "path": "offer_lifecycle",
+      "stamp": false,
+      "gate": false,
+      "note": "no dedicated expire worker; API-driven"
+    }
+  ],
+  "health_after": {
+    "http_status": 200,
+    "body": {
+      "status": "ok",
+      "runtime": "toolcall_fastapi",
+      "environment_binding": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      },
+      "permission_authority": "backend_current_required",
+      "legacy_dashboard_token_auth": false,
+      "legacy_untrusted_auth_usable": false
+    }
+  },
+  "failures": [],
+  "ok": true
+}

@@ -1,0 +1,8 @@
+OWNER_SEED {'leave_id': '2fc9c987-28b2-4480-9a8f-15806c8c55fb', 'leave_type': 'annual', 'start_date': datetime.date(2026, 9, 19)}
+OWNER_SEED {'leave_id': '9ed8b5d9-116f-4ce5-b15b-d86c6a1cf49e', 'leave_type': 'sick', 'start_date': datetime.date(2026, 9, 27)}
+LEAVES 3
+ONB 2
+DOCS 11
+PRI leave_approvals 3
+PRI onboarding_reviews 2
+PRI document_reviews 11

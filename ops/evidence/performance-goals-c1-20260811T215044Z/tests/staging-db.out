@@ -1,0 +1,59 @@
+    performance goals c1 — prove
+      PASS  c1 module
+      PASS  charter stamp
+      PASS  commercial performance
+      PASS  OKRs first-class honesty
+      PASS  decorative % forbidden
+      PASS  talent not required
+      PASS  cycles not required
+      PASS  assistant out
+      PASS  rollback
+      PASS  EN objective
+      PASS  AR key result
+      PASS  higher_is_better 40%
+      PASS  lower_is_better math
+      PASS  missing current ≠ 100%
+      PASS  target_range in bounds
+      PASS  reject free-typed %
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  OKRs visible
+      PASS  cycles hidden in C1
+      PASS  talent hidden in C1
+      PASS  measure contract created
+      PASS  versioned target change
+      PASS  target versions retained
+      PASS  objective created
+      PASS  objective requires KR
+      PASS  KR created with measure
+      PASS  second KR
+      PASS  KR without valid measure rejected
+      PASS  objective activated
+      PASS  OKR rollup unknown before progress
+      PASS  refuse decorative progress_pct
+      PASS  KR progress computed
+      PASS  KR2 progress
+      PASS  KR progress → Objective roll-up
+      PASS  KPI goal coexist
+      PASS  milestone goal
+      PASS  development goal without forcing OKR
+      PASS  OKR not stored as goal_kind
+      PASS  alignment without forced cascade
+      PASS  scope team
+      PASS  scope department
+      PASS  scope company
+      PASS  disable preserves history
+      PASS  objectives intact after rollback
+      PASS  progress history intact
+      PASS  module-off after disable
+      PASS  EN/AR contracts
+      PASS  conflation guards
+
+    53 passed, 0 failed
+PERFORMANCE_GOALS_UNIT_PASS
+PERFORMANCE_GOALS_FULL_PASS
+STAGING_RC=0

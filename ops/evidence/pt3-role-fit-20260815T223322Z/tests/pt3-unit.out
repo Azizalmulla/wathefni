@@ -1,0 +1,47 @@
+    pt3 role fit — unit prove
+      PASS  pt3 stamp
+      PASS  fit ≠ readiness
+      PASS  fit ≠ promotion
+      PASS  readiness ≠ promotion
+      PASS  C6 readiness authoritative
+      PASS  no JA write-back
+      PASS  no universal %
+      PASS  missing not 0
+      PASS  missing not 100
+      PASS  JA off unavailable
+      PASS  Talent works without JA
+      PASS  PT2 stamp unchanged
+      PASS  JA stamp unchanged
+      PASS  C6 stamp unchanged
+      PASS  weighted refused without weights
+      PASS  missing → not_assessed not gap/ready
+      PASS  JA required + JA off → unavailable
+      PASS  all met → strong_fit
+      PASS  partial required → partial_fit
+      PASS  required gap → gaps
+      PASS  suggestion unassessed for missing
+      PASS  suggestion does not invent not_ready from missing
+      PASS  EN strong fit
+      PASS  AR strong fit
+      PASS  EN not assessed
+      PASS  AR not assessed
+      PASS  EN unavailable
+      PASS  AR unavailable
+      PASS  EN fit ≠ readiness labels
+      PASS  AR fit ≠ readiness labels
+      PASS  no JA score write
+      PASS  ja_written CHECK false
+      PASS  c6 readiness CHECK false
+      PASS  HTTP role-fit sets
+      PASS  HTTP evaluate
+      PASS  HTTP import-ja
+      PASS  no PT mini-API
+      PASS  HR Web role fit EN
+      PASS  HR Web role fit AR
+      PASS  HR Web fit ≠ ready EN
+      PASS  HR Web fit ≠ ready AR
+      PASS  HR Web JA off honesty EN
+      PASS  HR Web JA off honesty AR
+
+    43 passed, 0 failed
+PT3_ROLE_FIT_READINESS_UNIT_PASS

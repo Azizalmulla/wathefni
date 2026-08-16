@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "status": 403,
+  "error": "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access is denied. Check credentials and try again.\"}}"
+}

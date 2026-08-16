@@ -1,0 +1,86 @@
+    employee relations c4 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  case-level need-to-know
+      PASS  ordinary hr not er
+      PASS  manager not er
+      PASS  submission not finding
+      PASS  investigation not outcome
+      PASS  outcome not employment
+      PASS  no invented KW legal
+      PASS  wave5 excludes free text
+      PASS  assistant mutations out
+      PASS  works without engagement
+      PASS  works without payroll
+      PASS  works without talent/perf
+      PASS  setup wave6 er
+      PASS  setup honesty er
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  hr web sealed
+      PASS  manager no er by line
+      PASS  employee safe only
+      PASS  assistant no narrative dump
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema cases
+      PASS  schema access grants
+      PASS  employment mutate check
+      PASS  no employee table
+      PASS  payload safe notify
+      PASS  disabled blocks ops
+      PASS  enable company
+      PASS  setup policy get
+      PASS  case type v1
+      PASS  case type version history
+      PASS  open case
+      PASS  submission not finding
+      PASS  pinned type version
+      PASS  due overdue not outcome
+      PASS  ordinary HR denied
+      PASS  manager denied by default
+      PASS  ordinary HR detail denied
+      PASS  manager referral opens
+      PASS  manager referral no content
+      PASS  assign investigator
+      PASS  investigator scoped
+      PASS  investigation note confidential
+      PASS  finding locked
+      PASS  locked findings not overwritten
+      PASS  evidence attached
+      PASS  evidence deny api
+      PASS  evidence deny direct_url
+      PASS  evidence deny export
+      PASS  evidence deny assistant
+      PASS  investigator needs sensitive grant
+      PASS  investigator sensitive ok
+      PASS  assistant evidence denied
+      PASS  employee safe view
+      PASS  safe message
+      PASS  unsafe message blocked
+      PASS  outcome not employment mutation
+      PASS  employment handoff explicit
+      PASS  wave5 facts safe
+      PASS  no allegation text in facts
+      PASS  assistant read metadata
+      PASS  assistant mutation forbidden
+      PASS  notify safe first
+      PASS  notify dedupe
+      PASS  closed case type version intact
+      PASS  governed reopen
+      PASS  employee submission off
+      PASS  manager referral off
+      PASS  other company gated
+      PASS  disable retains history
+      PASS  ops blocked when off
+      PASS  history retained after disable
+      PASS  modularity without engagement
+      PASS  modularity without payroll
+
+    81 passed, 0 failed
+EMPLOYEE_RELATIONS_FULL_PASS
+STAGING_RC=0

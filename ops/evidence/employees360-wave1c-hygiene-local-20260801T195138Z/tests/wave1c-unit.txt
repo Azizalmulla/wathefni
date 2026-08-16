@@ -1,0 +1,15 @@
+PASS  refuse guess without evidence
+PASS  hired+activity → active high
+PASS  rejected app → manual review
+PASS  P0-DUP synthetic
+PASS  real key not synthetic
+PASS  person_id deterministic
+PASS  employment_id deterministic
+PASS  assignment_id present
+PASS  distinct phones distinct persons
+PASS  map excludes orphan mint
+PASS  map count
+PASS  seed format
+PASS  prod map person matches mint
+
+13 passed, 0 failed

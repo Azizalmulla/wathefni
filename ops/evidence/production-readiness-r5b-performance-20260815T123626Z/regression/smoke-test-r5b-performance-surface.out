@@ -1,0 +1,61 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5B — performance surface (unit)
+      PASS  performance customer enableable
+      PASS  performance customer visible
+      PASS  talent still hidden
+      PASS  performance is catalog SKU
+      PASS  talent not catalog SKU
+      PASS  performance http_ready
+      PASS  performance hr_web_ready
+      PASS  performance employee_surface_ready
+      PASS  performance manager_surface_ready
+      PASS  performance mobile_ready
+      PASS  fail-closed skips performance namespaces
+      PASS  fail-closed keeps talent namespaces
+      PASS  strip hipo
+      PASS  strip potential
+      PASS  strip nine_box
+      PASS  keep rating
+      PASS  high performer is not hipo honesty
+      PASS  learning not required
+      PASS  Setup remounts Performance policies
+      PASS  Setup still omits Wave6 cards
+      PASS  PostHire mounts Performance workspace
+      PASS  workspace has no nine_box
+      PASS  workspace has no succession
+      PASS  workspace has no talent_score
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace no frontend rollup formula
+      PASS  Page includes performance
+      PASS  nav.performance registered
+      PASS  app registers performance HTTP
+      PASS  performance permissions exist
+      PASS  employee feature performance
+      PASS  HTTP exposes /dashboard/performance/workspace
+      PASS  HTTP exposes /dashboard/performance/objectives
+      PASS  HTTP exposes /dashboard/performance/cycles
+      PASS  HTTP exposes /dashboard/performance/reviews
+      PASS  HTTP exposes /dashboard/performance/calibration
+      PASS  HTTP exposes /dashboard/performance/development
+      PASS  HTTP exposes /dashboard/performance/competencies
+      PASS  HTTP exposes /dashboard/performance/feedback
+      PASS  HTTP exposes /dashboard/mobile/performance
+      PASS  HTTP exposes /app/performance
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP uses employee_app_context
+      PASS  employee composition has performance
+      PASS  employee hub exists
+      PASS  employee goals exists
+      PASS  employee reviews exists
+      PASS  HR mobile queue exists
+      PASS  HR mobile detail exists
+      PASS  employee EN copy
+      PASS  employee AR copy
+      PASS  fail-closed no longer steals performance
+      PASS  talent still fail-closed
+
+    55 passed, 0 failed
+R5B_PERFORMANCE_SURFACE_UNIT_PASS

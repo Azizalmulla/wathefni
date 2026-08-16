@@ -1,0 +1,6 @@
+{
+  "test_suite_url": "bs://4135db0ad586ee2a109730c207b9848f34a0fce3",
+  "execute": [
+    "bs-smoke/00-launch-unsigned.yaml"
+  ]
+}

@@ -1,0 +1,20 @@
+---
+description: Unified Action Inbox freeze — controlled real-HR canary (Aziz/Talal only)
+globs: apps/wathefni-dashboard/src/posthire/PostHire.tsx,wathefni-orchestrator/action_inbox_wave1.py,wathefni-orchestrator/app.py
+alwaysApply: false
+---
+
+# Unified Action Inbox freeze (controlled real-HR)
+
+See `ops/ACTION_INBOX_REAL_HR_CANARY_FREEZE.md` and `ops/ACTION_INBOX_WAVE1_FREEZE.md`.
+
+## Final posture
+
+- Viewer allowlist: Aziz `96599338566` only
+- Subject allowlist: Talal `WATHEFNI-96550252254` only
+- `EXCLUDE_PAYROLL=1`; read-only; Alerts & Delivery owns notifications
+- Do not widen allowlists; do not add AI/mutations/Wave 2/money/ingest/shifts-manager expand
+
+## Soft-kill
+
+Clear either allowlist, or set `WATHEFNI_ACTION_INBOX_WAVE1=0`.

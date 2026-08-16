@@ -1,0 +1,22 @@
+PASS API_overview status=200
+PASS API_jobs status=200
+PASS API_candidates status=200
+PASS API_interviews status=200
+PASS API_assessments status=200
+PASS API_calendar status=200
+PASS API_employees status=200
+PASS API_onboarding status=200
+PASS API_attendance status=200
+PASS API_leave status=200
+PASS API_shifts status=200
+PASS API_payroll status=200
+PASS API_analytics status=200
+PASS API_compliance status=200
+PASS API_needs_attention status=200
+PASS API_alerts_delivery status=200
+PASS API_activity status=200
+PASS API_settings status=200
+PASS API_employee_profile status=200
+PASS API_tenant_invalid_token status=401
+PASS API_tenant_foreign_company status=403
+API_SUMMARY pass=21 fail=0 total=21

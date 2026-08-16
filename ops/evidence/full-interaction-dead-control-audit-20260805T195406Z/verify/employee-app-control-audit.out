@@ -1,0 +1,18 @@
+PASS activation/session Automatic session refresh status=200; rotated=True
+PASS home Load employee identity and capability gates status=200
+PASS profile Open profile status=200
+PASS onboarding Open onboarding status=200
+PASS leave Open leave status=200
+PASS shifts Open today's shifts status=200
+PASS shifts Open upcoming shifts status=200
+PASS attendance Open attendance status=200
+PASS documents Open documents status=200
+PASS notifications Open notifications status=200
+PASS home Self-scope identity employee_key=WATHEFNI-96550252254
+PASS onboarding Open item history status=200
+PASS notifications Mark notification read first=200; repeat=200; persisted=True
+PASS leave Cancel stale/nonexistent request status=404; calm=True
+PASS settings Push preference register/unregister register=403; unregister=200; repeat=200
+PASS activation/session Expired/invalid session status=401; calm=True
+PASS settings Sign out first=200; repeat=200; revoked_probe=401
+EMPLOYEE_APP_CONTROL_AUDIT {"employee_key": "WATHEFNI-96550252254", "controls": 17, "status_counts": {"pass": 17}}

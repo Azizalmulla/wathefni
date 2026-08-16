@@ -1,0 +1,319 @@
+{
+  "audited_at": "2026-08-05T23:36:39.855849+00:00",
+  "employee_key": "WATHEFNI-96599338566",
+  "item_id": "civil_id_canary_test",
+  "rejections": [
+    {
+      "result_id": "2aeb20d8-103f-4bd7-ad94-24b289fb67c9",
+      "created_at": "2026-08-05 23:30:30.666564+00:00",
+      "status": "rejected",
+      "result": {
+        "item_id": "civil_id_canary_test",
+        "event_id": "79137baf-e15a-43fa-81b0-b0ff59260f9a",
+        "extension": ".jpg",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599338566",
+        "actor_context": {
+          "route": "/app/onboarding/documents",
+          "method": "POST",
+          "source": "employee_app"
+        },
+        "declared_mime": "image/jpeg",
+        "rejection_code": "identity_mismatch",
+        "attempted_byte_size": 246805
+      },
+      "actor_user_id": "employee:WATHEFNI-96599338566",
+      "actor_phone": "96599338566"
+    },
+    {
+      "result_id": "80ba3b99-430d-484c-b2b2-8e5b8022fb13",
+      "created_at": "2026-08-05 23:30:13.992703+00:00",
+      "status": "rejected",
+      "result": {
+        "item_id": "civil_id_canary_test",
+        "event_id": "1a212c2e-b2e5-4c21-bfe7-d9b2a40a53b4",
+        "extension": ".jpg",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599338566",
+        "actor_context": {
+          "route": "/app/onboarding/documents",
+          "method": "POST",
+          "source": "employee_app"
+        },
+        "declared_mime": "image/jpeg",
+        "rejection_code": "instruction_screenshot",
+        "attempted_byte_size": 349079
+      },
+      "actor_user_id": "employee:WATHEFNI-96599338566",
+      "actor_phone": "96599338566"
+    },
+    {
+      "result_id": "bbded2a1-5160-4dfd-830c-847c435aedfb",
+      "created_at": "2026-08-05 23:10:42.524837+00:00",
+      "status": "rejected",
+      "result": {
+        "item_id": "civil_id_canary_test",
+        "event_id": "d0b4788c-0bfb-44aa-8440-f119bb038f44",
+        "extension": ".jpg",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599338566",
+        "actor_context": {
+          "route": "/app/onboarding/documents",
+          "method": "POST",
+          "source": "employee_app"
+        },
+        "declared_mime": "image/jpeg",
+        "rejection_code": "instruction_screenshot",
+        "attempted_byte_size": 276758
+      },
+      "actor_user_id": "employee:WATHEFNI-96599338566",
+      "actor_phone": "96599338566"
+    },
+    {
+      "result_id": "7929a0fc-7bba-4945-919e-9e69c90ad7b2",
+      "created_at": "2026-08-05 23:10:37.205801+00:00",
+      "status": "rejected",
+      "result": {
+        "item_id": "civil_id_canary_test",
+        "event_id": "4f61b4ed-1e02-426a-afba-330a9181c41a",
+        "extension": ".jpg",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599338566",
+        "actor_context": {
+          "route": "/app/onboarding/documents",
+          "method": "POST",
+          "source": "employee_app"
+        },
+        "declared_mime": "image/jpeg",
+        "rejection_code": "instruction_screenshot",
+        "attempted_byte_size": 276758
+      },
+      "actor_user_id": "employee:WATHEFNI-96599338566",
+      "actor_phone": "96599338566"
+    },
+    {
+      "result_id": "74516a5f-9653-4eec-861e-609386f1c5c8",
+      "created_at": "2026-08-05 23:10:35.252347+00:00",
+      "status": "rejected",
+      "result": {
+        "item_id": "civil_id_canary_test",
+        "event_id": "ba2f289f-a68c-4732-a987-718819d389ec",
+        "extension": ".jpg",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599338566",
+        "actor_context": {
+          "route": "/app/onboarding/documents",
+          "method": "POST",
+          "source": "employee_app"
+        },
+        "declared_mime": "image/jpeg",
+        "rejection_code": "instruction_screenshot",
+        "attempted_byte_size": 276758
+      },
+      "actor_user_id": "employee:WATHEFNI-96599338566",
+      "actor_phone": "96599338566"
+    },
+    {
+      "result_id": "92181a76-dee0-4b08-b6d5-0ec3f2180fdd",
+      "created_at": "2026-08-05 23:10:22.535822+00:00",
+      "status": "rejected",
+      "result": {
+        "item_id": "civil_id_canary_test",
+        "event_id": "4640da18-f7a4-46d9-9e8c-34ee59731f1f",
+        "extension": ".jpg",
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96599338566",
+        "actor_context": {
+          "route": "/app/onboarding/documents",
+          "method": "POST",
+          "source": "employee_app"
+        },
+        "declared_mime": "image/jpeg",
+        "rejection_code": "instruction_screenshot",
+        "attempted_byte_size": 276758
+      },
+      "actor_user_id": "employee:WATHEFNI-96599338566",
+      "actor_phone": "96599338566"
+    }
+  ],
+  "latest_rejection": {
+    "result_id": "2aeb20d8-103f-4bd7-ad94-24b289fb67c9",
+    "created_at": "2026-08-05 23:30:30.666564+00:00",
+    "status": "rejected",
+    "result": {
+      "item_id": "civil_id_canary_test",
+      "event_id": "79137baf-e15a-43fa-81b0-b0ff59260f9a",
+      "extension": ".jpg",
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-96599338566",
+      "actor_context": {
+        "route": "/app/onboarding/documents",
+        "method": "POST",
+        "source": "employee_app"
+      },
+      "declared_mime": "image/jpeg",
+      "rejection_code": "identity_mismatch",
+      "attempted_byte_size": 246805
+    },
+    "actor_user_id": "employee:WATHEFNI-96599338566",
+    "actor_phone": "96599338566"
+  },
+  "employee": {
+    "employee_key": "WATHEFNI-96599338566",
+    "name": "W5C-SYNTH|Aziz Mobile QA",
+    "phone": "96599338566",
+    "company_code": "WATHEFNI",
+    "profile": {
+      "qa": "employee_mobile",
+      "synthetic": true,
+      "department": "Internal QA"
+    }
+  },
+  "canary_item": {
+    "status": "pending",
+    "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+    "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+    "mime_type": "image/jpeg",
+    "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+    "row_version": 3,
+    "lifecycle_meta": {
+      "phase": "processing",
+      "canary": true,
+      "purpose": "document_validation_parity_live_test",
+      "awaiting": "hr_review",
+      "created_at": "2026-08-05T23:07:47.792236+00:00",
+      "disposable": true,
+      "doc_validation": {
+        "gate": "soft",
+        "reason": "needs_review",
+        "decision": "allow_uncertain",
+        "gpt_used": false,
+        "hr_review_recommended": true
+      },
+      "canary_reset_at": "2026-08-05T23:22:15.341789+00:00",
+      "lifecycle_status": "processing",
+      "last_submit_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+      "explicitly_assigned": true,
+      "last_submit_file_id": "a9bdb930-fb30-42f4-abaf-f2e441e09219",
+      "lifecycle_updated_at": "2026-08-05T23:15:32.558495+00:00",
+      "do_not_approve_as_real": true,
+      "last_submit_version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a"
+    },
+    "updated_at": "2026-08-05 23:22:15.334144+00:00"
+  },
+  "versions_near_rejection": [],
+  "name_match_probes": [
+    {
+      "extracted": "Aziz Almulla",
+      "result": {
+        "status": "unverified",
+        "match": false,
+        "expected_name": "W5C-SYNTH|Aziz Mobile QA",
+        "document_name": "Aziz Almulla",
+        "overlap_tokens": [
+          "aziz"
+        ],
+        "token_score": 0.25,
+        "sequence_score": 0.242
+      }
+    },
+    {
+      "extracted": "Aziz Mobile QA",
+      "result": {
+        "status": "matched",
+        "match": true,
+        "expected_name": "W5C-SYNTH|Aziz Mobile QA",
+        "document_name": "Aziz Mobile QA",
+        "overlap_tokens": [
+          "aziz",
+          "mobile"
+        ],
+        "token_score": 0.5,
+        "sequence_score": 0.688
+      }
+    },
+    {
+      "extracted": "Mohammad Qattan",
+      "result": {
+        "status": "mismatch",
+        "match": false,
+        "expected_name": "W5C-SYNTH|Aziz Mobile QA",
+        "document_name": "Mohammad Qattan",
+        "overlap_tokens": [],
+        "token_score": 0.0,
+        "sequence_score": 0.222
+      }
+    },
+    {
+      "extracted": "Curriculum Vitae",
+      "result": {
+        "status": "mismatch",
+        "match": false,
+        "expected_name": "W5C-SYNTH|Aziz Mobile QA",
+        "document_name": "Curriculum Vitae",
+        "overlap_tokens": [],
+        "token_score": 0.0,
+        "sequence_score": 0.108
+      }
+    },
+    {
+      "extracted": "W5C-SYNTH|Aziz Mobile QA",
+      "result": {
+        "status": "matched",
+        "match": true,
+        "expected_name": "W5C-SYNTH|Aziz Mobile QA",
+        "document_name": "W5C-SYNTH|Aziz Mobile QA",
+        "overlap_tokens": [
+          "aziz",
+          "mobile",
+          "synth",
+          "w5c"
+        ],
+        "token_score": 1.0,
+        "sequence_score": 1.0
+      }
+    }
+  ],
+  "rule_ordering": [
+    "1. quality: file_too_small / wrong_format / media unreadable_reason",
+    "2. personal_photo lane (N/A for civil_id)",
+    "3. verify(media) via Mistral identity verify",
+    "4. if verify None \u2192 validator_unavailable block",
+    "5. instruction_screenshot \u2192 block",
+    "6. personal_photo/selfie/lifestyle on identity item \u2192 looks_like_photo_not_document",
+    "7. is_obvious_non_document \u2192 not_a_document (etc)",
+    "8. detected!=expected AND conf>=0.65 AND not matches \u2192 wrong_media_item",
+    "9. infer_capture_quality_reason \u2192 too_blurry/crop/glare/missing_side block",
+    "10. low_readability (not matches OR conf<0.65 OR needs_review+low conf) \u2192 retake block if credible else non-doc",
+    "11. ONLY if matches AND conf>=0.65: identity() / validate_onboarding_document_identity",
+    "12. missing_side / expiry / required_fields",
+    "13. identity_reason==identity_mismatch \u2192 BLOCK identity_mismatch  << selected",
+    "14. else identity_unverified \u2192 soft uncertain / hard block",
+    "15. else allow"
+  ],
+  "why_wrong_media_item_did_not_fire": "wrong_media_item only runs when detected_item differs from expected AND confidence>=0.65 AND matches_expected_item is False. identity_mismatch is only reachable after low_readability is False, which requires matches_expected_item True AND confidence>=VERIFY_CONFIDENCE_FLOOR (0.65). Therefore verify must have treated the upload as a matching Civil ID before identity ran.",
+  "verdict_categories": {
+    "misclassified_as_identity_document": "Required precondition for identity_mismatch under current soft gate: verify.matches_expected_item=True with confidence>=0.65 for expected civil_id.",
+    "identity_before_document_type": false,
+    "identity_before_document_type_detail": "Document-type verification (verify/matches/wrong_media_item/non-doc/capture) runs first; identity name-match runs only after a high-confidence expected match.",
+    "wrong_employee_message_fallback": false,
+    "message_source": "CORRECTION_COPY['identity_mismatch'] selected because validate_onboarding_document_identity returned reason identity_mismatch when document_name_match(...).status == 'mismatch'."
+  },
+  "employee_name_used_for_comparison": "W5C-SYNTH|Aziz Mobile QA",
+  "receipt": {
+    "result_id": "2aeb20d8-103f-4bd7-ad94-24b289fb67c9",
+    "event_id": "79137baf-e15a-43fa-81b0-b0ff59260f9a",
+    "rejection_code": "identity_mismatch",
+    "created_at": "2026-08-05 23:30:30.666564+00:00",
+    "declared_mime": "image/jpeg",
+    "extension": ".jpg",
+    "attempted_byte_size": 246805,
+    "version_id": null,
+    "version_note": "Blocked before store \u2014 no governed/ESS version_id was created for this attempt."
+  },
+  "flags": {
+    "soft": "on",
+    "hard": "off",
+    "allowlist": "WATHEFNI-96599338566,WATHEFNI-96550252254"
+  }
+}

@@ -1,0 +1,100 @@
+--- local/cv_extraction.py	2026-07-26 20:29:35
++++ production/cv_extraction.py	2026-07-26 20:29:18
+@@ -987,6 +987,30 @@
+           ON cv_extraction_runs(company_code, created_at DESC);
+         CREATE INDEX IF NOT EXISTS idx_cv_extraction_runs_document
+           ON cv_extraction_runs(document_id, created_at DESC);
++
++        CREATE TABLE IF NOT EXISTS cv_extraction_finalizations (
++          finalization_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++          company_code text NOT NULL,
++          document_id text NOT NULL,
++          app_key text NOT NULL,
++          source_content_sha256 text NOT NULL,
++          extracted_text_hash text NOT NULL,
++          extraction_method text,
++          quality_ok boolean NOT NULL DEFAULT false,
++          status text NOT NULL,
++          error text,
++          metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
++          finalized_at timestamptz NOT NULL DEFAULT now(),
++          created_at timestamptz NOT NULL DEFAULT now(),
++          UNIQUE (
++            company_code, app_key, document_id, source_content_sha256,
++            extracted_text_hash
++          )
++        );
++        CREATE INDEX IF NOT EXISTS idx_cv_extraction_finalizations_app
++          ON cv_extraction_finalizations(company_code, app_key, finalized_at DESC);
++        CREATE INDEX IF NOT EXISTS idx_cv_extraction_finalizations_document
++          ON cv_extraction_finalizations(company_code, document_id, finalized_at DESC);
+         """
+     )
+ 
+@@ -1162,8 +1186,66 @@
+             bool(fields.get("cache_hit")),
+             fields.get("error"),
+             json.dumps(fields.get("metadata") or {}),
++        ),
++    )
++
++
++def record_extraction_finalization(
++    execute: DbExecute,
++    *,
++    company_code: str,
++    document_id: str,
++    app_key: str,
++    source_content_sha256: str,
++    extracted_text: str,
++    extraction_method: str | None,
++    quality_ok: bool,
++    error: str | None = None,
++    metadata: dict[str, Any] | None = None,
++) -> dict[str, Any]:
++    """Record the final accepted output, separate from engine-stage audit rows."""
++    company = str(company_code or "").strip().upper()
++    document = str(document_id or "").strip()
++    application = str(app_key or "").strip()
++    source_hash = str(source_content_sha256 or "").strip().lower()
++    text_hash = hashlib.sha256(str(extracted_text or "").encode("utf-8")).hexdigest()
++    if not all((company, document, application, source_hash)):
++        raise ValueError("cv_extraction_finalization_fields_required")
++    status = "completed" if quality_ok and extracted_text else "failed"
++    row = execute(
++        """
++        INSERT INTO cv_extraction_finalizations(
++          company_code, document_id, app_key, source_content_sha256,
++          extracted_text_hash, extraction_method, quality_ok, status, error,
++          metadata, finalized_at, created_at
++        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,now(),now())
++        ON CONFLICT (
++          company_code, app_key, document_id, source_content_sha256,
++          extracted_text_hash
++        ) DO UPDATE SET
++          extraction_method=EXCLUDED.extraction_method,
++          quality_ok=EXCLUDED.quality_ok,
++          status=EXCLUDED.status,
++          error=EXCLUDED.error,
++          metadata=EXCLUDED.metadata,
++          finalized_at=now()
++        RETURNING finalization_id, status, quality_ok, extracted_text_hash
++        """,
++        (
++            company,
++            document,
++            application,
++            source_hash,
++            text_hash,
++            extraction_method,
++            bool(quality_ok),
++            status,
++            error,
++            json.dumps(metadata or {}, ensure_ascii=False),
+         ),
++        fetchone=True,
+     )
++    return dict(row or {})
+ 
+ 
+ def extract_image_with_mistral(path: Path, mime_type: str) -> tuple[str, list[dict[str, Any]], EngineCallMeta]:

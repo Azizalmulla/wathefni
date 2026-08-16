@@ -1,0 +1,93 @@
+{
+  "own": [
+    200,
+    {
+      "company_code": "WATHEFNI",
+      "feature": {
+        "enabled": true,
+        "global_enabled": true,
+        "allowlisted": true,
+        "tenant_flag": null,
+        "domain": "inbound.wathefni.ai",
+        "architecture": "forward_to_wathefni_intake",
+        "mailbox_sync_enabled": false,
+        "quotas": {
+          "daily_message_quota": 0,
+          "monthly_message_quota": 0,
+          "daily_source_bytes_quota": 0,
+          "monthly_source_bytes_quota": 0,
+          "daily_processing_job_quota": 0,
+          "commercial_enforced": false,
+          "tenant_overrides": {}
+        },
+        "health": {
+          "last_received_at": "2026-07-27T00:00:00+00:00",
+          "received_count": 7,
+          "received_7d": 6,
+          "last_status": "durable"
+        }
+      },
+      "address": {
+        "intake_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+        "company_code": "WATHEFNI",
+        "address": "wathefni-cv-d11603@inbound.wathefni.ai",
+        "local_part": "wathefni-cv-d11603",
+        "domain": "inbound.wathefni.ai",
+        "position_code": null,
+        "position_title": null,
+        "label": "waveD2-prod-proof general",
+        "status": "active",
+        "created_at": "2026-08-01T05:01:38.864678+00:00",
+        "updated_at": "2026-08-01T05:01:38.864678+00:00",
+        "role_bound": false,
+        "hold_policy": "needs_role",
+        "health": {
+          "last_received_at": null,
+          "received_count": 0,
+          "received_7d": 0,
+          "last_status": null
+        }
+      },
+      "primary_address": "wathefni-cv-d11603@inbound.wathefni.ai",
+      "forward_instructions_en": "Forward CVs from your company recruitment email to wathefni-cv-d11603@inbound.wathefni.ai. Wathefni receives a copy via secure inbound mail, scans attachments, and holds candidates until HR reviews identity and admits them to a role.",
+      "forward_instructions_ar": "\u062d\u0648\u0651\u0644 \u0627\u0644\u0633\u064a\u0631 \u0627\u0644\u0630\u0627\u062a\u064a\u0629 \u0645\u0646 \u0628\u0631\u064a\u062f \u0627\u0644\u062a\u0648\u0638\u064a\u0641 \u0641\u064a \u0634\u0631\u0643\u062a\u0643 \u0625\u0644\u0649 wathefni-cv-d11603@inbound.wathefni.ai. \u064a\u0633\u062a\u0644\u0645 \u0648\u0638\u0641\u0646\u064a \u0646\u0633\u062e\u0629 \u0639\u0628\u0631 \u0628\u0631\u064a\u062f \u0648\u0627\u0631\u062f \u0622\u0645\u0646\u060c \u064a\u0641\u062d\u0635 \u0627\u0644\u0645\u0631\u0641\u0642\u0627\u062a\u060c \u0648\u064a\u064f\u0628\u0642\u064a \u0627\u0644\u0645\u0631\u0634\u062d\u064a\u0646 \u0645\u0639\u0644\u0651\u0642\u064a\u0646 \u062d\u062a\u0649 \u062a\u0631\u0627\u062c\u0639 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u0647\u0648\u064a\u0629 \u0648\u062a\u0636\u064a\u0641\u0647\u0645 \u0625\u0644\u0649 \u0648\u0638\u064a\u0641\u0629.",
+      "setup_steps_en": [
+        "Create or choose the recruitment mailbox your company already uses (for example careers@yourcompany.com).",
+        "Add a forward (or inbox rule) so every message with a CV attachment is copied to wathefni-cv-d11603@inbound.wathefni.ai.",
+        "In Microsoft 365 / Outlook: Settings \u2192 Mail \u2192 Forwarding, or create a rule \u201cif has attachment \u2192 redirect/forward to Wathefni\u201d.",
+        "In Gmail: Settings \u2192 Forwarding and POP/IMAP \u2192 Add a forwarding address, then confirm; optionally filter \u201cHas attachment\u201d to that address.",
+        "Send one test CV from an external address and confirm Wathefni shows a recent received time on this page.",
+        "Optional: create a job-specific Wathefni alias for a single open role. Without a role alias, CVs are held as needs role until HR assigns one.",
+        "Wathefni does not open or sync your Microsoft/Google inbox in this phase \u2014 forwarding is the only intake path."
+      ],
+      "setup_steps_ar": [
+        "\u0623\u0646\u0634\u0626 \u0623\u0648 \u0627\u062e\u062a\u0631 \u0635\u0646\u062f\u0648\u0642 \u0628\u0631\u064a\u062f \u0627\u0644\u062a\u0648\u0638\u064a\u0641 \u0627\u0644\u0630\u064a \u062a\u0633\u062a\u062e\u062f\u0645\u0647 \u0627\u0644\u0634\u0631\u0643\u0629 \u0628\u0627\u0644\u0641\u0639\u0644 (\u0645\u062b\u0644 careers@yourcompany.com).",
+        "\u0623\u0636\u0641 \u062a\u062d\u0648\u064a\u0644\u0627\u064b (\u0623\u0648 \u0642\u0627\u0639\u062f\u0629 \u0648\u0627\u0631\u062f) \u0628\u062d\u064a\u062b \u062a\u064f\u0646\u0633\u062e \u0643\u0644 \u0631\u0633\u0627\u0644\u0629 \u062a\u062d\u062a\u0648\u064a \u0645\u0631\u0641\u0642 \u0633\u064a\u0631\u0629 \u0630\u0627\u062a\u064a\u0629 \u0625\u0644\u0649 wathefni-cv-d11603@inbound.wathefni.ai.",
+        "\u0641\u064a Microsoft 365 / Outlook: \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u2190 \u0627\u0644\u0628\u0631\u064a\u062f \u2190 \u0627\u0644\u062a\u062d\u0648\u064a\u0644\u060c \u0623\u0648 \u0623\u0646\u0634\u0626 \u0642\u0627\u0639\u062f\u0629 \u00ab\u0625\u0630\u0627 \u0648\u064f\u062c\u062f \u0645\u0631\u0641\u0642 \u2190 \u0625\u0639\u0627\u062f\u0629 \u062a\u0648\u062c\u064a\u0647 \u0625\u0644\u0649 \u0648\u0638\u0641\u0646\u064a\u00bb.",
+        "\u0641\u064a Gmail: \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u2190 \u0627\u0644\u062a\u062d\u0648\u064a\u0644 \u0648POP/IMAP \u2190 \u0623\u0636\u0641 \u0639\u0646\u0648\u0627\u0646 \u062a\u062d\u0648\u064a\u0644 \u062b\u0645 \u0623\u0643\u0651\u062f\u0647\u061b \u0648\u064a\u0645\u0643\u0646\u0643 \u062a\u0635\u0641\u064a\u0629 \u00ab\u064a\u062d\u062a\u0648\u064a \u0645\u0631\u0641\u0642\u0627\u064b\u00bb \u0625\u0644\u0649 \u0630\u0644\u0643 \u0627\u0644\u0639\u0646\u0648\u0627\u0646.",
+        "\u0623\u0631\u0633\u0644 \u0633\u064a\u0631\u0629 \u0630\u0627\u062a\u064a\u0629 \u062a\u062c\u0631\u064a\u0628\u064a\u0629 \u0645\u0646 \u0639\u0646\u0648\u0627\u0646 \u062e\u0627\u0631\u062c\u064a \u0648\u062a\u0623\u0643\u062f \u0623\u0646 \u0648\u0638\u0641\u0646\u064a \u064a\u0639\u0631\u0636 \u0648\u0642\u062a \u0627\u0633\u062a\u0644\u0627\u0645 \u062d\u062f\u064a\u062b \u0641\u064a \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629.",
+        "\u0627\u062e\u062a\u064a\u0627\u0631\u064a: \u0623\u0646\u0634\u0626 \u0627\u0633\u0645\u0627\u064b \u0645\u0633\u062a\u0639\u0627\u0631\u0627\u064b \u062e\u0627\u0635\u0627\u064b \u0628\u0648\u0638\u064a\u0641\u0629 \u0645\u0641\u062a\u0648\u062d\u0629. \u0628\u062f\u0648\u0646 \u062a\u0639\u064a\u064a\u0646 \u0648\u0638\u064a\u0641\u0629 \u062a\u064f\u062d\u0641\u0638 \u0627\u0644\u0633\u064a\u0631 \u0643\u0640 \u00ab\u062a\u062d\u062a\u0627\u062c \u062f\u0648\u0631\u0627\u064b\u00bb \u062d\u062a\u0649 \u064a\u0639\u064a\u0651\u0646\u0647\u0627 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629.",
+        "\u0648\u0638\u0641\u0646\u064a \u0644\u0627 \u064a\u0641\u062a\u062d \u0648\u0644\u0627 \u064a\u0632\u0627\u0645\u0646 \u0635\u0646\u062f\u0648\u0642 \u0628\u0631\u064a\u062f \u0645\u0627\u064a\u0643\u0631\u0648\u0633\u0648\u0641\u062a/\u062c\u0648\u062c\u0644 \u0641\u064a \u0647\u0630\u0647 \u0627\u0644\u0645\u0631\u062d\u0644\u0629 \u2014 \u0627\u0644\u062a\u062d\u0648\u064a\u0644 \u0647\u0648 \u0645\u0633\u0627\u0631 \u0627\u0644\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0627\u0644\u0648\u062d\u064a\u062f."
+      ]
+    }
+  ],
+  "cross_inspect": [
+    403,
+    {
+      "detail": {
+        "error": "dashboard_company_forbidden",
+        "message": "Access needs to be verified."
+      }
+    }
+  ],
+  "cross_disable": [
+    403,
+    {
+      "detail": {
+        "error": "dashboard_company_forbidden",
+        "message": "Access needs to be verified."
+      }
+    }
+  ],
+  "ok": true
+}

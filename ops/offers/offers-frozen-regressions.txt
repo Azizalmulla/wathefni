@@ -1,0 +1,691 @@
+=== candidates-c3-schema ===
+  PASS no_duplicate_cv_processing_authority
+  PASS hire_handoff_no_auto_move_docs
+  PASS onboarding_owns_post_hire_collection
+  PASS cv_kind_is_recruiting
+  PASS civil_id_kind_is_onboarding
+  PASS civil_id_apply_purpose_denied
+  PASS staging_db_identity
+  PASS c3_tables_present
+  PASS applications_person_columns
+  PASS file_registry_person_columns
+  PASS merge_item_ledger_complete
+  PASS merge_processing_state_supported
+  PASS merge_item_ledger_immutable_trigger
+  PASS merge_direct_identity_inventory_classified
+  PASS document_privacy_jobs_channel_column
+  PASS lifecycle_authority_guard_still_present
+  PASS no_parallel_c3_cv_extraction_table
+  PASS canonical_cv_pipeline_tables_untouched_by_c3_contract
+{"summary": {"passed": 18, "failed": 0}, "report": "/opt/wathefni/staging/orchestrator/ops/reports/candidates-c3-schema-verify.json"}
+RESULT candidates-c3-schema PASS
+=== candidates-c3-matrix ===
+  PASS staging_db_identity
+  PASS gate1_no_duplicate_cv_authority
+  PASS gate2_reuses_file_registry_association
+  PASS gate3_recruiting_whatsapp_no_civil_id_ask
+  PASS gate3_cv_ask_allowed
+  PASS gate5_hire_no_auto_move_docs
+  PASS gate6_onboarding_owns_post_hire
+  PASS gate4_privacy_jobs_channel_tagged
+  PASS migrate_dry_run_never_auto_merges
+  PASS migrate_apply_never_auto_merges
+  PASS migrate_created_persons
+  PASS two_persons_same_tenant_no_silent_merge
+  PASS cross_tenant_person_read_denied
+  PASS duplicates_advisory_and_civil_redacted
+  PASS civil_id_recruiting_purpose_denied
+  PASS privacy_job_recruiting_channel
+  PASS privacy_job_onboarding_channel_without_owning_workflow
+  PASS assistant_cannot_execute_merge
+  PASS merge_requires_confirmation
+  PASS human_confirmed_merge_ok
+  PASS legal_hold_blocks_delete
+  PASS hold_created
+  PASS candidate_payload_strip_sensitive
+  PASS c0_lifecycle_guard_intact
+  PASS merge_authority_completed
+  PASS merge_multiple_applications_db_mapping
+  PASS merge_multiple_cv_versions_db_mapping
+  PASS merge_application_notes_remains_application_owned
+  PASS merge_application_recruiter_tasks_remains_application_owned
+  PASS merge_candidate_interviews_remains_application_owned
+  PASS merge_employment_offers_remains_application_owned
+  PASS merge_hire_operations_remains_application_owned
+  PASS merge_exact_replay_without_second_confirmation
+  PASS merge_exact_replay_no_duplicate_operation_or_items
+  PASS merge_changed_payload_not_replayed
+  PASS reverse_after_post_merge_mutation_fails_closed
+  PASS unsafe_reverse_does_not_mark_reversed
+  PASS unsafe_reverse_writes_no_partial_reversal_items
+  PASS merge_reversal_completed
+  PASS reversal_restores_application_mappings_db
+  PASS reversal_restores_document_mappings_db
+  PASS reversal_exact_replay_without_confirmation
+  PASS canonical_cv_semantic_history_unchanged
+  PASS canonical_cv_extraction_run_unchanged
+  PASS document_reassociation_mid_transaction_failure_recorded
+  PASS document_failure_rolls_back_all_database_mappings
+  PASS cross_tenant_document_reassociation_rejected
+  PASS cross_tenant_document_mapping_unchanged
+  PASS c2_notes_table_intact
+{
+  "summary": {
+    "passed": 49,
+    "failed": 0,
+    "total": 49
+  },
+  "report": "/opt/wathefni/staging/orchestrator/ops/reports/candidates-c3-staging-matrix.json"
+}
+RESULT candidates-c3-matrix PASS
+=== ranking-r0-r3 ===
+[PASS] embedding_provider_voyage — voyage
+[PASS] embedding_model_voyage_4_large — voyage-4-large
+[PASS] rerank_flag_disabled — 0
+[PASS] tool_agent_terra
+[PASS] no_legacy_evaluator_env — unset
+[PASS] embedding_rebuild_attempted — {"ok": true, "rebuilt": 1, "skipped": 0, "failed": 0, "model": "voyage-4-large", "dimensions": 1024, "projection_version": "ranking-embed-projection-v1", "denylist_version": "ranking-denylist-v1"}
+[PASS] no_voyage_4_left_in_company_docs — mixed=0
+[PASS] criteria_approved — 1
+[PASS] pool_total_complete — 15
+[PASS] all_apps_present — 15
+[PASS] reranker_disabled_in_provenance — false
+[PASS] reranker_api_calls_zero — 0
+[PASS] legacy_gpt_evaluator_not_called
+[PASS] no_lifecycle_mutations
+[PASS] eligibility_buckets_present — {'insufficient_information'}
+[PASS] scoring_config_is_soft_v2 — ranking-soft-v2
+[PASS] evidence_policy_version_present — ranking-evidence-policy-v1
+[PASS] canonical_cv_evidence_version_present
+[PASS] application_cv_facts_version_present
+[PASS] all_items_use_application_scoped_cv_facts
+[PASS] missing_experience_unknown_or_not_met_visible — {'ranking-r0r3-staging-matrix-v1-app-14': 'insufficient_information', 'ranking-r0r3-staging-matrix-v1-app-13': 'insufficient_information', 'ranking-r0r3-staging-matrix-v1-app-11': 'insufficient_information', 'ranking-r0r3-staging-matrix-v1-app-10': 'insufficient_information', 'ranking-r0r3-staging-matrix-v1-app-12': 'insufficient_information'}
+[PASS] approved_assessment_contributes — 12.0
+[PASS] unrelated_assessment_omitted_or_zero — {'skills_alignment': 15.0, 'experience_alignment': 0.0, 'education_cert_alignment': 5.0}
+[PASS] incomplete_assessment_omitted_or_zero — ['assessment_in_progress', 'semantic_similarity_unavailable']
+[PASS] assessment_normalization_0_15 — got=12.0 expected=12.0
+[PASS] soft_v2_normalized_ranking-r0r3-staging-matrix-v1-app-00 — earned=35.03 available=100.0 expected=35.03 score=35.03
+[PASS] soft_v2_normalized_ranking-r0r3-staging-matrix-v1-app-02 — earned=20.0 available=70.0 expected=28.57 score=28.57
+[PASS] soft_v2_normalized_ranking-r0r3-staging-matrix-v1-app-01 — earned=20.0 available=70.0 expected=28.57 score=28.57
+[PASS] denylist_invariance_score — twin=35.03 base=35.03 twin_components={'skills_alignment': 15.0, 'experience_alignment': 0.0, 'education_cert_alignment': 5.0, 'assessment_evidence': 12.0, 'semantic_alignment': 3.03} base_components={'skills_alignment': 15.0, 'experience_alignment': 0.0, 'education_cert_alignment': 5.0, 'assessment_evidence': 12.0, 'semantic_alignment': 3.03}
+[PASS] denylist_invariance_components — twin={'skills_alignment': 15.0, 'experience_alignment': 0.0, 'education_cert_alignment': 5.0, 'assessment_evidence': 12.0, 'semantic_alignment': 3.03} base={'skills_alignment': 15.0, 'experience_alignment': 0.0, 'education_cert_alignment': 5.0, 'assessment_evidence': 12.0, 'semantic_alignment': 3.03}
+[PASS] denylist_invariance_eligibility — insufficient_information vs insufficient_information
+[PASS] parity_run_id — 24ae3dea-c0c9-44ae-aeb4-ecbb044d3e7b
+[PASS] parity_pool_total
+[PASS] parity_item_ids_order — ['b6f5d4c7-0b87-47b7-9150-cc205659a2e8', '6b6fbd61-d478-4f08-a875-07eccc13af6a', 'c3fd8e1c-6c1c-4763-a2c7-1fcd0260d1e5']
+[PASS] parity_narrative_ids
+[PASS] parity_backend_explanation
+[PASS] assistant_requires_job — {"success": false, "error": "job_required", "filters": {"company_code": "RANKSTG", "position": null, "position_raw": null, "literal_position_filter": true, "ranking_mode": "job_scoped_canonical", "assistant_ranking_mode": "replay_only"}}
+[PASS] terra_envelope_no_civil_id
+[PASS] terra_envelope_no_gender
+[PASS] backend_explanation_always
+[PASS] ranking_ok_despite_terra
+[PASS] terra_status_recorded — {'completed'}
+[PASS] terra_stub_success_during_rank — {'completed'}
+[PASS] terra_live_success — {"status": "completed", "model": "gpt-5.6-terra", "narrative_id": "e3331d0e-e9a3-4a7c-94cd-78b65ddec31e", "error": null}
+[PASS] terra_narrative_evidence_bound_language — Evidence shows Python, PostgreSQL and PMP keywords plus an approved 80% assessment; all hard requirements remain unverified, including experience.
+[PASS] terra_envelope_score_matches_item — envelope=35.03 item=35.03
+[PASS] terra_forced_failure_preserves_ranking — failed
+[PASS] terra_failure_keeps_backend_explanation — Eligibility=insufficient_information; advisory=35.03/100; coverage=0.75; components[assessment_evidence=12.0, education_
+[PASS] stale_after_criteria_change — 2
+[PASS] recalc_ok
+[PASS] unapproved_assessment_after_criteria
+[PASS] arabic_job_pool — 1
+[PASS] arabic_eligible_or_unknown
+[PASS] production_ranking_module_frozen_present — True
+[PASS] production_reports_v1_frozen_present — True
+[PASS] production_assistant_privacy_frozen_present — True
+[PASS] cleanup_complete — apps=17
+{
+  "pass": 57,
+  "fail": 0,
+  "report": "/opt/wathefni/staging/orchestrator/ops/reports/ranking-r0r3-staging-matrix-20260724T225243Z.json"
+}
+RESULT ranking-r0-r3 PASS
+=== ranking-presentation ===
+[PASS] presentation_module_loaded
+[PASS] score_display_version
+[PASS] tool_agent_terra
+[PASS] ranking_mode_replay_only
+[PASS] legacy_regex_off
+[PASS] privacy_version
+[PASS] reports_metric_version
+[PASS] delivery_dry_run
+[PASS] frozen_candidate_ranking_hash
+[PASS] frozen_cv_evidence_contract_hash
+[PASS] frozen_cv_facts_contract_hash
+[PASS] authority_fingerprints_unchanged — {"before": {"ranking_runs": "5261c55154edf252be245d6c59938f17829bf7950c4e70878a1ba568ea3b02c5", "ranking_run_items": "eea4e9721109d4c2b421e6ed21ab40993cd7c72c8ac6a1a16d4fd1ca4700c657", "ranking_item_narratives": "93cbd082a769b71921fa8aad0f36bc6bfba5d2a05ea41f4a6ddbf08fcf565d44", "applications": "b85f660314c29c0abf63fc8cf4212401841d59505298484ac1ad2740f0e0d0de", "application_lifecycle_events": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945", "assessments": "table_absent_or_empt
+[PASS] render_did_not_create_runs — runs=2
+[PASS] render_did_not_create_narratives — narratives=2
+[PASS] incomplete_candidate_present — 965884401-RANKPRESUX-RANKPRES_HR
+[PASS] incomplete_no_raw_debug
+[PASS] incomplete_has_name — RANKPRESUX Incomplete Criteria
+[PASS] incomplete_has_job — RANKPRESUX HR Specialist
+[PASS] incomplete_has_state
+[PASS] incomplete_has_explanation
+[PASS] incomplete_has_next_step
+[PASS] incomplete_hr_decides
+[PASS] incomplete_no_raw_zero_score
+[PASS] incomplete_no_absolute_cv_absence_claim — rankpresux incomplete criteria: finish the missing evidence before this candidate can be compared. | structured cv facts are not ready yet; do not infer missing skills or experience. | no employer-approved assessment is available for this ranking
+[PASS] incomplete_state_label — Ranking incomplete
+[PASS] incomplete_score_label — Not enough evidence
+[PASS] incomplete_hides_numeric
+[PASS] incomplete_blocked_score_not_exposed
+[PASS] incomplete_technical_present
+[PASS] incomplete_technical_score_suppressed
+[PASS] missing_assessment_candidate_present — 965884402-RANKPRESUX-RANKPRES_HR
+[PASS] missing_assessment_no_raw_debug
+[PASS] missing_assessment_has_name — RANKPRESUX Missing Assessment
+[PASS] missing_assessment_has_job — RANKPRESUX HR Specialist
+[PASS] missing_assessment_has_state
+[PASS] missing_assessment_has_explanation
+[PASS] missing_assessment_has_next_step
+[PASS] missing_assessment_hr_decides
+[PASS] missing_assessment_no_raw_zero_score
+[PASS] missing_assessment_no_absolute_cv_absence_claim — rankpresux missing assessment: finish the missing evidence before this candidate can be compared. | structured cv facts are not ready yet; do not infer missing skills or experience. | no employer-approved assessment is available for this ranking
+[PASS] missing_assessment_state_contains — Some required information is still unverified
+[PASS] missing_assessment_hides_numeric
+[PASS] missing_assessment_blocked_score_not_exposed
+[PASS] missing_assessment_missing_human — No employer-approved assessment is available for this Ranking
+[PASS] missing_assessment_technical_present
+[PASS] missing_assessment_technical_score_suppressed
+[PASS] semantic_unavailable_candidate_present — 965884403-RANKPRESUX-RANKPRES_HR
+[PASS] semantic_unavailable_no_raw_debug
+[PASS] semantic_unavailable_has_name — RANKPRESUX Semantic Unavailable
+[PASS] semantic_unavailable_has_job — RANKPRESUX HR Specialist
+[PASS] semantic_unavailable_has_state
+[PASS] semantic_unavailable_has_explanation
+[PASS] semantic_unavailable_has_next_step
+[PASS] semantic_unavailable_hr_decides
+[PASS] semantic_unavailable_no_raw_zero_score
+[PASS] semantic_unavailable_no_absolute_cv_absence_claim — rankpresux semantic unavailable: not enough verified evidence yet for a confident rankpresux hr specialist ranking. | structured cv facts are not ready yet; do not infer missing skills or experience.
+[PASS] semantic_unavailable_hides_numeric
+[PASS] semantic_unavailable_blocked_score_not_exposed
+[PASS] semantic_unavailable_missing_human — Optional CV similarity evidence was not included
+[PASS] semantic_unavailable_technical_present
+[PASS] semantic_unavailable_technical_score_suppressed
+[PASS] unknown_hard_candidate_present — 965884404-RANKPRESUX-RANKPRES_HR
+[PASS] unknown_hard_no_raw_debug
+[PASS] unknown_hard_has_name — RANKPRESUX Unknown Hard Req
+[PASS] unknown_hard_has_job — RANKPRESUX HR Specialist
+[PASS] unknown_hard_has_state
+[PASS] unknown_hard_has_explanation
+[PASS] unknown_hard_has_next_step
+[PASS] unknown_hard_hr_decides
+[PASS] unknown_hard_no_raw_zero_score
+[PASS] unknown_hard_no_absolute_cv_absence_claim — rankpresux unknown hard req: not enough verified evidence yet for a confident rankpresux hr specialist ranking. | structured cv facts are not ready yet; do not infer missing skills or experience.
+[PASS] unknown_hard_state_contains — Some required information is still unverified
+[PASS] unknown_hard_hides_numeric
+[PASS] unknown_hard_blocked_score_not_exposed
+[PASS] unknown_hard_missing_human — A required fact could not be verified
+[PASS] unknown_hard_technical_present
+[PASS] unknown_hard_technical_score_suppressed
+[PASS] not_met_candidate_present — 965884405-RANKPRESUX-RANKPRES_HR
+[PASS] not_met_no_raw_debug
+[PASS] not_met_has_name — RANKPRESUX Requirement Not Met
+[PASS] not_met_has_job — RANKPRESUX HR Specialist
+[PASS] not_met_has_state
+[PASS] not_met_has_explanation
+[PASS] not_met_has_next_step
+[PASS] not_met_hr_decides
+[PASS] not_met_no_raw_zero_score
+[PASS] not_met_no_absolute_cv_absence_claim — rankpresux requirement not met has some useful signals (recruitment, employee relations and experience on the cv: hr assistant), but dig into the gaps before deciding.
+[PASS] not_met_state_contains — Does not meet one or more required criteria
+[PASS] not_met_shows_numeric
+[PASS] not_met_numeric_value
+[PASS] not_met_label_has_score
+[PASS] not_met_technical_present
+[PASS] not_met_technical_score_unchanged
+[PASS] low_score_candidate_present — 965884406-RANKPRESUX-RANKPRES_HR
+[PASS] low_score_no_raw_debug
+[PASS] low_score_has_name — RANKPRESUX Genuine Low Score
+[PASS] low_score_has_job — RANKPRESUX HR Specialist
+[PASS] low_score_has_state
+[PASS] low_score_has_explanation
+[PASS] low_score_has_next_step
+[PASS] low_score_hr_decides
+[PASS] low_score_no_raw_zero_score
+[PASS] low_score_no_absolute_cv_absence_claim — rankpresux genuine low score has some useful signals (recruitment, employee relations and experience on the cv: hr assistant), but dig into the gaps before deciding.
+[PASS] low_score_shows_numeric
+[PASS] low_score_numeric_value
+[PASS] low_score_label_has_score
+[PASS] low_score_explanation_contains — RANKPRESUX Genuine Low Score has some useful signals (Recruitment, Employee Relations and Experience on the CV: HR Assistant), but dig into the gaps before deciding.
+[PASS] low_score_technical_present
+[PASS] low_score_technical_score_unchanged
+[PASS] strong_score_candidate_present — 965884407-RANKPRESUX-RANKPRES_HR
+[PASS] strong_score_no_raw_debug
+[PASS] strong_score_has_name — RANKPRESUX Strong Score
+[PASS] strong_score_has_job — RANKPRESUX HR Specialist
+[PASS] strong_score_has_state
+[PASS] strong_score_has_explanation
+[PASS] strong_score_has_next_step
+[PASS] strong_score_hr_decides
+[PASS] strong_score_no_raw_zero_score
+[PASS] strong_score_no_absolute_cv_absence_claim — rankpresux strong score looks promising because recruitment, employee relations and experience on the cv: hr assistant.
+[PASS] strong_score_shows_numeric
+[PASS] strong_score_numeric_value
+[PASS] strong_score_label_has_score
+[PASS] strong_score_technical_present
+[PASS] strong_score_technical_score_unchanged
+[PASS] terra_candidate_present — 965884408-RANKPRESUX-RANKPRES_HR
+[PASS] terra_no_raw_debug
+[PASS] terra_has_name — RANKPRESUX Terra Narrative
+[PASS] terra_has_job — RANKPRESUX HR Specialist
+[PASS] terra_has_state
+[PASS] terra_has_explanation
+[PASS] terra_has_next_step
+[PASS] terra_hr_decides
+[PASS] terra_no_raw_zero_score
+[PASS] terra_no_absolute_cv_absence_claim — rankpresux terra narrative looks promising because recruitment, employee relations and experience on the cv: hr assistant.
+[PASS] terra_shows_numeric
+[PASS] terra_numeric_value
+[PASS] terra_label_has_score
+[PASS] terra_explanation_source — deterministic_committed_result
+[PASS] terra_explanation_contains — RANKPRESUX Terra Narrative looks promising because Recruitment, Employee Relations and Experience on the CV: HR Assistant.
+[PASS] terra_technical_present
+[PASS] terra_technical_score_unchanged
+[PASS] fallback_candidate_present — 965884409-RANKPRESUX-RANKPRES_HR
+[PASS] fallback_no_raw_debug
+[PASS] fallback_has_name — RANKPRESUX Deterministic Fallback
+[PASS] fallback_has_job — RANKPRESUX HR Specialist
+[PASS] fallback_has_state
+[PASS] fallback_has_explanation
+[PASS] fallback_has_next_step
+[PASS] fallback_hr_decides
+[PASS] fallback_no_raw_zero_score
+[PASS] fallback_no_absolute_cv_absence_claim — rankpresux deterministic fallback: not enough verified evidence yet for a confident rankpresux hr specialist ranking. | structured cv facts are not ready yet; do not infer missing skills or experience.
+[PASS] fallback_state_label — Ranking incomplete
+[PASS] fallback_hides_numeric
+[PASS] fallback_blocked_score_not_exposed
+[PASS] fallback_explanation_source — deterministic_committed_result
+[PASS] fallback_technical_present
+[PASS] fallback_technical_score_suppressed
+[PASS] arabic_candidate_present — 965884410-RANKPRESUX-RANKPRES_HR
+[PASS] arabic_no_raw_debug
+[PASS] arabic_has_name — RANKPRESUX Arabic Candidate
+[PASS] arabic_has_job — RANKPRESUX HR Specialist
+[PASS] arabic_has_state
+[PASS] arabic_has_explanation
+[PASS] arabic_has_next_step
+[PASS] arabic_hr_decides
+[PASS] arabic_no_raw_zero_score
+[PASS] arabic_no_absolute_cv_absence_claim — rankpresux arabic candidate: أكمل الأدلة الناقصة قبل مقارنة هذا المرشح. | حقائق السيرة الذاتية المنظمة غير جاهزة بعد؛ لا تستنتج غياب المهارات أو الخبرة. | لا يوجد تقييم معتمد من جهة العمل لهذا الترتيب
+[PASS] arabic_incomplete — **RANKPRESUX Arabic Candidate**
+RANKPRESUX HR Specialist
+
+**الترتيب غير مكتمل**
+
+RANKPRESUX Arabic Candidate: أكمل الأدلة الناقصة قبل مقارنة هذا المرشح.
+
+لا توجد أدلة كافية
+الأدلة: تغطية الأدلة متوسطة
+
+نقاط يجب الانتباه لها:
+- لا يوجد تقييم معتمد من جهة العمل لهذا الترتيب
+- لم تُدرج أدلة تشابه السير
+[PASS] arabic_evidence — **RANKPRESUX Arabic Candidate**
+RANKPRESUX HR Specialist
+
+**الترتيب غير مكتمل**
+
+RANKPRESUX Arabic Candidate: أكمل الأدلة الناقصة قبل مقارنة هذا المرشح.
+
+لا توجد أدلة كافية
+الأدلة: تغطية الأدلة متوسطة
+
+نقاط يجب الانتباه لها:
+- لا يوجد تقييم معتمد من جهة العمل لهذا الترتيب
+- لم تُدرج أدلة تشابه السير
+[PASS] arabic_assessment — **RANKPRESUX Arabic Candidate**
+RANKPRESUX HR Specialist
+
+**الترتيب غير مكتمل**
+
+RANKPRESUX Arabic Candidate: أكمل الأدلة الناقصة قبل مقارنة هذا المرشح.
+
+لا توجد أدلة كافية
+الأدلة: تغطية الأدلة متوسطة
+
+نقاط يجب الانتباه لها:
+- لا يوجد تقييم معتمد من جهة العمل لهذا الترتيب
+- لم تُدرج أدلة تشابه السير
+[PASS] arabic_cv — **RANKPRESUX Arabic Candidate**
+RANKPRESUX HR Specialist
+
+**الترتيب غير مكتمل**
+
+RANKPRESUX Arabic Candidate: أكمل الأدلة الناقصة قبل مقارنة هذا المرشح.
+
+لا توجد أدلة كافية
+الأدلة: تغطية الأدلة متوسطة
+
+نقاط يجب الانتباه لها:
+- لا يوجد تقييم معتمد من جهة العمل لهذا الترتيب
+- لم تُدرج أدلة تشابه السير
+[PASS] arabic_hr — **RANKPRESUX Arabic Candidate**
+RANKPRESUX HR Specialist
+
+**الترتيب غير مكتمل**
+
+RANKPRESUX Arabic Candidate: أكمل الأدلة الناقصة قبل مقارنة هذا المرشح.
+
+لا توجد أدلة كافية
+الأدلة: تغطية الأدلة متوسطة
+
+نقاط يجب الانتباه لها:
+- لا يوجد تقييم معتمد من جهة العمل لهذا الترتيب
+- لم تُدرج أدلة تشابه السير
+[PASS] arabic_no_english_enums
+[PASS] arabic_technical_present
+[PASS] arabic_technical_score_suppressed
+[PASS] parity_candidate_present — 965884412-RANKPRESUX-RANKPRES_HR
+[PASS] parity_no_raw_debug
+[PASS] parity_has_name — RANKPRESUX Drawer Parity
+[PASS] parity_has_job — RANKPRESUX HR Specialist
+[PASS] parity_has_state
+[PASS] parity_has_explanation
+[PASS] parity_has_next_step
+[PASS] parity_hr_decides
+[PASS] parity_no_raw_zero_score
+[PASS] parity_no_absolute_cv_absence_claim — rankpresux drawer parity has some useful signals (recruitment, employee relations and experience on the cv: hr assistant), but dig into the gaps before deciding.
+[PASS] parity_state_contains — Does not meet one or more required criteria
+[PASS] parity_shows_numeric
+[PASS] parity_numeric_value
+[PASS] parity_label_has_score
+[PASS] parity_technical_present
+[PASS] parity_technical_score_unchanged
+[PASS] unconfigured_job_hides_numeric
+[PASS] unconfigured_job_uses_setup_card
+[PASS] unconfigured_job_action_consistent — Set the job criteria for HR, then recalculate Ranking.
+[PASS] stale_present
+[PASS] stale_hides_numeric
+[PASS] stale_score_not_exposed
+[PASS] unknown_differs_from_not_met
+[PASS] criteria_not_evaluated_is_incomplete
+[PASS] assistant_contains_state
+[PASS] assistant_contains_explanation
+[PASS] assistant_no_raw_debug
+[PASS] chat_uses_presentation_score
+[PASS] chat_hides_raw_zero_when_needed
+[PASS] chat_state_parity
+[PASS] drawer_dashboard_state_parity
+[PASS] drawer_dashboard_score_parity
+[PASS] drawer_dashboard_explanation_parity
+[PASS] skip_live_rank_to_protect_fixtures — presentation uses get_ranking_run path only
+[PASS] format_assistant_uses_shared_contract
+[PASS] tenant_isolation_other_no_run — ranking_run_not_found
+[PASS] canonical_score_preserved
+[PASS] canonical_eligibility_preserved
+{
+  "passed": 213,
+  "failed": 0,
+  "total": 213
+}
+REPORT=/opt/wathefni/staging/orchestrator/ops/assistant/ranking-result-presentation-staging-matrix.json
+OWNER_SEARCH=RANKPRESUX
+RESULT ranking-presentation PASS
+=== reports-v1 ===
+[PASS] metric_version — reports-metrics-v1
+[PASS] metric_catalog_complete
+[PASS] payload_ok
+[PASS] payload_metric_version
+[PASS] payload_stamp_present
+[PASS] clock_label_calendar
+[PASS] summary_applications_ge_10 — 11
+[PASS] summary_cvs_received_ge_10 — 11
+[PASS] summary_ready_for_review — 4
+[PASS] summary_shortlisted — 1
+[PASS] summary_interviews — 4
+[PASS] summary_offers — 3
+[PASS] summary_hires — 2
+[PASS] followups_apps_vs_events_separated — apps=1 events=2
+[PASS] overview_reports_ready_parity — overview=4 reports=4
+[PASS] overview_reports_followup_parity — overview=1 reports=1
+[PASS] overview_parity_flag
+[PASS] funnel_seven_steps
+[PASS] funnel_cv_received — 11
+[PASS] funnel_ready — 10
+[PASS] funnel_interview — 4
+[PASS] funnel_offer_sent — 3
+[PASS] funnel_offer_accepted — 2
+[PASS] funnel_hired — 2
+[PASS] funnel_conversion_present — 90.9
+[PASS] speed_unit_calendar
+[PASS] speed_to_review_present — 1.95
+[PASS] speed_to_interview_present — 6.95
+[PASS] speed_to_hire_present — 13.95
+[PASS] speed_to_review_approx_2d — 1.95
+[PASS] filtered_parity_flag_false
+[PASS] filtered_job
+[PASS] filtered_excludes_other_job_ready — all=4 filtered=3
+[PASS] date_filter_old_window_has_hire — {'key': 'hired', 'label': 'Hired', 'count': 1, 'conversion_from_previous_pct': 0.0}
+[PASS] ranking_available — {'available': True, 'position_code': 'RPT_ENGINEER', 'run_id': '926fc675-9c6a-4118-8757-4dcf3d289984', 'pool_total': 4, 'eligible': 2, 'requirement_not_met': 1, 'unknown': 1, 'criteria_not_evaluated': 0, 'stale': False, 'stale_reason': None, 'scoring_config_version': 'ranking-soft-v1', 'denylist_version': 'denylist-v1', 'advisory': True, 'hr_decides': True, 'message': 'Ranking is advisory. HR decides.'}
+[PASS] ranking_run_id_parity — 926fc675-9c6a-4118-8757-4dcf3d289984 vs 926fc675-9c6a-4118-8757-4dcf3d289984
+[PASS] ranking_pool_parity
+[PASS] ranking_eligible_parity
+[PASS] ranking_not_met_parity
+[PASS] ranking_unknown_parity
+[PASS] ranking_hr_decides
+[PASS] source_whatsapp_present
+[PASS] source_unknown_visible — {'source': 'unknown', 'applications': 1, 'hires': 0, 'label': 'Unknown'}
+[PASS] source_no_linkedin_bucket
+[PASS] source_hires_whatsapp
+[PASS] locale_ar
+[PASS] funnel_ar_label — السيرة مستلمة
+[PASS] source_ar_unknown_label
+[PASS] export_headers_candidates
+[PASS] export_headers_ar_candidates
+[PASS] export_no_civil_id_header_candidates
+[PASS] export_no_civil_id_rows_candidates
+[PASS] export_headers_roles
+[PASS] export_headers_ar_roles
+[PASS] export_no_civil_id_header_roles
+[PASS] export_no_civil_id_rows_roles
+[PASS] export_headers_assessments
+[PASS] export_headers_ar_assessments
+[PASS] export_no_civil_id_header_assessments
+[PASS] export_no_civil_id_rows_assessments
+[PASS] export_headers_interviews
+[PASS] export_headers_ar_interviews
+[PASS] export_no_civil_id_header_interviews
+[PASS] export_no_civil_id_rows_interviews
+[PASS] export_headers_followups
+[PASS] export_headers_ar_followups
+[PASS] export_no_civil_id_header_followups
+[PASS] export_no_civil_id_rows_followups
+[PASS] export_audit_five_types — 5
+[PASS] privacy_denylist_raises — sensitive_column_blocked
+[PASS] permission_recruiter_has_export — ['assessment.manage', 'candidate.import', 'candidate.manage', 'candidates.assign', 'candidates.duplicates.review', 'candidates.identity.manage', 'candidates.identity.read', 'candidates.notes.manage']
+[PASS] permission_some_role_lacks_export — manager,viewer
+[PASS] permission_export_denied — HTTPException
+[PASS] permission_export_allowed — fallback_role_map:HTTPException:403: {'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'REPORTSV1', 'required_module': 'pre_hiring', 'required_permission': 'report.export', 'role': 'recruiter'}
+[PASS] readonly_lifecycle_events — 32->32
+[PASS] readonly_ranking_scores
+[PASS] readonly_offers
+[PASS] readonly_app_status — ready_for_review
+[PASS] export_filter_job — n=10
+[PASS] cleanup_zero_apps — 0
+{
+  "total": 80,
+  "passed": 80,
+  "failed": 0
+}
+wrote /opt/wathefni/staging/orchestrator/ops/reports/reports-v1-staging-matrix-20260724T225246Z.json
+RESULT reports-v1 PASS
+=== assistant-a0a3 ===
+[PASS] tool_agent_terra
+[PASS] ranking_mode_replay_only
+[PASS] legacy_regex_off
+[PASS] privacy_version
+[PASS] reports_metric_version
+[PASS] delivery_dry_run
+[PASS] rank_not_semantic_first — replay the canonical job-scoped ranking run for an exact job/position. requires an exact job. reading an existing rankin
+[PASS] reports_tool_present
+[PASS] reports_bound_v1
+[PASS] compare_candidates_absent
+[PASS] c3_permission_map
+[PASS] prehire_map_complete — 35
+[PASS] recruiter_sees_rank_and_reports
+[PASS] viewer_no_shortlist_permission
+[PASS] viewer_shortlist_not_entitled — ['assign_candidate_owner', 'cancel_interview', 'candidate_cv_evaluation', 'close_job_opening', 'create_candidate_task', 'create_job_opening', 'execute_candidate_batch', 'execute_candidate_workflow', 'execute_mixed_candidate_batch', 'get_candidate_ownership', 'get_candidate_status', 'get_candidate_timeline']
+[PASS] viewer_sees_reports_read
+[PASS] empty_perms_no_c3_duplicates
+[PASS] legacy_inactive_evidence
+[PASS] dashboard_chat_toolcall_only
+[PASS] privacy_no_cv_text
+[PASS] privacy_no_notes
+[PASS] privacy_has_safe_summary_or_skills
+[PASS] privacy_has_provenance
+[PASS] privacy_absent_civil_id — civil id
+[PASS] privacy_absent_289010101234 — 289010101234
+[PASS] privacy_absent_gender — gender
+[PASS] privacy_absent_religion — religion
+[PASS] privacy_absent_married — married
+[PASS] privacy_absent_block_5 — block 5
+[PASS] privacy_keeps_useful_evidence
+[PASS] injection_scrubbed
+[PASS] injection_wrapped
+[PASS] ranking_seed_run — run=aa13781e-7532-4fe0-a305-8379436c5756 pool=7
+[PASS] replay_success — aa13781e-7532-4fe0-a305-8379436c5756
+[PASS] replay_same_run_id
+[PASS] replay_same_pool
+[PASS] replay_path
+[PASS] replay_advisory
+[PASS] replay_zero_new_runs — before=1 after=1
+[PASS] ranking_job_required
+[PASS] ranking_run_required — ranking_run_required
+[PASS] recalc_needs_confirmation — ranking_recalculate_confirmation_required
+[PASS] unconfirmed_recalc_no_run
+[PASS] confirmed_recalc_success — run=8654a24d-817f-4772-978d-3495f59920b0 path=confirmed_recalculate
+[PASS] confirmed_recalc_one_new_run — before=1 final=2
+[PASS] confirmed_recalc_idempotent_retry — retry_run=8654a24d-817f-4772-978d-3495f59920b0 count=2
+[PASS] reports_assistant_ok — None
+[PASS] reports_same_stamp_authority
+[PASS] reports_metric_version
+[PASS] reports_summary_parity — {'asst': {'applications': 7, 'cvs_received': 7, 'ready_for_review': 7, 'shortlisted': 0, 'interviews': 0, 'offers': 0, 'hires': 0, 'followups_needed': 0, 'followup_delivery_events': 0, 'cv_received': 
+[PASS] reports_funnel_len
+[PASS] reports_clarify_filters
+[PASS] overview_not_reports_desc
+[PASS] reports_question_detector
+[PASS] overview_question_detector
+[PASS] duplicate_name_ambiguous — ambiguous
+[PASS] multi_app_clarify — ambiguous
+[PASS] foreign_tenant_fail_closed — not_found
+[PASS] exact_app_key_resolves
+[PASS] confirm_required_shortlist_candidate
+[PASS] confirm_required_reject_candidate
+[PASS] confirm_required_hire_candidate
+[PASS] confirm_required_schedule_interview
+[PASS] confirm_required_assign_candidate_owner
+[PASS] confirm_required_create_candidate_task
+[PASS] confirm_required_send_assessment
+[PASS] confirm_required_send_interview_invite
+[PASS] confirm_required_send_video_interview
+[PASS] confirm_required_notify_candidate
+[PASS] confirm_required_send_email
+[PASS] rank_force_confirm_rule
+[PASS] rank_replay_no_confirm
+[PASS] outbound_mint_token
+[PASS] partial_batch_wording
+[PASS] correlation_id_format
+[PASS] useful_not_generic_only
+[PASS] useful_has_stage
+[PASS] useful_no_secret_notes
+[PASS] owner_ux_reseed — ASSTUX fixtures retained for owner review
+{"passed": 79, "failed": 0, "out": "/opt/wathefni/staging/orchestrator/ops/assistant/assistant-a0a3-staging-matrix.json"}
+RESULT assistant-a0a3 PASS
+=== assessments-on-off ===
+[PASS] assessments_toolcall_gated — TOOLCALL_GATED_MODULES=['analytics', 'assessments', 'attendance', 'compliance', 'leave', 'onboarding', 'payroll', 'shifts']
+[PASS] default_ranking_assessment_unused — {'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}
+[PASS] soft_weight_assessment_unchanged — 15.0
+[PASS] delivery_label_sent_not_confirmed_delivery — label='Send accepted'
+[PASS] delivery_label_send_accepted_not_confirmed_delivery — label='Send accepted'
+[PASS] legacy_whatsapp_sent_path_documented — reminder/status path still writes delivery_status='sent' (legacy residual)
+[PASS] on_create_attempt — {'ok': True, 'attempt': {'attempt_id': '7a585b00-cc46-466f-a067-52c1672b0eef', 'company_code': 'ASSESSON', 'app_key': 'assessments-on-off-staging-matrix-v1-assesson-assigned', 'phone': '96588301002', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery_ke
+[PASS] on_send_ok_or_dry_run — {'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '96588301002', 'name': None, 'email': None, 'position_title': 'Assess Role'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error': 'missing_candidate_email', 'result': {'ok': False, 'error': 'missing_candidate_email', 'candidate': {'phone':
+[PASS] on_send_delivery_truthful — delivery_status=intentionally_skipped
+[PASS] on_send_not_presented_as_delivered — delivery_status=intentionally_skipped
+[PASS] on_terminal_send_blocked — {'ok': False, 'error': 'terminal_application', 'status': 'hired', 'safe_user_message': 'Cannot send an assessment for an application that is already hired.'}
+[PASS] on_unassigned_not_forced_into_pending_definition — {'ready_for_review': 2, 'assessment_pending': 1, 'follow_up_needed': 0}
+[PASS] on_unassigned_has_no_attempt — n=0
+[PASS] on_link_open_needs_begin — {'ok': True, 'attempt': {'attempt_id': '7a585b00-cc46-466f-a067-52c1672b0eef', 'status': 'pending', 'candidate_name': None, 'position_title': 'Assess Role', 'current_item_index': 0, 'total_items': 22, 'percent_complete': 0.0, 'progress_version': 0, 'expires_at': '2026-07-31T22:54:41.999465+00:00', 'locale': 'en'}, 'locale': 'en', 'dir': 'ltr', 'needs_begin': True, 'item': None, 'completed': False}
+[PASS] on_public_html_has_begin_and_locales — begin/en/ar/rtl markers
+[PASS] on_default_policy_no_assessment_contribution — {'assessment_mode': 'unused', 'ranking_result_kind': 'cv_based', 'component_scores': {'semantic_alignment': 7.5}}
+[PASS] invitation_recovery_residual_no_worker — invitation_id=2484d5ca-d691-4836-a741-0bea516906b2; recover_syms=[]
+[PASS] off_seed_create_attempt — {'ok': True, 'attempt': {'attempt_id': 'a905424d-0c8e-41e1-ba27-8db2ca673232', 'company_code': 'ASSESSOFF', 'app_key': 'assessments-on-off-staging-matrix-v1-assessoff-hist', 'phone': '96588302001', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery_key'
+[PASS] off_history_seeded — {'attempts': 1, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 27}
+[PASS] off_open_attempt_seed — {'ok': True, 'attempt': {'attempt_id': 'cff10b4b-16ca-486d-90b1-dfa9411a7d3b', 'company_code': 'ASSESSOFF', 'app_key': 'assessments-on-off-staging-matrix-v1-assessoff-open', 'phone': '96588302002', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery_key'
+[PASS] off_module_disabled — modules=['pre_hiring']
+[PASS] off_history_preserved — before={'attempts': 1, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 27} before_open={'attempts': 2, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 29} after={'attempts': 2, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 29}
+[PASS] off_public_state_blocked — {'error': 'module_disabled', 'message': 'This link is no longer available. Please contact the hiring team if you need a new link.'}
+[PASS] off_public_cancel_blocked — module_disabled_precheck
+[PASS] off_public_shell_neutral — <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Link unavailable</title>
+  <style>
+    body { margi
+[PASS] off_overview_omits_or_zeros_pending — {'ready_for_review': 2, 'follow_up_needed': 0}
+[PASS] off_reports_omits_assessment_metrics — {'assessments_enabled': False, 'summary_keys': ['applications', 'cv_received', 'cvs_received', 'followup_delivery_events', 'followups', 'followups_needed', 'hires', 'interviews', 'offers', 'ready_for_review', 'shortlisted']}
+[PASS] off_assessments_export_blocked — export_headers assessments
+[PASS] off_ranking_forces_unused — {'assessment_mode': 'unused', 'ranking_result_kind': 'cv_based', 'component_scores': {'semantic_alignment': 9.0}}
+[PASS] off_mobile_omits_assessments_key — ['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration',
+[PASS] off_payload_word_scan_zero_assessment — hits=[]
+[PASS] off_assistant_hides_assessment_tools — off_tools_with_assessment=[]; on_has=['send_assessment']
+[PASS] on_assistant_can_discover_assessment_tools — on_assessment_tools=['send_assessment']
+[PASS] cross_tenant_token_blocked — off token vs on attempt
+[PASS] cleanup_zero_residue — {'attempts': 0, 'invitations': 0, 'applications': 0, 'modules': 0, 'companies': 0}
+{"suite": "assessments-on-off-staging-matrix-v1", "passed": 35, "failed": 0, "evidence": "/opt/wathefni/staging/orchestrator/ops/assessments/assessments-on-off-staging-matrix-20260724T225442Z.json"}
+RESULT assessments-on-off PASS
+=== interviews ===
+[PASS] ranking_interview_unused_or_absent — {'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}
+[PASS] ranking_does_not_require_interview_score — {'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}
+[PASS] assistant_schedule_requires_confirmation
+[PASS] assistant_cancel_requires_confirmation
+[PASS] assistant_reschedule_requires_confirmation
+[PASS] schedule_without_google_phone — not_configured
+[PASS] provider_not_configured_without_google — not_configured
+[PASS] duplicate_confirmation_one_interview — True
+[PASS] one_active_after_duplicate — 1
+[PASS] schedule_physical
+[PASS] schedule_manual_link
+[PASS] candidate_conflict_fail_closed — schedule_conflict
+[PASS] panel_conflict_fail_closed — schedule_conflict
+[PASS] concurrent_schedule_one_winner — active=1 winners=['b9a62a7a-8718-47a6-b50b-c3d35eca00d9'] errors=['schedule_conflict']
+[PASS] reschedule_one_active_interview — active=1
+[PASS] truth_not_delivered_from_calendar_alone
+[PASS] truth_rsvp_separate
+[PASS] truth_sync_separate_from_channel
+[PASS] panel_filter_uses_assignments — filtered=1
+[PASS] panel_filter_tenant_isolated — set()
+[PASS] two_raters_versioned_feedback
+[PASS] finalized_feedback_immutable — feedback_immutable
+[PASS] feedback_reopen_audited
+[PASS] notes_do_not_complete_human_feedback
+[PASS] cancel_idempotent
+[PASS] google_failure_keeps_wathefni_interview — failed
+[PASS] google_failure_visible_sync — failed
+[PASS] google_connected_creates_one_event — event=staging-mock-evt-1 sync=synced mode=mock_connected residual=sync=failed err=calendar_create_failed
+[PASS] google_reschedule_same_event_no_duplicate — old=staging-mock-evt-1 new=staging-mock-evt-1
+[PASS] google_cancel_syncs_without_invalidating_history
+[PASS] google_retry_does_not_duplicate_wathefni_row — 1
+[PASS] async_video_create — 50936b43-4a9d-4b4b-9394-80d8b47961ee
+[PASS] video_completion_does_not_mark_human_feedback_complete — notes_pending
+[PASS] ai_summary_does_not_mark_human_feedback_complete — human=notes_pending ai=True maybe=not_ready
+[PASS] stale_transcription_reclaimed — {'ok': True, 'reclaimed_response_ids': ['55f94365-5f8b-436e-8311-b83194e0335a'], 'count': 1}
+[PASS] stale_processing_reset_to_pending — pending
+[PASS] retention_purge_runs — 1
+[PASS] retention_purge_removed_file — /tmp/intv-staging-jtj4z1kc.webm
+[PASS] retention_purge_clears_registry_refs — {'local_path': None, 'video_file_id': None}
+[PASS] agenda_week_view — Asia/Kuwait
+[PASS] reports_no_interview_score_injection — scanned report payload
+[PASS] arabic_interview_copy_present — local_copy_exists=False text_len=962026
+[PASS] a11y_copy_keys_present
+[PASS] no_automatic_hire_or_reject_from_interview — shortlisted
+[PASS] cleanup_zero_residue — {'interviews': 0, 'assignments': 0, 'ops': 0, 'feedback': 0, 'retention_ops': 0, 'video_responses': 0, 'applications': 0, 'modules': 0, 'companies': 0, 'candidates': 0}
+
+Evidence: /opt/wathefni/staging/orchestrator/ops/interviews/interviews-staging-matrix-20260724T225444Z.json
+Summary: 45/45 passed, 0 failed
+RESULT interviews PASS

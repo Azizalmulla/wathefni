@@ -1,0 +1,31 @@
+{
+  "ok": false,
+  "status": "needs_confirmation",
+  "confirmation": {
+    "confirmation_id": "ca85abe8-6d6c-4c92-b639-8e6d5b775c76",
+    "confirmation_hash": "fd9381cb5397b42e86c21d53226918735b4ac511ae3a841d8ed9fd3a2b43d5b2",
+    "action": "onboarding_mark_item",
+    "target": {
+      "type": "onboarding_item",
+      "id": "WATHEFNI-9655237101:passport"
+    },
+    "summary": "WATHEFNI-9655237101 \u00b7 Passport copy (if applicable)",
+    "consequence": "Waive onboarding item.",
+    "current_state": "processing",
+    "expires_at": "2026-08-10T18:40:46.300311+00:00",
+    "status": "pending",
+    "backend_confirmation": {
+      "args": {
+        "notes": "hr-cfa2-20260810T183036Z",
+        "item_id": "passport",
+        "item_status": "waived",
+        "employee_key": "WATHEFNI-9655237101"
+      },
+      "text": "Update the onboarding checklist item?",
+      "action_hash": "b8e32d5945de0fcf5124f2a1d79d13f3614ec52adf54218d9884bb0783d239e8",
+      "action_type": "onboarding_mark_item"
+    },
+    "idempotent_replay": false
+  },
+  "result": null
+}

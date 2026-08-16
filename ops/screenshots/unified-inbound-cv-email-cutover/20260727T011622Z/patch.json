@@ -1,0 +1,1 @@
+{"ok": true, "app": "/opt/wathefni/orchestrator/app.py", "ingress": "/opt/wathefni/orchestrator/durable_email_ingress.py", "actions": ["observe", "extraction", "ingress_already"]}

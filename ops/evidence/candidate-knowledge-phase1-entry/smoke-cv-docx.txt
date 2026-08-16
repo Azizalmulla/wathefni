@@ -1,0 +1,27 @@
+    cv docx — local-first structure, selective image OCR, cache
+      PASS  EN method local — docx-local-v2
+      PASS  EN quality ok
+      PASS  EN no OCR calls
+      PASS  EN header text
+      PASS  EN footer text
+      PASS  EN table cell
+      PASS  EN textbox
+      PASS  EN hyperlink href
+      PASS  EN provenance blocks
+      PASS  AR extracted
+      PASS  AR rtl flag present
+      PASS  AR no OCR
+      PASS  mixed bilingual flag
+      PASS  mixed no OCR for ordinary text
+      PASS  logo skipped — skip_logo
+      PASS  large image text candidate — text_candidate
+      PASS  OCR called once for text image — 1
+      PASS  logo not OCR'd
+      PASS  OCR text merged
+      PASS  OCR call count metadata
+      PASS  cache hit on second pass
+      PASS  cache avoids OCR
+      PASS  human preserve still available
+      PASS  corrupted needs_review
+      PASS  corrupted not quality_ok
+    summary: 25 passed, 0 failed

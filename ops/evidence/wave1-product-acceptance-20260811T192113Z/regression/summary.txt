@@ -1,0 +1,13 @@
+UNIT smoke-test-wave1-lifecycle-full.py rc=0
+UNIT smoke-test-requisitions-wave1.py rc=0
+UNIT smoke-test-requisitions-surfaces.py rc=0
+UNIT smoke-test-preboarding-wave1.py rc=0
+UNIT smoke-test-preboarding-surfaces.py rc=0
+UNIT smoke-test-hire-ready-bridge.py rc=0
+UNIT smoke-test-probation-wave1.py rc=0
+UNIT smoke-test-probation-surfaces.py rc=0
+UNIT smoke-test-workflow-approvals-phase-a.py rc=0
+UNIT smoke-test-workflow-task-sla-phase-a.py rc=0
+UNIT smoke-test-capability-contracts-phase-a.py rc=0
+UNIT smoke-test-employment-truth-sync-phase-a.py rc=0
+REG_OK=YES

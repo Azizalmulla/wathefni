@@ -1,0 +1,7 @@
+Broken Encoding CV - Proxy
+Email: broken.encoding@example.com
+Phone: +96556667788
+Name mojibake: Ù■Ù■Ø±Ø©
+Garbled Arabic proxy: ÃÑÃÓÇä ãÔÝÑ
+EXPERIENCE: encoding stress case
+

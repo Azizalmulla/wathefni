@@ -16,22 +16,23 @@
  */
 export const colors = {
   // — ground —
-  bg: '#F9F3E5',
+  bg: '#FCF4E9',
   surface: '#FFFCF4',
   surfaceMuted: '#F0E8D8',
   border: '#E5DAC6',
   ink: '#1B1A17',
   text: '#1B1A17',
   subtle: '#5E5850',
+  navMuted: '#B9B4AA',
   primary: '#1B1A17',
   primaryText: '#FFFFFF',
 
-  // — ambient (module identity; cream still dominates every screen) —
-  butter: '#F6DA92',
-  pink: '#F7CFE3',
-  olive: '#DCE2BB',
-  sky: '#C7D9EF',
-  lilac: '#D6C9F0',
+  // — ambient (legacy single-tone; Home uses `ambient` two-tone instead) —
+  butter: '#F0D065',
+  pink: '#E5A6CB',
+  olive: '#B8CE7F',
+  sky: '#F0D065',
+  lilac: '#E5A6CB',
 
   // — semantic (status + interaction only) —
   success: '#2A6241',
@@ -39,6 +40,43 @@ export const colors = {
   danger: '#9B3239',
   accent: '#93356B',
 }
+
+/**
+ * Two-tone ambient system — refined HR Workspace brand fills.
+ *
+ * Home role mapping: pink owns the workday hero, yellow owns employee-action
+ * work under Your tasks, green owns Leave / Documents calm accents.
+ */
+export const ambient = {
+  schedule: { fill: '#E5A6CB', accent: '#C978AC' },
+  leave: { fill: '#B8CE7F', accent: '#87AA4F' },
+  documents: { fill: '#B8CE7F', accent: '#87AA4F' },
+  payslips: { fill: '#F0D065', accent: '#C5A52F' },
+  onboarding: { fill: '#F0D065', accent: '#C5A52F' },
+} as const
+
+export type AmbientModule = keyof typeof ambient
+
+/**
+ * Home-only composition colours.
+ *
+ * Request Leave on Home is blue so it neither competes with the black tab bar
+ * nor repeats green workspace accents. Not a global "leave = blue" rule.
+ */
+export const homeComposition = {
+  requestLeave: { fill: '#A9C0E4', accent: '#6F8FBF' },
+} as const
+
+/**
+ * Schedule-only colour roles for planned work vs attendance outcomes.
+ *
+ * Planned / scheduled surfaces use soft powder blue. Attendance outcomes keep
+ * the green / yellow / pink brand fills (Present / Late / Absent). Selected day
+ * stays black via the week strip. Do not reuse this as a Home ambient module.
+ */
+export const scheduleComposition = {
+  planned: { fill: '#C5D4F0', accent: '#7A94C4' },
+} as const
 
 export const spacing = {
   xs: 4,
@@ -84,6 +122,8 @@ export const radius = {
   md: 12,
   lg: 16,
   xl: 22,
+  /** Soft Home / ambient cards — rounder than xl so stacks feel less boxy. */
+  xxl: 26,
   pill: 999,
 }
 
@@ -111,10 +151,10 @@ export const typeScaling = {
 
 export const shadows = {
   card: {
-    shadowColor: '#5D5144',
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 5 },
+    shadowColor: '#3D3428',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
 }

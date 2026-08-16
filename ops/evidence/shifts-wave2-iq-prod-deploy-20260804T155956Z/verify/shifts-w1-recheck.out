@@ -1,0 +1,19 @@
+PASS posthire_bundle_present — PostHire-DWa5FLLn.js
+PASS surfaces_marker
+PASS schedule_default_marker
+PASS attention_strip
+PASS primary_schedule
+PASS board_marker
+PASS operations_collapsed
+PASS no_inner_h1_pattern
+PASS governed_filters
+PASS composer_org_governed
+PASS empty_cta
+PASS mutation_concurrency
+PASS mutation_swaps
+PASS arabic_surface
+PASS leave_still_present
+PASS attendance_still_present
+SHIFT_STATUS_COUNTS [{"status": "scheduled", "c": 81}, {"status": "cancelled", "c": 73}]
+PASS shifts_table_readable — statuses=2
+SHIFTS_WAVE1_SMOKE_OK

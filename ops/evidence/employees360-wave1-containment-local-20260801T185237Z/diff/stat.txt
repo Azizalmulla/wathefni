@@ -1,0 +1,6 @@
+ apps/wathefni-dashboard/src/lib/api.ts             | 1112 ++++++++++-
+ apps/wathefni-dashboard/src/posthire/PostHire.tsx  |  196 +-
+ wathefni-orchestrator/app.py                       | 2106 +++++++++++++++++---
+ wathefni-orchestrator/hire_operations.py           |   56 +-
+ .../smoke-test-employee-lifecycle.py               |   24 +-
+ 5 files changed, 3111 insertions(+), 383 deletions(-)

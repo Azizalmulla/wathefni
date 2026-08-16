@@ -1,0 +1,30 @@
+{
+  "package": "pdf-inspector",
+  "pypi_version": "0.2.6",
+  "binding": "Python via PyO3 (Rust abi3 extension)",
+  "module_file": "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/pdf_inspector/__init__.py",
+  "extension_so": "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/pdf_inspector/pdf_inspector.abi3.so",
+  "extension_so_sha256": "696e3bde5c1114fea03f9edd4c4276b27df4104eebdc7f034761b457ab27f53e",
+  "license": "MIT",
+  "project_urls": "Documentation, https://github.com/firecrawl/pdf-inspector/blob/main/docs/python.md",
+  "github_tag_note": "PyPI publishes 0.2.6; GitHub tags observed around evaluation time include v0.2.0\u2013v0.2.3 then v0.3.x\u2026v0.7.0. No matching GitHub tag named v0.2.6 was found; report package version + wheel digest instead of inventing a commit.",
+  "wheel_arm64_sha256_from_pypi": "d2b2aaa95b242da38630bbd0644ffe9a929466f9c4e6406d6f1957b59b413d08",
+  "apis_invoked": [
+    "process_pdf",
+    "detect_pdf",
+    "classify_pdf",
+    "extract_pages_markdown",
+    "extract_text"
+  ],
+  "scan_strategy": {
+    "python_exposed": false,
+    "rust_strategies_documented": [
+      "EarlyExit",
+      "Full",
+      "Sample(n)",
+      "Pages(vec)"
+    ],
+    "python_process_pdf_signature": "process_pdf(path, pages=None)",
+    "wave0_strategy": "Python binding does not expose ScanStrategy. Wave 0 uses process_pdf() default detection path for full detect+extract+markdown, plus extract_pages_markdown() for per-page Markdown/OCR flags. Full strategy is documented for Rust process_pdf_with_options only."
+  }
+}

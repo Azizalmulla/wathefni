@@ -1,0 +1,5 @@
+{
+  "compare_candidates": "no_winner_without_ranking_context",
+  "get_candidate_knowledge": "full_cv_omitted_chunks_budgeted",
+  "search_candidates": "grounded_shadow"
+}

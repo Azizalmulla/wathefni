@@ -1,0 +1,137 @@
+{
+  "verdict": "PASS",
+  "examples": [
+    {
+      "template": "leave_request_approved",
+      "en": {
+        "title": "Leave approved",
+        "body": "Your leave from 23–25 Aug has been approved."
+      },
+      "ar": {
+        "title": "تمت الموافقة على الإجازة",
+        "body": "تمت الموافقة على إجازتك من 23–25 أغسطس."
+      }
+    },
+    {
+      "template": "leave_request_rejected",
+      "en": {
+        "title": "Leave rejected",
+        "body": "Your leave request for 23–25 Aug was not approved."
+      },
+      "ar": {
+        "title": "رُفض طلب الإجازة",
+        "body": "لم تتم الموافقة على طلب إجازتك لـ 23–25 أغسطس."
+      }
+    },
+    {
+      "template": "shift_assigned",
+      "en": {
+        "title": "New shift",
+        "body": "Your shift on 12 Aug is 9:00 AM–5:00 PM."
+      },
+      "ar": {
+        "title": "مناوبة جديدة",
+        "body": "مناوبتك يوم 12 أغسطس هي 9:00–17:00."
+      }
+    },
+    {
+      "template": "shift_rescheduled",
+      "en": {
+        "title": "Shift updated",
+        "body": "Your shift on 12 Aug is now 9:00 AM–5:00 PM."
+      },
+      "ar": {
+        "title": "تم تحديث المناوبة",
+        "body": "مناوبتك يوم 12 أغسطس أصبحت 9:00–17:00."
+      }
+    },
+    {
+      "template": "shift_reminder",
+      "en": {
+        "title": "Shift reminder",
+        "body": "Your shift starts at 9:00 AM today."
+      },
+      "ar": {
+        "title": "تذكير بالمناوبة",
+        "body": "تبدأ مناوبتك اليوم الساعة 9:00."
+      }
+    },
+    {
+      "template": "shift_cancelled",
+      "en": {
+        "title": "Shift cancelled",
+        "body": "Your shift on 12 Aug was cancelled."
+      },
+      "ar": {
+        "title": "تم إلغاء المناوبة",
+        "body": "أُلغيت مناوبتك يوم 12 أغسطس."
+      }
+    },
+    {
+      "template": "compliance_document_expiring",
+      "en": {
+        "title": "Document expiring",
+        "body": "Your Civil ID expires on 27 Aug."
+      },
+      "ar": {
+        "title": "مستند ينتهي قريباً",
+        "body": "Civil ID ينتهي في 27 أغسطس."
+      }
+    },
+    {
+      "template": "compliance_document_required",
+      "en": {
+        "title": "Document action needed",
+        "body": "Please update your Civil ID."
+      },
+      "ar": {
+        "title": "مطلوب تحديث مستند",
+        "body": "يرجى تحديث Civil ID."
+      }
+    },
+    {
+      "template": "payslip_ready",
+      "en": {
+        "title": "Payslip ready",
+        "body": "Your August 2026 payslip is ready."
+      },
+      "ar": {
+        "title": "كشف الراتب جاهز",
+        "body": "كشف راتبك لـ أغسطس 2026 جاهز."
+      }
+    },
+    {
+      "template": "onboarding_reminder",
+      "en": {
+        "title": "Onboarding action needed",
+        "body": "You have an onboarding item waiting for you."
+      },
+      "ar": {
+        "title": "إجراء انضمام مطلوب",
+        "body": "لديك خطوة انضمام بانتظارك."
+      }
+    },
+    {
+      "template": "employee_onboarding_welcome",
+      "en": {
+        "title": "Onboarding started",
+        "body": "You have onboarding steps waiting for you."
+      },
+      "ar": {
+        "title": "بدأ الانضمام",
+        "body": "لديك خطوات انضمام بانتظارك."
+      }
+    },
+    {
+      "template": "bank_correction_required",
+      "en": {
+        "title": "Bank details need attention",
+        "body": "Please update your bank details."
+      },
+      "ar": {
+        "title": "تفاصيل البنك تحتاج تصحيحاً",
+        "body": "يرجى تحديث بياناتك البنكية."
+      }
+    }
+  ]
+}

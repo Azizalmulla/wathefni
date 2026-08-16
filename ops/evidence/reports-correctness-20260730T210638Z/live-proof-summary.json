@@ -1,0 +1,23 @@
+{
+  "verdict": "PASS",
+  "fail_keys": [],
+  "checks": {
+    "active_applications_equals_pipeline": true,
+    "active_applications_value": 7,
+    "active_pipeline_truth": 7,
+    "interview_debt_equals_4": true,
+    "interview_debt_value": 4,
+    "assessment_pending_excludes_completed": true,
+    "assessment_pending_value": 2,
+    "no_needs_role_in_stage": true,
+    "assessment_labels_human": true,
+    "interview_labels_human": true,
+    "owner_export_parity": true,
+    "manager_export_parity": true,
+    "recruiter_export_parity": true,
+    "owner_roles_not_open_only": true,
+    "interviews_export_visible_count": true,
+    "metric_version": true,
+    "held_still_exist_outside_reviewable": 5
+  }
+}

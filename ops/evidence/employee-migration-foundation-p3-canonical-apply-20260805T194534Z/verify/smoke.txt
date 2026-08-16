@@ -1,0 +1,11 @@
+OK contract 1.1.4 canonical apply
+OK reset Salem hub name + mapping
+OK preview: Salem name conflict on actionable batch
+OK queue canonical ids match preview conflict row
+OK approve stores Approved on the exact canonical row Apply will use
+OK apply resolves to canonical approved row (stale ids safe)
+OK employee updated once; same key; history stamps present
+OK apply idempotent
+OK queue cleared for Salem
+OK history preserves approval + apply + before/after
+OK employee migration foundation P3 Salem canonical apply smoke

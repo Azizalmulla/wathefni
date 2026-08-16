@@ -1,0 +1,9 @@
+PASS employee tabs call useAuth
+PASS useAuth throws outside provider
+PASS HR path uses Redirect guard
+PASS HR path mounts Slot only on /hr
+PASS unsafe HrShellHost removed
+PASS work email replace /hr before selectMode
+
+6/6 passed
+FIRST_FAILING_MODULE=app/(tabs)/_layout.tsx :: useAuth outside AuthProvider (post-auth shell swap on non-/hr URL)

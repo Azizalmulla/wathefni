@@ -1,0 +1,23 @@
+PASS  module import
+PASS  auto invite env readable
+PASS  invitation delivery columns — delivery_attempts,delivery_channel,delivery_status,last_delivery_at,last_delivery_error,trigger_source
+PASS  aziz snapshot ok
+PASS  aziz snapshot has no activation_code
+PASS  aziz snapshot has status
+PASS  synthetic employee ready — WATHEFNI-INVITE-SMOKE-2459BF91
+PASS  synthetic employee loadable
+PASS  issue_and_deliver returned
+PASS  no code in issue result
+PASS  invite_id present — 97167b39-a6f1-4a81-b51d-67395adc17d4
+PASS  delivery status stamped — failed
+PASS  synthetic snapshot status not none — failed
+PASS  synthetic snapshot no code
+PASS  show_code_exception only on needs_attention
+PASS  auto invite does not crash
+PASS  synthetic cleanup — WATHEFNI-INVITE-SMOKE-2459BF91
+PASS  activate route frozen present
+PASS  invitation GET route present
+PASS  invitation resend route present
+PASS  no phase6 device-trust route
+---
+PASS employee_app_invitation_smoke

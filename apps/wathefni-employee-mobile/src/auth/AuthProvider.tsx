@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Platform } from 'react-native'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import * as Updates from 'expo-updates'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -40,7 +40,7 @@ import { loadAutoLockTimeout, saveAutoLockTimeout } from './autoLockStorage'
 import { classifyAuthFailure, isDefinitiveAuthWipeError, markRefreshFailed, type AuthFailurePhase } from './authFailure'
 import { consumeSkipUnlockOnce, clearLocaleRestartPreserveAuth, isLocaleRestartPreserveAuth } from './sessionResume'
 import type { PickedFile } from '@/lib/uploadDocument'
-import { savePushPreference } from '@/push/preferences'
+import { clearInboxBadge } from '@/push/syncInboxBadge'
 
 type AuthStatus =
   | 'loading'
@@ -199,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearSession(),
       clearPinMaterial(),
       clearBiometricPreference(),
-      savePushPreference(false),
+      clearInboxBadge(),
       clearLocaleRestartPreserveAuth(),
     ])
     queryClient.clear()

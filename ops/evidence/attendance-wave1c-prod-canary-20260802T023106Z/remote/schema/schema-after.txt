@@ -1,0 +1,8 @@
+attendance_payroll_snapshots trg_attendance_payroll_snapshots_immutable
+attendance_punches trg_attendance_punches_immutable
+attendance_records 42
+attendance_punches 0
+attendance_day_projections 0
+attendance_payroll_snapshots 0
+attendance_authority_events 0
+attendance_compat_drift 0

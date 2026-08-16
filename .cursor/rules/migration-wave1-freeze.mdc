@@ -1,0 +1,31 @@
+---
+description: Migration Wave 1 Foundation + Chunked CV Intake freeze — do not reopen without owner change-control
+globs: wathefni-orchestrator/migration_wave1_cv_foundation.py,wathefni-orchestrator/canary-prod-migration-wave1b.py,wathefni-orchestrator/smoke-test-migration-wave1.py
+alwaysApply: false
+---
+
+# Migration Wave 1 freeze
+
+Migration Wave 1 Foundation + Chunked CV Intake is **production-qualified under synthetic-only WATHEFNI posture** and **frozen**. See `ops/MIGRATION_WAVE1_FOUNDATION_CV_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- `WATHEFNI_MIGRATION_WAVE1=1` + `SYNTHETIC_ONLY=1` + `COMPANIES=WATHEFNI`
+- Held-by-default; auto-admit forced OFF on Wave 1 path
+- Checksum dedupe without identity auto-merge
+- No real customer data; no millions claim
+
+## Hard bans
+
+1. **Do not import real customer CVs** on this path.
+2. **Do not claim millions-of-CVs cutover** without a new scale wave.
+3. **Do not build Migration Center UI** as the next unblock without durable-job ownership.
+4. **Do not start employee/leave/compensation/shifts/compliance migration** here.
+5. **Do not enable Payroll money or Attendance ingest** for migration.
+6. **Do not start Migration Wave 2** without owner-approved change-control.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- `smoke-test-migration-wave1.py` / `canary-prod-migration-wave1b.py`

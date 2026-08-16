@@ -1,0 +1,62 @@
+Leave Wave 4 prod canary tag=c577272a phone=965527257727
+[PASS] wave4 version
+[PASS] wave4 enabled
+[PASS] wave3 enabled
+[PASS] real decision gate on
+[PASS] allowlist has HR1
+[PASS] allowlist has HR2
+[PASS] allowlist size >= 2
+[PASS] enforced=false
+[PASS] legal_reviewed=false
+[PASS] non-allowlisted real denied
+[PASS] synthetic bypasses allowlist
+[PASS] unpaid handoff no money
+[PASS] am vs pm no overlap
+[PASS] db is wathefni
+[PASS] preflight: frozen leave count 2
+[PASS] preflight: frozen fp 51cd940f
+[PASS] preflight: frozen fp e3217e0e
+[PASS] eligibility rows 4
+[PASS] eligibility all found
+[PASS] eligibility enforced false
+[PASS] holiday status present
+[PASS] holiday fail-closed when not approved
+[PASS] employee app require allowlist
+[PASS] employee app Talal-only or empty-fail-closed
+[PASS] stale already resolved (idempotent)
+[PASS] post-dual-control: frozen leave count 2
+[PASS] post-dual-control: frozen fp 51cd940f
+[PASS] post-dual-control: frozen fp e3217e0e
+[PASS] synthetic employee
+[PASS] accrual posted
+[PASS] annual half-day request
+[PASS] enrich next_action decide
+[PASS] enrich non-binding
+[PASS] synth self-approval denied
+[PASS] stale concurrency exercised
+[PASS] HR approve half-day
+[PASS] attendance derived or noted
+[PASS] hourly request
+[PASS] sick request
+[PASS] needs-info
+[PASS] resubmit
+[PASS] attachment upload
+[FAIL] sensitive attachment masked for stranger :: {'ok': True, 'leave_id': 'be3161a3-bdd2-477d-a7de-4dd652d3cf7e', 'attachments': [{'attachment_id': 'c410f8e7-e444-4b60-8802-fc11f940d2ff', 'company_code': 'WATHEFNI', 'leave_id': 'be3161a3-bdd2-477d-a7de-4dd652d3cf7e', 'version': 1, 'filename': 'medical.pdf', 'content_type': 'application/pdf', 'storage_ref': 'wave4/c577272a/medical.pdf', 'sha256': None, 'category': 'medical', 'sensitive': True, 'status': 'active', 'replaces_attachment_id': None, 'uploaded_by_phone': '965527257727', 'rejected_by_phone': None, 'rejected_reason': None, 'provenance': {'actor': '965527257727', 'source': 'wave3_upload'}, 'created_at': '2026-08-02T17:20:46.648903+00:00', 'updated_at': '2026-08-02T17:20:46.648903+00:00'}], 'sensitive_access': True}
+[PASS] mask helper redacts
+[PASS] withdraw
+[PASS] unpaid request
+[PASS] unpaid no reservation money
+[PASS] unpaid approve
+[PASS] unpaid payroll handoff no money
+[PASS] cancel future approved
+[PASS] overlap or conflict surfaced
+[PASS] kill switch disables wave4
+[PASS] kill switch restored
+[PASS] post-cleanup: frozen leave count 2
+[PASS] post-cleanup: frozen fp 51cd940f
+[PASS] post-cleanup: frozen fp e3217e0e
+[PASS] residual synthetic employees 0
+[PASS] balances count unchanged vs preflight
+[PASS] ledger count unchanged vs preflight
+
+58 passed, 1 failed  evid=/opt/wathefni/production-evidence/leave-wave4/20260802T171521Z/canary-post-redeploy

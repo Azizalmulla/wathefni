@@ -1,0 +1,108 @@
+env staging
+schema_version 1.0.0
+expected_db wathefni_staging
+connected_db wathefni_staging
+tables ['leave_authority_settings', 'leave_type_catalogue']
+catalogue [{'leave_type': 'annual', 'ledger_eligible': True}, {'leave_type': 'other', 'ledger_eligible': False}, {'leave_type': 'sick', 'ledger_eligible': True}, {'leave_type': 'unpaid', 'ledger_eligible': False}]
+MIGRATE_OK leave_authority_wave1
+MIGRATE_OK leave_policy_wave2 2.1.0
+    leave authority wave1 — catalogue + gates + concurrency + honesty
+      PASS  schema version pinned
+      PASS  vacation → annual
+      PASS  time_off → annual
+      PASS  sick stays sick
+      PASS  unknown → other
+      PASS  annual ledger-eligible
+      PASS  unpaid not ledger-eligible
+      PASS  self-approve denied
+      PASS  self-reject denied
+      PASS  self-cancel allowed
+      PASS  other-actor approve not self-banned
+      PASS  lifecycle blocks terminated
+      PASS  lifecycle blocks suspended
+      PASS  lifecycle blocks future_start
+      PASS  lifecycle blocks notice_period
+      PASS  lifecycle allows active
+      PASS  honesty balances_enforced=false
+      PASS  honesty legal_reviewed=false
+      PASS  honesty observe_only
+      PASS  holiday path excludes weekend+holiday
+      PASS  manager lacks leave.request
+      PASS  manager has leave.decide
+      PASS  infer vacation → annual
+      PASS  infer time off → annual
+      PASS  invalidate_provisional does not pay
+      PASS  no payroll_payment in invalidate
+      PASS  no bank transfer in invalidate
+    using company WATHEFNI
+      PASS  temp employee created/exists
+      PASS  request ok
+      PASS  request stores annual not vacation
+      PASS  request honesty flags
+      PASS  self-approve denied at API
+      PASS  self-reject denied at API
+      PASS  stale version approve fails closed
+      PASS  approve with matching version
+      PASS  approve honesty
+      PASS  approve payroll_impact provisional only
+      PASS  cancel with stale version fails
+      PASS  cancel preserves history ok
+      PASS  events preserve request/approve/cancel
+      PASS  stale pending resolved
+      PASS  stale audit event
+      PASS  approve past-start returns stale resolved
+      PASS  terminated cannot request
+      PASS  lifecycle decline recorded
+      PASS  lifecycle reverse recorded
+      PASS  reverse never pending
+      PASS  reverse restores requested
+      PASS  legacy vacation maps into annual ledger
+      PASS  dashboard-equivalent honesty flags
+      PASS  list leave ok
+
+    51 passed, 0 failed
+    leave policy wave2 — holidays, reservations, reconcile, sick tiers, Kuwait TZ
+      PASS  version
+      PASS  carryover disabled
+      PASS  eligibility resolved to 6
+      PASS  eligibility 9 obsolete in resolution
+      PASS  eligibility statutory not unresolved
+      PASS  law85 gazette hash present
+      PASS  carryover art72 statutory
+      PASS  enforced false pack
+      PASS  weekends excluded
+      PASS  holiday excluded
+      PASS  span year+holiday
+      PASS  sick tiers 15+5
+      PASS  kuwait date near midnight
+      PASS  employee seeded
+      PASS  accrual posted
+      PASS  balance exists
+      PASS  available > 0
+      PASS  national+liberation seeded
+      PASS  feb week chargeable=3
+      PASS  enforced holiday fail-closed while year pending_review
+      PASS  request A ok
+      PASS  reservation A posted
+      PASS  request B created (observe)
+      PASS  concurrent B insufficient — no double-reserve
+      PASS  approve A
+      PASS  consume exactly once
+      PASS  approve converted reservation (open=0)
+      PASS  C reserved before reject
+      PASS  reject C
+      PASS  reject released reservation
+      PASS  cancel pending D
+      PASS  cancel pending released reservation
+      PASS  stale expire released reservation
+      PASS  sick tiers present
+      PASS  sick tiers observe-only payroll_owned
+      PASS  cancel approved
+      PASS  reversal restored balance >= mid
+      PASS  attendance reverse path safe
+      PASS  ledger/rollup reconcile
+      PASS  enforced false
+      PASS  wave2 pack legal_reviewed false
+
+    41 passed, 0 failed
+STAGING_LEAVE_W2B_OK

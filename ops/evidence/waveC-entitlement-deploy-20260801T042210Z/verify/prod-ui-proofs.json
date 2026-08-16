@@ -1,0 +1,88 @@
+{
+  "passed": 7,
+  "failed": 0,
+  "results": [
+    {
+      "gate": "en_desktop_loaded",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-en-desktop-overview.png",
+        "labels": {
+          "hasInterviewsEn": true,
+          "hasAssessmentsEn": true,
+          "hasInterviewsAr": false,
+          "hasAssessmentsAr": false,
+          "heading": "Good morning, Aziz",
+          "url": "https://api.wathefni.ai/dashboard/?page=overview"
+        }
+      }
+    },
+    {
+      "gate": "ar_desktop_rtl_or_arabic",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-ar-desktop-overview-rtl.png",
+        "dir": ""
+      }
+    },
+    {
+      "gate": "en_mobile_more_menu",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-en-mobile-more.png"
+      }
+    },
+    {
+      "gate": "ar_mobile_more_menu",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-ar-mobile-more.png"
+      }
+    },
+    {
+      "gate": "direct_url_interviews_fail_closed_when_off",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-en-desktop-direct-interviews-off.png",
+        "labels": {
+          "hasInterviewsEn": false,
+          "hasAssessmentsEn": false,
+          "hasInterviewsAr": false,
+          "hasAssessmentsAr": false,
+          "heading": "Good morning, Aziz",
+          "url": "https://api.wathefni.ai/dashboard/?page=interviews&status=upcoming&tab=upcoming"
+        }
+      }
+    },
+    {
+      "gate": "assessments_omitted_when_off_ui",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-ar-mobile-assessments-off.png",
+        "labels": {
+          "hasInterviewsEn": false,
+          "hasAssessmentsEn": false,
+          "hasInterviewsAr": false,
+          "hasAssessmentsAr": false,
+          "heading": "صباح الخير، Aziz",
+          "url": "https://api.wathefni.ai/dashboard/?page=assessments&assessment_cohort=assessment_ready_to_send&overview_cohort=assessment_ready_to_send&cohort_key=assessment_ready_to_send&tab=send"
+        }
+      }
+    },
+    {
+      "gate": "interviews_direct_url_works_when_on",
+      "ok": true,
+      "detail": {
+        "shotPath": "/Users/azizalmulla/Desktop/claw/ops/evidence/waveC-entitlement-deploy-20260801T042210Z/screenshots/prod-en-desktop-interviews-on.png",
+        "labels": {
+          "hasInterviewsEn": true,
+          "hasAssessmentsEn": true,
+          "hasInterviewsAr": false,
+          "hasAssessmentsAr": false,
+          "heading": "Interviews",
+          "url": "https://api.wathefni.ai/dashboard/?page=interviews&status=upcoming&tab=upcoming"
+        }
+      }
+    }
+  ]
+}

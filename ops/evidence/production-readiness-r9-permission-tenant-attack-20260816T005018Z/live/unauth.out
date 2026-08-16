@@ -1,0 +1,12 @@
+/dashboard/posthire/employees -> 401
+/dashboard/posthire/leave -> 401
+/dashboard/posthire/payroll -> 401
+/dashboard/performance/workspace -> 401
+/dashboard/talent/workspace -> 401
+/dashboard/employee-relations/workspace -> 401
+/dashboard/setup/company/module-policies -> 401
+/app/me -> 503
+UNEXPECTED_OPEN /app/me 503
+/app/leave -> 503
+UNEXPECTED_OPEN /app/leave 503
+LIVE_UNAUTH_FAIL

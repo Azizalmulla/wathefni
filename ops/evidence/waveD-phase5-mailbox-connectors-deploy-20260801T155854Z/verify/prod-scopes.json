@@ -1,0 +1,19 @@
+{
+  "gmail_readonly_in_src": true,
+  "mail_read": true,
+  "user_read": true,
+  "offline_access": true,
+  "attrs": {
+    "GMAIL_OAUTH_SCOPES": [
+      "https://www.googleapis.com/auth/gmail.readonly"
+    ],
+    "M365_GRAPH_MAIL_APP_ONLY_SCOPES": [
+      "Mail.Read"
+    ],
+    "M365_GRAPH_MAIL_SCOPES": [
+      "Mail.Read",
+      "User.Read",
+      "offline_access"
+    ]
+  }
+}

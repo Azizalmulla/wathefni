@@ -1,0 +1,35 @@
+# Kuwait Pilot Document Journey — Frozen Staging Artifact
+
+Date: 2026-07-25
+Prior staging-green: 73cccafdf4ae6cc57a68bb3d69197110b9413864a0ec361e8a021c8cb0812267
+Base staging app.py (foundation-green): 8d2e880aafcf1b639dbb53e3ef8544e013e01546ce8be7e6b491cbba29f22ab2
+Patched staging app.py (foundation-green + document-journey hooks only): b266a0d24ff49659fb8966b03818f32f2e12fc76cf659ea28514ad8a447d7602
+
+## Contained file SHA256
+
+78befeb08da1f94dca5cb10f3bc6514d4799a6ad71e383fda0eeb50b294f99f4  kuwait_pilot_document_journey.py
+448d0946807db1ef493fa5bde8825798ead9fa0b0d63ff182b000e4bf6d510f0  ops/lib/doc_type_map.py
+b266a0d24ff49659fb8966b03818f32f2e12fc76cf659ea28514ad8a447d7602  app.py (surgically patched staging)
+e73d7027e6fc9a443d8a1f8fbae0ce055d010f7d189fc94cd56b9aaf64d00cf9  apps/wathefni-dashboard/src/posthire/PostHire.tsx
+2b767b3b25facd8aebd624f5a8b3da177b2cc57eed6e21fd93f734ef37057f01  apps/wathefni-dashboard/src/lib/api.ts
+2525604e0e533ca54e0cbae061594ad3497d99f7409ac5e9715de6778d398dd7  apps/wathefni-employee-mobile/app/documents.tsx
+41deeb2d77a02ed95fd5b3cf38abc86f992acfd3cad5b15358d2ee44ac91eeec  apps/wathefni-employee-mobile/src/features/remaining/RemainingViews.tsx
+2450d1e49af7d1cd4c0b31be2b716ad5c0d69bc5d4d5775573d9936890ef6e40  apps/wathefni-employee-mobile/src/api/types.ts
+dac88b05d186a85fdcfdf6f13b2498b9598d13d96625df59711b9f303f8b2b15  apps/wathefni-employee-mobile/src/i18n/en.json
+99f8086a55191e64eb4fa3578eedd480d111e27c51d0c7e0465d478d044b4a59  apps/wathefni-employee-mobile/src/i18n/ar.json
+
+## Combined artifact SHA256
+
+4be5298e769576cb691b750ec9513c190d32adb13e9bddf2ebb004f694ab85d7
+
+**SUPERSEDED for production promotion.** Dashboard reconciliation staging-green:
+`6018796d265c1a8d77e3bd880849b8e65f627003dc20ca544403db426d2097e1`
+See `ops/KUWAIT_PILOT_DOCUMENT_JOURNEY_DASHBOARD_RECONCILIATION_STAGING_GREEN.md`.
+Do **not** re-promote `4be5298e…`.
+
+Orchestrator-only pin (journey + doc_type_map + surgically patched app.py):
+e418227b0acb87a688c2f4b721497d3219179de111713292c68af2796885d915
+
+Do not include unrelated local dirty tree content.
+Do not sync full local app.py — only the surgically patched staging app.py.
+Do not deploy to production from this freeze alone.

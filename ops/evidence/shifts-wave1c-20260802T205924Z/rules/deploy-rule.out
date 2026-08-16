@@ -1,0 +1,6 @@
+=== deployed hashes ===
+4310835c7b6ff1c713d48eef19e5a9a641247e0e672ade969717ca6479db1b13  /opt/wathefni/.cursor/rules/attendance-freeze.mdc
+4310835c7b6ff1c713d48eef19e5a9a641247e0e672ade969717ca6479db1b13  /opt/wathefni/ops/evidence/shifts-wave1c-rule-mirror/attendance-freeze.mdc
+-rw-r--r-- 1 root root 2168 Aug  2 20:59 /opt/wathefni/.cursor/rules/attendance-freeze.mdc
+ORCH_PARENT_OK
+OPS_PARENT_OK

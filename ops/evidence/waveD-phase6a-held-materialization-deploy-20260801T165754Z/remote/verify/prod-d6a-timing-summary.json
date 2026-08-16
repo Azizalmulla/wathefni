@@ -1,0 +1,137 @@
+[
+  {
+    "gate": 1,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 152,
+    "acc_ms": 86,
+    "held_ms": 5,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 1,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 655,
+    "acc_ms": 308,
+    "held_ms": 21,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 1,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 162,
+    "acc_ms": 199,
+    "held_ms": 13,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 1,
+    "kind": "opaque",
+    "held_n": 1,
+    "held_ms": 53,
+    "terminal": "low_quality_text",
+    "warned": true
+  },
+  {
+    "gate": 1,
+    "kind": "conflict",
+    "separate": true,
+    "warned": true,
+    "outcome": "conflict"
+  },
+  {
+    "gate": 2,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 96,
+    "acc_ms": 79,
+    "held_ms": 5,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 2,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 96,
+    "acc_ms": 79,
+    "held_ms": 8,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 2,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 121,
+    "acc_ms": 69,
+    "held_ms": 6,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 2,
+    "kind": "opaque",
+    "held_n": 1,
+    "held_ms": 53,
+    "terminal": "low_quality_text",
+    "warned": true
+  },
+  {
+    "gate": 2,
+    "kind": "conflict",
+    "separate": true,
+    "warned": true,
+    "outcome": "conflict"
+  },
+  {
+    "gate": 3,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 107,
+    "acc_ms": 123,
+    "held_ms": 11,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 3,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 109,
+    "acc_ms": 144,
+    "held_ms": 9,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 3,
+    "kind": "short",
+    "mat": "accepted",
+    "id_ms": 115,
+    "acc_ms": 96,
+    "held_ms": 5,
+    "acc_n": 1,
+    "held_n": 0
+  },
+  {
+    "gate": 3,
+    "kind": "opaque",
+    "held_n": 1,
+    "held_ms": 52,
+    "terminal": "low_quality_text",
+    "warned": true
+  },
+  {
+    "gate": 3,
+    "kind": "conflict",
+    "separate": true,
+    "warned": true,
+    "outcome": "conflict"
+  }
+]

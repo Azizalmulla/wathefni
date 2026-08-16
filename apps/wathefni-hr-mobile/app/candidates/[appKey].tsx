@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { ApiError } from '@/api/client'
@@ -9,11 +9,13 @@ import type { CandidateReview, ConfirmationMaterial, DecisionResponse } from '@/
 import { useAuth } from '@/auth/AuthProvider'
 import { routeAvailable } from '@/capabilities'
 import { CandidateReviewView, type CandidateViewState } from '@/features/recruiting/CandidateReviewView'
+import { lifecycleActionLabel } from '@/features/recruiting/lifecycle'
 import { useLocale } from '@/i18n'
 import { createIdempotencyKey } from '@/lib/idempotency'
 
 export default function CandidateRoute() {
   const { appKey } = useLocalSearchParams<{ appKey: string }>()
+  const router = useRouter()
   const { me, request, refreshMe } = useAuth()
   const { locale, setLocale } = useLocale()
   const queryClient = useQueryClient()
@@ -42,7 +44,7 @@ export default function CandidateRoute() {
     pending.current = { material: response.confirmation, action, key }
     return {
       target: response.confirmation.summary,
-      action,
+      action: lifecycleActionLabel(action, locale),
       consequence: response.confirmation.consequence,
       currentState: response.confirmation.current_state,
     }
@@ -118,6 +120,7 @@ export default function CandidateRoute() {
       company={me?.principal.company_code}
       onPrepareDecision={prepare}
       onConfirmDecision={confirm}
+      onScheduleInterview={() => router.push('/interviews' as never)}
       onOpenCV={(action) => {
         const cv = detail.data?.candidate.cv
         const path = action === 'download' ? cv?.download_path : cv?.preview_path

@@ -1,0 +1,104 @@
+AUDITED owner-en-desktop-overview controls=72 exercised=8
+AUDITED owner-en-desktop-jobs controls=23 exercised=8
+AUDITED owner-en-desktop-candidates controls=46 exercised=10
+AUDITED owner-en-desktop-interviews controls=41 exercised=10
+AUDITED owner-en-desktop-assessments controls=49 exercised=8
+AUDITED owner-en-desktop-ranking controls=25 exercised=9
+AUDITED owner-en-desktop-calendar controls=23 exercised=8
+AUDITED owner-en-desktop-employees controls=29 exercised=8
+AUDITED owner-en-desktop-workforce controls=36 exercised=8
+AUDITED owner-en-desktop-inbox controls=28 exercised=8
+AUDITED owner-en-desktop-onboarding controls=38 exercised=11
+AUDITED owner-en-desktop-attendance controls=34 exercised=8
+AUDITED owner-en-desktop-leave controls=29 exercised=9
+AUDITED owner-en-desktop-shifts controls=38 exercised=8
+AUDITED owner-en-desktop-payroll controls=38 exercised=9
+AUDITED owner-en-desktop-analytics controls=22 exercised=8
+AUDITED owner-en-desktop-compliance controls=23 exercised=9
+AUDITED owner-en-desktop-notifications controls=31 exercised=8
+AUDITED owner-en-desktop-activity controls=82 exercised=8
+AUDITED owner-en-desktop-settings controls=33 exercised=8
+AUDITED owner-ar-desktop-overview controls=72 exercised=4
+AUDITED owner-ar-desktop-jobs controls=57 exercised=4
+AUDITED owner-ar-desktop-candidates controls=23 exercised=4
+AUDITED owner-ar-desktop-interviews controls=41 exercised=6
+AUDITED owner-ar-desktop-assessments controls=49 exercised=4
+AUDITED owner-ar-desktop-ranking controls=25 exercised=5
+AUDITED owner-ar-desktop-calendar controls=23 exercised=4
+AUDITED owner-ar-desktop-employees controls=29 exercised=4
+AUDITED owner-ar-desktop-workforce controls=36 exercised=4
+AUDITED owner-ar-desktop-inbox controls=28 exercised=4
+AUDITED owner-ar-desktop-onboarding controls=38 exercised=7
+AUDITED owner-ar-desktop-attendance controls=34 exercised=4
+AUDITED owner-ar-desktop-leave controls=29 exercised=5
+AUDITED owner-ar-desktop-shifts controls=38 exercised=4
+AUDITED owner-ar-desktop-payroll controls=38 exercised=5
+AUDITED owner-ar-desktop-analytics controls=22 exercised=4
+AUDITED owner-ar-desktop-compliance controls=31 exercised=4
+AUDITED owner-ar-desktop-notifications controls=29 exercised=5
+AUDITED owner-ar-desktop-activity controls=82 exercised=4
+AUDITED owner-ar-desktop-settings controls=33 exercised=4
+AUDITED owner-en-mobile-overview controls=59 exercised=4
+AUDITED owner-en-mobile-jobs controls=44 exercised=4
+AUDITED owner-en-mobile-candidates controls=33 exercised=6
+AUDITED owner-en-mobile-interviews controls=10 exercised=4
+AUDITED owner-en-mobile-assessments controls=10 exercised=4
+AUDITED owner-en-mobile-ranking controls=12 exercised=5
+AUDITED owner-en-mobile-calendar controls=20 exercised=4
+AUDITED owner-en-mobile-employees controls=10 exercised=4
+AUDITED owner-en-mobile-workforce controls=24 exercised=4
+AUDITED owner-en-mobile-inbox controls=16 exercised=4
+AUDITED owner-en-mobile-onboarding controls=26 exercised=7
+AUDITED owner-en-mobile-attendance controls=22 exercised=4
+AUDITED owner-en-mobile-leave controls=17 exercised=5
+AUDITED owner-en-mobile-shifts controls=30 exercised=4
+AUDITED owner-en-mobile-payroll controls=26 exercised=5
+AUDITED owner-en-mobile-analytics controls=13 exercised=4
+AUDITED owner-en-mobile-compliance controls=19 exercised=4
+AUDITED owner-en-mobile-notifications controls=19 exercised=4
+AUDITED owner-en-mobile-activity controls=70 exercised=4
+AUDITED owner-en-mobile-settings controls=21 exercised=4
+AUDITED owner-ar-mobile-overview controls=59 exercised=4
+AUDITED owner-ar-mobile-jobs controls=44 exercised=4
+AUDITED owner-ar-mobile-candidates controls=33 exercised=6
+AUDITED owner-ar-mobile-interviews controls=28 exercised=6
+AUDITED owner-ar-mobile-assessments controls=10 exercised=4
+AUDITED owner-ar-mobile-ranking controls=12 exercised=5
+AUDITED owner-ar-mobile-calendar controls=19 exercised=4
+AUDITED owner-ar-mobile-employees controls=10 exercised=4
+AUDITED owner-ar-mobile-workforce controls=0 exercised=0
+AUDITED owner-ar-mobile-inbox controls=10 exercised=4
+AUDITED owner-ar-mobile-onboarding controls=26 exercised=7
+AUDITED owner-ar-mobile-attendance controls=10 exercised=4
+AUDITED owner-ar-mobile-leave controls=10 exercised=4
+AUDITED owner-ar-mobile-shifts controls=10 exercised=4
+AUDITED owner-ar-mobile-payroll controls=10 exercised=4
+AUDITED owner-ar-mobile-analytics controls=10 exercised=4
+AUDITED owner-ar-mobile-compliance controls=11 exercised=5
+AUDITED owner-ar-mobile-notifications controls=19 exercised=4
+AUDITED owner-ar-mobile-activity controls=70 exercised=4
+AUDITED owner-ar-mobile-settings controls=21 exercised=4
+AUDITED hr_manager-en-desktop-overview controls=67 exercised=4
+AUDITED hr_manager-en-desktop-jobs controls=52 exercised=4
+AUDITED hr_manager-en-desktop-candidates controls=18 exercised=4
+FAILED hr_manager-en-desktop-interviews Error: page.waitForTimeout: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-assessments Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-ranking Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-calendar Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-employees Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-workforce Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-inbox Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-onboarding Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-attendance Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-leave Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-shifts Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-payroll Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-analytics Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-compliance Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-notifications Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-activity Error: page.goto: Target page, context or browser has been closed
+FAILED hr_manager-en-desktop-settings Error: page.goto: Target page, context or browser has been closed
+browser.newContext: Target page, context or browser has been closed
+    at async run (/Users/azizalmulla/Desktop/claw/ops/full-web-e2e/run-control-audit.cjs:313:25) {
+  log: []
+}

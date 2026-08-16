@@ -1,0 +1,9 @@
+AdminAIPage-cqIsebZD.js
+AssessmentsPage-BZydQtSD.js
+CalendarShell-Ca2TrtYs.js
+CandidateProfilePage-w5IEO8e-.js
+CandidatesPage-ByaHi-9G.js
+BACKUP=/opt/wathefni/backups/production-pre-onboarding-wave4-dashboard-20260802T014652Z
+/var/www/wathefni-dashboard/assets/PostHire-BrW2GlcR.js
+0f13238daf5431b087da549c57abf17e3eb890453302af21ce409c7d64c349aa  /var/www/wathefni-dashboard/assets/PostHire-BrW2GlcR.js
+42aa780ec3869e810ad4749dc4f2208681cbd09bd3ab6239fd312f30ccb44882  /var/www/wathefni-dashboard/index.html

@@ -1,0 +1,40 @@
+=== Calendar sync authority smoke ===
+PASS: owner has calendar.sync by default
+PASS: owner has settings.manage
+PASS: hr_admin lacks calendar.sync
+PASS: hr_admin keeps settings.manage
+PASS: hr_admin keeps calendar.company
+PASS: hr_admin keeps calendar.manage
+PASS: hr_manager lacks calendar.sync
+PASS: recruiter lacks calendar.sync
+PASS: interviewer lacks calendar.sync
+PASS: no HR role auto-grants calendar.sync
+PASS: owner still strict superset of hr_admin
+PASS: public synced label
+PASS: public has no bindings key
+PASS: public has no provider
+PASS: public pending label
+PASS: public failed is unavailable without error
+PASS: public empty is none
+PASS: event sync uses calendar.read entitlement
+PASS: event sync gates full bindings on calendar.sync
+PASS: event sync returns empty bindings for non-sync
+PASS: event sync uses public_event_sync_status
+PASS: event sync detail full branch
+PASS: event sync detail status branch
+PASS: read payload empty bindings
+PASS: read payload no provider in top-level
+PASS: read payload customer synced
+PASS: sync payload retains bindings for operators
+PASS: sync payload still includes customer_status
+PASS: Calendar has no External sync
+PASS: Calendar has no Platform integrations console
+PASS: Calendar has no legacy operator control
+PASS: Calendar quiet Synced only
+PASS: Calendar no Open external
+PASS: Calendar no Retry sync
+PASS: Settings imports PlatformIntegrationsPanel
+PASS: Settings dual-gates settings.manage and calendar.sync
+PASS: Platform panel still has connect flows
+PASS: Platform panel keeps legacy operator
+=== sync authority done PASS=38 FAIL=0 ===

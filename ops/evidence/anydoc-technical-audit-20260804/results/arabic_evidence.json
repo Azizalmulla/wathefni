@@ -1,0 +1,51 @@
+{
+  "generated/cv_ar_en.docx": {
+    "ok": true,
+    "arabic_chars": 62,
+    "snippet": "# **سيرة ذاتية**\n\nالمرشح: علي محمد\n\n## **الخبرة**\n\n- مهندس برمجيات في وظفني\n\nBilingual note: Senior Software Engineer / مهندس برمجيات أول\n",
+    "has_heading": true,
+    "has_table": false
+  },
+  "generated/cv_text_ar_en.pdf": {
+    "ok": true,
+    "arabic_chars": 39,
+    "snippet": "## سيرة ذاتية - Wathefni Bilingual CV\n\nالاسم: علي محمد / Name: Ali Mohammad\n\n## المسمى: مهندس برمجيات / Software Engineer\n",
+    "has_heading": true,
+    "has_table": false
+  },
+  "generated/table_ar.csv": {
+    "ok": true,
+    "arabic_chars": 35,
+    "snippet": "|  |  |  |\n| --- | --- | --- |\n| الاسم | الدور | الساعات |\n| علي | مهندس | 40 |\n| سارة | عمليات | 36 |\n",
+    "has_heading": false,
+    "has_table": true
+  },
+  "generated/roster_ar.xlsx": {
+    "ok": true,
+    "arabic_chars": 27,
+    "snippet": "|  |  |  |\n| --- | --- | --- |\n| الموظف | الفرع | الساعات |\n| علي | الكويت | 40 |\n",
+    "has_heading": false,
+    "has_table": true
+  },
+  "generated/deck_ar.pptx": {
+    "ok": true,
+    "arabic_chars": 32,
+    "snippet": "## عرض التوظيف\n\n- النقاط\n- \\- الاستقبال\n- \\- الترتيب\n",
+    "has_heading": true,
+    "has_table": false
+  },
+  "generated/sample_ar.odt": {
+    "ok": true,
+    "arabic_chars": 23,
+    "snippet": "# ODT Sample\n\nوثيقة عربية تجريبية لوظفني\n\n|  |  |\n| --- | --- |\n| A | B |\n",
+    "has_heading": true,
+    "has_table": true
+  },
+  "from_prior_eval/contract_kuwait_labor_law_real_01.pdf": {
+    "ok": true,
+    "arabic_chars": 3321,
+    "snippet": "## ىقر مًؼنا ٌىَاق حُظن\n\n## يههلأا عاطقنا يف مًؼنا ٌأش يف\n\n- ،هٞزٍلُا ٠ِػ ع٬ؿ٩ا لؼث\n- ْهه ٕٞٗبوُبث هكبظُا ءايغُا ٕٞٗبه ٠ِػٝ16 خَُ٘ 1960 ،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ\n- ْهه ٕٞٗبه ٠ِػٝ38 خَُ٘ 1964 ،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ ٢ِٛ٧ا عبـوُا ٢ك َٔؼُا ٕؤش ٢ك\n- ْهه ٕٞٗبوُا ٠ِػٝ28 خَُ٘ 1969 ،خ٤ـلُ٘ا ٍبٔػ٧ا عبـه ٢ك َٔؼُا ٕؤش ٢ك\n- ْهه ٕٞٗبوُبث ١و٤ٓ٧ا وٓ٧بث هكبظُا خ٤ػبٔزع٩ا دب٘٤ٓؤزُا ٕٞٗبه ٠ِػٝ61 خَُ٘ 1976\n،ُٚ خُلؼُٔا ٖ٤ٗاٞوُاٝ\n\n- ْهه ٕٞٗبوُبث ٍّٞؤُا ٠ِػٝ28 خَُ٘ 1980 خُلؼُٔا ٖ٤ٗاٞوُاٝ خ٣وؾجُا حهبغزُا ٕٞٗبه هالطبث\n،ُٚ\n\n- ْهه ٕٞٗبوُبث ٍّٞؤُا ٠ِػٝ38 خَُ٘ 1980 خ٣هبغزُاٝ خ٤ٗلُٔا دبؼكاؤُا ٕٞٗبه هالطبث\n،ُٚ خُلؼُٔا ٖ٤ٗاٞوُا",
+    "has_heading": true,
+    "has_table": false
+  }
+}

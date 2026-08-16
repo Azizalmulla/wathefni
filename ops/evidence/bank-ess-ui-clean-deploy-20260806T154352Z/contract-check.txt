@@ -1,0 +1,7 @@
+OK /dashboard/posthire/employees/{employee_key}/bank
+OK /dashboard/posthire/employees/{employee_key}/bank/evidence/{evidence_id}
+OK /dashboard/posthire/employees/{employee_key}/onboarding-completion
+OK /dashboard/posthire/employee-ess/requests/{request_id}/decide
+OK /dashboard/posthire/employee-ess/requests/{request_id}/apply
+OK /app/bank
+OK /app/bank/requests

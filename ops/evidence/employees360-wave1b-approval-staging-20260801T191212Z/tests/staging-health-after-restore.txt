@@ -1,0 +1,16 @@
+active
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:   File "/opt/wathefni/staging/orchestrator/app.py", line 60, in <module>
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:     import tenant_control_service as _tenant_control  # noqa: E402
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]:     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 01 19:22:02 srv1419988 uvicorn[1851293]: ModuleNotFoundError: No module named 'tenant_control_service'
+Aug 01 19:22:03 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Main process exited, code=exited, status=1/FAILURE
+Aug 01 19:22:03 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Failed with result 'exit-code'.
+Aug 01 19:22:06 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Scheduled restart job, restart counter is at 26.
+Aug 01 19:22:06 srv1419988 systemd[1]: Started wathefni-orchestrator-staging.service - Wathefni HR Orchestrator (STAGING — dry-run delivery, internal/localhost only).

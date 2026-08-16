@@ -1,0 +1,55 @@
+    payroll authority wave1 — foundation + gates + adapters
+      PASS  version pinned
+      PASS  payment_processing disabled
+      PASS  money_authority false
+      PASS  no g2n
+      PASS  no pifss
+      PASS  no bank_wps
+      PASS  no eos_auto
+      PASS  art70=6
+      PASS  modes present
+      PASS  freeze no money
+      PASS  freeze self-approval
+      PASS  reason required
+      PASS  concurrency required
+      PASS  stale version
+      PASS  self ban
+      PASS  creator ban
+      PASS  sod detect
+      PASS  sod clear
+      PASS  sod warnings fire
+      PASS  source mix forbidden
+      PASS  export rejects enabled payment
+      PASS  input export ok
+      PASS  leave money fields forbidden
+      PASS  result import stub ok
+      PASS  result import bans posts_payment
+      PASS  payroll_operator has approve
+      PASS  payroll_operator lacks export
+      PASS  manager has payroll.approve
+      PASS  manager lacks payroll.export
+      PASS  payroll.approve known
+      PASS  approve tool → payroll.approve
+      PASS  export tool → payroll.export
+connected_db wathefni_staging
+      PASS  set mode native
+      PASS  set mode external
+      PASS  set mode parallel_shadow
+      PASS  settings payment disabled
+      PASS  settings art70=6
+      PASS  contract draft ok
+      PASS  creator self-approve denied
+      PASS  subject self-approve denied
+      PASS  contract approve ok
+      PASS  overlap approve denied
+      PASS  contract replace ok
+      PASS  offer seeds draft
+      PASS  period create open
+      PASS  period lock
+      PASS  period close
+      PASS  period reopen
+      PASS  authoritative source enforcement
+      PASS  quarantine soft
+      PASS  quarantine marked rows
+
+    51 passed, 0 failed

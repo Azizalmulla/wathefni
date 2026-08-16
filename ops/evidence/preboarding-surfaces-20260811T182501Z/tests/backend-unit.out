@@ -1,0 +1,42 @@
+    preboarding wave1 — SM + readiness + template + flags
+      PASS  schema version pinned
+      PASS  sql pack exists
+      PASS  asn not_started→in_progress
+      PASS  asn in_progress→ready
+      PASS  asn in_progress→blocked
+      PASS  asn ready→converted
+      PASS  asn →cancelled
+      PASS  asn converted terminal
+      PASS  item pending→done
+      PASS  item done terminal
+      PASS  readiness incomplete when required pending
+      PASS  percent partial
+      PASS  readiness derived when required done
+      PASS  blockers empty when ready
+      PASS  blocked when required item blocked
+      PASS  kuwait template has civil_id
+      PASS  kuwait template has passport
+      PASS  kuwait template has residence
+      PASS  kuwait template has work_permit
+      PASS  kuwait template has employment_contract
+      PASS  kuwait template has company_policy_ack
+      PASS  kuwait template has bank_details
+      PASS  kuwait template has equipment
+      PASS  kuwait template has it_system_access
+      PASS  kuwait template has workspace_site_ready
+      PASS  kuwait template has manager_preparation
+      PASS  kuwait template has employee_prejoin_actions
+      PASS  kuwait template has welcome_reminder_comms
+      PASS  bank is ESS-safe (no plaintext)
+      PASS  runtime flag default off
+      PASS  runtime flag on
+      PASS  allowlist normalizes
+      PASS  rollback guidance
+      PASS  manager in scope
+      PASS  manager out of scope denied
+      PASS  app.ensure_schema wires preboarding
+      PASS  requisitions freeze doc present
+      FAIL  no Preboarding UI page this slice :: ['/Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard/src/posthire/PreboardingWorkspace.tsx']
+
+37 passed, 1 failed
+PREBOARDING_WAVE1_UNIT_FAIL

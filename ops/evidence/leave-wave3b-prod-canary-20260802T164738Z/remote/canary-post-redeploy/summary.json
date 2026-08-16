@@ -1,0 +1,75 @@
+{
+  "pass": 62,
+  "fail": 0,
+  "tag": "b5dc061a",
+  "phone": "965527150610",
+  "ids": {
+    "tag": "b5dc061a",
+    "phone": "965527150610",
+    "name": "LVW3B-SYNTH| Emp b5dc061a",
+    "leave_ids": [
+      "e0b48de0-2909-4622-beaa-f09c12e940f9",
+      "56abdd54-bb86-4557-aeef-50961049dc01",
+      "b4c873d1-71df-4a15-b3c7-7366a2dee5dd",
+      "9d802cd1-b63a-46c3-a47b-5af23a8b110e",
+      "aea1cfc7-98d7-46d6-b676-f823f7d5d3bc",
+      "2db0a23f-449d-407e-a4f7-bf681498aeda",
+      "a4a4b3a3-808d-4dd0-9b38-18eec727c80e",
+      "c742e6b6-067e-485f-974f-041204a12b79",
+      "0bf8fa6d-6897-462a-a1eb-1c240eb174b9",
+      "285f9e4d-5f0d-4eef-a055-60377496bad0",
+      "87d7bed3-7959-4bf6-a8f2-e6965935af15",
+      "3b6f86e5-6b57-48dd-bf3e-be3d1e45b01b"
+    ],
+    "company_totals_before": {
+      "requests": 3,
+      "events": 10,
+      "ledger": 28,
+      "balances": 4
+    },
+    "cleanup_keys": [
+      "WATHEFNI-965527150610"
+    ],
+    "employee_key": "WATHEFNI-965527150610",
+    "day_shift": "8699747c-1f95-489a-8496-81145a318e44",
+    "night_shift": "3aa9ee3b-aec9-41b6-9687-5516e10875c1",
+    "half_leave_id": "e0b48de0-2909-4622-beaa-f09c12e940f9",
+    "half_reservation_days": 0.5,
+    "hourly_leave_id": "b4c873d1-71df-4a15-b3c7-7366a2dee5dd",
+    "attendance_updates": 1,
+    "unpaid_handoff": {
+      "note": "Leave provides classification/duration only; Payroll owns monetary impact.",
+      "end_date": "2026-08-26",
+      "leave_id": "3b6f86e5-6b57-48dd-bf3e-be3d1e45b01b",
+      "leave_type": "unpaid",
+      "start_date": "2026-08-26",
+      "employee_key": "WATHEFNI-965527150610",
+      "pay_fraction": null,
+      "duration_unit": "full_day",
+      "payroll_owned": true,
+      "classification": "unpaid_leave",
+      "chargeable_days": 1.0,
+      "monetary_fields": null,
+      "chargeable_hours": 8.0,
+      "salary_deduction": null
+    },
+    "attachment_v1": "4c5c8450-ddf8-44b7-9881-e264d1ae2c2b",
+    "attachment_v2": "27ec3a04-a00b-4655-a67c-347863cb9733",
+    "attachment_audit_n": 4,
+    "cleanup": {
+      "leave_attachment_audit": 4,
+      "leave_request_attachments": 3,
+      "leave_payroll_handoff_events": 1,
+      "leave_events": 19,
+      "leave_ledger": 21,
+      "leave_requests": 12,
+      "leave_balances": 1,
+      "attendance_events": 2,
+      "attendance_records": 1,
+      "shift_assignments": 7,
+      "attendance_day_projections": 3,
+      "payroll_timesheets": 0,
+      "employees": 1
+    }
+  }
+}

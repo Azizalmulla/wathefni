@@ -1,0 +1,5 @@
+Environment=WATHEFNI_INBOUND_ALLOWED_COMPANIES=WATHEFNI
+Environment=WATHEFNI_MAILBOX_SYNC=off
+active
+orch=200
+dash=200

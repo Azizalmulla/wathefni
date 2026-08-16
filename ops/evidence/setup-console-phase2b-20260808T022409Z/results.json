@@ -1,0 +1,163 @@
+{
+  "pass": 29,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "desired_everyone_active",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "desired_departments_scope",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "desired_employees_scope",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "desired_module_off_blocks",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_everyone_auto",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_departments_scope",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_selected_no_auto",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:employee-app-access/preview",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:employee-app-access/employees",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:apply_reconcile",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:confirm_large_impact",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:reconcile_employee_app_access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:allow_invite=False",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:_batch_set_flags",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:TRIGGER_ACCESS_POLICY",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:everyone",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:departments",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:employees",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Preview impact",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-phase=\"2b\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Who should have access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_internal_jargon",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_get_policy",
+      "detail": {
+        "ux_mode": "employees",
+        "module_enabled": true
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_preview_everyone",
+      "detail": "90 will gain access, 0 will lose access."
+    },
+    {
+      "status": "PASS",
+      "name": "live_employee_search",
+      "detail": {
+        "count": 5
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_apply_selected_employees",
+      "detail": {
+        "gained": 3,
+        "lost": 8,
+        "invites_issued": 3,
+        "invites_skipped": 0,
+        "revokes": 8,
+        "sessions_touch_attempts": 1
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_apply_idempotent",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_restore_attempted",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_tenant_404",
+      "detail": null
+    }
+  ]
+}

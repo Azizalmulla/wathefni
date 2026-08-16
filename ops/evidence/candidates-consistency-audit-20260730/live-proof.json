@@ -1,0 +1,172 @@
+{
+  "unified_enabled": true,
+  "api": {
+    "view_all": {
+      "total": 14,
+      "returned": 14,
+      "statuses": [
+        "awaiting_cv",
+        "hired",
+        "needs_role",
+        "review_pending",
+        "screening",
+        "screening_complete",
+        "shortlisted"
+      ],
+      "record_states": [
+        "active_application",
+        "hired",
+        "talent_pool"
+      ],
+      "status_displays": [
+        "Hired",
+        "Processing CV",
+        "Ready for review",
+        "Shortlisted",
+        "Talent Pool",
+        "Waiting for CV"
+      ]
+    },
+    "view_talent_pool": {
+      "total": 2,
+      "returned": 2,
+      "statuses": [
+        "needs_role"
+      ],
+      "record_states": [
+        "talent_pool"
+      ],
+      "status_displays": [
+        "Talent Pool"
+      ],
+      "sample": [
+        {
+          "app_key_suffix": "I-IMPORT",
+          "status": "needs_role",
+          "canonical_stage": "needs_role",
+          "record_state": "talent_pool",
+          "status_display": "Talent Pool",
+          "is_held": true
+        },
+        {
+          "app_key_suffix": "I-IMPORT",
+          "status": "needs_role",
+          "canonical_stage": "needs_role",
+          "record_state": "talent_pool",
+          "status_display": "Talent Pool",
+          "is_held": true
+        }
+      ]
+    },
+    "stage_new": {
+      "total": 2,
+      "returned": 2,
+      "statuses": [
+        "awaiting_cv",
+        "screening"
+      ],
+      "sample": [
+        {
+          "app_key_suffix": "-FINANCE",
+          "status": "screening",
+          "canonical_stage": "cv_processing",
+          "record_state": "active_application",
+          "status_display": "Processing CV",
+          "is_held": false
+        },
+        {
+          "app_key_suffix": "EVELOPER",
+          "status": "awaiting_cv",
+          "canonical_stage": "awaiting_cv",
+          "record_state": "active_application",
+          "status_display": "Waiting for CV",
+          "is_held": false
+        }
+      ]
+    },
+    "stage_shortlisted": {
+      "total": 3,
+      "returned": 3,
+      "statuses": [
+        "shortlisted"
+      ],
+      "sample": [
+        {
+          "app_key_suffix": "_MANAGER",
+          "status": "shortlisted",
+          "canonical_stage": "shortlisted",
+          "record_state": "active_application",
+          "status_display": "Shortlisted",
+          "is_held": false
+        },
+        {
+          "app_key_suffix": "HEFNI-HR",
+          "status": "shortlisted",
+          "canonical_stage": "shortlisted",
+          "record_state": "active_application",
+          "status_display": "Shortlisted",
+          "is_held": false
+        },
+        {
+          "app_key_suffix": "HEFNI-HR",
+          "status": "shortlisted",
+          "canonical_stage": "shortlisted",
+          "record_state": "active_application",
+          "status_display": "Shortlisted",
+          "is_held": false
+        }
+      ]
+    }
+  },
+  "talent_pool_in_all_view": {
+    "count": 2,
+    "rows": [
+      {
+        "status": "needs_role",
+        "status_display": "Talent Pool",
+        "canonical_stage": "needs_role",
+        "display_bucket": "new",
+        "in_new_filter_statuses": false
+      },
+      {
+        "status": "needs_role",
+        "status_display": "Talent Pool",
+        "canonical_stage": "needs_role",
+        "display_bucket": "new",
+        "in_new_filter_statuses": false
+      }
+    ],
+    "all_display_new": true,
+    "any_in_new_filter": false,
+    "backend_status_display": [
+      "Talent Pool"
+    ]
+  },
+  "offer": {
+    "normalize_offer_sent": "shortlisted",
+    "shortlisted_api_total": 3,
+    "shortlisted_display_buckets": [
+      "shortlisted"
+    ]
+  },
+  "parity_checks": {
+    "talent_pool_badge_new_vs_new_filter": {
+      "badge": "New",
+      "filter_includes": false,
+      "live_gap_rows": 2,
+      "result": "FAIL"
+    },
+    "offer_display_vs_filter": {
+      "display_bucket_exists": true,
+      "filter_exists": false,
+      "live_raw_offer_statuses": 0,
+      "live_employment_offers_show_as": "shortlisted",
+      "result": "FAIL"
+    },
+    "list_total_vs_opened_filter": {
+      "new_total_equals_returned_predicate": true,
+      "result": "PASS"
+    }
+  },
+  "verdict": "FAIL"
+}

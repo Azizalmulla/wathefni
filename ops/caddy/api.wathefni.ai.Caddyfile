@@ -1,0 +1,94 @@
+api.wathefni.ai {
+	encode gzip
+
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	# R8 readiness contract — must reach the production orchestrator, not Caddy 404.
+	handle /ready {
+		reverse_proxy 127.0.0.1:8010
+	}
+	handle /health {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	# Universal / App Links association documents (no redirect).
+	handle /.well-known/apple-app-site-association {
+		reverse_proxy 127.0.0.1:8010
+	}
+	handle /apple-app-site-association {
+		reverse_proxy 127.0.0.1:8010
+	}
+	handle /.well-known/assetlinks.json {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	# HTTPS app-link destinations (installed app intercepts; browser gets fallback).
+	handle /l {
+		reverse_proxy 127.0.0.1:8010
+	}
+	handle /l/* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle /webhook/octopus/wathefni {
+		reverse_proxy 127.0.0.1:18789
+	}
+
+	# Staging-only Postmark inbound (must precede /webhook/postmark* wildcard).
+	# Production Postmark must continue using /webhook/postmark/inbound → :8010.
+	handle /webhook/postmark-staging* {
+		uri replace /webhook/postmark-staging /webhook/postmark
+		reverse_proxy 127.0.0.1:8011
+	}
+
+	handle /webhook/postmark* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle /assessment* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle /video-interview* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle /setup-console* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	# --- Dashboard routing (inverted): static is the small allowlist, backend is the default ---
+	handle_path /dashboard/assets/* {
+		root * /opt/wathefni/dashboard-dist/assets
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	@dash_shell path /dashboard /dashboard/ /dashboard/index.html /dashboard/favicon.svg
+	handle @dash_shell {
+		uri strip_prefix /dashboard
+		root * /opt/wathefni/dashboard-dist
+		try_files {path} /index.html
+		header Cache-Control "no-store, max-age=0"
+		file_server
+	}
+
+	handle /dashboard/* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle_path /media/* {
+		root * /var/www/wathefni-media
+		file_server
+	}
+
+	handle /app* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle {
+		respond "Not Found" 404
+	}
+}

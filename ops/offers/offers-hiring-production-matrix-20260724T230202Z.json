@@ -1,0 +1,241 @@
+{
+  "marker": "offers-hiring-production-matrix-v1",
+  "started_at": "20260724T230202Z",
+  "gates": [
+    {
+      "gate": "schema_governance_columns",
+      "ok": true,
+      "detail": "authorized_signatory,configuration_effective_date,country_of_employment,document_language,employer_policy_version,employing_legal_entity,template_approval_ref,template_id,template_version"
+    },
+    {
+      "gate": "schema_accepted_unique_index",
+      "ok": true,
+      "detail": "['employment_offers_accepted_app_uq']"
+    },
+    {
+      "gate": "schema_append_only_triggers",
+      "ok": true,
+      "detail": "['employment_offer_events_append_only', 'employment_offer_versions_append_only']"
+    },
+    {
+      "gate": "schema_delivery_operations",
+      "ok": true,
+      "detail": "employment_offer_delivery_operations"
+    },
+    {
+      "gate": "gcc_fields_on_draft",
+      "ok": true,
+      "detail": "{\"country_of_employment\": \"KW\", \"employing_legal_entity\": \"Wathefni Production Fixture K.S.C.C.\", \"template_id\": \"KW-OFFER-PRODUCTION\", \"template_version\": \"2026.7\", \"document_language\": \"en\", \"currency\": \"KWD\"}"
+    },
+    {
+      "gate": "compensation_redacted_without_permission",
+      "ok": true,
+      "detail": "{\"compensation_redacted\": true, \"base_salary\": null, \"document\": {\"version\": 1, \"available\": false, \"sha256\": null, \"filename\": null, \"mime_type\": null, \"source\": null, \"upload_matches_terms_confirmed\": null}}"
+    },
+    {
+      "gate": "pdf_denied_without_compensation_read",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "english_generated_pdf_readable",
+      "ok": true,
+      "detail": "bytes=675"
+    },
+    {
+      "gate": "arabic_generated_path_rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arabic_uploaded_pdf_authority",
+      "ok": true,
+      "detail": "{'version': 2, 'available': True, 'sha256': '9fdee9d52c360801c6b3c85bd081edfb459b1e38e8dc4f15a43a510d612ff39c', 'filename': 'offer-8eeb30c0-v2.pdf', 'mime_type': 'application/pdf', 'source': 'uploaded', 'upload_matches_terms_confirmed': True}"
+    },
+    {
+      "gate": "concurrent_send_one_provider_message",
+      "ok": true,
+      "detail": "calls=1 statuses=['sent', 'sent']"
+    },
+    {
+      "gate": "durable_one_send_operation",
+      "ok": true,
+      "detail": "ops=1 deliveries=1"
+    },
+    {
+      "gate": "public_preview_usable_after_send",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "raw_token_never_persisted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "api_response_has_no_raw_token",
+      "ok": true,
+      "detail": "['accepted_version', 'allowances', 'allowed_actions', 'app_key', 'approved_at', 'authorized_signatory', 'base_salary', 'candidate_name_snapshot', 'candidate_phone_snapshot', 'company_code', 'compensation_redacted', 'configuration_effective_date', 'country_of_employment', 'created_at', 'currency', 'current_version', 'delivery', 'delivery_operation', 'department', 'document', 'document_language', 'employer_policy_version', 'employing_legal_entity', 'expires_at', 'internal_notes', 'offer_id', 'position_code', 'position_title', 'probation_days', 'proposed_start_date', 'responded_at', 'response_source', 'sent_at', 'status', 'status_label', 'template_approval_ref', 'template_id', 'template_version', 'terms', 'updated_at']"
+    },
+    {
+      "gate": "resend_revokes_old_token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "canonical_expiry_idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "stale_link_no_compensation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "replacement_draft_after_expiry",
+      "ok": true,
+      "detail": "1fc0273a-f957-49ac-a9df-1b0f4cac0405"
+    },
+    {
+      "gate": "known_provider_failure_retry_same_op",
+      "ok": true,
+      "detail": "attempts=2 ops=1"
+    },
+    {
+      "gate": "unknown_outcome_manual_review_no_autoresend",
+      "ok": true,
+      "detail": "code=offer_delivery_outcome_unknown status=manual_review calls=1"
+    },
+    {
+      "gate": "public_page_escapes_and_csp",
+      "ok": true,
+      "detail": "csp=default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+    },
+    {
+      "gate": "one_accepted_offer_per_application",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "append_only_versions_and_events",
+      "ok": true,
+      "detail": "ObjectNotInPrerequisiteState,ObjectNotInPrerequisiteState"
+    },
+    {
+      "gate": "no_legacy_direct_hire_bypass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "prepare_hire_operation",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"16cd7010-dabe-463a-abe3-55f233bbeb0f\", \"company_code\": \"OFFERPRO\", \"app_key\": \"OFFERPRO-APP-03\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire-accepted:8033776e-9c7f-4521-b247-c828cc1fb7bf\", \"confirmation_id\": null, \"actor_user_id\": \"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\", \"actor_phone\": null, \"channel\": \"offers-staging-matrix\", \"ex"
+    },
+    {
+      "gate": "accepted_offer_hire_gate_allows",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"a62fd55a-959d-4e02-a6ee-e48652505828\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"81a21877-929a-475a-8e63-cffdf83dff84\", \"company_code\": \"OFFERPRO\", \"app_key\": \"OFFERPRO-APP-03\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 0, \"target_payload\": {\"operation_id\": \"16cd7010-dabe-463a-abe3-55f233bbeb0f\", \"hiring_reference\": \"16cd7010-dabe-463a-abe3-55f233bbeb0f\"}, \"request_hash\": \"243819fd269449df98a0d21342"
+    },
+    {
+      "gate": "atomic_hire_one_employee_no_half_hire",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"hire\": {\"ok\": true, \"operation_id\": \"16cd7010-dabe-463a-abe3-55f233bbeb0f\", \"transition\": {\"ok\": true, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\", \"application\": {\"app_key\": \"OFFERPRO-APP-03\", \"phone\": \"+965886003\", \"company_code\": \"OFFERPRO\", \"position_code\": \"OFFER_ROLE\", \"apply_code\": null, \"position_title\": \"Offers Role\", \"company_name\": null, \"status\": \"hired\", \"current_step\": \"hired\", \"cv_received\": true, \"cv_received_at\": \"2026-07-24\", \"screening_status\": \"complete\", \"screening_completed_at\": null, \"sheet_sync_status\": null, \"drive_sync_status\": null, \"raw_json\": {\"locale\": \"en\", \"offers_staging_marker\": \"offers-hiring-production-matrix-v1\"}, \"created_at\": null, \"updated_at\": \"2026-07-24\", \"ingested_at\": \"2026-07-24T23:02:02.583668+00:00\", \"data_source\": \"pr"
+    },
+    {
+      "gate": "hire_idempotent_no_second_employee",
+      "ok": true,
+      "detail": "emp2=1"
+    },
+    {
+      "gate": "override_requires_explicit_confirm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "override_audit_pending",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": true, \"reason\": \"Documented staging override without accepted offer\", \"offer_id\": null, \"no_accepted_offer\": true, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\", \"audit_id\": \"6859e72c-9635-4101-99af-80170032e094\", \"actor_subject\": \"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\", \"confirmation_ref\": \"override-confirm:47a2f9bf-580c-47b6-a04b-7da6511c84d5\", \"idemp"
+    },
+    {
+      "gate": "override_confirmation_minted",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"248a8eab-0ded-4027-8ea8-038577214019\", \"company_code\": \"OFFERPRO\", \"app_key\": \"OFFERPRO-APP-04\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 0, \"target_payload\": {\"operation_id\": \"46a68867-47ce-40a8-916e-b2a6c4cc0fff\", \"hiring_reference\": \"46a68867-47ce-40a8-916e-b2a6c4cc0fff\"}, \"request_hash\": \"2419cb0fef720e82870477e743"
+    },
+    {
+      "gate": "override_final_outcome_completed",
+      "ok": true,
+      "detail": "{\"hire\": {\"ok\": true, \"operation_id\": \"46a68867-47ce-40a8-916e-b2a6c4cc0fff\", \"transition\": {\"ok\": true, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\", \"application\": {\"app_key\": \"OFFERPRO-APP-04\", \"phone\": \"+965886004\", \"company_code\": \"OFFERPRO\", \"position_code\": \"OFFER_ROLE\", \"apply_code\": null, \"position_title\": \"Offers Role\", \"company_name\": null, \"status\": \"hired\", \"current_step\": \"hired\", \"cv_received\": true, \"cv_received_at\": \"2026-07-24\", \"screening_status\": \"complete\", \"screening_completed_at\": null, \"sheet_sync_status\": null, \"drive_sync_status\": null, \"raw_json\": {\"locale\": \"en\", \"offers_staging_marker\": \"offers-hiring-production-matrix-v1\"}, \"created_at\": null, \"updated_at\": \"2026-07-24\", \"ingested_at\": \"2026-07-24T23:02:02.583668+00:00\", \"data_source\": \"production\", \"data_source_detail\": null, \"import_batch_id\": null, \"source_ref\": null, \"lifecycle_version\": 1, \"owner_user_id\": null, \"ownership_version\": 0, \"owner_assigned_at\": null, \"owner_assigned_by_user_id\": null, \"person_id\": null, \"membership_id\": null}, \"event\": {\"event_id\": \"0322ce52-6d45-4fe9-95cc-83f6cf0acf8a\", \"company_code\": \"OFFERPRO\", \"app_key\": \"OFFERPRO-APP-04\", \"from_stage\": \"shortlisted\", \"to_stag"
+    },
+    {
+      "gate": "tenant_isolation_peer_has_no_primary_offers",
+      "ok": true,
+      "detail": "iso=0 primary=5 listed=[]"
+    },
+    {
+      "gate": "expiry_worker_pass",
+      "ok": true,
+      "detail": "{\"ok\": true, \"expired_count\": 1, \"offer_ids\": [\"589219c8-eec1-4b79-b799-9a5a86817d3c\"]}"
+    },
+    {
+      "gate": "dashboard_confirmations_present",
+      "ok": true,
+      "detail": "source panel not on host; checked at build"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "ok": true,
+      "detail": "{\"removed_files\": 5, \"residue\": {\"offers\": 0, \"versions\": 0, \"events\": 0, \"tokens\": 0, \"deliveries\": 0, \"send_ops\": 0, \"overrides\": 0, \"hire_ops\": 0, \"employees\": 0, \"applications\": 0, \"modules\": 0, \"companies\": 0}, \"zero\": true}"
+    }
+  ],
+  "schema": {
+    "governance_columns": [
+      "authorized_signatory",
+      "configuration_effective_date",
+      "country_of_employment",
+      "document_language",
+      "employer_policy_version",
+      "employing_legal_entity",
+      "template_approval_ref",
+      "template_id",
+      "template_version"
+    ],
+    "accepted_indexes": [
+      "employment_offers_accepted_app_uq"
+    ],
+    "append_only_triggers": [
+      "employment_offer_events_append_only",
+      "employment_offer_versions_append_only"
+    ],
+    "delivery_operations_table": "employment_offer_delivery_operations"
+  },
+  "cleanup": {
+    "removed_files": 5,
+    "residue": {
+      "offers": 0,
+      "versions": 0,
+      "events": 0,
+      "tokens": 0,
+      "deliveries": 0,
+      "send_ops": 0,
+      "overrides": 0,
+      "hire_ops": 0,
+      "employees": 0,
+      "applications": 0,
+      "modules": 0,
+      "companies": 0
+    },
+    "zero": true
+  },
+  "finished_at": "20260724T230203Z",
+  "summary": {
+    "total": 38,
+    "passed": 38,
+    "failed": 0
+  }
+}

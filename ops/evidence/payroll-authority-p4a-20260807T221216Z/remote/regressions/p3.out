@@ -1,0 +1,82 @@
+[PASS] p3 version
+[PASS] preview only
+[PASS] mode a sealed locked
+[PASS] native pdf locked
+[PASS] pifss/eos not implemented
+[PASS] payment disabled
+[PASS] no payment_date invent
+[PASS] no formula scripts
+[PASS] counsel gated ot/sick/ph
+[PASS] synthetic only default
+[PASS] invariant locked inputs
+[PASS] invariant deterministic
+[PASS] p1 preserved
+[PASS] p2 preserved
+[PASS] native preview not pdf eligible
+[PASS] external without seal id not pdf eligible
+[PASS] custom component upsert
+[PASS] custom assignment
+[PASS] one-off adjustment
+[PASS] reserved statutory cannot be custom
+[PASS] period
+[PASS] assemble inputs
+[PASS] assemble status lockable
+[PASS] lock inputs
+[PASS] catalog has BASIC
+[PASS] catalog has ALLOWANCE.TRANSPORT
+[PASS] catalog has ALLOWANCE.PHONE
+[PASS] catalog has DEDUCTION.LATENESS
+[PASS] catalog has DEDUCTION.ABSENCE
+[PASS] catalog has OT_ORDINARY
+[PASS] catalog has CUSTOM.EARNING
+[PASS] catalog has PIFSS_EE
+[PASS] policy v1
+[PASS] calc1 ok
+[PASS] calc1 preview authority
+[PASS] calc1 fingerprints present
+[PASS] calc1 policy fp
+[PASS] calc1 input fp
+[PASS] basic salary line
+[PASS] recurring allowance
+[PASS] recurring deduction
+[PASS] one-off earning
+[PASS] basic full period ~600
+[PASS] mid-period salary change
+[PASS] mid-period hire proration
+[PASS] mid-period leaver proration
+[PASS] unpaid absence deduction
+[PASS] unpaid leave deduction
+[PASS] no double deduct unpaid+absence
+[PASS] paid leave no absence deduct
+[PASS] lateness off no money
+[PASS] ot disabled no counsel block
+[PASS] ot disabled no OT money line
+[PASS] custom company component line
+[PASS] one-off deduction line
+[PASS] overlapping compensation blocked
+[PASS] overlap blocker code
+[PASS] idempotent flag
+[PASS] idempotent same fingerprint
+[PASS] idempotent same calc_run_id
+[PASS] policy v2 lateness
+[PASS] calc2 ok
+[PASS] lateness on produces money
+[PASS] policy version change new fingerprint
+[PASS] calc informational ok
+[PASS] informational no att money 4dec6f64
+[PASS] informational no att money 4dec6f64
+[PASS] informational no att money 4dec6f64
+[PASS] ignored mode no absence money
+[PASS] ot policy calc returns
+[PASS] ot counsel fail closed
+[PASS] rest counsel fail closed
+[PASS] ph counsel fail closed
+[PASS] sick counsel fail closed
+[PASS] ot blocked employee
+[PASS] no silent OT amount
+[PASS] policy for unlocked test
+[PASS] supersede for unlocked test
+[PASS] unlocked input refused
+[PASS] counsel placeholders seeded
+[PASS] no approved OT rate
+PASS=81 FAIL=0 EVID=/opt/wathefni/ops/evidence/payroll-authority-p3-20260807T221342Z

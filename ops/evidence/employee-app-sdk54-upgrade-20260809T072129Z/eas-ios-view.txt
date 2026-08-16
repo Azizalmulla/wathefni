@@ -1,0 +1,21 @@
+- Fetching the build…
+✔ Found a matching build for the project @abdulazizalmullas-team/aziz
+
+ID                       83f5955b-f9c7-45a7-a4c9-d09f696a2dcf
+Platform                 iOS
+Status                   finished
+Profile                  production
+Distribution             internal
+Channel                  canary
+SDK Version              54.0.0
+Runtime Version          0.2.0
+Version                  0.2.0
+Build number             22
+Commit                   2fa16534c8846887472dabbd10cc164a6c788f3f
+Logs                     https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/83f5955b-f9c7-45a7-a4c9-d09f696a2dcf
+Application Archive URL  https://expo.dev/artifacts/eas/n32aCuim_3lCkkA9mWT4omjJUqOH2IwhvVt02lOj2Nw.ipa
+Build Artifacts URL      null
+Fingerprint              171fa7574f35966acfe47ba078c025a1b37ef9b9
+Started at               8/9/2026, 10:31:36 AM
+Finished at              8/9/2026, 10:37:07 AM
+Started by               abdulazizalmulla

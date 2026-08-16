@@ -1,0 +1,3 @@
+has_employee_status_approval_module False
+has_find_employee_by_phone_aliases False
+has_canary_allowed False

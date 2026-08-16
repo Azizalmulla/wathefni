@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 import { LocaleProvider } from '@/i18n'
+import { reportClientError } from '@/lib/reportClientError'
 import { Screen, StatePanel } from './primitives'
 
 type Props = { children: ReactNode }
@@ -13,8 +14,8 @@ export class AppErrorBoundary extends Component<Props, State> {
     return { failed: true }
   }
 
-  componentDidCatch(_error: Error, _info: ErrorInfo) {
-    // Intentionally no console/crash payload: raw errors may include request data.
+  componentDidCatch(error: Error, _info: ErrorInfo) {
+    reportClientError(error)
   }
 
   render() {

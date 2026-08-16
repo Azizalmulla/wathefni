@@ -1,0 +1,5 @@
+-rw-r--r-- 1 root root 11069 Aug  2 00:23 /opt/wathefni/staging/orchestrator/ops/onboarding-wave1-legacy-migration-assessment.py
+-rw-r--r-- 1 root root 12474 Aug  2 00:23 /opt/wathefni/staging/orchestrator/smoke-test-onboarding-wave1-read-authority.py
+active
+/etc/systemd/system/wathefni-orchestrator-staging.service:Environment=WATHEFNI_ONBOARDING_HR_MUTATE=true
+/etc/systemd/system/wathefni-orchestrator-staging.service.d/setup-console-v2.conf:Environment=WATHEFNI_ONBOARDING_SEED=off

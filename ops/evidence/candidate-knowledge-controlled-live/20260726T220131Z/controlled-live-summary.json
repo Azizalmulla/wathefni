@@ -1,0 +1,245 @@
+{
+  "generated_at": "2026-07-26T22:01:41Z",
+  "database": "wathefni",
+  "health_start": {
+    "http_code": 200,
+    "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+  },
+  "health_after_orch_restart": {
+    "http_code": 200,
+    "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+  },
+  "database_identity": {
+    "status": "PASS",
+    "database_url_name": "wathefni",
+    "connected_db": "wathefni",
+    "tenants": "WATHEFNI",
+    "wathefni_env": "production",
+    "expected_db": "wathefni",
+    "staging_tenants_leaked": false,
+    "mismatch_refused": true,
+    "production_flags_file": true,
+    "voyage_enabled_flag": "0"
+  },
+  "worker_start_journal_excerpt": "Jul 26 21:46:31 srv1419988 python3[3060339]: {\"event\": \"ck_worker_stop\", \"owner\": \"ck-worker-eb4e78ab\"}\nJul 26 21:46:31 srv1419988 systemd[1]: wathefni-ck-index.service: Deactivated successfully.\nJul 26 21:46:31 srv1419988 systemd[1]: Stopped wathefni-ck-index.service - Wathefni Candidate Knowledge Index Worker (PRODUCTION-DARK).\nJul 26 21:50:51 srv1419988 systemd[1]: Started wathefni-ck-index.service - Wathefni Candidate Knowledge Index Worker (PRODUCTION-DARK).\nJul 26 21:50:52 srv1419988 python3[3062185]: {\"event\": \"ck_worker_start\", \"owner\": \"ck-worker-6c2d361f\", \"tenants\": [\"WATHEFNI\"], \"concurrency\": 1, \"embedder\": \"voyage\", \"expected_db\": \"wathefni\", \"connected_db\": \"wathefni\", \"wathefni_env\": \"production\"}\nJul 26 22:01:38 srv1419988 systemd[1]: Stopping wathefni-ck-index.service - Wathefni Candidate Knowledge Index Worker (PRODUCTION-DARK)...\nJul 26 22:01:38 srv1419988 python3[3062185]: {\"event\": \"ck_worker_stop\", \"owner\": \"ck-worker-6c2d361f\"}\nJul 26 22:01:38 srv1419988 systemd[1]: wathefni-ck-index.service: Deactivated successfully.\nJul 26 22:01:38 srv1419988 systemd[1]: Stopped wathefni-ck-index.service - Wathefni Candidate Knowledge Index Worker (PRODUCTION-DARK).\nJul 26 22:01:38 srv1419988 systemd[1]: wathefni-ck-index.service: Consumed 3.437s CPU time.\nJul 26 22:01:44 srv1419988 systemd[1]: Started wathefni-ck-index.service - Wathefni Candidate Knowledge Index Worker (PRODUCTION-DARK).\nJul 26 22:01:44 srv1419988 python3[3066693]: {\"event\": \"ck_worker_start\", \"owner\": \"ck-worker-b72ec209\", \"tenants\": [\"WATHEFNI\"], \"concurrency\": 1, \"embedder\": \"voyage\", \"expected_db\": \"wathefni\", \"connected_db\": \"wathefni\", \"wathefni_env\": \"production\"}",
+  "voyage_reindex": {
+    "enqueue": {
+      "eligible": 2,
+      "invalidated_chunks": 10,
+      "enqueued": [
+        {
+          "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+          "version_id": "44cfbc94-9220-4d11-8af7-fd7823376079",
+          "job_id": "2cf4c352-3d97-4e9e-9601-9d586d7e4919",
+          "nchars": 15611,
+          "status": "needs_role"
+        },
+        {
+          "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+          "version_id": "c36c0291-ceec-4697-91d8-02e4c108d5b5",
+          "job_id": "32be2058-d9ef-4718-8dda-dfe3ba465e8f",
+          "nchars": 6680,
+          "status": "needs_role"
+        }
+      ]
+    },
+    "result": {
+      "counts": {
+        "completed": 4
+      },
+      "chunks": {
+        "n": 10,
+        "with_vec": 10,
+        "voyage_n": 10,
+        "model_n": 10
+      },
+      "elapsed_s": 0.02
+    }
+  },
+  "invalidation": {
+    "status": "PASS",
+    "before_current": 3,
+    "invalidated": 3,
+    "after_current": 0,
+    "restored_current": 3,
+    "restored_voyage_chunks": 3
+  },
+  "owner_canary": {
+    "search_matrix": {
+      "query_lexical": "Esraa Aziz HRCI Ambassador",
+      "lexical": {
+        "mode": "lexical_only",
+        "total": 1,
+        "status": "PASS"
+      },
+      "hybrid": {
+        "mode": "hybrid",
+        "total": 1,
+        "status": "PASS"
+      },
+      "semantic_probe": {
+        "query": "professional experience skills qualifications",
+        "mode": "hybrid",
+        "total": 2,
+        "status": "PASS",
+        "note": "hybrid preferred; lexical_only acceptable only if disclosed and non-empty"
+      }
+    },
+    "canary": [
+      {
+        "id": "C1_exact_cv",
+        "status": "PASS",
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "version_id": "44cfbc94-9220-4d11-8af7-fd7823376079"
+      },
+      {
+        "id": "C1_owner_get",
+        "status": "PASS",
+        "text_omitted": true
+      },
+      {
+        "id": "C1_owner_search",
+        "status": "PASS",
+        "total": 1,
+        "mode": "hybrid"
+      },
+      {
+        "id": "owner_allowlist_denies_normal_user",
+        "status": "PASS"
+      },
+      {
+        "id": "C2_mariam_surname",
+        "status": "PASS",
+        "code": "candidate_ambiguous"
+      },
+      {
+        "id": "C3_held",
+        "status": "PASS",
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "ranking_eligible": false,
+        "denial": "held_or_job_ranking_ineligible"
+      },
+      {
+        "id": "C4_long_chunk",
+        "status": "PASS",
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "n": 8468
+      },
+      {
+        "id": "C5_gap",
+        "status": "PASS",
+        "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "canonical_cv": "not_recorded"
+      },
+      {
+        "id": "C6_identity_no_false_bind",
+        "status": "PASS",
+        "note": "covered_by_C2"
+      },
+      {
+        "id": "C7_compare",
+        "status": "PASS"
+      },
+      {
+        "id": "C8_ranking_shadow",
+        "status": "PASS",
+        "class": "expected_authority_difference",
+        "denial": "held_or_job_ranking_ineligible",
+        "unexplained": [],
+        "live_ranking_reader": "off"
+      },
+      {
+        "id": "C10_audit_fail_closed",
+        "status": "PASS"
+      },
+      {
+        "id": "tenant_isolation",
+        "status": "PASS",
+        "other_company_chunks_in_db": 0
+      },
+      {
+        "id": "zero_mutation_guards",
+        "status": "PASS"
+      },
+      {
+        "id": "registry_no_live_tools",
+        "status": "PASS",
+        "tools_flag": "off"
+      },
+      {
+        "id": "ranking_reader_off",
+        "status": "PASS"
+      },
+      {
+        "id": "pii_email_absent_in_current_chunks",
+        "status": "PASS",
+        "hits": 0
+      },
+      {
+        "id": "C9_kill_switch_restore",
+        "status": "PASS",
+        "stopped": "inactive",
+        "restored": "active",
+        "health_stop": 200,
+        "health_restore": 200,
+        "prior_registry_clean": true,
+        "worker_connected_wathefni_in_journal": true
+      }
+    ],
+    "voyage_runtime": {
+      "document_calls": 0,
+      "query_calls": 2,
+      "provider": "voyage",
+      "model": "voyage-4-large"
+    },
+    "audit_events_session": 7,
+    "vector_chunks": 10
+  },
+  "voyage": {
+    "document_calls": 10,
+    "query_calls": 5,
+    "approx_doc_tokens": 7572,
+    "approx_query_tokens": 120,
+    "estimated_cost_usd": 0.000923,
+    "model": "voyage-4-large",
+    "voyage_current_chunks": 10
+  },
+  "kill_switch": {
+    "id": "C9_kill_switch_restore",
+    "status": "PASS",
+    "stopped": "inactive",
+    "restored": "active",
+    "health_stop": 200,
+    "health_restore": 200,
+    "prior_registry_clean": true,
+    "worker_connected_wathefni_in_journal": true
+  },
+  "health_end": {
+    "http_code": 200,
+    "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+  },
+  "flags_final": {
+    "WATHEFNI_CANDIDATE_KNOWLEDGE": "on",
+    "WATHEFNI_CANDIDATE_KNOWLEDGE_TENANTS": "WATHEFNI",
+    "WATHEFNI_CANDIDATE_KNOWLEDGE_TOOLS": "off",
+    "WATHEFNI_CANDIDATE_KNOWLEDGE_RANKING_READER": "off",
+    "WATHEFNI_CANDIDATE_KNOWLEDGE_INDEX_WORKERS": "off",
+    "WATHEFNI_CK_SHADOW_TOOLS_ENABLED": "0",
+    "WATHEFNI_CK_RANKING_SHADOW": "0",
+    "WATHEFNI_CK_VOYAGE_ENABLED": "1",
+    "WATHEFNI_CK_SEMANTIC_SEARCH": "1",
+    "WATHEFNI_CK_OWNER_CANARY_ACTORS": "ck-owner-canary"
+  },
+  "worker_final": {
+    "active": "inactive",
+    "enabled": "disabled"
+  },
+  "status": "PASS",
+  "controlled_live_readiness_go": true,
+  "normal_recruiter_exposure_go": false,
+  "accepted_limitations": [
+    "Only 2 current ready canonical CVs in WATHEFNI production; reindexed all of them with voyage-4-large.",
+    "Owner/admin canary uses shadow tools + allowlist; live action_registry tools remain unregistered.",
+    "Live Ranking reader remains OFF; Ranking shadow only."
+  ]
+}

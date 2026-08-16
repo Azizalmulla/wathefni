@@ -1,0 +1,564 @@
+{
+  "summary": {
+    "official_fixture_files": 61,
+    "good_ok": 43,
+    "good_n": 43,
+    "malformed_ok": 6,
+    "malformed_n": 10,
+    "abuse_rejected_or_error": 8,
+    "abuse_n": 8,
+    "abuse_unexpected_ok": [],
+    "median_good_ms": 0.252
+  },
+  "rows": [
+    {
+      "file": "abuse/deepnest--errors.ppt",
+      "ok": false,
+      "ms": 1.733,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_record_depth): record nesting exceeds 64",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/deepxml--errors.docx",
+      "ok": false,
+      "ms": 1.429,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_xml_depth): element nesting exceeds 256",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/emptyrowrepeat--errors.ods",
+      "ok": false,
+      "ms": 0.369,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_expansion): table repeat expansion exceeds the content budget",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/hugerepeat--errors.ods",
+      "ok": false,
+      "ms": 0.357,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_expansion): table repeat expansion exceeds the content budget",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/hugespan--errors.ods",
+      "ok": false,
+      "ms": 0.223,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_expansion): table repeat expansion exceeds the content budget",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/hugespan--errors.pptx",
+      "ok": false,
+      "ms": 0.377,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_expansion): table span expansion exceeds the content budget",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/imagebomb--errors.docx",
+      "ok": false,
+      "ms": 0.32,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_entry_bytes): word/media/image1.png declares 201326592 decompressed bytes",
+      "category": "abuse"
+    },
+    {
+      "file": "abuse/zipbomb--errors.docx",
+      "ok": false,
+      "ms": 0.234,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: resource limit exceeded (max_entry_bytes): word/document.xml declares 201326759 decompressed bytes",
+      "category": "abuse"
+    },
+    {
+      "file": "csv/handmade-quoted.csv",
+      "ok": true,
+      "ms": 0.252,
+      "chars": 111,
+      "arabic": 0,
+      "error": null,
+      "category": "csv"
+    },
+    {
+      "file": "csv/handmade-semicolon.csv",
+      "ok": true,
+      "ms": 0.158,
+      "chars": 79,
+      "arabic": 0,
+      "error": null,
+      "category": "csv"
+    },
+    {
+      "file": "csv/handmade-utf16.csv",
+      "ok": true,
+      "ms": 0.165,
+      "chars": 70,
+      "arabic": 0,
+      "error": null,
+      "category": "csv"
+    },
+    {
+      "file": "csv/sheet.csv",
+      "ok": true,
+      "ms": 0.177,
+      "chars": 305,
+      "arabic": 0,
+      "error": null,
+      "category": "csv"
+    },
+    {
+      "file": "doc/handmade-cyrillic.doc",
+      "ok": true,
+      "ms": 0.527,
+      "chars": 38,
+      "arabic": 0,
+      "error": null,
+      "category": "doc"
+    },
+    {
+      "file": "doc/handmade-shiftjis.doc",
+      "ok": true,
+      "ms": 0.257,
+      "chars": 20,
+      "arabic": 0,
+      "error": null,
+      "category": "doc"
+    },
+    {
+      "file": "doc/text.doc",
+      "ok": true,
+      "ms": 0.623,
+      "chars": 1253,
+      "arabic": 7,
+      "error": null,
+      "category": "doc"
+    },
+    {
+      "file": "docx/handmade-altpath.docx",
+      "ok": true,
+      "ms": 0.19,
+      "chars": 73,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-manyrefs.docx",
+      "ok": true,
+      "ms": 0.298,
+      "chars": 40,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-numbering.docx",
+      "ok": true,
+      "ms": 0.314,
+      "chars": 678,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-ole.docx",
+      "ok": true,
+      "ms": 0.143,
+      "chars": 51,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-outline.docx",
+      "ok": true,
+      "ms": 0.132,
+      "chars": 182,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-rich.docx",
+      "ok": true,
+      "ms": 0.235,
+      "chars": 197,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-strict.docx",
+      "ok": true,
+      "ms": 0.225,
+      "chars": 52,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/handmade-tables.docx",
+      "ok": true,
+      "ms": 0.185,
+      "chars": 115,
+      "arabic": 0,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "docx/text.docx",
+      "ok": true,
+      "ms": 1.506,
+      "chars": 1319,
+      "arabic": 7,
+      "error": null,
+      "category": "docx"
+    },
+    {
+      "file": "epub/book.epub",
+      "ok": true,
+      "ms": 0.561,
+      "chars": 769,
+      "arabic": 0,
+      "error": null,
+      "category": "epub"
+    },
+    {
+      "file": "epub/handmade-css-links.epub",
+      "ok": true,
+      "ms": 0.251,
+      "chars": 581,
+      "arabic": 0,
+      "error": null,
+      "category": "epub"
+    },
+    {
+      "file": "epub/handmade-features.epub",
+      "ok": true,
+      "ms": 0.237,
+      "chars": 635,
+      "arabic": 0,
+      "error": null,
+      "category": "epub"
+    },
+    {
+      "file": "malformed/brokenpersist--recovers.ppt",
+      "ok": true,
+      "ms": 0.53,
+      "chars": 250,
+      "arabic": 0,
+      "error": null,
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/corrupt-styles--skips.docx",
+      "ok": true,
+      "ms": 1.079,
+      "chars": 1257,
+      "arabic": 7,
+      "error": null,
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/empty--errors.docx",
+      "ok": false,
+      "ms": 0.07,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: malformed document: not a readable zip archive: invalid Zip archive: Could not find EOCD",
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/encrypted--errors.odt",
+      "ok": false,
+      "ms": 0.081,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: document is encrypted",
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/mismatched--recovers.docx",
+      "ok": true,
+      "ms": 0.106,
+      "chars": 16,
+      "arabic": 0,
+      "error": null,
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/missing-styles--skips.docx",
+      "ok": true,
+      "ms": 0.778,
+      "chars": 1257,
+      "arabic": 7,
+      "error": null,
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/truncated--errors.doc",
+      "ok": false,
+      "ms": 0.067,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: malformed document: not an OLE2 compound file: Malformed FAT (FAT has 39 entries, but file has only 7 sectors)",
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/truncated--errors.docx",
+      "ok": false,
+      "ms": 0.119,
+      "chars": 0,
+      "arabic": 0,
+      "error": "ConvertError: malformed document: not a readable zip archive: invalid Zip archive: Could not find EOCD",
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/unbalanced--recovers.rtf",
+      "ok": true,
+      "ms": 0.173,
+      "chars": 347,
+      "arabic": 3,
+      "error": null,
+      "category": "malformed"
+    },
+    {
+      "file": "malformed/unclosed--recovers.docx",
+      "ok": true,
+      "ms": 0.099,
+      "chars": 24,
+      "arabic": 0,
+      "error": null,
+      "category": "malformed"
+    },
+    {
+      "file": "odp/pres.odp",
+      "ok": true,
+      "ms": 1.083,
+      "chars": 280,
+      "arabic": 0,
+      "error": null,
+      "category": "odp"
+    },
+    {
+      "file": "ods/handmade-durations.ods",
+      "ok": true,
+      "ms": 0.124,
+      "chars": 175,
+      "arabic": 0,
+      "error": null,
+      "category": "ods"
+    },
+    {
+      "file": "ods/handmade-gaps.ods",
+      "ok": true,
+      "ms": 0.184,
+      "chars": 12836,
+      "arabic": 0,
+      "error": null,
+      "category": "ods"
+    },
+    {
+      "file": "ods/sheet.ods",
+      "ok": true,
+      "ms": 0.563,
+      "chars": 407,
+      "arabic": 0,
+      "error": null,
+      "category": "ods"
+    },
+    {
+      "file": "odt/handmade-defaults.odt",
+      "ok": true,
+      "ms": 0.1,
+      "chars": 122,
+      "arabic": 0,
+      "error": null,
+      "category": "odt"
+    },
+    {
+      "file": "odt/handmade-lists.odt",
+      "ok": true,
+      "ms": 0.107,
+      "chars": 128,
+      "arabic": 0,
+      "error": null,
+      "category": "odt"
+    },
+    {
+      "file": "odt/handmade-manifestcomment.odt",
+      "ok": true,
+      "ms": 0.091,
+      "chars": 22,
+      "arabic": 0,
+      "error": null,
+      "category": "odt"
+    },
+    {
+      "file": "odt/text.odt",
+      "ok": true,
+      "ms": 0.823,
+      "chars": 1325,
+      "arabic": 7,
+      "error": null,
+      "category": "odt"
+    },
+    {
+      "file": "pdf/text.pdf",
+      "ok": true,
+      "ms": 10.895,
+      "chars": 1061,
+      "arabic": 7,
+      "error": null,
+      "category": "pdf"
+    },
+    {
+      "file": "ppt/handmade-multimaster.ppt",
+      "ok": true,
+      "ms": 0.292,
+      "chars": 54,
+      "arabic": 0,
+      "error": null,
+      "category": "ppt"
+    },
+    {
+      "file": "ppt/handmade-sparsenotes.ppt",
+      "ok": true,
+      "ms": 0.198,
+      "chars": 66,
+      "arabic": 0,
+      "error": null,
+      "category": "ppt"
+    },
+    {
+      "file": "ppt/pres.ppt",
+      "ok": true,
+      "ms": 0.557,
+      "chars": 250,
+      "arabic": 0,
+      "error": null,
+      "category": "ppt"
+    },
+    {
+      "file": "pptx/handmade-altpath.pptx",
+      "ok": true,
+      "ms": 0.252,
+      "chars": 24,
+      "arabic": 0,
+      "error": null,
+      "category": "pptx"
+    },
+    {
+      "file": "pptx/handmade-inherit.pptx",
+      "ok": true,
+      "ms": 0.286,
+      "chars": 183,
+      "arabic": 0,
+      "error": null,
+      "category": "pptx"
+    },
+    {
+      "file": "pptx/handmade-links.pptx",
+      "ok": true,
+      "ms": 0.898,
+      "chars": 120,
+      "arabic": 0,
+      "error": null,
+      "category": "pptx"
+    },
+    {
+      "file": "pptx/handmade-order.pptx",
+      "ok": true,
+      "ms": 0.266,
+      "chars": 89,
+      "arabic": 0,
+      "error": null,
+      "category": "pptx"
+    },
+    {
+      "file": "pptx/handmade-strict.pptx",
+      "ok": true,
+      "ms": 0.257,
+      "chars": 40,
+      "arabic": 0,
+      "error": null,
+      "category": "pptx"
+    },
+    {
+      "file": "pptx/pres.pptx",
+      "ok": true,
+      "ms": 1.061,
+      "chars": 281,
+      "arabic": 0,
+      "error": null,
+      "category": "pptx"
+    },
+    {
+      "file": "rtf/handmade-bin.rtf",
+      "ok": true,
+      "ms": 0.153,
+      "chars": 347,
+      "arabic": 3,
+      "error": null,
+      "category": "rtf"
+    },
+    {
+      "file": "rtf/handmade-merge.rtf",
+      "ok": true,
+      "ms": 0.085,
+      "chars": 203,
+      "arabic": 0,
+      "error": null,
+      "category": "rtf"
+    },
+    {
+      "file": "rtf/text.rtf",
+      "ok": true,
+      "ms": 0.873,
+      "chars": 1324,
+      "arabic": 7,
+      "error": null,
+      "category": "rtf"
+    },
+    {
+      "file": "xls/sheet.xls",
+      "ok": true,
+      "ms": 0.316,
+      "chars": 402,
+      "arabic": 0,
+      "error": null,
+      "category": "xls"
+    },
+    {
+      "file": "xlsx/handmade-merged.xlsx",
+      "ok": true,
+      "ms": 0.163,
+      "chars": 94,
+      "arabic": 0,
+      "error": null,
+      "category": "xlsx"
+    },
+    {
+      "file": "xlsx/sheet.xlsx",
+      "ok": true,
+      "ms": 0.37,
+      "chars": 402,
+      "arabic": 0,
+      "error": null,
+      "category": "xlsx"
+    }
+  ]
+}

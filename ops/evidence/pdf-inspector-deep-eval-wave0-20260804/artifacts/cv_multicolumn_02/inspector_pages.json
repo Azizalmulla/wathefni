@@ -1,0 +1,16 @@
+{
+  "pages_with_tables_1idx": [
+    1
+  ],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": true,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "# Rita Gomez\n\nrita.gomez@example.com | +96550003344\n\n|LEFT COLUMN — Experience|RIGHT COLUMN — Education|\n|---|---|\n|Senior Engineer 2020-2026|BSc Computer Engineering|\n|Built intake queues and OCR gates.|Kuwait University 2019|\n|Owned PostgreSQL schemas.|Certifications|\n|Mentored 4 engineers.|AWS SAA, PMP|\n",
+      "markdown_len": 308
+    }
+  ]
+}

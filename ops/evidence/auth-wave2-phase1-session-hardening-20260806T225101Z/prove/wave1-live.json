@@ -1,0 +1,390 @@
+{
+  "started_at": "2026-08-06T22:51:50Z",
+  "checks": [
+    {
+      "check": "Aziz employee found",
+      "ok": true,
+      "detail": {
+        "key": "WATHEFNI-96599338566",
+        "phone": "96599338566"
+      }
+    },
+    {
+      "check": "Aziz activate via Kuwait local-8",
+      "ok": true,
+      "detail": {
+        "http": 200,
+        "employee_key": "WATHEFNI-96599338566"
+      }
+    },
+    {
+      "check": "Aziz reopen /app/me",
+      "ok": true,
+      "detail": {
+        "http": 200,
+        "employee_key": "WATHEFNI-96599338566"
+      }
+    },
+    {
+      "check": "Aziz refresh rotates tokens",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Aziz old access dead after refresh",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Aziz new-device re-activate",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Aziz prior session revoked on new-device activate",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Aziz revoke reason reactivated_via_invite",
+      "ok": true,
+      "detail": {
+        "revoked_reason": "reactivated_via_invite"
+      }
+    },
+    {
+      "check": "Aziz logout",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Aziz token dead after logout",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Aziz refresh dead after logout",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Aziz request-code generic ok",
+      "ok": true,
+      "detail": {
+        "http": 200,
+        "message": "If your number is registered, you'll receive a code shortly."
+      }
+    },
+    {
+      "check": "Aziz canary session restored",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Talal employee found",
+      "ok": true,
+      "detail": {
+        "key": "WATHEFNI-96550252254",
+        "phone": "96550252254"
+      }
+    },
+    {
+      "check": "Talal activate via Kuwait local-8",
+      "ok": true,
+      "detail": {
+        "http": 200,
+        "employee_key": "WATHEFNI-96550252254"
+      }
+    },
+    {
+      "check": "Talal reopen /app/me",
+      "ok": true,
+      "detail": {
+        "http": 200,
+        "employee_key": "WATHEFNI-96550252254"
+      }
+    },
+    {
+      "check": "Talal refresh rotates tokens",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Talal old access dead after refresh",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Talal new-device re-activate",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Talal prior session revoked on new-device activate",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Talal revoke reason reactivated_via_invite",
+      "ok": true,
+      "detail": {
+        "revoked_reason": "reactivated_via_invite"
+      }
+    },
+    {
+      "check": "Talal logout",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Talal token dead after logout",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Talal refresh dead after logout",
+      "ok": true,
+      "detail": {
+        "http": 401
+      }
+    },
+    {
+      "check": "Talal request-code generic ok",
+      "ok": true,
+      "detail": {
+        "http": 200,
+        "message": "If your number is registered, you'll receive a code shortly."
+      }
+    },
+    {
+      "check": "Talal canary session restored",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "Aziz Bank ESS snapshot unchanged",
+      "ok": true,
+      "detail": {
+        "before": {
+          "http": 200,
+          "has_verified_bank": true,
+          "iban_last4": "9548",
+          "bank_name": "Gulf bank",
+          "submission_state": "none",
+          "effective_fp": "0f349ce848ab5e4b",
+          "payroll_effective_present": true,
+          "denied": false
+        },
+        "after": {
+          "http": 200,
+          "has_verified_bank": true,
+          "iban_last4": "9548",
+          "bank_name": "Gulf bank",
+          "submission_state": "none",
+          "effective_fp": "0f349ce848ab5e4b",
+          "payroll_effective_present": true,
+          "denied": false
+        }
+      }
+    },
+    {
+      "check": "Aziz onboarding completion unchanged",
+      "ok": true,
+      "detail": {
+        "before": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        },
+        "after": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        },
+        "profile": [
+          "completed",
+          "completed"
+        ]
+      }
+    },
+    {
+      "check": "Talal Bank ESS snapshot unchanged",
+      "ok": true,
+      "detail": {
+        "before": {
+          "http": 403,
+          "error": "bank_ess_not_allowlisted",
+          "denied": true
+        },
+        "after": {
+          "http": 403,
+          "error": "bank_ess_not_allowlisted",
+          "denied": true
+        }
+      }
+    },
+    {
+      "check": "Talal onboarding completion unchanged",
+      "ok": true,
+      "detail": {
+        "before": {
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4,
+          "owner": "employee"
+        },
+        "after": {
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4,
+          "owner": "employee"
+        },
+        "profile": [
+          "waiting_on_employee",
+          "waiting_on_employee"
+        ]
+      }
+    }
+  ],
+  "failed": 0,
+  "employees": {
+    "Aziz": {
+      "employee_key": "WATHEFNI-96599338566",
+      "phone_full": "96599338566",
+      "local8": "99338566",
+      "invite_id": "4e26bb7e-1fa1-4172-964d-4010dc1acb7e",
+      "restored": true
+    },
+    "Talal": {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone_full": "96550252254",
+      "local8": "50252254",
+      "invite_id": "b5814f79-88a5-4dfe-a6b7-76ab8b09cd99",
+      "restored": true
+    }
+  },
+  "before": {
+    "Aziz": {
+      "http": {
+        "bank": 200,
+        "onboarding": 200,
+        "profile": 200
+      },
+      "bank": {
+        "http": 200,
+        "has_verified_bank": true,
+        "iban_last4": "9548",
+        "bank_name": "Gulf bank",
+        "submission_state": "none",
+        "effective_fp": "0f349ce848ab5e4b",
+        "payroll_effective_present": true,
+        "denied": false
+      },
+      "onboarding": {
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none"
+      },
+      "profile_completion_state": "completed"
+    },
+    "Talal": {
+      "http": {
+        "bank": 403,
+        "onboarding": 200,
+        "profile": 200
+      },
+      "bank": {
+        "http": 403,
+        "error": "bank_ess_not_allowlisted",
+        "denied": true
+      },
+      "onboarding": {
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee"
+      },
+      "profile_completion_state": "waiting_on_employee"
+    }
+  },
+  "after": {
+    "Aziz": {
+      "http": {
+        "bank": 200,
+        "onboarding": 200,
+        "profile": 200
+      },
+      "bank": {
+        "http": 200,
+        "has_verified_bank": true,
+        "iban_last4": "9548",
+        "bank_name": "Gulf bank",
+        "submission_state": "none",
+        "effective_fp": "0f349ce848ab5e4b",
+        "payroll_effective_present": true,
+        "denied": false
+      },
+      "onboarding": {
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none"
+      },
+      "profile_completion_state": "completed"
+    },
+    "Talal": {
+      "http": {
+        "bank": 403,
+        "onboarding": 200,
+        "profile": 200
+      },
+      "bank": {
+        "http": 403,
+        "error": "bank_ess_not_allowlisted",
+        "denied": true
+      },
+      "onboarding": {
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee"
+      },
+      "profile_completion_state": "waiting_on_employee"
+    }
+  },
+  "finished_at": "2026-08-06T22:51:52Z",
+  "verdict": "PASS"
+}

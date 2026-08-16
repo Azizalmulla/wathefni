@@ -1,0 +1,16 @@
+    PRODUCTION READINESS R8 — delivery safety DB contracts
+      PASS  runtime path does not apply schema
+      PASS  drift detector is ok after apply
+      PASS  version 1 is in history
+      PASS  no pending forward migrations
+      PASS  required relations exist
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-r8-delivery-safety-db.py", line 100, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-r8-delivery-safety-db.py", line 58, in main
+    event = observability.record_error_event(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/observability.py", line 87, in record_error_event
+    structured_log("error", "client_or_server_error", **event)
+TypeError: structured_log() got multiple values for argument 'level'

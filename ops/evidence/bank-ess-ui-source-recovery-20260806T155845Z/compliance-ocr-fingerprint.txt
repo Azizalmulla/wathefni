@@ -1,0 +1,14 @@
+needle                                        live base rel
+data-compliance-findings                         1    1    1
+data-compliance-register                         1    1    1
+data-compliance-summary                          1    1    1
+data-document-extraction-summary                 1    1    1
+Extraction & validation summary                  1    1    1
+No findings in this view                         1    1    1
+All documents                                    1    1    1
+Open in Findings                                 1    1    1
+Bank details                                     1    1    1
+masked by default                                1    1    1
+Currently verified                               0    0    1
+data-completion-state                            0    0    1
+COMPLIANCE+OCR PRESERVED OK

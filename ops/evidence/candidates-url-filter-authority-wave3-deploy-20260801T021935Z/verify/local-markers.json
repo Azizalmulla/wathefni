@@ -1,0 +1,15 @@
+{
+  "dashboard": "dashboard-B_fWNxcn.js",
+  "dashboard_sha256": "ec1df8bb80370987a7019b41cecaaed6b6f89b6de3f0d44bc186293a6b3d6245",
+  "checks": {
+    "cv_processing_state": true,
+    "received_from": true,
+    "source_channel": true,
+    "recruiter_owner": true,
+    "department_intake_tag": true,
+    "cohort_key": true,
+    "overview_cohort": true,
+    "follow_up": true
+  },
+  "size": 227230
+}

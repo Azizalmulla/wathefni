@@ -1,0 +1,4 @@
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  app.py
+4c26aa9277d1e4c75662b9cb95e39844c56ee0868bfcfc29296e2e1ebcc57659  smoke-test-onboarding-wave1-read-authority.py
+f4ade6b0075d7a5970860c46052a7597bfea84b3d45a2ed000c1b341bbf4550c  smoke-test-employees360-freeze-regression.py
+f5e38a037fc242f72e4852fd8ec1f579d420bdb63e82061907bc726fbc06ca6a  ops/onboarding-wave1-legacy-migration-assessment.py

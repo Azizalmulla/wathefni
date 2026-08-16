@@ -1,0 +1,65 @@
+=== index.html ===
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/dashboard/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wathefni</title>
+    <script type="module" crossorigin src="/dashboard/assets/dashboard-Chj8zF7Y.js"></script>
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/rolldown-runtime-ciTZEWaI.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/src-vT2ogiMW.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/lucide-DXG-lAS2.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/react-query-C-0RpxWl.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/button-CdsJfbcM.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/react-vendor-K9trxRfS.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/useOverlayA11y-Cdn2kTJj.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/ConfirmDialog-B1z6I9X4.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/badge-ByGi6G6Z.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/card-CRyt1qVN.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/field-jjpJt-eD.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/api-CdlXhpLo.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/access-jb0jv3UY.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/dashboardPerf-BmWSAjrQ.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/fetchers-BudFlB02.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/freshness-D5u22DzA.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/keys-CPFej8aV.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/recruitingLifecycle-BwGtHlaT.js">
+    <link rel="stylesheet" crossorigin href="/dashboard/assets/src-ApqOsuXo.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+=== assets listing ===
+AdminAIPage-DmuJx1kn.js
+AssessmentsPage-B-IyezMY.js
+CalendarShell-BuD1renC.js
+CandidateProfilePage-BAHoOIfh.js
+CandidatesPage-B2TucSs1.js
+ConfirmDialog-B1z6I9X4.js
+InterviewsPage-D8CIYwnq.js
+JobWorkspace-DEmia-t5.js
+JobsPage-DG2OcREq.js
+NotificationsPage-CHIBvdIC.js
+PostHire-BRA7Ln_S.js
+RankingPage-CvJmb4Cy.js
+ReportsPage-CdJiltSr.js
+SettingsPage-BQyymP2x.js
+access-jb0jv3UY.js
+api-CdlXhpLo.js
+badge-ByGi6G6Z.js
+button-CdsJfbcM.js
+card-CRyt1qVN.js
+dashboard-Chj8zF7Y.js
+dashboardPerf-BmWSAjrQ.js
+fetchers-BudFlB02.js
+field-jjpJt-eD.js
+freshness-D5u22DzA.js
+inboundIntakePresentation-BbF5Ihcx.js
+keys-CPFej8aV.js
+load-more-bar-BLwi3Wc1.js
+lucide-DXG-lAS2.js
+react-query-C-0RpxWl.js
+react-vendor-K9trxRfS.js
+=== nginx ===

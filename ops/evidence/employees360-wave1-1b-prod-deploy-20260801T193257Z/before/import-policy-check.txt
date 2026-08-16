@@ -1,0 +1,6 @@
+IMPORT_OK
+canary_allowed_WATHEFNI False
+canary_envs ['dev', 'development', 'harness', 'local', 'pytest', 'stage', 'staging', 'test']
+policy_eligible 1 ['azizalmulla16@gmail.com']
+self_approval_allowed False
+PREDEPLOY_IMPORT_POLICY_OK

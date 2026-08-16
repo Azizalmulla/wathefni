@@ -1,0 +1,1520 @@
+{
+  "summary": {
+    "pass": 43,
+    "fail": 0,
+    "tag": "90554fba",
+    "company": "ATTW2B",
+    "employee_key": "ATTW2B-ATTW2B-90554fba"
+  },
+  "results": [
+    {
+      "label": "privacy hard-fail biotime",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "biometric_payload_forbidden",
+        "forbidden_keys": [
+          "fingerprint_image",
+          "template"
+        ],
+        "privacy_hard_fail": true
+      }
+    },
+    {
+      "label": "privacy hard-fail csv",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "biometric_payload_forbidden",
+        "forbidden_keys": [
+          "face_image"
+        ],
+        "privacy_hard_fail": true
+      }
+    },
+    {
+      "label": "biotime pagination pages",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "biotime pulled 4",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "label": "capture methods card+face+biometric",
+      "ok": true,
+      "detail": [
+        "biometric",
+        "card",
+        "face"
+      ]
+    },
+    {
+      "label": "no biometric payloads in raw_ref",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority ingest biotime",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 4,
+        "duplicates": 0,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "biotime:101",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:102",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:201",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:202",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "duplicate pull idempotent",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 4,
+        "duplicates": 4,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "biotime:101",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:102",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:201",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:202",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "normal day projection 480",
+      "ok": true,
+      "detail": {
+        "company_code": "ATTW2B",
+        "employee_key": "ATTW2B-ATTW2B-90554fba",
+        "employee_phone": "96558109055",
+        "employee_name": "W2B-90554fba",
+        "work_date": "2026-08-20",
+        "shift_id": "2868093c-17a6-46e1-95c6-649838aacaf7",
+        "shift_key": "2868093c-17a6-46e1-95c6-649838aacaf7",
+        "status": "completed",
+        "exception_state": "none",
+        "approval_status": "unapproved",
+        "payroll_eligible": false,
+        "check_in_at": "2026-08-20T09:00:00+03:00",
+        "check_out_at": "2026-08-20T17:00:00+03:00",
+        "scheduled_start": "09:00:00",
+        "scheduled_end": "17:00:00",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "worked_minutes": 480,
+        "unpaid_break_minutes": 0,
+        "paid_break_minutes": 0,
+        "sessions": [
+          {
+            "session_index": 1,
+            "check_in_at": "2026-08-20T09:00:00+03:00",
+            "check_out_at": "2026-08-20T17:00:00+03:00",
+            "worked_minutes": 480,
+            "open": false
+          }
+        ],
+        "breaks": [],
+        "source_counts": {
+          "biotime": 2
+        },
+        "authority": "attendance_authority_wave1_v1",
+        "leave_id": null,
+        "derived_from_leave": false,
+        "manual_correction": false,
+        "metadata": {},
+        "created_by_phone": "",
+        "version": 4,
+        "is_current": true,
+        "projection_id": "9e1b20a2-4cbc-42e6-b53b-a86a30f3bb18",
+        "created_at": "2026-08-02T05:53:20.694126+03:00",
+        "updated_at": "2026-08-02T05:53:20.694127+03:00"
+      }
+    },
+    {
+      "label": "overnight projection",
+      "ok": true,
+      "detail": {
+        "company_code": "ATTW2B",
+        "employee_key": "ATTW2B-ATTW2B-90554fba",
+        "employee_phone": "96558109055",
+        "employee_name": "W2B-90554fba",
+        "work_date": "2026-08-21",
+        "shift_id": "f882650f-6fc9-4136-baea-80e560bd05a0",
+        "shift_key": "f882650f-6fc9-4136-baea-80e560bd05a0",
+        "status": "completed",
+        "exception_state": "none",
+        "approval_status": "unapproved",
+        "payroll_eligible": false,
+        "check_in_at": "2026-08-21T22:00:00+03:00",
+        "check_out_at": "2026-08-22T06:00:00+03:00",
+        "scheduled_start": "22:00:00",
+        "scheduled_end": "06:00:00",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "worked_minutes": 480,
+        "unpaid_break_minutes": 0,
+        "paid_break_minutes": 0,
+        "sessions": [
+          {
+            "session_index": 1,
+            "check_in_at": "2026-08-21T22:00:00+03:00",
+            "check_out_at": "2026-08-22T06:00:00+03:00",
+            "worked_minutes": 480,
+            "open": false
+          }
+        ],
+        "breaks": [],
+        "source_counts": {
+          "biotime": 2
+        },
+        "authority": "attendance_authority_wave1_v1",
+        "leave_id": null,
+        "derived_from_leave": false,
+        "manual_correction": false,
+        "metadata": {},
+        "created_by_phone": "",
+        "version": 4,
+        "is_current": true,
+        "projection_id": "dcdc2843-936f-4b9d-b92d-4a5eb27f75d2",
+        "created_at": "2026-08-02T05:53:20.695499+03:00",
+        "updated_at": "2026-08-02T05:53:20.695500+03:00"
+      }
+    },
+    {
+      "label": "checkpoint skips old ids",
+      "ok": true,
+      "detail": [
+        "biotime:301",
+        "biotime:302"
+      ]
+    },
+    {
+      "label": "agent poll enqueue",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "enqueued": 2,
+        "privacy_fails": [],
+        "quarantined": [],
+        "checkpoint": "biotime:102",
+        "pages": 1
+      }
+    },
+    {
+      "label": "agent offline enqueue",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "agent flush delivered",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "delivered": 3,
+        "pending": 0,
+        "errors": []
+      }
+    },
+    {
+      "label": "credentials persisted sealed",
+      "ok": true,
+      "detail": "gAAAAABqbrEgyWQPWO1tzWvdTdjWrGHdQxKJBw0P8FvnKVFu1N3t99Z6rusMPIMoMIiSp4eqiU5LPuexr3SFnqxY_UMqf1OoXQ_-GWaeZSDZ1T9II4Ipn5AVWrFWoz1a3iqz8G79X3eiKtj0MBNilELc1x8bbKbh3Fb_4MCBTYOtg5L2MnOGrjQ="
+    },
+    {
+      "label": "restart outbox empty",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "checkpoint durable",
+      "ok": true,
+      "detail": "biotime:102"
+    },
+    {
+      "label": "invalid credentials fail",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "auth_failed:401",
+        "auth_error": true
+      }
+    },
+    {
+      "label": "credential rotation recovers",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "enqueued": 1,
+        "privacy_fails": [],
+        "quarantined": [],
+        "checkpoint": "biotime:999",
+        "pages": 1
+      }
+    },
+    {
+      "label": "connector health present",
+      "ok": true,
+      "detail": {
+        "connector_id": "agent-90554fba",
+        "connector_version": "attendance_capture_wave2b_v1",
+        "company_code": "ATTW2B",
+        "status": "ok",
+        "last_sync_at": "2026-08-02T02:53:20.757994+00:00",
+        "last_success_at": "2026-08-02T02:53:20.757994+00:00",
+        "lag_seconds": 0.0,
+        "events_in_window": 1,
+        "error_count": 1,
+        "last_error": "auth_failed:401",
+        "checkpoint": "biotime:999",
+        "auth_expires_at": null
+      }
+    },
+    {
+      "label": "unknown maps to canonical",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "punch": {
+          "company_code": "ATTW2B",
+          "source": "biotime",
+          "source_event_id": "biotime:777",
+          "device_user_id": "9999",
+          "punched_at": "2026-08-20T09:05:00+03:00",
+          "direction": "in",
+          "capture_method": "card",
+          "employee_key": null,
+          "device_id": "SN-A",
+          "connector_id": "w2b-90554fba",
+          "connector_version": "attendance_capture_wave2b_v1",
+          "work_date_hint": null,
+          "raw_ref": {
+            "id": 777,
+            "emp_code": "9999",
+            "punch_time": "2026-08-20 09:05:00",
+            "punch_state": "0",
+            "verify_type": 2,
+            "terminal_sn": "SN-A"
+          },
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2
+          }
+        }
+      }
+    },
+    {
+      "label": "unknown quarantined",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "quarantined": true,
+        "reason": "unknown_device_user",
+        "quarantine_id": "8efb1948-4c81-4e79-a984-ada8732af387",
+        "source_event_id": "biotime:777"
+      }
+    },
+    {
+      "label": "mapping replay accepted",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "created": true,
+        "duplicate": false,
+        "punch": {
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "punched_at": "2026-08-20T09:05:00+03:00",
+          "direction": "in",
+          "source": "biotime",
+          "source_event_id": "biotime:777",
+          "shift_id": "2868093c-17a6-46e1-95c6-649838aacaf7",
+          "shift_key": "2868093c-17a6-46e1-95c6-649838aacaf7",
+          "work_date": "2026-08-20",
+          "break_paid": null,
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2,
+            "device_id": "SN-A",
+            "device_user_id": "9999",
+            "connector_id": "w2b-90554fba",
+            "connector_version": "attendance_capture_wave2b_v1",
+            "raw_ref": {
+              "id": 777,
+              "emp_code": "9999",
+              "punch_time": "2026-08-20 09:05:00",
+              "punch_state": "0",
+              "verify_type": 2,
+              "terminal_sn": "SN-A"
+            }
+          },
+          "created_by_phone": "",
+          "punch_id": "23013009-6d4b-40e3-84fd-e43dcb6e0fd7",
+          "created_at": "2026-08-02T05:53:20.762731+03:00"
+        },
+        "projection": {
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "work_date": "2026-08-20",
+          "shift_id": "2868093c-17a6-46e1-95c6-649838aacaf7",
+          "shift_key": "2868093c-17a6-46e1-95c6-649838aacaf7",
+          "status": "incomplete",
+          "exception_state": "ambiguous_punches",
+          "approval_status": "unapproved",
+          "payroll_eligible": false,
+          "check_in_at": "2026-08-20T09:00:00+03:00",
+          "check_out_at": "2026-08-20T17:00:00+03:00",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 475,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-20T09:00:00+03:00",
+              "check_out_at": null,
+              "worked_minutes": 0,
+              "open": false
+            },
+            {
+              "session_index": 2,
+              "check_in_at": "2026-08-20T09:05:00+03:00",
+              "check_out_at": "2026-08-20T17:00:00+03:00",
+              "worked_minutes": 475,
+              "open": false
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "biotime": 3
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {},
+          "created_by_phone": "",
+          "version": 5,
+          "is_current": true,
+          "projection_id": "9fd35499-99da-4730-b6b0-d454e34c2074",
+          "created_at": "2026-08-02T05:53:20.763135+03:00",
+          "updated_at": "2026-08-02T05:53:20.763135+03:00"
+        },
+        "compat": {
+          "attendance_id": "9fd35499-99da-4730-b6b0-d454e34c2074",
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "shift_id": "2868093c-17a6-46e1-95c6-649838aacaf7",
+          "attendance_date": "2026-08-20",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "check_in_at": "2026-08-20T09:00:00+03:00",
+          "check_out_at": "2026-08-20T17:00:00+03:00",
+          "status": "incomplete",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "notes": null,
+          "source_text": null,
+          "metadata": {
+            "authority": "attendance_authority_wave1_v1",
+            "projection_version": 5,
+            "exception_state": "ambiguous_punches",
+            "approval_status": "unapproved",
+            "payroll_eligible": false,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-20T09:00:00+03:00",
+                "check_out_at": null,
+                "worked_minutes": 0,
+                "open": false
+              },
+              {
+                "session_index": 2,
+                "check_in_at": "2026-08-20T09:05:00+03:00",
+                "check_out_at": "2026-08-20T17:00:00+03:00",
+                "worked_minutes": 475,
+                "open": false
+              }
+            ],
+            "breaks": [],
+            "worked_minutes": 475,
+            "shift_key": "2868093c-17a6-46e1-95c6-649838aacaf7"
+          },
+          "created_by_phone": "",
+          "created_at": "2026-08-02T05:53:20.763135+03:00",
+          "updated_at": "2026-08-02T05:53:20.763135+03:00"
+        },
+        "canonical": {
+          "company_code": "ATTW2B",
+          "source": "biotime",
+          "source_event_id": "biotime:777",
+          "device_user_id": "9999",
+          "punched_at": "2026-08-20T09:05:00+03:00",
+          "direction": "in",
+          "capture_method": "card",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "device_id": "SN-A",
+          "connector_id": "w2b-90554fba",
+          "connector_version": "attendance_capture_wave2b_v1",
+          "work_date_hint": null,
+          "raw_ref": {
+            "id": 777,
+            "emp_code": "9999",
+            "punch_time": "2026-08-20 09:05:00",
+            "punch_state": "0",
+            "verify_type": 2,
+            "terminal_sn": "SN-A"
+          },
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2
+          }
+        }
+      }
+    },
+    {
+      "label": "csv same content same event ids",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "csv duplicate across files idempotent",
+      "ok": true,
+      "detail": {
+        "r1": {
+          "ok": true,
+          "accepted": 2,
+          "duplicates": 0,
+          "quarantined": 0,
+          "failed": 0,
+          "details": [
+            {
+              "source_event_id": "csv:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:73f0e2aa2966e1503074044db1868acfb4dea8ed2b8151c9cc591f41241dec6b",
+              "result": {
+                "ok": true,
+                "duplicate": false,
+                "quarantined": null,
+                "error": null
+              }
+            },
+            {
+              "source_event_id": "csv:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:3425bfbfad9293e1e2c2fa3904da5535e12a4bc24826feea798a0dc1b24592dd",
+              "result": {
+                "ok": true,
+                "duplicate": false,
+                "quarantined": null,
+                "error": null
+              }
+            }
+          ]
+        },
+        "r2": {
+          "ok": true,
+          "accepted": 2,
+          "duplicates": 2,
+          "quarantined": 0,
+          "failed": 0,
+          "details": [
+            {
+              "source_event_id": "csv:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:73f0e2aa2966e1503074044db1868acfb4dea8ed2b8151c9cc591f41241dec6b",
+              "result": {
+                "ok": true,
+                "duplicate": true,
+                "quarantined": null,
+                "error": null
+              }
+            },
+            {
+              "source_event_id": "csv:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:3425bfbfad9293e1e2c2fa3904da5535e12a4bc24826feea798a0dc1b24592dd",
+              "result": {
+                "ok": true,
+                "duplicate": true,
+                "quarantined": null,
+                "error": null
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "xlsx parsed",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "filename": "d.xlsx",
+        "file_sha256": "7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc",
+        "punches": [
+          {
+            "company_code": "ATTW2B",
+            "source": "csv",
+            "source_event_id": "csv:7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc:f577872a2529bd86615a2f98dda742029c301b61b5f6e2330734c0123125e162",
+            "device_user_id": "1001",
+            "punched_at": "2026-08-24T09:00:00+03:00",
+            "direction": "in",
+            "capture_method": "pin",
+            "employee_key": null,
+            "device_id": "SN-A",
+            "connector_id": "xlsx-90554fba",
+            "connector_version": "attendance_capture_wave2b_v1",
+            "work_date_hint": null,
+            "raw_ref": {
+              "file_sha256": "7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc",
+              "row_sha256": "f577872a2529bd86615a2f98dda742029c301b61b5f6e2330734c0123125e162"
+            },
+            "metadata": {
+              "capture_method": "pin",
+              "import_kind": "csv"
+            }
+          },
+          {
+            "company_code": "ATTW2B",
+            "source": "csv",
+            "source_event_id": "csv:7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc:fe5458971285372f1e4461c555ee07531e6bdcd8bacba977ef0b7f56628c4064",
+            "device_user_id": "1001",
+            "punched_at": "2026-08-24T17:00:00+03:00",
+            "direction": "out",
+            "capture_method": "pin",
+            "employee_key": null,
+            "device_id": "SN-A",
+            "connector_id": "xlsx-90554fba",
+            "connector_version": "attendance_capture_wave2b_v1",
+            "work_date_hint": null,
+            "raw_ref": {
+              "file_sha256": "7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc",
+              "row_sha256": "fe5458971285372f1e4461c555ee07531e6bdcd8bacba977ef0b7f56628c4064"
+            },
+            "metadata": {
+              "capture_method": "pin",
+              "import_kind": "csv"
+            }
+          }
+        ],
+        "quarantined": [],
+        "privacy_fails": [],
+        "row_count": 2
+      }
+    },
+    {
+      "label": "xlsx ingest",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 2,
+        "duplicates": 0,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "csv:7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc:f577872a2529bd86615a2f98dda742029c301b61b5f6e2330734c0123125e162",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "csv:7ff3f12ce684c0dff8e1ba0f9429a86969bec7b3eb91cd358be57e5b42522dfc:fe5458971285372f1e4461c555ee07531e6bdcd8bacba977ef0b7f56628c4064",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "sftp batch files",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "batches": [
+          {
+            "ok": true,
+            "filename": "one.csv",
+            "file_sha256": "ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c",
+            "punches": [
+              {
+                "company_code": "ATTW2B",
+                "source": "sftp",
+                "source_event_id": "sftp:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:73f0e2aa2966e1503074044db1868acfb4dea8ed2b8151c9cc591f41241dec6b",
+                "device_user_id": "1001",
+                "punched_at": "2026-08-23T09:00:00+03:00",
+                "direction": "in",
+                "capture_method": "card",
+                "employee_key": null,
+                "device_id": "SN-A",
+                "connector_id": "sftp-90554fba",
+                "connector_version": "attendance_capture_wave2b_v1",
+                "work_date_hint": null,
+                "raw_ref": {
+                  "file_sha256": "ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c",
+                  "row_sha256": "73f0e2aa2966e1503074044db1868acfb4dea8ed2b8151c9cc591f41241dec6b"
+                },
+                "metadata": {
+                  "capture_method": "card",
+                  "import_kind": "sftp"
+                }
+              },
+              {
+                "company_code": "ATTW2B",
+                "source": "sftp",
+                "source_event_id": "sftp:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:3425bfbfad9293e1e2c2fa3904da5535e12a4bc24826feea798a0dc1b24592dd",
+                "device_user_id": "1001",
+                "punched_at": "2026-08-23T17:00:00+03:00",
+                "direction": "out",
+                "capture_method": "card",
+                "employee_key": null,
+                "device_id": "SN-A",
+                "connector_id": "sftp-90554fba",
+                "connector_version": "attendance_capture_wave2b_v1",
+                "work_date_hint": null,
+                "raw_ref": {
+                  "file_sha256": "ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c",
+                  "row_sha256": "3425bfbfad9293e1e2c2fa3904da5535e12a4bc24826feea798a0dc1b24592dd"
+                },
+                "metadata": {
+                  "capture_method": "card",
+                  "import_kind": "sftp"
+                }
+              }
+            ],
+            "quarantined": [],
+            "privacy_fails": [],
+            "row_count": 2
+          }
+        ],
+        "files": 1
+      }
+    },
+    {
+      "label": "interrupted import resume skips file",
+      "ok": true,
+      "detail": {
+        "first": true,
+        "second": false
+      }
+    },
+    {
+      "label": "csv day projection",
+      "ok": true,
+      "detail": {
+        "company_code": "ATTW2B",
+        "employee_key": "ATTW2B-ATTW2B-90554fba",
+        "employee_phone": "96558109055",
+        "employee_name": "W2B-90554fba",
+        "work_date": "2026-08-23",
+        "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+        "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+        "status": "completed",
+        "exception_state": "none",
+        "approval_status": "unapproved",
+        "payroll_eligible": false,
+        "check_in_at": "2026-08-23T09:00:00+03:00",
+        "check_out_at": "2026-08-23T17:00:00+03:00",
+        "scheduled_start": "09:00:00",
+        "scheduled_end": "17:00:00",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "worked_minutes": 480,
+        "unpaid_break_minutes": 0,
+        "paid_break_minutes": 0,
+        "sessions": [
+          {
+            "session_index": 1,
+            "check_in_at": "2026-08-23T09:00:00+03:00",
+            "check_out_at": "2026-08-23T17:00:00+03:00",
+            "worked_minutes": 480,
+            "open": false
+          }
+        ],
+        "breaks": [],
+        "source_counts": {
+          "csv": 2
+        },
+        "authority": "attendance_authority_wave1_v1",
+        "leave_id": null,
+        "derived_from_leave": false,
+        "manual_correction": false,
+        "metadata": {},
+        "created_by_phone": "",
+        "version": 4,
+        "is_current": true,
+        "projection_id": "5b0c397a-5b4e-449f-857e-223db1cb2742",
+        "created_at": "2026-08-02T05:53:20.767000+03:00",
+        "updated_at": "2026-08-02T05:53:20.767001+03:00"
+      }
+    },
+    {
+      "label": "day approved",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "projection": {
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "work_date": "2026-08-23",
+          "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "status": "completed",
+          "exception_state": "none",
+          "approval_status": "approved",
+          "payroll_eligible": true,
+          "check_in_at": "2026-08-23T09:00:00+03:00",
+          "check_out_at": "2026-08-23T17:00:00+03:00",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 480,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-23T09:00:00+03:00",
+              "check_out_at": "2026-08-23T17:00:00+03:00",
+              "worked_minutes": 480,
+              "open": false
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "csv": 2
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {
+            "approved_by": "96550000001"
+          },
+          "created_by_phone": "96550000001",
+          "version": 5,
+          "is_current": true,
+          "projection_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+          "created_at": "2026-08-02T05:53:20.950569+03:00",
+          "updated_at": "2026-08-02T05:53:20.950569+03:00"
+        },
+        "snapshot": {
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "work_date": "2026-08-23",
+          "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "projection_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+          "projection_version": 5,
+          "approved_by_phone": "96550000001",
+          "payload": {
+            "status": "completed",
+            "check_in_at": "2026-08-23T09:00:00+03:00",
+            "check_out_at": "2026-08-23T17:00:00+03:00",
+            "scheduled_start": "09:00:00",
+            "scheduled_end": "17:00:00",
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "worked_minutes": 480,
+            "unpaid_break_minutes": 0,
+            "paid_break_minutes": 0,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-23T09:00:00+03:00",
+                "check_out_at": "2026-08-23T17:00:00+03:00",
+                "worked_minutes": 480,
+                "open": false
+              }
+            ],
+            "breaks": [],
+            "exception_state": "none",
+            "authority": "attendance_authority_wave1_v1"
+          },
+          "snapshot_id": "3fef86a7-3ff4-4a7e-8c4e-a2889173668a",
+          "approved_at": "2026-08-02T05:53:20.950840+03:00"
+        },
+        "compat": {
+          "attendance_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "attendance_date": "2026-08-23",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "check_in_at": "2026-08-23T09:00:00+03:00",
+          "check_out_at": "2026-08-23T17:00:00+03:00",
+          "status": "completed",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "notes": null,
+          "source_text": null,
+          "metadata": {
+            "approved_by": "96550000001",
+            "authority": "attendance_authority_wave1_v1",
+            "projection_version": 5,
+            "exception_state": "none",
+            "approval_status": "approved",
+            "payroll_eligible": true,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-23T09:00:00+03:00",
+                "check_out_at": "2026-08-23T17:00:00+03:00",
+                "worked_minutes": 480,
+                "open": false
+              }
+            ],
+            "breaks": [],
+            "worked_minutes": 480,
+            "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428"
+          },
+          "created_by_phone": "96550000001",
+          "created_at": "2026-08-02T05:53:20.950569+03:00",
+          "updated_at": "2026-08-02T05:53:20.950569+03:00"
+        }
+      }
+    },
+    {
+      "label": "payroll reconcile exact",
+      "ok": true,
+      "detail": {
+        "worked": 480,
+        "snapshot": {
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "employee_name": "W2B-90554fba",
+          "work_date": "2026-08-23",
+          "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "projection_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+          "projection_version": 5,
+          "approved_by_phone": "96550000001",
+          "payload": {
+            "status": "completed",
+            "check_in_at": "2026-08-23T09:00:00+03:00",
+            "check_out_at": "2026-08-23T17:00:00+03:00",
+            "scheduled_start": "09:00:00",
+            "scheduled_end": "17:00:00",
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "worked_minutes": 480,
+            "unpaid_break_minutes": 0,
+            "paid_break_minutes": 0,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-23T09:00:00+03:00",
+                "check_out_at": "2026-08-23T17:00:00+03:00",
+                "worked_minutes": 480,
+                "open": false
+              }
+            ],
+            "breaks": [],
+            "exception_state": "none",
+            "authority": "attendance_authority_wave1_v1"
+          },
+          "snapshot_id": "3fef86a7-3ff4-4a7e-8c4e-a2889173668a",
+          "approved_at": "2026-08-02T05:53:20.950840+03:00"
+        }
+      }
+    },
+    {
+      "label": "payroll eligible after approve",
+      "ok": true,
+      "detail": {
+        "company_code": "ATTW2B",
+        "employee_key": "ATTW2B-ATTW2B-90554fba",
+        "employee_phone": "96558109055",
+        "employee_name": "W2B-90554fba",
+        "work_date": "2026-08-23",
+        "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+        "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+        "status": "completed",
+        "exception_state": "none",
+        "approval_status": "approved",
+        "payroll_eligible": true,
+        "check_in_at": "2026-08-23T09:00:00+03:00",
+        "check_out_at": "2026-08-23T17:00:00+03:00",
+        "scheduled_start": "09:00:00",
+        "scheduled_end": "17:00:00",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "worked_minutes": 480,
+        "unpaid_break_minutes": 0,
+        "paid_break_minutes": 0,
+        "sessions": [
+          {
+            "session_index": 1,
+            "check_in_at": "2026-08-23T09:00:00+03:00",
+            "check_out_at": "2026-08-23T17:00:00+03:00",
+            "worked_minutes": 480,
+            "open": false
+          }
+        ],
+        "breaks": [],
+        "source_counts": {
+          "csv": 2
+        },
+        "authority": "attendance_authority_wave1_v1",
+        "leave_id": null,
+        "derived_from_leave": false,
+        "manual_correction": false,
+        "metadata": {
+          "approved_by": "96550000001"
+        },
+        "created_by_phone": "96550000001",
+        "version": 5,
+        "is_current": true,
+        "projection_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+        "created_at": "2026-08-02T05:53:20.950569+03:00",
+        "updated_at": "2026-08-02T05:53:20.950569+03:00"
+      }
+    },
+    {
+      "label": "correction requested after snapshot",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "correction": {
+          "company_code": "ATTW2B",
+          "employee_key": "ATTW2B-ATTW2B-90554fba",
+          "employee_phone": "96558109055",
+          "work_date": "2026-08-23",
+          "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+          "projection_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+          "status": "requested",
+          "requested_changes": {
+            "check_out_at": "2026-08-23T17:30:00+03:00"
+          },
+          "requested_by_phone": "96550000002",
+          "metadata": {
+            "actor_is_manager": false
+          },
+          "correction_id": "3a931d0b-55b4-4001-bbe8-6d4392830984",
+          "created_at": "2026-08-02T05:53:20.951234+03:00",
+          "updated_at": "2026-08-02T05:53:20.951235+03:00"
+        }
+      }
+    },
+    {
+      "label": "safe reversal/reimport still idempotent",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 2,
+        "duplicates": 2,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "csv:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:73f0e2aa2966e1503074044db1868acfb4dea8ed2b8151c9cc591f41241dec6b",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "csv:ecb195492b2d546fc3aafa64c54f727c9913061482a8fde6bf489361039d7c6c:3425bfbfad9293e1e2c2fa3904da5535e12a4bc24826feea798a0dc1b24592dd",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "punches immutable count",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "locked payroll snapshot unchanged",
+      "ok": true,
+      "detail": {
+        "company_code": "ATTW2B",
+        "employee_key": "ATTW2B-ATTW2B-90554fba",
+        "employee_phone": "96558109055",
+        "employee_name": "W2B-90554fba",
+        "work_date": "2026-08-23",
+        "shift_id": "caf3c35f-4145-4aff-900f-dd075f9df428",
+        "shift_key": "caf3c35f-4145-4aff-900f-dd075f9df428",
+        "projection_id": "209199eb-126f-4ca5-a26e-9e135f653fa7",
+        "projection_version": 5,
+        "approved_by_phone": "96550000001",
+        "payload": {
+          "status": "completed",
+          "check_in_at": "2026-08-23T09:00:00+03:00",
+          "check_out_at": "2026-08-23T17:00:00+03:00",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 480,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-23T09:00:00+03:00",
+              "check_out_at": "2026-08-23T17:00:00+03:00",
+              "worked_minutes": 480,
+              "open": false
+            }
+          ],
+          "breaks": [],
+          "exception_state": "none",
+          "authority": "attendance_authority_wave1_v1"
+        },
+        "snapshot_id": "3fef86a7-3ff4-4a7e-8c4e-a2889173668a",
+        "approved_at": "2026-08-02T05:53:20.950840+03:00"
+      }
+    },
+    {
+      "label": "other tenant ingest",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "created": true,
+        "duplicate": false,
+        "punch": {
+          "company_code": "ATTW2BX",
+          "employee_key": "ATTW2BX-ATTW2B-90554fba",
+          "employee_phone": "96558209055",
+          "employee_name": "W2BX-90554fba",
+          "punched_at": "2026-08-20T09:00:00+03:00",
+          "direction": "in",
+          "source": "biotime",
+          "source_event_id": "biotime:501",
+          "shift_id": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "shift_key": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "work_date": "2026-08-20",
+          "break_paid": null,
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2,
+            "device_id": "SN-B",
+            "device_user_id": "2002",
+            "connector_id": "other-90554fba",
+            "connector_version": "attendance_capture_wave2b_v1",
+            "raw_ref": {
+              "id": 501,
+              "emp_code": "2002",
+              "punch_time": "2026-08-20 09:00:00",
+              "punch_state": "0",
+              "verify_type": 2,
+              "terminal_sn": "SN-B"
+            }
+          },
+          "created_by_phone": "",
+          "punch_id": "45fba191-8802-43ac-852a-3f43ad22f82c",
+          "created_at": "2026-08-02T05:53:20.953319+03:00"
+        },
+        "projection": {
+          "company_code": "ATTW2BX",
+          "employee_key": "ATTW2BX-ATTW2B-90554fba",
+          "employee_phone": "96558209055",
+          "employee_name": "W2BX-90554fba",
+          "work_date": "2026-08-20",
+          "shift_id": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "shift_key": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "status": "present",
+          "exception_state": "missing_check_out",
+          "approval_status": "unapproved",
+          "payroll_eligible": false,
+          "check_in_at": "2026-08-20T09:00:00+03:00",
+          "check_out_at": null,
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 0,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-20T09:00:00+03:00",
+              "check_out_at": null,
+              "worked_minutes": 0,
+              "open": true
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "biotime": 1
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {},
+          "created_by_phone": "",
+          "version": 1,
+          "is_current": true,
+          "projection_id": "1879e80b-9719-4899-9938-b70242e131d4",
+          "created_at": "2026-08-02T05:53:20.953509+03:00",
+          "updated_at": "2026-08-02T05:53:20.953510+03:00"
+        },
+        "compat": {
+          "attendance_id": "1879e80b-9719-4899-9938-b70242e131d4",
+          "company_code": "ATTW2BX",
+          "employee_key": "ATTW2BX-ATTW2B-90554fba",
+          "employee_phone": "96558209055",
+          "employee_name": "W2BX-90554fba",
+          "shift_id": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "attendance_date": "2026-08-20",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "check_in_at": "2026-08-20T09:00:00+03:00",
+          "check_out_at": null,
+          "status": "present",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "notes": null,
+          "source_text": null,
+          "metadata": {
+            "authority": "attendance_authority_wave1_v1",
+            "projection_version": 1,
+            "exception_state": "missing_check_out",
+            "approval_status": "unapproved",
+            "payroll_eligible": false,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-20T09:00:00+03:00",
+                "check_out_at": null,
+                "worked_minutes": 0,
+                "open": true
+              }
+            ],
+            "breaks": [],
+            "worked_minutes": 0,
+            "shift_key": "8d032f3a-d824-4e1d-b198-3ee3bc96879a"
+          },
+          "created_by_phone": "",
+          "created_at": "2026-08-02T05:53:20.953509+03:00",
+          "updated_at": "2026-08-02T05:53:20.953510+03:00"
+        },
+        "canonical": {
+          "company_code": "ATTW2BX",
+          "source": "biotime",
+          "source_event_id": "biotime:501",
+          "device_user_id": "2002",
+          "punched_at": "2026-08-20T09:00:00+03:00",
+          "direction": "in",
+          "capture_method": "card",
+          "employee_key": null,
+          "device_id": "SN-B",
+          "connector_id": "other-90554fba",
+          "connector_version": "attendance_capture_wave2b_v1",
+          "work_date_hint": null,
+          "raw_ref": {
+            "id": 501,
+            "emp_code": "2002",
+            "punch_time": "2026-08-20 09:00:00",
+            "punch_state": "0",
+            "verify_type": 2,
+            "terminal_sn": "SN-B"
+          },
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2
+          }
+        }
+      }
+    },
+    {
+      "label": "tenant isolation company punches",
+      "ok": true,
+      "detail": 3
+    },
+    {
+      "label": "other tenant has punch",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "created": true,
+        "duplicate": false,
+        "punch": {
+          "company_code": "ATTW2BX",
+          "employee_key": "ATTW2BX-ATTW2B-90554fba",
+          "employee_phone": "96558209055",
+          "employee_name": "W2BX-90554fba",
+          "punched_at": "2026-08-20T09:00:00+03:00",
+          "direction": "in",
+          "source": "biotime",
+          "source_event_id": "biotime:501",
+          "shift_id": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "shift_key": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "work_date": "2026-08-20",
+          "break_paid": null,
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2,
+            "device_id": "SN-B",
+            "device_user_id": "2002",
+            "connector_id": "other-90554fba",
+            "connector_version": "attendance_capture_wave2b_v1",
+            "raw_ref": {
+              "id": 501,
+              "emp_code": "2002",
+              "punch_time": "2026-08-20 09:00:00",
+              "punch_state": "0",
+              "verify_type": 2,
+              "terminal_sn": "SN-B"
+            }
+          },
+          "created_by_phone": "",
+          "punch_id": "45fba191-8802-43ac-852a-3f43ad22f82c",
+          "created_at": "2026-08-02T05:53:20.953319+03:00"
+        },
+        "projection": {
+          "company_code": "ATTW2BX",
+          "employee_key": "ATTW2BX-ATTW2B-90554fba",
+          "employee_phone": "96558209055",
+          "employee_name": "W2BX-90554fba",
+          "work_date": "2026-08-20",
+          "shift_id": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "shift_key": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "status": "present",
+          "exception_state": "missing_check_out",
+          "approval_status": "unapproved",
+          "payroll_eligible": false,
+          "check_in_at": "2026-08-20T09:00:00+03:00",
+          "check_out_at": null,
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "worked_minutes": 0,
+          "unpaid_break_minutes": 0,
+          "paid_break_minutes": 0,
+          "sessions": [
+            {
+              "session_index": 1,
+              "check_in_at": "2026-08-20T09:00:00+03:00",
+              "check_out_at": null,
+              "worked_minutes": 0,
+              "open": true
+            }
+          ],
+          "breaks": [],
+          "source_counts": {
+            "biotime": 1
+          },
+          "authority": "attendance_authority_wave1_v1",
+          "leave_id": null,
+          "derived_from_leave": false,
+          "manual_correction": false,
+          "metadata": {},
+          "created_by_phone": "",
+          "version": 1,
+          "is_current": true,
+          "projection_id": "1879e80b-9719-4899-9938-b70242e131d4",
+          "created_at": "2026-08-02T05:53:20.953509+03:00",
+          "updated_at": "2026-08-02T05:53:20.953510+03:00"
+        },
+        "compat": {
+          "attendance_id": "1879e80b-9719-4899-9938-b70242e131d4",
+          "company_code": "ATTW2BX",
+          "employee_key": "ATTW2BX-ATTW2B-90554fba",
+          "employee_phone": "96558209055",
+          "employee_name": "W2BX-90554fba",
+          "shift_id": "8d032f3a-d824-4e1d-b198-3ee3bc96879a",
+          "attendance_date": "2026-08-20",
+          "scheduled_start": "09:00:00",
+          "scheduled_end": "17:00:00",
+          "check_in_at": "2026-08-20T09:00:00+03:00",
+          "check_out_at": null,
+          "status": "present",
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "notes": null,
+          "source_text": null,
+          "metadata": {
+            "authority": "attendance_authority_wave1_v1",
+            "projection_version": 1,
+            "exception_state": "missing_check_out",
+            "approval_status": "unapproved",
+            "payroll_eligible": false,
+            "sessions": [
+              {
+                "session_index": 1,
+                "check_in_at": "2026-08-20T09:00:00+03:00",
+                "check_out_at": null,
+                "worked_minutes": 0,
+                "open": true
+              }
+            ],
+            "breaks": [],
+            "worked_minutes": 0,
+            "shift_key": "8d032f3a-d824-4e1d-b198-3ee3bc96879a"
+          },
+          "created_by_phone": "",
+          "created_at": "2026-08-02T05:53:20.953509+03:00",
+          "updated_at": "2026-08-02T05:53:20.953510+03:00"
+        },
+        "canonical": {
+          "company_code": "ATTW2BX",
+          "source": "biotime",
+          "source_event_id": "biotime:501",
+          "device_user_id": "2002",
+          "punched_at": "2026-08-20T09:00:00+03:00",
+          "direction": "in",
+          "capture_method": "card",
+          "employee_key": null,
+          "device_id": "SN-B",
+          "connector_id": "other-90554fba",
+          "connector_version": "attendance_capture_wave2b_v1",
+          "work_date_hint": null,
+          "raw_ref": {
+            "id": 501,
+            "emp_code": "2002",
+            "punch_time": "2026-08-20 09:00:00",
+            "punch_state": "0",
+            "verify_type": 2,
+            "terminal_sn": "SN-B"
+          },
+          "metadata": {
+            "capture_method": "card",
+            "vendor": "biotime",
+            "verify_type_code": 2
+          }
+        }
+      }
+    },
+    {
+      "label": "canonical has capture_method",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "canonical has no zkteco fields",
+      "ok": true,
+      "detail": [
+        "capture_method",
+        "company_code",
+        "connector_id",
+        "connector_version",
+        "device_id",
+        "device_user_id",
+        "direction",
+        "employee_key",
+        "metadata",
+        "punched_at",
+        "raw_ref",
+        "source",
+        "source_event_id",
+        "work_date_hint"
+      ]
+    },
+    {
+      "label": "freeze skipped",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

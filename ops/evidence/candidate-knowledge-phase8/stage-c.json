@@ -1,0 +1,90 @@
+{
+  "status": "PASS",
+  "metrics": {
+    "indexed": 50000,
+    "index_seconds": 88.35,
+    "needle_recall": 1.0,
+    "needles": 50,
+    "found": 50,
+    "search_p95_ms": 94.1,
+    "search_p95_needle_ms": 56.07,
+    "exact_read_p95_ms": 102.35,
+    "compare_p95_ms": 44.46,
+    "cross_tenant_fp": 0,
+    "invalidation_ok": true,
+    "audit_fail_closed": true,
+    "dead_letter_ok": true,
+    "worker_drained_jobs": 51,
+    "worker_ok": true,
+    "kill_switch": {
+      "stopped": true,
+      "restored": true
+    },
+    "health_codes_unique": [
+      200
+    ],
+    "load_duration_s": 600,
+    "zero_mutation_guards": true,
+    "chunk_count_current": 50597,
+    "index_method": "indexer_sample_200_plus_bulk_sql_49800",
+    "indexer_sample_seconds": 23.66
+  },
+  "gates": [
+    {
+      "id": "recall_50k",
+      "status": "PASS",
+      "value": 1.0
+    },
+    {
+      "id": "cross_tenant_fp",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "id": "search_p95",
+      "status": "PASS",
+      "value": 94.09851115196943
+    },
+    {
+      "id": "read_p95",
+      "status": "PASS",
+      "value": 102.35471557825804
+    },
+    {
+      "id": "compare_p95",
+      "status": "PASS",
+      "value": 44.464669190347195
+    },
+    {
+      "id": "invalidation",
+      "status": "PASS"
+    },
+    {
+      "id": "audit_fail_closed",
+      "status": "PASS"
+    },
+    {
+      "id": "dead_letter",
+      "status": "PASS"
+    },
+    {
+      "id": "worker_drain",
+      "status": "PASS",
+      "drained": 51
+    },
+    {
+      "id": "kill_switch_restore",
+      "status": "PASS"
+    },
+    {
+      "id": "health",
+      "status": "PASS"
+    },
+    {
+      "id": "zero_mutation",
+      "status": "PASS"
+    }
+  ],
+  "blockers": [],
+  "fails": []
+}

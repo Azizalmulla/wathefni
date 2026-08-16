@@ -1,0 +1,38 @@
+    payroll external ops wave2ac — workflow helpers
+      PASS  payment disabled
+      PASS  money authority external
+      PASS  vendor unclaimed
+      PASS  wave1 contracts unchanged
+connected_db wathefni_staging
+      PASS  contract draft
+      PASS  contract approve
+      PASS  period create
+      PASS  readiness ready
+      PASS  readiness not authoritative
+      PASS  bootstrap ok
+      PASS  bootstrap enabled
+      PASS  bootstrap payment disabled
+      PASS  bootstrap not authoritative
+      PASS  assemble has employee
+      PASS  manager empty scope blocks
+      PASS  export ok
+      PASS  list exports
+      PASS  import ok
+      PASS  import not money authority
+      PASS  duplicate upload idempotent
+      PASS  stale fingerprint blocked
+      PASS  stale fingerprint quarantined
+      PASS  malformed quarantined
+      PASS  quarantine list non-empty
+      PASS  reconcile ok
+      PASS  reconciliation stored
+      PASS  import lines present
+      PASS  replace import ok
+      PASS  replace flagged
+      PASS  replace not authoritative
+      PASS  replace money external
+      PASS  events timeline
+      PASS  replace event present
+      PASS  native mode blocks readiness
+
+    34 passed, 0 failed

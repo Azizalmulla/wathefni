@@ -1,0 +1,109 @@
+{
+  "pack_code": "KW_PRIVATE_SECTOR",
+  "policy_version": "1.0.0",
+  "content_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8",
+  "pack_snapshot": {
+    "pack_code": "KW_PRIVATE_SECTOR",
+    "retention": {
+      "mode": "retain",
+      "auto_purge": false,
+      "floor_days": 365,
+      "article_refs": [
+        "80",
+        "144"
+      ]
+    },
+    "frozen_wave": "employees360-wave3h-jurisdiction-packs-v1",
+    "source_refs": [
+      {
+        "role": "primary_arabic",
+        "title": "Kuwait Labour Law No. 6 of 2010 (e.gov / MOJ PDF)",
+        "sha256": "20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326",
+        "evidence": "ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/sources/"
+      },
+      {
+        "role": "english_gazette_reading_aid",
+        "title": "Official Gazette Issue 963 extract (21 Feb 2010)",
+        "sha256": "aaed5c6e02a03df4bfdcf035ba1befb9ece3c96d635c5a947f0c5ae929a70fe0"
+      },
+      {
+        "role": "wave3f_closure",
+        "title": "Employees 360 Wave 3F public-law closure pack",
+        "evidence": "ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/"
+      }
+    ],
+    "content_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8",
+    "notice_rules": {
+      "label": "Optional labeled guidance only \u2014 not a legal determination. Shown only when contract_type=unlimited, probation is not active, pay_frequency is known, and the case is not an exceptional/summary path. Mirrors Law No. 6/2010 Art. 44 (Official Gazette Issue 963, 21 Feb 2010): 3 months (monthly) / 1 month (other). HR must still enter effective date and last working day.",
+      "article_refs": [
+        "44"
+      ],
+      "other_hint_days": 30,
+      "monthly_hint_days": 90,
+      "show_hints_default": false,
+      "applies_to_contract_types": [
+        "unlimited"
+      ],
+      "blocked_for_exceptional_cases": true,
+      "blocked_when_probation_active": true
+    },
+    "policy_version": "1.0.0",
+    "mandatory_rules": {
+      "require_impact_ack": true,
+      "allow_self_approval": false,
+      "settlement_packet_mode": "inputs_only",
+      "document_retention_mode": "retain",
+      "require_last_working_day": true,
+      "monetary_calculations_owner": "payroll",
+      "service_certificate_default": true,
+      "document_retention_floor_days": 365,
+      "exceptional_cases_manual_only": true,
+      "require_termination_case_class": true,
+      "require_employment_classification": true
+    },
+    "worker_category": "private_sector",
+    "jurisdiction_code": "KW",
+    "disabled_fallbacks": {
+      "show_notice_hints": false,
+      "auto_cancel_shifts": false,
+      "auto_decline_leave": false,
+      "allow_self_approval": false,
+      "missing_classification": "manual_review_missing_classification",
+      "missing_worker_category": "fail_closed",
+      "unsupported_jurisdiction": "fail_closed",
+      "allow_reinstate_after_effective": false
+    },
+    "service_certificate": {
+      "fields": [
+        "duration",
+        "position",
+        "last_remuneration"
+      ],
+      "article_refs": [
+        "54"
+      ],
+      "required_default": true,
+      "forbid_harmful_expressions": true
+    },
+    "settlement_ownership": {
+      "mode": "inputs_only",
+      "owner": "payroll",
+      "forbidden_in_employees360": [
+        "eosb",
+        "notice_pay",
+        "garden_leave_pay",
+        "damages",
+        "leave_encashment"
+      ]
+    },
+    "exceptional_case_classes": [
+      "summary_dismissal_41a",
+      "summary_dismissal_41b",
+      "abandonment_42",
+      "worker_summary_exit_48",
+      "death_disability_49",
+      "employer_status_50",
+      "other_exceptional"
+    ]
+  }
+}

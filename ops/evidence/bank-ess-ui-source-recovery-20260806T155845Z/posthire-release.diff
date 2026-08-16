@@ -1,0 +1,39 @@
+diff --git a/apps/wathefni-dashboard/src/posthire/PostHire.tsx b/apps/wathefni-dashboard/src/posthire/PostHire.tsx
+index 02357b6..4216ca4 100644
+--- a/apps/wathefni-dashboard/src/posthire/PostHire.tsx
++++ b/apps/wathefni-dashboard/src/posthire/PostHire.tsx
+@@ -75,7 +75,9 @@ import { AttendanceImportDialog } from '@/posthire/AttendanceImport'
+ import { AttendanceCaptureOpsPanel } from '@/posthire/AttendanceCaptureOps'
+ import { AttendanceOpsPanel } from '@/posthire/AttendanceOpsPanel'
+ import { AttendanceAttentionStrip, AttendanceDailyTable } from '@/posthire/AttendanceDailyBoard'
+-import { AssignmentHistoryPanel, EssBankMaskPanel } from '@/posthire/employees360/ProfilePanels'
++import { AssignmentHistoryPanel } from '@/posthire/employees360/ProfilePanels'
++import { BankReviewPanel } from '@/posthire/employees360/BankReviewPanel'
++import { OnboardingCompletionStrip } from '@/posthire/employees360/OnboardingCompletionStrip'
+ import { WorkforcePage } from '@/posthire/employees360/WorkforcePage'
+ import { MigrationSyncShell } from '@/posthire/MigrationSyncShell'
+ import { LeaveWorkspace } from '@/posthire/LeaveWorkspace'
+@@ -2387,7 +2389,14 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
+           )}
+ 
+           <AssignmentHistoryPanel access={access} employeeKey={employeeKey} onAccessIssue={onAccessIssue} />
+-          <EssBankMaskPanel access={access} employeeKey={employeeKey} onAccessIssue={onAccessIssue} />
++          <BankReviewPanel
++            key={employeeKey}
++            access={access}
++            employeeKey={employeeKey}
++            canDecide={can(permissions, 'employees.ess.approve.hr', role) || canManageRoster}
++            onAccessIssue={onAccessIssue}
++            onDecided={() => void reload()}
++          />
+ 
+           <div className="space-y-4">
+             {sections?.onboarding ? (
+@@ -3355,6 +3364,7 @@ function OnboardingDetailPanel({
+           {detail.permission_authority}
+         </p>
+       ) : null}
++      <OnboardingCompletionStrip completion={detail.completion} locale={locale} />
+       {detail.bank_collection?.plaintext_forbidden ? (
+         <p className="flex items-start gap-1.5 text-[12px] leading-5 text-subtle/80">
+           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />

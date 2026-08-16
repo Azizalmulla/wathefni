@@ -1,0 +1,55 @@
+name: Delivery safety
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - "canary*"
+
+jobs:
+  r8-python:
+    name: R8 / R7 / R2 unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wathefni-orchestrator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install import deps for frozen R2 unit
+        run: pip install fastapi pydantic psycopg2-binary python-multipart puremagic cryptography
+      - name: R8 unit
+        run: python3 smoke-test-r8-delivery-safety.py
+      - name: R7 unit
+        run: python3 smoke-test-r7-mobile-native-safety.py
+      - name: R2 unit
+        run: python3 smoke-test-r2-security.py
+      - name: R6 unit
+        run: python3 smoke-test-r6-setup-self-service.py
+
+  r8-clients:
+    name: HR vitest + employee composition
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            apps/wathefni-hr-mobile/package-lock.json
+            apps/wathefni-employee-mobile/package-lock.json
+      - name: HR Mobile vitest
+        working-directory: apps/wathefni-hr-mobile
+        run: |
+          npm ci --ignore-scripts
+          npx vitest run
+      - name: Employee composition
+        working-directory: apps/wathefni-employee-mobile
+        run: |
+          npm ci --ignore-scripts
+          node scripts/composition-shapes-test.js

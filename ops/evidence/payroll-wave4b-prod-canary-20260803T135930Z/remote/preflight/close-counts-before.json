@@ -1,0 +1,18 @@
+{
+  "db": "wathefni",
+  "payroll_close_runs": {
+    "present": false
+  },
+  "payroll_preview_runs": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_adapter_import_runs": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_payslip_documents": {
+    "present": true,
+    "count": 0
+  }
+}

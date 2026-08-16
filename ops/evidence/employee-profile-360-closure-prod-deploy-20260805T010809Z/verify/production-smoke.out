@@ -1,0 +1,4 @@
+BUNDLE=PostHire-BBh-0pcx.js
+MARKERS {'bundle': 'PostHire-BBh-0pcx.js', 'profile_testid': True, 'docs_anchor': True, 'open_shifts': True, 'open_attendance': True, 'open_payroll': True, 'approver_pick': True, 'no_phone_whatsapp_combo': True}
+PROFILE_CLOSURE_SMOKE_OK
+CALENDAR_UX_PRESERVED CalendarShell-KlPj_qBg.js

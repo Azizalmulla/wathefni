@@ -1,0 +1,564 @@
+{
+  "stamp": "20260801T161522Z",
+  "marker": "wave_d6_ga_proof",
+  "passed": 41,
+  "failed": 1,
+  "cases": {
+    "health_200": {
+      "ok": true,
+      "detail": {
+        "orch": 200,
+        "dash": 200
+      }
+    },
+    "commercial_packaging_forwarding_vs_premium": {
+      "ok": true,
+      "detail": {
+        "default_intake_product": "forwarding",
+        "mailbox_connectors_premium": true,
+        "mailbox_sync_enabled": false,
+        "connector_premium": true,
+        "connector_default_product": "forwarding",
+        "connector_sync_enabled": false,
+        "flag_off": true
+      }
+    },
+    "external_tenants_remain_disabled": {
+      "ok": true,
+      "detail": {
+        "allowlist": "WATHEFNI",
+        "mailbox_sync": "off",
+        "retention_execute": "off"
+      }
+    },
+    "forwarding_general_alias": {
+      "ok": true,
+      "detail": {
+        "intake_id": "f93b1e8f-394a-4189-9e0a-beab8379f996",
+        "hold_policy": "needs_role",
+        "address": "wathefni-cv-5cc53a@inbound.wathefni.ai"
+      }
+    },
+    "job_specific_alias": {
+      "ok": true,
+      "detail": {
+        "intake_id": "f30537d0-dccd-403a-a968-bfe16ae107e2",
+        "hold_policy": "role_bound",
+        "position_code": "OCCTST_044035"
+      }
+    },
+    "forwarding_list_includes_created": {
+      "ok": true,
+      "detail": {
+        "count": 18
+      }
+    },
+    "forwarding_ingress_durable": {
+      "ok": true,
+      "detail": {
+        "status": "queued",
+        "inbound_id": "e9190158-42e4-514a-a369-bff2f659a326",
+        "duplicate": null
+      }
+    },
+    "duplicate_idempotent_forwarding": {
+      "ok": true,
+      "detail": {
+        "status": "durable",
+        "duplicate": true,
+        "inbound_id": "e9190158-42e4-514a-a369-bff2f659a326"
+      }
+    },
+    "concurrency_burst_durable": {
+      "ok": true,
+      "detail": {
+        "statuses": [
+          "queued",
+          "queued",
+          "queued",
+          "queued"
+        ],
+        "ids": [
+          "75b81d02-c01a-511e-9230-bc8782b9e63b",
+          "f1f7895f-fcc6-5110-9306-37aee27a9b15",
+          "6b17e793-dd2a-57e8-99f7-f5b5f54b05fc",
+          "62b8c8ad-443e-5478-a24a-873e1ccd9db1"
+        ]
+      }
+    },
+    "quota_soft_warning": {
+      "ok": true,
+      "detail": {
+        "warnings": [
+          "daily_message_quota_soft_warning"
+        ]
+      }
+    },
+    "quota_over_limit_waiting_quota": {
+      "ok": true,
+      "detail": {
+        "q1": "waiting_quota",
+        "q2": "waiting_quota",
+        "waiting": 2
+      }
+    },
+    "burst_override_raises_caps": {
+      "ok": true,
+      "detail": {
+        "override": {
+          "enabled": true,
+          "burst_enabled": true,
+          "created_at": "2026-08-01T16:15:23.791894+00:00",
+          "expires_at": "2026-08-01T17:15:23.791894+00:00",
+          "actor": "d6-proof@wathefni.ai",
+          "reason": "d6_ga_burst",
+          "id": "602223de3ac611e4",
+          "burst_pct": 0,
+          "quota_overrides": {
+            "daily_message_quota": 100
+          }
+        },
+        "q3": "queued"
+      }
+    },
+    "burst_override_expires": {
+      "ok": true,
+      "detail": {
+        "expires_at": "2026-08-01T16:14:23.866518+00:00"
+      }
+    },
+    "kill_switch_waiting_budget": {
+      "ok": true,
+      "detail": {
+        "durable": true,
+        "inbound_id": "c6ace312-e302-546d-a428-4d6f239c4215",
+        "submission_id": "ec822c2b-7701-5cfb-9d63-22a94553a685",
+        "company_code": "WATHEFNI",
+        "job_id": "f8e7f6af-783b-48c3-9c00-44a5b16e2bd2",
+        "status": "waiting_budget",
+        "quota_code": "tenant_kill_switch",
+        "soft_warnings": [],
+        "attachment_count": 1,
+        "accepted_attachment_count": 1,
+        "total_attachment_bytes": 464,
+        "documents": [
+          {
+            "document_id": "b99b90bd-7e91-54b5-8ad7-119ea27e7157",
+            "ordinal": 1,
+            "filename": "k.pdf",
+            "storage_status": "stored",
+            "safety_state": "scan_pending",
+            "reason": null,
+            "duplicate_of_document_id": null,
+            "content_sha256": "4abc2004792f303cb80e239929bcda2482f29d70e6485def010d6c8289c5fc64"
+          }
+        ],
+        "durability_latency_ms": 37
+      }
+    },
+    "_worker_note": "module 'durable_email_ingress' has no attribute 'run_worker'",
+    "held_intake_review_visible": {
+      "ok": true,
+      "detail": {
+        "api_total": 3,
+        "seeded": [
+          "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT",
+          "imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT",
+          "imp-wathefni-fe1b596eb9134774-WATHEFNI-OCCTST_044035"
+        ],
+        "visible": [
+          "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT",
+          "imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT",
+          "imp-wathefni-fe1b596eb9134774-WATHEFNI-OCCTST_044035"
+        ],
+        "seed_mode": "register_imported_cv_email_inbound",
+        "durable_to_held_note": "synthetic durable receive completed jobs without app materialization in wait window; held UX proved via same import held queue used by email_inbound"
+      }
+    },
+    "held_intake_assign_admit": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "app_key": "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT",
+          "status": "ready_for_review",
+          "position_code": "OCCTST_044035"
+        },
+        "app_key": "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT"
+      }
+    },
+    "held_intake_bulk_admit": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "company_code": "WATHEFNI",
+          "action": "assign",
+          "updated": 1,
+          "skipped": 0,
+          "archived": 0,
+          "promoted": 1
+        },
+        "keys": [
+          "imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT"
+        ]
+      }
+    },
+    "clamav_ocr_outage_replay": {
+      "ok": true,
+      "detail": {
+        "dead_id": "80472ad7-f1e7-4a20-96c0-a85288642cbb",
+        "replayed": {
+          "job_id": "80472ad7-f1e7-4a20-96c0-a85288642cbb",
+          "company_code": "WATHEFNI",
+          "status": "pending"
+        }
+      }
+    },
+    "retention_dry_run_execute_off": {
+      "ok": true,
+      "detail": {
+        "execute_env": "off",
+        "eligible_count": 0
+      }
+    },
+    "gmail_readonly_scope": {
+      "ok": true,
+      "detail": [
+        "https://www.googleapis.com/auth/gmail.readonly"
+      ]
+    },
+    "m365_mail_read_scopes": {
+      "ok": true,
+      "detail": [
+        "Mail.Read",
+        "User.Read",
+        "offline_access"
+      ]
+    },
+    "m365_dedicated_app_separate": {
+      "ok": true,
+      "detail": {
+        "mailbox_client_configured": false,
+        "mail_send_client_set": true,
+        "module_doc": "WATHEFNI_M365_MAILBOX_* dedicated"
+      }
+    },
+    "mailbox_sync_disabled_by_default": {
+      "ok": true,
+      "detail": {
+        "env": "off"
+      }
+    },
+    "gmail_connector_durable_path": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "mode": "live_durable",
+        "company_code": "WATHEFNI",
+        "mailbox_id": "276fd036-b02c-41e3-a1f0-1be8d7cc6b61",
+        "provider": "gmail",
+        "route_intake_id": "2493b577-09e3-45c2-b923-b0c382c251df",
+        "route_address": "92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com",
+        "counts": {
+          "durable": 1,
+          "duplicate": 0,
+          "ignored": 0,
+          "failed": 0,
+          "messages": 1
+        },
+        "results": [
+          {
+            "ok": true,
+            "provider": "gmail",
+            "company_code": "WATHEFNI",
+            "source_message_id": "d6ga-cont-msg-08343d30",
+            "durable": {
+              "durable": true,
+              "inbound_id": "c2202d7e-82e0-5c25-8a0d-ba7a949c2ddc",
+              "submission_id": "74a1542a-6b0b-5768-806f-92f731de7d8f",
+              "company_code": "WATHEFNI",
+              "job_id": "058740fe-b818-4d08-a7c8-57bd3cb42345",
+              "status": "queued",
+              "quota_code": null,
+              "soft_warnings": [],
+              "attachment_count": 1,
+              "accepted_attachment_count": 1,
+              "total_attachment_bytes": 474,
+              "documents": [
+                {
+                  "document_id": "65f5866c-36eb-52d8-9252-874c039019d6",
+                  "ordinal": 1,
+                  "filename": "mbx.pdf",
+                  "storage_status": "stored",
+                  "safety_state": "scan_pending",
+                  "reason": null,
+                  "duplicate_of_document_id": null,
+                  "content_sha256": "403ebc0883a927ac3a28ffd184ebe10067b576993b332d83d59affa72c457531"
+                }
+              ],
+              "durability_latency_ms": 53
+            }
+          }
+        ],
+        "next_cursor": {
+          "after_epoch": 1
+        }
+      }
+    },
+    "configured_folder_only": {
+      "ok": true,
+      "detail": {
+        "label_filter": "Recruitment"
+      }
+    },
+    "gmail_connector_idempotent": {
+      "ok": true,
+      "detail": {
+        "durable": 0,
+        "duplicate": 1,
+        "ignored": 0,
+        "failed": 0,
+        "messages": 1
+      }
+    },
+    "incremental_cursor_persisted": {
+      "ok": true,
+      "detail": {
+        "cursor": {
+          "after_epoch": 2
+        },
+        "last_sync_status": "ok",
+        "status": "connected"
+      }
+    },
+    "connector_pause": {
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "skipped": "mailbox_paused"
+      }
+    },
+    "connector_revoke_needs_reconnect": {
+      "ok": true,
+      "detail": {
+        "sync": {
+          "ok": false,
+          "error": "mailbox_fetch_failed"
+        },
+        "row": {
+          "status": "needs_reconnect",
+          "last_sync_status": "error"
+        }
+      }
+    },
+    "connector_disconnect": {
+      "ok": true,
+      "detail": {
+        "mailbox_id": "276fd036-b02c-41e3-a1f0-1be8d7cc6b61"
+      }
+    },
+    "connector_off_fail_closed": {
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "skipped": "mailbox_sync_disabled"
+      }
+    },
+    "tenant_scoped_encrypted_secrets": {
+      "ok": true,
+      "detail": {
+        "encryption_ready": true,
+        "ciphertext_len": 120,
+        "tenant": "WATHEFNI",
+        "plaintext_absent": true
+      }
+    },
+    "tenant_isolation_fail_closed": {
+      "ok": true,
+      "detail": {
+        "error": "module_disabled",
+        "message": "This module is not enabled for this company.",
+        "company_code": "ACMECORP",
+        "required_module": "pre_hiring",
+        "required_permission": "settings.manage",
+        "role": "owner"
+      }
+    },
+    "environment_isolation_postmark": {
+      "ok": true,
+      "detail": {
+        "mismatch": 401,
+        "pin": 200
+      }
+    },
+    "environment_binding_production": {
+      "ok": true,
+      "detail": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      }
+    },
+    "ops_monitoring_support_ready": {
+      "ok": true,
+      "detail": {
+        "worker_timer": true,
+        "ops_timer": true,
+        "never_reject": true
+      }
+    },
+    "ui_en_ar_rtl_markers": {
+      "ok": true,
+      "detail": {
+        "en_intake": true,
+        "ar_intake": true,
+        "en_job_alias": true,
+        "ar_job_alias": true,
+        "en_held": true,
+        "ar_held": true,
+        "en_connector": true,
+        "ar_connector": true
+      }
+    },
+    "onboarding_setup_clarity": {
+      "ok": true,
+      "detail": {
+        "forwarding_default": true,
+        "connector_optional_premium": true,
+        "sync_dark": true,
+        "setup_steps_en": true,
+        "setup_steps_ar": true
+      }
+    },
+    "privacy_retention_readiness": {
+      "ok": true,
+      "detail": {
+        "retention_execute_off": true,
+        "encryption_ready": true,
+        "quarantine_active": true
+      }
+    },
+    "operational_rollback_levers": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "address": {
+          "intake_id": "c41ba4e6-9d6f-48f6-8cea-6846e290e27d",
+          "company_code": "WATHEFNI",
+          "address": "wathefni-cv-06a51f@inbound.wathefni.ai",
+          "local_part": "wathefni-cv-06a51f",
+          "domain": "inbound.wathefni.ai",
+          "position_code": null,
+          "position_title": null,
+          "label": "wave_d6_ga_proof-08343d30-gen-cont",
+          "status": "disabled",
+          "created_at": "2026-08-01T16:17:59.434718+00:00",
+          "updated_at": "2026-08-01T16:19:52.877334+00:00",
+          "role_bound": false,
+          "hold_policy": "needs_role",
+          "health": {
+            "last_received_at": null,
+            "received_count": 1,
+            "received_7d": 0,
+            "last_status": "durable"
+          }
+        }
+      }
+    },
+    "prior_wave_rollback_scripts_present": {
+      "ok": true,
+      "detail": {
+        "d3": true,
+        "d4": true,
+        "d5": true
+      }
+    },
+    "durable_to_held_materialization_synthetic": {
+      "ok": false,
+      "detail": {
+        "severity": "medium",
+        "finding": "D6 synthetic Postmark durable receives reached completed jobs but did not create held applications within wait window; Held Intake admit/bulk proved via register_imported_cv email_inbound seed (same queue). Prior D4 prod admit PASS remains supporting evidence.",
+        "recommendation": "Investigate durable worker promote-to-application path for minimal/synthetic PDFs before external-tenant GA; do not block WATHEFNI forwarding GA if admit UX + durable receive both independently PASS."
+      }
+    }
+  },
+  "ids": {
+    "stamp": "20260801T161522Z",
+    "short": "08343d30",
+    "general_intake_id": "c41ba4e6-9d6f-48f6-8cea-6846e290e27d",
+    "general_address": "wathefni-cv-5cc53a@inbound.wathefni.ai",
+    "position_code": "OCCTST_044035",
+    "job_intake_id": "910c254f-9c4c-49d2-aee4-b408a05d7694",
+    "mailbox_id": "276fd036-b02c-41e3-a1f0-1be8d7cc6b61"
+  },
+  "cleanup": {
+    "intake_ids": [
+      "f93b1e8f-394a-4189-9e0a-beab8379f996",
+      "f30537d0-dccd-403a-a968-bfe16ae107e2",
+      "910c254f-9c4c-49d2-aee4-b408a05d7694",
+      "c41ba4e6-9d6f-48f6-8cea-6846e290e27d"
+    ],
+    "inbound_ids": [
+      "e9190158-42e4-514a-a369-bff2f659a326",
+      "75b81d02-c01a-511e-9230-bc8782b9e63b",
+      "f1f7895f-fcc6-5110-9306-37aee27a9b15",
+      "6b17e793-dd2a-57e8-99f7-f5b5f54b05fc",
+      "62b8c8ad-443e-5478-a24a-873e1ccd9db1",
+      "6b089687-7348-5905-bce4-5d8ca85bdf55",
+      "a87f1463-b57d-5a62-90fc-36c0808093a7",
+      "22eed13d-92a6-582e-aea2-fdd87f8a9ff2",
+      "c6ace312-e302-546d-a428-4d6f239c4215",
+      "ac712e91-83b5-5a01-9b51-6e17e77276d7",
+      "c4d3531b-f0eb-5d29-ba9d-71f521b19b49",
+      "054b1afe-dc79-57b1-8231-5d1c6645e9de",
+      "60753f89-d8f7-53df-896a-18d4b6888071",
+      "a3d609aa-54e7-5d69-992b-5c8c729a2304"
+    ],
+    "job_ids": [
+      "80472ad7-f1e7-4a20-96c0-a85288642cbb"
+    ],
+    "mailbox_ids": [],
+    "app_keys": [
+      "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT",
+      "imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT",
+      "imp-wathefni-fe1b596eb9134774-WATHEFNI-OCCTST_044035"
+    ],
+    "enterprise_restored": true,
+    "override_cleared": true,
+    "proof_intakes": [
+      {
+        "intake_id": "f93b1e8f-394a-4189-9e0a-beab8379f996",
+        "label": "wave_d6_ga_proof-08343d30-general",
+        "status": "disabled"
+      },
+      {
+        "intake_id": "f30537d0-dccd-403a-a968-bfe16ae107e2",
+        "label": "wave_d6_ga_proof-08343d30-job",
+        "status": "disabled"
+      },
+      {
+        "intake_id": "c41ba4e6-9d6f-48f6-8cea-6846e290e27d",
+        "label": "wave_d6_ga_proof-08343d30-gen-cont",
+        "status": "disabled"
+      },
+      {
+        "intake_id": "910c254f-9c4c-49d2-aee4-b408a05d7694",
+        "label": "wave_d6_ga_proof-08343d30-job-cont",
+        "status": "disabled"
+      }
+    ],
+    "active_intake_count": 1,
+    "leftover_d6_mailboxes": 0,
+    "held_seed_batch_id": "a90dd388-8f3b-43e7-ae0b-1cedb50c6c27"
+  },
+  "external_tenants_enabled": false,
+  "post_hiring_started": false,
+  "continued": true,
+  "held_seeded": true
+}

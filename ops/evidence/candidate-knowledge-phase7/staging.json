@@ -1,0 +1,97 @@
+{
+  "accepted_limitations": [
+    "Staging synthetic pool was 1,000 rows (not 10k/50k).",
+    "CK modules were not installed into the live staging orchestrator service; shadow/ranking proofs ran in-process from /tmp against additive schema + local modules.",
+    "No index worker systemd unit was installed.",
+    "Real Voyage was not executed on staging.",
+    "Normal staging users were not exposed to Candidate Knowledge tools."
+  ],
+  "executed": true,
+  "flags": {
+    "WATHEFNI_CK_RANKING_ADAPTER_LIVE": "<unset>",
+    "WATHEFNI_CK_SHADOW_TOOLS_ENABLED": "<unset>",
+    "WATHEFNI_CK_VOYAGE_ENABLED": "<unset>",
+    "application_environment": "<unset>",
+    "unit_mentions_ck_live": false
+  },
+  "gates": [
+    {
+      "id": "schema_idempotent",
+      "status": "PASS"
+    },
+    {
+      "id": "tenant_search_isolation",
+      "status": "PASS"
+    },
+    {
+      "id": "jobs_audit",
+      "status": "PASS"
+    },
+    {
+      "id": "invalidation",
+      "status": "PASS"
+    },
+    {
+      "id": "shadow_tools_ranking",
+      "status": "PASS"
+    },
+    {
+      "detail": {
+        "WATHEFNI_CK_RANKING_ADAPTER_LIVE": "<unset>",
+        "WATHEFNI_CK_SHADOW_TOOLS_ENABLED": "<unset>",
+        "WATHEFNI_CK_VOYAGE_ENABLED": "<unset>",
+        "application_environment": "<unset>",
+        "unit_mentions_ck_live": false
+      },
+      "id": "flags_default_off",
+      "status": "PASS"
+    },
+    {
+      "id": "synthetic_cleanup",
+      "status": "PASS"
+    },
+    {
+      "id": "health_200",
+      "status": "PASS"
+    }
+  ],
+  "health_after": {
+    "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"staging\",\"database_environment\":\"staging\",\"database_environment_marker\":\"65aede205f95\",\"database_logical_name\":\"15cab0f44aae\",\"database_host\":\"aaf",
+    "http_code": 200
+  },
+  "result_path": "ops/evidence/candidate-knowledge-phase7/staging-qualify-result.json",
+  "schema": {
+    "first_apply_ms": 2.03,
+    "idempotent": true,
+    "second_apply_ms": 0.81,
+    "tables": [
+      "candidate_knowledge_access_events",
+      "candidate_knowledge_chunks",
+      "candidate_knowledge_index_jobs"
+    ]
+  },
+  "search_isolation": {
+    "hits": 1,
+    "needle_found": true,
+    "other_tenant_leaked": false,
+    "search_ms": 2.41,
+    "tenant_only": true
+  },
+  "shadow_tools_ranking": {
+    "audit_events": 3,
+    "compare_no_winner": true,
+    "held_ranking_denied": true,
+    "live_registry_writes": 0,
+    "search_ok": true,
+    "shadow_default_off": true
+  },
+  "status": "PASS",
+  "zero_mutation": {
+    "canonical_tables_dropped": false,
+    "index_schema_retained_additive": true,
+    "lifecycle_mutations": 0,
+    "outbound_messages": 0,
+    "production_touched": false,
+    "ranking_cutover": false
+  }
+}

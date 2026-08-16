@@ -1,0 +1,26 @@
+| fixture | category | nature | poppler_ocr | inspector_ocr | insp_false_skip | insp_unnec | insp_ms | field_insp | ar_integrity |
+|---|---|---|---|---|---|---|---:|---:|---:|
+| cv_en_digital_01 | english_digital_cv | digital_text | - | - | - | - | 3 | 1.0 | - |
+| cv_en_digital_02 | english_digital_cv | digital_text | - | - | - | - | 1 | 1.0 | - |
+| cv_en_digital_03 | english_digital_cv | digital_text | - | - | - | - | 1 | 1.0 | - |
+| cv_ar_digital_01 | arabic_digital_cv | digital_text | 1 | - | - | - | 1 | 1.0 | 1.0 |
+| cv_ar_digital_02 | arabic_digital_cv | digital_text | 1 | - | - | - | 1 | 1.0 | 1.0 |
+| cv_ar_digital_03 | arabic_digital_cv | digital_text | 1 | - | - | - | 1 | 1.0 | 1.0 |
+| cv_bilingual_01 | bilingual_cv | digital_text | - | - | - | - | 1 | 0.8 | 0.5 |
+| cv_bilingual_02 | bilingual_cv | digital_text | - | - | - | - | 1 | 1.0 | 1.0 |
+| cv_multicolumn_01 | multicolumn_cv | digital_text | - | - | - | - | 1 | 1.0 | - |
+| cv_multicolumn_02 | multicolumn_cv | digital_text | - | - | - | - | 1 | 1.0 | - |
+| cv_scanned_en_01 | scanned_image_only_cv | scanned_image_only | 1 | 1 | - | - | 0 | 0.0 | - |
+| cv_scanned_ar_01 | scanned_image_only_cv | scanned_image_only | 1 | 1 | - | - | 0 | 0.0 | 0.0 |
+| cv_scanned_en_02 | scanned_image_only_cv | scanned_image_only | 1 | 1 | - | - | 0 | 0.0 | - |
+| cv_mixed_01 | mixed_digital_scanned | mixed | 2 | 2 | - | - | 1 | 1.0 | - |
+| cv_mixed_02 | mixed_digital_scanned | mixed | 2 | 2 | - | - | 1 | 1.0 | - |
+| cv_tounicode_proper_01 | cid_tounicode | digital_text_tounicode | - | - | - | - | 1 | 1.0 | 1.0 |
+| cv_broken_encoding_01 | broken_encoding | digital_broken_encoding | - | - | 1 | - | 0 | 1.0 | - |
+| contract_employment_en_01 | contract | digital_text | - | - | - | - | 1 | 0.667 | - |
+| contract_kuwait_labor_law_real_01 | contract | digital_text_real_world | - | - | - | - | 7 | 0.0 | 0.0 |
+| identity_civil_id_digital_01 | identity_document | digital_text | - | - | - | - | 1 | 0.667 | - |
+| identity_passport_scanned_01 | identity_document | scanned_image_only | 1 | 1 | - | - | 0 | 0.0 | - |
+| table_compensation_01 | table_heavy | digital_text | - | - | - | - | 1 | 1.0 | - |
+| table_experience_matrix_01 | table_heavy | digital_text | - | - | - | - | 1 | 1.0 | - |
+| cv_en_digital_multipage_01 | english_digital_cv | digital_text | - | - | - | - | 1 | 1.0 | - |

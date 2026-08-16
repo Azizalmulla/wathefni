@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-07-25T22:20:11Z",
+  "source_commit": "40a4e2621f4818bf7c0f6ce3642032297bfbe7b2",
+  "health": "200",
+  "worker": "inactive",
+  "classifier_sha": "827e92cda2754a6d90f1aefce96f125cc725c385ab9241b07fb388d529628fe7",
+  "test_sha": "c9afab55180110523ff7ffc2549c093be59986be91a55573d01256d65a94b058",
+  "held_authority_sha": "8a3949eac6d72c7f18514810171298615e1fded40e81afba2ee91239305aab53",
+  "classification_conf": "[Service]\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_TENANTS=\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_SCHEMA=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_MANUAL=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_WORKERS=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_UI=off\n",
+  "unified_conf": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n",
+  "backup": "/opt/wathefni/backups/production-pre-talent-pool-classification-v12-20260725T221918Z",
+  "snapshot": {
+    "applications": {
+      "exists": true,
+      "count": 17,
+      "latest": "2026-07-05"
+    },
+    "candidates": {
+      "exists": true,
+      "count": 20,
+      "latest": "2026-07-24 09:44:30.145469+00:00"
+    },
+    "positions": {
+      "exists": true,
+      "count": 11,
+      "latest": "2026-07-21 03:03:17.935228+00:00"
+    },
+    "application_lifecycle_events": {
+      "exists": true,
+      "count": 2,
+      "latest": "2026-07-18 00:18:36.697691+00:00"
+    },
+    "ranking_runs": {
+      "exists": true,
+      "count": 31,
+      "latest": "2026-07-23 23:22:16.852803+00:00"
+    },
+    "ranking_run_items": {
+      "exists": true,
+      "count": 27,
+      "latest": "2026-07-23 23:22:06.138305+00:00"
+    },
+    "outbound_delivery_events": {
+      "exists": true,
+      "count": 721,
+      "latest": "2026-07-25 22:01:40.454771+00:00"
+    },
+    "cv_extraction_cache": {
+      "exists": true,
+      "count": 9,
+      "latest": "2026-07-23 18:28:55.649154+00:00"
+    },
+    "cv_extraction_finalizations": {
+      "exists": true,
+      "count": 10,
+      "latest": "2026-07-23 18:28:55.649154+00:00"
+    },
+    "cv_extraction_leases": {
+      "exists": true,
+      "count": 0,
+      "latest": null
+    },
+    "cv_extraction_runs": {
+      "exists": true,
+      "count": 9,
+      "latest": "2026-07-23 18:28:55.649154+00:00"
+    },
+    "embedding_reindex_events": {
+      "exists": true,
+      "count": 14,
+      "latest": "2026-07-20 09:54:21.495598+00:00"
+    },
+    "embedding_reindex_runs": {
+      "exists": true,
+      "count": 2,
+      "latest": "2026-07-20 09:54:25.080628+00:00"
+    },
+    "semantic_documents": {
+      "exists": true,
+      "count": 17,
+      "latest": "2026-07-23 18:28:55.649154+00:00"
+    },
+    "candidate_classification_runs": {
+      "exists": true,
+      "count": 0,
+      "latest": null
+    },
+    "candidate_classification_suggestions": {
+      "exists": true,
+      "count": 0,
+      "latest": null
+    },
+    "candidate_classification_review_events": {
+      "exists": true,
+      "count": 0,
+      "latest": null
+    },
+    "talent_pool_classification_jobs": {
+      "exists": true,
+      "count": 0,
+      "latest": null
+    },
+    "taxonomy_tenant_nodes": {
+      "exists": true,
+      "count": 0,
+      "latest": null
+    }
+  }
+}

@@ -1,0 +1,23 @@
+    wave1 lifecycle — full DB prove
+      PASS  truth-sync dry-run
+      PASS  truth-sync writers company canary
+      PASS  A1 create+submit
+      PASS  A1 SoD blocks creator
+      PASS  A1 approve
+      PASS  A1 open
+      PASS  A2 link job
+      PASS  A2 publish gate allows
+      PASS  A3 candidate application soft
+      PASS  A4 offer→pending_start
+      PASS  A4 preboard created
+      PASS  A4 hub pending_start
+      PASS  A5 assignment id
+      PASS  A5 ready
+      PASS  A6 hire tx ok
+      PASS  A6 activated
+      PASS  A6 same employment_id
+      PASS  A6 onboarding auto-start path
+      PASS  A6 onboarding started
+      PASS  A7 probation auto-plan
+      PASS  A7 case present
+      PASS  A7 30/60/90 seeded

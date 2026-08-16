@@ -1,0 +1,1 @@
+DENY_OK — running minimal allow/deny matrix (2 sends max)

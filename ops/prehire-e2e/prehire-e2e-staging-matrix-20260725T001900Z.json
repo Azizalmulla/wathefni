@@ -1,0 +1,2854 @@
+{
+  "marker": "prehire-e2e-qualification-v1",
+  "started_at": "20260725T001714Z",
+  "environment": {
+    "env": "staging",
+    "database": "wathefni_staging",
+    "delivery_mode": "dry_run"
+  },
+  "tenants": [
+    {
+      "code": "E2EAVO",
+      "combo": "assessments_ON__interviews_ON",
+      "assessments": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "E2EAXO",
+      "combo": "assessments_ON__interviews_OFF",
+      "assessments": true,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "E2EXVO",
+      "combo": "assessments_OFF__interviews_ON",
+      "assessments": false,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "E2EXXO",
+      "combo": "assessments_OFF__interviews_OFF",
+      "assessments": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "E2ENOOF",
+      "combo": "offers_OFF_tenant_contract",
+      "assessments": false,
+      "video": false,
+      "offers": false
+    },
+    {
+      "code": "E2EPEER",
+      "combo": "peer_isolation_and_history",
+      "assessments": true,
+      "video": true,
+      "offers": true
+    }
+  ],
+  "gates": [
+    {
+      "gate": "catalog_has_assessments_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "prehire=['assessments', 'employment_offers', 'pre_hiring', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_offers_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "keys=['analytics', 'assessments', 'attendance', 'compliance', 'employee_app', 'employment_offers', 'leave', 'onboarding', 'payroll', 'pre_hiring', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_dedicated_interviews_module",
+      "scope": "contract",
+      "ok": false,
+      "detail": "interview-related keys present=['video_interviews']; full=['analytics', 'assessments', 'attendance', 'compliance', 'employee_app', 'employment_offers', 'leave', 'onboarding', 'payroll', 'pre_hiring', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "toolcall_gated_covers_optional_prehire_modules",
+      "scope": "contract",
+      "ok": false,
+      "detail": "TOOLCALL_GATED_MODULES=['analytics', 'assessments', 'attendance', 'compliance', 'leave', 'onboarding', 'payroll', 'shifts']"
+    },
+    {
+      "gate": "ranking_default_policy_assessment_and_interview_unused",
+      "scope": "contract",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-E2EAVO-E2E_ROLE\", \"link\": \"https://wa.me/96599338566?text=APPLY-E2EAVO-E2E_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"3de57dfd-4b5a-40e3-a36a-01c9f6e520f6\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"E2EAVO\", \"position_code\": \"E2E_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"191dd4ab4218368aa692b1e83163cef3601806ef4e217a20367722536ceee553\"}, \"pool_app_keys\": [\"E2EAVO-E2E-withdraw\", \"E2EAVO-E2E-reject\", \"E2EAVO-E2E-main\", \"E2EAVO-E2E-bare\", \"E2EAVO-E2E-ardoc\"], \"scoring_config"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EAVO-E2E-main\", \"phone\": \"+965886046614\", \"company_code\": \"E2EAVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EAVO-E2E-bare\", \"phone\": \"+965886065038\", \"company_code\": \"E2EAVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EAVO-E2E-ardoc\", \"phone\": \"+965886052945\", \"company_code\": \"E2EAVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \""
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '1b36858e-e67a-4e04-a685-c5522980b6c8', 'company_code': 'E2EAVO', 'app_key': 'E2EAVO-E2E-main', 'phone': '965886046614', 'candidate_name': None, 'position_code': 'E2E_ROLE', 'position_title': 'E2E Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'sta"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886046614', 'name': None, 'email': None, 'position_title': 'E2E Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'erro"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "00afe83e-12bb-4ff7-9937-8a5eebe8d948"
+    },
+    {
+      "gate": "interview_queue_items_when_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "4bb6cd07-8b3f-428b-a528-3d1c2f841b5b"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{'offer_id': '4bb6cd07-8b3f-428b-a528-3d1c2f841b5b', 'app_key': 'E2EAVO-E2E-main', 'company_code': 'E2EAVO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version':"
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"4bb6cd07-8b3f-428b-a528-3d1c2f841b5b\", \"app_key\": \"E2EAVO-E2E-main\", \"company_code\": \"E2EAVO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"4bb6cd07-8b3f-428b-a528-3d1c2f841b5b\", \"app_key\": \"E2EAVO-E2E-main\", \"company_code\": \"E2EAVO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"offer_id\", \"offer_version\", \"ok\", \"position_title\", \"p"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"4bb6cd07-8b3f-428b-a528-3d1c2f841b5b\", \"app_key\": \"E2EAVO-E2E-main\", \"company_code\": \"E2EAVO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"c"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: cfa4d27b-3520-4ac4-bb3e-028ea12597dd"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"75704c76-8a5b-4c77-b5e5-4494dc64ad39\", \"company_code\": \"E2EAVO\", \"app_key\": \"E2EAVO-E2E-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:E2EAVO:96f99663-227a-4f52-bb75-dfe9b44e4591\", \"confirmation_id\": null, \"actor_user_id\": \"e2e"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"4bb6cd07-8b3f-428b-a528-3d1c2f841b5b\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"bee007f5-25c0-4c5b-9692-5f8eac3741cb\", \"company_code\": \"E2EAVO\", \"app_key\": \"E2EAVO-E2E-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"75704c76-8a5b-4c77-b5e5-4494dc64ad39\", \"hiring_reference\": \"75704c76-8a5b-4c77-b5e5-4494dc64ad39\"}, \"request_hash\": \"a0e7333809997e58ee69a72d7a8f"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"E2EAVO-965886046614\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"E2EAVO-965886046614\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2EAVO-E2E-reject\", \"phone\": \"+965886068527\", \"company_code\": \"E2EAVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"re"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"E2EAVO-E2E-withdraw\", \"phone\": \"+965886096029\", \"company_code\": \"E2EAVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_interview_tools_when_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite', 'send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EAVO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EAVO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_pre_hiring",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['pre_hiring']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EAVO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "E2EAVO[assessments_ON__interviews_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-E2EAXO-E2E_ROLE\", \"link\": \"https://wa.me/96599338566?text=APPLY-E2EAXO-E2E_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"b0b628f7-c2bd-4cdc-88df-8246ec2344f8\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"E2EAXO\", \"position_code\": \"E2E_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"191dd4ab4218368aa692b1e83163cef3601806ef4e217a20367722536ceee553\"}, \"pool_app_keys\": [\"E2EAXO-E2E-withdraw\", \"E2EAXO-E2E-reject\", \"E2EAXO-E2E-main\", \"E2EAXO-E2E-bare\", \"E2EAXO-E2E-ardoc\"], \"scoring_config"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EAXO-E2E-main\", \"phone\": \"+965886050636\", \"company_code\": \"E2EAXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EAXO-E2E-bare\", \"phone\": \"+965886034990\", \"company_code\": \"E2EAXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EAXO-E2E-ardoc\", \"phone\": \"+965886061553\", \"company_code\": \"E2EAXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \""
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'a2788dc6-3ab9-40e2-bac5-a4276231a2a8', 'company_code': 'E2EAXO', 'app_key': 'E2EAXO-E2E-main', 'phone': '965886050636', 'candidate_name': None, 'position_code': 'E2E_ROLE', 'position_title': 'E2E Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'sta"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886050636', 'name': None, 'email': None, 'position_title': 'E2E Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'erro"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "interviews_off_blocks_live_scheduling",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": false,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": false,
+      "detail": "created=555225a4-9070-4bc2-be55-11dd273b6b91"
+    },
+    {
+      "gate": "interviews_off_no_interview_queue_or_warning",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": false,
+      "detail": "[{\"action_type\": \"interview_scheduling_debt\", \"app_key\": \"E2EAXO-E2E-ardoc\", \"candidate_name\": \"E2E E2EAXO ardoc\", \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"reason\": \"Interview scheduling still needed\", \"priority\": 40, \"age_hours\": 0.3, \"destination\": {\"page\": \"interviews\", \"filters\": {}}, \"authority_source\": \"prehire_overview.interview_scheduling_debt\", \"as_of\": \"2026-07-25T00:17:16.393798+00:00\"}, {\"action_type\": \"interview_scheduling_debt\", \"app_key\": \"E2EAXO-E2E-bare\", \"candidate_name\": \"E2E E2EAXO bare\", \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"reason\": \"Interview scheduling still needed\", \"priority\": 40, \"age_hours\": 0."
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{'offer_id': 'bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142', 'app_key': 'E2EAXO-E2E-main', 'company_code': 'E2EAXO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version':"
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142\", \"app_key\": \"E2EAXO-E2E-main\", \"company_code\": \"E2EAXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142\", \"app_key\": \"E2EAXO-E2E-main\", \"company_code\": \"E2EAXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"offer_id\", \"offer_version\", \"ok\", \"position_title\", \"p"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142\", \"app_key\": \"E2EAXO-E2E-main\", \"company_code\": \"E2EAXO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"c"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 0f810468-48ec-4f09-83ff-7a023d423774"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"acc6996e-ac7a-4cbb-b16f-1139a17d4cc9\", \"company_code\": \"E2EAXO\", \"app_key\": \"E2EAXO-E2E-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:E2EAXO:6a9144e6-fd53-44b5-8bff-d19d5a3b11c7\", \"confirmation_id\": null, \"actor_user_id\": \"e2e"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"77a8bc8f-4f99-4e9b-b9a4-d1f643693409\", \"company_code\": \"E2EAXO\", \"app_key\": \"E2EAXO-E2E-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"acc6996e-ac7a-4cbb-b16f-1139a17d4cc9\", \"hiring_reference\": \"acc6996e-ac7a-4cbb-b16f-1139a17d4cc9\"}, \"request_hash\": \"1d4791d0d05522ab551e061274b8"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"E2EAXO-965886050636\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"E2EAXO-965886050636\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2EAXO-E2E-reject\", \"phone\": \"+965886043089\", \"company_code\": \"E2EAXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"re"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"E2EAXO-E2E-withdraw\", \"phone\": \"+965886084290\", \"company_code\": \"E2EAXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "reports_zero_interview_wording_when_off",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": false,
+      "detail": "[\".exports.types[3]:interview\", \".exports.types[3]:interviews\", \".breakdowns.applications_by_stage[3].label:interview\", \".funnel[3].key:interview\", \".funnel[3].label:interview\"]"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_hides_interview_tools_when_off",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": false,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite', 'send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EAXO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EAXO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_pre_hiring",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['pre_hiring']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EAXO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_zero_interview_payload_when_off",
+      "scope": "E2EAXO[assessments_ON__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-E2EXVO-E2E_ROLE\", \"link\": \"https://wa.me/96599338566?text=APPLY-E2EXVO-E2E_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"18e9b729-534e-47e0-90e4-298638037d57\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"191dd4ab4218368aa692b1e83163cef3601806ef4e217a20367722536ceee553\"}, \"pool_app_keys\": [\"E2EXVO-E2E-withdraw\", \"E2EXVO-E2E-reject\", \"E2EXVO-E2E-main\", \"E2EXVO-E2E-bare\", \"E2EXVO-E2E-ardoc\"], \"scoring_config"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EXVO-E2E-main\", \"phone\": \"+965886047763\", \"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EXVO-E2E-bare\", \"phone\": \"+965886070714\", \"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EXVO-E2E-ardoc\", \"phone\": \"+965886023209\", \"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \""
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "assessments_off_service_mutation_blocked",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": false,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'f7c960c8-ce1e-4c3b-910b-87d47224a68e', 'company_code': 'E2EXVO', 'app_key': 'E2EXVO-E2E-main', 'phone': '965886047763', 'candidate_name': None, 'position_code': 'E2E_ROLE', 'position_title': 'E2E Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'sta"
+    },
+    {
+      "gate": "assessments_off_entitlement_403",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'E2EXVO', 'required_module': 'assessments', 'required_permission': 'assessment.manage'}"
+    },
+    {
+      "gate": "overview_omits_assessment_counts_when_off",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "032e3a70-5edc-4df7-977e-08cf410865ea"
+    },
+    {
+      "gate": "interview_queue_items_when_on",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "05f2c569-4606-4bec-9a10-994448f7885a"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{'offer_id': '05f2c569-4606-4bec-9a10-994448f7885a', 'app_key': 'E2EXVO-E2E-main', 'company_code': 'E2EXVO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version':"
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"05f2c569-4606-4bec-9a10-994448f7885a\", \"app_key\": \"E2EXVO-E2E-main\", \"company_code\": \"E2EXVO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"05f2c569-4606-4bec-9a10-994448f7885a\", \"app_key\": \"E2EXVO-E2E-main\", \"company_code\": \"E2EXVO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"offer_id\", \"offer_version\", \"ok\", \"position_title\", \"p"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"05f2c569-4606-4bec-9a10-994448f7885a\", \"app_key\": \"E2EXVO-E2E-main\", \"company_code\": \"E2EXVO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"c"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 3f166993-9afd-461d-ade3-e874a608705b"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"ba1eccc9-8f6e-479e-91e8-5a56d0f27c83\", \"company_code\": \"E2EXVO\", \"app_key\": \"E2EXVO-E2E-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:E2EXVO:4aed3447-d7c6-4dad-a51c-2ed85f794d0f\", \"confirmation_id\": null, \"actor_user_id\": \"e2e"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"05f2c569-4606-4bec-9a10-994448f7885a\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"8aa9c71e-d099-45ee-a019-499c3d803e9c\", \"company_code\": \"E2EXVO\", \"app_key\": \"E2EXVO-E2E-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"ba1eccc9-8f6e-479e-91e8-5a56d0f27c83\", \"hiring_reference\": \"ba1eccc9-8f6e-479e-91e8-5a56d0f27c83\"}, \"request_hash\": \"b960d4266018774a15714aee05ee"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"E2EXVO-965886047763\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"E2EXVO-965886047763\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2EXVO-E2E-reject\", \"phone\": \"+965886095323\", \"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"re"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"E2EXVO-E2E-withdraw\", \"phone\": \"+965886097655\", \"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "gate": "reports_zero_assessment_wording_when_off",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_assessments_export_blocked_when_off",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "export_headers"
+    },
+    {
+      "gate": "assistant_hides_assessment_tools_when_off",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_interview_tools_when_on",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite', 'send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EXVO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EXVO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_pre_hiring",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['pre_hiring']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EXVO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "scope": "E2EXVO[assessments_OFF__interviews_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-E2EXXO-E2E_ROLE\", \"link\": \"https://wa.me/96599338566?text=APPLY-E2EXXO-E2E_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"2dc1b38c-45d6-494d-9134-bd854fb817c4\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"E2EXXO\", \"position_code\": \"E2E_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"191dd4ab4218368aa692b1e83163cef3601806ef4e217a20367722536ceee553\"}, \"pool_app_keys\": [\"E2EXXO-E2E-withdraw\", \"E2EXXO-E2E-reject\", \"E2EXXO-E2E-main\", \"E2EXXO-E2E-bare\", \"E2EXXO-E2E-ardoc\"], \"scoring_config"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EXXO-E2E-main\", \"phone\": \"+965886006150\", \"company_code\": \"E2EXXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EXXO-E2E-bare\", \"phone\": \"+965886012779\", \"company_code\": \"E2EXXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"s"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EXXO-E2E-ardoc\", \"phone\": \"+965886083941\", \"company_code\": \"E2EXXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \""
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "assessments_off_service_mutation_blocked",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": false,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'e2d509de-ef3a-4460-97ae-0233f78cb96c', 'company_code': 'E2EXXO', 'app_key': 'E2EXXO-E2E-main', 'phone': '965886006150', 'candidate_name': None, 'position_code': 'E2E_ROLE', 'position_title': 'E2E Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'sta"
+    },
+    {
+      "gate": "assessments_off_entitlement_403",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'E2EXXO', 'required_module': 'assessments', 'required_permission': 'assessment.manage'}"
+    },
+    {
+      "gate": "overview_omits_assessment_counts_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "interviews_off_blocks_live_scheduling",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": false,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": false,
+      "detail": "created=67137211-662a-4b89-aa3d-da09cacea70d"
+    },
+    {
+      "gate": "interviews_off_no_interview_queue_or_warning",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": false,
+      "detail": "[{\"action_type\": \"interview_scheduling_debt\", \"app_key\": \"E2EXXO-E2E-ardoc\", \"candidate_name\": \"E2E E2EXXO ardoc\", \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"reason\": \"Interview scheduling still needed\", \"priority\": 40, \"age_hours\": 0.3, \"destination\": {\"page\": \"interviews\", \"filters\": {}}, \"authority_source\": \"prehire_overview.interview_scheduling_debt\", \"as_of\": \"2026-07-25T00:17:18.070766+00:00\"}, {\"action_type\": \"interview_scheduling_debt\", \"app_key\": \"E2EXXO-E2E-bare\", \"candidate_name\": \"E2E E2EXXO bare\", \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"reason\": \"Interview scheduling still needed\", \"priority\": 40, \"age_hours\": 0."
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "df100076-f1ae-4022-9577-cfeef9147196"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{'offer_id': 'df100076-f1ae-4022-9577-cfeef9147196', 'app_key': 'E2EXXO-E2E-main', 'company_code': 'E2EXXO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version':"
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"df100076-f1ae-4022-9577-cfeef9147196\", \"app_key\": \"E2EXXO-E2E-main\", \"company_code\": \"E2EXXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"df100076-f1ae-4022-9577-cfeef9147196\", \"app_key\": \"E2EXXO-E2E-main\", \"company_code\": \"E2EXXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"countr"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"offer_id\", \"offer_version\", \"ok\", \"position_title\", \"p"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"df100076-f1ae-4022-9577-cfeef9147196\", \"app_key\": \"E2EXXO-E2E-main\", \"company_code\": \"E2EXXO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"c"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: e93e1d96-8882-4e85-8750-e932ab7efd39"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"8c2630d2-904e-4ede-ad9c-1ad8681d5a80\", \"company_code\": \"E2EXXO\", \"app_key\": \"E2EXXO-E2E-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:E2EXXO:694bf9a9-33fc-4d18-a023-436c2026a42d\", \"confirmation_id\": null, \"actor_user_id\": \"e2e"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"df100076-f1ae-4022-9577-cfeef9147196\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"8a8c072b-3025-4941-be61-48910c9cc1f4\", \"company_code\": \"E2EXXO\", \"app_key\": \"E2EXXO-E2E-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"8c2630d2-904e-4ede-ad9c-1ad8681d5a80\", \"hiring_reference\": \"8c2630d2-904e-4ede-ad9c-1ad8681d5a80\"}, \"request_hash\": \"4a45818dbcbde7c48d433e3fd194"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"E2EXXO-965886006150\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"E2EXXO-965886006150\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2EXXO-E2E-reject\", \"phone\": \"+965886005752\", \"company_code\": \"E2EXXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"re"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"E2EXXO-E2E-withdraw\", \"phone\": \"+965886061203\", \"company_code\": \"E2EXXO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "gate": "reports_zero_assessment_wording_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_assessments_export_blocked_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "export_headers"
+    },
+    {
+      "gate": "reports_zero_interview_wording_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": false,
+      "detail": "[\".exports.types[2]:interview\", \".exports.types[2]:interviews\", \".breakdowns.applications_by_stage[3].label:interview\", \".funnel[3].key:interview\", \".funnel[3].label:interview\"]"
+    },
+    {
+      "gate": "assistant_hides_assessment_tools_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_hides_interview_tools_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": false,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite', 'send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EXXO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EXXO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_pre_hiring",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['pre_hiring']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EXXO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_zero_interview_payload_when_off",
+      "scope": "E2EXXO[assessments_OFF__interviews_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-E2ENOOF-E2E_ROLE\", \"link\": \"https://wa.me/96599338566?text=APPLY-E2ENOOF-E2E_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"f010b76b-15d8-487f-bd9a-5ece9a71178f\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"E2ENOOF\", \"position_code\": \"E2E_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"191dd4ab4218368aa692b1e83163cef3601806ef4e217a20367722536ceee553\"}, \"pool_app_keys\": [\"E2ENOOF-E2E-withdraw\", \"E2ENOOF-E2E-reject\", \"E2ENOOF-E2E-main\", \"E2ENOOF-E2E-bare\", \"E2ENOOF-E2E-ardoc\"], \"scoring_"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2ENOOF-E2E-main\", \"phone\": \"+965886023720\", \"company_code\": \"E2ENOOF\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2ENOOF-E2E-bare\", \"phone\": \"+965886000535\", \"company_code\": \"E2ENOOF\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2ENOOF-E2E-ardoc\", \"phone\": \"+965886074575\", \"company_code\": \"E2ENOOF\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\":"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "assessments_off_service_mutation_blocked",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '4ea4b131-6cd6-434a-a005-42641b6e2ec6', 'company_code': 'E2ENOOF', 'app_key': 'E2ENOOF-E2E-main', 'phone': '965886023720', 'candidate_name': None, 'position_code': 'E2E_ROLE', 'position_title': 'E2E Operations Engineer', 'battery_key': 'wathefni_ability_v1', 's"
+    },
+    {
+      "gate": "assessments_off_entitlement_403",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'E2ENOOF', 'required_module': 'assessments', 'required_permission': 'assessment.manage'}"
+    },
+    {
+      "gate": "overview_omits_assessment_counts_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "interviews_off_blocks_live_scheduling",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "created=b5d7c75b-ec1b-4b0e-bfe0-b922af3c8753"
+    },
+    {
+      "gate": "interviews_off_no_interview_queue_or_warning",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "[{\"action_type\": \"interview_scheduling_debt\", \"app_key\": \"E2ENOOF-E2E-ardoc\", \"candidate_name\": \"E2E E2ENOOF ardoc\", \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"reason\": \"Interview scheduling still needed\", \"priority\": 40, \"age_hours\": 0.3, \"destination\": {\"page\": \"interviews\", \"filters\": {}}, \"authority_source\": \"prehire_overview.interview_scheduling_debt\", \"as_of\": \"2026-07-25T00:17:19.035546+00:00\"}, {\"action_type\": \"interview_scheduling_debt\", \"app_key\": \"E2ENOOF-E2E-bare\", \"candidate_name\": \"E2E E2ENOOF bare\", \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"reason\": \"Interview scheduling still needed\", \"priority\": 40, \"age_hours\""
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "expected=False"
+    },
+    {
+      "gate": "offers_off_draft_blocked",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "OfferAuthorityError:module_disabled"
+    },
+    {
+      "gate": "offers_off_hire_gate_not_required",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": false, \"offer_id\": null, \"override\": false}"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"878f0792-1ecf-43a1-bbb0-5f5478d852ad\", \"company_code\": \"E2ENOOF\", \"app_key\": \"E2ENOOF-E2E-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:E2ENOOF:98246f93-f7bf-44b8-9b20-6298d3bb1109\", \"confirmation_id\": null, \"actor_user_id\": \""
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": false, \"offer_id\": null, \"override\": false}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"c994bed6-1f58-4b31-b3d6-899c60d53984\", \"company_code\": \"E2ENOOF\", \"app_key\": \"E2ENOOF-E2E-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"878f0792-1ecf-43a1-bbb0-5f5478d852ad\", \"hiring_reference\": \"878f0792-1ecf-43a1-bbb0-5f5478d852ad\"}, \"request_hash\": \"ea1397b55a3207eaa08493f680"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"E2ENOOF-965886023720\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"E2ENOOF-965886023720\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2ENOOF-E2E-reject\", \"phone\": \"+965886050769\", \"company_code\": \"E2ENOOF\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \""
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"E2ENOOF-E2E-withdraw\", \"phone\": \"+965886000461\", \"company_code\": \"E2ENOOF\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\""
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 0, \"offer_accepted\": 0, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "reported=0 truth=0"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "gate": "reports_zero_assessment_wording_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_assessments_export_blocked_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "export_headers"
+    },
+    {
+      "gate": "reports_zero_interview_wording_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "[\".exports.types[2]:interview\", \".exports.types[2]:interviews\", \".breakdowns.applications_by_stage[3].label:interview\", \".funnel[3].key:interview\", \".funnel[3].label:interview\"]"
+    },
+    {
+      "gate": "reports_zero_offer_wording_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "[\".breakdowns.applications_by_stage[4].label:offer\", \".breakdowns.applications_by_stage[5].label:offer\", \".funnel[4].key:offer\", \".funnel[4].label:offer\", \".funnel[5].key:offer\", \".funnel[5].label:offer\"]"
+    },
+    {
+      "gate": "assistant_hides_assessment_tools_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_hides_interview_tools_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": false,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite', 'send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2ENOOF\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2ENOOF\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_pre_hiring",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['pre_hiring']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2ENOOF\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_zero_interview_payload_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_offers_disabled_when_off",
+      "scope": "E2ENOOF[offers_OFF_tenant_contract]",
+      "ok": true,
+      "detail": "{\"enabled\": false, \"actions\": [], \"reason\": \"module_disabled\", \"confirmation_required\": true}"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-E2EPEER-E2E_ROLE\", \"link\": \"https://wa.me/96599338566?text=APPLY-E2EPEER-E2E_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"8fcc6865-dd41-41a2-b83d-b47cc2129c75\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"E2EPEER\", \"position_code\": \"E2E_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"191dd4ab4218368aa692b1e83163cef3601806ef4e217a20367722536ceee553\"}, \"pool_app_keys\": [\"E2EPEER-E2E-withdraw\", \"E2EPEER-E2E-reject\", \"E2EPEER-E2E-main\", \"E2EPEER-E2E-bare\", \"E2EPEER-E2E-ardoc\"], \"scoring_"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EPEER-E2E-main\", \"phone\": \"+965886025533\", \"company_code\": \"E2EPEER\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EPEER-E2E-bare\", \"phone\": \"+965886015396\", \"company_code\": \"E2EPEER\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": "
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"E2EPEER-E2E-ardoc\", \"phone\": \"+965886057276\", \"company_code\": \"E2EPEER\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\":"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '207861a9-cd67-4a9c-a279-9c25dfe89ee8', 'company_code': 'E2EPEER', 'app_key': 'E2EPEER-E2E-main', 'phone': '965886025533', 'candidate_name': None, 'position_code': 'E2E_ROLE', 'position_title': 'E2E Operations Engineer', 'battery_key': 'wathefni_ability_v1', 's"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886025533', 'name': None, 'email': None, 'position_title': 'E2E Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'erro"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "6ab98515-fae8-47fb-ae9a-f475fa010ae1"
+    },
+    {
+      "gate": "interview_queue_items_when_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "56b0b754-3f73-4355-8f92-a53ea41048b3"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{'offer_id': '56b0b754-3f73-4355-8f92-a53ea41048b3', 'app_key': 'E2EPEER-E2E-main', 'company_code': 'E2EPEER', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version"
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"56b0b754-3f73-4355-8f92-a53ea41048b3\", \"app_key\": \"E2EPEER-E2E-main\", \"company_code\": \"E2EPEER\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"56b0b754-3f73-4355-8f92-a53ea41048b3\", \"app_key\": \"E2EPEER-E2E-main\", \"company_code\": \"E2EPEER\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"offer_id\", \"offer_version\", \"ok\", \"position_title\", \"p"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"56b0b754-3f73-4355-8f92-a53ea41048b3\", \"app_key\": \"E2EPEER-E2E-main\", \"company_code\": \"E2EPEER\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"E2E_ROLE\", \"position_title\": \"E2E Operations Engineer\", \"department\": null, "
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: ff9053a0-9569-43a5-9ca3-e85c4312f303"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"133c826f-d9d9-4fcf-bec5-158749c420ad\", \"company_code\": \"E2EPEER\", \"app_key\": \"E2EPEER-E2E-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:E2EPEER:8239f2b3-2af8-4c4a-855b-9e90283792ac\", \"confirmation_id\": null, \"actor_user_id\": \""
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"56b0b754-3f73-4355-8f92-a53ea41048b3\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"3db49bf8-b08b-4c1f-95df-04933e1a9639\", \"company_code\": \"E2EPEER\", \"app_key\": \"E2EPEER-E2E-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"133c826f-d9d9-4fcf-bec5-158749c420ad\", \"hiring_reference\": \"133c826f-d9d9-4fcf-bec5-158749c420ad\"}, \"request_hash\": \"e13cad93e4f753096a54c0872a"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"E2EPEER-965886025533\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"E2EPEER-965886025533\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2EPEER-E2E-reject\", \"phone\": \"+965886055219\", \"company_code\": \"E2EPEER\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \""
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"E2EPEER-E2E-withdraw\", \"phone\": \"+965886027002\", \"company_code\": \"E2EPEER\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\""
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_interview_tools_when_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "observation": true,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite', 'send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EPEER\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EPEER\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_pre_hiring",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['pre_hiring']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"E2EPEER\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "E2EPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "ai_cannot_reject_candidate",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"ai_cannot_mutate_stage\", \"message\": \"AI may propose this change but cannot execute it.\", \"to_stage\": \"rejected\"}"
+    },
+    {
+      "gate": "ai_cannot_hire_candidate",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"ai_cannot_mutate_stage\", \"message\": \"AI may propose this change but cannot execute it.\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "ai_cannot_use_hire_override",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "OfferAuthorityError:ai_forbidden:Only a human operator can use offer hire override."
+    },
+    {
+      "gate": "stale_version_rejected",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"stale_state\", \"expected_version\": 10, \"current_version\": 3, \"message\": \"Application version changed since this action was prepared.\"}"
+    },
+    {
+      "gate": "confirmation_token_single_use",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"first\": true, \"replay\": {\"ok\": false, \"error\": \"confirmation_already_used\"}}"
+    },
+    {
+      "gate": "concurrent_decisions_single_winner",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "[{\"ok\": true, \"from_stage\": \"shortlisted\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"E2EXVO-E2E-bare\", \"phone\": \"+965886070714\", \"company_code\": \"E2EXVO\", \"position_code\": \"E2E_ROLE\", \"apply_code\": null, \"position_title\": \"E2E Operations Engineer\", \"company_name\": null, \"status\": \"rejected\", \"current_step\": \"rejected\", \"cv_received\": true, \"cv_received_at\": \"2026-07-25\", \"screening_status\": null, \"screening_completed_at\": null, \"sheet_sync_status\": null, \"drive_sync_status\": null, \"raw_json\": {\"cv\": {\"extracted\": {\"skills\": [\"Python\", \"SQL\"], \"years_experience\": 8}}, \"intake\": {\"sour"
+    },
+    {
+      "gate": "cross_tenant_application_not_visible",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "gate": "cross_tenant_confirmation_mint_rejected",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"application_not_found\"}"
+    },
+    {
+      "gate": "cross_tenant_transition_rejected",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"confirmation_required\", \"to_stage\": \"rejected\", \"message\": \"Human confirmation is required for this transition.\"}"
+    },
+    {
+      "gate": "cross_tenant_offer_read_blocked",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "HTTPException:{'error': 'offer_not_found', 'message': 'Offer not found.'}"
+    },
+    {
+      "gate": "public_assessment_page_bilingual_rtl",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "ar+rtl markers present"
+    },
+    {
+      "gate": "public_unavailable_page_leaks_no_tenant",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>Link unavai"
+    },
+    {
+      "gate": "public_offer_link_respects_disabled_offers_module",
+      "scope": "cross_cutting",
+      "ok": false,
+      "detail": "served: keys=['allowances', 'already_used', 'authorized_signatory', 'base_salary', 'can_respond', 'candidate_name_snapshot', 'company_code', 'country_of_employment', 'currency', 'document_language', 'document_sha256', 'employing_legal_entity', 'expires_at', 'offer_id', 'offer_version', 'ok', 'position_title', 'proposed_start_date', 'status', 'used_decision', 'wording_ar', 'wording_en']"
+    },
+    {
+      "gate": "historical_records_preserved_after_disable",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"before\": {\"attempts\": 1, \"interviews\": 3, \"offers\": 5}, \"after\": {\"attempts\": 1, \"interviews\": 3, \"offers\": 5}}"
+    },
+    {
+      "gate": "disabled_history_not_exposed_in_payloads",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "stale_history_does_not_affect_ranking",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "scope": "cleanup",
+      "ok": true,
+      "detail": "{}"
+    }
+  ],
+  "findings": {},
+  "state": {
+    "E2EAVO": {
+      "apps": {
+        "main": "E2EAVO-E2E-main",
+        "bare": "E2EAVO-E2E-bare",
+        "reject": "E2EAVO-E2E-reject",
+        "withdraw": "E2EAVO-E2E-withdraw",
+        "ardoc": "E2EAVO-E2E-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "1b36858e-e67a-4e04-a685-c5522980b6c8",
+      "interview_id": "65f45005-2626-4744-94fa-97534a7fdb78",
+      "gcal_interview_id": "355e21d0-c189-4e2b-9447-78c8f0830c5f",
+      "video_interview_id": "00afe83e-12bb-4ff7-9937-8a5eebe8d948",
+      "offer_id": "4bb6cd07-8b3f-428b-a528-3d1c2f841b5b",
+      "dup_offer_id": "cfa4d27b-3520-4ac4-bb3e-028ea12597dd",
+      "bare_offer_id": "baf84ce4-ca69-4c10-914b-a93a2677d140",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "E2EAXO": {
+      "apps": {
+        "main": "E2EAXO-E2E-main",
+        "bare": "E2EAXO-E2E-bare",
+        "reject": "E2EAXO-E2E-reject",
+        "withdraw": "E2EAXO-E2E-withdraw",
+        "ardoc": "E2EAXO-E2E-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "a2788dc6-3ab9-40e2-bac5-a4276231a2a8",
+      "interview_id": "9b8390bf-1165-4351-89a5-b2357c9e87c1",
+      "video_interview_id": "555225a4-9070-4bc2-be55-11dd273b6b91",
+      "offer_id": "bfdad0d0-9fbf-4d0e-8ef1-f37b6ee02142",
+      "dup_offer_id": "0f810468-48ec-4f09-83ff-7a023d423774",
+      "bare_offer_id": "9c8bd867-a891-4a1f-98b3-b7e3acea7b93",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "E2EXVO": {
+      "apps": {
+        "main": "E2EXVO-E2E-main",
+        "bare": "E2EXVO-E2E-bare",
+        "reject": "E2EXVO-E2E-reject",
+        "withdraw": "E2EXVO-E2E-withdraw",
+        "ardoc": "E2EXVO-E2E-ardoc"
+      },
+      "ranking_items": 5,
+      "interview_id": "50f232ae-5463-45d9-932c-29ece9ac35a9",
+      "gcal_interview_id": "92771923-f8c1-4ee7-91f9-d454fbc24573",
+      "video_interview_id": "032e3a70-5edc-4df7-977e-08cf410865ea",
+      "offer_id": "05f2c569-4606-4bec-9a10-994448f7885a",
+      "dup_offer_id": "3f166993-9afd-461d-ade3-e874a608705b",
+      "bare_offer_id": "3a91ae03-d11f-4d70-9d3f-8dde2f66e16a",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "E2EXXO": {
+      "apps": {
+        "main": "E2EXXO-E2E-main",
+        "bare": "E2EXXO-E2E-bare",
+        "reject": "E2EXXO-E2E-reject",
+        "withdraw": "E2EXXO-E2E-withdraw",
+        "ardoc": "E2EXXO-E2E-ardoc"
+      },
+      "ranking_items": 5,
+      "interview_id": "fbcb7da7-7a6f-4cbc-8131-6a311c8be76d",
+      "video_interview_id": "67137211-662a-4b89-aa3d-da09cacea70d",
+      "offer_id": "df100076-f1ae-4022-9577-cfeef9147196",
+      "dup_offer_id": "e93e1d96-8882-4e85-8750-e932ab7efd39",
+      "bare_offer_id": "55a3755f-7384-42a7-8ae8-d6980d621eac",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "E2ENOOF": {
+      "apps": {
+        "main": "E2ENOOF-E2E-main",
+        "bare": "E2ENOOF-E2E-bare",
+        "reject": "E2ENOOF-E2E-reject",
+        "withdraw": "E2ENOOF-E2E-withdraw",
+        "ardoc": "E2ENOOF-E2E-ardoc"
+      },
+      "ranking_items": 5,
+      "interview_id": "f31e3dc0-cbbc-403d-af8d-b8a66fa836ec",
+      "video_interview_id": "b5d7c75b-ec1b-4b0e-bfe0-b922af3c8753",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "E2EPEER": {
+      "apps": {
+        "main": "E2EPEER-E2E-main",
+        "bare": "E2EPEER-E2E-bare",
+        "reject": "E2EPEER-E2E-reject",
+        "withdraw": "E2EPEER-E2E-withdraw",
+        "ardoc": "E2EPEER-E2E-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "207861a9-cd67-4a9c-a279-9c25dfe89ee8",
+      "interview_id": "ab862164-f5b4-414a-bf74-47e69d24d301",
+      "gcal_interview_id": "5cb39784-0a1b-425c-b207-c9ff3f941eb3",
+      "video_interview_id": "6ab98515-fae8-47fb-ae9a-f475fa010ae1",
+      "offer_id": "56b0b754-3f73-4355-8f92-a53ea41048b3",
+      "dup_offer_id": "ff9053a0-9569-43a5-9ca3-e85c4312f303",
+      "bare_offer_id": "34a704ca-d985-49f4-98be-7c66ca3d80b2",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    }
+  },
+  "cleanup": {
+    "removed_files": 20,
+    "cleanup_errors": []
+  },
+  "residue_after_cleanup": {
+    "companies": 0,
+    "company_modules": 0,
+    "positions": 0,
+    "applications": 0,
+    "lifecycle_events": 0,
+    "confirmations": 0,
+    "ranking_runs": 0,
+    "ranking_items": 0,
+    "cv_evidence": 0,
+    "cv_facts": 0,
+    "semantic_docs": 0,
+    "files": 0,
+    "assessment_attempts": 0,
+    "assessment_invitations": 0,
+    "interviews": 0,
+    "interview_events": 0,
+    "offers": 0,
+    "offer_events": 0,
+    "offer_tokens": 0,
+    "offer_deliveries": 0,
+    "offer_send_ops": 0,
+    "hire_operations": 0,
+    "hire_override_audits": 0,
+    "employees": 0,
+    "compliance_documents": 0,
+    "employee_documents": 0,
+    "interview_schedule_ops": 0,
+    "onboarding_items": 0,
+    "report_export_audits": 0,
+    "candidates": 0
+  },
+  "finished_at": "20260725T001720Z",
+  "passed": 360,
+  "failed": 22
+}

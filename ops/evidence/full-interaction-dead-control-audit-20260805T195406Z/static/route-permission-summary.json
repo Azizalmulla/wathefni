@@ -1,0 +1,8 @@
+{
+  "backend_routes": 582,
+  "backend_mutations": 338,
+  "frontend_endpoint_literals": 288,
+  "unmatched_frontend_candidates": 7,
+  "mutation_risk_candidates": 320,
+  "raw_error_route_candidates": 108
+}

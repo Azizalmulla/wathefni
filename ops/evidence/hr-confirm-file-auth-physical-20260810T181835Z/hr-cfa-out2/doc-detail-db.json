@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "document": {
+    "document_id": "WATHEFNI-96550010001:work_permit",
+    "source": "compliance",
+    "employee": {
+      "employee_key": "WATHEFNI-96550010001",
+      "name": "Noura Almutairi",
+      "department": "Human Resources"
+    },
+    "document_type": "work_permit",
+    "label": "Work permit",
+    "status": "missing",
+    "status_label": "Missing",
+    "tone": "warning",
+    "expiry_date": "2027-02-25",
+    "days_until_expiry": null,
+    "last_checked_at": null,
+    "last_reminded_at": null,
+    "reminder_count": 0,
+    "extraction_confidence": null,
+    "next_action": "Request this document from Noura Almutairi.",
+    "has_file": true,
+    "preview_path": "/dashboard/mobile/documents/files/ddf26fa5-c676-4894-a2cf-fa2da2bbc51c",
+    "download_path": "/dashboard/mobile/documents/files/ddf26fa5-c676-4894-a2cf-fa2da2bbc51c?disposition=attachment",
+    "allowed_actions": [],
+    "destination": "/documents/WATHEFNI-96550010001/work_permit"
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "tag": "5f82ea37",
+  "pass": 43,
+  "fail": 0,
+  "results": [
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "phase0 viewer fail-closed flag",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "phase0 subject fail-closed flag",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exclude payroll default/on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no mutations",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "analytics freeze intact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance freeze intact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "viewer allowlist empty (live env)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "subject allowlist empty (live env)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real canary not enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nav hidden for Aziz when empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "API denial empty allowlist",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp probe Talal-only subjects",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp probe no payroll rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approved boundary",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live payload ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live Talal-only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "temp live no payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fouad denied during temp probe",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill viewers empty after clear",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill subjects empty after clear",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft-kill API denial after clear",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "WAVE1=0 kill switch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gate viewer denied code",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gate disabled code",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bootstrap action_inbox nav",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI Action Inbox EN/AR present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canary ack deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "final real canary disabled",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "residual": 0
+}

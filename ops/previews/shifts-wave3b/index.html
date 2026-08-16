@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wathefni — Shifts Wave 3B Preview</title>
+  <style>
+    :root {
+      --canvas: #eee8da;
+      --frame: #f8f2e6;
+      --surface: #fffaf0;
+      --raised: #fffdf8;
+      --ink: #23211d;
+      --muted: #756b5d;
+      --line: rgba(35, 33, 29, 0.09);
+      --olive: #a9ba7d;
+      --olive-soft: #e8efd8;
+      --olive-ink: #2f3a22;
+      --yellow: #f1d96f;
+      --yellow-soft: #f7e89a;
+      --yellow-ink: #3d3410;
+      --pink: #e8acd0;
+      --pink-soft: #f0c4de;
+      --pink-ink: #4a2438;
+      --blue: #b4c9e5;
+      --blue-soft: #dce7f4;
+      --blue-ink: #243044;
+      --taupe: #c4b49a;
+      --taupe-soft: #efe8dc;
+      --taupe-ink: #4a4338;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--frame);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--frame); }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    svg { display: block; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 188px minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .sidebar {
+      margin: 14px 0 14px 14px;
+      border-radius: 20px;
+      background: var(--ink);
+      color: #fff;
+      padding: 22px 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 28px);
+    }
+
+    [dir="rtl"] .sidebar { margin: 14px 14px 14px 0; }
+
+    .brand {
+      font-size: 19px;
+      font-weight: 750;
+      letter-spacing: -0.04em;
+      padding: 2px 10px 24px;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255,255,255,.5);
+      font-size: 8px;
+      font-weight: 650;
+      letter-spacing: .18em;
+    }
+
+    .nav-label {
+      margin: 12px 10px 5px;
+      color: rgba(255,255,255,.36);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,255,255,.62);
+      padding: 8px 10px;
+      text-align: start;
+      font-size: 11px;
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,.09);
+      color: #fff;
+    }
+
+    .nav-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .75;
+    }
+
+    .sidebar-foot { margin-top: auto; }
+
+    .workspace {
+      min-width: 0;
+      padding: 20px 22px 26px;
+      overflow: hidden;
+    }
+
+    .mobile-nav { display: none; }
+
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 5px 0 4px;
+      font-size: 29px;
+      line-height: 1;
+      letter-spacing: -0.045em;
+      font-weight: 730;
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .top-actions, .view-actions, .segmented, .date-nav, .filter-bar, .drawer-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .top-actions { gap: 8px; }
+
+    .icon-button, .quiet-button, .primary-button {
+      border: 0;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease;
+    }
+
+    .icon-button:active, .quiet-button:active, .primary-button:active { transform: scale(.98); }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(35,33,29,.055);
+    }
+
+    .primary-button {
+      min-height: 34px;
+      padding: 0 15px;
+      border-radius: 10px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .quiet-button {
+      min-height: 32px;
+      padding: 0 11px;
+      border-radius: 9px;
+      background: transparent;
+      font-size: 11px;
+      font-weight: 650;
+      color: var(--muted);
+    }
+
+    .control-deck {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .segmented {
+      gap: 2px;
+      background: rgba(35,33,29,.05);
+      padding: 3px;
+      border-radius: 11px;
+    }
+
+    .segment {
+      border: 0;
+      border-radius: 8px;
+      padding: 6px 11px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 680;
+      cursor: pointer;
+    }
+
+    .segment.active { background: var(--ink); color: #fff; }
+
+    .date-nav {
+      justify-content: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .date-range {
+      margin: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .date-arrow {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+    }
+
+    .filter-bar {
+      gap: 2px;
+      min-width: 0;
+      justify-self: end;
+      background: var(--raised);
+      padding: 3px;
+      border-radius: 11px;
+    }
+
+    .search {
+      width: 130px;
+      height: 28px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      padding: 0 8px;
+      font-size: 10.5px;
+      color: var(--ink);
+    }
+
+    .filter-button {
+      border: 0;
+      border-inline-start: 1px solid var(--line);
+      background: transparent;
+      height: 28px;
+      padding: 0 9px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 650;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .active-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--yellow-soft);
+      color: var(--yellow-ink);
+      padding: 5px 8px;
+      font-size: 9.5px;
+      font-weight: 700;
+    }
+
+    .board-shell {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      background: var(--raised);
+      box-shadow: 0 12px 30px rgba(35,33,29,.06);
+    }
+
+    .update-rail {
+      position: absolute;
+      z-index: 8;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0, var(--olive) 34%, var(--blue) 64%, transparent 100%);
+      opacity: .72;
+    }
+
+    .board-scroll { overflow-x: auto; }
+    .board-min { min-width: 1080px; }
+
+    .days-grid, .roster-row {
+      display: grid;
+      grid-template-columns: 190px repeat(7, minmax(124px, 1fr));
+      gap: 3px;
+    }
+
+    [dir="rtl"] .days-grid,
+    [dir="rtl"] .roster-row { grid-template-columns: 190px repeat(7, minmax(124px, 1fr)); }
+
+    .days-grid {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 12px 12px 8px;
+      background: rgba(255,253,248,.96);
+      backdrop-filter: blur(8px);
+    }
+
+    .employee-head {
+      position: sticky;
+      inset-inline-start: 12px;
+      z-index: 7;
+      align-self: center;
+      padding-inline-start: 5px;
+      color: var(--muted);
+      font-size: 8.5px;
+      font-weight: 760;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .day-head {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .day-head-inner {
+      min-width: 46px;
+      padding: 5px 8px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .day-head.today .day-head-inner {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .weekday {
+      display: block;
+      font-size: 8.5px;
+      line-height: 1.1;
+      font-weight: 760;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .day-number {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 660;
+    }
+
+    .today .day-number { color: rgba(255,255,255,.72); }
+
+    .roster {
+      padding: 0 12px 12px;
+    }
+
+    .roster-row {
+      border-top: 1px solid rgba(35,33,29,.055);
+    }
+
+    .identity {
+      position: sticky;
+      inset-inline-start: 12px;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      align-content: center;
+      gap: 8px;
+      min-height: 96px;
+      padding: 12px 9px 12px 5px;
+      background: rgba(255,253,248,.97);
+      backdrop-filter: blur(8px);
+    }
+
+    [dir="rtl"] .identity { padding: 12px 5px 12px 9px; }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: var(--olive-soft);
+      color: var(--olive-ink);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .avatar.blue { background: var(--blue-soft); color: var(--blue-ink); }
+    .avatar.pink { background: var(--pink-soft); color: var(--pink-ink); }
+    .avatar.yellow { background: var(--yellow-soft); color: var(--yellow-ink); }
+
+    .identity-copy { min-width: 0; }
+
+    .employee-name {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11.5px;
+      font-weight: 740;
+      letter-spacing: -0.015em;
+    }
+
+    .employee-meta {
+      margin: 3px 0 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 8.7px;
+      line-height: 1.35;
+    }
+
+    .hours {
+      align-self: center;
+      color: var(--muted);
+      font-size: 8.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .day-cell {
+      position: relative;
+      min-height: 96px;
+      padding: 9px 5px;
+      background: rgba(248,242,230,.36);
+    }
+
+    .day-cell.today { background: rgba(35,33,29,.045); }
+    .day-cell.empty { background: rgba(248,242,230,.22); }
+    .shift-stack { display: grid; gap: 5px; }
+    .shift-stack.overlap { grid-template-columns: 1fr 1fr; gap: 4px; }
+
+    .shift {
+      --rail: var(--olive);
+      --fill: var(--olive-soft);
+      --shift-ink: var(--olive-ink);
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-radius: 9px;
+      background: var(--fill);
+      color: var(--shift-ink);
+      padding: 7px 7px 7px 10px;
+      text-align: start;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 140ms ease, filter 140ms ease;
+    }
+
+    [dir="rtl"] .shift { padding: 7px 10px 7px 7px; }
+
+    .shift::before {
+      content: "";
+      position: absolute;
+      inset-block: 6px;
+      inset-inline-start: 4px;
+      width: 3px;
+      border-radius: 4px;
+      background: var(--rail);
+    }
+
+    .shift:hover { transform: translateY(-1px); filter: saturate(1.05); }
+    .shift.conflict { --rail: var(--yellow-ink); --fill: var(--yellow-soft); --shift-ink: var(--yellow-ink); }
+    .shift.recon { --rail: var(--pink-ink); --fill: var(--pink-soft); --shift-ink: var(--pink-ink); }
+    .shift.cancelled { --rail: var(--taupe); --fill: var(--taupe-soft); --shift-ink: var(--taupe-ink); opacity: .72; }
+    .shift.overnight, .shift.continue { --rail: var(--blue); --fill: var(--blue-soft); --shift-ink: var(--blue-ink); }
+    .shift.overnight { border-start-end-radius: 3px; }
+    .shift.continue { border-start-start-radius: 3px; }
+    .shift.overnight::after {
+      content: "";
+      position: absolute;
+      inset-inline-end: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: var(--blue);
+    }
+    .shift.continue::after {
+      content: "";
+      position: absolute;
+      inset-inline-start: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: var(--blue);
+    }
+
+    .shift-time {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      font-size: 10.5px;
+      line-height: 1.2;
+      font-weight: 790;
+      letter-spacing: -.015em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .shift-state {
+      font-size: 7.3px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .shift-title {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 9.3px;
+      font-weight: 690;
+    }
+
+    .shift-meta {
+      display: block;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      opacity: .7;
+      font-size: 7.8px;
+    }
+
+    .overlap .shift { padding-inline-end: 5px; padding-inline-start: 8px; }
+    .overlap .shift-time { font-size: 8.8px; }
+    .overlap .shift-title { font-size: 8px; }
+    .overlap .shift-meta { display: none; }
+
+    .add-slot {
+      width: 100%;
+      min-height: 28px;
+      border: 1px dashed rgba(35,33,29,.12);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 9px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 140ms ease, background 140ms ease;
+    }
+
+    .day-cell:hover .add-slot { opacity: 1; }
+    .add-slot.first-action {
+      opacity: 1;
+      border-color: transparent;
+      background: var(--surface);
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 9px 14px 11px;
+      color: var(--muted);
+      font-size: 8.5px;
+    }
+
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .legend-mark { width: 12px; height: 3px; border-radius: 5px; background: var(--olive); }
+    .legend-mark.yellow { background: var(--yellow); }
+    .legend-mark.pink { background: var(--pink); }
+    .legend-mark.blue { background: var(--blue); }
+
+    .mobile-agenda { display: none; }
+
+    .quiet-surface {
+      display: none;
+      border-radius: 18px;
+      background: rgba(255,253,248,.72);
+      padding: 18px;
+      min-height: 360px;
+    }
+
+    .quiet-surface.visible { display: block; }
+    .quiet-head { max-width: 520px; margin-bottom: 18px; }
+    .quiet-head h2 { margin: 0; font-size: 17px; letter-spacing: -.025em; }
+    .quiet-head p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .request-row {
+      display: grid;
+      grid-template-columns: 36px minmax(0,1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+    .request-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--blue-soft); }
+    .request-title { margin: 0; font-size: 11px; font-weight: 720; }
+    .request-meta { margin: 3px 0 0; color: var(--muted); font-size: 9px; }
+
+    .scrim {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      background: rgba(35,33,29,.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .scrim.open { opacity: 1; pointer-events: auto; }
+
+    .drawer {
+      position: fixed;
+      z-index: 31;
+      inset-block: 0;
+      inset-inline-end: 0;
+      width: min(420px, calc(100vw - 24px));
+      display: grid;
+      grid-template-rows: auto minmax(0,1fr) auto;
+      background: var(--raised);
+      box-shadow: -20px 0 48px rgba(35,33,29,.16);
+      transform: translateX(105%);
+      transition: transform 220ms cubic-bezier(.2,.75,.25,1);
+    }
+
+    [dir="rtl"] .drawer {
+      box-shadow: 20px 0 48px rgba(35,33,29,.16);
+      transform: translateX(-105%);
+    }
+
+    .drawer.open { transform: translateX(0); }
+
+    .drawer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .drawer-kicker {
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 760;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .drawer-title {
+      margin: 5px 0 3px;
+      font-size: 20px;
+      font-weight: 740;
+      letter-spacing: -.035em;
+    }
+
+    .drawer-subtitle { margin: 0; color: var(--muted); font-size: 10px; }
+
+    .drawer-body {
+      overflow-y: auto;
+      padding: 5px 20px 24px;
+    }
+
+    .form-section {
+      padding: 17px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 11px;
+    }
+
+    .section-title { margin: 0; font-size: 11px; font-weight: 760; }
+    .section-hint { color: var(--muted); font-size: 8px; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field-grid.one { grid-template-columns: 1fr; }
+
+    .field label {
+      display: block;
+      margin: 0 0 5px 2px;
+      color: var(--muted);
+      font-size: 8.5px;
+      font-weight: 670;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      height: 38px;
+      border: 1px solid rgba(35,33,29,.1);
+      border-radius: 9px;
+      outline: 0;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0 10px;
+      font-size: 10.5px;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: rgba(35,33,29,.28);
+      box-shadow: 0 0 0 3px rgba(169,186,125,.18);
+    }
+
+    .drawer-note {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      border-radius: 10px;
+      background: var(--blue-soft);
+      color: var(--blue-ink);
+      padding: 10px;
+      font-size: 9px;
+      line-height: 1.45;
+    }
+
+    .drawer-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,253,248,.96);
+      backdrop-filter: blur(8px);
+    }
+
+    .drawer-actions { gap: 7px; }
+
+    .secondary-button {
+      min-height: 34px;
+      border: 1px solid rgba(35,33,29,.1);
+      border-radius: 9px;
+      background: var(--surface);
+      padding: 0 12px;
+      color: var(--ink);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .save-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 8.5px;
+    }
+    .save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--olive); }
+
+    @media (max-width: 900px) {
+      .app { display: block; }
+      .sidebar { display: none; }
+      .workspace { padding: 0 12px 18px; }
+      .mobile-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 54px;
+        margin: 0 -12px 18px;
+        padding: 0 14px;
+        background: var(--ink);
+        color: #fff;
+      }
+      .mobile-nav strong { font-size: 13px; }
+      .mobile-nav-links { display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,.66); font-size: 9px; }
+      .page-head { align-items: flex-start; margin-bottom: 14px; }
+      h1 { font-size: 25px; }
+      .page-subtitle { max-width: 270px; font-size: 10.5px; }
+      .top-actions .icon-button { display: none; }
+      .primary-button { padding: 0 11px; font-size: 9.5px; }
+      .control-deck {
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+      .control-deck > .segmented:first-child { grid-column: 1; justify-self: start; }
+      .date-nav { grid-column: 2; justify-content: flex-end; }
+      .filter-bar { grid-column: 1 / -1; width: 100%; justify-content: space-between; }
+      .search { flex: 1; width: auto; min-width: 0; }
+      .filter-button.scope { display: none; }
+      .date-range { display: none; }
+      .board-shell { display: none; }
+      .mobile-agenda { display: block; }
+      .day-strip {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin: 8px 0 13px;
+      }
+      .day-chip {
+        border: 0;
+        border-radius: 10px;
+        background: rgba(35,33,29,.045);
+        padding: 7px 2px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .day-chip.active { background: var(--ink); color: #fff; }
+      .day-chip span { display: block; font-size: 7.5px; font-weight: 730; text-transform: uppercase; }
+      .day-chip b { display: block; margin-top: 3px; font-size: 10px; }
+      .agenda-surface {
+        border-radius: 17px;
+        background: var(--raised);
+        overflow: hidden;
+      }
+      .agenda-date {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 14px 9px;
+      }
+      .agenda-date h2 { margin: 0; font-size: 14px; letter-spacing: -.02em; }
+      .agenda-group {
+        display: grid;
+        grid-template-columns: 42px minmax(0,1fr);
+        gap: 10px;
+        padding: 12px 14px;
+        border-top: 1px solid var(--line);
+      }
+      .agenda-person .avatar { width: 36px; height: 36px; }
+      .agenda-person small { display: block; margin-top: 4px; color: var(--muted); font-size: 7.5px; text-align: center; }
+      .agenda-shifts { display: grid; gap: 6px; }
+      .agenda-shifts .shift { min-height: 54px; padding: 9px 9px 9px 12px; }
+      [dir="rtl"] .agenda-shifts .shift { padding: 9px 12px 9px 9px; }
+      .agenda-shifts .shift-time { font-size: 11.5px; }
+      .agenda-shifts .shift-title { font-size: 10px; }
+      .agenda-shifts .shift-meta { font-size: 8.5px; }
+      .drawer { width: 100vw; }
+    }
+
+    @media (max-width: 520px) {
+      .workspace { padding-inline: 11px; }
+      .page-head { gap: 10px; }
+      .page-head .primary-button { width: 36px; padding: 0; font-size: 0; }
+      .page-head .primary-button::after { content: "+"; font-size: 18px; }
+      .segmented { max-width: 100%; }
+      .segment { padding: 6px 9px; font-size: 9.5px; }
+      .active-filter { display: none; }
+      .drawer-head, .drawer-body, .drawer-foot { padding-inline: 16px; }
+      .field-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">wathefni<small>HR WORKSPACE</small></div>
+      <div class="nav-label" data-i18n="prehire">Pre-hiring</div>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="overview">Overview</span></button>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="jobs">Jobs</span></button>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="candidates">Candidates</span></button>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="interviews">Interviews</span></button>
+      <div class="nav-label" data-i18n="posthire">Post-hiring</div>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="employees">Employees</span></button>
+      <button class="nav-item active"><span class="nav-dot"></span><span data-i18n="shifts">Shifts</span></button>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="attendance">Attendance</span></button>
+      <button class="nav-item"><span class="nav-dot"></span><span data-i18n="leave">Leave</span></button>
+      <div class="sidebar-foot">
+        <button class="nav-item"><span class="nav-dot"></span><span data-i18n="settings">Settings</span></button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="mobile-nav">
+        <strong>wathefni</strong>
+        <div class="mobile-nav-links"><span data-i18n="shifts">Shifts</span><span data-i18n="overview">Overview</span><span data-i18n="more">More</span></div>
+      </div>
+
+      <header class="page-head">
+        <div>
+          <div class="eyebrow" data-i18n="posthire">Post-hiring</div>
+          <h1 data-i18n="shifts">Shifts</h1>
+          <p class="page-subtitle" data-i18n="subtitle">Plan the week, spot coverage gaps, and resolve conflicts without leaving the board.</p>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" aria-label="refresh">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg>
+          </button>
+          <button class="primary-button" data-open-drawer="create" data-i18n="scheduleShift">Schedule a shift</button>
+        </div>
+      </header>
+
+      <section class="control-deck">
+        <div class="segmented" data-surface-tabs>
+          <button class="segment active" data-surface="schedule" data-i18n="schedule">Schedule</button>
+          <button class="segment" data-surface="requests" data-i18n="requests">Requests</button>
+          <button class="segment" data-surface="planning" data-i18n="planning">Planning</button>
+        </div>
+
+        <div class="date-nav">
+          <button class="date-arrow" aria-label="previous">‹</button>
+          <button class="quiet-button" data-i18n="today">Today</button>
+          <button class="date-arrow" aria-label="next">›</button>
+          <strong class="date-range" data-i18n="dateRange">2–8 August 2026</strong>
+        </div>
+
+        <div class="filter-bar">
+          <input class="search" data-i18n-placeholder="searchEmployee" placeholder="Find employee" />
+          <button class="filter-button scope" data-i18n="allTeams">All teams</button>
+          <button class="filter-button" data-i18n="filters">Filters · 1</button>
+          <button class="active-filter"><span data-i18n="activeOnly">Active shifts</span><span>×</span></button>
+        </div>
+      </section>
+
+      <section id="schedule-surface">
+        <div class="board-shell" data-preview-board>
+          <div class="update-rail" data-shifts-updating></div>
+          <div class="board-scroll">
+            <div class="board-min">
+              <div class="days-grid">
+                <div class="employee-head" data-i18n="employee">Employee</div>
+                <div class="day-head"><div class="day-head-inner"><span class="weekday" data-i18n="sun">Sun</span><span class="day-number">2</span></div></div>
+                <div class="day-head"><div class="day-head-inner"><span class="weekday" data-i18n="mon">Mon</span><span class="day-number">3</span></div></div>
+                <div class="day-head today"><div class="day-head-inner"><span class="weekday" data-i18n="tue">Tue</span><span class="day-number">4</span></div></div>
+                <div class="day-head"><div class="day-head-inner"><span class="weekday" data-i18n="wed">Wed</span><span class="day-number">5</span></div></div>
+                <div class="day-head"><div class="day-head-inner"><span class="weekday" data-i18n="thu">Thu</span><span class="day-number">6</span></div></div>
+                <div class="day-head"><div class="day-head-inner"><span class="weekday" data-i18n="fri">Fri</span><span class="day-number">7</span></div></div>
+                <div class="day-head"><div class="day-head-inner"><span class="weekday" data-i18n="sat">Sat</span><span class="day-number">8</span></div></div>
+              </div>
+
+              <div class="roster">
+                <div class="roster-row">
+                  <div class="identity">
+                    <div class="avatar">FA</div>
+                    <div class="identity-copy"><p class="employee-name" data-name-en="Fatima Al‑Sabah" data-name-ar="فاطمة الصباح">Fatima Al‑Sabah</p><p class="employee-meta" data-meta-en="Front desk · Marina" data-meta-ar="الاستقبال · المارينا">Front desk · Marina</p></div>
+                    <span class="hours">40h</span>
+                  </div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift" data-open-drawer="edit"><span class="shift-time">08:00–16:00</span><span class="shift-title" data-role-en="Front desk" data-role-ar="الاستقبال">Front desk</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">08:00–16:00</span><span class="shift-title" data-role-en="Front desk" data-role-ar="الاستقبال">Front desk</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button></div></div>
+                  <div class="day-cell today"><div class="shift-stack"><button class="shift conflict"><span class="shift-time"><span>08:00–14:00</span><span class="shift-state" data-i18n="conflict">Conflict</span></span><span class="shift-title" data-role-en="Front desk" data-role-ar="الاستقبال">Front desk</span><span class="shift-meta" data-location-en="Coverage overlap" data-location-ar="تداخل في التغطية">Coverage overlap</span></button><button class="shift"><span class="shift-time">15:00–19:00</span><span class="shift-title" data-role-en="Guest support" data-role-ar="دعم الضيوف">Guest support</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">09:00–17:00</span><span class="shift-title" data-role-en="Front desk" data-role-ar="الاستقبال">Front desk</span><span class="shift-meta" data-location-en="City branch" data-location-ar="فرع المدينة">City branch</span></button></div></div>
+                  <div class="day-cell empty"><button class="add-slot" data-open-drawer="create" data-i18n="addShift">Add shift</button></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">10:00–18:00</span><span class="shift-title" data-role-en="Guest support" data-role-ar="دعم الضيوف">Guest support</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button></div></div>
+                  <div class="day-cell empty"></div>
+                </div>
+
+                <div class="roster-row">
+                  <div class="identity">
+                    <div class="avatar blue">YA</div>
+                    <div class="identity-copy"><p class="employee-name" data-name-en="Yousef Al‑Mutairi" data-name-ar="يوسف المطيري">Yousef Al‑Mutairi</p><p class="employee-meta" data-meta-en="Operations · City" data-meta-ar="العمليات · المدينة">Operations · City</p></div>
+                    <span class="hours">36h</span>
+                  </div>
+                  <div class="day-cell empty"></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">06:00–14:00</span><span class="shift-title" data-role-en="Opening lead" data-role-ar="مشرف الافتتاح">Opening lead</span><span class="shift-meta" data-location-en="City branch" data-location-ar="فرع المدينة">City branch</span></button></div></div>
+                  <div class="day-cell today"><div class="shift-stack overlap"><button class="shift conflict"><span class="shift-time">06–12</span><span class="shift-title" data-role-en="Opening" data-role-ar="افتتاح">Opening</span></button><button class="shift conflict"><span class="shift-time">10–16</span><span class="shift-title" data-role-en="Floor" data-role-ar="الصالة">Floor</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">06:00–14:00</span><span class="shift-title" data-role-en="Opening lead" data-role-ar="مشرف الافتتاح">Opening lead</span><span class="shift-meta" data-location-en="City branch" data-location-ar="فرع المدينة">City branch</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">12:00–20:00</span><span class="shift-title" data-role-en="Operations" data-role-ar="العمليات">Operations</span><span class="shift-meta" data-location-en="City branch" data-location-ar="فرع المدينة">City branch</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift cancelled"><span class="shift-time"><span>12:00–20:00</span><span class="shift-state" data-i18n="cancelled">Cancelled</span></span><span class="shift-title" data-role-en="Operations" data-role-ar="العمليات">Operations</span></button></div></div>
+                  <div class="day-cell empty"></div>
+                </div>
+
+                <div class="roster-row">
+                  <div class="identity">
+                    <div class="avatar pink">NH</div>
+                    <div class="identity-copy"><p class="employee-name" data-name-en="Noura Al‑Haddad" data-name-ar="نورة الحداد">Noura Al‑Haddad</p><p class="employee-meta" data-meta-en="Night team · Airport" data-meta-ar="الفريق الليلي · المطار">Night team · Airport</p></div>
+                    <span class="hours">32h</span>
+                  </div>
+                  <div class="day-cell empty"></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift overnight"><span class="shift-time"><span>22:00–</span><span class="shift-state" data-i18n="overnight">Overnight</span></span><span class="shift-title" data-role-en="Night supervisor" data-role-ar="مشرف المناوبة الليلية">Night supervisor</span><span class="shift-meta" data-location-en="Airport branch" data-location-ar="فرع المطار">Airport branch</span></button></div></div>
+                  <div class="day-cell today"><div class="shift-stack"><button class="shift continue"><span class="shift-time">–06:00</span><span class="shift-title" data-i18n="continuation">Continues from Monday</span><span class="shift-meta" data-location-en="Airport branch" data-location-ar="فرع المطار">Airport branch</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift recon"><span class="shift-time"><span>22:00–06:00</span><span class="shift-state" data-i18n="review">Review</span></span><span class="shift-title" data-role-en="Night supervisor" data-role-ar="مشرف المناوبة الليلية">Night supervisor</span><span class="shift-meta" data-location-en="Attendance mismatch" data-location-ar="عدم تطابق الحضور">Attendance mismatch</span></button></div></div>
+                  <div class="day-cell empty"></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift overnight"><span class="shift-time"><span>22:00–</span><span class="shift-state" data-i18n="overnight">Overnight</span></span><span class="shift-title" data-role-en="Night supervisor" data-role-ar="مشرف المناوبة الليلية">Night supervisor</span><span class="shift-meta" data-location-en="Airport branch" data-location-ar="فرع المطار">Airport branch</span></button></div></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift continue"><span class="shift-time">–06:00</span><span class="shift-title" data-i18n="continuation">Continues from Monday</span><span class="shift-meta" data-location-en="Airport branch" data-location-ar="فرع المطار">Airport branch</span></button></div></div>
+                </div>
+
+                <div class="roster-row">
+                  <div class="identity">
+                    <div class="avatar yellow">MA</div>
+                    <div class="identity-copy"><p class="employee-name" data-name-en="Mariam Abdulrahman" data-name-ar="مريم عبدالرحمن الطويل">Mariam Abdulrahman</p><p class="employee-meta" data-meta-en="Guest services · Marina" data-meta-ar="خدمات الضيوف · المارينا">Guest services · Marina</p></div>
+                    <span class="hours">24h</span>
+                  </div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">10:00–18:00</span><span class="shift-title" data-role-en="Guest services" data-role-ar="خدمات الضيوف">Guest services</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button></div></div>
+                  <div class="day-cell empty"></div>
+                  <div class="day-cell today"><div class="shift-stack"><button class="shift"><span class="shift-time">10:00–14:00</span><span class="shift-title" data-role-en="Guest services" data-role-ar="خدمات الضيوف">Guest services</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button><button class="shift"><span class="shift-time">16:00–20:00</span><span class="shift-title" data-role-en="Event support" data-role-ar="دعم الفعاليات">Event support</span><span class="shift-meta" data-location-en="Harbour hall" data-location-ar="قاعة الميناء">Harbour hall</span></button></div></div>
+                  <div class="day-cell empty"></div>
+                  <div class="day-cell"><div class="shift-stack"><button class="shift"><span class="shift-time">12:00–20:00</span><span class="shift-title" data-role-en="Guest services" data-role-ar="خدمات الضيوف">Guest services</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button></div></div>
+                  <div class="day-cell empty"><button class="add-slot first-action" data-open-drawer="create" data-i18n="addShift">Add shift</button></div>
+                  <div class="day-cell empty"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-mark"></span><span data-i18n="scheduled">Scheduled</span></span>
+            <span class="legend-item"><span class="legend-mark yellow"></span><span data-i18n="conflict">Conflict</span></span>
+            <span class="legend-item"><span class="legend-mark pink"></span><span data-i18n="review">Review</span></span>
+            <span class="legend-item"><span class="legend-mark blue"></span><span data-i18n="overnight">Overnight</span></span>
+          </div>
+        </div>
+
+        <div class="mobile-agenda">
+          <div class="day-strip">
+            <button class="day-chip"><span data-i18n="sun">Sun</span><b>2</b></button>
+            <button class="day-chip"><span data-i18n="mon">Mon</span><b>3</b></button>
+            <button class="day-chip active"><span data-i18n="tue">Tue</span><b>4</b></button>
+            <button class="day-chip"><span data-i18n="wed">Wed</span><b>5</b></button>
+            <button class="day-chip"><span data-i18n="thu">Thu</span><b>6</b></button>
+            <button class="day-chip"><span data-i18n="fri">Fri</span><b>7</b></button>
+            <button class="day-chip"><span data-i18n="sat">Sat</span><b>8</b></button>
+          </div>
+          <div class="agenda-surface">
+            <div class="agenda-date"><h2 data-i18n="tuesdayTitle">Tuesday, 4 August</h2><button class="quiet-button" data-open-drawer="create" data-i18n="add">Add</button></div>
+            <div class="agenda-group">
+              <div class="agenda-person"><div class="avatar">FA</div><small>Fatima</small></div>
+              <div class="agenda-shifts">
+                <button class="shift conflict" data-open-drawer="edit"><span class="shift-time"><span>08:00–14:00</span><span class="shift-state" data-i18n="conflict">Conflict</span></span><span class="shift-title" data-role-en="Front desk" data-role-ar="الاستقبال">Front desk</span><span class="shift-meta" data-location-en="Coverage overlap · Marina" data-location-ar="تداخل في التغطية · المارينا">Coverage overlap · Marina</span></button>
+                <button class="shift"><span class="shift-time">15:00–19:00</span><span class="shift-title" data-role-en="Guest support" data-role-ar="دعم الضيوف">Guest support</span><span class="shift-meta" data-location-en="Marina branch" data-location-ar="فرع المارينا">Marina branch</span></button>
+              </div>
+            </div>
+            <div class="agenda-group">
+              <div class="agenda-person"><div class="avatar blue">YA</div><small>Yousef</small></div>
+              <div class="agenda-shifts">
+                <div class="shift-stack overlap"><button class="shift conflict"><span class="shift-time">06:00–12:00</span><span class="shift-title" data-role-en="Opening lead" data-role-ar="مشرف الافتتاح">Opening lead</span></button><button class="shift conflict"><span class="shift-time">10:00–16:00</span><span class="shift-title" data-role-en="Floor cover" data-role-ar="تغطية الصالة">Floor cover</span></button></div>
+              </div>
+            </div>
+            <div class="agenda-group">
+              <div class="agenda-person"><div class="avatar pink">NH</div><small>Noura</small></div>
+              <div class="agenda-shifts">
+                <button class="shift continue"><span class="shift-time">–06:00</span><span class="shift-title" data-i18n="continuation">Continues from Monday</span><span class="shift-meta" data-location-en="Night supervisor · Airport" data-location-ar="مشرف المناوبة الليلية · المطار">Night supervisor · Airport</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="requests-surface" class="quiet-surface">
+        <div class="quiet-head"><h2 data-i18n="requests">Requests</h2><p data-i18n="requestsHint">Review changes without competing with the weekly schedule.</p></div>
+        <div class="request-row"><div class="request-mark"></div><div><p class="request-title" data-name-en="Aisha · shift swap" data-name-ar="عائشة · طلب تبديل وردية">Aisha · shift swap</p><p class="request-meta" data-meta-en="Tuesday, 08:00–16:00 · Marina" data-meta-ar="الثلاثاء، 08:00–16:00 · المارينا">Tuesday, 08:00–16:00 · Marina</p></div><button class="secondary-button" data-i18n="review">Review</button></div>
+        <div class="request-row"><div class="request-mark" style="background:var(--pink-soft)"></div><div><p class="request-title" data-name-en="Noura · attendance reconciliation" data-name-ar="نورة · مطابقة الحضور">Noura · attendance reconciliation</p><p class="request-meta" data-meta-en="Wednesday overnight · Airport" data-meta-ar="وردية الأربعاء الليلية · المطار">Wednesday overnight · Airport</p></div><button class="secondary-button" data-i18n="review">Review</button></div>
+      </section>
+
+      <section id="planning-surface" class="quiet-surface">
+        <div class="quiet-head"><h2 data-i18n="planning">Planning</h2><p data-i18n="planningHint">Templates, coverage, and rotations stay secondary to this week's schedule.</p></div>
+        <div class="request-row"><div class="request-mark" style="background:var(--olive-soft)"></div><div><p class="request-title" data-i18n="morningTemplate">Morning operations template</p><p class="request-meta" data-i18n="templateMeta">5 roles · 3 locations · Draft</p></div><button class="secondary-button" data-i18n="open">Open</button></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="scrim" data-close-drawer></div>
+  <aside class="drawer" aria-label="Shift drawer">
+    <header class="drawer-head">
+      <div>
+        <div class="drawer-kicker" data-i18n="shiftDetails">Shift details</div>
+        <h2 class="drawer-title" data-create-en="Schedule a shift" data-create-ar="جدولة وردية" data-edit-en="Edit Fatima's shift" data-edit-ar="تعديل وردية فاطمة">Schedule a shift</h2>
+        <p class="drawer-subtitle" data-create-en="Add one governed assignment to the weekly plan." data-create-ar="أضف تعييناً واحداً محكوماً إلى خطة الأسبوع." data-edit-en="Tuesday, 08:00–14:00 · Marina branch" data-edit-ar="الثلاثاء، 08:00–14:00 · فرع المارينا">Add one governed assignment to the weekly plan.</p>
+      </div>
+      <button class="icon-button" data-close-drawer aria-label="Close">×</button>
+    </header>
+
+    <div class="drawer-body">
+      <section class="form-section">
+        <div class="section-head"><h3 class="section-title" data-i18n="shift">Shift</h3><span class="section-hint" data-i18n="required">Required</span></div>
+        <div class="field-grid one">
+          <div class="field"><label data-i18n="employee">Employee</label><select><option data-i18n="fatima">Fatima Al‑Sabah</option></select></div>
+        </div>
+        <div class="field-grid" style="margin-top:10px">
+          <div class="field"><label data-i18n="date">Date</label><input value="2026-08-04" /></div>
+          <div class="field"><label data-i18n="role">Role</label><select><option data-i18n="frontDesk">Front desk</option></select></div>
+          <div class="field"><label data-i18n="starts">Starts</label><input value="08:00" /></div>
+          <div class="field"><label data-i18n="ends">Ends</label><input value="14:00" /></div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-head"><h3 class="section-title" data-i18n="organization">Organization</h3><span class="section-hint" data-i18n="governed">Governed</span></div>
+        <div class="field-grid">
+          <div class="field"><label data-i18n="branch">Branch</label><select><option data-i18n="marinaBranch">Marina branch</option></select></div>
+          <div class="field"><label data-i18n="site">Site</label><select><option data-i18n="mainFloor">Main floor</option></select></div>
+          <div class="field"><label data-i18n="team">Team</label><select><option data-i18n="guestServices">Guest services</option></select></div>
+          <div class="field"><label data-i18n="location">Location</label><select><option data-i18n="frontDesk">Front desk</option></select></div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-head"><h3 class="section-title" data-i18n="controls">Controls</h3><span class="section-hint" data-i18n="localPending">Local pending</span></div>
+        <div class="drawer-note"><span>i</span><span data-i18n="controlHint">Conflicts remain visible here. Confirmation stays open until the governed action succeeds.</span></div>
+      </section>
+    </div>
+
+    <footer class="drawer-foot">
+      <span class="save-state"><span class="save-dot"></span><span data-i18n="latestData">Latest data retained</span></span>
+      <div class="drawer-actions">
+        <button class="secondary-button" data-close-drawer data-i18n="cancel">Cancel</button>
+        <button class="primary-button" data-i18n="saveShift">Save shift</button>
+      </div>
+    </footer>
+  </aside>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const lang = params.get('lang') === 'ar' ? 'ar' : 'en';
+    const initialDrawer = params.get('drawer');
+    const initialSurface = params.get('surface') || 'schedule';
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+    const copy = {
+      ar: {
+        prehire:'ما قبل التوظيف', overview:'نظرة عامة', jobs:'الوظائف', candidates:'المرشحون', interviews:'المقابلات',
+        posthire:'ما بعد التوظيف', employees:'الموظفون', shifts:'الورديات', attendance:'الحضور', leave:'الإجازات',
+        settings:'الإعدادات', more:'المزيد', subtitle:'خطط للأسبوع، واكتشف فجوات التغطية، وعالج التعارضات دون مغادرة اللوحة.',
+        scheduleShift:'جدولة وردية', schedule:'الجدول', requests:'الطلبات', planning:'التخطيط', today:'اليوم',
+        dateRange:'2–8 أغسطس 2026', searchEmployee:'ابحث عن موظف', allTeams:'كل الفرق', filters:'الفلاتر · 1',
+        activeOnly:'الورديات النشطة', employee:'الموظف', sun:'الأحد', mon:'الإثنين', tue:'الثلاثاء', wed:'الأربعاء',
+        thu:'الخميس', fri:'الجمعة', sat:'السبت', conflict:'تعارض', cancelled:'ملغاة', overnight:'ليلي',
+        continuation:'استمرار من الإثنين', review:'مراجعة', scheduled:'مجدولة', addShift:'إضافة وردية', add:'إضافة',
+        tuesdayTitle:'الثلاثاء، 4 أغسطس', requestsHint:'راجع التغييرات بهدوء دون منافسة الجدول الأسبوعي.',
+        planningHint:'تبقى القوالب والتغطية والدورات ثانوية أمام جدول هذا الأسبوع.', morningTemplate:'قالب العمليات الصباحية',
+        templateMeta:'5 أدوار · 3 مواقع · مسودة', open:'فتح', shiftDetails:'تفاصيل الوردية', shift:'الوردية',
+        required:'مطلوب', fatima:'فاطمة الصباح', date:'التاريخ', role:'الدور', frontDesk:'الاستقبال', starts:'تبدأ',
+        ends:'تنتهي', organization:'الهيكل التنظيمي', governed:'محكوم', branch:'الفرع', marinaBranch:'فرع المارينا',
+        site:'الموقع', mainFloor:'الطابق الرئيسي', team:'الفريق', guestServices:'خدمات الضيوف', location:'المكان',
+        controls:'الضوابط', localPending:'حالة محلية', controlHint:'تبقى التعارضات ظاهرة هنا. يظل التأكيد مفتوحاً حتى ينجح الإجراء المحكوم.',
+        latestData:'تم الاحتفاظ بأحدث البيانات', cancel:'إلغاء', saveShift:'حفظ الوردية'
+      }
+    };
+
+    if (lang === 'ar') {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const value = copy.ar[el.dataset.i18n];
+        if (value) el.textContent = value;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const value = copy.ar[el.dataset.i18nPlaceholder];
+        if (value) el.placeholder = value;
+      });
+      document.querySelectorAll('[data-name-ar]').forEach(el => el.textContent = el.dataset.nameAr);
+      document.querySelectorAll('[data-meta-ar]').forEach(el => el.textContent = el.dataset.metaAr);
+      document.querySelectorAll('[data-role-ar]').forEach(el => el.textContent = el.dataset.roleAr);
+      document.querySelectorAll('[data-location-ar]').forEach(el => el.textContent = el.dataset.locationAr);
+    }
+
+    const drawer = document.querySelector('.drawer');
+    const scrim = document.querySelector('.scrim');
+    function openDrawer(mode = 'create') {
+      drawer.classList.add('open');
+      scrim.classList.add('open');
+      drawer.dataset.mode = mode;
+      const title = drawer.querySelector('.drawer-title');
+      const subtitle = drawer.querySelector('.drawer-subtitle');
+      title.textContent = title.dataset[mode + (lang === 'ar' ? 'Ar' : 'En')];
+      subtitle.textContent = subtitle.dataset[mode + (lang === 'ar' ? 'Ar' : 'En')];
+    }
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      scrim.classList.remove('open');
+    }
+    document.querySelectorAll('[data-open-drawer]').forEach(el => el.addEventListener('click', () => openDrawer(el.dataset.openDrawer)));
+    document.querySelectorAll('[data-close-drawer]').forEach(el => el.addEventListener('click', closeDrawer));
+
+    function showSurface(surface) {
+      document.querySelectorAll('[data-surface]').forEach(el => el.classList.toggle('active', el.dataset.surface === surface));
+      document.getElementById('schedule-surface').style.display = surface === 'schedule' ? '' : 'none';
+      document.getElementById('requests-surface').classList.toggle('visible', surface === 'requests');
+      document.getElementById('planning-surface').classList.toggle('visible', surface === 'planning');
+    }
+    document.querySelectorAll('[data-surface]').forEach(el => el.addEventListener('click', () => showSurface(el.dataset.surface)));
+    showSurface(initialSurface);
+    if (initialDrawer === 'create' || initialDrawer === 'edit') openDrawer(initialDrawer);
+  </script>
+</body>
+</html>

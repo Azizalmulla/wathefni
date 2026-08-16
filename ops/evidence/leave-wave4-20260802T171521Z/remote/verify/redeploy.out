@@ -1,0 +1,120 @@
+stamp=20260802T171521Z-redeploy
+time_utc=2026-08-02T17:20:30Z
+active
+=== SHAs before ===
+b18e4b7d8986bb71380b4508001033030ce3efab8a135b8ca16203048dcd3c75  /opt/wathefni/orchestrator/app.py
+b153a0cf6154d82698f3f54342efa15e1591c6e6df14c05b5d47ca45b9ee8e8a  /opt/wathefni/orchestrator/leave_authority_wave1.py
+809d427c8163395ee92bf7b1e15446450d122c662b95a985146283ac9286d5b7  /opt/wathefni/orchestrator/leave_policy_wave2.py
+c8dad47eaca79e57be84dbecb6bd5891768e3554db035a45404e35f88be4e7d4  /opt/wathefni/orchestrator/leave_workflow_wave3.py
+f2dfbabb717dc8a4d912619663681973b1346f2224e69b45a5fe26c912161099  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+ls: cannot access '/opt/wathefni/orchestrator/leave_wave4_controlled.py': No such file or directory
+leave_wave4_controlled.py ABSENT
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525,965526,965527
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_LEAVE_POLICY_WAVE2=on
+WATHEFNI_LEAVE_WORKFLOW_WAVE3=on
+{
+  "db": "wathefni",
+  "leave_requests_all": 3,
+  "real_leaves": [
+    {
+      "leave_id": "51cd940f-a04b-4ad1-9a6a-43e3da59a222",
+      "employee_key": "WATHEFNI-96597727743",
+      "leave_type": "sick",
+      "status": "rejected",
+      "start_date": "2026-06-12",
+      "end_date": "2026-06-12",
+      "fp": "8f6d67e3cc4fbf5ee321af235ecbb20d"
+    },
+    {
+      "leave_id": "dbf82ecf-7ac4-451b-b41c-03de943f2161",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "annual",
+      "status": "expired_stale",
+      "start_date": "2026-06-16",
+      "end_date": "2026-06-18",
+      "fp": "3c6801c99cfd0ebc5db0acc24e4fd774"
+    },
+    {
+      "leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "sick",
+      "status": "approved",
+      "start_date": "2026-05-11",
+      "end_date": "2026-05-11",
+      "fp": "abf4cba7cb8702b2d7c067db795d0701"
+    }
+  ],
+  "leave_events": 12,
+  "leave_ledger": 28,
+  "leave_balances": 4,
+  "policies": [
+    {
+      "leave_type": "annual",
+      "enforced": false,
+      "legal_reviewed": false
+    },
+    {
+      "leave_type": "sick",
+      "enforced": false,
+      "legal_reviewed": false
+    }
+  ]
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[17:20:32] backing up orchestrator modules + leave fingerprints
+leave_wave4_absent_pre=yes
+b18e4b7d8986bb71380b4508001033030ce3efab8a135b8ca16203048dcd3c75  app.py
+a3787aa3c9dc9866ddc4f5bd27ffa0f3063aee1aeab3ee41ad9286eeba00d303  leave-requests-fingerprint.csv
+b2a592e9aa3859367c9db0f44202f1d433493ed74efe30dcac6aef3530f21cf6  leave-balances-fingerprint.csv
+ee3cd5a2f8ea1f4033bdaa48fb8d2ccf89795cdb3d316d094d478bc959e69961  leave-ledger-fingerprint.csv
+809d427c8163395ee92bf7b1e15446450d122c662b95a985146283ac9286d5b7  modules/leave_policy_wave2.py
+b55c79d3fb1840ba8de4f616a0aeb1c43e621da29bb022de9b87c396452371d3  modules/action_registry.py
+c8dad47eaca79e57be84dbecb6bd5891768e3554db035a45404e35f88be4e7d4  modules/leave_workflow_wave3.py
+b153a0cf6154d82698f3f54342efa15e1591c6e6df14c05b5d47ca45b9ee8e8a  modules/leave_authority_wave1.py
+f2dfbabb717dc8a4d912619663681973b1346f2224e69b45a5fe26c912161099  modules/employee_lifecycle_wave3c.py
+[17:20:33] deploying wave4 modules from stage
+[17:20:33] writing wave4 drop-in (keeps wave1b + wave2c + wave3b)
+[17:20:33] migrate wave4 schema
+MIGRATE_OK leave_wave4_prod 4.0.0
+enforced=false legal_reviewed=false
+health_ok
+=== SHAs after ===
+0cba5bb0f95b7aa11df6f95b6e01ae9805e45ad79c2d0fd2f6cf67732d5ea379  /opt/wathefni/orchestrator/app.py
+4fdfe59d2f1c2bdc1672236afaf1ad504ae8390ec789784435d4c6fb311b79a9  /opt/wathefni/orchestrator/leave_wave4_controlled.py
+c8dad47eaca79e57be84dbecb6bd5891768e3554db035a45404e35f88be4e7d4  /opt/wathefni/orchestrator/leave_workflow_wave3.py
+809d427c8163395ee92bf7b1e15446450d122c662b95a985146283ac9286d5b7  /opt/wathefni/orchestrator/leave_policy_wave2.py
+b153a0cf6154d82698f3f54342efa15e1591c6e6df14c05b5d47ca45b9ee8e8a  /opt/wathefni/orchestrator/leave_authority_wave1.py
+f2dfbabb717dc8a4d912619663681973b1346f2224e69b45a5fe26c912161099  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525,965526,965527
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_LEAVE_POLICY_WAVE2=on
+WATHEFNI_LEAVE_REAL_DECISION_ALLOWLIST=96599338566,96588009911
+WATHEFNI_LEAVE_REAL_DECISION_GATE=on
+WATHEFNI_LEAVE_WAVE4=on
+WATHEFNI_LEAVE_WORKFLOW_WAVE3=on
+wave4 4.0.0 enabled True
+allowlist ['96588009911', '96599338566']
+honesty {'balances_enforced': False, 'legal_reviewed': False, 'balances_binding': False, 'observe_only': True}
+flags_ok_wave4=true
+enabled
+active
+DEPLOY_OK stamp=20260802T171521Z-redeploy backup=/opt/wathefni/backups/production-pre-leave-wave4-20260802T171521Z-redeploy evid=/opt/wathefni/production-evidence/leave-wave4/20260802T171521Z-redeploy allowlist=96599338566,96588009911

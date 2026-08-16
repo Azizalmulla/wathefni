@@ -1,0 +1,57 @@
+{
+  "ok": true,
+  "run": {
+    "run_id": "899666eb-1d44-427e-b165-7154888467fb",
+    "company_code": "WATHEFNI",
+    "environment": "production",
+    "status": "succeeded",
+    "started_at": "2026-08-01T22:15:15.351907+00:00",
+    "finished_at": "2026-08-01T22:15:15.500368+00:00",
+    "terminations_executed": 0,
+    "revokes_executed": 0,
+    "lag_seconds": 0,
+    "error_text": null,
+    "evidence": {
+      "lag": {
+        "alert": false,
+        "as_of": "2026-08-02T01:15:15.482484+03:00",
+        "due_count": 0,
+        "lag_seconds": 0,
+        "company_code": "WATHEFNI"
+      },
+      "term": {
+        "ok": true,
+        "count": 0,
+        "skipped": [],
+        "executed": []
+      },
+      "revoke": {
+        "ok": true,
+        "as_of": "2026-08-02T01:15:15.432074+03:00",
+        "count": 0,
+        "revoked": [],
+        "skipped": []
+      }
+    }
+  },
+  "terminations": {
+    "ok": true,
+    "executed": [],
+    "count": 0,
+    "skipped": []
+  },
+  "revokes": {
+    "ok": true,
+    "revoked": [],
+    "count": 0,
+    "skipped": [],
+    "as_of": "2026-08-02T01:15:15.432074+03:00"
+  },
+  "lag": {
+    "company_code": "WATHEFNI",
+    "due_count": 0,
+    "lag_seconds": 0,
+    "alert": false,
+    "as_of": "2026-08-02T01:15:15.482484+03:00"
+  }
+}

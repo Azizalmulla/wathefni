@@ -1,0 +1,19 @@
+    employment truth-sync — dry-run foundation
+      PASS  writers default off
+      PASS  assert writers dark
+      PASS  version pinned
+      PASS  P1–P9 listed
+      PASS  pending_start hub active warning
+      PASS  pending_start payroll fail
+      PASS  joining missing flagged
+      PASS  joining write blocked while dark
+      PASS  joining mismatch does not suggest overwrite
+      PASS  probation missing flagged
+      PASS  expected probation end
+      PASS  duplicate employment detected
+      PASS  module-off: joining sync inactive without offers
+      PASS  module-off note present
+      PASS  rollback keeps writers off
+SKIP DB: no DATABASE_URL (unit only)
+
+    15 passed, 0 failed

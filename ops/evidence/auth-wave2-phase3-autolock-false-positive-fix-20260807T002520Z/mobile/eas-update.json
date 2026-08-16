@@ -1,0 +1,15 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "0ac5d3b9-442e-422d-8bcc-39d0b1027346",
+  "androidUpdateId": "019fd99c-9e93-73d1-ad37-93d70a5aa0d6",
+  "iosUpdateId": "019fd99c-9e93-7a49-91f1-282d03fb61a1",
+  "message": "Auth Wave 2 Phase 3: no false lock on inactive; timeout vs confirmed_device_lock",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/0ac5d3b9-442e-422d-8bcc-39d0b1027346",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1"
+  },
+  "priorGroupForRollback": "6cffdfd1-a7d9-4b1e-9d9e-5bb731fc2e5f"
+}

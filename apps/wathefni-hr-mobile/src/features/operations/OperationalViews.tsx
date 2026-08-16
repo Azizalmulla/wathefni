@@ -125,10 +125,12 @@ export function OperationalListView({
   items,
   state,
   onOpen,
+  canOpen,
   onRetry,
   onLocale,
   emptyTitle,
   emptyBody,
+  header,
   footer,
   actionsForItem,
   onAction,
@@ -139,10 +141,12 @@ export function OperationalListView({
   items: OperationalItem[]
   state: ResourceState
   onOpen?: (item: OperationalItem) => void
+  canOpen?: (item: OperationalItem) => boolean
   onRetry?: () => void
   onLocale?: () => void
   emptyTitle?: string
   emptyBody?: string
+  header?: ReactNode
   footer?: ReactNode
   actionsForItem?: (item: OperationalItem) => Array<{
     key: string
@@ -164,6 +168,7 @@ export function OperationalListView({
         />
       ) : (
         <View style={styles.stack}>
+          {header}
           {items.map((item) => {
             const itemActions = actionsForItem?.(item) || []
             return (
@@ -174,7 +179,7 @@ export function OperationalListView({
                   meta={item.meta}
                   status={item.status}
                   tone={item.tone}
-                  onPress={onOpen ? () => onOpen(item) : undefined}
+                  onPress={onOpen && (canOpen ? canOpen(item) : true) ? () => onOpen(item) : undefined}
                 />
                 {itemActions.length ? (
                   <View style={styles.itemActions}>

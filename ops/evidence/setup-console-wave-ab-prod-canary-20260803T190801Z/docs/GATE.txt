@@ -1,0 +1,14 @@
+stamp=20260803T190801Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/setup-console-wave-ab-prod-canary-20260803T190801Z
+company=WATHEFNI
+external_tenants=false
+payroll_money=false
+attendance_ingest=false
+capture_ingest=off
+wave_b_started=false
+ai=false
+mobile_apps=false
+residual=0
+GATE=PROD_SYNTHETIC_SETUP_CONSOLE_WAVE_A_GO
+PROD_SYNTHETIC_WAVE_A=GO
+SETUP_WAVE_B=NO-GO

@@ -95,9 +95,17 @@ def main() -> int:
     check("item_ids are unique", len(item_ids) == len(set(item_ids)))
     check("all categories are valid", all(spec[2] in app.ONBOARDING_ITEM_CATEGORIES for spec in template))
     required_specs = [spec for spec in template if spec[4] is True]
+    # Required items must be employee-owned AND have a surface the employee can
+    # act on. Documents and text fields qualify; so does the ESS bank task, which
+    # has its own employee flow. Anything else would be an HR readiness nag.
+    ESS_BACKED_REQUIRED_TASKS = {"bank_details"}
     check(
-        "every required item is employee-owned document/text (no readiness-task nags)",
-        all(spec[5] == "employee" and spec[3] in ("document", "text") for spec in required_specs),
+        "every required item is employee-owned and employee-actionable",
+        all(
+            spec[5] == "employee"
+            and (spec[3] in ("document", "text") or spec[0] in ESS_BACKED_REQUIRED_TASKS)
+            for spec in required_specs
+        ),
     )
     TOTAL = len(template)
     REQUIRED_IDS = {spec[0] for spec in required_specs}

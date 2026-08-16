@@ -1,0 +1,6 @@
+Searched:
+- ops/evidence (bank-ess*, aziz-real-bank-acceptance) — no IBAN letter PDF/image fixtures
+- canary DB employee_bank_evidence for Aziz WATHEFNI-96599338566 and Talal WATHEFNI-96550252254 — 0 rows
+- /opt/wathefni/production-evidence — P0/P1 stamps only; no certificate media
+- Desktop / Documents / Downloads — no IBAN letter; found only KIB online-banking terms PDFs and unrelated screenshots
+- Prior P1 prove used synthetic minimal PDF/PNG and correctly fail-opened (explicitly not accepted as rich-extraction PASS)

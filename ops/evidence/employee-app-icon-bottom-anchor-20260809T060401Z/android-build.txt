@@ -1,0 +1,19 @@
+Resolved "preview" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "preview" environment on EAS.
+Environment variables loaded from the "production" build profile "env" configuration: EXPO_PUBLIC_API_BASE_URL, EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED, EXPO_PUBLIC_LOCAL_PIN_UNLOCK, EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK, EXPO_PUBLIC_LOCAL_AUTO_LOCK, EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC.
+
+- Incrementing versionCode from 7 to 8.
+✔ Incremented versionCode from 7 to 8.
+
+
+✔ Using remote Android credentials (Expo server)
+✔ Using Keystore from configuration: Build Credentials RmOrjViTgk (default)
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+- Compressing project files
+Your project archive is 300 MB. You can reduce its size and the time it takes to upload by excluding files that are unnecessary for the build process in .easignore file. Learn more: https://expo.fyi/eas-build-archive
+- Uploading to EAS Build (0 / 300 MB)
+✔ Uploaded to EAS 56s
+
+See logs: https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/7116970a-3ae0-4c45-825c-ddf5bb5cccfb
+

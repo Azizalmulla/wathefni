@@ -1,0 +1,49 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "extended-srgb:0.99608,0.94118,0.83922,1.00000"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "extended-srgb:0.99608,0.94118,0.83922,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "blur-material": 0,
+      "layers": [
+        {
+          "glass": false,
+          "image-name": "badge.png",
+          "name": "Badge",
+          "opacity": 1
+        }
+      ],
+      "lighting": "individual",
+      "name": "Foreground",
+      "refractivity": {
+        "enabled": false,
+        "depth": 0,
+        "strength": 0
+      },
+      "shadow": {
+        "kind": "none",
+        "opacity": 0
+      },
+      "specular": false,
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "iOS"
+    ]
+  }
+}

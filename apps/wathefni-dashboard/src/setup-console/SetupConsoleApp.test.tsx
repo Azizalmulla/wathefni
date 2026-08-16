@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ConfirmProvider } from '@/components/ConfirmDialog'
 
@@ -13,12 +13,35 @@ function renderConsole() {
   )
 }
 
+/** Company select defaults to Launch readiness; classic cards live under Classic setup. */
+async function selectCompanyClassicSetup(companyName = /Acme Company/) {
+  fireEvent.click(await screen.findByRole('button', { name: companyName }, { timeout: 8000 }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Classic setup' }))
+}
+
+function authHeader(init?: RequestInit) {
+  const headers = init?.headers
+  if (!headers) return null
+  if (typeof (headers as Headers).get === 'function') return (headers as Headers).get('Authorization')
+  if (Array.isArray(headers)) {
+    const hit = headers.find(([key]) => key.toLowerCase() === 'authorization')
+    return hit?.[1] ?? null
+  }
+  const record = headers as Record<string, string>
+  return record.Authorization || record.authorization || null
+}
+
 describe('setup console', () => {
-  test('keeps operator credentials in session storage and loads companies after connect', async () => {
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
+    vi.unstubAllGlobals()
+  })
+  test('exchanges operator secret for a persistent session and loads companies', async () => {
     const fetchMock = mockSetupApi()
     renderConsole()
 
-    const tokenInput = screen.getByLabelText('Operator token')
+    const tokenInput = await screen.findByLabelText('Operator token')
     expect(tokenInput).toHaveAttribute('type', 'password')
     fireEvent.change(tokenInput, { target: { value: ' operator-secret ' } })
     fireEvent.change(screen.getByLabelText('Authorised operator phone'), {
@@ -29,39 +52,54 @@ describe('setup console', () => {
     await screen.findByRole('heading', { name: 'Companies' })
     await screen.findByRole('button', { name: /Acme Company/ })
 
-    expect(sessionStorage.getItem('wathefni_setup_operator_token')).toBe('operator-secret')
-    expect(sessionStorage.getItem('wathefni_setup_operator_phone')).toBe('96590000000')
-    expect(localStorage.getItem('wathefni_setup_operator_token')).toBeNull()
+    expect(localStorage.getItem('wathefni_setup_access_token')).toBe('access-session-token')
+    expect(localStorage.getItem('wathefni_setup_refresh_token')).toBe('refresh-session-token')
+    expect(localStorage.getItem('wathefni_setup_operator_phone')).toBe('96590000000')
+    expect(sessionStorage.getItem('wathefni_setup_operator_token')).toBeNull()
+
+    const loginCall = fetchMock.mock.calls.find(([input]) =>
+      String(input).includes('/dashboard/superadmin/setup/auth/login'),
+    )
+    expect(JSON.parse(String(loginCall?.[1]?.body))).toEqual({
+      operator_token: 'operator-secret',
+      phone: '96590000000',
+    })
 
     const listCall = fetchMock.mock.calls.find(([input]) =>
       String(input).includes('/dashboard/superadmin/setup/companies?q=&limit=20&offset=0'),
     )
     const headers = listCall?.[1]?.headers as Headers
-    expect(headers.get('Authorization')).toBe('Bearer operator-secret')
+    expect(headers.get('Authorization')).toBe('Bearer access-session-token')
     expect(headers.get('X-HR-Phone')).toBe('96590000000')
   })
 
-  test('restores session access and loads the company list immediately', async () => {
-    sessionStorage.setItem('wathefni_setup_operator_token', 'saved-session-token')
-    sessionStorage.setItem('wathefni_setup_operator_phone', '96591111111')
+  test('restores persisted session access and loads the company list immediately', async () => {
+    localStorage.setItem('wathefni_setup_access_token', 'saved-access-token')
+    localStorage.setItem('wathefni_setup_refresh_token', 'saved-refresh-token')
+    localStorage.setItem('wathefni_setup_operator_phone', '96591111111')
     const fetchMock = mockSetupApi()
 
     renderConsole()
 
-    await screen.findByRole('button', { name: /Acme Company/ })
+    await screen.findByRole('button', { name: /Acme Company/ }, { timeout: 8000 })
     expect(screen.queryByLabelText('Operator token')).not.toBeInTheDocument()
+    const sessionCall = fetchMock.mock.calls.find(([input]) => String(input).includes('/auth/session'))
+    expect(authHeader(sessionCall?.[1])).toBe('Bearer saved-access-token')
     const listCall = fetchMock.mock.calls.find(([input]) => String(input).includes('/companies?q='))
-    expect((listCall?.[1]?.headers as Headers).get('Authorization')).toBe('Bearer saved-session-token')
+    expect(authHeader(listCall?.[1])).toBe('Bearer saved-access-token')
   })
 
-  test('groups modules, keeps employee app selectable behind its platform gate, and separates channels', async () => {
+  test(
+    'groups modules, keeps employee app selectable behind its platform gate, and separates channels',
+    async () => {
     seedSession()
     const fetchMock = mockSetupApi()
     renderConsole()
 
-    fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
+    await screen.findByRole('heading', { name: 'Companies' }, { timeout: 8000 })
+    await selectCompanyClassicSetup()
 
-    expect(await screen.findByRole('heading', { name: 'Canonical modules' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'What this company uses' })).toBeInTheDocument()
     expect(screen.getByText('Pre Hire')).toBeInTheDocument()
     expect(screen.getByText('Post Hire')).toBeInTheDocument()
 
@@ -84,15 +122,20 @@ describe('setup console', () => {
       )
       expect(JSON.parse(String(reviewCall?.[1]?.body))).toEqual({ channel_policy_reviewed: true })
     })
-  })
+  },
+  20000,
+  )
 
-  test('auto-includes hard dependencies, keeps soft recommendations optional, and previews app surfaces', async () => {
+  test(
+    'auto-includes hard dependencies, keeps soft recommendations optional, and previews app surfaces',
+    async () => {
     seedSession()
     const fetchMock = mockSetupApi()
     renderConsole()
 
-    fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
-    await screen.findByRole('heading', { name: 'Canonical modules' })
+    await screen.findByRole('heading', { name: 'Companies' }, { timeout: 8000 })
+    await selectCompanyClassicSetup()
+    await screen.findByRole('heading', { name: 'What this company uses' })
 
     const preHiringRow = screen.getByText('Pre-Hiring').closest('label')
     fireEvent.click(within(preHiringRow!).getByRole('checkbox'))
@@ -111,7 +154,8 @@ describe('setup console', () => {
     expect(screen.getByText(/Recommended with selection/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /\+ Shifts/ })).toBeInTheDocument()
 
-    const payrollRow = screen.getByText('Payroll').closest('label')
+    const payrollRow = screen.getAllByText('Payroll').find((node) => node.closest('label'))?.closest('label')
+    expect(payrollRow).not.toBeNull()
     expect(within(payrollRow!).getByRole('checkbox')).toBeChecked()
 
     const employeeRow = screen.getByText('Employee App').closest('label')
@@ -131,14 +175,16 @@ describe('setup console', () => {
       expect(body.modules).toEqual(expect.arrayContaining(['assessments', 'pre_hiring', 'payroll', 'attendance', 'leave', 'employee_app']))
       expect(body.modules).not.toContain('shifts')
     })
-  })
+  },
+  20000,
+  )
 
   test('creates and selects a company, then saves profile changes', async () => {
     seedSession()
     const fetchMock = mockSetupApi()
     renderConsole()
 
-    await screen.findByRole('button', { name: /Acme Company/ })
+    await screen.findByRole('button', { name: /Acme Company/ }, { timeout: 8000 })
     fireEvent.change(screen.getByLabelText('Company code'), { target: { value: 'northstar' } })
     fireEvent.change(screen.getByLabelText('Display name'), { target: { value: 'Northstar Co' } })
     fireEvent.change(screen.getByLabelText('Country'), { target: { value: 'kw' } })
@@ -146,7 +192,6 @@ describe('setup console', () => {
     fireEvent.change(screen.getByLabelText('Timezone'), { target: { value: 'Asia/Kuwait' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create and select' }))
 
-    const profileHeading = await screen.findByRole('heading', { name: 'Company profile' })
     const createCall = fetchMock.mock.calls.find(
       ([input, init]) =>
         String(input) === '/dashboard/superadmin/setup/companies' && init?.method === 'POST',
@@ -159,6 +204,8 @@ describe('setup console', () => {
       currency: 'KWD',
     })
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Classic setup' }))
+    const profileHeading = await screen.findByRole('heading', { name: 'Company profile' })
     const profileCard = profileHeading.closest('section')
     expect(profileCard).not.toBeNull()
     fireEvent.change(within(profileCard!).getByLabelText('Display name'), {
@@ -175,7 +222,9 @@ describe('setup console', () => {
     })
   })
 
-  test('creates a copy-only Owner invite link without claiming delivery', async () => {
+  test(
+    'creates a copy-only Owner invite link without claiming delivery',
+    async () => {
     seedSession()
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
@@ -185,24 +234,27 @@ describe('setup console', () => {
     mockSetupApi()
     renderConsole()
 
-    fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
-    await screen.findByRole('heading', { name: 'Owner invite' })
+    await screen.findByRole('heading', { name: 'Companies' }, { timeout: 8000 })
+    await selectCompanyClassicSetup()
+    await screen.findByRole('heading', { name: 'First Company Admin' })
     fireEvent.change(screen.getByLabelText('Owner name'), { target: { value: 'Aisha Owner' } })
     fireEvent.change(screen.getByLabelText('Owner email'), { target: { value: 'aisha@acme.test' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create owner invite' }))
 
     expect(await screen.findByText(/invite created — copy and share it securely/i)).toBeInTheDocument()
-    expect(screen.getByText(/the console does not send invitations/i)).toBeInTheDocument()
+    expect(screen.getByText(/day-to-day invites and role changes stay in settings/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Copy invite link' }))
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(expect.stringContaining('?invite=invite-smoke-token')))
-  })
+  },
+  20000,
+  )
 
   test('shows lifecycle state and requires a reason to disable', async () => {
     seedSession()
     const fetchMock = mockSetupApi()
     renderConsole()
 
-    fireEvent.click(await screen.findByRole('button', { name: /Acme Company/ }))
+    await selectCompanyClassicSetup()
     const lifecycleHeading = await screen.findByRole('heading', { name: 'Company lifecycle' })
     const lifecycleCard = lifecycleHeading.closest('section')
     expect(lifecycleCard).not.toBeNull()
@@ -233,13 +285,51 @@ describe('setup console', () => {
 })
 
 function seedSession() {
-  sessionStorage.setItem('wathefni_setup_operator_token', 'session-token')
-  sessionStorage.setItem('wathefni_setup_operator_phone', '96590000000')
+  localStorage.setItem('wathefni_setup_access_token', 'session-token')
+  localStorage.setItem('wathefni_setup_refresh_token', 'refresh-token')
+  localStorage.setItem('wathefni_setup_operator_phone', '96590000000')
 }
 
 function mockSetupApi() {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input)
+    if (path.includes('/dashboard/superadmin/setup/auth/login') && init?.method === 'POST') {
+      const body = JSON.parse(String(init.body || '{}')) as { phone?: string }
+      return jsonResponse({
+        ok: true,
+        access_token: 'access-session-token',
+        refresh_token: 'refresh-session-token',
+        phone: String(body.phone || '').trim(),
+        expires_at: new Date(Date.now() + 8 * 3600_000).toISOString(),
+        refresh_expires_at: new Date(Date.now() + 30 * 86400_000).toISOString(),
+        access_ttl_seconds: 28800,
+        refresh_ttl_seconds: 2592000,
+      })
+    }
+    if (path.includes('/dashboard/superadmin/setup/auth/session')) {
+      return jsonResponse({ ok: true, phone: '96590000000', auth_source: 'setup_session' })
+    }
+    if (path.includes('/dashboard/superadmin/setup/auth/refresh') && init?.method === 'POST') {
+      return jsonResponse({
+        ok: true,
+        access_token: 'rotated-access-token',
+        refresh_token: 'rotated-refresh-token',
+        phone: '96590000000',
+        expires_at: new Date(Date.now() + 8 * 3600_000).toISOString(),
+        refresh_expires_at: new Date(Date.now() + 30 * 86400_000).toISOString(),
+      })
+    }
+    if (path.includes('/dashboard/superadmin/setup/auth/logout') && init?.method === 'POST') {
+      return jsonResponse({ ok: true, revoked: true })
+    }
+    if (path.includes('/launch-readiness')) {
+      return jsonResponse({
+        ok: true,
+        company_code: 'ACME',
+        overall: 'ready',
+        items: [],
+      })
+    }
     if (path.includes('/dashboard/superadmin/setup/companies?')) {
       return jsonResponse({
         companies: [

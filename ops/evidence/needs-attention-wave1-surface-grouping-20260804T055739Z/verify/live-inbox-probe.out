@@ -1,0 +1,81 @@
+{
+  "contract_version": "1.0.2",
+  "total": 2,
+  "pre_group_total": 19,
+  "grouped_compliance_cases": 4,
+  "grouped_collapsed_members": 18,
+  "phase0_drops": {
+    "dropped_payroll": 0,
+    "dropped_subject": 3,
+    "dropped_unscoped": 0
+  },
+  "employee_keys": [
+    "WATHEFNI-96550252254"
+  ],
+  "allowlist_viewer_env": "96599338566",
+  "allowlist_subject_env": "WATHEFNI-96550252254",
+  "approved_subjects": [
+    "WATHEFNI-96550252254"
+  ],
+  "items": [
+    {
+      "id": "group:missing_documents:WATHEFNI-96550252254:onboarding",
+      "what_en": "Talal Fadhli is missing 5 required documents",
+      "what_ar": "Talal Fadhli ينقصه 5 مستندات مطلوبة",
+      "why_en": "Several required documents are still missing. Open Onboarding to collect them in one place.",
+      "severity": "medium",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "source_stream": "compliance",
+      "system_of_action": "onboarding",
+      "deep_link": {
+        "page": "onboarding",
+        "employee": "WATHEFNI-96550252254"
+      },
+      "grouped": true,
+      "grouped_count": 5,
+      "grouped_document_types": [
+        "civil_id",
+        "medical",
+        "passport",
+        "residence",
+        "work_permit"
+      ],
+      "owner_label_en": "Company HR / Compliance",
+      "deadline_label_en": "Request within 7 days",
+      "evidence_status_label_en": "Missing",
+      "authority_status_label_en": "Document findings — never government verified"
+    },
+    {
+      "id": "employees:WATHEFNI-96550252254:onboarding:incomplete",
+      "what_en": "Onboarding incomplete",
+      "what_ar": "Onboarding incomplete",
+      "why_en": "4 required items still open: required item, required item, required item",
+      "severity": "medium",
+      "employee_key": "WATHEFNI-96550252254",
+      "employee_name": "Talal Fadhli",
+      "source_stream": "employees",
+      "system_of_action": "onboarding",
+      "deep_link": {
+        "page": "onboarding",
+        "employee": "WATHEFNI-96550252254"
+      },
+      "grouped": null,
+      "grouped_count": null,
+      "grouped_document_types": null,
+      "owner_label_en": "Company HR",
+      "deadline_label_en": "See person profile / module",
+      "evidence_status_label_en": "Employees 360 next action (composed from module reads)",
+      "authority_status_label_en": "Person projection — frozen module remains authority"
+    }
+  ]
+}
+TALAL_GROUPED_OK Talal Fadhli is missing 5 required documents count= 5
+PHASE0_DROPS {'dropped_payroll': 0, 'dropped_subject': 3, 'dropped_unscoped': 0}
+ALLOWLIST_ONLY_REASON_OTHERS_HIDDEN
+Environment=WATHEFNI_ACTION_INBOX_REAL_VIEWER_ALLOWLIST=96599338566
+Environment=WATHEFNI_ACTION_INBOX_REAL_SUBJECT_ALLOWLIST=WATHEFNI-96550252254
+ROLLBACK_OK=/opt/wathefni/backups/production-pre-needs-attention-wave1-20260804T055739Z/ROLLBACK.sh
+dashboard_hits [('PostHire-LG5Kx4GB.js', 'needs-attention-page'), ('PostHire-LG5Kx4GB.js', 'Needs Attention'), ('PostHire-LG5Kx4GB.js', 'grouped_document_types'), ('PostHire-LG5Kx4GB.js', 'يحتاج متابعة')]
+DASHBOARD_OK
+PROBE_OK

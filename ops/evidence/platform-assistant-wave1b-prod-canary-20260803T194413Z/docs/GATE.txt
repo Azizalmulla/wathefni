@@ -1,0 +1,15 @@
+stamp=20260803T194413Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/platform-assistant-wave1b-prod-canary-20260803T194413Z
+company=WATHEFNI
+channel=hr_dashboard
+mutations=off
+whatsapp_widening=false
+wave2_started=false
+payroll_money=false
+attendance_ingest=false
+capture_ingest=off
+candidate_knowledge=false
+residual=0
+GATE=PROD_SYNTHETIC_PLATFORM_ASSISTANT_WAVE1_SPINE_GO
+PROD_SYNTHETIC_WAVE1=GO
+ASSISTANT_WAVE2=NO-GO

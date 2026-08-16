@@ -1,0 +1,18 @@
+{
+  "company": "WATHEFNI",
+  "employee_key": "WATHEFNI-96599338566",
+  "employee_app_in_modules": true,
+  "company_has_module_employee_app": true,
+  "modules_sample": [
+    "attendance",
+    "employee_app",
+    "leave",
+    "payroll"
+  ],
+  "app_access_enabled": true,
+  "employment_status": "active",
+  "runtime_allowed": true,
+  "runtime_reason": "employee_enabled",
+  "employee_app_enabled_platform": true
+}
+STORM_COUNTS {"push_register_lines": 307, "200": 240, "403": 11, "500": 56}

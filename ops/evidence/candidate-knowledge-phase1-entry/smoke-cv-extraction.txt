@@ -1,0 +1,34 @@
+    cv extraction — mistral-ocr-4-0 routing, arabic, cache, provenance
+      PASS  model pin is mistral-ocr-4-0
+      PASS  sdk pin is mistralai==2.6.0
+      PASS  never uses mistral-ocr-latest constant
+      PASS  arabic-indic digits normalize
+      PASS  persian digits normalize
+      PASS  email inside RTL marks
+      PASS  kuwait phone from arabic digits
+      PASS  url extracted
+      PASS  arabic headings detected
+      PASS  arabic month date parsed
+      PASS  arabic-only digital text accepted locally — accepted_local
+      PASS  empty fails quality
+      PASS  short fails quality
+      PASS  good bilingual passes quality
+      PASS  human_verified email preserved
+      PASS  non-protected field can update
+      PASS  cache key stable
+      PASS  cache key changes with model
+      PASS  mistral OCR default off
+      PASS  OCR only failed page indexes — [[1]]
+      PASS  mixed PDF keeps local page text
+      PASS  metadata has real stage/tier/provider/models
+      PASS  billable pages recorded
+      PASS  OCR skipped when flag off
+      PASS  missing tenant fails closed
+      PASS  cost estimate $4/1000 pages
+      PASS  meta has stage
+      PASS  meta has tier
+      PASS  meta has provider
+      PASS  meta has actual_request_model
+      PASS  meta has provider_response_model
+      PASS  no gpt-5.4-vision label
+    summary: 32 passed, 0 failed

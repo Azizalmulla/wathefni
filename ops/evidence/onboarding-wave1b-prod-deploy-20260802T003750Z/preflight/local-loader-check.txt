@@ -1,0 +1,3 @@
+candidates.read_in_loader False
+has_load_onboarding_items True
+has_bank_forbidden True

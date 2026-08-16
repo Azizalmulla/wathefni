@@ -1,0 +1,3922 @@
+{
+  "marker": "prehire-final-production-requal-v1",
+  "started_at": "20260725T023144Z",
+  "environment": {
+    "env": "production",
+    "database": "wathefni",
+    "delivery_mode": "dry_run",
+    "binding": {
+      "application_environment": "production",
+      "database_environment": "production",
+      "database_environment_marker": "2646585bbedb",
+      "database_logical_name": "b1f1a54885f2",
+      "database_host": "aaf075b7b4bf",
+      "match": true
+    }
+  },
+  "tenants": [
+    {
+      "code": "FQAVLO",
+      "combo": "asm_ON__live_ON__video_ON__offers_ON",
+      "assessments": true,
+      "live": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "FQALXO",
+      "combo": "asm_ON__live_ON__video_OFF__offers_ON",
+      "assessments": true,
+      "live": true,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "FQAXVO",
+      "combo": "asm_ON__live_OFF__video_ON__offers_ON",
+      "assessments": true,
+      "live": false,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "FQAXXO",
+      "combo": "asm_ON__live_OFF__video_OFF__offers_ON",
+      "assessments": true,
+      "live": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "FQXVLO",
+      "combo": "asm_OFF__live_ON__video_ON__offers_ON",
+      "assessments": false,
+      "live": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "FQXXXO",
+      "combo": "asm_OFF__live_OFF__video_OFF__offers_ON",
+      "assessments": false,
+      "live": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "FQNOOF",
+      "combo": "all_optional_OFF",
+      "assessments": false,
+      "live": false,
+      "video": false,
+      "offers": false
+    },
+    {
+      "code": "FQPEER",
+      "combo": "peer_isolation_and_history",
+      "assessments": true,
+      "live": true,
+      "video": true,
+      "offers": true
+    }
+  ],
+  "gates": [
+    {
+      "gate": "catalog_has_assessments_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "prehire=['assessments', 'employment_offers', 'interviews', 'pre_hiring', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_offers_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "keys=['analytics', 'assessments', 'attendance', 'compliance', 'employee_app', 'employment_offers', 'interviews', 'leave', 'onboarding', 'payroll', 'pre_hiring', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_live_interviews_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "interview-related=['interviews', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_video_interviews_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "live_and_video_interview_modules_are_independent",
+      "scope": "contract",
+      "ok": true,
+      "detail": "live.depends_on=('pre_hiring',) video.depends_on=('pre_hiring',)"
+    },
+    {
+      "gate": "toolcall_gated_covers_optional_interview_and_assessment_modules",
+      "scope": "contract",
+      "ok": true,
+      "detail": "TOOLCALL_GATED_MODULES=['analytics', 'assessments', 'attendance', 'compliance', 'interviews', 'leave', 'onboarding', 'payroll', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "employment_offers_has_no_assistant_mutation_surface",
+      "scope": "contract",
+      "ok": true,
+      "detail": "offers are dashboard/API entitled; Assistant must not expose offer mutation tools (checked per-tenant)"
+    },
+    {
+      "gate": "unconditional_interviews_or_True_removed",
+      "scope": "contract",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "ranking_default_policy_assessment_and_interview_unused",
+      "scope": "contract",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQAVLO-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQAVLO-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"66bbda67-4107-429b-9f88-956fdab82e78\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQAVLO\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQAVLO-FQ-withdraw\", \"FQAVLO-FQ-reject\", \"FQAVLO-FQ-main\", \"FQAVLO-FQ-bare\", \"FQAVLO-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAVLO-FQ-main\", \"phone\": \"+965886317397\", \"company_code\": \"FQAVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAVLO-FQ-bare\", \"phone\": \"+965886346561\", \"company_code\": \"FQAVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAVLO-FQ-ardoc\", \"phone\": \"+965886319606\", \"company_code\": \"FQAVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '664313ec-e25f-4473-83ee-06f1f2bf797e', 'company_code': 'FQAVLO', 'app_key': 'FQAVLO-FQ-main', 'phone': '965886317397', 'candidate_name': None, 'position_code': 'FQ_ROLE', 'position_title': 'FQ Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'status"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886317397', 'name': None, 'email': None, 'position_title': 'FQ Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works_when_live_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "b3c5d41e-c67f-4861-a317-c0ea67e405d0"
+    },
+    {
+      "gate": "interview_queue_items_when_live_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "assistant_assessments_chip_present_when_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "pages=['assessments']"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "269b63c8-e908-428f-84dc-b068772d4164"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': '269b63c8-e908-428f-84dc-b068772d4164', 'app_key': 'FQAVLO-FQ-main', 'company_code': 'FQAVLO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"269b63c8-e908-428f-84dc-b068772d4164\", \"app_key\": \"FQAVLO-FQ-main\", \"company_code\": \"FQAVLO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"269b63c8-e908-428f-84dc-b068772d4164\", \"app_key\": \"FQAVLO-FQ-main\", \"company_code\": \"FQAVLO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"269b63c8-e908-428f-84dc-b068772d4164\", \"app_key\": \"FQAVLO-FQ-main\", \"company_code\": \"FQAVLO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 9ed8247f-1471-467d-8d2e-6893080e4e1e"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"883d90f9-13e0-4267-9bf3-630c073bc691\", \"company_code\": \"FQAVLO\", \"app_key\": \"FQAVLO-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQAVLO:41711881-322a-422c-b788-3180405e959d\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"269b63c8-e908-428f-84dc-b068772d4164\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"788e94e9-d8e0-4948-a046-26617e01783a\", \"company_code\": \"FQAVLO\", \"app_key\": \"FQAVLO-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"883d90f9-13e0-4267-9bf3-630c073bc691\", \"hiring_reference\": \"883d90f9-13e0-4267-9bf3-630c073bc691\"}, \"request_hash\": \"5605342146ce8cbc6288bb8999710"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQAVLO-965886317397\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQAVLO-965886317397\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQAVLO-FQ-reject\", \"phone\": \"+965886342233\", \"company_code\": \"FQAVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQAVLO-FQ-withdraw\", \"phone\": \"+965886361255\", \"company_code\": \"FQAVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "reports_live_interview_flag_when_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"interviews_enabled\": null}"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "live_on=True visible=['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite']"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "video_on=True visible=['send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAVLO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAVLO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAVLO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "FQAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQALXO-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQALXO-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"db1ebe03-7ed3-4715-9b6b-5d2795214110\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQALXO\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQALXO-FQ-withdraw\", \"FQALXO-FQ-reject\", \"FQALXO-FQ-main\", \"FQALXO-FQ-bare\", \"FQALXO-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQALXO-FQ-main\", \"phone\": \"+965886397267\", \"company_code\": \"FQALXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQALXO-FQ-bare\", \"phone\": \"+965886300636\", \"company_code\": \"FQALXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQALXO-FQ-ardoc\", \"phone\": \"+965886383893\", \"company_code\": \"FQALXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '716c6fdf-143e-424c-ba10-a426f33575a1', 'company_code': 'FQALXO', 'app_key': 'FQALXO-FQ-main', 'phone': '965886397267', 'candidate_name': None, 'position_code': 'FQ_ROLE', 'position_title': 'FQ Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'status"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886397267', 'name': None, 'email': None, 'position_title': 'FQ Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works_when_live_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "HTTPException:{'error': 'module_disabled', 'required_module': 'video_interviews', 'message': 'This module is not enabled for this company.'}"
+    },
+    {
+      "gate": "interview_queue_items_when_live_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "assistant_assessments_chip_present_when_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "pages=['assessments']"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "6f98ac6d-d6da-467f-9c2b-fbc66c231000"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': '6f98ac6d-d6da-467f-9c2b-fbc66c231000', 'app_key': 'FQALXO-FQ-main', 'company_code': 'FQALXO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"6f98ac6d-d6da-467f-9c2b-fbc66c231000\", \"app_key\": \"FQALXO-FQ-main\", \"company_code\": \"FQALXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"6f98ac6d-d6da-467f-9c2b-fbc66c231000\", \"app_key\": \"FQALXO-FQ-main\", \"company_code\": \"FQALXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"6f98ac6d-d6da-467f-9c2b-fbc66c231000\", \"app_key\": \"FQALXO-FQ-main\", \"company_code\": \"FQALXO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 606e99b8-161f-48ff-af12-2aef934efaf4"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"31114de9-619f-4add-91e3-69dc34e41614\", \"company_code\": \"FQALXO\", \"app_key\": \"FQALXO-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQALXO:e1f247da-55a8-44fb-bffc-8865d930f8ae\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"6f98ac6d-d6da-467f-9c2b-fbc66c231000\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"f6fb17e9-ad54-4e99-952a-263cb053c3da\", \"company_code\": \"FQALXO\", \"app_key\": \"FQALXO-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"31114de9-619f-4add-91e3-69dc34e41614\", \"hiring_reference\": \"31114de9-619f-4add-91e3-69dc34e41614\"}, \"request_hash\": \"55823ab468f64e3de4487e3ba57e4"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQALXO-965886397267\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQALXO-965886397267\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQALXO-FQ-reject\", \"phone\": \"+965886302046\", \"company_code\": \"FQALXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQALXO-FQ-withdraw\", \"phone\": \"+965886363359\", \"company_code\": \"FQALXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "reports_live_interview_flag_when_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"interviews_enabled\": null}"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "live_on=True visible=['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite']"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "video_on=False visible=[]"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQALXO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQALXO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQALXO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "FQALXO[asm_ON__live_ON__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQAXVO-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQAXVO-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"3c5498d2-3a63-4946-add9-33b59a430326\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQAXVO-FQ-withdraw\", \"FQAXVO-FQ-reject\", \"FQAXVO-FQ-main\", \"FQAXVO-FQ-bare\", \"FQAXVO-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAXVO-FQ-main\", \"phone\": \"+965886331305\", \"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAXVO-FQ-bare\", \"phone\": \"+965886326528\", \"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAXVO-FQ-ardoc\", \"phone\": \"+965886387332\", \"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '516c5d83-e81a-405f-a52d-e5eec714850e', 'company_code': 'FQAXVO', 'app_key': 'FQAXVO-FQ-main', 'phone': '965886331305', 'candidate_name': None, 'position_code': 'FQ_ROLE', 'position_title': 'FQ Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'status"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886331305', 'name': None, 'email': None, 'position_title': 'FQ Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_blocked_when_off",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company."
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company. provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "940ef733-2362-4fa1-923a-96c073c0548c"
+    },
+    {
+      "gate": "live_interviews_off_no_interview_queue_or_warning",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_assessments_chip_present_when_on",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "pages=['assessments']"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "da427bd9-a13d-4500-b056-14c796e81dda"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': 'da427bd9-a13d-4500-b056-14c796e81dda', 'app_key': 'FQAXVO-FQ-main', 'company_code': 'FQAXVO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"da427bd9-a13d-4500-b056-14c796e81dda\", \"app_key\": \"FQAXVO-FQ-main\", \"company_code\": \"FQAXVO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"da427bd9-a13d-4500-b056-14c796e81dda\", \"app_key\": \"FQAXVO-FQ-main\", \"company_code\": \"FQAXVO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"da427bd9-a13d-4500-b056-14c796e81dda\", \"app_key\": \"FQAXVO-FQ-main\", \"company_code\": \"FQAXVO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 0023580a-b442-4b19-8b61-bb4ccda78f9c"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"0b0f89ed-8b08-455d-a27c-16d2345e3f0a\", \"company_code\": \"FQAXVO\", \"app_key\": \"FQAXVO-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQAXVO:9be2afb1-7b91-4483-a05f-b7367f891b4c\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"da427bd9-a13d-4500-b056-14c796e81dda\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"41d9d051-9ec9-4b23-b362-a08df89baa7b\", \"company_code\": \"FQAXVO\", \"app_key\": \"FQAXVO-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"0b0f89ed-8b08-455d-a27c-16d2345e3f0a\", \"hiring_reference\": \"0b0f89ed-8b08-455d-a27c-16d2345e3f0a\"}, \"request_hash\": \"dbde2467b67e829afeceae36cff6d"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQAXVO-965886331305\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQAXVO-965886331305\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQAXVO-FQ-reject\", \"phone\": \"+965886328178\", \"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQAXVO-FQ-withdraw\", \"phone\": \"+965886301324\", \"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "live_on=False visible=[]"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "video_on=True visible=['send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAXVO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAXVO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAXVO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "FQAXVO[asm_ON__live_OFF__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQAXXO-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQAXXO-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"01593620-4c9a-447a-a661-eb024ff85e1f\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQAXXO\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQAXXO-FQ-withdraw\", \"FQAXXO-FQ-reject\", \"FQAXXO-FQ-main\", \"FQAXXO-FQ-bare\", \"FQAXXO-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAXXO-FQ-main\", \"phone\": \"+965886376921\", \"company_code\": \"FQAXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAXXO-FQ-bare\", \"phone\": \"+965886354331\", \"company_code\": \"FQAXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQAXXO-FQ-ardoc\", \"phone\": \"+965886354077\", \"company_code\": \"FQAXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '57602798-4c26-43a4-9882-66ed805da860', 'company_code': 'FQAXXO', 'app_key': 'FQAXXO-FQ-main', 'phone': '965886376921', 'candidate_name': None, 'position_code': 'FQ_ROLE', 'position_title': 'FQ Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'status"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886376921', 'name': None, 'email': None, 'position_title': 'FQ Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "live_interview_blocked_when_off",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company."
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company. provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "HTTPException:{'error': 'module_disabled', 'required_module': 'video_interviews', 'message': 'This module is not enabled for this company.'}"
+    },
+    {
+      "gate": "live_interviews_off_no_interview_queue_or_warning",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_assessments_chip_present_when_on",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "pages=['assessments']"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': 'bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff', 'app_key': 'FQAXXO-FQ-main', 'company_code': 'FQAXXO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff\", \"app_key\": \"FQAXXO-FQ-main\", \"company_code\": \"FQAXXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff\", \"app_key\": \"FQAXXO-FQ-main\", \"company_code\": \"FQAXXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff\", \"app_key\": \"FQAXXO-FQ-main\", \"company_code\": \"FQAXXO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 99e95d30-01fb-469e-a567-e9173447583f"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"4649aae4-2449-4cee-a9d0-88f1c8e96cf9\", \"company_code\": \"FQAXXO\", \"app_key\": \"FQAXXO-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQAXXO:ed5aed6e-0ab2-457e-a01a-cadef53a570d\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"5c9031e3-868d-4f45-9331-a94f4b8b8c0c\", \"company_code\": \"FQAXXO\", \"app_key\": \"FQAXXO-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"4649aae4-2449-4cee-a9d0-88f1c8e96cf9\", \"hiring_reference\": \"4649aae4-2449-4cee-a9d0-88f1c8e96cf9\"}, \"request_hash\": \"2ab1bceb0b928f135e11233837982"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQAXXO-965886376921\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQAXXO-965886376921\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQAXXO-FQ-reject\", \"phone\": \"+965886386735\", \"company_code\": \"FQAXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQAXXO-FQ-withdraw\", \"phone\": \"+965886322994\", \"company_code\": \"FQAXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "reports_zero_interview_wording_when_both_off",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "live_on=False visible=[]"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "video_on=False visible=[]"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAXXO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAXXO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQAXXO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_zero_interview_payload_when_both_off",
+      "scope": "FQAXXO[asm_ON__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQXVLO-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQXVLO-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"c1376621-5428-416c-8645-24aae0ac5b61\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQXVLO\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQXVLO-FQ-withdraw\", \"FQXVLO-FQ-reject\", \"FQXVLO-FQ-main\", \"FQXVLO-FQ-bare\", \"FQXVLO-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQXVLO-FQ-main\", \"phone\": \"+965886327614\", \"company_code\": \"FQXVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQXVLO-FQ-bare\", \"phone\": \"+965886326924\", \"company_code\": \"FQXVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQXVLO-FQ-ardoc\", \"phone\": \"+965886361917\", \"company_code\": \"FQXVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "assessments_off_service_mutation_blocked",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': False, 'error': 'module_disabled', 'required_module': 'assessments'}"
+    },
+    {
+      "gate": "assessments_off_entitlement_403",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'FQXVLO', 'required_module': 'assessments', 'required_permission': 'assessment.manage'}"
+    },
+    {
+      "gate": "overview_omits_assessment_counts_when_off",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works_when_live_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "10b552b6-e442-4f9e-940e-53535da2743c"
+    },
+    {
+      "gate": "interview_queue_items_when_live_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "assistant_assessments_chip_absent_when_off",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "pages=[]"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "c9f7aeea-1d67-4a20-a1d2-c22caef30c17"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': 'c9f7aeea-1d67-4a20-a1d2-c22caef30c17', 'app_key': 'FQXVLO-FQ-main', 'company_code': 'FQXVLO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"c9f7aeea-1d67-4a20-a1d2-c22caef30c17\", \"app_key\": \"FQXVLO-FQ-main\", \"company_code\": \"FQXVLO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"c9f7aeea-1d67-4a20-a1d2-c22caef30c17\", \"app_key\": \"FQXVLO-FQ-main\", \"company_code\": \"FQXVLO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"c9f7aeea-1d67-4a20-a1d2-c22caef30c17\", \"app_key\": \"FQXVLO-FQ-main\", \"company_code\": \"FQXVLO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 6b4d175e-9910-472c-babf-c108705fe5f7"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"b3502c6a-5acf-4723-83da-269a978adf5d\", \"company_code\": \"FQXVLO\", \"app_key\": \"FQXVLO-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQXVLO:3d51a1d2-5482-4a26-aa28-6e77793256c9\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"c9f7aeea-1d67-4a20-a1d2-c22caef30c17\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"7fc0fab0-6ccd-4e9d-a6b1-9a34dbcfa096\", \"company_code\": \"FQXVLO\", \"app_key\": \"FQXVLO-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"b3502c6a-5acf-4723-83da-269a978adf5d\", \"hiring_reference\": \"b3502c6a-5acf-4723-83da-269a978adf5d\"}, \"request_hash\": \"bdaa8ff526d792c6bd2de9f6da68d"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQXVLO-965886327614\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQXVLO-965886327614\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQXVLO-FQ-reject\", \"phone\": \"+965886332164\", \"company_code\": \"FQXVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQXVLO-FQ-withdraw\", \"phone\": \"+965886306568\", \"company_code\": \"FQXVLO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "gate": "reports_zero_assessment_wording_when_off",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_assessments_export_blocked_when_off",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "export_headers"
+    },
+    {
+      "gate": "reports_live_interview_flag_when_on",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"interviews_enabled\": null}"
+    },
+    {
+      "gate": "assistant_hides_assessment_tools_when_off",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "live_on=True visible=['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite']"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "video_on=True visible=['send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQXVLO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQXVLO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQXVLO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "scope": "FQXVLO[asm_OFF__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQXXXO-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQXXXO-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"7770e260-4fa9-4df3-8d84-04b175024acc\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQXXXO\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQXXXO-FQ-withdraw\", \"FQXXXO-FQ-reject\", \"FQXXXO-FQ-main\", \"FQXXXO-FQ-bare\", \"FQXXXO-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQXXXO-FQ-main\", \"phone\": \"+965886374131\", \"company_code\": \"FQXXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQXXXO-FQ-bare\", \"phone\": \"+965886338772\", \"company_code\": \"FQXXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQXXXO-FQ-ardoc\", \"phone\": \"+965886347529\", \"company_code\": \"FQXXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "assessments_off_service_mutation_blocked",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': False, 'error': 'module_disabled', 'required_module': 'assessments'}"
+    },
+    {
+      "gate": "assessments_off_entitlement_403",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'FQXXXO', 'required_module': 'assessments', 'required_permission': 'assessment.manage'}"
+    },
+    {
+      "gate": "overview_omits_assessment_counts_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "live_interview_blocked_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company."
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company. provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "HTTPException:{'error': 'module_disabled', 'required_module': 'video_interviews', 'message': 'This module is not enabled for this company.'}"
+    },
+    {
+      "gate": "live_interviews_off_no_interview_queue_or_warning",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_assessments_chip_absent_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "pages=[]"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "f57a1484-641d-419a-b0ec-bd897acd6020"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': 'f57a1484-641d-419a-b0ec-bd897acd6020', 'app_key': 'FQXXXO-FQ-main', 'company_code': 'FQXXXO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"f57a1484-641d-419a-b0ec-bd897acd6020\", \"app_key\": \"FQXXXO-FQ-main\", \"company_code\": \"FQXXXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"f57a1484-641d-419a-b0ec-bd897acd6020\", \"app_key\": \"FQXXXO-FQ-main\", \"company_code\": \"FQXXXO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"f57a1484-641d-419a-b0ec-bd897acd6020\", \"app_key\": \"FQXXXO-FQ-main\", \"company_code\": \"FQXXXO\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 1e9c81e0-2f68-484f-bbfa-fddd5708a076"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"3e2da285-fcb7-425e-81ec-038559c4291d\", \"company_code\": \"FQXXXO\", \"app_key\": \"FQXXXO-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQXXXO:2ce5972e-1adf-4549-81c9-5556e076b024\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"f57a1484-641d-419a-b0ec-bd897acd6020\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"c91f991c-5989-44cf-85bd-6c36c099c395\", \"company_code\": \"FQXXXO\", \"app_key\": \"FQXXXO-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"3e2da285-fcb7-425e-81ec-038559c4291d\", \"hiring_reference\": \"3e2da285-fcb7-425e-81ec-038559c4291d\"}, \"request_hash\": \"95d2e1e0a7f0d79548c058ee9bf95"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQXXXO-965886374131\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQXXXO-965886374131\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQXXXO-FQ-reject\", \"phone\": \"+965886312804\", \"company_code\": \"FQXXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQXXXO-FQ-withdraw\", \"phone\": \"+965886321768\", \"company_code\": \"FQXXXO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "gate": "reports_zero_assessment_wording_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_assessments_export_blocked_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "export_headers"
+    },
+    {
+      "gate": "reports_zero_interview_wording_when_both_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_hides_assessment_tools_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "live_on=False visible=[]"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "video_on=False visible=[]"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQXXXO\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQXXXO\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQXXXO\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_zero_interview_payload_when_both_off",
+      "scope": "FQXXXO[asm_OFF__live_OFF__video_OFF__offers_ON]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQNOOF-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQNOOF-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"ccbc472b-edff-41b1-b48f-0f8772ae4063\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQNOOF\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQNOOF-FQ-withdraw\", \"FQNOOF-FQ-reject\", \"FQNOOF-FQ-main\", \"FQNOOF-FQ-bare\", \"FQNOOF-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQNOOF-FQ-main\", \"phone\": \"+965886300277\", \"company_code\": \"FQNOOF\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQNOOF-FQ-bare\", \"phone\": \"+965886353821\", \"company_code\": \"FQNOOF\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQNOOF-FQ-ardoc\", \"phone\": \"+965886390614\", \"company_code\": \"FQNOOF\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "assessments_off_service_mutation_blocked",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{'ok': False, 'error': 'module_disabled', 'required_module': 'assessments'}"
+    },
+    {
+      "gate": "assessments_off_entitlement_403",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{'error': 'permission_denied', 'message': 'You do not have permission to do this action.', 'company_code': 'FQNOOF', 'required_module': 'assessments', 'required_permission': 'assessment.manage'}"
+    },
+    {
+      "gate": "overview_omits_assessment_counts_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "expected=False actual=False"
+    },
+    {
+      "gate": "live_interview_blocked_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company."
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "InterviewAuthorityError:This module is not enabled for this company. provider_status=not_configured"
+    },
+    {
+      "gate": "async_video_blocked_when_module_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "HTTPException:{'error': 'module_disabled', 'required_module': 'video_interviews', 'message': 'This module is not enabled for this company.'}"
+    },
+    {
+      "gate": "live_interviews_off_no_interview_queue_or_warning",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_assessments_chip_absent_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "pages=[]"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "expected=False"
+    },
+    {
+      "gate": "offers_off_draft_blocked",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "OfferAuthorityError:module_disabled"
+    },
+    {
+      "gate": "offers_off_hire_gate_not_required",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": false, \"offer_id\": null, \"override\": false}"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"1e934d77-b7e9-47f8-8717-34ad9ff960e3\", \"company_code\": \"FQNOOF\", \"app_key\": \"FQNOOF-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQNOOF:47b820ac-09bd-4280-9b7a-ea5d77d6ccdf\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": false, \"offer_id\": null, \"override\": false}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"90db9bc9-3f06-4883-b219-deec909dc6ca\", \"company_code\": \"FQNOOF\", \"app_key\": \"FQNOOF-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"1e934d77-b7e9-47f8-8717-34ad9ff960e3\", \"hiring_reference\": \"1e934d77-b7e9-47f8-8717-34ad9ff960e3\"}, \"request_hash\": \"b05cf11993aa4073bcaceee34ba7b"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQNOOF-965886300277\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQNOOF-965886300277\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQNOOF-FQ-reject\", \"phone\": \"+965886341576\", \"company_code\": \"FQNOOF\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQNOOF-FQ-withdraw\", \"phone\": \"+965886349006\", \"company_code\": \"FQNOOF\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "reported=0 truth=0"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "gate": "reports_zero_assessment_wording_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_assessments_export_blocked_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "export_headers"
+    },
+    {
+      "gate": "reports_zero_interview_wording_when_both_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reports_zero_offer_wording_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_hides_assessment_tools_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "live_on=False visible=[]"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "video_on=False visible=[]"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQNOOF\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQNOOF\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQNOOF\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_zero_interview_payload_when_both_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_offers_disabled_when_off",
+      "scope": "FQNOOF[all_optional_OFF]",
+      "ok": true,
+      "detail": "{\"enabled\": false, \"actions\": [], \"reason\": \"module_disabled\", \"confirmation_required\": true}"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-FQPEER-FQ_ROLE\", \"link\": \"https://wa.me/96597453460?text=APPLY-FQPEER-FQ_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"61cd1f75-415a-4de5-860d-dff062c6e023\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"FQPEER\", \"position_code\": \"FQ_ROLE\", \"job_version\": 2, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"c13c9f95a1fb67764e9efafc65bbbe8d05f77ee0f6cb227654b179fb60f8a78f\"}, \"pool_app_keys\": [\"FQPEER-FQ-withdraw\", \"FQPEER-FQ-reject\", \"FQPEER-FQ-main\", \"FQPEER-FQ-bare\", \"FQPEER-FQ-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQPEER-FQ-main\", \"phone\": \"+965886312364\", \"company_code\": \"FQPEER\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQPEER-FQ-bare\", \"phone\": \"+965886339350\", \"company_code\": \"FQPEER\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"FQPEER-FQ-ardoc\", \"phone\": \"+965886321705\", \"company_code\": \"FQPEER\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '36c0ad69-7baf-4a22-8c31-b42469f7338a', 'company_code': 'FQPEER', 'app_key': 'FQPEER-FQ-main', 'phone': '965886312364', 'candidate_name': None, 'position_code': 'FQ_ROLE', 'position_title': 'FQ Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'status"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886312364', 'name': None, 'email': None, 'position_title': 'FQ Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0}"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works_when_live_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "3b950629-cba6-4ea8-8847-d2960ea82e36"
+    },
+    {
+      "gate": "interview_queue_items_when_live_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Interview scheduling still needed\", \"Interview scheduling still needed\", \"Interview scheduling still needed\"]"
+    },
+    {
+      "gate": "assistant_assessments_chip_present_when_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "pages=['assessments']"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "c885b0f6-85f9-452d-9ed6-80d83ccc7910"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{'offer_id': 'c885b0f6-85f9-452d-9ed6-80d83ccc7910', 'app_key': 'FQPEER-FQ-main', 'company_code': 'FQPEER', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"c885b0f6-85f9-452d-9ed6-80d83ccc7910\", \"app_key\": \"FQPEER-FQ-main\", \"company_code\": \"FQPEER\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "offer_resend_ok",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"c885b0f6-85f9-452d-9ed6-80d83ccc7910\", \"app_key\": \"FQPEER-FQ-main\", \"company_code\": \"FQPEER\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"country_o"
+    },
+    {
+      "gate": "public_offer_preview_available_after_send",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "[\"allowances\", \"already_used\", \"authorized_signatory\", \"base_salary\", \"can_respond\", \"candidate_name_snapshot\", \"company_code\", \"country_of_employment\", \"currency\", \"document_language\", \"document_sha256\", \"employing_legal_entity\", \"expires_at\", \"link_policy\", \"offer_id\", \"offer_version\", \"ok\", \"posi"
+    },
+    {
+      "gate": "offer_accepted_by_candidate",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"c885b0f6-85f9-452d-9ed6-80d83ccc7910\", \"app_key\": \"FQPEER-FQ-main\", \"company_code\": \"FQPEER\", \"status\": \"accepted\", \"status_label\": \"Accepted\", \"current_version\": 1, \"accepted_version\": 1, \"position_code\": \"FQ_ROLE\", \"position_title\": \"FQ Operations Engineer\", \"department\": null, \"coun"
+    },
+    {
+      "gate": "one_accepted_offer_governs_application",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "accepted=1; second_draft_blocked=False; second offer reached approved: 613f152b-5c51-4206-a081-0b2a4cd7f0fb"
+    },
+    {
+      "gate": "arabic_offer_document_control_enforced_at_approval",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "OfferAuthorityError:arabic_upload_required:Arabic offers require a company-approved uploaded Unicode PDF confirmed against the recorded terms."
+    },
+    {
+      "gate": "offer_expiry_canonical_and_idempotent",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"expired\", \"first\": true, \"second\": false}"
+    },
+    {
+      "gate": "expired_link_reveals_no_compensation",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "OfferAuthorityError:This offer link was revoked."
+    },
+    {
+      "gate": "expired_offer_status_is_terminal_and_not_rewritable",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "status=expired OfferAuthorityError:permission_denied"
+    },
+    {
+      "gate": "sent_offer_withdrawable_and_tokens_revoked",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "status=withdrawn revoked_tokens=1 "
+    },
+    {
+      "gate": "hire_requires_accepted_offer_when_offers_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "OfferAuthorityError:accepted_offer_required"
+    },
+    {
+      "gate": "hire_operation_prepared",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation\": {\"operation_id\": \"ab304b1f-7c88-4c90-b2c7-e3031179c1e0\", \"company_code\": \"FQPEER\", \"app_key\": \"FQPEER-FQ-main\", \"employee_key\": null, \"status\": \"prepared\", \"idempotency_key\": \"hire:FQPEER:35294912-267f-4afd-a133-12f8a67393c3\", \"confirmation_id\": null, \"actor_user_id\": \"f0a1"
+    },
+    {
+      "gate": "canonical_hire_gate_evaluated",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"required\": true, \"override\": false, \"offer_id\": \"c885b0f6-85f9-452d-9ed6-80d83ccc7910\", \"accepted_version\": 1, \"no_accepted_offer\": false, \"from_stage\": \"shortlisted\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "hire_confirmation_minted",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"confirmation\": {\"confirmation_id\": \"d316a0e1-b4fd-49c4-8846-8e9cad69a8e2\", \"company_code\": \"FQPEER\", \"app_key\": \"FQPEER-FQ-main\", \"action\": \"hire\", \"observed_stage\": \"shortlisted\", \"observed_version\": 3, \"target_payload\": {\"operation_id\": \"ab304b1f-7c88-4c90-b2c7-e3031179c1e0\", \"hiring_reference\": \"ab304b1f-7c88-4c90-b2c7-e3031179c1e0\"}, \"request_hash\": \"724ae4d509f79a89368bd36740c39"
+    },
+    {
+      "gate": "atomic_hire_one_employee",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"hire_ok\": true, \"status\": \"hired\", \"emp\": {\"n\": 1, \"employee_key\": \"FQPEER-965886312364\"}, \"hop\": {\"status\": \"completed\", \"employee_key\": \"FQPEER-965886312364\"}}"
+    },
+    {
+      "gate": "post_hire_handoff_seeded",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "compliance_documents=3"
+    },
+    {
+      "gate": "duplicate_hire_confirmation_no_second_employee",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "n=1 replay_ok=True"
+    },
+    {
+      "gate": "no_half_hire",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "reject_at_ready_for_review",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQPEER-FQ-reject\", \"phone\": \"+965886359767\", \"company_code\": \"FQPEER\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejec"
+    },
+    {
+      "gate": "withdraw_path_available",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"withdrawn\", \"application\": {\"app_key\": \"FQPEER-FQ-withdraw\", \"phone\": \"+965886393407\", \"company_code\": \"FQPEER\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"wi"
+    },
+    {
+      "gate": "terminal_stage_cannot_be_hired",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"ok\": false, \"stage\": \"mint\", \"result\": {\"ok\": false, \"error\": \"transition_not_allowed\", \"from_stage\": \"rejected\", \"to_stage\": \"hired\"}}"
+    },
+    {
+      "gate": "reports_funnel_matches_lifecycle_truth",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"mismatch\": {}, \"reported\": {\"cv_received\": 5, \"ready_for_review\": 5, \"shortlisted\": 3, \"interview\": 0, \"offer_sent\": 3, \"offer_accepted\": 1, \"hired\": 1}, \"status_truth\": {\"hired\": 1, \"rejected\": 1, \"shortlisted\": 2, \"withdrawn\": 1}}"
+    },
+    {
+      "gate": "reports_offer_accepted_matches_truth",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "reported=1 truth=1"
+    },
+    {
+      "gate": "reports_assessments_flag_matches_module",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "reports_live_interview_flag_when_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"interviews_enabled\": null}"
+    },
+    {
+      "gate": "assistant_exposes_assessment_tools_when_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "['send_assessment']"
+    },
+    {
+      "gate": "assistant_live_tools_follow_interviews_module",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "live_on=True visible=['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite']"
+    },
+    {
+      "gate": "assistant_video_tools_follow_video_module",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "video_on=True visible=['send_video_interview']"
+    },
+    {
+      "gate": "tool_send_video_interview_gated_by_video_interviews",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['video_interviews']"
+    },
+    {
+      "gate": "tool_send_video_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_video_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQPEER\"}"
+    },
+    {
+      "gate": "tool_send_assessment_gated_by_assessments",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['assessments']"
+    },
+    {
+      "gate": "tool_send_assessment_execution_fails_closed_for_unverified_actor",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"send_assessment\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQPEER\"}"
+    },
+    {
+      "gate": "tool_schedule_interview_gated_by_interviews",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "required_entitlement_modules=['interviews']"
+    },
+    {
+      "gate": "tool_schedule_interview_execution_fails_closed_for_unverified_actor",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "{\"status\": \"dashboard_user_identity_required\", \"tool\": \"schedule_interview\", \"message\": \"Access needs to be verified.\", \"company_id\": \"FQPEER\"}"
+    },
+    {
+      "gate": "assistant_exposes_no_offer_mutation_tools",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "scope": "FQPEER[peer_isolation_and_history]",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'assessments', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "ai_cannot_reject_candidate",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"ai_cannot_mutate_stage\", \"message\": \"AI may propose this change but cannot execute it.\", \"to_stage\": \"rejected\"}"
+    },
+    {
+      "gate": "ai_cannot_hire_candidate",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"ai_cannot_mutate_stage\", \"message\": \"AI may propose this change but cannot execute it.\", \"to_stage\": \"hired\"}"
+    },
+    {
+      "gate": "ai_cannot_use_hire_override",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "OfferAuthorityError:ai_forbidden:Only a human operator can use offer hire override."
+    },
+    {
+      "gate": "stale_version_rejected",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"stale_state\", \"expected_version\": 10, \"current_version\": 3, \"message\": \"Application version changed since this action was prepared.\"}"
+    },
+    {
+      "gate": "confirmation_token_single_use",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"first\": true, \"replay\": {\"ok\": false, \"error\": \"confirmation_already_used\"}}"
+    },
+    {
+      "gate": "concurrent_decisions_single_winner",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "[{\"ok\": true, \"from_stage\": \"shortlisted\", \"to_stage\": \"rejected\", \"application\": {\"app_key\": \"FQAXVO-FQ-bare\", \"phone\": \"+965886326528\", \"company_code\": \"FQAXVO\", \"position_code\": \"FQ_ROLE\", \"apply_code\": null, \"position_title\": \"FQ Operations Engineer\", \"company_name\": null, \"status\": \"rejected\", \"current_step\": \"rejected\", \"cv_received\": true, \"cv_received_at\": \"2026-07-25\", \"screening_status\": null, \"screening_completed_at\": null, \"sheet_sync_status\": null, \"drive_sync_status\": null, \"raw_json\": {\"cv\": {\"extracted\": {\"skills\": [\"Python\", \"SQL\"], \"years_experience\": 8}}, \"intake\": {\"source\""
+    },
+    {
+      "gate": "cross_tenant_application_not_visible",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "gate": "cross_tenant_confirmation_mint_rejected",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"application_not_found\"}"
+    },
+    {
+      "gate": "cross_tenant_transition_rejected",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"ok\": false, \"error\": \"confirmation_required\", \"to_stage\": \"rejected\", \"message\": \"Human confirmation is required for this transition.\"}"
+    },
+    {
+      "gate": "cross_tenant_offer_read_blocked",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "HTTPException:{'error': 'offer_not_found', 'message': 'Offer not found.'}"
+    },
+    {
+      "gate": "public_assessment_page_bilingual_rtl",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "ar+rtl markers present"
+    },
+    {
+      "gate": "public_unavailable_page_leaks_no_tenant",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>Link unavai"
+    },
+    {
+      "gate": "issued_public_offer_link_stays_active_after_offers_disabled",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"servable\": true, \"reason\": \"issued_before_module_disabled\", \"module_enabled\": false}"
+    },
+    {
+      "gate": "issued_public_offer_link_policy_reason",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"servable\": true, \"reason\": \"issued_before_module_disabled\", \"module_enabled\": false}"
+    },
+    {
+      "gate": "historical_records_preserved_after_disable",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"before\": {\"attempts\": 1, \"interviews\": 3, \"offers\": 5}, \"after\": {\"attempts\": 1, \"interviews\": 3, \"offers\": 5}}"
+    },
+    {
+      "gate": "disabled_history_not_exposed_in_payloads",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "stale_history_does_not_affect_ranking",
+      "scope": "cross_cutting",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "scope": "cleanup",
+      "ok": true,
+      "detail": "{}"
+    }
+  ],
+  "findings": {},
+  "state": {
+    "FQAVLO": {
+      "apps": {
+        "main": "FQAVLO-FQ-main",
+        "bare": "FQAVLO-FQ-bare",
+        "reject": "FQAVLO-FQ-reject",
+        "withdraw": "FQAVLO-FQ-withdraw",
+        "ardoc": "FQAVLO-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "664313ec-e25f-4473-83ee-06f1f2bf797e",
+      "interview_id": "8526d64f-3cb8-47a3-9955-8df040f9fcc1",
+      "gcal_interview_id": "ce8405e5-1a93-4f3d-ba93-5eb86cf7c8ec",
+      "video_interview_id": "b3c5d41e-c67f-4861-a317-c0ea67e405d0",
+      "offer_id": "269b63c8-e908-428f-84dc-b068772d4164",
+      "dup_offer_id": "9ed8247f-1471-467d-8d2e-6893080e4e1e",
+      "bare_offer_id": "c5141400-a1df-4bc2-b25c-c1a9c705b841",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQALXO": {
+      "apps": {
+        "main": "FQALXO-FQ-main",
+        "bare": "FQALXO-FQ-bare",
+        "reject": "FQALXO-FQ-reject",
+        "withdraw": "FQALXO-FQ-withdraw",
+        "ardoc": "FQALXO-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "716c6fdf-143e-424c-ba10-a426f33575a1",
+      "interview_id": "d447c825-64e4-4d1c-903b-f523aabccc4c",
+      "gcal_interview_id": "97591485-2dd6-4506-99f2-902aaf2df7ac",
+      "offer_id": "6f98ac6d-d6da-467f-9c2b-fbc66c231000",
+      "dup_offer_id": "606e99b8-161f-48ff-af12-2aef934efaf4",
+      "bare_offer_id": "8b075f08-357a-45aa-a9e6-f9f567ab1236",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQAXVO": {
+      "apps": {
+        "main": "FQAXVO-FQ-main",
+        "bare": "FQAXVO-FQ-bare",
+        "reject": "FQAXVO-FQ-reject",
+        "withdraw": "FQAXVO-FQ-withdraw",
+        "ardoc": "FQAXVO-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "516c5d83-e81a-405f-a52d-e5eec714850e",
+      "video_interview_id": "940ef733-2362-4fa1-923a-96c073c0548c",
+      "offer_id": "da427bd9-a13d-4500-b056-14c796e81dda",
+      "dup_offer_id": "0023580a-b442-4b19-8b61-bb4ccda78f9c",
+      "bare_offer_id": "610dd21a-5f75-4037-8a78-0ec70149c7b5",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQAXXO": {
+      "apps": {
+        "main": "FQAXXO-FQ-main",
+        "bare": "FQAXXO-FQ-bare",
+        "reject": "FQAXXO-FQ-reject",
+        "withdraw": "FQAXXO-FQ-withdraw",
+        "ardoc": "FQAXXO-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "57602798-4c26-43a4-9882-66ed805da860",
+      "offer_id": "bd3a94c5-f4bc-4797-9f0c-ae0ddb5baaff",
+      "dup_offer_id": "99e95d30-01fb-469e-a567-e9173447583f",
+      "bare_offer_id": "9b910493-fbef-4add-9543-d2bc4819ba42",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_screening_questions",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQXVLO": {
+      "apps": {
+        "main": "FQXVLO-FQ-main",
+        "bare": "FQXVLO-FQ-bare",
+        "reject": "FQXVLO-FQ-reject",
+        "withdraw": "FQXVLO-FQ-withdraw",
+        "ardoc": "FQXVLO-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "interview_id": "46576a8d-67d1-4248-b039-8b07c5377fda",
+      "gcal_interview_id": "484a27e6-16ed-4a4d-b6c0-c479c83fa67a",
+      "video_interview_id": "10b552b6-e442-4f9e-940e-53535da2743c",
+      "offer_id": "c9f7aeea-1d67-4a20-a1d2-c22caef30c17",
+      "dup_offer_id": "6b4d175e-9910-472c-babf-c108705fe5f7",
+      "bare_offer_id": "91635d5b-d9a0-4699-9f96-9a33f35b4b4f",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQXXXO": {
+      "apps": {
+        "main": "FQXXXO-FQ-main",
+        "bare": "FQXXXO-FQ-bare",
+        "reject": "FQXXXO-FQ-reject",
+        "withdraw": "FQXXXO-FQ-withdraw",
+        "ardoc": "FQXXXO-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "offer_id": "f57a1484-641d-419a-b0ec-bd897acd6020",
+      "dup_offer_id": "1e9c81e0-2f68-484f-bbfa-fddd5708a076",
+      "bare_offer_id": "fcd54f91-6555-4985-a5b8-5a56c3237e55",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "search_job_openings",
+        "send_email",
+        "send_screening_questions",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQNOOF": {
+      "apps": {
+        "main": "FQNOOF-FQ-main",
+        "bare": "FQNOOF-FQ-bare",
+        "reject": "FQNOOF-FQ-reject",
+        "withdraw": "FQNOOF-FQ-withdraw",
+        "ardoc": "FQNOOF-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "visible_tools": [
+        "assign_candidate_owner",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "search_job_openings",
+        "send_email",
+        "send_screening_questions",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    },
+    "FQPEER": {
+      "apps": {
+        "main": "FQPEER-FQ-main",
+        "bare": "FQPEER-FQ-bare",
+        "reject": "FQPEER-FQ-reject",
+        "withdraw": "FQPEER-FQ-withdraw",
+        "ardoc": "FQPEER-FQ-ardoc"
+      },
+      "ranking_items": 5,
+      "attempt_id": "36c0ad69-7baf-4a22-8c31-b42469f7338a",
+      "interview_id": "99cb743c-6c75-4c13-843e-37c647c0509e",
+      "gcal_interview_id": "ba977327-0839-4201-b53f-d8dc664f054b",
+      "video_interview_id": "3b950629-cba6-4ea8-8847-d2960ea82e36",
+      "offer_id": "c885b0f6-85f9-452d-9ed6-80d83ccc7910",
+      "dup_offer_id": "613f152b-5c51-4206-a081-0b2a4cd7f0fb",
+      "bare_offer_id": "43f44289-9446-40e9-891f-6d2510148f86",
+      "visible_tools": [
+        "assign_candidate_owner",
+        "cancel_interview",
+        "candidate_cv_evaluation",
+        "close_job_opening",
+        "create_candidate_task",
+        "create_job_opening",
+        "execute_candidate_batch",
+        "execute_candidate_workflow",
+        "execute_mixed_candidate_batch",
+        "get_candidate_ownership",
+        "get_candidate_status",
+        "get_candidate_timeline",
+        "get_interview_invite_status",
+        "get_person_identity",
+        "get_prehire_action_counts",
+        "get_prehire_priorities",
+        "get_prehire_work_queue",
+        "get_reports_metrics",
+        "hire_candidate",
+        "list_candidate_notes",
+        "list_candidate_tasks",
+        "list_duplicate_suggestions",
+        "list_job_openings",
+        "notify_candidate",
+        "pause_job_opening",
+        "rank_candidates",
+        "reject_candidate",
+        "reopen_job_opening",
+        "reschedule_interview",
+        "schedule_interview",
+        "search_job_openings",
+        "send_assessment",
+        "send_email",
+        "send_interview_invite",
+        "send_screening_questions",
+        "send_video_interview",
+        "shortlist_candidate"
+      ],
+      "mobile_keys": [
+        "ai_scoring_configuration",
+        "assessments",
+        "bulk_import",
+        "candidate_communication_status",
+        "candidate_cv",
+        "candidate_evidence",
+        "candidate_hire",
+        "candidate_identity",
+        "candidate_ownership",
+        "candidate_rankings",
+        "candidate_reject",
+        "candidate_shortlist",
+        "candidate_summary",
+        "candidate_timeline",
+        "employment_offers",
+        "interview_notes",
+        "interview_reschedule",
+        "interview_status",
+        "job_pipeline_configuration",
+        "kanban_stage_management",
+        "new_candidate_push"
+      ]
+    }
+  },
+  "cleanup": {
+    "removed_files": 28,
+    "cleanup_errors": []
+  },
+  "residue_after_cleanup": {
+    "companies": 0,
+    "company_modules": 0,
+    "positions": 0,
+    "applications": 0,
+    "lifecycle_events": 0,
+    "confirmations": 0,
+    "ranking_runs": 0,
+    "ranking_items": 0,
+    "cv_evidence": 0,
+    "cv_facts": 0,
+    "semantic_docs": 0,
+    "files": 0,
+    "assessment_attempts": 0,
+    "assessment_invitations": 0,
+    "interviews": 0,
+    "interview_events": 0,
+    "offers": 0,
+    "offer_events": 0,
+    "offer_tokens": 0,
+    "offer_deliveries": 0,
+    "offer_send_ops": 0,
+    "hire_operations": 0,
+    "hire_override_audits": 0,
+    "employees": 0,
+    "compliance_documents": 0,
+    "employee_documents": 0,
+    "interview_schedule_ops": 0,
+    "onboarding_items": 0,
+    "report_export_audits": 0,
+    "candidates": 0
+  },
+  "finished_at": "20260725T023151Z",
+  "passed": 536,
+  "failed": 0
+}

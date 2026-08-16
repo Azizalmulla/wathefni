@@ -1,0 +1,13 @@
+{
+  "teams_meet_available_or_honest": false,
+  "teams_meet_status": "enabled_but_not_configured",
+  "teams_offerable_matches": true,
+  "email_status": "enabled_but_not_configured",
+  "email_offerable": false,
+  "providers": {
+    "email": false,
+    "whatsapp": false,
+    "google_calendar": true,
+    "microsoft_calendar": false
+  }
+}

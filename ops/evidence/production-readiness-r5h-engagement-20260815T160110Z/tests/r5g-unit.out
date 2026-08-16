@@ -1,0 +1,95 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5G — employee relations surface (unit)
+      PASS  ER customer enableable
+      PASS  ER customer visible
+      PASS  benefits still enableable
+      PASS  learning still enableable
+      PASS  engagement now enableable after R5H
+      PASS  comp planning still hidden
+      PASS  workforce planning still hidden
+      PASS  ER is catalog SKU
+      PASS  ER people_surface off
+      PASS  ER audience is hr
+      PASS  ER domain_authority_ready
+      PASS  ER http_ready
+      PASS  ER hr_web_ready
+      PASS  ER mobile_ready
+      PASS  ER employee surface not required
+      PASS  ER manager surface not required
+      PASS  ER employee surface not ready
+      PASS  ER manager surface not ready
+      PASS  fail-closed skips ER namespaces
+      PASS  fail-closed skips engagement
+      PASS  submission ≠ proven
+      PASS  investigation ≠ finding
+      PASS  finding ≠ outcome
+      PASS  outcome ≠ employment mutation
+      PASS  empty assignment ≠ company-wide
+      PASS  ordinary HR ≠ ER
+      PASS  manager ≠ ER
+      PASS  no ER scoring
+      PASS  assistant mutations out
+      PASS  C4 remains canonical
+      PASS  wave5 excludes free text
+      PASS  Setup remounts ER
+      PASS  Setup still remounts Benefits
+      PASS  Setup remounts Engagement after R5H
+      PASS  Setup still omits Comp Planning
+      PASS  PostHire mounts ER workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace names intake boundary
+      PASS  workspace names employment boundary
+      PASS  workspace is not a generic task list
+      PASS  403 is not empty-cases copy
+      PASS  Page includes employee-relations
+      PASS  nav.employee-relations registered
+      PASS  nav uses er.read
+      PASS  ER is a canonical posthire SKU
+      PASS  ER is not a people-360 module
+      PASS  app registers ER HTTP
+      PASS  er.read permission exists
+      PASS  er.manage permission exists
+      PASS  er.investigate permission exists
+      PASS  er.decide permission exists
+      PASS  er.sensitive permission exists
+      PASS  er.export permission exists
+      PASS  notification flow ER
+      PASS  manager fixture has no er perms
+      PASS  viewer fixture has no er perms
+      PASS  HTTP mentions /dashboard/employee-relations
+      PASS  HTTP mentions /dashboard/mobile/employee-relations
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /cases
+      PASS  HTTP mentions /triage
+      PASS  HTTP mentions /assign
+      PASS  HTTP mentions /notes
+      PASS  HTTP mentions /evidence
+      PASS  HTTP mentions /findings
+      PASS  HTTP mentions /outcomes
+      PASS  HTTP mentions /closure
+      PASS  HTTP mentions /handoffs
+      PASS  HTTP mentions /history
+      PASS  HTTP mentions /export
+      PASS  no employee app ER workspace
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP refuses manager workspace
+      PASS  privacy-safe notification copy
+      PASS  no second ER model
+      PASS  no ER scoring
+      PASS  handoff idempotent
+      PASS  evidence strips raw URLs
+      PASS  assistant wrapper grant-scoped
+      PASS  HR mobile queue exists
+      PASS  HR mobile case exists
+      PASS  no employee app ER workspace dir
+      PASS  HR mobile EN copy
+      PASS  HR mobile AR copy
+      PASS  employee composition has no ER case workspace
+      PASS  fail-closed no longer steals ER
+      PASS  fail-closed no longer steals Engagement
+
+    89 passed, 0 failed
+R5G_EMPLOYEE_RELATIONS_SURFACE_UNIT_PASS

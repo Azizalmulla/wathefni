@@ -1,0 +1,14 @@
+# BrowserStack: prove RC + canary OTA land on intended UnsignedEntry (not stale chooser).
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - browserstack
+  - unsigned
+  - launch
+  - ota
+---
+- runFlow:
+    file: _ota-to-unsigned.yaml
+- takeScreenshot: bs-rc-unsigned-entry
+- assertVisible:
+    id: "e2e.auth.methodSwitch"

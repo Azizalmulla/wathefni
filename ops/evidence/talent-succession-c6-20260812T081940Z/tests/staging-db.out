@@ -1,0 +1,77 @@
+    talent succession c6 — prove
+      PASS  c6 module
+      PASS  charter stamp
+      PASS  c5 authoritative
+      PASS  not perf cal
+      PASS  hipo explicit
+      PASS  no auto hipo
+      PASS  9box projection
+      PASS  9box optional
+      PASS  succ w/o 9box
+      PASS  hipo w/o 9box
+      PASS  succ w/o hipo
+      PASS  target readiness
+      PASS  no master score
+      PASS  assistant out
+      PASS  EN designated
+      PASS  AR ready_now
+      PASS  rollback
+      PASS  no ai hipo
+      PASS  no employee.box
+      PASS  9box projects
+      PASS  9box not SoT
+      PASS  top-right ≠ hipo
+      PASS  9box unavailable if axis missing
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable c6
+      PASS  9box disabled setting
+      PASS  critical role
+      PASS  canonical role key
+      PASS  succession plan
+      PASS  uncovered honest
+      PASS  nominate successor
+      PASS  target-specific readiness
+      PASS  no global readiness
+      PASS  multiple successors
+      PASS  one emp multiple roles
+      PASS  map role→successors
+      PASS  map emp→roles
+      PASS  map no master score
+      PASS  wave5 coverage facts
+      PASS  no longer uncovered eng
+      PASS  explicit hipo
+      PASS  top-right not auto hipo
+      PASS  stale hipo denied
+      PASS  hipo change versioned
+      PASS  hipo history retained
+      PASS  hipo hidden from employee
+      PASS  create talent review
+      PASS  review population snapshot
+      PASS  9box off in snapshot
+      PASS  review in_review
+      PASS  review locked
+      PASS  historical review survives
+      PASS  9box config
+      PASS  projection top-right
+      PASS  no auto hipo from projection
+      PASS  review with 9box snapshot
+      PASS  historical projection stored
+      PASS  projection not employee SoT
+      PASS  succ hidden from employee
+      PASS  mgr needs sensitive
+      PASS  hr with sensitive ok
+      PASS  cross-tenant denied
+      PASS  idempotent nomination
+      PASS  disable preserves
+      PASS  reviews remain
+      PASS  nominations remain
+      PASS  hipo history remains
+      PASS  module-off blocks
+      PASS  perf flags remain off
+
+    72 passed, 0 failed
+    TALENT_SUCCESSION_MOBILITY_FULL_PASS
+STAGING_RC=0

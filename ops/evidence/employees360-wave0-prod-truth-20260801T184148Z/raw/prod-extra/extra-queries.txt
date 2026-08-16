@@ -1,0 +1,72 @@
+ company_code |    name     
+--------------+-------------
+ C1A1EFB783A  | C1A1EFB783A
+ C1A337C46B4  | C1A337C46B4
+ C1A3B936DBA  | C1A3B936DBA
+ C1A3DDA247D  | C1A3DDA247D
+ C1A46872D9F  | C1A46872D9F
+ C1A70FF5760  | C1A70FF5760
+ C1A76618D15  | C1A76618D15
+ C1A83D33836  | C1A83D33836
+ C1ACC5AB281  | C1ACC5AB281
+ C1AEAC285A8  | C1AEAC285A8
+ C1AF1FF352C  | C1AF1FF352C
+ WATHEFNI     | Wathefni
+(12 rows)
+
+ company_code | module_key | enabled 
+--------------+------------+---------
+ WATHEFNI     | analytics  | t
+ WATHEFNI     | attendance | t
+ WATHEFNI     | compliance | t
+ WATHEFNI     | leave      | t
+ WATHEFNI     | onboarding | t
+ WATHEFNI     | payroll    | t
+ WATHEFNI     | shifts     | t
+(7 rows)
+
+ company_code |     employee_key     | phone_redacted | phone_digits_len | email_redacted | employment_status | onboarding_status | has_app_key |   source_hint    |          created_at           |          updated_at           
+--------------+----------------------+----------------+------------------+----------------+-------------------+-------------------+-------------+------------------+-------------------------------+-------------------------------
+ WATHEFNI     | WATHEFNI-96550252254 | ***2254        |               11 | t***@gmail.com | <null>            | in_progress       | t           |                  | 2026-05-12 20:43:01.670538+00 | 2026-06-09 19:17:43.087577+00
+ WATHEFNI     | WATHEFNI-96566363363 | ***3363        |               11 | f***@gmail.com | active            | in_progress       | t           |                  | 2026-05-07 11:44:31.945877+00 | 2026-07-12 15:46:31.905837+00
+ WATHEFNI     | WATHEFNI-96597727743 | ***7743        |               11 |                | <null>            | in_progress       | t           |                  | 2026-05-07 18:54:27.277275+00 | 2026-06-09 14:40:54.108887+00
+ WATHEFNI     | WATHEFNI-96599411617 | ***1617        |               11 | b***@gmail.com | active            | in_progress       | f           | dashboard_roster | 2026-07-13 19:21:39.853058+00 | 2026-07-13 19:22:41.486318+00
+(4 rows)
+
+ company_code |   employee_key    | n 
+--------------+-------------------+---
+ WATHEFNI     | WATHEFNI-P0-DUP-1 | 3
+(1 row)
+
+ company_code |        permission        | status |  role  |     email_redacted     | user_status 
+--------------+--------------------------+--------+--------+------------------------+-------------
+ WATHEFNI     | employees.manage         | active | viewer | f***@gmail.com         | active
+ WATHEFNI     | employees.manage         | active | owner  | f***@disruptv.tech     | active
+ WATHEFNI     | employees.manage         | active | owner  | a***@gmail.com         | active
+ WATHEFNI     | employees.manage         | active | viewer | h***@almulla-media.com | active
+ WATHEFNI     | employees.read           | active | viewer | f***@gmail.com         | active
+ WATHEFNI     | employees.read           | active | viewer | h***@almulla-media.com | active
+ WATHEFNI     | employees.read           | active | owner  | f***@disruptv.tech     | active
+ WATHEFNI     | employees.read           | active | owner  | a***@gmail.com         | active
+ WATHEFNI     | employees.status.approve | active | owner  | f***@disruptv.tech     | active
+(9 rows)
+
+ company_code | scope_type | is_active | count 
+--------------+------------+-----------+-------
+(0 rows)
+
+ scope_members 
+---------------
+             0
+(1 row)
+
+ org_assignments 
+-----------------
+               0
+(1 row)
+
+ company_code |         approval_mode         | previous_status | requested_status | verification_status |         committed_at          
+--------------+-------------------------------+-----------------+------------------+---------------------+-------------------------------
+ WATHEFNI     | self_approved_internal_canary | active          | active           | verified            | 2026-07-12 15:46:31.901606+00
+(1 row)
+

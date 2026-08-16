@@ -1,0 +1,33 @@
+{
+  "tested_at": "2026-07-18T22:17:39.152146+00:00",
+  "environment": "staging",
+  "service": "wathefni-orchestrator-staging",
+  "fix_summary": "Mobile Safari blank-render between items",
+  "root_causes_fixed": [
+    "undefined data.attempt.progress_version threw before fetch",
+    "full content.innerHTML wipe painted empty frames on Mobile Safari",
+    "choice hover transform contributed to compositor flash",
+    "100vh iOS chrome jump mitigated with 100svh"
+  ],
+  "changes": [
+    "Bind progress_version to render(state).attempt.progress_version",
+    "Atomic DOM replace via replaceChildren",
+    "Non-empty Saving your answer pending chrome during POST",
+    "Remove hover translateY transform",
+    "min-height 100svh; fetch cache no-store"
+  ],
+  "contract_checks": {
+    "progress_version_uses_state": true,
+    "undefined_data_removed": true,
+    "atomic_replaceChildren": true,
+    "pending_nonempty_chrome": true,
+    "hover_transform_removed": true,
+    "svh_viewport": true,
+    "fetch_no_store": true,
+    "overflow_hidden_removed_from_shell": true
+  },
+  "all_passed": true,
+  "html_sha256": "ebc49418533c597c31851d0952150d920bc043f75287eaa115c7f333083ede60",
+  "scoring_authority_unchanged": true,
+  "production_untouched": true
+}

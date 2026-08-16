@@ -1,0 +1,15 @@
+ transaction_read_only 
+-----------------------
+ off
+(1 row)
+
+ current_database | txn_ro 
+------------------+--------
+ wathefni         | off
+(1 row)
+
+ employees 
+-----------
+         4
+(1 row)
+

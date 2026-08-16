@@ -1,0 +1,64 @@
+    payroll payslip payment c5 — prove
+      PASS  c5 module
+      PASS  rollback guidance
+      PASS  EN released
+      PASS  AR released
+      PASS  acknowledged ≠ paid honesty
+      PASS  no fund transfer
+      PASS  attendance not required
+      PASS  global c5 off
+      PASS  empty allowlist denies
+      PASS  canary runtime allowlisted
+      PASS  other company denied
+      PASS  period created
+      PASS  assemble
+      PASS  lock
+      PASS  policy
+      PASS  calc
+      PASS  finalize run create
+      PASS  finalize approved
+      PASS  authoritative finalize
+      PASS  sealed snapshot
+      PASS  generate payslip from sealed
+      PASS  charter state generated
+      PASS  unreleased invisible to employee
+      PASS  EN/AR payslip fields
+      PASS  official PDF EN/AR renderer present
+      PASS  artifact tied to finalized payroll
+      PASS  release payslip
+      PASS  release → visible
+      PASS  notification on release
+      PASS  idempotent release
+      PASS  void path audited
+      PASS  voided not employee-visible
+      PASS  correction via new payslip after void
+      PASS  release → immediately downloadable
+      PASS  released artifact tied to finalized payroll
+      PASS  payment generation blocked while entitlement off
+      PASS  payment_processing enabled
+      PASS  payment entitlement open
+      PASS  kill switch blocks generation
+      PASS  valid payment draft when enabled
+      PASS  provenance fingerprint present
+      PASS  duplicate draft idempotent
+      PASS  stale/concurrent generate protection
+      PASS  valid generation when enabled
+      PASS  format pack not real WPS
+      PASS  duplicate/idempotent generation
+      PASS  acknowledged state
+      PASS  acknowledged is ops-only not paid
+      PASS  failed state
+      PASS  cancelled state
+      PASS  tenant isolation
+      PASS  wave1 payment_processing column still disabled (no money rails)
+      PASS  payroll SoD still enforceable
+      PASS  independent of attendance_truth
+      PASS  independent of leave_enforcement
+      PASS  independent of shifts_mss
+      PASS  disable payment processing
+      PASS  blocked after disable
+
+    58 passed, 0 failed
+PAYSLIP_PAYMENT_UNIT_PASS
+PAYSLIP_PAYMENT_FULL_PASS
+STAGING_RC=0

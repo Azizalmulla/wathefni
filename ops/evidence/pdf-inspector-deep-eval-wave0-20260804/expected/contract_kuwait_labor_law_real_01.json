@@ -1,0 +1,20 @@
+{
+  "fixture_id": "contract_kuwait_labor_law_real_01",
+  "category": "contract",
+  "language": "ar",
+  "layout": "official_legal",
+  "pdf_nature": "digital_text_real_world",
+  "pages": 3,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "قانون",
+    "العمل"
+  ],
+  "expected_fields": {
+    "document_type": "kuwait_labor_law",
+    "source": "moj_law_6_2010"
+  },
+  "notes": "Real-world MOJ Kuwait Labor Law PDF, first 3 pages only.",
+  "sha256": "3237ee7b6709de8ec4462ce81aebd63b0f7dc5dfed53fad5256f1d737bd97ad4",
+  "bytes": 104615
+}

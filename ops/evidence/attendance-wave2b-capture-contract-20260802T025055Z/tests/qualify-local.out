@@ -1,0 +1,76 @@
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-attendance-capture-wave2b.py", line 484, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-attendance-capture-wave2b.py", line 478, in main
+    Path(out, "qualification.json").write_text(json.dumps({"summary": summary, "results": RESULTS}, indent=2), encoding="utf-8")
+                                               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type CanonicalPunch is not JSON serializable
+when serializing dict item 'punch'
+when serializing dict item 'detail'
+when serializing list item 20
+when serializing dict item 'results'
+PASS  privacy hard-fail biotime
+PASS  privacy hard-fail csv
+PASS  biotime pagination pages
+PASS  biotime pulled 4
+PASS  capture methods card+face+biometric
+PASS  no biometric payloads in raw_ref
+PASS  authority ingest biotime
+PASS  duplicate pull idempotent
+PASS  normal day projection 480
+PASS  overnight projection
+PASS  checkpoint skips old ids
+PASS  agent poll enqueue
+PASS  agent offline enqueue
+PASS  agent flush delivered
+PASS  credentials persisted sealed
+PASS  restart outbox empty
+PASS  checkpoint durable
+PASS  invalid credentials fail
+PASS  credential rotation recovers
+PASS  connector health present
+PASS  unknown maps to canonical
+PASS  unknown quarantined
+PASS  mapping replay accepted
+PASS  csv same content same event ids
+PASS  csv duplicate across files idempotent
+PASS  xlsx parsed
+PASS  xlsx ingest
+PASS  sftp batch files
+PASS  interrupted import resume skips file
+PASS  csv day projection
+PASS  day approved
+PASS  payroll reconcile exact
+PASS  payroll eligible after approve
+PASS  correction requested after snapshot
+PASS  safe reversal/reimport still idempotent
+PASS  punches immutable count
+PASS  locked payroll snapshot unchanged
+PASS  other tenant ingest
+PASS  tenant isolation company punches
+PASS  other tenant has punch
+PASS  canonical has capture_method
+PASS  canonical has no zkteco fields
+PASS  freeze smoke-test-employees360-freeze-regression.py
+PASS  freeze smoke-test-onboarding-freeze-regression.py
+{
+  "summary": {
+    "pass": 44,
+    "fail": 0,
+    "tag": "fb29b5e8",
+    "company": "ATTW2B",
+    "employee_key": "ATTW2B-ATTW2B-fb29b5e8"
+  }
+}
+SUMMARY pass=44 fail=0

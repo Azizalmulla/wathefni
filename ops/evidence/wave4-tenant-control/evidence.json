@@ -1,0 +1,310 @@
+{
+  "run_at": "20260727T112334Z",
+  "schema_version": "tenant-control-schema-v4",
+  "health_before": {
+    "http_status": 200,
+    "body": {
+      "status": "ok",
+      "runtime": "toolcall_fastapi",
+      "environment_binding": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      },
+      "permission_authority": "backend_current_required",
+      "legacy_dashboard_token_auth": false,
+      "legacy_untrusted_auth_usable": false
+    }
+  },
+  "delivery_sweep": {
+    "timer_active": "active",
+    "service_show_env": "Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env WATHEFNI_ENV=production WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1 WATHEFNI_EXPECTED_DATABASE_PORT=5432 WATHEFNI_EXPECTED_DATABASE_NAME=wathefni WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-production-isolation-v1 HOME=/root XDG_CONFIG_HOME=/root/.config WATHEFNI_DELIVERY_MODE=dry_run",
+    "last_result": "Jul 27 11:22:54 srv1419988 systemd[1]: Starting wathefni-delivery-sweep.service - Wathefni outbound delivery retry sweep (employee messages -> WhatsApp/template/email/HR task)...\nJul 27 11:22:57 srv1419988 python[3346900]: {\"ok\": true, \"processed\": 0, \"skipped\": 0, \"by_status\": {}}\nJul 27 11:22:57 srv1419988 systemd[1]: wathefni-delivery-sweep.service: Deactivated successfully.\nJul 27 11:22:57 srv1419988 systemd[1]: Finished wathefni-delivery-sweep.service - Wathefni outbound delivery retry sweep (employee messages -> WhatsApp/template/email/HR task).\nJul 27 11:22:57 srv1419988 systemd[1]: wathefni-delivery-sweep.service: Consumed 2.048s CPU time.",
+    "qualification_delivery_mode": "dry_run",
+    "real_external_sends": false,
+    "manual_dry_run": {
+      "ok": true,
+      "processed": 0,
+      "skipped": 0,
+      "by_status": {}
+    }
+  },
+  "schema": {
+    "ok": true,
+    "schema_version": "tenant-control-schema-v4",
+    "wave3": {
+      "ok": true,
+      "schema_version": "tenant-control-schema-v3",
+      "wave2": {
+        "ok": true,
+        "schema_version": "tenant-control-schema-v2",
+        "wave1": {
+          "ok": true,
+          "schema_version": "tenant-control-schema-v1"
+        }
+      }
+    }
+  },
+  "wizard": {
+    "draft_ok": true,
+    "draft_id": "72bfc944-d5fe-497d-89ec-5dd515f2e552",
+    "steps": [
+      {
+        "step": 1,
+        "key": "company",
+        "label_en": "Company",
+        "label_ar": "\u0627\u0644\u0634\u0631\u0643\u0629",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 2,
+        "key": "modules",
+        "label_en": "Purchased modules",
+        "label_ar": "\u0627\u0644\u0648\u062d\u062f\u0627\u062a \u0627\u0644\u0645\u0634\u062a\u0631\u0627\u0629",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 3,
+        "key": "structure",
+        "label_en": "Company structure",
+        "label_ar": "\u0647\u064a\u0643\u0644 \u0627\u0644\u0634\u0631\u0643\u0629",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 4,
+        "key": "admins",
+        "label_en": "Administrators and roles",
+        "label_ar": "\u0627\u0644\u0645\u0633\u0624\u0648\u0644\u0648\u0646 \u0648\u0627\u0644\u0623\u062f\u0648\u0627\u0631",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 5,
+        "key": "module_config",
+        "label_en": "Module configuration",
+        "label_ar": "\u0625\u0639\u062f\u0627\u062f \u0627\u0644\u0648\u062d\u062f\u0627\u062a",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 6,
+        "key": "policies",
+        "label_en": "Policies and workflows",
+        "label_ar": "\u0627\u0644\u0633\u064a\u0627\u0633\u0627\u062a \u0648\u0633\u064a\u0631 \u0627\u0644\u0639\u0645\u0644",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 7,
+        "key": "integrations",
+        "label_en": "Integrations",
+        "label_ar": "\u0627\u0644\u062a\u0643\u0627\u0645\u0644\u0627\u062a",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 8,
+        "key": "data",
+        "label_en": "Data and imports",
+        "label_ar": "\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0648\u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 9,
+        "key": "readiness",
+        "label_en": "Readiness",
+        "label_ar": "\u0627\u0644\u062c\u0627\u0647\u0632\u064a\u0629",
+        "validation_ok": true,
+        "blockers": []
+      },
+      {
+        "step": 10,
+        "key": "review",
+        "label_en": "Review and activate",
+        "label_ar": "\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0648\u0627\u0644\u062a\u0641\u0639\u064a\u0644",
+        "validation_ok": true,
+        "blockers": []
+      }
+    ],
+    "purchasable_excludes_backend": true
+  },
+  "control_page": {
+    "ok": true,
+    "module_count": 13,
+    "integration_count": 12,
+    "unavailable_providers": [
+      "microsoft_365",
+      "microsoft_teams",
+      "imap",
+      "sms"
+    ],
+    "sections": [
+      "overview",
+      "modules",
+      "integrations",
+      "roles",
+      "policies",
+      "data",
+      "readiness",
+      "health",
+      "audit"
+    ]
+  },
+  "runtime_cutover": {
+    "results": [
+      {
+        "boundary": "company_profile",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "module_policies",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "prehire_policies",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "notification_policies",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "supported_integration_state",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "readiness_state",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "roles_permissions_canary",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      },
+      {
+        "boundary": "lifecycle_activation_epochs",
+        "parity_ok": true,
+        "activated": true,
+        "authority_after": "canonical",
+        "rollback_ok": true,
+        "global_canonical": false
+      }
+    ],
+    "global_canonical_hard_off": true
+  },
+  "module_lifecycle_ux": {
+    "impact_ok": true,
+    "pause_ok": true,
+    "resume_ok": true
+  },
+  "import_dry_run": {
+    "ok": true,
+    "duplicates": 1,
+    "imported": false
+  },
+  "offboarding_preview": {
+    "ok": true,
+    "wathefni_protected": true
+  },
+  "roles_canary": {
+    "roles_count": 5,
+    "fixed_role_users_unchanged": true
+  },
+  "synthetic_lifecycle": {
+    "tenant": {
+      "tenant_id": "fe2be3ea-caac-49ed-b0c0-d0b2e6fb0743",
+      "company_code": "__TC_WAVE4_SYNTHETIC__",
+      "synthetic": true,
+      "externally_usable": false,
+      "lifecycle_status": "draft"
+    },
+    "readiness_selected_not_live": true,
+    "suspend_ok": true,
+    "restore_status": "active",
+    "not_in_companies": true,
+    "stale_or_suspend_denied": true,
+    "gate_mode": "authoritative",
+    "gate_allow": false,
+    "externally_usable": false
+  },
+  "wathefni_final": {
+    "companies_count": 1,
+    "orphans": 12,
+    "interviews_enabled": true,
+    "video_interviews_enabled": true,
+    "distinct": true,
+    "false_denials": [],
+    "global_authority": false,
+    "enforce_tenants": null,
+    "enforce": null
+  },
+  "unsupported_still_unavailable": {
+    "ok": false,
+    "error": "provider_not_selectable",
+    "message": "Microsoft Teams is unsupported and cannot be selected as ready.",
+    "support_tier": "unsupported",
+    "available": false
+  },
+  "delivery_sweep_rollback": {
+    "overlay_removed": true,
+    "timer_active": "active",
+    "service_start": "",
+    "service_result": "Result=success\nExecMainStatus=0"
+  },
+  "health_after": {
+    "http_status": 200,
+    "body": {
+      "status": "ok",
+      "runtime": "toolcall_fastapi",
+      "environment_binding": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      },
+      "permission_authority": "backend_current_required",
+      "legacy_dashboard_token_auth": false,
+      "legacy_untrusted_auth_usable": false
+    }
+  },
+  "failures": [],
+  "ok": true,
+  "go_no_go_external_company": "NO-GO \u2014 technical Wave 4 PASS; first external company still requires explicit product authorization and remaining platform deps",
+  "final_pass_fail": "PASS"
+}

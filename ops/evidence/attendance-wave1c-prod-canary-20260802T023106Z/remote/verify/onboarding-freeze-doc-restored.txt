@@ -1,0 +1,1 @@
+-rw-r--r-- 1 root root 10644 Aug  2 02:37 /opt/wathefni/ops/ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md

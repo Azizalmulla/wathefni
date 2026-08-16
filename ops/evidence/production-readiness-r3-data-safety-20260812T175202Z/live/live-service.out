@@ -1,0 +1,7 @@
+staging_health=200
+      PASS  live missing company fails closed
+      PASS  live missing company does not resolve to WATHEFNI
+      PASS  live explicit tenant still resolves
+      PASS  live WATHEFNI still resolves only when named
+      PASS  live synthetic connectors off by default
+    LIVE_SERVICE 5 passed, 0 failed

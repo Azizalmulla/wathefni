@@ -1,0 +1,312 @@
+{
+  "passed": 26,
+  "failed": 0,
+  "tag": "ef8647ec",
+  "contract_version": "1.0.0",
+  "deletion_order": [
+    "shift_reminder_queue",
+    "shift_reconciliation_flags",
+    "shift_assignment_versions",
+    "shift_lifecycle_flags",
+    "shift_orphan_quarantine",
+    "shift_swap_events",
+    "shift_swap_requests",
+    "shift_events",
+    "employee_availability_requests",
+    "shift_assignments",
+    "leave_requests",
+    "shift_seasonal_policies",
+    "employees"
+  ],
+  "results": [
+    {
+      "name": "cleanup contract version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deletion order starts with reminders",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deletion order ends with employees",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "protected orphans listed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 cleanup residual zero for SHW1B",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 cleanup does not delete wave2 assignment",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 cleanup does not delete wave2 versions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 assignment removed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "interrupted wave2 cleanup completes to residual 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "idempotent wave2 cleanup rerun residual 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 cleanup does not delete wave1 assignment",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "final wave1 prove residual zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "SHW1B family residual zero after prove",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "SHW2B family residual zero after prove",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real assignment fingerprints unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real event ids unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real swap count unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real availability count unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real version count unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real reminder count unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill switch disables lifecycle job",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "advisory lock contention returns job_lock_held",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle job ok after lock released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "systemd job units installed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "timers remain disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "timers not active",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "cleanup_wave1": {
+    "contract_version": "1.0.0",
+    "dry_run": false,
+    "markers": [
+      "SHW1B",
+      "SHW1B-SYNTH|"
+    ],
+    "phone_prefixes": [
+      "965529"
+    ],
+    "tag": "ef8647ec",
+    "deleted_shift_ids": [
+      "037b33da-4787-4ffc-90b4-b268df15d25c"
+    ],
+    "deleted": {
+      "shift_reminder_queue": 1,
+      "shift_reconciliation_flags": 1,
+      "shift_assignment_versions": 1,
+      "shift_lifecycle_flags": 0,
+      "shift_orphan_quarantine": 0,
+      "shift_swap_events": 0,
+      "shift_swap_requests": 0,
+      "shift_events": 0,
+      "employee_availability_requests": 0,
+      "shift_assignments": 1,
+      "leave_requests": 0,
+      "shift_seasonal_policies": 0,
+      "employees": 1
+    },
+    "deletion_order": [
+      "shift_reminder_queue",
+      "shift_reconciliation_flags",
+      "shift_assignment_versions",
+      "shift_lifecycle_flags",
+      "shift_orphan_quarantine",
+      "shift_swap_events",
+      "shift_swap_requests",
+      "shift_events",
+      "employee_availability_requests",
+      "shift_assignments",
+      "leave_requests",
+      "shift_seasonal_policies",
+      "employees"
+    ],
+    "residual": {
+      "assignments": 0,
+      "versions": 0,
+      "reminders": 0,
+      "reconciliation_flags": 0,
+      "lifecycle_flags": 0,
+      "swaps": 0,
+      "availability": 0,
+      "leave": 0,
+      "seasonal_policies": 0,
+      "employees": 0,
+      "total": 0
+    },
+    "residual_total": 0,
+    "total": 0,
+    "residual_assignments": 0,
+    "residual_swaps": 0,
+    "residual_employees": 0
+  },
+  "cleanup_wave2_interrupted": {
+    "contract_version": "1.0.0",
+    "dry_run": false,
+    "markers": [
+      "SHW2B",
+      "SHW2B-SYNTH|"
+    ],
+    "phone_prefixes": [
+      "965530"
+    ],
+    "tag": "ef8647ec",
+    "deleted_shift_ids": [
+      "17a27b2e-7bd2-4bf3-926c-7c4394d0eaa2"
+    ],
+    "deleted": {
+      "shift_reminder_queue": 0,
+      "shift_reconciliation_flags": 1,
+      "shift_assignment_versions": 0,
+      "shift_lifecycle_flags": 0,
+      "shift_orphan_quarantine": 0,
+      "shift_swap_events": 0,
+      "shift_swap_requests": 0,
+      "shift_events": 0,
+      "employee_availability_requests": 0,
+      "shift_assignments": 1,
+      "leave_requests": 0,
+      "shift_seasonal_policies": 0,
+      "employees": 1
+    },
+    "deletion_order": [
+      "shift_reminder_queue",
+      "shift_reconciliation_flags",
+      "shift_assignment_versions",
+      "shift_lifecycle_flags",
+      "shift_orphan_quarantine",
+      "shift_swap_events",
+      "shift_swap_requests",
+      "shift_events",
+      "employee_availability_requests",
+      "shift_assignments",
+      "leave_requests",
+      "shift_seasonal_policies",
+      "employees"
+    ],
+    "residual": {
+      "assignments": 0,
+      "versions": 0,
+      "reminders": 0,
+      "reconciliation_flags": 0,
+      "lifecycle_flags": 0,
+      "swaps": 0,
+      "availability": 0,
+      "leave": 0,
+      "seasonal_policies": 0,
+      "employees": 0,
+      "total": 0
+    },
+    "residual_total": 0,
+    "total": 0,
+    "residual_assignments": 0,
+    "residual_swaps": 0,
+    "residual_employees": 0
+  },
+  "timer_evidence": {
+    "timers": {
+      "wathefni-shifts-reminder-drain.timer": {
+        "is-enabled": "disabled",
+        "is-active": "inactive"
+      },
+      "wathefni-shifts-lifecycle-recon.timer": {
+        "is-enabled": "disabled",
+        "is-active": "inactive"
+      },
+      "wathefni-shifts-leave-recon.timer": {
+        "is-enabled": "disabled",
+        "is-active": "inactive"
+      }
+    },
+    "services": {
+      "wathefni-shifts-reminder-drain.service": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "wathefni-shifts-lifecycle-recon.service": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "wathefni-shifts-leave-recon.service": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    }
+  }
+}

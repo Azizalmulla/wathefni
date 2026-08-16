@@ -1,0 +1,3 @@
+SEED False
+HR_MUTATE False
+flags_ok_off=true

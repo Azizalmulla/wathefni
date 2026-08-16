@@ -1,0 +1,245 @@
+<!doctype html><meta charset="utf-8"><title>TPC production canary UX</title>
+<style>body{font:14px/1.4 system-ui;margin:28px;background:#f4f1eb;color:#15201c}
+table{border-collapse:collapse;width:100%;background:#fff}th,td{padding:9px;border-bottom:1px solid #ddd;text-align:left}
+.muted{color:#777}.panel{background:#fff;padding:18px;margin-top:22px;border:1px solid #d5d0c8}
+pre{white-space:pre-wrap;font-size:12px}</style>
+<h1>Unified Candidates — internal WATHEFNI classification canary</h1>
+<p>Production synthetic records. One compact chip only when current High evidence allows it.</p>
+<table><tr><th>Fixture</th><th>Outcome</th><th>Bands</th><th>Compact chip</th></tr><tr><td>technology</td><td>classified</td><td>High, Medium</td><td>Technology</td></tr>
+<tr><td>hr</td><td>classified</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>finance</td><td>classified</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>operations</td><td>classified</td><td>High</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>common_tools</td><td>classified</td><td>High</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>finance_erp</td><td>classified</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>hr_systems</td><td>classified</td><td>High</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>multi</td><td>classified_multi</td><td>High, Medium</td><td>Operations</td></tr>
+<tr><td>career_change</td><td>classified_multi</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>short_clear</td><td>classified_multi</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>long_unclear</td><td>unclassified</td><td>—</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>arabic</td><td>classified_multi</td><td>High</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>english</td><td>classified</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>bilingual</td><td>classified</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>incomplete_facts</td><td>classified_multi</td><td>High, Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>insufficient</td><td>unclassified</td><td>—</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>medium</td><td>cautious</td><td>Medium</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>needs_review</td><td>needs_review</td><td>Needs review</td><td><span class=muted>hidden</span></td></tr></table><div class=panel><h2>Saved classification view</h2><pre>{
+  &quot;ok&quot;: true,
+  &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+  &quot;view&quot;: {
+    &quot;view_id&quot;: &quot;cc01b61b-298e-4832-b3a9-062a03d34569&quot;,
+    &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+    &quot;actor_user_id&quot;: &quot;88b17ca9-aff4-4721-a553-c1b5514ef95f&quot;,
+    &quot;name&quot;: &quot;TPCCAN613AB9EA Technology High&quot;,
+    &quot;filters&quot;: {
+      &quot;classification_node_ids&quot;: [
+        &quot;fn.technology&quot;
+      ],
+      &quot;classification_authority&quot;: &quot;confirmed_or_ai&quot;,
+      &quot;classification_confidence&quot;: [
+        &quot;High&quot;
+      ]
+    },
+    &quot;created_at&quot;: &quot;2026-07-25T22:46:56.119297+00:00&quot;,
+    &quot;updated_at&quot;: &quot;2026-07-25T22:46:56.119297+00:00&quot;
+  }
+}</pre></div><div class=panel><h2>Classification profile: evidence, versions, authority and history</h2><pre>{
+  &quot;status&quot;: &quot;classified&quot;,
+  &quot;refusal_reason&quot;: null,
+  &quot;taxonomy_version&quot;: &quot;taxonomy_v1.1.0&quot;,
+  &quot;classifier_version&quot;: &quot;classifier.deterministic_v1.2&quot;,
+  &quot;confirmed&quot;: [
+    {
+      &quot;node_id&quot;: &quot;fn.technology&quot;,
+      &quot;node_type&quot;: null,
+      &quot;label_en&quot;: null,
+      &quot;label_ar&quot;: null,
+      &quot;authority&quot;: &quot;hr_confirmed&quot;,
+      &quot;event_id&quot;: &quot;6d102570-d558-430c-a884-c8c459d29d7c&quot;
+    },
+    {
+      &quot;node_id&quot;: &quot;lang.arabic&quot;,
+      &quot;node_type&quot;: null,
+      &quot;label_en&quot;: null,
+      &quot;label_ar&quot;: null,
+      &quot;authority&quot;: &quot;hr_confirmed&quot;,
+      &quot;event_id&quot;: &quot;84322353-14d3-4552-84b0-42ceb4d86d7e&quot;
+    }
+  ],
+  &quot;ai_suggested&quot;: [
+    {
+      &quot;suggestion_id&quot;: &quot;dabe3901-894b-495e-bb0f-dc8deb95ae91&quot;,
+      &quot;run_id&quot;: &quot;f314dee7-9e42-432e-87ef-24f40725c3cf&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;node_id&quot;: &quot;cert.aws&quot;,
+      &quot;node_type&quot;: &quot;certification&quot;,
+      &quot;confidence_score&quot;: 0.7,
+      &quot;confidence_band&quot;: &quot;Medium&quot;,
+      &quot;evidence&quot;: [
+        {
+          &quot;end&quot;: 77,
+          &quot;quote&quot;: &quot;ars building Python FastAPI services on AWS. Computer Science degree.&quot;,
+          &quot;start&quot;: 74,
+          &quot;evidence_kind&quot;: &quot;cv_text&quot;,
+          &quot;matched_alias&quot;: &quot;AWS&quot;
+        }
+      ],
+      &quot;state&quot;: &quot;active&quot;,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.978509+00:00&quot;,
+      &quot;label_en&quot;: &quot;AWS&quot;,
+      &quot;label_ar&quot;: &quot;أمازون ويب سيرفيسز&quot;,
+      &quot;authority&quot;: &quot;ai_suggested&quot;
+    },
+    {
+      &quot;suggestion_id&quot;: &quot;84f6b31c-2e4e-49ef-b257-656c8c79fda8&quot;,
+      &quot;run_id&quot;: &quot;f314dee7-9e42-432e-87ef-24f40725c3cf&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;node_id&quot;: &quot;skill.python&quot;,
+      &quot;node_type&quot;: &quot;skill&quot;,
+      &quot;confidence_score&quot;: 0.8,
+      &quot;confidence_band&quot;: &quot;High&quot;,
+      &quot;evidence&quot;: [
+        {
+          &quot;end&quot;: 53,
+          &quot;quote&quot;: &quot;Software Engineer with 6 years building Python FastAPI services on AWS. Computer Scien&quot;,
+          &quot;start&quot;: 47,
+          &quot;evidence_kind&quot;: &quot;cv_text&quot;,
+          &quot;matched_alias&quot;: &quot;Python&quot;
+        },
+        {
+          &quot;end&quot;: 61,
+          &quot;quote&quot;: &quot;e Engineer with 6 years building Python FastAPI services on AWS. Computer Science degre&quot;,
+          &quot;start&quot;: 54,
+          &quot;evidence_kind&quot;: &quot;cv_text&quot;,
+          &quot;matched_alias&quot;: &quot;fastapi&quot;
+        }
+      ],
+      &quot;state&quot;: &quot;active&quot;,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.978509+00:00&quot;,
+      &quot;label_en&quot;: &quot;Python&quot;,
+      &quot;label_ar&quot;: &quot;بايثون&quot;,
+      &quot;authority&quot;: &quot;ai_suggested&quot;
+    },
+    {
+      &quot;suggestion_id&quot;: &quot;f6a73530-72ec-40f6-a1cb-c66c7463969e&quot;,
+      &quot;run_id&quot;: &quot;f314dee7-9e42-432e-87ef-24f40725c3cf&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;node_id&quot;: &quot;sen.senior&quot;,
+      &quot;node_type&quot;: &quot;seniority&quot;,
+      &quot;confidence_score&quot;: 0.7,
+      &quot;confidence_band&quot;: &quot;Medium&quot;,
+      &quot;evidence&quot;: [
+        {
+          &quot;end&quot;: 6,
+          &quot;quote&quot;: &quot;Senior Software Engineer with 6 years building&quot;,
+          &quot;start&quot;: 0,
+          &quot;evidence_kind&quot;: &quot;cv_text&quot;,
+          &quot;matched_alias&quot;: &quot;Senior&quot;
+        }
+      ],
+      &quot;state&quot;: &quot;active&quot;,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.978509+00:00&quot;,
+      &quot;label_en&quot;: &quot;Senior&quot;,
+      &quot;label_ar&quot;: &quot;خبير&quot;,
+      &quot;authority&quot;: &quot;ai_suggested&quot;
+    },
+    {
+      &quot;suggestion_id&quot;: &quot;6b4ba44c-db6e-4752-9666-537db4f148a7&quot;,
+      &quot;run_id&quot;: &quot;f314dee7-9e42-432e-87ef-24f40725c3cf&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;node_id&quot;: &quot;edu.computer_science&quot;,
+      &quot;node_type&quot;: &quot;education_field&quot;,
+      &quot;confidence_score&quot;: 0.7,
+      &quot;confidence_band&quot;: &quot;Medium&quot;,
+      &quot;evidence&quot;: [
+        {
+          &quot;end&quot;: 95,
+          &quot;quote&quot;: &quot;uilding Python FastAPI services on AWS. Computer Science degree.&quot;,
+          &quot;start&quot;: 79,
+          &quot;evidence_kind&quot;: &quot;cv_text&quot;,
+          &quot;matched_alias&quot;: &quot;Computer Science&quot;
+        }
+      ],
+      &quot;state&quot;: &quot;active&quot;,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.978509+00:00&quot;,
+      &quot;label_en&quot;: &quot;Computer Science&quot;,
+      &quot;label_ar&quot;: &quot;علوم الحاسوب&quot;,
+      &quot;authority&quot;: &quot;ai_suggested&quot;
+    }
+  ],
+  &quot;rejected_node_ids&quot;: [
+    &quot;lang.english&quot;,
+    &quot;role.software_engineer&quot;
+  ],
+  &quot;history&quot;: [
+    {
+      &quot;event_id&quot;: &quot;6d102570-d558-430c-a884-c8c459d29d7c&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;action&quot;: &quot;confirm&quot;,
+      &quot;node_id&quot;: &quot;fn.technology&quot;,
+      &quot;previous_node_id&quot;: null,
+      &quot;suggestion_id&quot;: &quot;b9de6e1a-9b16-4046-bd7a-13b54e5466c6&quot;,
+      &quot;reason&quot;: &quot;Internal production canary confirmation&quot;,
+      &quot;actor_user_id&quot;: &quot;local&quot;,
+      &quot;actor_email&quot;: &quot;&quot;,
+      &quot;supersedes_event_id&quot;: null,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.931702+00:00&quot;
+    },
+    {
+      &quot;event_id&quot;: &quot;ee780666-3365-4048-a134-cc740d8eab0f&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;action&quot;: &quot;reject&quot;,
+      &quot;node_id&quot;: &quot;role.software_engineer&quot;,
+      &quot;previous_node_id&quot;: null,
+      &quot;suggestion_id&quot;: &quot;5f6cdbdb-76c7-4e36-bd5c-08778470a220&quot;,
+      &quot;reason&quot;: &quot;Internal production canary rejection&quot;,
+      &quot;actor_user_id&quot;: &quot;local&quot;,
+      &quot;actor_email&quot;: &quot;&quot;,
+      &quot;supersedes_event_id&quot;: null,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.940701+00:00&quot;
+    },
+    {
+      &quot;event_id&quot;: &quot;c8fc6fa9-09cc-4b9b-a151-f15a810e46a3&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;action&quot;: &quot;add&quot;,
+      &quot;node_id&quot;: &quot;lang.english&quot;,
+      &quot;previous_node_id&quot;: null,
+      &quot;suggestion_id&quot;: null,
+      &quot;reason&quot;: &quot;Internal production canary add&quot;,
+      &quot;actor_user_id&quot;: &quot;local&quot;,
+      &quot;actor_email&quot;: &quot;&quot;,
+      &quot;supersedes_event_id&quot;: null,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.949465+00:00&quot;
+    },
+    {
+      &quot;event_id&quot;: &quot;84322353-14d3-4552-84b0-42ceb4d86d7e&quot;,
+      &quot;company_code&quot;: &quot;WATHEFNI&quot;,
+      &quot;app_key&quot;: &quot;TPCCAN613AB9EA-TECHNOLOGY&quot;,
+      &quot;action&quot;: &quot;correct&quot;,
+      &quot;node_id&quot;: &quot;lang.arabic&quot;,
+      &quot;previous_node_id&quot;: &quot;lang.english&quot;,
+      &quot;suggestion_id&quot;: null,
+      &quot;reason&quot;: &quot;Internal production canary correction&quot;,
+      &quot;actor_user_id&quot;: &quot;local&quot;,
+      &quot;actor_email&quot;: &quot;&quot;,
+      &quot;supersedes_event_id&quot;: null,
+      &quot;created_at&quot;: &quot;2026-07-25T22:46:55.958073+00:00&quot;
+    }
+  ],
+  &quot;chip&quot;: &quot;Technology&quot;,
+  &quot;actions&quot;: [
+    &quot;confirm&quot;,
+    &quot;reject&quot;,
+    &quot;add&quot;,
+    &quot;correct&quot;
+  ],
+  &quot;hiring_score&quot;: null,
+  &quot;role_profile_score&quot;: null,
+  &quot;job_assignment&quot;: null
+}</pre></div>

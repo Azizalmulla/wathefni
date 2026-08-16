@@ -1,0 +1,1 @@
+PASS ota startup contract: syncLayoutLocale aligned + bank route registered

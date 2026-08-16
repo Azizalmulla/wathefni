@@ -1,0 +1,8 @@
+ legacy_employee_key  | employment_status | policy_pack_status | jurisdiction_code | worker_category 
+----------------------+-------------------+--------------------+-------------------+-----------------
+ WATHEFNI-96550252254 | active            | remediation        |                   | 
+ WATHEFNI-96566363363 | active            | remediation        |                   | 
+ WATHEFNI-96597727743 | active            | remediation        |                   | 
+ WATHEFNI-96599411617 | active            | remediation        |                   | 
+(4 rows)
+

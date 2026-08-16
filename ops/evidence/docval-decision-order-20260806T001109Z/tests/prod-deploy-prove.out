@@ -1,0 +1,245 @@
+health_ok
+FLAGS:
+WATHEFNI_ONBOARDING_DOC_VALIDATION_SOFT=on
+WATHEFNI_ONBOARDING_DOC_VALIDATION_HARD=off
+WATHEFNI_ONBOARDING_DOC_VALIDATION_COMPANIES=WATHEFNI
+WATHEFNI_ONBOARDING_DOC_VALIDATION_EMPLOYEE_ALLOWLIST=WATHEFNI-96599338566,WATHEFNI-96550252254
+PASS clear status clean
+PASS blur rejects or borderline
+PASS blur reason too_blurry
+PASS glare rejects
+PASS glare reason
+PASS crop reject or borderline
+PASS tiny rejects
+PASS tiny reason resolution
+PASS mild blur borderline
+PASS mild blur HR reason
+PASS clear gate allows
+PASS clear capture clean
+PASS severe blur blocks despite high OCR confidence
+PASS severe blur reason too_blurry
+PASS severe blur still ran verify
+PASS nondoc blocks
+PASS nondoc wrong-document message wins over glare
+PASS nondoc not capture-quality reason
+PASS nondoc capture metrics present
+PASS nondoc capture would have rejected glare
+PASS nondoc capture signal glare
+OK onboarding capture quality smoke
+PASS partial civil_id blocks
+PASS partial reason document_not_fully_visible
+PASS glare blocks
+PASS glare reason
+PASS missing back blocks
+PASS missing_side reason
+PASS missing_side EN
+PASS clear civil_id allow
+PASS clear civil_id not blocked
+PASS low-conf credible blocks
+PASS low-conf not uncertain
+PASS low-conf retake reason
+PASS oreo-style blocks
+PASS oreo-style not_a_document
+PASS oreo-style not uncertain
+PASS nondoc blocks
+PASS nondoc reason photo/wrong-doc
+PASS nondoc not glare/blur message
+PASS blurry+highOCR blocks
+PASS blurry+highOCR reason too_blurry
+PASS blurry+highOCR not allow
+PASS blurry+highOCR not HR
+PASS blurry capture reject status
+PASS alias helper matches EN
+PASS alias not applied to other employees
+PASS canary alias allows clear ID
+PASS canary alias not blocked
+PASS validator unavailable blocks
+PASS validator_unavailable reason
+OK onboarding doc validation parity local smoke
+{
+  "blur_sha256": "afa47900d614dd8c270369917f9d0f688800e1faf45b752898ca628d2bcc0c4f",
+  "nondoc_sha256": "cecff1e58912fa53401bb6c7b07e3390e83576ec0fe8429fc9ad08f7302627d9",
+  "blur_assess": {
+    "status": "reject",
+    "reason": "too_blurry",
+    "metrics": {
+      "width": 1583,
+      "height": 994,
+      "short_side": 994,
+      "long_side": 1583,
+      "laplacian_var": 3.366,
+      "glare_frac": 0.0,
+      "crop_hot_sides": 3
+    },
+    "engine": "pil_numpy_v1"
+  },
+  "nondoc_assess": {
+    "status": "reject",
+    "reason": "glare_or_shadow",
+    "metrics": {
+      "width": 1350,
+      "height": 900,
+      "short_side": 900,
+      "long_side": 1350,
+      "laplacian_var": 100.34,
+      "glare_frac": 0.4436,
+      "crop_hot_sides": 0
+    },
+    "engine": "pil_numpy_v1"
+  },
+  "thresholds": {
+    "BLUR_REJECT_MAX": 6.0,
+    "BLUR_BORDERLINE_MAX": 40.0,
+    "GLARE_REJECT_MIN": 0.28,
+    "GLARE_BORDERLINE_MIN": 0.18,
+    "CROP_REJECT_SIDES": 3
+  },
+  "blur_high_ocr_mock": {
+    "decision": "block",
+    "reason": "too_blurry",
+    "message_en": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "too_blurry",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1583,
+        "height": 994,
+        "short_side": 994,
+        "long_side": 1583,
+        "laplacian_var": 3.366,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 3
+      },
+      "engine": "pil_numpy_v1"
+    },
+    "verification": {
+      "detected_item": "civil_id",
+      "matches_expected_item": true,
+      "confidence": 0.97,
+      "extraction_status": "extracted"
+    }
+  },
+  "blur_live_mistral": {
+    "decision": "block",
+    "reason": "too_blurry",
+    "message_en": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "too_blurry",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1583,
+        "height": 994,
+        "short_side": 994,
+        "long_side": 1583,
+        "laplacian_var": 3.366,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 3
+      },
+      "engine": "pil_numpy_v1"
+    },
+    "verification": {
+      "detected_item": "civil_id",
+      "confidence": 0.96,
+      "matches_expected_item": true,
+      "extraction_status": "extracted",
+      "unreadable_reason": null
+    }
+  },
+  "nondoc_lifestyle_mock": {
+    "decision": "block",
+    "reason": "looks_like_photo_not_document",
+    "message_en": "That looks like a personal photo, not the requested document. Please upload the correct document.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "glare_or_shadow",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1350,
+        "height": 900,
+        "short_side": 900,
+        "long_side": 1350,
+        "laplacian_var": 100.34,
+        "glare_frac": 0.4436,
+        "crop_hot_sides": 0
+      },
+      "engine": "pil_numpy_v1"
+    }
+  },
+  "nondoc_live_mistral": {
+    "decision": "block",
+    "reason": "not_a_document",
+    "message_en": "This doesn't look like the document we asked for. Please upload a clear photo or scan of the requested document.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "glare_or_shadow",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1350,
+        "height": 900,
+        "short_side": 900,
+        "long_side": 1350,
+        "laplacian_var": 100.34,
+        "glare_frac": 0.4436,
+        "crop_hot_sides": 0
+      },
+      "engine": "pil_numpy_v1"
+    },
+    "verification": {
+      "detected_item": "unknown",
+      "confidence": 0.0,
+      "matches_expected_item": false,
+      "extraction_status": "needs_review",
+      "unreadable_reason": null
+    }
+  }
+}
+PROVE_OK
+{
+  "action": "reset",
+  "canary": {
+    "status": "pending",
+    "document_type": "civil_id_canary_test",
+    "required": false
+  },
+  "civil_id_untouched": "accepted"
+}
+{
+  "verify": {
+    "canary_present": true,
+    "canary_status": "pending",
+    "canary_document_type": "civil_id_canary_test",
+    "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+    "visible_in_employee_app": true,
+    "group": "your_actions",
+    "actions": [
+      "upload"
+    ],
+    "upload_enabled": true,
+    "required_canary": false,
+    "real_civil_id_status": "accepted",
+    "real_civil_id_required": true,
+    "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "required_item_count_excluding_canary": 4
+  }
+}
+READY_FOR_APP_TEST civil_id_canary_test
+{
+  "canary_present": true,
+  "canary_status": "pending",
+  "canary_document_type": "civil_id_canary_test",
+  "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+  "visible_in_employee_app": true,
+  "group": "your_actions",
+  "actions": [
+    "upload"
+  ],
+  "upload_enabled": true,
+  "required_canary": false,
+  "real_civil_id_status": "accepted",
+  "real_civil_id_required": true,
+  "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "required_item_count_excluding_canary": 4
+}
+VERIFY PASS

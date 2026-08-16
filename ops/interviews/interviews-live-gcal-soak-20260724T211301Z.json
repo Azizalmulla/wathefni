@@ -1,0 +1,305 @@
+{
+  "started_at": "2026-07-24T21:12:55.233879+00:00",
+  "marker": "interviews-live-gcal-soak-v1",
+  "company": "INTVGCAL",
+  "artifact_sha_expected": "c434d4b2076ccf22e4808b3f8739d48ba9b11f22ee05628915e8026e5f902cb9",
+  "account": "azizalmulla16@gmail.com",
+  "gates": [
+    {
+      "gate": "artifact_sha_matches_staging_green",
+      "result": "PASS",
+      "detail": "c434d4b2076ccf22e4808b3f8739d48ba9b11f22ee05628915e8026e5f902cb9"
+    },
+    {
+      "gate": "oauth_calendar_list_ok",
+      "result": "PASS",
+      "detail": "ok"
+    },
+    {
+      "gate": "google_calendar_configured",
+      "result": "PASS",
+      "detail": "azizalmulla16@gmail.com"
+    },
+    {
+      "gate": "create_wathefni_scheduled",
+      "result": "PASS",
+      "detail": {
+        "ok": true,
+        "interview_id": "cc00b83a-5767-42e7-a602-0b502405487b",
+        "status": "scheduled",
+        "provider_sync_status": "synced",
+        "provider_sync_error": null,
+        "calendar_event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+        "meet_link": "https://meet.google.com/tur-zysu-yoe",
+        "provider_sync": {
+          "ok": true,
+          "error": null,
+          "status": "synced",
+          "interview_valid": true
+        }
+      }
+    },
+    {
+      "gate": "create_provider_synced",
+      "result": "PASS",
+      "detail": "sync=synced event=bpboc5dt8cn4mc08mbmp7ljuso err=None"
+    },
+    {
+      "gate": "create_one_google_event_exists",
+      "result": "PASS",
+      "detail": "bpboc5dt8cn4mc08mbmp7ljuso"
+    },
+    {
+      "gate": "create_attendees_candidate_and_panel",
+      "result": "PASS",
+      "detail": [
+        "cand.gcal.soak@intv.invalid",
+        "panel.gcal.soak@intv.invalid"
+      ]
+    },
+    {
+      "gate": "create_meet_link_present",
+      "result": "PASS",
+      "detail": "https://meet.google.com/tur-zysu-yoe"
+    },
+    {
+      "gate": "wathefni_canonical_after_create",
+      "result": "PASS",
+      "detail": {
+        "status": "scheduled",
+        "provider_key": "google"
+      }
+    },
+    {
+      "gate": "reschedule_same_event_id",
+      "result": "PASS",
+      "detail": {
+        "ok": true,
+        "status": "scheduled",
+        "provider_sync_status": "synced",
+        "provider_sync_error": null,
+        "old_event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+        "new_event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+        "scheduled_start": "2026-07-28T09:00:00+00:00",
+        "provider_sync": {
+          "ok": true,
+          "error": null,
+          "status": "synced",
+          "interview_valid": true
+        }
+      }
+    },
+    {
+      "gate": "reschedule_wathefni_still_canonical",
+      "result": "PASS",
+      "detail": "scheduled"
+    },
+    {
+      "gate": "reschedule_google_event_updated_in_place",
+      "result": "PASS",
+      "detail": {
+        "event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+        "start": "2026-07-28T12:00:00+03:00",
+        "prev": "2026-07-28T10:00:00+03:00"
+      }
+    },
+    {
+      "gate": "no_duplicate_active_events_after_reschedule",
+      "result": "PASS",
+      "detail": [
+        {
+          "id": "bpboc5dt8cn4mc08mbmp7ljuso",
+          "status": "confirmed",
+          "start": {
+            "dateTime": "2026-07-28T12:00:00+03:00",
+            "timeZone": "UTC"
+          },
+          "summary": "Wathefni interview with GCal Soak Candidate"
+        }
+      ]
+    },
+    {
+      "gate": "cancel_wathefni_cancelled_history_preserved",
+      "result": "PASS",
+      "detail": {
+        "ok": true,
+        "status": "cancelled",
+        "provider_sync_status": "synced",
+        "provider_sync_error": null,
+        "provider_sync": {
+          "ok": true,
+          "error": null,
+          "status": "synced"
+        },
+        "calendar_event_id": "bpboc5dt8cn4mc08mbmp7ljuso"
+      }
+    },
+    {
+      "gate": "cancel_provider_synced",
+      "result": "PASS",
+      "detail": "synced"
+    },
+    {
+      "gate": "cancel_removes_or_cancels_google_event",
+      "result": "PASS",
+      "detail": {
+        "ok": true,
+        "id": "bpboc5dt8cn4mc08mbmp7ljuso",
+        "status": "cancelled",
+        "stderr": ""
+      }
+    },
+    {
+      "gate": "no_stale_active_meet_or_event_after_cancel",
+      "result": "PASS",
+      "detail": []
+    },
+    {
+      "gate": "cleanup_zero_db_residue",
+      "result": "PASS",
+      "detail": {
+        "interviews": 0,
+        "assignments": 0,
+        "ops": 0,
+        "applications": 0,
+        "companies": 0,
+        "candidates": 0
+      }
+    },
+    {
+      "gate": "cleanup_zero_google_residue",
+      "result": "PASS",
+      "detail": []
+    }
+  ],
+  "google_events": [
+    "bpboc5dt8cn4mc08mbmp7ljuso",
+    "bpboc5dt8cn4mc08mbmp7ljuso"
+  ],
+  "residuals": {},
+  "create": {
+    "ok": true,
+    "interview_id": "cc00b83a-5767-42e7-a602-0b502405487b",
+    "status": "scheduled",
+    "provider_sync_status": "synced",
+    "provider_sync_error": null,
+    "calendar_event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+    "meet_link": "https://meet.google.com/tur-zysu-yoe",
+    "provider_sync": {
+      "ok": true,
+      "error": null,
+      "status": "synced",
+      "interview_valid": true
+    }
+  },
+  "create_google_event": {
+    "id": "bpboc5dt8cn4mc08mbmp7ljuso",
+    "status": "confirmed",
+    "attendees": [
+      {
+        "email": "panel.gcal.soak@intv.invalid",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "cand.gcal.soak@intv.invalid",
+        "responseStatus": "needsAction"
+      }
+    ],
+    "hangoutLink": "https://meet.google.com/tur-zysu-yoe",
+    "start": {
+      "dateTime": "2026-07-28T10:00:00+03:00",
+      "timeZone": "UTC"
+    },
+    "end": {
+      "dateTime": "2026-07-28T10:30:00+03:00",
+      "timeZone": "UTC"
+    },
+    "summary": "Wathefni interview with GCal Soak Candidate"
+  },
+  "reschedule": {
+    "ok": true,
+    "status": "scheduled",
+    "provider_sync_status": "synced",
+    "provider_sync_error": null,
+    "old_event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+    "new_event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+    "scheduled_start": "2026-07-28T09:00:00+00:00",
+    "provider_sync": {
+      "ok": true,
+      "error": null,
+      "status": "synced",
+      "interview_valid": true
+    }
+  },
+  "reschedule_google_event": {
+    "id": "bpboc5dt8cn4mc08mbmp7ljuso",
+    "status": "confirmed",
+    "start": {
+      "dateTime": "2026-07-28T12:00:00+03:00",
+      "timeZone": "UTC"
+    },
+    "end": {
+      "dateTime": "2026-07-28T12:30:00+03:00",
+      "timeZone": "UTC"
+    },
+    "hangoutLink": "https://meet.google.com/tur-zysu-yoe"
+  },
+  "nearby_soak_events_after_reschedule": [
+    {
+      "id": "bpboc5dt8cn4mc08mbmp7ljuso",
+      "status": "confirmed",
+      "start": {
+        "dateTime": "2026-07-28T12:00:00+03:00",
+        "timeZone": "UTC"
+      },
+      "summary": "Wathefni interview with GCal Soak Candidate"
+    }
+  ],
+  "cancel": {
+    "ok": true,
+    "status": "cancelled",
+    "provider_sync_status": "synced",
+    "provider_sync_error": null,
+    "provider_sync": {
+      "ok": true,
+      "error": null,
+      "status": "synced"
+    },
+    "calendar_event_id": "bpboc5dt8cn4mc08mbmp7ljuso"
+  },
+  "cancel_google_event": {
+    "ok": true,
+    "id": "bpboc5dt8cn4mc08mbmp7ljuso",
+    "status": "cancelled",
+    "stderr": ""
+  },
+  "nearby_active_after_cancel": [],
+  "cleanup": {
+    "deleted_google_events": [
+      {
+        "event_id": "bpboc5dt8cn4mc08mbmp7ljuso",
+        "ok": false,
+        "raw": {
+          "ok": false,
+          "stderr": "unexpected argument primary\n"
+        }
+      }
+    ]
+  },
+  "residue": {
+    "interviews": 0,
+    "assignments": 0,
+    "ops": 0,
+    "applications": 0,
+    "companies": 0,
+    "candidates": 0
+  },
+  "final_google_active": [],
+  "finished_at": "2026-07-24T21:13:01.467854+00:00",
+  "summary": {
+    "passed": 19,
+    "failed": 0,
+    "total": 19
+  },
+  "verdict": "PASS"
+}

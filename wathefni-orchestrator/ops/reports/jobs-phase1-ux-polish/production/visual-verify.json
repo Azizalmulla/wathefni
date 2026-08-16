@@ -1,0 +1,121 @@
+{
+  "passed": 23,
+  "failed": 0,
+  "results": [
+    {
+      "ok": true,
+      "label": "no duplicate Open roles metric",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "one clear Jobs subtitle",
+      "detail": "1"
+    },
+    {
+      "ok": true,
+      "label": "inventory metrics and openings list",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "intentional em-dash for missing values present",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "laptop layout screenshot captured",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Ownership optional section present",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "sticky Save draft and Publish present",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "drawer uses Done",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Cancel not used as drawer dismiss next to Close",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "pause and close actions visible",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Arabic Jobs title",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "RTL applied",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Arabic lifecycle badges/labels",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Arabic create CTA",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "AR Jobs title",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "RTL",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "AR lifecycle labels",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "no Open roles in AR",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "sticky Save draft visible",
+      "detail": "[{\"text\":\"Save draft\",\"visible\":true},{\"text\":\"Publish job\",\"visible\":true}]"
+    },
+    {
+      "ok": true,
+      "label": "sticky Publish visible",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "pause confirm consequence copy",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "pause confirm pipeline preserved",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "close confirm consequence copy",
+      "detail": ""
+    }
+  ]
+}

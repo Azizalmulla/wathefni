@@ -1,0 +1,12 @@
+GAP legacy @hr/theme Screen/WorkspaceHeader
+GAP multi-tone card stack
+GAP always info badge
+GAP #appKey chrome
+GAP EN-only CV fallback
+GAP EN-only prepare fallback consequence
+GAP route passes raw consequence
+GAP no already_decided state
+NOTE action labels via i18n on buttons
+  present= True
+NOTE confirm action localized via lifecycleActionLabel
+  present= True

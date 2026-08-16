@@ -1,0 +1,58 @@
+[
+  {
+    "file": "apps/wathefni-dashboard/src/setup-console/api.ts",
+    "line": 16,
+    "route": "/dashboard/superadmin/setup",
+    "normalized_route": "/dashboard/superadmin/setup",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/setup-console/api.ts:16"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 759,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/classification${suffix}",
+    "normalized_route": "/dashboard/prehire/applications/{param}/classification{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:759"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 929,
+    "route": "/dashboard/prehire/assessments/authoring/product2",
+    "normalized_route": "/dashboard/prehire/assessments/authoring/product2",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:929"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1771,
+    "route": "/dashboard/posthire/employee-status/pending${q}",
+    "normalized_route": "/dashboard/posthire/employee-status/pending{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1771"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1995,
+    "route": "/dashboard/attendance/ops/exceptions${suffix}",
+    "normalized_route": "/dashboard/attendance/ops/exceptions{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1995"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2251,
+    "route": "/dashboard/posthire/shifts/templates${qs}",
+    "normalized_route": "/dashboard/posthire/shifts/templates{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2251"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3129,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/evaluation${suffix}",
+    "normalized_route": "/dashboard/prehire/applications/{param}/evaluation{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3129"
+  }
+]

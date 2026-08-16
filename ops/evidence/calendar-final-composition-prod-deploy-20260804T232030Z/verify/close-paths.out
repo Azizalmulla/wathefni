@@ -1,0 +1,12 @@
+PASS  closeSelected_def
+PASS  selectEvent_def
+PASS  escape
+PASS  outside_mousedown
+PASS  ignore_event_click
+PASS  detail_close
+PASS  nav_clears
+PASS  view_clears
+PASS  today_clears
+PASS  month_clears
+PASS  create_clears
+CLOSE_PATH_SMOKE_OK

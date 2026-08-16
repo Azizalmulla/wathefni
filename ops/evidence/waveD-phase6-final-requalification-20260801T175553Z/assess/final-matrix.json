@@ -1,0 +1,505 @@
+{
+  "stamp": "20260801T175553Z",
+  "live_matrix": {
+    "passed": 38,
+    "failed": 0,
+    "cases": {
+      "health_200": "PASS",
+      "external_tenants_remain_disabled": "PASS",
+      "mailbox_sync_disabled_by_default": "PASS",
+      "environment_binding_production": "PASS",
+      "environment_isolation_postmark": "PASS",
+      "commercial_packaging_forwarding_vs_premium": "PASS",
+      "forwarding_general_alias": "PASS",
+      "job_specific_alias": "PASS",
+      "forwarding_list_includes_created": "PASS",
+      "forwarding_ingress_durable": "PASS",
+      "duplicate_idempotent_forwarding": "PASS",
+      "kill_switch_waiting_budget": "PASS",
+      "quota_soft_warning_posture": "PASS",
+      "burst_override_raises_caps": "PASS",
+      "burst_override_expires_clear": "PASS",
+      "held_intake_review_visible": "PASS",
+      "held_intake_admit_path_present": "PASS",
+      "tenant_isolation_fail_closed": "PASS",
+      "retention_dry_run_execute_off": "PASS",
+      "privacy_retention_readiness": "PASS",
+      "clamav_ocr_outage_replay_posture": "PASS",
+      "gmail_m365_connector_posture_dark": "PASS",
+      "connector_off_fail_closed": "PASS",
+      "tenant_scoped_encrypted_secrets_ready": "PASS",
+      "ops_monitoring_support_ready": "PASS",
+      "operational_rollback_levers": "PASS",
+      "ui_en_ar_desktop_mobile_posture": "PASS",
+      "onboarding_setup_clarity": "PASS",
+      "durable_to_held_materialization_synthetic": "PASS",
+      "cv_extraction_promotion_pdf_docx": "PASS",
+      "identity_conflict_opaque_extraction": "PASS",
+      "pdf_extraction_promotion": "PASS",
+      "docx_extraction_promotion": "PASS",
+      "conflict_held_scan_clean_auth": "PASS",
+      "opaque_held_soft_complete": "PASS",
+      "extraction_idempotent_no_duplicates": "PASS",
+      "no_indefinite_pending_extraction": "PASS",
+      "d6a_gate_passed": "PASS"
+    }
+  },
+  "capability_dimensions": {
+    "forwarding_intake": {
+      "result": "PASS",
+      "evidence": "forwarding_general_alias + list + durable ingress"
+    },
+    "aliases_and_held_review_admit": {
+      "result": "PASS",
+      "evidence": "job_specific_alias + held_intake_review_visible + admit path present; prior D6 GA admit/bulk PASS unchanged"
+    },
+    "pdf_and_docx_extraction": {
+      "result": "PASS",
+      "evidence": {
+        "ok": true,
+        "held_processed": {
+          "intake_validation": 1,
+          "file_safety_scan": 1,
+          "cv_identity_resolution": 1,
+          "accepted_intake_preparation": 1,
+          "held_intake_materialization": 0
+        },
+        "extraction_ms": 5483,
+        "authorization_mode": "accepted_identity_binding",
+        "extraction_status": "ok",
+        "error": null,
+        "elapsed_ms": 6515,
+        "full_success": true
+      }
+    },
+    "identity_conflict_opaque": {
+      "result": "PASS",
+      "evidence": {
+        "d6a": true,
+        "d6b_conflict": {
+          "ok": true,
+          "authorization_mode": "held_identity_review_scan_clean",
+          "extraction_status": "ok",
+          "d6a_held_warned": true,
+          "processed": 1
+        },
+        "d6b_opaque": {
+          "ok": true,
+          "held_warning": true,
+          "extraction": {
+            "status": "extraction_soft_failed",
+            "error": "low_quality_text",
+            "authorization_mode": "held_identity_review_scan_clean",
+            "attempts": 1
+          },
+          "d6a_held_preserved": true
+        }
+      }
+    },
+    "duplicates_idempotency": {
+      "result": "PASS",
+      "evidence": {
+        "forwarding_dup": true,
+        "extraction": {
+          "ok": true,
+          "second_processed": 0
+        }
+      }
+    },
+    "quotas_burst_kill_switch": {
+      "result": "PASS",
+      "evidence": "kill_switch_waiting_budget live; quota/burst posture + prior D6 GA PASS"
+    },
+    "outage_replay_retention": {
+      "result": "PASS",
+      "evidence": "retention execute off; outage/replay posture; prior D6 GA PASS"
+    },
+    "gmail_m365_connector_posture": {
+      "result": "PASS_DARK",
+      "evidence": "sync=off; prior D5/D6 connector PASS; dedicated mailbox app may be unset (LOW)"
+    },
+    "tenant_environment_isolation": {
+      "result": "PASS",
+      "evidence": "allowlist WATHEFNI; unknown recipient ignored; env pin production"
+    },
+    "en_ar_desktop_mobile": {
+      "result": "PASS",
+      "evidence": "prior D4/D5/D6 UI screenshots; no UI change in D6A/D6B"
+    },
+    "cleanup_rollback_posture": {
+      "result": "PASS",
+      "evidence": "proof intakes disabled; rollback scripts present; timer restored"
+    },
+    "durable_to_held": {
+      "result": "PASS",
+      "prior": "FAIL",
+      "evidence": {
+        "marker": "wave_d6a_prod_proof",
+        "company": "WATHEFNI",
+        "allowlist": "WATHEFNI",
+        "mailbox_sync": "off",
+        "runs": [
+          {
+            "run": 1,
+            "inbound_id": "cdc25ef3-eef0-5902-bca7-d78e6aaa31b1",
+            "app_key": "imp-wathefni-e1cfae921cf84c3c-WATHEFNI-IMPORT",
+            "outcome": "new_candidate",
+            "materialization": "accepted",
+            "timing": {
+              "intake_validation": {
+                "processed": 1,
+                "elapsed_ms": 236
+              },
+              "file_safety_scan": {
+                "processed": 1,
+                "elapsed_ms": 114
+              },
+              "cv_identity_resolution": {
+                "processed": 1,
+                "elapsed_ms": 143
+              },
+              "accepted_intake_preparation": {
+                "processed": 1,
+                "elapsed_ms": 136
+              },
+              "held_intake_materialization": {
+                "processed": 0,
+                "elapsed_ms": 6
+              }
+            },
+            "duplicate_ok": true
+          }
+        ],
+        "passed": true,
+        "app_keys": [
+          "imp-wathefni-e1cfae921cf84c3c-WATHEFNI-IMPORT",
+          "imp-wathefni-386e62fe4ff524cd-WATHEFNI-IMPORT",
+          "imp-wathefni-6ae63120d3d07e0e-WATHEFNI-IMPORT",
+          "imp-wathefni-2ca454a8e8140f52-WATHEFNI-IMPORT"
+        ],
+        "intake_ids": [
+          "80ddb7bb-13ec-45ca-bc99-16f872d56dcf"
+        ],
+        "external_tenant_denied": {
+          "durable": true,
+          "ignored": "unknown_recipient",
+          "inbound_id": "c644b93d-baa4-5fde-8b32-7fdc44277ef3"
+        },
+        "address": "d6a-9f2248e8@inbound.wathefni.ai",
+        "sterilized": 4,
+        "rich_path": {
+          "ok": true,
+          "mode": "accepted",
+          "row": {
+            "app_key": "imp-wathefni-386e62fe4ff524cd-WATHEFNI-IMPORT",
+            "metadata": {
+              "pdf_pages": 1,
+              "prepared_at": "2026-08-01T17:59:48Z",
+              "malware_scan": {
+                "state": "clean",
+                "engine": "clamav",
+                "evidence": {
+                  "raw": "stream: OK",
+                  "host": "127.0.0.1",
+                  "port": 3311,
+                  "bytes": 853,
+                  "transport": "tcp",
+                  "unix_socket": null
+                },
+                "scanned_at": "2026-08-01T17:59:47.739887+00:00",
+                "reason_code": null,
+                "signature_version": "ClamAV 1.5.3/28079/Sat Aug  1 06:24:25 2026"
+              },
+              "object_reused": false,
+              "import_item_id": "e2cda86a-79cc-4856-afde-5688983dc9f7",
+              "identity_outcome": "new_candidate",
+              "preparation_status": "imported",
+              "identity_resolved_at": "2026-08-01T17:59:47Z",
+              "identity_contact_only": false,
+              "identity_resolution_id": "eb731bdb-4450-4ef1-8758-2c7d7618b1de",
+              "provider_content_length": 1140
+            },
+            "outcome": "new_candidate",
+            "ownership_confirmed": true,
+            "app_status": "needs_role",
+            "app_phone": "imp-wathefni-386e62fe4ff524cd",
+            "candidate_email": "d6a.prod.rich.1e8bb805@example.com",
+            "warned": false,
+            "terminal_reason": null,
+            "submission_status": "accepted"
+          },
+          "timing": {
+            "intake_validation": {
+              "processed": 1,
+              "elapsed_ms": 50
+            },
+            "file_safety_scan": {
+              "processed": 1,
+              "elapsed_ms": 103
+            },
+            "cv_identity_resolution": {
+              "processed": 1,
+              "elapsed_ms": 89
+            },
+            "accepted_intake_preparation": {
+              "processed": 1,
+              "elapsed_ms": 98
+            },
+            "held_intake_materialization": {
+              "processed": 0,
+              "elapsed_ms": 8
+            }
+          }
+        },
+        "conflict_path": {
+          "ok": true,
+          "row": {
+            "app_key": "imp-wathefni-6ae63120d3d07e0e-WATHEFNI-IMPORT",
+            "metadata": {
+              "pdf_pages": 1,
+              "malware_scan": {
+                "state": "clean",
+                "engine": "clamav",
+                "evidence": {
+                  "raw": "stream: OK",
+                  "host": "127.0.0.1",
+                  "port": 3311,
+                  "bytes": 843,
+                  "transport": "tcp",
+                  "unix_socket": null
+                },
+                "scanned_at": "2026-08-01T17:59:48.350707+00:00",
+                "reason_code": null,
+                "signature_version": "ClamAV 1.5.3/28079/Sat Aug  1 06:24:25 2026"
+              },
+              "object_reused": false,
+              "import_item_id": "c8bb0e4a-9b1a-4d36-bd11-ecb9bc8aa2c6",
+              "identity_outcome": "conflict",
+              "held_materialized_at": "2026-08-01T17:59:48Z",
+              "held_terminal_reason": "conflicting_cv_name",
+              "identity_resolved_at": "2026-08-01T17:59:48Z",
+              "identity_contact_only": false,
+              "identity_resolution_id": "5f0d1400-2099-43b3-b367-2af5db55f5a3",
+              "provider_content_length": 1124,
+              "held_materialization_status": "imported"
+            },
+            "outcome": "conflict",
+            "ownership_confirmed": false,
+            "app_status": "needs_role",
+            "app_phone": "imp-wathefni-6ae63120d3d07e0e",
+            "candidate_email": "d6a.prod.rich.1e8bb805@example.com",
+            "warned": true,
+            "terminal_reason": "conflicting_cv_name",
+            "submission_status": "held_identity_review"
+          },
+          "timing": {
+            "intake_validation": {
+              "worker_id": "email-ingress-1809246-feef6ef1",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 51
+            },
+            "file_safety_scan": {
+              "worker_id": "email-ingress-1809246-4d5c50f0",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 80
+            },
+            "cv_identity_resolution": {
+              "worker_id": "email-ingress-1809246-69fad52a",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 87
+            },
+            "accepted_intake_preparation": {
+              "worker_id": "email-ingress-1809246-3c7c14ef",
+              "processed": 0,
+              "outcomes": [],
+              "_elapsed_ms": 4
+            },
+            "held_intake_materialization": {
+              "worker_id": "email-ingress-1809246-b362ecdb",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 38
+            }
+          }
+        },
+        "opaque_path": {
+          "ok": true,
+          "row": {
+            "app_key": "imp-wathefni-2ca454a8e8140f52-WATHEFNI-IMPORT",
+            "metadata": {
+              "pdf_pages": 1,
+              "malware_scan": {
+                "state": "clean",
+                "engine": "clamav",
+                "evidence": {
+                  "raw": "stream: OK",
+                  "host": "127.0.0.1",
+                  "port": 3311,
+                  "bytes": 658,
+                  "transport": "tcp",
+                  "unix_socket": null
+                },
+                "scanned_at": "2026-08-01T17:59:48.849136+00:00",
+                "reason_code": null,
+                "signature_version": "ClamAV 1.5.3/28079/Sat Aug  1 06:24:25 2026"
+              },
+              "object_reused": false,
+              "import_item_id": "fdd26b95-ae4a-4a74-91a4-1b2af93333fa",
+              "identity_outcome": "possible_match",
+              "held_materialized_at": "2026-08-01T17:59:49Z",
+              "held_terminal_reason": "low_quality_text",
+              "identity_resolved_at": "2026-08-01T17:59:49Z",
+              "identity_contact_only": false,
+              "identity_resolution_id": "7129cae5-acdf-4d74-80be-10ca1a43f3f7",
+              "provider_content_length": 880,
+              "held_materialization_status": "imported"
+            },
+            "outcome": "possible_match",
+            "ownership_confirmed": false,
+            "app_status": "needs_role",
+            "app_phone": "imp-wathefni-2ca454a8e8140f52",
+            "candidate_email": null,
+            "warned": true,
+            "terminal_reason": "low_quality_text",
+            "submission_status": "held_identity_review"
+          },
+          "timing": {
+            "intake_validation": {
+              "worker_id": "email-ingress-1809246-e80362a0",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 40
+            },
+            "file_safety_scan": {
+              "worker_id": "email-ingress-1809246-1a23191c",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 72
+            },
+            "cv_identity_resolution": {
+              "worker_id": "email-ingress-1809246-9d061efa",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 96
+            },
+            "accepted_intake_preparation": {
+              "worker_id": "email-ingress-1809246-ee200be0",
+              "processed": 0,
+              "outcomes": [],
+              "_elapsed_ms": 6
+            },
+            "held_intake_materialization": {
+              "worker_id": "email-ingress-1809246-9a26b580",
+              "processed": 1,
+              "outcomes": [],
+              "_elapsed_ms": 45
+            }
+          }
+        },
+        "posture": {
+          "inbound_email": "on",
+          "allowlist": "WATHEFNI",
+          "mailbox_sync": "off",
+          "held_job_type_registered": true,
+          "explicit_admit_required": true
+        },
+        "cleanup": {
+          "archived_apps": 4,
+          "active_intakes": 1,
+          "intake_ids": [
+            "80ddb7bb-13ec-45ca-bc99-16f872d56dcf"
+          ]
+        }
+      }
+    },
+    "cv_extraction_promotion": {
+      "result": "PASS",
+      "prior": "deferred/FAIL",
+      "evidence": {
+        "passed": true
+      }
+    }
+  },
+  "prior_ga_carryforward": {
+    "held_intake_assign_admit": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "held_intake_bulk_admit": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "gmail_readonly_scope": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "m365_mail_read_scopes": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "gmail_connector_durable_path": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "gmail_connector_idempotent": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "connector_pause": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "connector_revoke_needs_reconnect": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "connector_disconnect": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "concurrency_burst_durable": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "quota_soft_warning": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "quota_over_limit_waiting_quota": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "burst_override_expires": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    },
+    "clamav_ocr_outage_replay": {
+      "result": "PASS",
+      "basis": "prior_d6_ga_unchanged_posture"
+    }
+  },
+  "d6a_requal_passed": true,
+  "d6b_requal_passed": true,
+  "posture": {
+    "allowlist": "WATHEFNI",
+    "mailbox_sync": "off",
+    "inbound_email": "on",
+    "retention_execute": "off"
+  },
+  "sha256": "27c7e2f0d8fe110b2683a0173b29122c5293411a64a71fcb865cdab8d079e790  /opt/wathefni/orchestrator/app.py\n8cf1759371a2a3d4f1f42125e1ba960ae34db23f6c173f657aa1532cd95a4fab  /opt/wathefni/orchestrator/inbound_cv_authority.py",
+  "previously_failed_now": {
+    "durable_to_held_materialization_synthetic": "PASS",
+    "cv_extraction_promotion": "PASS"
+  },
+  "recommendation": "controlled_external_canary_forwarding_only",
+  "recommendation_detail": {
+    "wathefni_only": "GO (current live posture)",
+    "controlled_external_canary": "READY for forwarding-only when operator enables; connectors stay dark",
+    "broader_ga": "NO-GO",
+    "premium_connectors_ga": "NO-GO (mailbox sync off)",
+    "post_hiring": "not_started"
+  }
+}

@@ -1,0 +1,130 @@
+<!doctype html><meta charset=utf-8><title>Staging classification UX density</title>
+<style>body{font:14px/1.4 Georgia,serif;margin:24px;background:#f3efe7;color:#1a1a1a}table{border-collapse:collapse;width:100%;background:#fff}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}.chip{display:inline-block;font-size:12px;color:#244;background:#e8f0ec;padding:2px 8px}.muted{color:#666}.panel{background:#fff;padding:16px;margin-top:24px;border:1px solid #ddd}</style>
+<h1>Unified Candidates — classification density (staging synthetic)</h1>
+<p class=muted>No permanent classification columns. At most one High-confidence chip. Medium / Needs review / Unclassified stay in profile + filters.</p>
+<table><tr><th>Fixture</th><th>Outcome</th><th>Bands</th><th>Compact chip (High only)</th></tr>
+<tr><td>software</td><td>Clear evidence</td><td>High, Medium</td><td><span class=chip>fn.technology · role.software_engineer</span></td></tr>
+<tr><td>hr</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.hr · role.hr_generalist</span></td></tr>
+<tr><td>finance</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.finance · role.accountant</span></td></tr>
+<tr><td>engineering</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.engineering · role.mechanical_engineer</span></td></tr>
+<tr><td>sales</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.sales_marketing · role.sales_executive</span></td></tr>
+<tr><td>marketing</td><td>Multiple relevant areas</td><td>High</td><td><span class=chip>fn.sales_marketing · role.marketing_specialist</span></td></tr>
+<tr><td>operations</td><td>Clear evidence</td><td>High</td><td><span class=chip>fn.operations · role.operations_coordinator</span></td></tr>
+<tr><td>multi</td><td>Multiple relevant areas</td><td>High</td><td><span class=chip>fn.engineering · role.software_engineer</span></td></tr>
+<tr><td>career_change</td><td>Multiple relevant areas</td><td>High</td><td><span class=chip>fn.engineering · role.mechanical_engineer</span></td></tr>
+<tr><td>short_clear</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.engineering · role.software_engineer</span></td></tr>
+<tr><td>long_unclear</td><td>Clear evidence</td><td>High</td><td><span class=chip>fn.technology</span></td></tr>
+<tr><td>incomplete_facts</td><td>Clear evidence</td><td>High, Medium</td><td><span class=chip>fn.technology · role.software_engineer</span></td></tr>
+<tr><td>insufficient</td><td>Insufficient evidence to classify</td><td>—</td><td><span class=muted>hidden</span></td></tr>
+<tr><td>arabic</td><td>Multiple relevant areas</td><td>High</td><td><span class=chip>fn.engineering · role.software_engineer</span></td></tr>
+<tr><td>english</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.sales_marketing · role.marketing_specialist</span></td></tr>
+<tr><td>bilingual</td><td>Multiple relevant areas</td><td>High, Medium</td><td><span class=chip>fn.sales_marketing · role.marketing_specialist</span></td></tr>
+</table><div class=panel><h2>Profile Classification section samples</h2>
+<h3>software</h3><pre>{
+  "status": "classified",
+  "outcome_label": "Clear evidence",
+  "suggestion_count": 8,
+  "bands": [
+    "High",
+    "Medium"
+  ],
+  "node_ids": [
+    "cert.aws",
+    "edu.computer_science",
+    "fn.technology",
+    "ind.banking",
+    "role.software_engineer",
+    "sen.senior",
+    "skill.python",
+    "skill.sql"
+  ],
+  "ocr_triggered": false,
+  "workers_started": false,
+  "idempotent_hit": false
+}</pre>
+<h3>multi</h3><pre>{
+  "status": "classified_multi",
+  "outcome_label": "Multiple relevant areas",
+  "suggestion_count": 6,
+  "bands": [
+    "High"
+  ],
+  "node_ids": [
+    "fn.engineering",
+    "fn.operations",
+    "fn.technology",
+    "role.software_engineer",
+    "skill.excel",
+    "skill.recruiting"
+  ],
+  "ocr_triggered": false,
+  "workers_started": false,
+  "idempotent_hit": false
+}</pre>
+<h3>incomplete_facts</h3><pre>{
+  "status": "classified",
+  "outcome_label": "Clear evidence",
+  "suggestion_count": 5,
+  "bands": [
+    "High",
+    "Medium"
+  ],
+  "node_ids": [
+    "fn.technology",
+    "ind.banking",
+    "role.software_engineer",
+    "skill.python",
+    "skill.sql"
+  ],
+  "ocr_triggered": false,
+  "workers_started": false,
+  "idempotent_hit": false
+}</pre>
+<h3>insufficient</h3><pre>{
+  "status": "unclassified",
+  "outcome_label": "Insufficient evidence to classify",
+  "suggestion_count": 0,
+  "bands": [],
+  "node_ids": [],
+  "ocr_triggered": false,
+  "workers_started": false,
+  "idempotent_hit": false
+}</pre>
+<h3>arabic</h3><pre>{
+  "status": "classified_multi",
+  "outcome_label": "Multiple relevant areas",
+  "suggestion_count": 5,
+  "bands": [
+    "High"
+  ],
+  "node_ids": [
+    "fn.engineering",
+    "fn.technology",
+    "role.software_engineer",
+    "skill.python",
+    "skill.sql"
+  ],
+  "ocr_triggered": false,
+  "workers_started": false,
+  "idempotent_hit": false
+}</pre>
+<h3>career_change</h3><pre>{
+  "status": "classified_multi",
+  "outcome_label": "Multiple relevant areas",
+  "suggestion_count": 6,
+  "bands": [
+    "High"
+  ],
+  "node_ids": [
+    "fn.engineering",
+    "fn.technology",
+    "role.mechanical_engineer",
+    "role.software_engineer",
+    "skill.autocad",
+    "skill.python"
+  ],
+  "ocr_triggered": false,
+  "workers_started": false,
+  "idempotent_hit": false
+}</pre>
+</div>

@@ -1,0 +1,61 @@
+[
+  {
+    "file": "cv_mixed_02.pdf",
+    "anydoc": {
+      "ok": true,
+      "chars": 120
+    },
+    "pi_0_2_6": {
+      "ok": true,
+      "chars": 120,
+      "pdf_type": "mixed",
+      "pages_needing_ocr": [
+        2
+      ]
+    }
+  },
+  {
+    "file": "cv_mixed_text_scan.pdf",
+    "anydoc": {
+      "ok": false,
+      "error": "unsupported input: PDF has no extractable text (ImageBased, 2 pages): OCR is required"
+    },
+    "pi_0_2_6": {
+      "ok": false,
+      "chars": 0,
+      "pdf_type": "image_based",
+      "pages_needing_ocr": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "file": "cv_scanned_image_only.pdf",
+    "anydoc": {
+      "ok": false,
+      "error": "unsupported input: PDF has no extractable text (Scanned, 1 pages): OCR is required"
+    },
+    "pi_0_2_6": {
+      "ok": false,
+      "chars": 0,
+      "pdf_type": "scanned",
+      "pages_needing_ocr": [
+        1
+      ]
+    }
+  },
+  {
+    "file": "cv_text_en.pdf",
+    "anydoc": {
+      "ok": true,
+      "chars": 135
+    },
+    "pi_0_2_6": {
+      "ok": true,
+      "chars": 135,
+      "pdf_type": "text_based",
+      "pages_needing_ocr": []
+    }
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "probes": 191,
+  "status_counts": {
+    "broken": 102,
+    "pass": 89
+  },
+  "server_failures": 4,
+  "raw_error_candidates": 98
+}

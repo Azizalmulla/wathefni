@@ -1,0 +1,8 @@
+staging_health=200
+staging_ready=200
+staging_app_link_leave=200
+staging_app_link_registry=200
+staging_aasa=200
+ready_status ready
+destinations 38
+LIVE_OK

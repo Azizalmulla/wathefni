@@ -1,0 +1,163 @@
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_AUTO_LOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+PASS  app.config.js forces defaults when unset
+PASS  app.config.js asserts flags
+PASS  .env.example exists
+PASS  .env.example has EXPO_PUBLIC_LOCAL_PIN_UNLOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_AUTO_LOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC=1
+PASS  .env has EXPO_PUBLIC_LOCAL_PIN_UNLOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_AUTO_LOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC=1
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_AUTO_LOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+PASS  publish-canary-ota.sh exists
+PASS  publish script uses --environment production
+PASS  publish script exports PIN flag
+PASS  pinPolicy has no employee-key allowlist
+PASS  biometricPolicy has no employee-key allowlist
+PASS  autoLockPolicy has no employee-key allowlist
+PASS  PIN enabled for any session key when master on
+auth-wave2 flags preflight: GREEN
+Environment variables with visibility "Plain text" and "Sensitive" loaded from the "production" environment on EAS: EXPO_PUBLIC_API_BASE_URL, EXPO_PUBLIC_LOCAL_AUTO_LOCK, EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC, EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK, EXPO_PUBLIC_LOCAL_PIN_UNLOCK, EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED.
+
+- Exporting...
+[expo-cli] --non-interactive is not supported, use $CI=1 instead
+[expo-cli] Starting Metro Bundler
+[expo-cli] warning: Bundler cache is empty, rebuilding (this may take a minute)
+[expo-cli] | (node:2919) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2922) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2923) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2921) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2925) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2926) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] | (node:2924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] | (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓░░░░░░░░░░░ 37.1% (179/320)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓░░░░░░░░░░░░░░ 16.0% ( 44/212)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 19.2% (215/491)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.7% (496/797)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓░░░░░░░░░░░ 35.6% (479/803)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓░░░░░░░░░░░ 31.7% (395/725)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 54.0% ( 796/1083)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 40.8% ( 660/1033)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 51.5% (641/893)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 74.4% (1102/1278)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 53.2% ( 806/1105)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 67.1% ( 833/1017)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 84.9% (1271/1379)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 74.5% (1111/1287)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 85.1% (1199/1334)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 91.4% (1487/1555)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 87.7% (1455/1559)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 87.7% (1471/1603)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 91.4% (1772/1872)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 88.5% (1698/1811)
+[expo-cli] Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1740/1741)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.4% (1939/1955)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (1973/1975)
+[expo-cli] Web Bundled 27628ms node_modules/expo-router/entry.js (1741 modules)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.4% (1939/1955)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (1973/1975)
+[expo-cli] iOS Bundled 31545ms node_modules/expo-router/entry.js (1955 modules)
+[expo-cli] iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.4% (1939/1955)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (1973/1975)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (1973/1975)
+[expo-cli] Android Bundled 35212ms node_modules/expo-router/entry.js (1975 modules)
+[expo-cli] Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (1973/1975)
+[expo-cli] Creating asset map
+[expo-cli] 
+[expo-cli] › Assets (57):
+[expo-cli] assets/brand/icon-composer/badge-black-alpha.f2f25bf4d4fdf24e7275451c300c2c7a.png (39.9 kB)
+[expo-cli] assets/brand/icon-composer/badge-black-alpha.png (39.9 kB)
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.20bce29dc5180892ce1fbf4a563737a0.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.cceb8828a5f1f7a53506cceb54937a6e.ttf (181 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.b4eb097d35f44ed943676fd56f6bdc51.ttf (390 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (390 kB)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.0a328cd9c1afd0afe8e3b1ec5165b1b4.png (653 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png (653 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon.35ba0eaec5a4f5ed12ca16fabeae451d.png (207 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/back-icon.png (8 variations | 359 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/clear-icon.c94f6478e7ae0cdd9f15de1fcb9e5e55.png (4 variations | 425 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png (4 variations | 425 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/close-icon.808e1b1b9b53114ec2838071a7e6daa7.png (4 variations | 235 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/close-icon.png (4 variations | 235 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/search-icon.286d67d3f74808a60a78d3ebf1a5fb57.png (928 B)
+[expo-cli] node_modules/@react-navigation/elements/lib/module/assets/search-icon.png (7 variations | 592 B)
+[expo-cli] node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png (9.46 kB)
+[expo-cli] node_modules/expo-router/assets/arrow_down.png (9.46 kB)
+[expo-cli] node_modules/expo-router/assets/error.d1ea1496f9057eb392d5bbf3732a61b7.png (469 B)
+[expo-cli] node_modules/expo-router/assets/error.png (469 B)
+[expo-cli] node_modules/expo-router/assets/file.19eeb73b9593a38f8e9f418337fc7d10.png (138 B)
+[expo-cli] node_modules/expo-router/assets/file.png (138 B)
+[expo-cli] node_modules/expo-router/assets/forward.d8b800c443b8972542883e0b9de2bdc6.png (188 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (188 B)
+[expo-cli] node_modules/expo-router/assets/pkg.ab19f4cbc543357183a20571f68380a3.png (364 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (364 B)
+[expo-cli] node_modules/expo-router/assets/sitemap.412dd9275b6b48ad28f5e3d81bb1f626.png (465 B)
+[expo-cli] node_modules/expo-router/assets/sitemap.png (465 B)
+[expo-cli] node_modules/expo-router/assets/unmatched.20e71bdf79e3a97bf55fd9e164041578.png (4.75 kB)
+[expo-cli] node_modules/expo-router/assets/unmatched.png (4.75 kB)
+[expo-cli] 
+[expo-cli] › web bundles (2):
+[expo-cli] _expo/static/js/web/entry-be70baa55aafb3cdd2703073c70fd65f.js (3.22 MB)
+[expo-cli] _expo/static/js/web/entry-be70baa55aafb3cdd2703073c70fd65f.js.map (10.2 MB)
+[expo-cli] 
+[expo-cli] › ios bundles (2):
+[expo-cli] _expo/static/js/ios/entry-03501b3d2be2bde8325aacb624626394.hbc (3.42 MB)
+[expo-cli] _expo/static/js/ios/entry-03501b3d2be2bde8325aacb624626394.hbc.map (11.1 MB)
+[expo-cli] 
+[expo-cli] › android bundles (2):
+[expo-cli] _expo/static/js/android/entry-1875df9cce16d872cfd3d66a8eb955a7.hbc (3.42 MB)
+[expo-cli] _expo/static/js/android/entry-1875df9cce16d872cfd3d66a8eb955a7.hbc.map (11.1 MB)
+[expo-cli] 
+[expo-cli] › Files (3):
+[expo-cli] assetmap.json (13.8 kB)
+[expo-cli] index.html (1.18 kB)
+[expo-cli] metadata.json (4.02 kB)
+[expo-cli] 
+[expo-cli] Exported: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 13.5 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 31 iOS assets, 31 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Computing project fingerprints
+✔ Computed project fingerprints
+- Publishing...
+✔ Published!
+Branch             canary
+Runtime version    0.3.0
+Platform           android, ios
+Update group ID    7c52c216-8534-4e16-a141-ab177495dea5
+Android update ID  019fed03-d990-763c-934e-de0007f30868
+iOS update ID      019fed03-d990-7cdf-8b79-8ae7f9376b79
+Message            HR leave confirm silent-fail + queue reachability fixes
+Commit             2fa16534c8846887472dabbd10cc164a6c788f3f*
+EAS Dashboard      https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/7c52c216-8534-4e16-a141-ab177495dea5
+
+PASS  dist iOS bundle exists
+PASS  bundle contains pin-unlock-effective:on
+PASS  bundle contains bio-unlock-effective:on
+PASS  bundle contains al-lock-effective:on
+PASS  pin effective-on present (Auth Wave 2 live)
+auth-wave2 flags dist: GREEN

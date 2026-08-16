@@ -1,0 +1,112 @@
+=== SNAPSHOT BEFORE ===
+{
+  "item_id": "civil_id",
+  "status": "accepted",
+  "required": true,
+  "document_type": "civil_id",
+  "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg",
+  "storage_status": "stored",
+  "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "row_version": 3,
+  "lifecycle_meta": {
+    "phase": "accepted",
+    "source": "hr_approve",
+    "backfill_wave": "2a",
+    "backfilled_at": "2026-08-05T04:10:09.756363+00:00",
+    "backfilled_from": "received",
+    "lifecycle_status": "accepted",
+    "lifecycle_updated_at": "2026-08-05T04:11:01.093498+00:00"
+  }
+}
+=== CREATE ===
+{
+  "action": "created",
+  "civil_id_untouched": "accepted",
+  "civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7"
+}
+=== VERIFY ===
+{
+  "civil_id": {
+    "status": "accepted",
+    "sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "sha_matches_expected": true
+  },
+  "dual_side_enabled": true,
+  "canary_item": {
+    "item_id": "civil_id_dual_side_canary",
+    "status": "pending",
+    "required": false,
+    "document_type": "civil_id_dual_side_canary",
+    "lifecycle_meta": {
+      "canary": true,
+      "purpose": "civil_id_dual_side_live_test",
+      "dual_side": true,
+      "created_at": "2026-08-06T01:54:12.575822+00:00",
+      "disposable": true,
+      "explicitly_assigned": true,
+      "do_not_approve_as_real": true
+    }
+  },
+  "canary_version": null
+}
+=== PROJECTION VISIBILITY ===
+{
+  "dual_side_enabled": true,
+  "lifecycle_on": true,
+  "canary_db": {
+    "item_id": "civil_id_dual_side_canary",
+    "status": "pending",
+    "required": false,
+    "document_type": "civil_id_dual_side_canary"
+  },
+  "canary_visible": true,
+  "canary_group": "your_actions",
+  "canary_status": "pending",
+  "canary_actions": [
+    "upload_front",
+    "upload_back"
+  ],
+  "canary_parts": {
+    "schema": "civil_id_v1",
+    "front": {
+      "present": false,
+      "file_id": null,
+      "filename": null,
+      "detected_side": null,
+      "hr_warning": false
+    },
+    "back": {
+      "present": false,
+      "file_id": null,
+      "filename": null,
+      "detected_side": null,
+      "hr_warning": false
+    },
+    "parts_complete": false,
+    "missing": [
+      "front",
+      "back"
+    ],
+    "version_id": null,
+    "review_status": null,
+    "attempt_open": false
+  },
+  "in_your_actions": true,
+  "civil_id_projection": {
+    "status": "accepted",
+    "actions": [
+      "preview",
+      "view_versions"
+    ],
+    "parts_schema": "legacy_single",
+    "legacy_single": true
+  },
+  "civil_id_db": {
+    "status": "accepted",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+  },
+  "civil_id_sha_unchanged": true,
+  "civil_id_still_accepted": true
+}
+READY_FOR_MOBILE_DUAL_SIDE_LIVE_TEST

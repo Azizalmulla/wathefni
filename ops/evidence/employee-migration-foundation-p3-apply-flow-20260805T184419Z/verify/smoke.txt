@@ -1,0 +1,8 @@
+OK contract 1.1.3 apply-once honesty
+OK preview: 1 safe update + 1 name conflict
+OK confirm safe rows; conflict person unchanged; batch partial
+OK approve keeps original batch; Approved card ready to apply
+OK re-upload does not inherit approval onto new batch
+OK apply updates once; audit stamps; queue clears for original batch
+OK history retains approval, application, actor/time, before/after
+OK employee migration foundation P3 apply-flow smoke

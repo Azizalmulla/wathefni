@@ -1,0 +1,222 @@
+{
+  "stamp": "20260807T225154Z",
+  "tag": "331116c9",
+  "period_start": "2044-06-01",
+  "period_end": "2044-06-30",
+  "pass": 41,
+  "fail": 0,
+  "results": [
+    {
+      "name": "p5 version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a unlocked via P5",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview remains preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period_close not money seal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p6 real employees locked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p6 blockers listed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period_close_grants_money_authority False",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gcc gated code in GATED_BLOCKERS",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assemble inputs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lock inputs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approved P3 policy",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "calc ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "calc status calculated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "calc money_authority still preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "evaluate_finalize_gates ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "normal employee gates no gcc",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p4b gcc blocker exists",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unlocked input blocks gates",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unlocked create finalize refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finalize policy upsert",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create_finalize_run",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "submit_finalize_for_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "SOD creator cannot approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve_finalize_run",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finalize_mode_a",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sealed snapshot present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "money_authority=wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source_kind=native_authoritative",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "calc still preview_non_authoritative after finalize",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "immutable refuse_mutate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "repeat finalize idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "generate payslip from sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip money_authority=wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official PDF eligible with sealed verification",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unreleased invisible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "release_payslip_to_employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "released visible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "seal_from_native_preview still refused",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "honesty": {
+    "mode_a_unlocked": true,
+    "preview_remains_preview": true,
+    "period_close_is_money_seal": false,
+    "payment_processing": "disabled",
+    "synthetic_only": true
+  }
+}

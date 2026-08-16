@@ -1,0 +1,204 @@
+=== smoke-test-attendance-wave1-ui-prod.py ===
+FAIL_smoke-test-attendance-wave1-ui-prod.py
+=== smoke-test-leave-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS leave_queue_marker
+PASS leave_attention
+PASS primary_action_marker
+PASS open_in_leave
+PASS approve_action
+PASS dual_initiate
+PASS dual_confirm_separate
+PASS row_version
+PASS approve_separate_honesty
+PASS balances_nonbinding
+PASS unpaid_honesty
+PASS stale_conflict_copy
+PASS arabic_rtl_hint
+LEAVE_STATUS_COUNTS [{"status": "approved", "c": 3}, {"status": "rejected", "c": 1}, {"status": "cancelled", "c": 1}, {"status": "expired_stale", "c": 1}]
+PASS leave_table_readable — requested=0 dual_pending=0
+PASS dual_path_ui
+PASS confirm_path_ui
+LEAVE_WAVE1_SMOKE_OK
+OK_smoke-test-leave-wave1-ui-prod.py
+=== smoke-test-shifts-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS surfaces_marker
+PASS schedule_default_marker
+PASS attention_strip
+PASS primary_schedule
+PASS board_marker
+PASS operations_collapsed
+PASS no_inner_h1_pattern
+PASS governed_filters
+PASS composer_org_governed
+PASS empty_cta
+PASS mutation_concurrency
+PASS mutation_swaps
+PASS arabic_surface
+PASS leave_still_present
+PASS attendance_still_present
+SHIFT_STATUS_COUNTS [{"status": "scheduled", "c": 81}, {"status": "cancelled", "c": 73}]
+PASS shifts_table_readable — statuses=2
+SHIFTS_WAVE1_SMOKE_OK
+OK_smoke-test-shifts-wave1-ui-prod.py
+=== smoke-test-payroll-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS surfaces_marker
+PASS queue_marker
+PASS records_panels
+PASS run_default_tab
+PASS hours_tab
+PASS records_tab
+PASS payslips_tab
+PASS close_tab
+PASS statutory_tab
+PASS honesty_toggle
+PASS hours_export_soft
+PASS external_workspace
+PASS money_honesty_copy
+PASS mutation_row_version
+PASS arabic_surface
+PASS shifts_still_present
+PASS leave_still_present
+PASS attendance_still_present
+PAYROLL_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+PAYROLL_WAVE1_SMOKE_OK
+OK_smoke-test-payroll-wave1-ui-prod.py
+=== smoke-test-analytics-page-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS insights_marker
+PASS snapshot_marker
+PASS narrative_marker
+PASS patterns_marker
+PASS period_marker
+PASS comparison_marker
+PASS methodology_marker
+PASS triage_deeplink
+PASS no_analytics_attention_card
+PASS purpose_copy
+PASS arabic_surface
+PASS payroll_still_present
+PASS shifts_still_present
+PASS inbox_still_present
+ANALYTICS_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ANALYTICS_PAGE_WAVE1_SMOKE_OK
+OK_smoke-test-analytics-page-wave1-ui-prod.py
+=== smoke-test-compliance-page-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS findings_marker
+PASS findings_list_marker
+PASS register_marker
+PASS surfaces_marker
+PASS filters_marker
+PASS summary_marker
+PASS methodology_marker
+PASS remind_marker
+PASS purpose_copy
+PASS all_documents_label
+PASS open_in_findings
+PASS no_remind_all
+PASS governed_dates_modal
+PASS hr_reviewed_honesty
+PASS arabic_surface
+PASS analytics_still_present
+PASS payroll_still_present
+PASS shifts_still_present
+COMPLIANCE_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+COMPLIANCE_PAGE_WAVE1_SMOKE_OK
+OK_smoke-test-compliance-page-wave1-ui-prod.py
+=== smoke-test-alerts-delivery-page-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS alerts_marker
+PASS issues_marker
+PASS filters_marker
+PASS summary_marker
+PASS details_marker
+PASS purpose_copy
+PASS scoped_rows_rendered
+PASS no_void_issues
+PASS no_urgent_nested_card
+PASS mark_done_path
+PASS status_cta_path
+PASS arabic_surface
+PASS no_specialist_strip_mount
+PASS compliance_still_present
+PASS analytics_still_present
+ALERTS_DELIVERY_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ALERTS_DELIVERY_PAGE_WAVE1_SMOKE_OK
+OK_smoke-test-alerts-delivery-page-wave1-ui-prod.py
+=== smoke-test-activity-page-wave1-ui-prod.py ===
+PASS posthire_bundle_present — PostHire-BBh-0pcx.js
+PASS timeline_marker
+PASS list_marker
+PASS filters_marker
+PASS export_marker
+PASS details_marker
+PASS purpose_copy
+PASS no_company_activity_card
+PASS no_decorative_category_meta
+PASS rbac_admins
+PASS no_hr_managers_copy
+PASS arabic_surface
+PASS read_only_honesty
+PASS alerts_still_present
+PASS compliance_still_present
+ACTIVITY_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ACTIVITY_PAGE_WAVE1_SMOKE_OK
+OK_smoke-test-activity-page-wave1-ui-prod.py
+=== smoke-test-settings-page-wave1-ui-prod.py ===
+PASS settings_marker
+PASS ia_closure_marker
+PASS nav_marker
+PASS account_marker
+PASS team_marker
+PASS company_marker
+PASS comms_marker
+PASS integrations_marker
+PASS advanced_marker
+PASS ownership_marker
+PASS no_page_purpose_dup
+PASS nav_labels
+PASS setup_guide_collapsible
+PASS plain_legacy_label
+PASS no_ensure_legacy_copy
+PASS no_platform_integrations_title
+PASS no_c6b_jargon
+PASS arabic_surface
+PASS activity_still_present
+PASS alerts_still_present
+SETTINGS_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+SETTINGS_PAGE_WAVE1_SMOKE_OK
+OK_smoke-test-settings-page-wave1-ui-prod.py
+=== smoke-test-interaction-quality-wave1-ui-prod.py ===
+PASS confirm_marker
+PASS shell_busy_marker
+PASS activity_refreshing
+PASS working_copy
+PASS no_always_refreshing_banner_only
+PASS activity_timeline
+PASS settings_ia
+PASS alerts_preserved
+IQ_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+INTERACTION_QUALITY_WAVE1_SMOKE_OK
+OK_smoke-test-interaction-quality-wave1-ui-prod.py
+BUNDLE_MARKERS {'posthire': 'PostHire-BBh-0pcx.js', 'calendar': 'CalendarShell-KlPj_qBg.js', 'dashboard': 'dashboard-BnPdHXAl.js', 'employee_profile': True, 'emp360_docs': True, 'open_shifts': True, 'cal_rail': True, 'cal_open_record': True, 'cal_projection': True}
+BUNDLE_MARKERS_OK
+WATHEFNI_CALENDAR_PROJECTION_COMPANY_EVENTS=on
+WATHEFNI_CALENDAR_PROJECTION_COMPANY_EVENTS_COMPANIES=WATHEFNI
+WATHEFNI_CALENDAR_PROJECTION_COMPLIANCE=on
+WATHEFNI_CALENDAR_PROJECTION_COMPLIANCE_COMPANIES=WATHEFNI
+WATHEFNI_CALENDAR_PROJECTION_EMPLOYEE_START=on
+WATHEFNI_CALENDAR_PROJECTION_EMPLOYEE_START_COMPANIES=WATHEFNI
+WATHEFNI_CALENDAR_PROJECTION_LEAVE=on
+WATHEFNI_CALENDAR_PROJECTION_LEAVE_COMPANIES=WATHEFNI
+WATHEFNI_CALENDAR_PROJECTION_ONBOARDING=on
+WATHEFNI_CALENDAR_PROJECTION_ONBOARDING_COMPANIES=WATHEFNI
+HEALTH_OK

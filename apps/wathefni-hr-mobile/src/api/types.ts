@@ -109,7 +109,32 @@ export type CandidateReview = {
     canonical_stage?: string
     current_step?: string
     cv?: Record<string, unknown>
-    assessment?: unknown
+    assessment?: {
+      attempt_id?: string
+      assessment_version_id?: string
+      battery_key?: string
+      status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'expired' | string
+      delivery_status?: 'pending' | 'sent' | 'failed' | 'intentionally_skipped' | string
+      review_status?: 'unreviewed' | 'reviewed' | string
+      percent?: number
+      band?: string
+      summary?: string
+      expires_at?: string
+      completed_at?: string
+    }
+    intake_source?: string
+    cv_processing?: { status?: string; received?: boolean; automatic?: boolean }
+    screening?: { status?: string; automatic?: boolean }
+    communication?: {
+      status?: string
+      message_kind?: string | null
+      sent_at?: string | null
+      failed_at?: string | null
+      last_error?: string | null
+      stage_changed_without_contact?: boolean
+    }
+    automatic_activity?: string[]
+    waiting_for_hr?: string[]
   }
   ranking: {
     score: number | null
@@ -263,6 +288,11 @@ export type CandidateSummary = {
   candidate: { name: string; email?: string | null }
   position?: { code?: string | null; title?: string | null }
   status: string
+  canonical_stage?: string | null
+  status_label?: string | null
+  intake_source?: string | null
+  communication_status?: string | null
+  next_human_action?: string | null
   score?: number | null
   confidence?: string | number | null
   updated_at?: string | null
@@ -275,9 +305,22 @@ export type InterviewSummary = {
   candidate: { name: string; email?: string | null }
   position?: { code?: string | null; title?: string | null }
   status: string
+  application_stage?: string | null
+  application_stage_label?: string | null
+  interview_type?: string | null
+  feedback_status?: string | null
   scheduled_at?: string | null
+  scheduled_end?: string | null
+  timezone?: string | null
+  meeting?: { type?: string | null; join_url?: string | null }
   notes?: string | null
   communication_status?: string | null
+  invitation_status?: string | null
+  candidate_confirmation?: string | null
+  notes_status?: string | null
+  next_human_action?: string | null
+  ai_summary?: Record<string, unknown>
+  ai_advisory?: true
   allowed_actions: AllowedAction[]
 }
 

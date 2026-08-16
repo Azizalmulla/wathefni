@@ -1,0 +1,67 @@
+PASS  zero-module Home has no entitlement tiles
+PASS  zero-module Home lays out wide
+PASS  zero-module keeps core surfaces
+PASS  zero-module hides optional tabs
+PASS  no separate compliance tab ever
+PASS  zero-module has no Schedule surface
+PASS  one-module Home shows exactly one tile
+PASS  one-module Home stays wide
+PASS  one-module shows only its tab
+PASS  shifts + attendance collapse into one Schedule tile
+PASS  a single Schedule tile lays out wide
+PASS  Schedule reports both contributing authorities
+PASS  shifts alone opens Schedule
+PASS  attendance alone opens Schedule
+PASS  four-module Home keeps canonical tile order
+PASS  four-module Home switches to the grid
+PASS  full-suite Home shows one tile per destination
+PASS  Inbox is never a Home module tile
+PASS  Bank is never a Home module tile
+PASS  performance-only Home shows the Performance tile
+PASS  performance is a Home destination, not a tab
+PASS  talent-only Home shows the Talent tile
+PASS  talent is a Home destination, not a tab
+PASS  onboarding in progress shows the journey
+PASS  onboarding in progress is not demoted
+PASS  completed onboarding hides the journey
+PASS  completed onboarding is demoted
+PASS  disabled onboarding is demoted, not shown
+PASS  unloaded onboarding counts do not claim completion
+PASS  Home destinations are the entitled modules with no tab
+PASS  no destination duplicates a bottom tab
+PASS  a tabbed module is still an entitlement tile, just not a Home route
+PASS  every destination points at a registry route
+PASS  zero-module Home offers no destinations
+PASS  a documents-only company still gets its one destination
+PASS  a leave-only company has a tab and therefore no Home destination
+PASS  leave request action is the only primary action, and only when granted
+PASS  entitled deep link opens
+PASS  unentitled deep link is refused
+PASS  core deep link always opens
+PASS  the pre-bell Inbox path still opens the Inbox
+PASS  Inbox is reachable without any entitlement, from Home rather than a tab
+PASS  Payslips takes the freed tab slot only when entitled
+PASS  unknown deep link is refused
+PASS  empty deep link is refused
+PASS  Schedule opens on shifts alone and on attendance alone
+PASS  Schedule is refused without either authority
+PASS  the pre-Schedule paths still land on the combined surface
+PASS  an old attendance link is refused when neither authority is entitled
+PASS  Schedule declares no query parameters
+PASS  registry resolves an explicit alias
+PASS  registry canonicalizes the root path
+PASS  registry tolerates a trailing slash
+PASS  a path that merely contains a known word is refused
+PASS  absolute and scheme URLs are refused
+PASS  traversal is refused
+PASS  declared parameters are accepted and re-encoded
+PASS  undeclared or malformed parameters invalidate the link
+PASS  openableHref returns null instead of a dead route
+PASS  zero-entitlement client drops every server task
+PASS  full-suite client keeps the server task order and counts
+PASS  a task kind the client does not know is ignored, not guessed
+PASS  a revoked entitlement drops its task before it can be tapped
+PASS  every presented task points at a path the employee may open
+PASS  missing server tasks yield no tasks
+---
+PASS employee app composition shapes (65 checks)

@@ -1,0 +1,25 @@
+PASS flag_on
+PASS enabled_for_allowlisted
+PASS disabled_for_other_employee
+PASS civil_id_is_dual_item
+PASS canary_is_dual_item
+PASS passport_not_dual_item
+PASS wrong_side_blocks — wrong_side
+PASS unknown_soft
+PASS front_matches
+PASS pair_incomplete_missing_back
+PASS pair_duplicate_sha
+PASS pair_identity_mismatch
+PASS pair_ok_with_unknown_hr_warn
+PASS canary_alias
+PASS wrong_side_in_clear_blocks
+PASS correction_wrong_side
+PASS legacy_accepted_schema
+PASS legacy_no_upload_front
+PASS collecting_upload_front
+PASS collecting_upload_back
+PASS collecting_no_generic_upload
+PASS one_side_replace_front
+PASS one_side_upload_back
+PASS one_side_incomplete
+OK civil_id_dual_side smoke

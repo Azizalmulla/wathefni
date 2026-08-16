@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/posthire/complianceFindingsWave1.test.ts
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  19:24:40
+   Duration  575ms (transform 16ms, setup 98ms, import 9ms, tests 2ms, environment 405ms)
+

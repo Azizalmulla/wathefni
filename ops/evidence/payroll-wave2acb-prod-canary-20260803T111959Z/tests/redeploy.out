@@ -1,0 +1,70 @@
+stamp=20260803T111959Z-redeploy
+time_utc=2026-08-03T11:22:21Z
+active
+=== SHAs before ===
+f44118ded8ca1276013e4b25e6125580608522f9878037021bb0bab8fda6e035  /opt/wathefni/orchestrator/app.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  /opt/wathefni/orchestrator/payroll_authority_wave1.py
+-rw-r--r-- 1 root root 53871 Aug  3 11:19 /opt/wathefni/orchestrator/payroll_external_adapter_wave2a.py
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_PAYROLL_WAVE1=1
+WATHEFNI_PAYROLL_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS=PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_PHONE_PREFIXES=965539
+WATHEFNI_PAYROLL_WAVE2A=1
+WATHEFNI_PAYROLL_WAVE2A_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_KEY_MARKERS=PYW2ACB,PYW2ACB-SYNTH|,PYW2AB,PYW2AB-SYNTH|,PYW2A,PYW2A-SYNTH|,PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_PHONE_PREFIXES=965540,965539
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[11:22:21] backing up modules + dropin + dashboard
+4540e93c8a01c3b95642f35ab0483498198b0f085f9789a4e73f5914bdc67773  modules/payroll_external_adapter_wave2a.py
+f44118ded8ca1276013e4b25e6125580608522f9878037021bb0bab8fda6e035  modules/app.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  modules/payroll_authority_wave1.py
+542fb6147c821c94f1889b99efe44a60c53c334c404893a2fab90239eaeee6c6  payroll-wave2ab-synthetic.conf
+[11:22:21] deploying wave2acb modules
+[11:22:21] deploying dashboard dist (external payroll ops workspace)
+DASHBOARD_DIST_DEPLOYED
+[11:22:21] writing synthetic-only Wave 2A drop-in (markers include PYW2ACB; Wave 1 retained elsewhere)
+[11:22:21] migrate/ACK ops workflow
+wave2a_version 1.0.0
+wave1_version 1.0.0
+ops_helpers_ok
+honesty_ok {'payment_processing': 'disabled', 'money_authority': 'external', 'vendor_claimed': False, 'adapter_kind': 'synthetic_csv_sftp'}
+connected_db wathefni
+adapter_tables ['payroll_adapter_events', 'payroll_adapter_export_runs', 'payroll_adapter_import_lines', 'payroll_adapter_import_runs', 'payroll_adapter_quarantine', 'payroll_adapter_reconciliations']
+wave1_contract_cols_ok ['contract_id', 'row_version', 'status']
+routes_present ['/dashboard/posthire/payroll/external', '/dashboard/posthire/payroll/external/events', '/dashboard/posthire/payroll/external/exports', '/dashboard/posthire/payroll/external/quarantine', '/dashboard/posthire/payroll/external/readiness']
+MIGRATE_OK payroll_external_ops_wave2ac_prod
+ACK_PRODUCTION_PAYROLL_W2ACB=YES
+health_ok
+active
+=== SHAs after ===
+f44118ded8ca1276013e4b25e6125580608522f9878037021bb0bab8fda6e035  /opt/wathefni/orchestrator/app.py
+4540e93c8a01c3b95642f35ab0483498198b0f085f9789a4e73f5914bdc67773  /opt/wathefni/orchestrator/payroll_external_adapter_wave2a.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  /opt/wathefni/orchestrator/payroll_authority_wave1.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_PAYROLL_WAVE1=1
+WATHEFNI_PAYROLL_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS=PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_PHONE_PREFIXES=965539
+WATHEFNI_PAYROLL_WAVE2A=1
+WATHEFNI_PAYROLL_WAVE2A_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_KEY_MARKERS=PYW2ACB,PYW2ACB-SYNTH|,PYW2AB,PYW2AB-SYNTH|,PYW2A,PYW2A-SYNTH|,PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_PHONE_PREFIXES=965540,965539
+PAYROLL_WAVE2A 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW2ACB', 'PYW2ACB-SYNTH|', 'PYW2AB', 'PYW2AB-SYNTH|', 'PYW2A', 'PYW2A-SYNTH|', 'PYW1', 'PYW1-SYNTH|')
+prefixes ('965540', '965539')
+honesty {'payment_processing': 'disabled', 'money_authority': 'external', 'wathefni_money_authority': False, 'posts_payment': False, 'vendor_claimed': False, 'bank_files': False, 'native_gross_to_net': False, 'wave1_contracts_unchanged': True, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK
+DEPLOY_OK stamp=20260803T111959Z-redeploy backup=/opt/wathefni/backups/production-pre-payroll-wave2acb-20260803T111959Z-redeploy evid=/opt/wathefni/production-evidence/payroll-wave2acb-prod-canary/20260803T111959Z-redeploy

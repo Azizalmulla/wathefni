@@ -1,0 +1,23 @@
+PASS cream PageScreen + HrPushedNav shared
+PASS CandidatesQueueView cream + position param
+PASS JobsPositionsView opens scoped candidates
+PASS Interviews cream list + detail
+PASS notes send expected_updated_at + expected_version
+PASS notes stale codes handled inline
+PASS notes invalidate hiring+interviews caches
+PASS routes thin-wrap cream views
+PASS jobs stack + route registered
+PASS hiring browse omits assessments
+PASS browseDestination jobs path
+PASS assistant interview_id only
+PASS assistant ranking→jobs base
+PASS assessments web-only
+PASS API positions + candidates opts
+PASS normalize preserves requires_position
+PASS destinationAvailable /jobs
+PASS canonical parent /jobs → hiring
+PASS schedule stays interviews list
+PASS EN+AR recruiting honesty keys
+PASS schedule copy not fake detail
+PASS AR requires position present
+hr-hiring-interviews-wave: GREEN

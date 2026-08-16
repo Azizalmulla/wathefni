@@ -1,0 +1,13 @@
+/opt/wathefni/var/ck-flags.production.env
+/root/.openclaw/secrets/wathefni-civil-id.production.env
+/root/.openclaw/secrets/mistral.env
+/root/.openclaw/secrets/wathefni-intake.env
+/root/.openclaw/secrets/wathefni-google-oauth.production.env
+/root/.openclaw/secrets/wathefni-m365-mail.production.env
+/root/.openclaw/secrets/wathefni-m365.production.env
+/root/.openclaw/secrets/wathefni-mailbox-secret.production.env
+/root/.openclaw/secrets/wathefni-offer-token.production.env
+/root/.openclaw/secrets/gog-keyring.env
+/root/.openclaw/secrets/wathefni-setup-operator.env
+/opt/wathefni/var/unified-inbound-cv.production.env
+/opt/wathefni/var/ck-flags.production.env

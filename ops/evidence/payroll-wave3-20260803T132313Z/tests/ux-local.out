@@ -1,0 +1,16 @@
+    payroll payslip wave3 UX EN/AR/mobile
+      PASS  posthire dir
+      PASS  EN title
+      PASS  AR title
+      PASS  honesty EN
+      PASS  honesty AR
+      PASS  payment disabled EN
+      PASS  payment disabled AR
+      PASS  history retained
+      PASS  workspace rtl
+      PASS  mobile hint
+      PASS  testid
+      PASS  posthire tab
+      PASS  tabPayslips copy
+
+    13 passed, 0 failed

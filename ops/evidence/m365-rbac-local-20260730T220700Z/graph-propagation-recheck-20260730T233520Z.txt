@@ -1,0 +1,4 @@
+check_utc=2026-07-30T23:35:20Z
+assigned_at=2026-07-30T22:12:23Z
+elapsed_since_assign=1:22:57
+result=PASS http_status=201

@@ -83,20 +83,17 @@ def main() -> int:
     from lifecycle_fixture_quarantine import refuse_unless_legacy_fixtures_explicitly_allowed
 
     refuse_unless_legacy_fixtures_explicitly_allowed(script_name="mobile-lifecycle-authority-production-proof.py")
-    os.environ.setdefault("WATHEFNI_POSTGRES_ENV", "/root/.openclaw/secrets/postgres.env")
-    os.environ.setdefault("WATHEFNI_WORKSPACE", "/root/.openclaw/workspaces/company-wathefni")
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
     os.environ.pop("WATHEFNI_ALLOW_LEGACY_DASHBOARD_TOKEN_AUTH", None)
-    os.environ.setdefault("WATHEFNI_ENV", "production")
     os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_HOST", "127.0.0.1")
     os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_PORT", "5432")
-    os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_NAME", "wathefni")
-    os.environ.setdefault("WATHEFNI_DATABASE_ENVIRONMENT_MARKER", "wathefni-production-isolation-v1")
     os.environ.setdefault("WATHEFNI_CANONICAL_LIFECYCLE", "true")
 
     prod_orch = os.environ.get("WATHEFNI_PROD_ORCH", "/opt/wathefni/orchestrator")
     sys.path = [p for p in sys.path if p not in {prod_orch, "/opt/wathefni/staging/orchestrator"}]
     sys.path.insert(0, prod_orch)
+    import production_data_safety as _r3_data_safety
+    _r3_data_safety.require_non_production_ops()
     import app
     import operator_mobile as om
     import recruiting_lifecycle as rl

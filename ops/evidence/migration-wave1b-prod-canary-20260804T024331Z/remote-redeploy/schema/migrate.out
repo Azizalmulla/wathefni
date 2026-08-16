@@ -1,0 +1,4 @@
+ack_id d9f6fc8f-cfe2-448a-8cfc-f05b90b87732
+ACK_PRODUCTION_MIGRATION_WAVE1B=YES
+residual_policy=synthetic_batches_rolled_back_ack_retained
+MIGRATE_OK

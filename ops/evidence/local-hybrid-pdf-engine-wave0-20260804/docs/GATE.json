@@ -1,0 +1,11 @@
+{
+  "wave": "local_hybrid_pdf_engine_wave0",
+  "pin": "pdf-inspector==0.2.6",
+  "integration": "python_pyo3_binding",
+  "production_routing_changed": false,
+  "corpus_gates": "PASS",
+  "real_ocr_proof": "PASS_12_pages_0.048_usd",
+  "cv_staging_canary": "CONDITIONAL_GO",
+  "production_cutover": "NO-GO",
+  "report": "ops/LOCAL_HYBRID_PDF_ENGINE_WAVE0.md"
+}

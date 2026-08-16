@@ -6,6 +6,7 @@ and routes it to the appropriate handler.
 from sqlalchemy.orm import Session
 
 from app.models.hr_user import HRUser
+from app.models.employee import Employee
 from app.models.candidate import Candidate
 
 
@@ -15,7 +16,7 @@ def identify_sender(phone: str, db: Session) -> dict:
     
     Returns:
         {
-            "type": "hr" | "candidate" | "unknown",
+            "type": "hr" | "employee" | "candidate" | "unknown",
             "user": HRUser | Candidate | None,
             "company_id": UUID | None
         }
@@ -31,6 +32,15 @@ def identify_sender(phone: str, db: Session) -> dict:
             "type": "hr",
             "user": hr_user,
             "company_id": hr_user.company_id,
+        }
+
+    # Employees are routed before candidates because a hired candidate can exist in both tables.
+    employee = db.query(Employee).filter(Employee.phone == phone).first()
+    if employee:
+        return {
+            "type": "employee",
+            "user": employee,
+            "company_id": employee.company_id,
         }
 
     # Check if sender is an existing candidate

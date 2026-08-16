@@ -1,0 +1,8 @@
+33:    showOperations: isAr ? 'إظهار العمليات المتقدمة' : 'Show advanced operations',
+34:    hideOperations: isAr ? 'إخفاء العمليات المتقدمة' : 'Hide advanced operations',
+62:    assignmentGuest: isAr ? 'خدمة العملاء' : 'Customer-facing',
+63:    assignmentOperations: isAr ? 'العمليات' : 'Operations',
+65:    assignmentEvent: isAr ? 'مهمة خاصة' : 'Special assignment',
+72:    statusConflictShort: isAr ? 'تعارض' : 'Conflict',
+194:    statusConflicted: isAr ? 'تعارض' : 'Conflicted',
+215:  if (s === 'conflicted') return c.statusConflictShort

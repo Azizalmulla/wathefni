@@ -1,0 +1,144 @@
+{
+  "inventory": {
+    "numerical_reasoning": {
+      "generated": 15,
+      "usable_complete_packages": 0,
+      "content_failures": 15
+    },
+    "logical_reasoning": {
+      "generated": 15,
+      "usable_complete_packages": 0,
+      "content_failures": 15
+    },
+    "verbal_reasoning": {
+      "generated": 13,
+      "usable_complete_packages": 2,
+      "content_failures": 11
+    },
+    "situational_judgment": {
+      "generated": 12,
+      "usable_complete_packages": 2,
+      "content_failures": 10
+    },
+    "prioritization": {
+      "generated": 12,
+      "usable_complete_packages": 3,
+      "content_failures": 9
+    }
+  },
+  "failure_stage_counts": {
+    "logical_reasoning|bilingual_model_review_not_passed": 1,
+    "logical_reasoning|deterministic_source_review_failed": 8,
+    "logical_reasoning|secondary_review_not_passed": 6,
+    "numerical_reasoning|adaptation_failed_closed": 2,
+    "numerical_reasoning|secondary_review_not_passed": 13,
+    "prioritization|deterministic_source_review_failed": 3,
+    "prioritization|secondary_review_not_passed": 6,
+    "situational_judgment|secondary_review_not_passed": 10,
+    "verbal_reasoning|deterministic_source_review_failed": 2,
+    "verbal_reasoning|secondary_review_not_passed": 9
+  },
+  "numerical_reasoning": {
+    "usable": 0,
+    "primary_failure_locus": "secondary_reviewer",
+    "stage_split": {
+      "secondary_review_not_passed": 13,
+      "adaptation_failed_closed": 2,
+      "deterministic_source_review_failed": 0
+    },
+    "recurring_reasons": [
+      {
+        "reason": "Secondary reviewer repeatedly reports missing answer_uniqueness_proof",
+        "count_theme_hits": 12,
+        "source": "secondary_reviewer",
+        "note": "Spot-check of failed drafts shows proofs of length ~391–521 already present in content_json. This is a secondary false-positive / payload-visibility issue, not absence of the field. Do not weaken uniqueness safeguards."
+      },
+      {
+        "reason": "Difficulty judged below medium / too direct",
+        "count_theme_hits": 4,
+        "source": "secondary_reviewer",
+        "note": "Often co-occurs with proof complaint. Blueprint difficulty target and author prompt need clearer multi-step constraints; keep ambiguity/key safeguards."
+      },
+      {
+        "reason": "Answer-key / prompt math mismatch or ambiguity",
+        "count_theme_hits": 4,
+        "source": "scoring_key_proof + author_prompt",
+        "note": "Legitimate content failures; retain strict key/ambiguity rejection."
+      },
+      {
+        "reason": "Arabic adaptation fail-closed (translation_deterministic_checks_failed)",
+        "count": 2,
+        "source": "arabic_adaptation",
+        "note": "After secondary pass, bilingual completeness checks failed closed. Keep fail-closed policy."
+      },
+      {
+        "reason": "False complaint that a single draft is not a five-item set",
+        "count_theme_hits": 1,
+        "source": "secondary_reviewer",
+        "note": "Reviewer conflated batch request size with per-item review. Blueprint/review prompt should clarify item-level review scope; not a correctness weakening."
+      }
+    ],
+    "component_attribution": {
+      "blueprint": "Contributes indirectly via requiring human-readable uniqueness proof and medium difficulty; batch-size wording confuses secondary.",
+      "author_prompt": "Sometimes produces easy single-step arithmetic or ambiguous capacity wording; proof field usually present.",
+      "deterministic_validator": "Not the blocker for numerical (0 deterministic_source failures in rejection inventory).",
+      "secondary_reviewer": "Dominant blocker (13/15), including false missing-proof claims.",
+      "arabic_adaptation": "Secondary blocker (2/15) via fail-closed bilingual checks.",
+      "scoring_key_proof": "Real key/ambiguity issues in a minority of items; keep."
+    }
+  },
+  "logical_reasoning": {
+    "usable": 0,
+    "primary_failure_locus": "deterministic_validator + secondary_reviewer",
+    "stage_split": {
+      "deterministic_source_review_failed": 8,
+      "secondary_review_not_passed": 6,
+      "bilingual_model_review_not_passed": 1
+    },
+    "recurring_reasons": [
+      {
+        "reason": "proof_missing_uniqueness_claim",
+        "count": 8,
+        "source": "deterministic_validator",
+        "exact_rule": "logical_uniqueness_proof_check requires proof text to match \\b(only|unique|exactly one|sole|واحد|فقط|فريدة)\\b",
+        "note": "Drafts often have long proofs that eliminate distractors but omit an explicit uniqueness claim word. Correct fail-closed behavior; author prompt must require the claim. Do not remove the rule."
+      },
+      {
+        "reason": "Secondary reports missing uniqueness proof / too easy / weak distractor",
+        "count_theme_hits": 11,
+        "theme_buckets": {
+          "secondary_claims_missing_uniqueness_proof": 6,
+          "weak_or_obvious_distractor": 1,
+          "difficulty_below_medium": 3,
+          "other": 1
+        },
+        "source": "secondary_reviewer",
+        "note": "Some proofs exist but lack uniqueness keyword; secondary also flags difficulty and obvious distractors."
+      },
+      {
+        "reason": "One bilingual review non-pass after source stages",
+        "count": 1,
+        "source": "arabic_adaptation / bilingual_review"
+      }
+    ],
+    "component_attribution": {
+      "blueprint": "Correctly requires uniqueness proof; keep.",
+      "author_prompt": "Does not reliably force explicit uniqueness claim wording required by the deterministic checker.",
+      "deterministic_validator": "Primary hard gate (8/15). Safeguard is correct; keep.",
+      "secondary_reviewer": "Secondary gate (6/15) on proof completeness, difficulty, distractors.",
+      "arabic_adaptation": "Rare (1 bilingual non-pass).",
+      "scoring_key_proof": "Tied to uniqueness-claim rule; keep."
+    }
+  },
+  "other_categories_brief": {
+    "verbal_reasoning": "11 content failures mostly secondary_review_not_passed (9) and deterministic (2); 2 packages usable and now human-reviewed.",
+    "situational_judgment": "10 content failures all secondary_review_not_passed; 2 packages usable and human-reviewed.",
+    "prioritization": "9 content failures (6 secondary, 3 deterministic); 3 packages usable and human-reviewed."
+  },
+  "safeguards_not_to_weaken": [
+    "logical uniqueness proof with explicit uniqueness claim",
+    "answer-key / ambiguity rejection",
+    "bilingual fail-closed completeness",
+    "key invariance and scoring-map invariance"
+  ]
+}

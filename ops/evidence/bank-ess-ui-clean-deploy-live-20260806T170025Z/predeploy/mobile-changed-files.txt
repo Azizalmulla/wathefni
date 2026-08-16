@@ -1,0 +1,12 @@
+apps/wathefni-employee-mobile/app/_layout.tsx
+apps/wathefni-employee-mobile/app/bank.tsx
+apps/wathefni-employee-mobile/app/onboarding.tsx
+apps/wathefni-employee-mobile/scripts/verify-capability-foundation.py
+apps/wathefni-employee-mobile/src/api/errors.ts
+apps/wathefni-employee-mobile/src/api/types.ts
+apps/wathefni-employee-mobile/src/features/bank/BankView.tsx
+apps/wathefni-employee-mobile/src/features/onboarding/OnboardingView.tsx
+apps/wathefni-employee-mobile/src/features/onboarding/lifecycleProjection.ts
+apps/wathefni-employee-mobile/src/i18n/ar.json
+apps/wathefni-employee-mobile/src/i18n/en.json
+apps/wathefni-employee-mobile/src/lib/documents.ts

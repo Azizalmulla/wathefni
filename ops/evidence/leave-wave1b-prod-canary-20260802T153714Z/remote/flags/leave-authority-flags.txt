@@ -1,0 +1,5 @@
+LEAVE_AUTHORITY on
+SYNTHETIC_ONLY True
+enabled True
+companies ['WATHEFNI']
+flags_ok_synthetic=true

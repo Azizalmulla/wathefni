@@ -1,0 +1,16 @@
+analytics-attention-wave1 smoke tests passed
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+89 passed, 7 failed

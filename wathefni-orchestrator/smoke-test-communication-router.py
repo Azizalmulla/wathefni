@@ -9,12 +9,16 @@ def assert_true(condition: bool, message: str) -> None:
 
 
 def main() -> None:
+    # Canonical live Job application shape — authority gate must allow policy/router behavior.
     candidate = {
         "app_key": "96500000000-WATHEFNI-ACCOUNTING",
+        "company_code": "WATHEFNI",
         "phone": "96500000000",
-        "candidate_name": "Test Candidate",
+        "candidate_name": "Accounting Candidate",
         "candidate_email": "candidate@example.com",
         "position_title": "Accounting",
+        "status": "screening",
+        "data_source": "production",
     }
     original_email = app.send_email
     original_notify = app.notify_candidate
@@ -47,6 +51,21 @@ def main() -> None:
         result = app.candidate_communication_router(candidate, account_id="default", kind="assessment", message="Assessment ready", action={})
         assert_true(calls == ["email", "whatsapp"], "assessment policy must attempt email and WhatsApp")
         assert_true(result["successful_channels"] == ["email"], "assessment email success must be preserved even if WhatsApp fails")
+
+        held = {**candidate, "status": "needs_role"}
+        denied = app.candidate_communication_router(
+            held,
+            account_id="default",
+            kind="notification",
+            message="Hello",
+            action={"preferred_channel": "whatsapp"},
+        )
+        assert_true(denied.get("ok") is False, "held Talent Pool row must fail closed")
+        assert_true(
+            denied.get("error") == "held_record_communication_forbidden",
+            "held denial must use held_record_communication_forbidden",
+        )
+        assert_true(calls == ["email", "whatsapp"], "held denial must not invoke providers")
     finally:
         app.send_email = original_email
         app.notify_candidate = original_notify

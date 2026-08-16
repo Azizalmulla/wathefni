@@ -1,0 +1,431 @@
+{
+  "pass": 25,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "composition_matrix_A_to_F",
+      "detail": {
+        "A_documents_only": "ok",
+        "B_leave_documents": "ok",
+        "C_leave_documents_attendance_payslips": "ok",
+        "D_full_suite": "ok",
+        "E_onboarding_employee": "ok",
+        "F_onboarding_complete": "ok"
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "config:A_documents_only",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "config:B_leave_documents",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "config:C_leave_documents_attendance_payslips",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "config:D_full_suite",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "config:E_onboarding_employee",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "config:F_onboarding_complete",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "one_module_intentional",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "inbox_not_purchased_module",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "disabled_module_absent",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:compositionFromMe",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:wideHomeTiles",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:inboxStrip",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:canOpenPath",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:showOnboardingJourney",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:separateComplianceTab: false",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:moduleCount_removed",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "mobile_verify_capability_foundation",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:ownership",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:company",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:payroll_setup",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:module_policies",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:team_access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:integrations",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "regression:employee_app_access",
+      "detail": null
+    }
+  ],
+  "matrix": {
+    "ok": true,
+    "phase": "setup_console_phase5",
+    "contract_version": "employee_app_composition_v1",
+    "results": [
+      {
+        "ok": true,
+        "name": "A_documents_only",
+        "composition": {
+          "ok": true,
+          "phase": "setup_console_phase5",
+          "contract_version": "employee_app_composition_v1",
+          "core": {
+            "home": true,
+            "inbox": true,
+            "profile": true,
+            "settings": true
+          },
+          "modules": {
+            "onboarding": false,
+            "documents": true,
+            "attendance": false,
+            "shifts": false,
+            "leave": false,
+            "payslips": false,
+            "bank": false
+          },
+          "home_tiles": [
+            "documents"
+          ],
+          "wide_home_tiles": true,
+          "show_onboarding_journey": false,
+          "onboarding_demoted": true,
+          "tabs": {
+            "home": true,
+            "inbox": true,
+            "shifts": false,
+            "leave": false,
+            "profile": true
+          },
+          "separate_compliance_tab": false,
+          "inbox_is_purchased_module": false,
+          "honesty": {
+            "derives_from_app_me_features": true,
+            "no_parallel_frontend_registry": true,
+            "notifications_not_purchased_module": true,
+            "documents_owns_employee_compliance": true
+          }
+        },
+        "failures": []
+      },
+      {
+        "ok": true,
+        "name": "B_leave_documents",
+        "composition": {
+          "ok": true,
+          "phase": "setup_console_phase5",
+          "contract_version": "employee_app_composition_v1",
+          "core": {
+            "home": true,
+            "inbox": true,
+            "profile": true,
+            "settings": true
+          },
+          "modules": {
+            "onboarding": false,
+            "documents": true,
+            "attendance": false,
+            "shifts": false,
+            "leave": true,
+            "payslips": false,
+            "bank": false
+          },
+          "home_tiles": [
+            "leave",
+            "documents"
+          ],
+          "wide_home_tiles": false,
+          "show_onboarding_journey": false,
+          "onboarding_demoted": true,
+          "tabs": {
+            "home": true,
+            "inbox": true,
+            "shifts": false,
+            "leave": true,
+            "profile": true
+          },
+          "separate_compliance_tab": false,
+          "inbox_is_purchased_module": false,
+          "honesty": {
+            "derives_from_app_me_features": true,
+            "no_parallel_frontend_registry": true,
+            "notifications_not_purchased_module": true,
+            "documents_owns_employee_compliance": true
+          }
+        },
+        "failures": []
+      },
+      {
+        "ok": true,
+        "name": "C_leave_documents_attendance_payslips",
+        "composition": {
+          "ok": true,
+          "phase": "setup_console_phase5",
+          "contract_version": "employee_app_composition_v1",
+          "core": {
+            "home": true,
+            "inbox": true,
+            "profile": true,
+            "settings": true
+          },
+          "modules": {
+            "onboarding": false,
+            "documents": true,
+            "attendance": true,
+            "shifts": false,
+            "leave": true,
+            "payslips": true,
+            "bank": false
+          },
+          "home_tiles": [
+            "attendance",
+            "leave",
+            "documents",
+            "payslips"
+          ],
+          "wide_home_tiles": false,
+          "show_onboarding_journey": false,
+          "onboarding_demoted": true,
+          "tabs": {
+            "home": true,
+            "inbox": true,
+            "shifts": false,
+            "leave": true,
+            "profile": true
+          },
+          "separate_compliance_tab": false,
+          "inbox_is_purchased_module": false,
+          "honesty": {
+            "derives_from_app_me_features": true,
+            "no_parallel_frontend_registry": true,
+            "notifications_not_purchased_module": true,
+            "documents_owns_employee_compliance": true
+          }
+        },
+        "failures": []
+      },
+      {
+        "ok": true,
+        "name": "D_full_suite",
+        "composition": {
+          "ok": true,
+          "phase": "setup_console_phase5",
+          "contract_version": "employee_app_composition_v1",
+          "core": {
+            "home": true,
+            "inbox": true,
+            "profile": true,
+            "settings": true
+          },
+          "modules": {
+            "onboarding": true,
+            "documents": true,
+            "attendance": true,
+            "shifts": true,
+            "leave": true,
+            "payslips": true,
+            "bank": true
+          },
+          "home_tiles": [
+            "shifts",
+            "attendance",
+            "leave",
+            "documents",
+            "payslips"
+          ],
+          "wide_home_tiles": false,
+          "show_onboarding_journey": false,
+          "onboarding_demoted": false,
+          "tabs": {
+            "home": true,
+            "inbox": true,
+            "shifts": true,
+            "leave": true,
+            "profile": true
+          },
+          "separate_compliance_tab": false,
+          "inbox_is_purchased_module": false,
+          "honesty": {
+            "derives_from_app_me_features": true,
+            "no_parallel_frontend_registry": true,
+            "notifications_not_purchased_module": true,
+            "documents_owns_employee_compliance": true
+          }
+        },
+        "failures": []
+      },
+      {
+        "ok": true,
+        "name": "E_onboarding_employee",
+        "composition": {
+          "ok": true,
+          "phase": "setup_console_phase5",
+          "contract_version": "employee_app_composition_v1",
+          "core": {
+            "home": true,
+            "inbox": true,
+            "profile": true,
+            "settings": true
+          },
+          "modules": {
+            "onboarding": true,
+            "documents": true,
+            "attendance": false,
+            "shifts": false,
+            "leave": true,
+            "payslips": false,
+            "bank": false
+          },
+          "home_tiles": [
+            "leave",
+            "documents"
+          ],
+          "wide_home_tiles": false,
+          "show_onboarding_journey": true,
+          "onboarding_demoted": false,
+          "tabs": {
+            "home": true,
+            "inbox": true,
+            "shifts": false,
+            "leave": true,
+            "profile": true
+          },
+          "separate_compliance_tab": false,
+          "inbox_is_purchased_module": false,
+          "honesty": {
+            "derives_from_app_me_features": true,
+            "no_parallel_frontend_registry": true,
+            "notifications_not_purchased_module": true,
+            "documents_owns_employee_compliance": true
+          }
+        },
+        "failures": []
+      },
+      {
+        "ok": true,
+        "name": "F_onboarding_complete",
+        "composition": {
+          "ok": true,
+          "phase": "setup_console_phase5",
+          "contract_version": "employee_app_composition_v1",
+          "core": {
+            "home": true,
+            "inbox": true,
+            "profile": true,
+            "settings": true
+          },
+          "modules": {
+            "onboarding": true,
+            "documents": true,
+            "attendance": false,
+            "shifts": false,
+            "leave": true,
+            "payslips": false,
+            "bank": false
+          },
+          "home_tiles": [
+            "leave",
+            "documents"
+          ],
+          "wide_home_tiles": false,
+          "show_onboarding_journey": false,
+          "onboarding_demoted": true,
+          "tabs": {
+            "home": true,
+            "inbox": true,
+            "shifts": false,
+            "leave": true,
+            "profile": true
+          },
+          "separate_compliance_tab": false,
+          "inbox_is_purchased_module": false,
+          "honesty": {
+            "derives_from_app_me_features": true,
+            "no_parallel_frontend_registry": true,
+            "notifications_not_purchased_module": true,
+            "documents_owns_employee_compliance": true
+          }
+        },
+        "failures": []
+      }
+    ]
+  }
+}

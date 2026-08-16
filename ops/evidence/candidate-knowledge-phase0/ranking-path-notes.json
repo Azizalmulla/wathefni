@@ -1,0 +1,57 @@
+{
+  "captured_at": "2026-07-26T17:22:49Z",
+  "deployed_modules_restored": true,
+  "paths": {
+    "registry_rank": "action_registry._rank_candidates_executor",
+    "legacy_dashboard_rank_local": "app.rank_candidates -> candidate_ranking.rank_candidates_compat (reconciled)",
+    "legacy_dashboard_rank_production": "candidate_ranking.rank_candidates_compat -> rank_job_applications"
+  },
+  "registry_path": {
+    "entry": "action_registry._rank_candidates_executor",
+    "mode": "job_scoped_canonical / assistant replay_only default",
+    "delegates_to": "candidate_ranking",
+    "top_n_max": "RANK_CANDIDATES_MAX_TOP_N = 10",
+    "held_exclusion": "via ranking module + production_application_predicate",
+    "known_production_gaps": [
+      "compare_candidates not registered"
+    ]
+  },
+  "dashboard_mobile_path": {
+    "production_entry": "candidate_ranking.rank_candidates_compat",
+    "local_checkout_entry": "app.rank_candidates via candidate_ranking.rank_candidates_compat",
+    "requires": "exact job/position",
+    "scoring_contract": "ranking-soft-v2",
+    "embedding_model": "voyage-4-large",
+    "uses_cv_facts_evidence": true,
+    "held_exclusion": "production_application_predicate via ranking module helpers"
+  },
+  "parity_boundary": {
+    "scores_must_match": false,
+    "reason_scores_may_diverge": "Registry path is semantic-first talent-pool search with boosts; dashboard/mobile path is job-anchored soft ranking with role criteria and evidence policy.",
+    "tenant_and_held_exclusions_must_agree": true,
+    "shared_invariants": [
+      "company_code tenant scope",
+      "production_application_predicate held-status exclusions",
+      "top_n hard cap of 10 for legacy-shaped responses",
+      "no lifecycle mutation from ranking reads",
+      "no identity merge from embeddings"
+    ],
+    "must_not_claim_parity_for": [
+      "absolute score values",
+      "ordering when registry uses free-text query without exact job",
+      "role_profile criterion evidence depth",
+      "narrative/brief fields from ranking-soft-v2"
+    ],
+    "replacement_rule": "CandidateKnowledgeAuthority may feed both paths, but each path keeps its own ranking semantics until an explicit unified ranker cutover."
+  },
+  "reconciliation_update": {
+    "date": "2026-07-26",
+    "production_registry_rank": "job-scoped candidate_ranking authority (replay_only by default)",
+    "obsolete_local_defects_not_in_production": [
+      "rank_candidate_row without role_profile",
+      "screening before assignment",
+      "semantic pool_limit getattr fallback path as primary assistant ranker"
+    ],
+    "compare_candidates": "still implemented in app.py; still not registry-registered in production"
+  }
+}

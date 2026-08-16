@@ -1,0 +1,22 @@
+# Dashboard (intentional)
+apps/wathefni-dashboard/src/posthire/employees360/BankReviewPanel.tsx
+apps/wathefni-dashboard/src/posthire/employees360/bankReview.ts
+apps/wathefni-dashboard/src/posthire/employees360/OnboardingCompletionStrip.tsx
+apps/wathefni-dashboard/src/posthire/employees360/onboardingCompletion.ts
+apps/wathefni-dashboard/src/components/ui/page-chrome.tsx
+apps/wathefni-dashboard/src/lib/api.ts  # bank helpers only
+apps/wathefni-dashboard/src/types.ts    # bank + completion types only
+apps/wathefni-dashboard/src/posthire/PostHire.tsx  # surgical mounts only on prod snapshot
+
+# Employee mobile (intentional)
+apps/wathefni-employee-mobile/app/bank.tsx
+apps/wathefni-employee-mobile/src/features/bank/BankView.tsx
+apps/wathefni-employee-mobile/app/_layout.tsx
+apps/wathefni-employee-mobile/app/onboarding.tsx
+apps/wathefni-employee-mobile/src/features/onboarding/OnboardingView.tsx
+apps/wathefni-employee-mobile/src/features/onboarding/lifecycleProjection.ts
+apps/wathefni-employee-mobile/src/api/types.ts
+apps/wathefni-employee-mobile/src/api/errors.ts
+apps/wathefni-employee-mobile/src/lib/documents.ts
+apps/wathefni-employee-mobile/src/i18n/en.json
+apps/wathefni-employee-mobile/src/i18n/ar.json

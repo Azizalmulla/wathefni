@@ -1,0 +1,16 @@
+{
+  "intake_ids": [
+    "e3b158cb-36aa-46a4-9239-020344f6031c",
+    "f2aa579b-df45-48ff-b6ff-3b820634e2a0"
+  ],
+  "app_keys": [],
+  "disabled": [],
+  "active_intakes": [
+    {
+      "intake_id": "2493b577-09e3-45c2-b923-b0c382c251df",
+      "label": "Postmark default test",
+      "status": "active"
+    }
+  ],
+  "open_cv_extraction": 0
+}

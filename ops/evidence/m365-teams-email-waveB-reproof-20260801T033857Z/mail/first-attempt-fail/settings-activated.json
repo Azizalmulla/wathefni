@@ -1,0 +1,16 @@
+{
+  "company_code": "WATHEFNI",
+  "outbound_mode": "microsoft_mailbox",
+  "display_name": "Wathefni Evidence",
+  "from_address": null,
+  "reply_to": "hr@wathefni.ai",
+  "company_name_en": null,
+  "company_name_ar": null,
+  "logo_url": null,
+  "outbound_mailbox_id": "e51803f4-c385-440f-a285-0f3088639be1",
+  "interview_email_when_calendar_sent": false,
+  "allow_wathefni_emergency_fallback": false,
+  "public_forward_address": null,
+  "updated_at": "2026-08-01 03:40:57.986257+00:00",
+  "updated_by_user_id": "mail-outbound-evidence"
+}

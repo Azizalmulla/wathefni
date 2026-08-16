@@ -1,0 +1,5 @@
+ACTOR {"company_code": "WATHEFNI", "actor_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f", "actor_role": "owner"}
+LIST_COUNT 0 items 0
+PRIORITY_CANDIDATE {"hiring_sections": ["prehire_priorities", "candidate_decisions"], "count": 0, "destinations": []}
+NO_CANDIDATE_FOR_DETAIL
+VERDICT_BACKEND_PATH PARTIAL

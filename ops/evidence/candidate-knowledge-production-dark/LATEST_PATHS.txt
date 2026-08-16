@@ -1,0 +1,4 @@
+STAMP=20260726T213640Z
+REMOTE_BACKUP=/opt/wathefni/backups/production-pre-ck-dark-20260726T213640Z
+REMOTE_EVIDENCE=/opt/wathefni/production-evidence/candidate-knowledge-dark/20260726T213640Z
+PROD_ORCH=/opt/wathefni/orchestrator

@@ -1,0 +1,74 @@
+[
+  {
+    "mode": "before",
+    "locale": "en",
+    "vp": "desktop",
+    "dir": null,
+    "textSample": "Wathefni HR WORKSPACE PRE-HIRING Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking Reports POST-HIRE Employees Onboarding Attendance Leave Shifts Payroll Analytics Compliance WORKSPACE Alerts & Delivery Activity Settings PRE-HIRING Reports Hirin",
+    "blackPills": 15,
+    "dots": 6
+  },
+  {
+    "mode": "after",
+    "locale": "en",
+    "vp": "desktop",
+    "dir": null,
+    "textSample": "Wathefni HR WORKSPACE PRE-HIRING Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking Reports POST-HIRE Employees Onboarding Attendance Leave Shifts Payroll Analytics Compliance WORKSPACE Alerts & Delivery Activity Settings PRE-HIRING Reports Hirin",
+    "blackPills": 21,
+    "dots": 6
+  },
+  {
+    "mode": "before",
+    "locale": "en",
+    "vp": "mobile",
+    "dir": null,
+    "textSample": "Reports Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking More PRE-HIRING Reports Hiring reports for roles, candidates, CVs, assessments, and follow-ups. You’re viewing the latest data. Refresh Overview Current hiring snapshot for leadership. ",
+    "blackPills": 15,
+    "dots": 6
+  },
+  {
+    "mode": "after",
+    "locale": "en",
+    "vp": "mobile",
+    "dir": null,
+    "textSample": "Reports Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking More PRE-HIRING Reports Hiring reports for roles, candidates, CVs, assessments, and follow-ups. You’re viewing the latest data. Refresh Overview Current hiring snapshot for leadership. ",
+    "blackPills": 21,
+    "dots": 6
+  },
+  {
+    "mode": "before",
+    "locale": "ar",
+    "vp": "desktop",
+    "dir": null,
+    "textSample": "Wathefni مساحة الموارد البشرية ما قبل التوظيف نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب التقارير ما بعد التوظيف الموظفون التهيئة الحضور الإجازات الورديات الرواتب التحليلات الامتثال مساحة العمل التنبيهات والتسليم النشاط الإعدادات ما قبل التوظيف ال",
+    "blackPills": 15,
+    "dots": 6
+  },
+  {
+    "mode": "after",
+    "locale": "ar",
+    "vp": "desktop",
+    "dir": null,
+    "textSample": "Wathefni مساحة الموارد البشرية ما قبل التوظيف نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب التقارير ما بعد التوظيف الموظفون التهيئة الحضور الإجازات الورديات الرواتب التحليلات الامتثال مساحة العمل التنبيهات والتسليم النشاط الإعدادات ما قبل التوظيف ال",
+    "blackPills": 21,
+    "dots": 6
+  },
+  {
+    "mode": "before",
+    "locale": "ar",
+    "vp": "mobile",
+    "dir": null,
+    "textSample": "التقارير نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب المزيد ما قبل التوظيف التقارير تقارير التوظيف للوظائف والمرشحين والسير الذاتية والتقييمات والمتابعات. أنت تعرض أحدث البيانات. تحديث نظرة عامة لمحة حالية عن التوظيف للقيادة. الوظائف المفتوحة 9",
+    "blackPills": 15,
+    "dots": 6
+  },
+  {
+    "mode": "after",
+    "locale": "ar",
+    "vp": "mobile",
+    "dir": null,
+    "textSample": "التقارير نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب المزيد ما قبل التوظيف التقارير تقارير التوظيف للوظائف والمرشحين والسير الذاتية والتقييمات والمتابعات. أنت تعرض أحدث البيانات. تحديث نظرة عامة لمحة حالية عن التوظيف للقيادة. الوظائف المفتوحة 9",
+    "blackPills": 21,
+    "dots": 6
+  }
+]

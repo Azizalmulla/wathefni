@@ -1,0 +1,42 @@
+PASS  version 5.0.0
+PASS  wave5 enabled
+PASS  company WATHEFNI
+PASS  honesty publishing true
+PASS  honesty open_shifts true
+PASS  honesty draft_publish true
+PASS  honesty coverage_rules true
+PASS  honesty payroll false
+PASS  honesty leave false
+PASS  honesty attendance false
+PASS  honesty rotations false
+PASS  honesty pam_export false
+PASS  w4 honesty publishing false
+PASS  w3 honesty templates false
+PASS  shw5 synthetic key
+PASS  real phone not synth
+PASS  permission_matrix self_approval false
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  PERIOD_STATES complete
+PASS  VERSION_STATES complete
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-shifts-publish-wave5.py", line 720, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-shifts-publish-wave5.py", line 111, in main
+    with app.db_connect() as conn:
+         ~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 238, in __enter__
+    self._conn = _get_db_pool().getconn()
+                 ~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 215, in _get_db_pool
+    binding = runtime_binding()
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 204, in runtime_binding
+    assert_runtime_environment_binding()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 182, in assert_runtime_environment_binding
+    binding = _runtime_environment.resolve_runtime_binding(os.environ)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/runtime_environment.py", line 101, in resolve_runtime_binding
+    raise RuntimeEnvironmentError("application_environment_missing_or_invalid")
+runtime_environment.RuntimeEnvironmentError: application_environment_missing_or_invalid
+LOCAL_DB_UNAVAILABLE — continuing with staging prove

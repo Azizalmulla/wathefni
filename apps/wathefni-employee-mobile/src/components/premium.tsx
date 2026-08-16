@@ -15,7 +15,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { readingEdgeAlign, useI18n } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
-import { actionHaptic } from '@/native/haptics'
+import { lightImpactFeedback } from '@/native/haptics'
 import { colors, font, radius, shadows, spacing, typeScaling } from '@/theme'
 
 /** Ambient brand tones. These carry module identity and warmth, never status. */
@@ -48,7 +48,8 @@ export function FadeIn({
   children,
   style,
   delay = 0,
-  lift = 8,
+  /** Vertical lift in pt. Default 0 — opacity-only enter feels calmer on first paint. */
+  lift = 0,
 }: {
   children: ReactNode
   style?: StyleProp<ViewStyle>
@@ -58,7 +59,7 @@ export function FadeIn({
   const reducedMotion = useReducedMotion()
   // iOS Safari has composited blank-layer bugs with overflow clipping + translateY.
   // Keep motion on web to opacity only so the first paint cannot vanish.
-  const useLift = Platform.OS !== 'web'
+  const useLift = Platform.OS !== 'web' && lift > 0
   const opacity = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current
   const translateY = useRef(new Animated.Value(reducedMotion || !useLift ? 0 : lift)).current
 
@@ -71,7 +72,7 @@ export function FadeIn({
     const animations = [
       Animated.timing(opacity, {
         toValue: 1,
-        duration: motion.duration.enter,
+        duration: motion.duration.quick,
         delay,
         easing: motion.easing.standard,
         useNativeDriver: true,
@@ -81,7 +82,7 @@ export function FadeIn({
       animations.push(
         Animated.timing(translateY, {
           toValue: 0,
-          duration: motion.duration.enter,
+          duration: motion.duration.quick,
           delay,
           easing: motion.easing.standard,
           useNativeDriver: true,
@@ -241,18 +242,30 @@ export function PremiumButton({
   busy = false,
   success = false,
   showDirection = false,
+  icon,
+  tone = 'primary',
+  testID,
 }: {
   label: string
-  onPress: () => void
+  onPress?: () => void
   disabled?: boolean
   busy?: boolean
   success?: boolean
   showDirection?: boolean
+  icon?: keyof typeof Ionicons.glyphMap
+  /** Primary = ink fill. Secondary = quiet outline — never two identical giant blacks. */
+  tone?: 'primary' | 'secondary'
+  /** Stable Maestro / UI-test anchor. Optional — never required for product UX. */
+  testID?: string
 }) {
   const { isRTL } = useI18n()
   const reducedMotion = useReducedMotion()
   const scale = useRef(new Animated.Value(1)).current
   const unavailable = disabled || busy || success
+  const secondary = tone === 'secondary'
+  const spinnerColor = secondary ? colors.ink : colors.surface
+  const labelColor = success ? colors.surface : secondary ? colors.ink : colors.surface
+  const iconColor = labelColor
 
   const animate = (toValue: number) => {
     if (reducedMotion) return
@@ -267,31 +280,42 @@ export function PremiumButton({
   return (
     <Animated.View style={{ transform: [{ scale }] }}>
       <Pressable
+        testID={testID}
         accessibilityRole="button"
+        accessibilityLabel={label}
         accessibilityState={{ disabled: unavailable, busy }}
         disabled={unavailable}
         onPress={() => {
-          actionHaptic()
-          onPress()
+          if (!unavailable) onPress?.()
         }}
-        onPressIn={() => animate(0.985)}
+        onPressIn={() => {
+          // Primary CTAs only — light tactile on press, never secondary/outline.
+          if (!secondary && !unavailable) lightImpactFeedback()
+          animate(0.985)
+        }}
         onPressOut={() => animate(1)}
-        style={[styles.premiumButton, disabled && styles.premiumButtonDisabled, success && styles.premiumButtonSuccess]}
+        style={[
+          styles.premiumButton,
+          secondary && styles.premiumButtonSecondary,
+          disabled && (secondary ? styles.premiumButtonSecondaryDisabled : styles.premiumButtonDisabled),
+          success && styles.premiumButtonSuccess,
+        ]}
       >
         {busy ? (
-          <ActivityIndicator size="small" color={colors.surface} />
+          <ActivityIndicator size="small" color={spinnerColor} />
         ) : (
           <View style={styles.buttonContent}>
-            {success ? <Ionicons name="checkmark" size={18} color={colors.surface} /> : null}
+            {success ? <Ionicons name="checkmark" size={18} color={iconColor} /> : null}
+            {icon && !success ? <Ionicons name={icon} size={18} color={iconColor} /> : null}
             <Text
               maxFontSizeMultiplier={typeScaling.body}
               numberOfLines={2}
-              style={styles.premiumButtonText}
+              style={[styles.premiumButtonText, { color: labelColor }]}
             >
               {label}
             </Text>
             {showDirection && !success ? (
-              <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={17} color={colors.surface} />
+              <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={17} color={iconColor} />
             ) : null}
           </View>
         )}
@@ -300,7 +324,13 @@ export function PremiumButton({
   )
 }
 
-export function MotionProgressBar({ value }: { value: number }) {
+export function MotionProgressBar({
+  value,
+  color = colors.accent,
+}: {
+  value: number
+  color?: string
+}) {
   const normalized = Math.max(0, Math.min(1, value))
   const reducedMotion = useReducedMotion()
   const progress = useRef(new Animated.Value(reducedMotion ? normalized : 0)).current
@@ -330,7 +360,7 @@ export function MotionProgressBar({ value }: { value: number }) {
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: Math.round(normalized * 100) }}
     >
-      <Animated.View style={[styles.progressFill, { width }]} />
+      <Animated.View style={[styles.progressFill, { width, backgroundColor: color }]} />
     </View>
   )
 }
@@ -458,8 +488,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
+  premiumButtonSecondary: {
+    backgroundColor: 'transparent',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
   premiumButtonDisabled: {
     backgroundColor: colors.subtle,
+    shadowOpacity: 0,
+  },
+  premiumButtonSecondaryDisabled: {
+    backgroundColor: 'transparent',
+    borderColor: colors.navMuted,
+    opacity: 0.55,
     shadowOpacity: 0,
   },
   premiumButtonSuccess: { backgroundColor: colors.success },
@@ -471,7 +514,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.surfaceMuted,
   },
-  progressFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.accent },
+  progressFill: { height: '100%', borderRadius: radius.pill },
   iconBadge: {
     alignItems: 'center',
     justifyContent: 'center',

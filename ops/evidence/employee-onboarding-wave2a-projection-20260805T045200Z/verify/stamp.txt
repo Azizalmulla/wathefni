@@ -1,0 +1,13 @@
+stamp=20260805T045200Z
+api_lifecycle_version=2a
+aziz_civil_id=accepted/completed
+aziz_employment_contract=replacement_required/your_actions
+aziz_personal_photo=processing/being_reviewed
+aziz_offer_letter=processing/being_reviewed
+root_cause=client_used_legacy_received_alias
+fix=lifecycleProjection_exact_groups_only
+activation_code=156689
+phone_field=99338566
+eas_build_number=6
+eas_status=finished
+eas_build=https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/58b6f1e0-42d5-4c60-b9ad-b9226eb4eeff

@@ -1,0 +1,4 @@
+ROLLBACK_OK
+PAYROLL_WAVE1_FLAGS_CLEARED
+QUARANTINE_SURVIVED_ROLLBACK [{'timesheet_id': 'cc68a9fb-df72-4e13-a0db-cc13a3805380', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}, {'timesheet_id': '7950dafd-6cf7-44b1-9f92-26f685c34ab5', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}]
+ROLLBACK_VERIFIED

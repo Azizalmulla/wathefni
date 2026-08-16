@@ -1,0 +1,1 @@
+PROD_IMPORT_HANDLER=foundation_only_no_legacy

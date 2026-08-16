@@ -1,0 +1,42 @@
+/opt/wathefni/orchestrator/.venv/bin/python
+# /etc/systemd/system/wathefni-orchestrator.service
+[Unit]
+Description=Wathefni HR LangGraph Orchestrator
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/wathefni/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8010
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/20-assessment-authoring-off.conf
+[Service]
+Environment=WATHEFNI_ASSESSMENT_AUTHORING=false
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/assistant-hr-reads.conf
+[Service]
+Environment=WATHEFNI_ASSISTANT_HR_READS=on
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/assistant-remediation.conf
+# Pre-Hiring Assistant A0–A3 production pins (safe conversational surface).
+# Do NOT set WATHEFNI_DELIVERY_MODE here — Candidate WhatsApp Luna / outbound remain separate.
+[Service]
+Environment=WATHEFNI_TOOL_AGENT_MODEL=gpt-5.6-terra
+Environment=WATHEFNI_ASSISTANT_RANKING_MODE=replay_only
+Environment=WATHEFNI_LEGACY_REGEX_INFERENCE_ENABLED=0
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/bank-ess-ocr-p1.conf
+[Service]
+Environment=WATHEFNI_BANK_ESS_OCR_V1=on
+Environment=WATHEFNI_BANK_ESS_OCR_V1_COMPANIES=WATHEFNI
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/candidate-knowledge.conf
+[Service]
+bash: line 1: rg: command not found

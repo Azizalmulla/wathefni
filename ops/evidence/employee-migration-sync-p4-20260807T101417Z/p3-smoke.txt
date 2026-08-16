@@ -1,0 +1,10 @@
+OK P3/P4 honesty
+OK unknown defaults — no fake completion
+OK mapping profile with onboarding fields
+OK preview dispositions batch=22347056-a632-47c2-9fa0-14f5ad924bb6
+OK dispositions applied (explicit start attempted=True)
+OK idempotent recommit
+OK native Wathefni activity supersedes imported state
+OK rollback ok status=rolled_back
+OK employee migration sync P3 onboarding
+P3_EXIT=0

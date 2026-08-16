@@ -1,0 +1,157 @@
+diff --git a/wathefni-orchestrator/hire_operations.py b/wathefni-orchestrator/hire_operations.py
+index c300d3d..6e5825c 100644
+--- a/wathefni-orchestrator/hire_operations.py
++++ b/wathefni-orchestrator/hire_operations.py
+@@ -203,21 +203,31 @@ def _employee_transaction(
+                 "employee_key": operation.get("employee_key"),
+             }
+         company = str(hired.get("company_code") or "").upper()
+-        phone = legacy.digits(hired.get("phone"))
++        phone = legacy.canonical_employee_phone(hired.get("phone"))
+         if not company or not phone:
+             return {"ok": False, "error": "candidate_identity_incomplete"}
++        aliases = sorted(legacy.phone_identity_candidates(phone))
++        alias_keys = [f"{company}-{alias}" for alias in aliases]
+         cur.execute("SELECT * FROM candidates WHERE phone=%s LIMIT 1", (phone,))
+         candidate_row = cur.fetchone()
++        if not candidate_row and aliases:
++            # Alias-aware candidate lookup for local/965 form mismatches.
++            cur.execute("SELECT * FROM candidates WHERE phone = ANY(%s) LIMIT 1", (aliases,))
++            candidate_row = cur.fetchone()
+         candidate = dict(candidate_row) if candidate_row else {}
+         employee_key = f"{company}-{phone}"
+         cur.execute(
+             """
+             SELECT * FROM employees
+-            WHERE company_code=%s AND (app_key=%s OR employee_key=%s)
++            WHERE company_code=%s AND (
++              app_key=%s
++              OR employee_key = ANY(%s)
++              OR phone = ANY(%s)
++            )
+             ORDER BY CASE WHEN app_key=%s THEN 0 ELSE 1 END
+             FOR UPDATE
+             """,
+-            (company, hired["app_key"], employee_key, hired["app_key"]),
++            (company, hired["app_key"], alias_keys, aliases, hired["app_key"]),
+         )
+         matches = [dict(item) for item in (cur.fetchall() or [])]
+         linked = [item for item in matches if str(item.get("app_key") or "") == str(hired["app_key"])]
+@@ -239,11 +249,12 @@ def _employee_transaction(
+                 UPDATE employees
+                 SET app_key=%s, name=COALESCE(NULLIF(name,''),%s),
+                     email=COALESCE(email,%s), position_title=COALESCE(position_title,%s),
++                    phone=%s,
+                     updated_at=now()
+                 WHERE employee_key=%s AND company_code=%s
+                 RETURNING *
+                 """,
+-                (hired["app_key"], name, email, position, employee["employee_key"], company),
++                (hired["app_key"], name, email, position, phone, employee["employee_key"], company),
+             )
+             employee = dict(cur.fetchone())
+         else:
+@@ -268,8 +279,42 @@ def _employee_transaction(
+                 ),
+             )
+             employee = dict(cur.fetchone())
++        # Kuwait first-client foundation: one immutable employment-applicability
++        # snapshot in the same TX as the employee row (no duplicate on replay).
++        try:
++            import kuwait_first_client_foundation as _kw_foundation
++
++            _kw_foundation.ensure_foundation_schema(cur)
++            snap = _kw_foundation.create_applicability_snapshot_on_cur(
++                legacy,
++                cur,
++                company_code=company,
++                employee_key=str(employee["employee_key"]),
++                app_key=str(hired["app_key"]),
++                hire_operation_id=str(operation_id),
++                hire_operation=operation,
++                actor_user_id=str(operation.get("actor_user_id") or "") or None,
++            )
++            result_snapshot_id = str((snap.get("snapshot") or {}).get("snapshot_id") or "")
++        except Exception as exc:
++            return {"ok": False, "error": "employment_applicability_snapshot_failed", "detail": f"{type(exc).__name__}:{exc}"}
++        # Compliance seed respects employee category when already known; otherwise
++        # nationals-safe defaults (no residence/work_permit required yet).
++        category = "unspecified"
++        try:
++            cur.execute(
++                "SELECT employee_category FROM employee_identity WHERE company_code=%s AND employee_key=%s",
++                (company, employee["employee_key"]),
++            )
++            idrow = cur.fetchone()
++            if idrow:
++                category = str(idrow.get("employee_category") or "unspecified")
++        except Exception:
++            category = "unspecified"
+         if hasattr(legacy, "_seed_employee_compliance_documents"):
+-            legacy._seed_employee_compliance_documents(cur, company, employee["employee_key"])
++            legacy._seed_employee_compliance_documents(
++                cur, company, employee["employee_key"], employee_category=category
++            )
+         if hasattr(legacy, "onboarding_seed_enabled") and legacy.onboarding_seed_enabled() and hasattr(legacy, "seed_onboarding_items"):
+             legacy.seed_onboarding_items(cur, employee)
+         cur.execute(
+@@ -288,6 +333,7 @@ def _employee_transaction(
+             "operation_id": operation_id,
+             "employee_key": employee["employee_key"],
+             "application_app_key": hired["app_key"],
++            "employment_applicability_snapshot_id": locals().get("result_snapshot_id") or "",
+         }
+         cur.execute(
+             """
+diff --git a/wathefni-orchestrator/smoke-test-employee-lifecycle.py b/wathefni-orchestrator/smoke-test-employee-lifecycle.py
+index 28ac1fb..d247357 100644
+--- a/wathefni-orchestrator/smoke-test-employee-lifecycle.py
++++ b/wathefni-orchestrator/smoke-test-employee-lifecycle.py
+@@ -20,6 +20,7 @@ Run against a DB (staging): python3 smoke-test-employee-lifecycle.py
+ 
+ from __future__ import annotations
+ 
++import os
+ import sys
+ import uuid
+ from pathlib import Path
+@@ -40,6 +41,9 @@ def check(label: str, condition: bool) -> None:
+ 
+ def main() -> int:
+     print("    employee lifecycle — edit + mark as left + reactivate, RBAC + scope + audit")
++    # Wave 1 canary is fail-closed outside allowlisted envs; default local smoke
++    # to a non-production env so status self-approval still exercises the path.
++    os.environ.setdefault("WATHEFNI_ENV", "test")
+     sys.path.insert(0, str(Path(__file__).resolve().parent))
+     try:
+         import app
+@@ -194,11 +198,27 @@ def main() -> int:
+ 
+         # --- PATCH endpoint: audit + RBAC --------------------------------
+         audits.clear()
+-        resp = app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="Lead"), context=owner)
++        with app.db_connect() as conn:
++            with conn.cursor() as cur:
++                cur.execute("SELECT updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
++                patch_version = dict(cur.fetchone())["updated_at"]
++        resp = app.dashboard_posthire_update_employee(
++            employee_key=key_a,
++            request=app.DashboardEmployeeUpdate(position_title="Lead", expected_updated_at=patch_version),
++            context=owner,
++        )
+         check("PATCH endpoint returns ok", bool(resp.get("ok")))
+         check("edit recorded an 'employee_updated' audit", any(a["action_type"] == "employee_updated" for a in audits))
+         try:
+-            app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="X"), context=ctx(["attendance.read"], role="viewer"))
++            with app.db_connect() as conn:
++                with conn.cursor() as cur:
++                    cur.execute("SELECT updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
++                    denied_version = dict(cur.fetchone())["updated_at"]
++            app.dashboard_posthire_update_employee(
++                employee_key=key_a,
++                request=app.DashboardEmployeeUpdate(position_title="X", expected_updated_at=denied_version),
++                context=ctx(["attendance.read"], role="viewer"),
++            )
+             check("role without employees.manage cannot edit", False)
+         except app.HTTPException as exc:
+             check("role without employees.manage cannot edit", exc.status_code in (401, 403))

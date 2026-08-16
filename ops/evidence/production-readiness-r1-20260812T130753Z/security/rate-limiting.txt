@@ -1,0 +1,50 @@
+== rate limit / throttle middleware search ==
+wathefni-orchestrator/ops-canary-push-physical.py:269:            "send": {k: send.get(k) for k in ("ok", "delivery_status", "channel", "throttled", "error")},
+wathefni-orchestrator/assessment_ai_eval.py:91:        "provider_rate_limit",
+wathefni-orchestrator/employee_app_invitation.py:141:    if status in {"failed", "suppressed", "throttled", "dashboard_only"} or not outbound.get("ok"):
+wathefni-orchestrator/operator_mobile.py:184:                        code="rate_limited",
+wathefni-orchestrator/recruiting_lifecycle.py:110:    "throttled": "pending",
+wathefni-orchestrator/outbound_delivery.py:157:STATUS_THROTTLED = "throttled"
+wathefni-orchestrator/outbound_delivery.py:171:    STATUS_THROTTLED,
+wathefni-orchestrator/outbound_delivery.py:1410:_NEEDS_FOLLOW_UP_STATUSES = (STATUS_NEEDS_HR, STATUS_FAILED, STATUS_SUPPRESSED, STATUS_THROTTLED, STATUS_DASHBOARD_ONLY)
+wathefni-orchestrator/jobs_phase2_stage_b.py:59:def stage_b_rate_limit_per_hour() -> int:
+wathefni-orchestrator/jobs_phase2_stage_b.py:61:        return max(1, int((os.environ.get("WATHEFNI_STAGE_B_RATE_LIMIT_PER_HOUR") or "8").strip()))
+wathefni-orchestrator/jobs_phase2_stage_b.py:436:            rate_limited = recent >= stage_b_rate_limit_per_hour()
+wathefni-orchestrator/jobs_phase2_stage_b.py:567:            if rate_limited:
+wathefni-orchestrator/jobs_phase2_stage_b.py:570:                    "error": "stage_b_rate_limited",
+wathefni-orchestrator/jobs_phase2_stage_b.py:573:                    "rate_limit_per_hour": stage_b_rate_limit_per_hour(),
+wathefni-orchestrator/ops/wathefni-orchestrator-production-environment.conf:17:Environment=WATHEFNI_STAGE_B_RATE_LIMIT_PER_HOUR=8
+wathefni-orchestrator/ops/HR1_CONTRACT.md:26:- Explicit codes for `operator_disabled`, `company_disabled`, `company_archived`, `rate_limited`.
+wathefni-orchestrator/ops/HR1_CONTRACT.md:27:- Rate limit: 8 failures / 15 minutes → 15-minute lock (`rate_limited`).
+wathefni-orchestrator/ops/HR1_CONTRACT.md:90:Stable codes: `invalid_credentials`, `session_expired`, `session_revoked`, `operator_disabled`, `company_disabled`, `company_archived`, `permission_authority_unavailable`, `module_disabled` (feature reason), `manager_scope_missing` / `manager_scope_conflict` (feature reasons), `feature_disabled`, `action_forbidden`, `rate_limited`, `employee_token_rejected`, `browser_session_rejected`, `legacy_authority_rejected`.
+wathefni-orchestrator/app.py:19222:def reminder_cap_throttled(company_code: str, employee_key: str, template_key: str, window_hours: int) -> bool:
+wathefni-orchestrator/app.py:19223:    """True if a real (non-throttled) send of this reminder template already went
+wathefni-orchestrator/app.py:19231:                   AND status <> '{_outbound_delivery.STATUS_THROTTLED}'
+wathefni-orchestrator/app.py:19240:def record_throttled_reminder(*, company_code: str, employee_key: str, flow: str, template_key: str, window_hours: int) -> dict[str, Any]:
+wathefni-orchestrator/app.py:19241:    """Low-noise audit row: at most ONE throttled row per employee/template/window
+wathefni-orchestrator/app.py:19265:                    _outbound_delivery.STATUS_THROTTLED, label, dedupe,
+wathefni-orchestrator/app.py:19303:        # in REMINDER_CAP_HOURS and so are never throttled (idempotency still applies).
+wathefni-orchestrator/app.py:19305:        if window and emp_key and reminder_cap_throttled(company, str(emp_key), template_key, window):
+wathefni-orchestrator/app.py:19306:            record_throttled_reminder(company_code=company, employee_key=str(emp_key), flow=flow, template_key=template_key, window_hours=window)
+wathefni-orchestrator/app.py:19307:            throttled = {
+wathefni-orchestrator/app.py:19310:                "delivery_status": _outbound_delivery.STATUS_THROTTLED,
+wathefni-orchestrator/app.py:19313:                "throttled": True,
+wathefni-orchestrator/app.py:19318:                throttled.update(extra)
+wathefni-orchestrator/app.py:19319:            return throttled
+wathefni-orchestrator/app.py:29009:        if error == "stage_b_rate_limited":
+wathefni-orchestrator/app.py:29017:                "intent": "candidate_apply_confirm_rate_limited",
+wathefni-orchestrator/app.py:40533:    is throttled by the same cooldown as a successful one. This stops a delivery
+wathefni-orchestrator/app.py:40791:                elif send_result.get("throttled"):
+wathefni-orchestrator/app.py:40792:                    entry["throttled"] = True
+wathefni-orchestrator/app.py:46672:        # card while showing intentional/non-failure states (throttled, opt-out)
+wathefni-orchestrator/app.py:46674:        if status == _outbound_delivery.STATUS_THROTTLED:
+wathefni-orchestrator/ops/staging-smoke.sh:296:log "reminder frequency caps (flag on, throttle within window, idempotent critical events, shift per-shift not collapsed, low-noise audit, calm Delivery Issues, compliance grouping, templates stay off)"
+wathefni-orchestrator/reports/assessment-product2-eval/assessment-product2-eval-v1.json:379:      "failure_class": "rate_limit",
+wathefni-orchestrator/reports/assessment-product2-eval/assessment-product2-eval-v1.json:649:      "case_id": "provider_rate_limit",
+wathefni-orchestrator/reports/assessment-product2-eval/assessment-product2-eval-v1.json:653:        "failure_class": "rate_limit",
+wathefni-orchestrator/reports/assessment-product2-eval/assessment-product2-eval-v2.json:399:      "failure_class": "rate_limit",
+wathefni-orchestrator/reports/assessment-product2-eval/assessment-product2-eval-v2.json:1110:      "case_id": "provider_rate_limit",
+wathefni-orchestrator/reports/assessment-product2-eval/assessment-product2-eval-v2.json:1114:        "failure_class": "rate_limit",
+wathefni-orchestrator/ops/hr1-staging-verify.py:545:        rl_email = f"ratelimit-{uuid.uuid4().hex[:8]}@hr1.staging.test"
+wathefni-orchestrator/ops/hr1-staging-verify.py:556:            any(c == 429 and e == "rate_limited" for c, e in codes),
+wathefni-orchestrator/ops/jobs-phase2-production-verify.py:265:    os.environ["WATHEFNI_STAGE_B_RATE_LIMIT_PER_HOUR"] = "8"

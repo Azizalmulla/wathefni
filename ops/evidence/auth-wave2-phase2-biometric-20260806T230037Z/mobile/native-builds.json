@@ -1,0 +1,30 @@
+{
+  "ios": {
+    "id": "24c71b0a-6b09-4bb3-8d0d-c1e5dcbdc076",
+    "buildNumber": "10",
+    "runtimeVersion": "0.1.0",
+    "channel": "canary",
+    "distribution": "INTERNAL",
+    "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/24c71b0a-6b09-4bb3-8d0d-c1e5dcbdc076",
+    "artifact": "https://expo.dev/artifacts/eas/DDTQ09q5JLEHb-vJQbIt3Ofu1Sv8hsDURql_BCvEYa4.ipa"
+  },
+  "android": {
+    "id": "e7eefb47-abfb-4b0e-8387-bf02b75805cc",
+    "versionCode": "3",
+    "runtimeVersion": "0.1.0",
+    "channel": "canary",
+    "distribution": "INTERNAL",
+    "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/e7eefb47-abfb-4b0e-8387-bf02b75805cc",
+    "artifact": "https://expo.dev/artifacts/eas/xPRMOdQJS0NI9InNttye4b7Yhrqy1Dfuk91fhi0JHqc.apk"
+  },
+  "nativeCapabilities": {
+    "expo-local-authentication": "~14.0.1",
+    "NSFaceIDUsageDescription": true,
+    "USE_BIOMETRIC": true,
+    "USE_FINGERPRINT": true,
+    "bakedEnv": {
+      "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+      "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1"
+    }
+  }
+}

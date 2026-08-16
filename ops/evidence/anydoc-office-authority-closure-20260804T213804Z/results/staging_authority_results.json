@@ -1,0 +1,364 @@
+{
+  "summary": {
+    "mode": "staging",
+    "host": "vps",
+    "files": 19,
+    "promoted_total": 12,
+    "fallback_total": 2,
+    "material_disagreement_total": 1,
+    "structured_xlsx_integrity": true,
+    "structured_csv_integrity": true,
+    "live_docx_engine": "anydoc",
+    "live_docx_promoted": true,
+    "live_csv_structured_unchanged": true,
+    "pinned_version": "0.1.2"
+  },
+  "rows": [
+    {
+      "name": "contract_offer_ar_en.docx",
+      "ext": ".docx",
+      "role": "primary_local_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_docx",
+      "latency_ms": 2,
+      "output_sha256": "1d7da5864246e6c6be7fde5e320428f2df8375bb3d3816be7cab4ff9db79618b"
+    },
+    {
+      "name": "cv_ar_en.docx",
+      "ext": ".docx",
+      "role": "primary_local_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_docx",
+      "latency_ms": 0,
+      "output_sha256": "40cee60874011a295698016b8fd3f0dba3c65966774aba647fae5947877c7aa9"
+    },
+    {
+      "name": "cv_en.docx",
+      "ext": ".docx",
+      "role": "primary_local_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_docx",
+      "latency_ms": 0,
+      "output_sha256": "d3f4b678d50e6befec7c20c834cc2a81e32d3fa39a797422713f53ae5819afd2"
+    },
+    {
+      "name": "deck_ar.pptx",
+      "ext": ".pptx",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_pptx",
+      "latency_ms": 0,
+      "output_sha256": "0f56abbf9de8aad31d0a72f23df94f008406a7f4f88f1cd67f0f3ddea61d0fb9"
+    },
+    {
+      "name": "deck_onboarding_en.pptx",
+      "ext": ".pptx",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_pptx",
+      "latency_ms": 0,
+      "output_sha256": "7c4a83877225ddd6a92741f0f8667177cb687069ee739da7c0b55c7f900ebf1a"
+    },
+    {
+      "name": "employee_list_ar_en.xlsx",
+      "ext": ".xlsx",
+      "role": "markdown_normalization_only",
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "openpyxl",
+      "latency_ms": 1,
+      "output_sha256": "53190e9a97f910b3da59a9a38a74d4547894a53ed60f9563fc54a3f475abfb93"
+    },
+    {
+      "name": "gov_notice_ar.odt",
+      "ext": ".odt",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_odt",
+      "latency_ms": 0,
+      "output_sha256": "471ec7c369fa9d04a37302a180f0e0a804f02e28b6771203aaefe0e9d96c47a0"
+    },
+    {
+      "name": "gov_roster.ods",
+      "ext": ".ods",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_ods",
+      "latency_ms": 0,
+      "output_sha256": "520d15ddb314894d19ef6018b0370da07a2393ab25dd5e5ed8e5f7af1201cc2c"
+    },
+    {
+      "name": "hr_letter_en.docx",
+      "ext": ".docx",
+      "role": "primary_local_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_docx",
+      "latency_ms": 0,
+      "output_sha256": "42d9640b1d228e8305f1875616ff7bb05d44c501d769a1a273cdcecdee7344a6"
+    },
+    {
+      "name": "legacy_stub.doc",
+      "ext": ".doc",
+      "role": "shadow_only",
+      "selected_engine": "existing",
+      "promoted": null,
+      "fallback_reason": "format_shadow_only",
+      "material_disagreement": null,
+      "method": "existing",
+      "latency_ms": null,
+      "output_sha256": null
+    },
+    {
+      "name": "memo_ar.rtf",
+      "ext": ".rtf",
+      "role": "shadow_only",
+      "selected_engine": "existing",
+      "promoted": null,
+      "fallback_reason": "format_shadow_only",
+      "material_disagreement": true,
+      "method": "existing",
+      "latency_ms": null,
+      "output_sha256": null
+    },
+    {
+      "name": "payroll_aug2026.csv",
+      "ext": ".csv",
+      "role": "markdown_normalization_only",
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "text",
+      "latency_ms": 0,
+      "output_sha256": "bbef8fe745c882289b3664a16ce60af7554771f54ba35ddc8ef233447a8d0381"
+    },
+    {
+      "name": "payroll_aug2026.xlsx",
+      "ext": ".xlsx",
+      "role": "markdown_normalization_only",
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "openpyxl",
+      "latency_ms": 1,
+      "output_sha256": "5866dfa2a918d7063133e7668408c3cd1805791b58fe36df1d693d92639d4a88"
+    },
+    {
+      "name": "prior_cv_ar_en.docx",
+      "ext": ".docx",
+      "role": "primary_local_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_docx",
+      "latency_ms": 18,
+      "output_sha256": "5be43e14c1382b44693ff9106a0e23d31ad8a7b53c92ab959381586785ad9735"
+    },
+    {
+      "name": "prior_deck_ar.pptx",
+      "ext": ".pptx",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_pptx",
+      "latency_ms": 1,
+      "output_sha256": "fdab4df5c99402c847b253d6169d181cd6d6ef96f3d468b34658837549b98eff"
+    },
+    {
+      "name": "prior_roster_ar.xlsx",
+      "ext": ".xlsx",
+      "role": "markdown_normalization_only",
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "openpyxl",
+      "latency_ms": 0,
+      "output_sha256": "81280abb8833fb8c822b9a32556219698b9aaab41d60de08aedc4e6075ad229c"
+    },
+    {
+      "name": "prior_sample.ods",
+      "ext": ".ods",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_ods",
+      "latency_ms": 0,
+      "output_sha256": "d85e8548eb00c76d15d175a736604525aa1ae5f659fdaaac24ca9ee16f2cb42d"
+    },
+    {
+      "name": "prior_sample_ar.odt",
+      "ext": ".odt",
+      "role": "document_text_normalization",
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "anydoc_odt",
+      "latency_ms": 0,
+      "output_sha256": "6b069b0b9df075292b89f436b8656cf5bcd5ec0eccd2f7355c972ea7b2e68c33"
+    },
+    {
+      "name": "prior_table_ar.csv",
+      "ext": ".csv",
+      "role": "markdown_normalization_only",
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "fallback_reason": null,
+      "material_disagreement": false,
+      "method": "text",
+      "latency_ms": 0,
+      "output_sha256": "7f42180666b66e87180ee8ad471836aa59ad93cc9529c388efe879d895e314cb"
+    }
+  ],
+  "arabic_evidence": {
+    "contract_offer_ar_en.docx": {
+      "arabic_chars": 85,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "primary_local_normalization"
+    },
+    "cv_ar_en.docx": {
+      "arabic_chars": 84,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "primary_local_normalization"
+    },
+    "deck_ar.pptx": {
+      "arabic_chars": 52,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "document_text_normalization"
+    },
+    "deck_onboarding_en.pptx": {
+      "arabic_chars": 0,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "document_text_normalization"
+    },
+    "employee_list_ar_en.xlsx": {
+      "arabic_chars": 15,
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "role": "markdown_normalization_only"
+    },
+    "gov_notice_ar.odt": {
+      "arabic_chars": 83,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "document_text_normalization"
+    },
+    "gov_roster.ods": {
+      "arabic_chars": 23,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "document_text_normalization"
+    },
+    "memo_ar.rtf": {
+      "arabic_chars": null,
+      "selected_engine": "existing",
+      "promoted": null,
+      "role": "shadow_only"
+    },
+    "payroll_aug2026.csv": {
+      "arabic_chars": 15,
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "role": "markdown_normalization_only"
+    },
+    "prior_cv_ar_en.docx": {
+      "arabic_chars": 62,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "primary_local_normalization"
+    },
+    "prior_deck_ar.pptx": {
+      "arabic_chars": 32,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "document_text_normalization"
+    },
+    "prior_roster_ar.xlsx": {
+      "arabic_chars": 27,
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "role": "markdown_normalization_only"
+    },
+    "prior_sample_ar.odt": {
+      "arabic_chars": 23,
+      "selected_engine": "anydoc",
+      "promoted": true,
+      "role": "document_text_normalization"
+    },
+    "prior_table_ar.csv": {
+      "arabic_chars": 35,
+      "selected_engine": "existing_structured",
+      "promoted": null,
+      "role": "markdown_normalization_only"
+    }
+  },
+  "structured_proof": {
+    "employee_list_ar_en.xlsx": {
+      "text_unchanged": true,
+      "structured_rows_unchanged": true,
+      "md_attached": true,
+      "role": "markdown_normalization_only"
+    },
+    "payroll_aug2026.csv": {
+      "text_unchanged": true,
+      "structured_rows_unchanged": true,
+      "md_attached": true,
+      "role": "markdown_normalization_only"
+    },
+    "payroll_aug2026.xlsx": {
+      "text_unchanged": true,
+      "structured_rows_unchanged": true,
+      "md_attached": true,
+      "role": "markdown_normalization_only"
+    },
+    "prior_roster_ar.xlsx": {
+      "text_unchanged": true,
+      "structured_rows_unchanged": true,
+      "md_attached": true,
+      "role": "markdown_normalization_only"
+    },
+    "prior_table_ar.csv": {
+      "text_unchanged": true,
+      "structured_rows_unchanged": true,
+      "md_attached": true,
+      "role": "markdown_normalization_only"
+    }
+  }
+}

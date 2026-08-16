@@ -1,0 +1,5 @@
+NO_POS {"ok": true, "total": 0, "ranking_unavailable": true, "ranking_error": "job_required", "requires_position": true, "message": "Ranking requires an exact job/position"}
+WITH_POS True 3 2 False
+OFFER_CURRENT True draft
+TERMINAL import_archived []
+SPINE_OK True

@@ -1,0 +1,12 @@
+{
+  "ScopeName": "Wathefni-Mail-Evidence-Scope",
+  "ScopeIdentity": "Wathefni-Mail-Evidence-Scope",
+  "Identity": "ffd171d7-94a7-41a2-a38a-b9bc3ba4a082\\8994e095-0605-4baa-86c0-54185c95b496:S-1-5-21-419062287-4201824721-144665852-27804605;c1fbb7cb-36f3-401e-ad5f-cfa3aeb41c50",
+  "AppId": "8994e095-0605-4baa-86c0-54185c95b496",
+  "ScopeIdentityRaw": "S-1-5-21-419062287-4201824721-144665852-27804605;c1fbb7cb-36f3-401e-ad5f-cfa3aeb41c50",
+  "Description": "Wathefni email send evidence mailbox only",
+  "AccessRight": "RestrictAccess",
+  "ShardType": "All",
+  "IsValid": true,
+  "ObjectState": "Unchanged"
+}

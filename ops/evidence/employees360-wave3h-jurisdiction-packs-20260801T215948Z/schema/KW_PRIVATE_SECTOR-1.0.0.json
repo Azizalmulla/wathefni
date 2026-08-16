@@ -1,0 +1,191 @@
+{
+  "pack_code": "KW_PRIVATE_SECTOR",
+  "jurisdiction_code": "KW",
+  "worker_category": "private_sector",
+  "policy_version": "1.0.0",
+  "effective_from": "2010-02-21",
+  "effective_to": null,
+  "status": "verified",
+  "enabled": true,
+  "timezone_default": "Asia/Kuwait",
+  "source_refs": [
+    {
+      "role": "primary_arabic",
+      "title": "Kuwait Labour Law No. 6 of 2010 (e.gov / MOJ PDF)",
+      "sha256": "20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326",
+      "evidence": "ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/sources/"
+    },
+    {
+      "role": "english_gazette_reading_aid",
+      "title": "Official Gazette Issue 963 extract (21 Feb 2010)",
+      "sha256": "aaed5c6e02a03df4bfdcf035ba1befb9ece3c96d635c5a947f0c5ae929a70fe0"
+    },
+    {
+      "role": "wave3f_closure",
+      "title": "Employees 360 Wave 3F public-law closure pack",
+      "evidence": "ops/evidence/employees360-wave3f-public-law-closure-20260801T214550Z/"
+    }
+  ],
+  "required_employment_fields": [
+    "contract_type",
+    "pay_frequency",
+    "probation_status",
+    "termination_case_class",
+    "termination_effective_on",
+    "last_working_day"
+  ],
+  "contract_types": [
+    "unlimited",
+    "fixed_term"
+  ],
+  "pay_frequencies": [
+    "monthly",
+    "other"
+  ],
+  "probation_statuses": [
+    "none",
+    "active",
+    "completed"
+  ],
+  "probation_rules": {
+    "max_working_days": 100,
+    "terminate_without_notice_during_probation": true,
+    "hide_notice_hints_when_active": true,
+    "require_dates_when_active": true,
+    "once_per_employer": true,
+    "article_refs": [
+      "32"
+    ]
+  },
+  "notice_rules": {
+    "applies_to_contract_types": [
+      "unlimited"
+    ],
+    "blocked_when_probation_active": true,
+    "blocked_for_exceptional_cases": true,
+    "show_hints_default": false,
+    "monthly_hint_days": 90,
+    "other_hint_days": 30,
+    "article_refs": [
+      "44"
+    ],
+    "label": "Optional labeled guidance only — not a legal determination. Shown only when contract_type=unlimited, probation is not active, pay_frequency is known, and the case is not an exceptional/summary path. Mirrors Law No. 6/2010 Art. 44 (Official Gazette Issue 963, 21 Feb 2010): 3 months (monthly) / 1 month (other). HR must still enter effective date and last working day."
+  },
+  "fixed_term_rules": {
+    "notice_hints_apply": false,
+    "damages_owned_by": "payroll",
+    "article_refs": [
+      "30",
+      "31",
+      "47"
+    ]
+  },
+  "termination_case_classes": [
+    "resignation",
+    "dismissal_ordinary",
+    "summary_dismissal_41a",
+    "summary_dismissal_41b",
+    "end_of_fixed_term",
+    "mutual",
+    "abandonment_42",
+    "worker_summary_exit_48",
+    "death_disability_49",
+    "employer_status_50",
+    "other_exceptional"
+  ],
+  "exceptional_case_classes": [
+    "summary_dismissal_41a",
+    "summary_dismissal_41b",
+    "abandonment_42",
+    "worker_summary_exit_48",
+    "death_disability_49",
+    "employer_status_50",
+    "other_exceptional"
+  ],
+  "exceptional_case_escalation": {
+    "manual_only": true,
+    "require_escalation_note": true,
+    "software_decides_lawfulness": false
+  },
+  "settlement_ownership": {
+    "owner": "payroll",
+    "mode": "inputs_only",
+    "forbidden_in_employees360": [
+      "eosb",
+      "notice_pay",
+      "garden_leave_pay",
+      "damages",
+      "leave_encashment"
+    ]
+  },
+  "service_certificate": {
+    "required_default": true,
+    "article_refs": [
+      "54"
+    ],
+    "fields": [
+      "duration",
+      "position",
+      "last_remuneration"
+    ],
+    "forbid_harmful_expressions": true
+  },
+  "retention": {
+    "mode": "retain",
+    "floor_days": 365,
+    "auto_purge": false,
+    "article_refs": [
+      "80",
+      "144"
+    ]
+  },
+  "allowed_lifecycle_actions": [
+    "termination",
+    "cancel_scheduled",
+    "rehire",
+    "notice",
+    "suspension",
+    "unsuspend",
+    "activate_start",
+    "downstream_action",
+    "reinstate"
+  ],
+  "disabled_fallbacks": {
+    "allow_reinstate_after_effective": false,
+    "show_notice_hints": false,
+    "auto_cancel_shifts": false,
+    "auto_decline_leave": false,
+    "allow_self_approval": false,
+    "unsupported_jurisdiction": "fail_closed",
+    "missing_worker_category": "fail_closed",
+    "missing_classification": "manual_review_missing_classification"
+  },
+  "mandatory_rules": {
+    "require_last_working_day": true,
+    "require_employment_classification": true,
+    "require_termination_case_class": true,
+    "require_impact_ack": true,
+    "exceptional_cases_manual_only": true,
+    "monetary_calculations_owner": "payroll",
+    "settlement_packet_mode": "inputs_only",
+    "service_certificate_default": true,
+    "document_retention_mode": "retain",
+    "document_retention_floor_days": 365,
+    "allow_self_approval": false
+  },
+  "ui_copy": {
+    "termination_banner": "Enter contract type, pay frequency, probation status, case classification, effective date and last working day. Missing or conflicting fields go to manual review.",
+    "notice_hint_hidden": "Notice-period guidance is hidden until unlimited contract, non-probation status and pay frequency are complete, and the case is not exceptional.",
+    "exceptional_case_banner": "Exceptional / high-risk case. Wathefni will not decide lawfulness. Complete evidence, escalate for human legal judgment, and keep dates/approvals manual.",
+    "settlement_handoff": "Settlement packet is inputs-only. Payroll calculates EOSB, notice compensation, garden-leave pay and leave encashment outside Employees 360.",
+    "service_certificate": "On end of service the worker is entitled to a service certificate (Art. 54) stating duration, position and last remuneration, without harmful expressions. Track issuance in Wathefni.",
+    "rehire_vs_reinstate": "Post-effective reinstatement is disabled by default. Use true rehire (new employment) unless policy explicitly enables reinstate.",
+    "retention": "Personnel file contents (Art. 80) are retained. No automatic purge. Conservative floor aligns with the one-year lawsuit horizon (Art. 144).",
+    "unsupported_pack": "This employment jurisdiction/worker category has no verified Employees 360 policy pack. Lifecycle actions are blocked until a verified pack exists or the record is remediated.",
+    "remediation_required": "Jurisdiction or worker category is uncertain. Complete remediation before lifecycle actions."
+  },
+  "disclaimer": "Configurable policy only. Not legal advice. Wathefni records, validates and orchestrates HR decisions. Wathefni does not determine whether a specific termination is legally justified. Employees 360 never calculates EOSB, notice pay, garden leave, damages or leave encashment — Payroll owns monetary calculations from an inputs-only settlement packet.",
+  "wave": "wave3h",
+  "wave3f_compatible": true,
+  "content_hash": "fc0f28b10db1b0c6ace97e2b5741d2bf2d3b230d99227d0ece96bf4679a2c8e8"
+}

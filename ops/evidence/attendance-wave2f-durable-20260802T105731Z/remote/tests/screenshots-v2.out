@@ -1,0 +1,20 @@
+OVERVIEW 200 {'store_mode': 'postgres', 'ok': True, 'error': None}
+SEED 401 {'ok': None, 'error': None}
+SEED_FALLBACK_EXISTING_ROWS
+SHOT /opt/wathefni/staging-evidence/attendance-wave2f-durable-20260802T105731Z/screenshots/capture-ops-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave2f-durable-20260802T105731Z/screenshots/capture-ops-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave2f-durable-20260802T105731Z/screenshots/capture-ops-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave2f-durable-20260802T105731Z/screenshots/capture-ops-ar-mobile.png
+{
+  "prefix": "ATTW2FUI2CE74C",
+  "company": "WATHEFNI",
+  "store_mode": "postgres",
+  "shots": [
+    "capture-ops-ar-desktop.png",
+    "capture-ops-ar-mobile.png",
+    "capture-ops-en-desktop.png",
+    "capture-ops-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false
+}

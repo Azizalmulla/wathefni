@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "attendance": {
+    "attendance_id": "bd743aa2-bc85-4d66-b21f-60a27e7ff0c6",
+    "employee": {
+      "employee_key": "WATHEFNI-9655237101",
+      "name": "W2B-SYNTH| Onboarding Visual",
+      "department": null
+    },
+    "attendance_date": "2026-08-09",
+    "scheduled_start": "09:00:00",
+    "scheduled_end": "17:00:00",
+    "check_in_at": "2026-08-09T08:58:00+00:00",
+    "check_out_at": null,
+    "status": "late",
+    "exception_kind": "lateness",
+    "is_exception": true,
+    "late_minutes": 28,
+    "early_leave_minutes": 0,
+    "notes": " [hr-cfa-20260810T182638Z]",
+    "updated_at": "2026-08-10T18:26:40.437573+00:00",
+    "action_mode": "request_correction",
+    "allowed_actions": [
+      "resolve"
+    ],
+    "destination": "/attendance/bd743aa2-bc85-4d66-b21f-60a27e7ff0c6"
+  }
+}

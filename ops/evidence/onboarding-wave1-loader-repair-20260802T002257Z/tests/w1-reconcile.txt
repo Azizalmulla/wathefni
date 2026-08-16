@@ -1,0 +1,10 @@
+found_employees 3
+{"employee_key": "WATHEFNI-96597727743", "name": "mohammad alqattan", "item_count": 6, "helper_eq_summary": true, "counts_match": true, "pending": 2, "received": 2, "wrong_tenant_empty": true}
+{"employee_key": "WATHEFNI-96550252254", "name": "Talal Fadhli", "item_count": 6, "helper_eq_summary": true, "counts_match": true, "pending": 4, "received": 0, "wrong_tenant_empty": true}
+{"employee_key": "WATHEFNI-96566363363", "name": "Fouad Burhamad", "item_count": 6, "helper_eq_summary": true, "counts_match": true, "pending": 3, "received": 1, "wrong_tenant_empty": true}
+ALL_MATCH True
+REMINDER_NO_COMPANY_EMPTY True
+SEED False
+HR_MUTATE True
+BANK_BLOCK (False, 'bank_via_ess_required')
+RECOMPUTE_MATCH True {'documents_pending': 2, 'documents_complete': 2, 'onboarding_status': 'in_progress'} {'p': 2, 'r': 2}

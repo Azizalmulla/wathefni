@@ -1,0 +1,131 @@
+PDF_INSPECTOR_DEEP_EVAL_WAVE0_START
+{
+  "evid": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804",
+  "fixture_target": 24
+}
+FIXTURES_BUILT count=24
+BENCH cv_en_digital_01
+BENCH cv_en_digital_02
+BENCH cv_en_digital_03
+BENCH cv_ar_digital_01
+BENCH cv_ar_digital_02
+BENCH cv_ar_digital_03
+BENCH cv_bilingual_01
+BENCH cv_bilingual_02
+BENCH cv_multicolumn_01
+BENCH cv_multicolumn_02
+BENCH cv_scanned_en_01
+BENCH cv_scanned_ar_01
+BENCH cv_scanned_en_02
+BENCH cv_mixed_01
+BENCH cv_mixed_02
+BENCH cv_tounicode_proper_01
+BENCH cv_broken_encoding_01
+BENCH contract_employment_en_01
+BENCH contract_kuwait_labor_law_real_01
+BENCH identity_civil_id_digital_01
+BENCH identity_passport_scanned_01
+BENCH table_compensation_01
+BENCH table_experience_matrix_01
+BENCH cv_en_digital_multipage_01
+{
+  "summary": {
+    "fixtures": 24,
+    "total_pages": 29,
+    "routing": {
+      "inspector_exact_match_rate": 0.958,
+      "poppler_exact_match_rate": 0.833,
+      "inspector_poppler_agreement_rate": 0.875,
+      "fixtures_with_inspector_false_skips": 1,
+      "fixtures_with_inspector_unnecessary_ocr": 0,
+      "fixtures_with_poppler_false_skips": 1
+    },
+    "speed_ms": {
+      "inspector_process_avg": 1.125,
+      "inspector_library_avg": 1.125,
+      "poppler_assess_avg": 58.625
+    },
+    "digital_native_needle_hit_avg": 0.935,
+    "poppler_digital_needle_hit_avg": 0.78,
+    "arabic_integrity_markdown_avg": 0.688,
+    "field_accuracy_avg": {
+      "inspector_markdown": 0.756,
+      "poppler": 0.668
+    },
+    "projected_mistral": {
+      "usd_per_page_assumption": 0.004,
+      "pages_total": 29,
+      "ocr_pages_expected": 7,
+      "ocr_pages_poppler": 9,
+      "ocr_pages_inspector": 6,
+      "cost_all_pages_usd": 0.116,
+      "cost_poppler_usd": 0.036,
+      "cost_inspector_usd": 0.024,
+      "savings_vs_all_pages_usd": 0.092,
+      "savings_vs_poppler_usd": 0.012,
+      "note": "Projection only; Wave 0 did not call Mistral."
+    },
+    "subset_counts": {
+      "digital_like": 18,
+      "scanned": 4,
+      "mixed": 2
+    }
+  },
+  "decisions": {
+    "native_pdf_text_extraction": {
+      "verdict": "NO-GO",
+      "reasons": [
+        "Digital needle hit=0.935, arabic_integrity=0.688; below safe replace threshold."
+      ]
+    },
+    "ocr_page_advising": {
+      "verdict": "CONDITIONAL-GO",
+      "reasons": [
+        "Exact match 0.958; false-skip fixtures=1; usable only behind Poppler veto."
+      ]
+    },
+    "primary_routing_with_poppler_veto": {
+      "verdict": "NO-GO",
+      "reasons": [
+        "Primary routing requires durable false-skip=0 on broken encoding + Arabic/real-scan soak, Python Full scan strategy exposure, and production shadow metrics. Not met for Wave 0."
+      ]
+    },
+    "smallest_safe_implementation_wave": {
+      "name": "pdf_inspector_shadow_advisor_wave1",
+      "scope": "CV PDF intake only: record pdf-inspector process_pdf signals beside Poppler assess_pdf_pages; never change paid OCR routing; emit disagreement metrics.",
+      "feature_flag": "WATHEFNI_PDF_INSPECTOR_SHADOW=1",
+      "authoritative_router": "Poppler assess_pdf_pages / page_text_usable",
+      "shadow_signals": [
+        "pdf_type",
+        "confidence",
+        "pages_needing_ocr",
+        "has_encoding_issues",
+        "pages_with_tables",
+        "pages_with_columns",
+        "markdown_len",
+        "processing_time_ms"
+      ],
+      "observability": [
+        "cv_extraction_runs.raw_json.pdf_inspector_shadow",
+        "metric: pdf_inspector_poppler_ocr_page_disagreement",
+        "metric: pdf_inspector_false_skip_candidate",
+        "metric: pdf_inspector_encoding_issue_rate"
+      ],
+      "rollback": "Unset WATHEFNI_PDF_INSPECTOR_SHADOW; no routing code path depends on it.",
+      "acceptance_thresholds_before_advisor_canary": {
+        "false_ocr_skips_on_known_need_ocr_set": 0,
+        "broken_encoding_flag_or_ocr_rate": "100%",
+        "arabic_needle_integrity_avg": ">=0.90",
+        "digital_needle_hit_avg": ">=0.90",
+        "shadow_overhead_p95_ms": "<=150 on <=10 page CVs"
+      },
+      "explicitly_out_of_scope": [
+        "Replace Poppler",
+        "Call/skip Mistral based on inspector alone",
+        "Identity/contract/payroll routing changes",
+        "Migration Wave 1-B resume"
+      ]
+    }
+  }
+}
+PDF_INSPECTOR_DEEP_EVAL_WAVE0_DONE

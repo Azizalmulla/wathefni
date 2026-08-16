@@ -1,0 +1,45 @@
+== setup console cards mounted ==
+35:import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+65:import { EmployeeAppAccessPolicyCard } from './EmployeeAppAccessPolicyCard'
+68:import { OwnershipDeepLinksCard } from './OwnershipDeepLinksCard'
+69:import { IntegrationsCatalogCard } from './IntegrationsCatalogCard'
+70:import { ModuleCompanyPoliciesCard } from './ModuleCompanyPoliciesCard'
+71:import { Wave1HireReadyPoliciesCard } from './Wave1HireReadyPoliciesCard'
+72:import { Wave2WorkforceTruthPoliciesCard } from './Wave2WorkforceTruthPoliciesCard'
+73:import { Wave3EmployeeLifecyclePoliciesCard } from './Wave3EmployeeLifecyclePoliciesCard'
+74:import { Wave4PerformanceTalentPoliciesCard } from './Wave4PerformanceTalentPoliciesCard'
+75:import { Wave6JobArchitecturePoliciesCard } from './Wave6JobArchitecturePoliciesCard'
+76:import { Wave6LearningPoliciesCard } from './Wave6LearningPoliciesCard'
+77:import { Wave6BenefitsPoliciesCard } from './Wave6BenefitsPoliciesCard'
+78:import { Wave6EmployeeRelationsPoliciesCard } from './Wave6EmployeeRelationsPoliciesCard'
+79:import { Wave6EngagementPoliciesCard } from './Wave6EngagementPoliciesCard'
+80:import { Wave6CompensationPlanningPoliciesCard } from './Wave6CompensationPlanningPoliciesCard'
+81:import { Wave6WorkforcePlanningPoliciesCard } from './Wave6WorkforcePlanningPoliciesCard'
+82:import { PayrollSetupCard } from './PayrollSetupCard'
+83:import { TeamAccessCard } from './TeamAccessCard'
+490:          <CreateCompanyCard onCreate={handleCreated} />
+776:      <LifecycleCard
+784:      <ReadinessCard detail={detail} />
+785:      <OwnershipDeepLinksCard locale={locale} />
+787:        <ProfileCard
+801:        <ModulesCard
+812:      <EmployeeAppAccessPolicyCard
+824:      <PayrollSetupCard
+836:      <ModuleCompanyPoliciesCard
+845:      <Wave1HireReadyPoliciesCard
+852:      <Wave2WorkforceTruthPoliciesCard
+859:      <Wave3EmployeeLifecyclePoliciesCard
+866:      <Wave4PerformanceTalentPoliciesCard
+873:      <Wave6JobArchitecturePoliciesCard
+880:      <Wave6LearningPoliciesCard
+887:      <Wave6BenefitsPoliciesCard
+894:      <Wave6EmployeeRelationsPoliciesCard
+901:      <Wave6EngagementPoliciesCard
+908:      <Wave6CompensationPlanningPoliciesCard
+915:      <Wave6WorkforcePlanningPoliciesCard
+922:      <IntegrationsCatalogCard
+929:      <ChannelPolicyCard
+938:        <CompanyChannelAccountCard
+952:        <HrWhatsAppCard
+961:        <OwnerInviteCard
+967:        <TeamAccessCard

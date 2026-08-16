@@ -1,0 +1,4 @@
+ack_event_id e0191ada-ffb3-4e00-8df7-443c63694cc5
+ACK_PRODUCTION_MODULE_AWARE_SHELL_W0B=YES
+residual_policy=canary_tagged_cleaned_ack_retained
+MIGRATE_OK

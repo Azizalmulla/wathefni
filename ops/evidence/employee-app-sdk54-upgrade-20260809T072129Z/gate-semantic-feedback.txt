@@ -1,0 +1,45 @@
+PASS  kind selection
+PASS  kind weekSnap
+PASS  kind tab
+PASS  kind lightImpact
+PASS  kind success
+PASS  kind warning
+PASS  kind error
+PASS  export selectionFeedback
+PASS  export weekSnapFeedback
+PASS  export tabFeedback
+PASS  export lightImpactFeedback
+PASS  export successFeedback
+PASS  export warningFeedback
+PASS  export errorFeedback
+PASS  per-kind throttle present
+PASS  fire-and-forget (non-blocking)
+PASS  selection uses Soft impact
+PASS  Medium impact present for snap/warning
+PASS  no expo-av
+PASS  no playSound
+PASS  no SOUND_MODULES
+PASS  no Audio.Sound
+PASS  no require('../../assets/feedback
+PASS  removed in-app UI tone snap.wav
+PASS  removed in-app UI tone success.wav
+PASS  removed in-app UI tone warning.wav
+PASS  removed in-app UI tone error.wav
+PASS  push wathefni_default.wav preserved
+PASS  expo-av removed from package.json
+PASS  expo-av not in app.json plugins
+PASS  push sound still in expo-notifications.sounds
+PASS  no raw expo-haptics/expo-av outside central layer
+PASS  PremiumButton primary CTA light impact on press
+PASS  CTA haptic gated to primary
+PASS  ScheduleWeekStrip day vs week snap split
+PASS  bottom tabs use tabFeedback
+PASS  app/onboarding.tsx wired
+PASS  app/documents.tsx wired
+PASS  app/bank.tsx wired
+PASS  app/(tabs)/leave.tsx wired
+PASS  app/leave/request.tsx wired
+PASS  app/(tabs)/payslips.tsx wired
+PASS  app/settings.tsx wired
+PASS  app/change-pin.tsx wired
+PASS semantic feedback (44 checks)

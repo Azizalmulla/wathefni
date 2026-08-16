@@ -1,0 +1,3 @@
+FAIL RTL single-source (2 problems)
+  - src/features/schedule/ScheduleView.tsx:619 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order
+  - src/features/schedule/ScheduleWeekStrip.tsx:326 — manual `row-reverse`: Yoga already mirrors `row` under RTL, so this flips Arabic back to Latin order

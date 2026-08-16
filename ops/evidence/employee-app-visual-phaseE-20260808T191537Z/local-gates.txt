@@ -1,0 +1,77 @@
+=== typecheck (strict, unused locals) ===
+typecheck exit=1
+
+=== node scripts/composition-shapes-test.js ===
+PASS  every presented task points at a path the employee may open
+PASS  missing server tasks yield no tasks
+---
+PASS employee app composition shapes (61 checks)
+
+=== node scripts/density-hierarchy-test.js ===
+PASS  every growth list declares a page size
+PASS  the open year of a decade of history renders one page, not 264 rows
+---
+PASS density + hierarchy (24 checks)
+
+=== node scripts/documents-hierarchy-test.js ===
+PASS  registry-only payload marks compliance partial
+PASS  empty payload is genuinely empty
+---
+PASS documents hierarchy (7 checks)
+
+=== node scripts/feature-unavailable-copy-test.js ===
+PASS  EN+AR feature reason copy present and equal keysets for these keys
+PASS  customer copy does not echo backend reason tokens
+---
+PASS feature unavailable copy (9 checks)
+
+=== node scripts/high-value-additions-test.js ===
+      PASS  exact timestamp is available in both locales
+      PASS  exact timestamp is empty rather than wrong when absent
+
+    23 passed, 0 failed
+
+=== node scripts/pin-crypto-selftest.js ===
+PIN_CRYPTO_SELFTEST_PASS
+
+=== node scripts/push-follow-through-test.js ===
+PASS  flow-only entitled hint opens schedule
+PASS  flow-only unentitled hint falls back to Inbox
+---
+PASS push follow-through (14 checks)
+
+=== python3 scripts/a11y-i18n-static-scan.py ===
+PASS  Editorial headings default to header role
+PASS  Inbox preserves server title/body (no client fake-translate of HR text)
+---
+PASS a11y+i18n static scan (21 checks) — not a physical QA pass
+
+=== python3 scripts/session-refresh-static-proof.py ===
+PASS  feature-disabled API responses trigger refreshMe
+PASS  FeatureUnavailable reads server features.reason (no client entitlement invention)
+---
+PASS session/refresh static proof (8 checks)
+
+=== python3 scripts/verify-capability-foundation.py ===
+PASS payslip authority copy is source-neutral and free of payroll jargon
+PASS no internal terminology in employee-facing copy ([])
+PASS translation keys have no scalar/object collisions
+employee mobile capability foundation: GREEN
+
+=== python3 scripts/verify-color-system.py ===
+PASS  no list-position-driven colour assignment (none)
+PASS  no untokenised colour literals in screens (none)
+---
+PASS employee app colour system (32 checks)
+
+=== python3 scripts/verify-density-hierarchy.py ===
+PASS  app/(tabs)/payslips.tsx bounds its growth list (PAYSLIP_PAGE)
+PASS  Schedule's capped recent history is unchanged
+---
+PASS density + hierarchy static scan (71 checks) — not a physical QA pass
+
+=== python3 scripts/verify-high-value-additions.py ===
+PASS  the client never decides whether a balance is enforceable
+PASS  leave submission is unchanged
+
+79 passed, 0 failed

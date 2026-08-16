@@ -1,0 +1,21 @@
+active
+PASS decision allow_uncertain
+PASS hr review recommended
+PASS hard blocks needs_review
+PASS photo that is ID blocks
+PASS looks_like_id_not_photo
+PASS personal photo allows
+PASS expired passport blocks
+PASS expired reason
+PASS tiny file blocks
+PASS file_too_small
+PASS route gpt false
+PASS docx anydoc flag
+PASS error code prefix
+PASS validation gpt false
+OK onboarding doc validation parity local smoke
+--- CREATE ---
+{
+  "action": "created",
+  "civil_id_untouched": "accepted"
+}

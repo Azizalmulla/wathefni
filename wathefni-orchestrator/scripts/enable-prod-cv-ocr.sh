@@ -28,7 +28,7 @@ cat > "$DROPIN" <<'EOF'
 EnvironmentFile=-/root/.openclaw/secrets/mistral.env
 Environment=WATHEFNI_MISTRAL_ENV=/root/.openclaw/secrets/mistral.env
 Environment=WATHEFNI_CV_MISTRAL_OCR=true
-Environment=WATHEFNI_CV_GPT_VISION_RESCUE=true
+Environment=WATHEFNI_CV_GPT_VISION_RESCUE=off
 EOF
 chmod 644 "$DROPIN"
 
@@ -59,13 +59,13 @@ sudo -u postgres psql -d wathefni -c '\dt cv_extraction*'
 
 echo "=== runtime confirmation ==="
 export WATHEFNI_CV_MISTRAL_OCR=true
-export WATHEFNI_CV_GPT_VISION_RESCUE=true
+export WATHEFNI_CV_GPT_VISION_RESCUE=off
 export WATHEFNI_MISTRAL_ENV=/root/.openclaw/secrets/mistral.env
 set -a
 # shellcheck disable=SC1091
 . /root/.openclaw/secrets/mistral.env
 set +a
-( cd "$PROD" && "$VENV/python" -c 'import cv_extraction as cv; print("model", cv.MISTRAL_OCR_MODEL); print("enabled", cv.mistral_ocr_enabled()); print("key", bool(cv.mistral_api_key())); print("rescue", cv.gpt_vision_rescue_enabled())' )
+( cd "$PROD" && "$VENV/python" -c 'import cv_extraction as cv; print("model", cv.MISTRAL_OCR_MODEL); print("enabled", cv.mistral_ocr_enabled()); print("key", bool(cv.mistral_api_key())); print("rescue", cv.gpt_vision_rescue_enabled()); print("retired", cv.cv_gpt_rescue_retired())' )
 
 echo "=== health ==="
 curl -sS -o /dev/null -w 'prod_local_http=%{http_code}\n' http://127.0.0.1:8010/dashboard/auth/me || true

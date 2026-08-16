@@ -1,0 +1,156 @@
+{
+  "stamp": "20260811T061112Z",
+  "suite": "bs-smoke",
+  "runtime": "browserstack",
+  "evidence": "ops/evidence/mobile-e2e-gate-bs-20260811T061112Z",
+  "host": {
+    "app_id": "ai.wathefni.employee",
+    "repo_root": "/Users/azizalmulla/Desktop/claw",
+    "maestro_ok": true,
+    "java_ok": false,
+    "simctl_ok": true,
+    "ios_runtime_ok": false,
+    "ios_booted": false,
+    "app_installed_booted": false,
+    "adb_ok": false,
+    "usb_android_device": false,
+    "disk_free_gb": "2",
+    "ui_runtime_ready": false,
+    "blockers": [
+      "java_runtime_missing_for_maestro",
+      "ios_simulator_runtime_missing",
+      "adb_missing",
+      "disk_free_lt_9gb_for_ios_runtime",
+      "no_executable_ui_target"
+    ],
+    "rule": "API PASS \u2260 MOBILE PASS \u2014 ui_runtime_ready=false means MOBILE_PASS stays 0"
+  },
+  "fixtures": {
+    "skipped": true
+  },
+  "leave_reconcile": {
+    "checks": {
+      "approve": {
+        "pass": false,
+        "expect": "approved",
+        "leave_id": "60822864-fff9-4f22-a8c3-077a90907128",
+        "status": "requested",
+        "decision_note": null,
+        "allowed_actions": [
+          "read",
+          "approve",
+          "reject"
+        ],
+        "employee_key": "WATHEFNI-96550252254",
+        "start_date": "2026-09-01",
+        "leave_type": "annual",
+        "reason": "[wathefni_mobile_e2e_leave_fixture_v1:approve] disposable BrowserStack leave fixture \u2014 safe to decide/cleanup"
+      },
+      "reject_reason_persisted": false,
+      "reject": {
+        "pass": false,
+        "expect": "rejected",
+        "leave_id": "d42c4045-f96e-4b34-b338-c5480846d75f",
+        "status": "requested",
+        "decision_note": null,
+        "allowed_actions": [
+          "read",
+          "approve",
+          "reject"
+        ],
+        "employee_key": "WATHEFNI-96550252254",
+        "start_date": "2026-09-08",
+        "leave_type": "annual",
+        "reason": "[wathefni_mobile_e2e_leave_fixture_v1:reject] disposable BrowserStack leave fixture \u2014 safe to decide/cleanup"
+      }
+    },
+    "ok": false,
+    "rule": "API/DB reconcile supports MOBILE_PASS but cannot replace it"
+  },
+  "browserstack": {
+    "build_id": "f4c9eb771dd01934f11423082cab99e8d71777fa",
+    "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/f4c9eb771dd01934f11423082cab99e8d71777fa",
+    "MOBILE_PASS": 0
+  },
+  "counts": {
+    "FAIL": 2,
+    "API_SPINE": 6,
+    "BLOCKED": 1
+  },
+  "MOBILE_PASS": 0,
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "MOBILE_PASS=0 (no real UI execution succeeded)",
+  "rule": "API PASS \u2260 MOBILE PASS",
+  "selected_flows": [
+    "bs-smoke/00-launch-unsigned.yaml",
+    "bs-smoke/01-hr-login.yaml",
+    "bs-smoke/02-hr-tabs.yaml",
+    "bs-smoke/03-hr-leave-approve.yaml",
+    "bs-smoke/04-hr-leave-reject.yaml"
+  ],
+  "matrix": [
+    {
+      "id": "UI.browserstack.sessions",
+      "flow": "browserstack/bs-smoke/00-launch-unsigned.yaml,bs-smoke/01-hr-login.yaml,bs-smoke/02-hr-tabs.yaml,bs-smoke/03-hr-leave-approve.yaml,bs-smoke/04-hr-leave-reject.yaml",
+      "verdict": "FAIL",
+      "detail": "passed=0 failed=1 error=0 status=failed",
+      "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/f4c9eb771dd01934f11423082cab99e8d71777fa",
+      "build_id": "f4c9eb771dd01934f11423082cab99e8d71777fa"
+    },
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "HR login OK company=WATHEFNI",
+      "http": 200
+    },
+    {
+      "id": "API.hr.me",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/me \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.priorities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/priorities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.leave.requested",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/leave?status=requested&limit=5 \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.assistant.capabilities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/assistant/capabilities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    },
+    {
+      "id": "API.leave.reconcile",
+      "flow": "reconcile-leave-decision",
+      "verdict": "FAIL",
+      "detail": "{\"approve\": \"requested\", \"reject_reason_persisted\": false, \"reject\": \"requested\"}"
+    }
+  ]
+}

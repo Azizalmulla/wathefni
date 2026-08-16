@@ -1,0 +1,63 @@
+    payroll settlement ot c6 — prove
+      PASS  c6 module
+      PASS  rollback guidance
+      PASS  EN finalized
+      PASS  AR finalized
+      PASS  EN OT pending
+      PASS  AR OT pending
+      PASS  settlement ≠ paid honesty
+      PASS  no invented EOS/PIFSS
+      PASS  E360 not calculator
+      PASS  OT not required for payroll
+      PASS  settlement ≠ clearance
+      PASS  module-off / global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  settlement blocked while entitlement off
+      PASS  enable settlement+ot auth
+      PASS  lifecycle packet seeded
+      PASS  settlement from valid lifecycle inputs
+      PASS  status inputs_ready
+      PASS  calculate settlement
+      PASS  encashment quantity only (no money invented)
+      PASS  EOS refs without invented formulas
+      PASS  EN/AR settlement calc labels
+      PASS  SoD creator/calculator cannot approve
+      PASS  stale approval protection
+      PASS  approve settlement
+      PASS  kill switch blocks finalize
+      PASS  SoD creator cannot finalize
+      PASS  finalize seals result
+      PASS  settlement payslip/payment inputs
+      PASS  no false paid state
+      PASS  EN/AR payslip/payment input labels
+      PASS  stale/duplicate finalize idempotent
+      PASS  finalized settlement immutable
+      PASS  adjustment path after finalization
+      PASS  prior superseded
+      PASS  sealed prior not silently mutated status
+      PASS  Payroll without OT remains green
+      PASS  OT→Payroll optional feed off blocks export
+      PASS  OT create
+      PASS  OT submit → pending
+      PASS  OT self-approve fails
+      PASS  OT out-of-scope fails
+      PASS  OT stale fails safely
+      PASS  OT reject
+      PASS  OT cancel
+      PASS  OT approve
+      PASS  OT export blocked until feed enabled
+      PASS  OT→Payroll optional feed export
+      PASS  EN/AR OT payroll input labels
+      PASS  OT export idempotent
+      PASS  independent of attendance_truth
+      PASS  independent of leave_enforcement
+      PASS  independent of shifts_mss
+      PASS  disable company entitlement
+      PASS  module-off after disable
+
+    57 passed, 0 failed
+SETTLEMENT_OT_UNIT_PASS
+SETTLEMENT_OT_FULL_PASS
+STAGING_RC=0

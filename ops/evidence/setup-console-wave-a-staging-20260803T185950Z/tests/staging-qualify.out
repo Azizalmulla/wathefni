@@ -1,0 +1,71 @@
+health_ok
+active
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SETUP_CONSOLE_ENABLED=true
+WATHEFNI_SETUP_CONSOLE_V2=on
+CAPTURE_INGEST_OFF_OK
+PASS  wave a version
+PASS  wathefni only constant
+PASS  honest states complete
+PASS  six stages
+PASS  refuses non-wathefni
+PASS  launch readiness page present
+PASS  UI overall status
+PASS  UI important blockers
+PASS  UI pause impact
+PASS  UI EN launch title
+PASS  UI AR launch title
+PASS  UI rtl
+PASS  UI mobile wrap
+PASS  app wires launch view
+PASS  no giant form in launch page
+PASS  route registered
+PASS  module imported in app
+PASS  db evaluate ok
+PASS  overall state present
+PASS  stages returned
+PASS  entitlements cannot bypass
+PASS  payroll money false
+PASS  attendance ingest false
+PASS  modules stage non-empty
+PASS  attendance honest ingest block
+PASS  payroll honest state
+PASS  payroll not claiming money authority
+PASS  blockers have next actions
+PASS  blockers have deep links
+db wathefni_staging
+
+29 passed, 0 failed
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+PASS  E360 freeze doc present
+PASS  Onboarding freeze doc present
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+96 passed, 0 failed
+EVALUATE_OK live_controlled blockers 5
+{
+  "overall": "live_controlled",
+  "modules": 14,
+  "blockers": 5
+}
+UI_EN_AR_MOBILE_OK
+STAGING_WAVE_A_OK

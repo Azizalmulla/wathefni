@@ -1,0 +1,30 @@
+{
+  "id": "restricted_recruiter",
+  "label": "Restricted recruiter vs owner",
+  "modules": [
+    "pre_hiring",
+    "assessments",
+    "interviews",
+    "leave",
+    "payroll"
+  ],
+  "role": "recruiter",
+  "nav_groups": [
+    "prehire",
+    "settings"
+  ],
+  "nav_ids": [
+    "jobs",
+    "candidates",
+    "interviews",
+    "notifications"
+  ],
+  "overview_layout": "two",
+  "offerable_tabs": {
+    "video_interviews": false
+  },
+  "settings": {
+    "team": false,
+    "integrations": false
+  }
+}

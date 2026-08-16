@@ -1,0 +1,48 @@
+PASS employeeCanonicalParent + decideEmployeeSafeBack
+PASS useEmployeeSafeBack uses performEmployeeSafeBack
+PASS EmployeePushedEscape uses PageBackButton
+PASS PageBackButton RTL arrow
+PASS parent /notifications → /(tabs)
+PASS parent /leave/history → /(tabs)/leave
+PASS parent /leave/request → /(tabs)/leave
+PASS parent /schedule/history → /(tabs)/schedule
+PASS parent /settings → /(tabs)/profile
+PASS parent /change-pin → /settings
+PASS parent /privacy-support → /settings
+PASS parent /documents → /(tabs)
+PASS parent /onboarding → /(tabs)
+PASS parent /bank → /(tabs)/profile
+PASS push history → back
+PASS cold deep link change-pin → settings
+PASS cold documents → home
+PASS useEmployeeSafeBack on settings.tsx
+PASS useEmployeeSafeBack on documents.tsx
+PASS useEmployeeSafeBack on bank.tsx
+PASS useEmployeeSafeBack on onboarding.tsx
+PASS useEmployeeSafeBack on privacy-support.tsx
+PASS useEmployeeSafeBack on change-pin.tsx
+PASS useEmployeeSafeBack on notifications.tsx
+PASS useEmployeeSafeBack on leave/request.tsx
+PASS useEmployeeSafeBack on leave/history.tsx
+PASS useEmployeeSafeBack on schedule/history.tsx
+PASS no bare router.back() on Employee app routes (excl D1 payslips onRefresh)
+PASS documents loading/error use EmployeePushedEscape
+PASS inbox loading/error use EmployeePushedEscape
+PASS onboarding loading/error pass onBack
+PASS bank unavailable uses onBack safe helper
+PASS bank loading/error pass onBack
+PASS BankUnavailableView has PageBackButton chrome
+PASS change-pin never return null
+PASS change-pin pinEnabled false shows escape
+PASS change-pin parent override settings
+PASS payslips BackHandler closes detail
+PASS signedOut mounts auth-only stack
+PASS signedOut stack only (auth)
+PASS signedOut block has no (tabs)
+PASS tab (tabs)/index.tsx is not forced pushed chrome
+PASS tab (tabs)/leave.tsx is not forced pushed chrome
+PASS tab (tabs)/schedule.tsx is not forced pushed chrome
+PASS tab (tabs)/profile.tsx is not forced pushed chrome
+PASS RTL affordance preserved on PageBackButton
+
+employee-navigation-ergonomics: GREEN

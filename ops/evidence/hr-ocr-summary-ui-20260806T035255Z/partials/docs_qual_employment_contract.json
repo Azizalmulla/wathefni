@@ -1,0 +1,245 @@
+{
+  "item_id": "docs_qual_employment_contract",
+  "validation_item": "employment_contract",
+  "started_at": "2026-08-06T03:54:46.650807+00:00",
+  "checks": {
+    "civil_untouched": {
+      "status": "accepted",
+      "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+      "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+    },
+    "linkage": {
+      "employee_key": "WATHEFNI-96599338566",
+      "item_id": "docs_qual_employment_contract",
+      "document_type": "docs_qual_employment_contract",
+      "status": "pending",
+      "required": false,
+      "owner": "employee",
+      "collection_mode": "document"
+    },
+    "wrong_document": {
+      "http": 422,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "document_validation_glare_or_shadow",
+          "message": "Glare or heavy shadow is covering parts of the document. Please retake in even light without flash reflection.",
+          "message_en": "Glare or heavy shadow is covering parts of the document. Please retake in even light without flash reflection.",
+          "message_ar": "\u0648\u0647\u062c \u0623\u0648 \u0638\u0644 \u0643\u062b\u064a\u0641 \u064a\u063a\u0637\u064a \u0623\u062c\u0632\u0627\u0621 \u0645\u0646 \u0627\u0644\u0645\u0633\u062a\u0646\u062f. \u064a\u0631\u062c\u0649 \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0642\u0627\u0637 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0625\u0636\u0627\u0621\u0629 \u0645\u062a\u0633\u0627\u0648\u064a\u0629 \u0648\u062f\u0648\u0646 \u0627\u0646\u0639\u0643\u0627\u0633 \u0627\u0644\u0641\u0644\u0627\u0634.",
+          "reason": "glare_or_shadow",
+          "gate": "soft",
+          "detected_item": "unknown",
+          "validation": {
+            "decision": "block",
+            "confidence": 0.0,
+            "route": {
+              "document_class": "contract",
+              "file_type": "png",
+              "extension": ".png",
+              "reading_route": "mistral_or_shared",
+              "gpt_auto_ocr_fallback": false,
+              "gpt_fallback_forbidden": true
+            },
+            "gpt_used": false
+          },
+          "capture_quality": {
+            "status": "reject",
+            "reason": "glare_or_shadow",
+            "signal_reason": null,
+            "metrics": {
+              "width": 1400,
+              "height": 1000,
+              "short_side": 1000,
+              "long_side": 1400,
+              "laplacian_var": 351.994,
+              "glare_frac": 0.4561,
+              "crop_hot_sides": 0,
+              "crop_signal": "none"
+            },
+            "engine": "pil_numpy_v1"
+          },
+          "quality_issues": [
+            "glare_or_shadow"
+          ]
+        }
+      }
+    },
+    "cross_type_rejection": {
+      "http": 422,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "document_validation_too_blurry",
+          "message": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+          "message_en": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+          "message_ar": "\u0647\u0630\u0647 \u0627\u0644\u0635\u0648\u0631\u0629 \u063a\u064a\u0631 \u0648\u0627\u0636\u062d\u0629 \u0644\u0644\u0642\u0631\u0627\u0621\u0629. \u064a\u0631\u062c\u0649 \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0642\u0627\u0637\u0647\u0627 \u0639\u0646 \u0642\u0631\u0628 \u0648\u0628\u062a\u0631\u0643\u064a\u0632 \u0623\u0648\u0636\u062d\u060c \u062b\u0645 \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.",
+          "reason": "too_blurry",
+          "gate": "soft",
+          "detected_item": "unknown",
+          "validation": {
+            "decision": "block",
+            "confidence": 0.0,
+            "route": {
+              "document_class": "contract",
+              "file_type": "png",
+              "extension": ".png",
+              "reading_route": "mistral_or_shared",
+              "gpt_auto_ocr_fallback": false,
+              "gpt_fallback_forbidden": true
+            },
+            "gpt_used": false
+          },
+          "capture_quality": {
+            "status": "clean",
+            "reason": null,
+            "signal_reason": null,
+            "metrics": {
+              "width": 900,
+              "height": 1200,
+              "short_side": 900,
+              "long_side": 1200,
+              "laplacian_var": 264.547,
+              "glare_frac": 0.0,
+              "crop_hot_sides": 0,
+              "crop_signal": "none"
+            },
+            "engine": "pil_numpy_v1"
+          },
+          "quality_issues": [
+            "too_blurry"
+          ]
+        }
+      }
+    },
+    "upload": {
+      "http": 200,
+      "kind": "ok",
+      "body": {
+        "ok": true,
+        "item_id": "docs_qual_employment_contract",
+        "file_id": "9fb3b290-1b0b-4a2e-8794-619b7bf99f8b",
+        "storage_status": "stored",
+        "status": "processing",
+        "lifecycle_version": "2a",
+        "validation": {
+          "gate": "soft",
+          "decision": "allow",
+          "reason": null,
+          "hr_review_recommended": false,
+          "message": null,
+          "message_en": null,
+          "message_ar": null,
+          "gpt_used": false
+        }
+      }
+    },
+    "version": {
+      "version_id": "1763c100-bee2-48b7-bcc8-bb462a8c07bd",
+      "review_status": "pending_hr_review",
+      "parts_complete": false,
+      "document_number": null,
+      "expiry_date": null,
+      "issue_date": null,
+      "file_id": "9fb3b290-1b0b-4a2e-8794-619b7bf99f8b"
+    },
+    "identity": "not_applicable_for_item",
+    "hr_journey_hit": true,
+    "hr_projection": {
+      "review_status": "pending_hr_review",
+      "expiry_date": null,
+      "issue_date": null,
+      "has_ocr_proposal": true,
+      "ocr_keys": [
+        "authoritative",
+        "confidence",
+        "document_type",
+        "employer_or_sponsor",
+        "extraction_status",
+        "full_name",
+        "name"
+      ],
+      "versions_count": 1
+    },
+    "hr_fields_shown_in_ui": [
+      "expiry_date",
+      "issue_date",
+      "review_status",
+      "rejection_reason",
+      "versions",
+      "extracted_name",
+      "document_type",
+      "nationality",
+      "date_of_birth",
+      "employer_or_sponsor",
+      "confidence",
+      "extraction_status",
+      "identity_match",
+      "hr_warnings",
+      "document_number_masked",
+      "civil_id_parts_front_back",
+      "extracted_vs_verified"
+    ],
+    "hr_fields_in_api_not_ui": [],
+    "extraction_vs_verified": {
+      "extracted_are_proposals": true,
+      "never_auto_overwrite_employee_profile": true,
+      "hr_must_confirm_explicitly": true
+    },
+    "verified_fields": null,
+    "preview_file_id": "9fb3b290-1b0b-4a2e-8794-619b7bf99f8b",
+    "preview_http": 200,
+    "employee_status_after_approve": "accepted",
+    "employee_status_after_reject": "replacement_required",
+    "cross_employee_upload": {
+      "http": 404,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "item_not_found",
+          "message": "We couldn't find that document on your checklist."
+        }
+      }
+    }
+  },
+  "proven": [
+    "linkage",
+    "wrong_document_rejection",
+    "cross_type_rejection",
+    "supported_upload",
+    "classification_allow",
+    "ocr_stored",
+    "identity_matching_na",
+    "expiry_na",
+    "version_history",
+    "hr_receives_submission",
+    "hr_ocr_summary_ui",
+    "hr_ocr_no_raw_dump",
+    "preview",
+    "hr_approve_roundtrip",
+    "hr_reject_replacement",
+    "cross_employee_blocked"
+  ],
+  "partial": [],
+  "missing": [],
+  "extracted_schema": {
+    "document_type": "employment_contract",
+    "full_name": "ABDULAZIZ H R ALMULLA",
+    "employer_or_sponsor": "WATHEFNI Company W.L.L.",
+    "confidence": 0.0,
+    "extraction_status": "needs_review",
+    "_top_level_keys": [
+      "authoritative",
+      "confidence",
+      "document_type",
+      "employer_or_sponsor",
+      "extraction_status",
+      "full_name",
+      "name"
+    ],
+    "_field_keys": []
+  },
+  "errors": [],
+  "failing_request": null,
+  "verdict": "fully proven",
+  "finished_at": "2026-08-06T03:55:00.359918+00:00"
+}

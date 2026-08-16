@@ -1,0 +1,51 @@
+{
+  "stamp": "20260801T160950Z",
+  "external_tenants_enabled": false,
+  "post_hiring_started": false,
+  "code_deployed_this_phase": false,
+  "ga_recommendation": "limited_canary",
+  "external_tenant_enablement": "NO-GO",
+  "premium_connector_ga": "NO-GO",
+  "wathefni_forwarding_canary": "GO",
+  "blockers": [
+    {
+      "severity": "medium",
+      "id": "durable_to_held_materialization_synthetic",
+      "summary": "Synthetic Postmark durable receives completed processing jobs without creating Held Intake applications in the D6 wait window.",
+      "impact": "Blocks confident external-tenant GA and full E2E durable→held claims for unattended synthetic traffic; does not block WATHEFNI forwarding canary because durable receive, quotas, and Held admit UX separately PASS.",
+      "mitigation": "Investigate promote-to-application path (malware/OCR/identity) with production-like CVs before expanding beyond WATHEFNI; keep ops monitor watching dead_letter/waiting_* queues."
+    },
+    {
+      "severity": "low",
+      "id": "m365_mailbox_oauth_unset",
+      "summary": "Dedicated WATHEFNI_M365_MAILBOX_* app credentials remain unset; Mail.Send app is separate and present.",
+      "impact": "Premium M365 connector cannot be customer-enabled until app registration + tenant flagging.",
+      "mitigation": "Expected dark posture; configure only when a premium canary tenant is approved."
+    },
+    {
+      "severity": "low",
+      "id": "inbound_metrics_surface",
+      "summary": "Inbound ops monitor timer exists; no dedicated Prometheus scrape called out for inbound quotas/outages.",
+      "impact": "Support relies on usage API + systemd timers + audit logs.",
+      "mitigation": "Acceptable for limited canary; add alert hooks on dead_letter and waiting_budget before external enablement."
+    }
+  ],
+  "ops_readiness": {
+    "inbound_worker_timer": true,
+    "ops_monitor_timer": true,
+    "usage_endpoint": true,
+    "kill_switch": true,
+    "retention_execute_off": true,
+    "quarantine_volume_active": true
+  },
+  "commercial_packaging": {
+    "default_product": "forwarding",
+    "mailbox_connectors": "premium_optional_dark",
+    "sync_default": "off"
+  },
+  "privacy_retention": {
+    "execute_flag": "off",
+    "dry_run_ok": true,
+    "fernet_mailbox_secrets": true
+  }
+}

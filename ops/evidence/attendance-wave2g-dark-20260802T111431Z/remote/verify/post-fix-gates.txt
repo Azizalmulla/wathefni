@@ -1,0 +1,2 @@
+gates_ok postgres
+sha_ops b'#!/usr/bin/env pytho'

@@ -6,6 +6,7 @@ import type {
   EmployeeSummary,
   HRTask,
   InterviewSummary,
+  LeaveRequest,
   MobileCollection,
   MobileDetail,
   OnboardingChecklistItem,
@@ -90,6 +91,27 @@ function detail<T>(payload: unknown, keys: string[], normalize: (value: unknown)
     item: normalize(value.item),
     generated_at: optionalText(value.source.generated_at),
     stale: value.source.stale === true,
+  }
+}
+
+export function normalizeLeave(value: unknown): LeaveRequest {
+  const input = record(value)
+  return {
+    leave_id: text(input.leave_id, text(input.id)),
+    employee: person(input.employee),
+    leave_type: optionalText(input.leave_type),
+    start_date: text(input.start_date),
+    end_date: text(input.end_date),
+    duration_days: numberOrNull(input.duration_days),
+    reason: optionalText(input.reason),
+    status: text(input.status, 'requested'),
+    decision_note: optionalText(input.decision_note),
+    requested_at: optionalText(input.requested_at),
+    updated_at: optionalText(input.updated_at),
+    shift_conflict_count: numberOrNull(input.shift_conflict_count) || 0,
+    balance: input.balance,
+    allowed_actions: actions(input.allowed_actions),
+    destination: text(input.destination, `/leave/${text(input.leave_id, text(input.id))}`),
   }
 }
 
@@ -265,6 +287,12 @@ export function normalizeCandidateSummary(value: unknown): CandidateSummary {
   const candidate = record(input.candidate || overview.candidate)
   const position = record(input.position || overview.position)
   const ranking = record(input.ranking)
+  const communication = record(input.communication || overview.communication)
+  const waitingForHr = Array.isArray(input.waiting_for_hr)
+    ? input.waiting_for_hr
+    : Array.isArray(overview.waiting_for_hr)
+      ? overview.waiting_for_hr
+      : []
   return {
     app_key: text(input.app_key, text(input.id)),
     candidate: {
@@ -276,6 +304,11 @@ export function normalizeCandidateSummary(value: unknown): CandidateSummary {
       title: optionalText(position.title),
     },
     status: text(input.status, text(overview.status, 'review_pending')),
+    canonical_stage: optionalText(input.canonical_stage) || optionalText(overview.canonical_stage),
+    status_label: optionalText(input.status_label) || optionalText(overview.status_label),
+    intake_source: optionalText(input.intake_source) || optionalText(overview.intake_source),
+    communication_status: optionalText(input.communication_status) || optionalText(communication.status),
+    next_human_action: waitingForHr.length ? optionalText(waitingForHr[0]) : null,
     score: numberOrNull(input.score ?? ranking.score),
     confidence:
       typeof (input.confidence ?? ranking.confidence) === 'string' ||
@@ -292,13 +325,24 @@ export function normalizeInterview(value: unknown): InterviewSummary {
   const candidate = record(input.candidate)
   const position = record(input.position)
   const communication = record(input.communication)
+  const meeting = record(input.meeting)
   return {
     interview_id: text(input.interview_id, text(input.id)),
     app_key: optionalText(input.app_key),
     candidate: { name: text(candidate.name, 'Candidate'), email: optionalText(candidate.email) },
     position: { code: optionalText(position.code), title: optionalText(position.title) },
     status: text(input.status, 'scheduled'),
+    application_stage: optionalText(input.application_stage),
+    application_stage_label: optionalText(input.application_stage_label),
+    interview_type: optionalText(input.interview_type),
+    feedback_status: optionalText(input.feedback_status),
     scheduled_at: optionalText(input.scheduled_at) || optionalText(input.scheduled_start),
+    scheduled_end: optionalText(input.scheduled_end),
+    timezone: optionalText(input.timezone),
+    meeting: {
+      type: optionalText(meeting.type),
+      join_url: optionalText(meeting.join_url),
+    },
     notes: optionalText(input.notes),
     communication_status:
       optionalText(input.communication_status) ||
@@ -310,11 +354,18 @@ export function normalizeInterview(value: unknown): InterviewSummary {
           : communication.calendar_invite_sent === true
             ? 'Calendar sent'
             : null),
+    invitation_status: optionalText(input.invitation_status),
+    candidate_confirmation: optionalText(input.candidate_confirmation),
+    notes_status: optionalText(input.notes_status),
+    next_human_action: optionalText(input.next_human_action),
+    ai_summary: record(input.ai_summary),
+    ai_advisory: input.ai_advisory === true ? true : undefined,
     allowed_actions: actions(input.allowed_actions),
   }
 }
 
 export const normalize = {
+  leave: (payload: unknown) => collection(payload, ['leave_requests', 'leave'], normalizeLeave),
   tasks: (payload: unknown) => collection(payload, ['tasks', 'hr_tasks'], normalizeTask),
   onboarding: (payload: unknown) => collection(payload, ['onboarding', 'employees'], normalizeOnboarding),
   onboardingDetail: (payload: unknown) =>

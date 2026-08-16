@@ -1,0 +1,13 @@
+{
+  "pass": 86,
+  "fail": 0,
+  "tag": "663e0765",
+  "residual": 0,
+  "ack_count": 2,
+  "mutations_allowed": false,
+  "leave_authority": "live_controlled",
+  "leave_total": 0,
+  "attendance_authority": "synthetic",
+  "attendance_total": 0,
+  "attendance_capture_ingest": "off"
+}

@@ -1,0 +1,101 @@
+{
+  "owner_email": "azizalmulla16@gmail.com",
+  "viewer_email": "fslalmulla@gmail.com",
+  "profile_general": {
+    "http": 200,
+    "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+    "name": "yasser al dossary",
+    "status": "needs_role",
+    "is_held": true,
+    "record_state": "talent_pool",
+    "position": ""
+  },
+  "profile_single_application": {
+    "http": 200,
+    "app_key": "96597485758-WATHEFNI-HR",
+    "name": "Hamad Almulla",
+    "status": "shortlisted",
+    "is_held": false,
+    "record_state": "active_application",
+    "position": "HR"
+  },
+  "profile_multi_application_person": {
+    "http": 200,
+    "app_key": "96598900677-WATHEFNI-FINANCE",
+    "name": "AZIZ ALMULLA",
+    "status": "screening",
+    "is_held": false,
+    "record_state": "active_application",
+    "position": "FINANCE"
+  },
+  "permission_denial": {
+    "http": 403,
+    "detail": {
+      "error": "permission_denied",
+      "message": "You do not have permission to do this action.",
+      "company_code": "WATHEFNI",
+      "required_module": "pre_hiring",
+      "required_permission": "candidate.import",
+      "role": "viewer"
+    }
+  },
+  "duplicate_or_not_held_denial": {
+    "http": 409,
+    "detail": {
+      "error": "not_in_import_review",
+      "message": "This candidate is already in the pipeline."
+    }
+  },
+  "add_to_job_success": {
+    "http": 200,
+    "payload": {
+      "ok": true,
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "status": "ready_for_review",
+      "position_code": "J2P2_PROD_TEST"
+    }
+  },
+  "idempotent_or_duplicate_second": {
+    "http": 409,
+    "detail": {
+      "error": "not_in_import_review",
+      "message": "This candidate is already in the pipeline."
+    },
+    "payload": {
+      "detail": {
+        "error": "not_in_import_review",
+        "message": "This candidate is already in the pipeline."
+      }
+    }
+  },
+  "health": {
+    "http": 200,
+    "payload": {
+      "status": "ok",
+      "runtime": "toolcall_fastapi",
+      "environment_binding": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      },
+      "permission_authority": "backend_current_required",
+      "legacy_dashboard_token_auth": false,
+      "legacy_untrusted_auth_usable": false
+    }
+  },
+  "ui_scan": {
+    "Add to job": 3,
+    "No job assigned": 3,
+    "Talent Pool": 0,
+    "held intake": 0,
+    "Intake Operations": 0,
+    "intake_operations": 0,
+    "needs_role": 5,
+    "provenance": 1,
+    "taxonomy": 3
+  },
+  "asset": "dashboard-BEPGpsMJ.js"
+}

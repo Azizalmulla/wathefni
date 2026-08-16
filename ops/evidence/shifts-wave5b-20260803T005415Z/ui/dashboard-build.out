@@ -1,0 +1,5 @@
+
+> wathefni-dashboard@0.0.0 build
+> tsc -b && vite build
+
+src/posthire/ShiftsWorkspace.tsx(8,3): error TS6133: 'AlertTriangle' is declared but its value is never read.

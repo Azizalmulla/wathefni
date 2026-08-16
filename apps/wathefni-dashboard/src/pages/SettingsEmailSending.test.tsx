@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { describe, expect, test, vi } from 'vitest'
 
 import { SettingsPage } from '@/pages/SettingsPage'
@@ -77,10 +77,30 @@ const emailView: EmailSendingSettingsResponse = {
   allow_wathefni_emergency_fallback: false,
   primary_action: { id: 'test', label: 'Test' },
   intake: {
-    addresses: [{ address: 'acme@inbound.wathefni.ai', label: 'General' }],
+    feature: {
+      enabled: true,
+      global_enabled: true,
+      allowlisted: true,
+      domain: 'inbound.wathefni.ai',
+      architecture: 'forward_to_wathefni_intake',
+      mailbox_sync_enabled: false,
+      health: { last_received_at: null, received_count: 0, received_7d: 0 },
+      quotas: {
+        daily_message_quota: 0,
+        monthly_message_quota: 0,
+        daily_source_bytes_quota: 0,
+        monthly_source_bytes_quota: 0,
+        daily_processing_job_quota: 0,
+        commercial_enforced: false,
+      },
+    },
+    addresses: [{ intake_id: 'i1', address: 'acme@inbound.wathefni.ai', label: 'General', status: 'active', role_bound: false, hold_policy: 'needs_role' }],
     public_forward_address: null,
     forward_instructions_en: 'Forward CVs to your Wathefni intake address.',
     forward_instructions_ar: 'حوّل السير الذاتية إلى عنوان استقبال وظفني.',
+    setup_steps_en: ['Create a recruitment mailbox.', 'Forward CVs to Wathefni.'],
+    setup_steps_ar: ['أنشئ صندوق بريد توظيف.', 'حوّل السير إلى وظفني.'],
+    inbound_forwarding_enabled: true,
   },
 }
 
@@ -116,7 +136,18 @@ describe('Settings Email sending Communications', () => {
     const src = readFileSync(resolve(__dirname, '../pages/SettingsPage.tsx'), 'utf8')
     expect(src).toContain('Email sending')
     expect(src).toContain('Email & document intake')
-    expect(src).toContain('Communications')
+    expect(src).toContain('Create address')
+    expect(src).toContain('Job-specific alias')
+    expect(src).toContain('General address')
+    expect(src).toContain('Rotate')
+    expect(src).toContain('Last received')
+    expect(src).toContain('Recruitment mailbox connector (optional)')
+    expect(src).toContain('MailboxConnectorCard')
+    expect(src).toContain('default product path')
+    expect(src).toContain('ربط صندوق التوظيف (اختياري)')
+    expect(src).toContain('durable intake pipeline')
+    expect(src).not.toContain('Intake Operations')
+    expect(src).toContain('position_code')
     expect(src).toContain('Also send an email with calendar invitations')
     expect(src).toContain('Allow Wathefni emergency fallback')
     expect(src).not.toContain('service principal')
@@ -147,6 +178,7 @@ describe('Settings Email sending Communications', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     renderWithProviders(<SettingsPage {...settingsBase} />)
+    fireEvent.click(await screen.findByRole('tab', { name: 'Communications' }))
 
     await waitFor(() => {
       expect(screen.getAllByText('Email sending').length).toBeGreaterThan(0)
@@ -175,11 +207,42 @@ describe('Settings Email sending Communications', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const { container } = renderWithProviders(<SettingsPage {...settingsBase} />)
+    fireEvent.click(await screen.findByRole('tab', { name: 'الاتصالات' }))
     await waitFor(() => {
       expect(screen.getAllByText('إرسال البريد').length).toBeGreaterThan(0)
     })
     const rtlNodes = container.querySelectorAll('[dir="rtl"]')
     expect(rtlNodes.length).toBeGreaterThan(0)
     expect(screen.getByText('استقبال البريد والمستندات')).toBeInTheDocument()
+  })
+
+  test('renders job alias create controls', async () => {
+    document.documentElement.lang = 'en'
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input)
+      if (path.includes('/dashboard/prehire/integrations/email')) return jsonResponse(emailView)
+      if (path.includes('/dashboard/prehire/visibility-policy') || path.includes('/dashboard/prehire/import/settings')) {
+        return jsonResponse({ company_code: 'WATHEFNI', prehire_visibility_policy: 'shared_company', auto_admit_explicit_imports: false })
+      }
+      if (path.includes('/dashboard/prehire/integrations/mailbox')) {
+        return jsonResponse({ company_code: 'WATHEFNI', feature: { enabled: false }, connections: [] })
+      }
+      return jsonResponse({})
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderWithProviders(
+      <SettingsPage
+        {...settingsBase}
+        positions={[{ position_code: 'ENG', position_title: 'Engineer', status: 'open' } as never]}
+      />,
+    )
+    fireEvent.click(await screen.findByRole('tab', { name: 'Communications' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('intake-alias-create')).toBeInTheDocument()
+    })
+    expect(screen.getByText('General address')).toBeInTheDocument()
+    expect(screen.getByText('Job-specific alias')).toBeInTheDocument()
+    expect(screen.getByText('Needs a job')).toBeInTheDocument()
   })
 })

@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_en_digital_01",
+  "category": "english_digital_cv",
+  "language": "en",
+  "layout": "single_column",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Sara Al-Mutairi",
+    "sara.almutairi@example.com",
+    "+96550110011",
+    "EXPERIENCE",
+    "SKILLS"
+  ],
+  "expected_fields": {
+    "full_name": "Sara Al-Mutairi",
+    "email": "sara.almutairi@example.com",
+    "phone": "+96550110011",
+    "title": "Senior Backend Engineer"
+  },
+  "notes": "Structurally valid digital English CV with embedded TrueType text.",
+  "sha256": "b0ca976fd5c05de6b4167a482486840826332148566c5eb8055268166cf86fc3",
+  "bytes": 32332
+}

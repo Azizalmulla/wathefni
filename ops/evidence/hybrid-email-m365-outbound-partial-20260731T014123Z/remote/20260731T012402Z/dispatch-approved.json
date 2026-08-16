@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "provider": "microsoft_graph",
+  "message_id": null,
+  "error": null,
+  "provider_accept_status": "accepted_by_provider",
+  "user_status": "Accepted by Microsoft",
+  "raw": {
+    "http_status": 202,
+    "body": ""
+  },
+  "dry_run": false,
+  "sender_mode": "microsoft_mailbox",
+  "visible_from": "abdulazizalmulla@wathefni.onmicrosoft.com",
+  "visible_reply_to": "hr@wathefni.ai",
+  "emergency_fallback_used": false,
+  "intended_mode": "microsoft_mailbox"
+}

@@ -1,0 +1,71 @@
+{
+  "stamp_utc": "2026-08-01T18:46:13Z",
+  "database": "wathefni",
+  "employee_total": 4,
+  "status_distribution": {
+    "<null_or_blank>": 2,
+    "active": 2
+  },
+  "invalid_statuses": {
+    "<null_or_blank>": 2
+  },
+  "phone_formats": {
+    "kw_965": 4
+  },
+  "exact_phone_dup_groups": 0,
+  "local_vs_965_groups": 0,
+  "email_dup_groups": 0,
+  "keys_suffix_ne_phone": 0,
+  "keys_local_8": 0,
+  "orphan_total": 3,
+  "orphan_tables": [
+    "employee_messages"
+  ],
+  "dual_manage_approve": 1,
+  "nav_api_mismatch": 0,
+  "scoped_manage_risk": 0,
+  "canary_total": 1,
+  "canary_outside_wathefni": 0,
+  "left_with_app_key": 0,
+  "hire_ops_on_left": 0,
+  "has_unique_company_phone": false,
+  "flags": {
+    "WATHEFNI_DOC_UPLOAD": "on",
+    "WATHEFNI_ONBOARDING_SEED": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "WATHEFNI_EMPLOYEE_NEXT_ACTIONS": "on",
+    "WATHEFNI_LEAVE_BALANCES": "on",
+    "WATHEFNI_INBOUND_EMAIL": "on",
+    "WATHEFNI_MAILBOX_SYNC": "off",
+    "WATHEFNI_ENV": "production",
+    "WATHEFNI_EXPECTED_DATABASE_NAME": "wathefni",
+    "WATHEFNI_DATABASE_ENVIRONMENT_MARKER": "wathefni-production-isolation-v1",
+    "WATHEFNI_ORG_HIERARCHY": null,
+    "WATHEFNI_ONBOARDING_HR_MUTATE": null,
+    "WATHEFNI_ENVIRONMENT": null
+  },
+  "immediate_risk": {
+    "signals": [
+      {
+        "severity": "P0",
+        "signal": "self_approved_internal_canary_used_on_WATHEFNI",
+        "count": 1,
+        "active_customer_data_at_risk": false,
+        "note": "Internal-only usage observed; server still does not tenant-restrict the mode"
+      },
+      {
+        "severity": "P1",
+        "signal": "orphan_employee_linked_rows",
+        "count": 3,
+        "tables": [
+          "employee_messages"
+        ],
+        "active_customer_data_at_risk": true
+      }
+    ],
+    "any_active_customer_data_at_immediate_risk": true
+  },
+  "mutated": false
+}
+
+WROTE /tmp/employees360-wave0-run3/wave0-inventory.json

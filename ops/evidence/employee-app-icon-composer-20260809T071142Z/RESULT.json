@@ -1,0 +1,23 @@
+{
+  "verdict": "FAIL",
+  "current_icon_path": "expo.icon -> ./assets/icon.png",
+  "current_icon_type": "legacy_png_AppIcon.appiconset",
+  "ios_auto_adapting_legacy": true,
+  "explicit_icon_composer_in_installed_build": false,
+  "composer_package": "assets/WathefniAppIcon.icon",
+  "composer_settings": {
+    "fill": "#FEF0D6",
+    "glass": false,
+    "specular": false,
+    "translucency": false,
+    "shadow": "none",
+    "blur-material": 0,
+    "refractivity": false,
+    "default_appearance": "fill-specializations default (Light/Default)"
+  },
+  "physical_before": "soft/grey badge on Home Screen (owner; legacy PNG + iOS 26 auto Liquid Glass)",
+  "physical_after": null,
+  "physical_after_blocked_by": "EAS build 4146bebf on Xcode 26.2 failed: SDK 51 XCODE_BUILD_ERROR switch must be exhaustive",
+  "build_attempt": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/4146bebf-3af3-4727-bf88-86e37c77fd47",
+  "unblock": "Upgrade to Expo SDK 54+ then ship ios.icon / WATHEFNI_IOS_ICON_COMPOSER=1 on Xcode 26"
+}

@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "provider": "microsoft_graph",
+  "error": "microsoft_http_403",
+  "provider_accept_status": "failed",
+  "user_status": "Error",
+  "raw": {
+    "http_status": 403,
+    "body": "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access to OData is disabled: [RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings.\"}}"
+  }
+}

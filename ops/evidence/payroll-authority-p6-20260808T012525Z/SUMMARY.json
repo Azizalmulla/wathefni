@@ -1,0 +1,910 @@
+{
+  "stamp": "20260808T012525Z",
+  "tag": "fb03ee11",
+  "pass": 61,
+  "fail": 0,
+  "results": [
+    {
+      "name": "p6 version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "entitlement model",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no global mode a",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode b supported",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview remains preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle pack self-consistent residual=0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle fixture version present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle scenario A_normal_full_period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle scenario A_mid_month_hire",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle scenario B_ot_rest_ph",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle scenario C_pifss_resolvable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle scenario C_gated_gcc_blocks",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "oracle scenario D_external_mode_b_mirror",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gated scenario not authoritative",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "non-applicable statutory still eligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "setup schema version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "setup has required/optional/advanced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "setup lists wathefni_owned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "independent residual A_normal = 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "readiness returns actionable issues list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "readiness ok after setup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "set entitlement disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic still qual-allowed when disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nonsynthetic blocked when disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "opt-in authoritative_allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "entitlement state allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlisted state still blocks non-listed employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "add employee allowlist",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlisted employee may seal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlisted nonsynthetic compensation approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a pipeline ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sealed snapshot present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "money_authority=wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exception review ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exception summary has ready bucket",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "variance advisory_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payslip from sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official PDF eligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unreleased invisible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "release payslip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sealed immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "correction period pipeline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replacement authority distinct",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p1 period_close not money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p4b baseline version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview seal still refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "rollback to preview_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restore WATHEFNI allowlisted entitlement",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "statutory override refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "variance ack override allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 10 pipeline ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 100 pipeline ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 1000 assemble ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 1000 lock ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 1000 calc ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 1000 classify ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scale 1000 batch oriented",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "remaining gaps listed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gcc still gated in p4b",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "oracle": {
+    "ok": true,
+    "oracle_version": "1.0.0",
+    "fixture_version": "KW_P6_ORACLE_v1.0.0",
+    "statutory_policy_version": "KW_PUBLIC_BASELINE_v1.0.0",
+    "results": [
+      {
+        "scenario_id": "A_normal_full_period",
+        "oracle_version": "1.0.0",
+        "policy_versions": {
+          "company_policy": "informational_no_ot_money",
+          "statutory": "KW_PUBLIC_BASELINE_v1.0.0"
+        },
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 600.0
+          },
+          {
+            "code": "TRANSPORT",
+            "category": "earning_allowance_recurring",
+            "amount": 50.0
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 650.0,
+        "net": 650.0,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "A_mid_month_hire",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 320.0
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 320.0,
+        "net": 320.0,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "A_mid_month_leaver",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 300.0
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 300.0,
+        "net": 300.0,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "A_salary_increase_mid",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 651.613
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 651.613,
+        "net": 651.613,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "A_bonus_and_deduction",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 500.0
+          },
+          {
+            "code": "BONUS",
+            "category": "earning_allowance_one_off",
+            "amount": 100.0
+          }
+        ],
+        "deductions": [
+          {
+            "code": "LOAN",
+            "category": "deduction_recurring",
+            "amount": 75.0
+          }
+        ],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 600.0,
+        "net": 525.0,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "A_unpaid_leave",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 620.0
+          }
+        ],
+        "deductions": [
+          {
+            "code": "UNPAID_LEAVE",
+            "category": "deduction_unpaid_leave",
+            "amount": 40.0
+          }
+        ],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 620.0,
+        "net": 580.0,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "B_ot_rest_ph",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 560.0
+          },
+          {
+            "code": "OT_ORDINARY",
+            "category": "earning_ot_ordinary",
+            "amount": 26.92
+          },
+          {
+            "code": "REST_DAY",
+            "category": "earning_rest_day",
+            "amount": 32.304
+          },
+          {
+            "code": "PH_WORK",
+            "category": "earning_public_holiday",
+            "amount": 43.072
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 662.296,
+        "net": 662.296,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "B_absence_lateness",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 560.0
+          }
+        ],
+        "deductions": [
+          {
+            "code": "ABSENCE",
+            "category": "deduction_absence",
+            "amount": 20.0
+          },
+          {
+            "code": "LATENESS",
+            "category": "deduction_lateness",
+            "amount": 5.0
+          }
+        ],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 560.0,
+        "net": 535.0,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "C_pifss_resolvable",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 800.0
+          },
+          {
+            "code": "HOUSING",
+            "category": "earning_allowance_recurring",
+            "amount": 100.0
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [
+          {
+            "code": "PIFSS_EE",
+            "amount": 67.5
+          }
+        ],
+        "statutory_employer": [
+          {
+            "code": "PIFSS_ER",
+            "amount": 103.5
+          }
+        ],
+        "gross": 900.0,
+        "net": 832.5,
+        "blockers": [],
+        "warnings": [],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "C_non_applicable_statutory",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 700.0
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 700.0,
+        "net": 700.0,
+        "blockers": [],
+        "warnings": [
+          "statutory_not_applicable"
+        ],
+        "authoritative_eligible": true
+      },
+      {
+        "scenario_id": "C_gated_gcc_blocks",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "BASIC",
+            "category": "earning_basic",
+            "amount": 900.0
+          }
+        ],
+        "deductions": [],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 900.0,
+        "net": 900.0,
+        "blockers": [
+          "gcc_extension_review_required"
+        ],
+        "warnings": [],
+        "authoritative_eligible": false
+      },
+      {
+        "scenario_id": "D_external_mode_b_mirror",
+        "oracle_version": "1.0.0",
+        "policy_versions": {},
+        "earnings": [
+          {
+            "code": "EXTERNAL_GROSS",
+            "category": "external",
+            "amount": 1000.0
+          }
+        ],
+        "deductions": [
+          {
+            "code": "EXTERNAL_DEDUCTIONS",
+            "category": "external",
+            "amount": 50.0
+          }
+        ],
+        "statutory_employee": [],
+        "statutory_employer": [],
+        "gross": 1000.0,
+        "net": 950.0,
+        "blockers": [],
+        "warnings": [
+          "mode_b_external_authority"
+        ],
+        "authoritative_eligible": false,
+        "money_authority": "external"
+      }
+    ],
+    "fixture_self_consistency_residuals": [],
+    "residual_count": 0
+  },
+  "residual": {
+    "A_normal_full_period": {
+      "ok": true,
+      "gross_residual": 0.0,
+      "net_residual": 0.0,
+      "line_residuals": [],
+      "unexplained_residual": 0.0
+    },
+    "oracle_pack": {
+      "residual_count": 0
+    }
+  },
+  "archetypes": {
+    "A_small_simple": {
+      "scenarios": [
+        "A_normal_full_period",
+        "A_mid_month_hire",
+        "A_mid_month_leaver",
+        "A_salary_increase_mid",
+        "A_bonus_and_deduction",
+        "A_unpaid_leave"
+      ],
+      "status": "PASS"
+    },
+    "B_shift_based": {
+      "scenarios": [
+        "B_ot_rest_ph",
+        "B_absence_lateness"
+      ],
+      "status": "PASS"
+    },
+    "C_medium_corporate": {
+      "scenarios": [
+        "C_pifss_resolvable",
+        "C_non_applicable_statutory",
+        "C_gated_gcc_blocks"
+      ],
+      "status": "PASS"
+    },
+    "D_enterprise_external": {
+      "scenarios": [
+        "D_external_mode_b_mirror"
+      ],
+      "status": "PASS"
+    }
+  },
+  "scale": [
+    {
+      "employee_count": 10,
+      "assemble_ms": 180.37878894805908,
+      "calculate_ms": 47.641629219055176,
+      "classify_ms": 40.00354862213135,
+      "finalize_ms": 90.51342487335205,
+      "payslip_ms": null,
+      "per_employee_calc_ms": 4.764162921905518,
+      "batch_oriented": true,
+      "n_plus_one_forbidden": true
+    },
+    {
+      "employee_count": 100,
+      "assemble_ms": 1628.9237270355225,
+      "calculate_ms": 313.82952404022217,
+      "classify_ms": 203.3749132156372,
+      "finalize_ms": 1139.9954118728638,
+      "payslip_ms": null,
+      "per_employee_calc_ms": 3.1382952404022215,
+      "batch_oriented": true,
+      "n_plus_one_forbidden": true
+    },
+    {
+      "employee_count": 1000,
+      "assemble_ms": 30302.253074645996,
+      "calculate_ms": 6305.830300331116,
+      "classify_ms": 2480.627914428711,
+      "finalize_ms": null,
+      "payslip_ms": null,
+      "per_employee_calc_ms": 6.305830300331116,
+      "batch_oriented": true,
+      "n_plus_one_forbidden": true
+    }
+  ],
+  "honesty": {
+    "company_entitlement_model": true,
+    "global_mode_a": false,
+    "payment_processing": "disabled",
+    "preview_remains_preview": true
+  },
+  "production_entitlement": {
+    "company": "WATHEFNI",
+    "target_state": "authoritative_allowlisted",
+    "note": "Restored after rollback drill; synthetic qualification remains; nonsynthetic requires allowlist."
+  },
+  "remaining_gaps": [
+    "Per-customer legal/ops onboarding checklist beyond WATHEFNI canary",
+    "Broader multi-tenant residual-zero evidence packs",
+    "Setup Console UX implementation of setup schema (contract only in P6)",
+    "Payment/WPS program still separate \u2014 not required for Mode A authority",
+    "Counsel acknowledgement workflow for company-specific statutory extensions",
+    "Employee App payslip UX polish outside P0/P0.1 already frozen"
+  ],
+  "setup_contract": {
+    "schema_version": "payroll_setup_console_contract_v1",
+    "purpose": "Exact required/optional/advanced payroll setup contract for future Setup Console. P6 defines the contract only \u2014 no broad Setup Console redesign.",
+    "adaptation": {
+      "sme": "Show required + sensible defaults; hide advanced until needed.",
+      "medium": "Surface optional policies and statutory classification fields.",
+      "enterprise": "Expose advanced SOD, allowlists, overrides, Mode B coexistence."
+    },
+    "wathefni_owned": [
+      {
+        "key": "kuwait_statutory_baseline_version",
+        "label_en": "Kuwait statutory baseline version",
+        "label_ar": "\u0625\u0635\u062f\u0627\u0631 \u062e\u0637 \u0627\u0644\u0623\u0633\u0627\u0633 \u0627\u0644\u0642\u0627\u0646\u0648\u0646\u064a \u0627\u0644\u0643\u0648\u064a\u062a\u064a",
+        "company_editable": false
+      },
+      {
+        "key": "calculation_engine",
+        "label_en": "Calculation engine",
+        "company_editable": false
+      },
+      {
+        "key": "authority_sealing_rules",
+        "label_en": "Authority / sealing rules",
+        "company_editable": false
+      },
+      {
+        "key": "statutory_provenance",
+        "label_en": "Statutory provenance",
+        "company_editable": false
+      }
+    ],
+    "required": [
+      {
+        "key": "payroll_mode",
+        "label_en": "Payroll money authority mode",
+        "label_ar": "\u0648\u0636\u0639 \u0633\u0644\u0637\u0629 \u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "values": [
+          "native",
+          "external",
+          "parallel_shadow"
+        ],
+        "notes": "native=Mode A eligible; external=Mode B; never inferred from module enablement alone."
+      },
+      {
+        "key": "payroll_frequency",
+        "label_en": "Payroll frequency / cycle",
+        "label_ar": "\u062f\u0648\u0631\u0629 \u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "values": [
+          "monthly"
+        ],
+        "default": "monthly"
+      },
+      {
+        "key": "period_cutoff",
+        "label_en": "Period / cut-off settings",
+        "label_ar": "\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0641\u062a\u0631\u0629 \u0627\u0644\u0642\u0637\u0639"
+      },
+      {
+        "key": "attendance_payroll_mode",
+        "label_en": "Attendance payroll mode",
+        "label_ar": "\u0648\u0636\u0639 \u062d\u0636\u0648\u0631 \u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "values": [
+          "informational",
+          "deduct_unexcused",
+          "deduct_all_unpaid"
+        ]
+      },
+      {
+        "key": "salary_component_structure",
+        "label_en": "Salary / component structure",
+        "label_ar": "\u0647\u064a\u0643\u0644 \u0627\u0644\u0631\u0627\u062a\u0628 \u0648\u0627\u0644\u0645\u0643\u0648\u0646\u0627\u062a"
+      },
+      {
+        "key": "approval_sod_chain",
+        "label_en": "Approval / SOD chain",
+        "label_ar": "\u0633\u0644\u0633\u0644\u0629 \u0627\u0644\u0627\u0639\u062a\u0645\u0627\u062f \u0648\u0641\u0635\u0644 \u0627\u0644\u0635\u0644\u0627\u062d\u064a\u0627\u062a",
+        "sme_default": {
+          "require_review_step": true,
+          "require_distinct_approver": true,
+          "allow_approver_as_finalizer": true
+        }
+      },
+      {
+        "key": "mode_a_entitlement_opt_in",
+        "label_en": "Explicit Mode A opt-in",
+        "label_ar": "\u062a\u0641\u0639\u064a\u0644 \u0635\u0631\u064a\u062d \u0644\u0633\u0644\u0637\u0629 \u0648\u0638\u0641\u0646\u064a",
+        "values": [
+          "disabled",
+          "preview_only",
+          "authoritative_allowlisted",
+          "authoritative"
+        ],
+        "notes": "Required for money_authority=wathefni. Never auto-inferred."
+      }
+    ],
+    "optional": [
+      {
+        "key": "working_calendar",
+        "label_en": "Working calendar",
+        "label_ar": "\u062a\u0642\u0648\u064a\u0645 \u0627\u0644\u0639\u0645\u0644"
+      },
+      {
+        "key": "lateness_absence_policies",
+        "label_en": "Lateness / absence policies",
+        "label_ar": "\u0633\u064a\u0627\u0633\u0627\u062a \u0627\u0644\u062a\u0623\u062e\u064a\u0631 \u0648\u0627\u0644\u063a\u064a\u0627\u0628"
+      },
+      {
+        "key": "ot_eligibility",
+        "label_en": "OT eligibility",
+        "label_ar": "\u0623\u0647\u0644\u064a\u0629 \u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u0625\u0636\u0627\u0641\u064a"
+      },
+      {
+        "key": "employee_statutory_classifications",
+        "label_en": "Employee statutory classifications",
+        "label_ar": "\u062a\u0635\u0646\u064a\u0641\u0627\u062a \u0627\u0644\u0645\u0648\u0638\u0641\u064a\u0646 \u0627\u0644\u0646\u0638\u0627\u0645\u064a\u0629"
+      },
+      {
+        "key": "pifss_wage_bases",
+        "label_en": "PIFSS wage bases / classification",
+        "label_ar": "\u0623\u0648\u0639\u064a\u0629 \u0623\u062c\u0648\u0631 \u0627\u0644\u062a\u0623\u0645\u064a\u0646\u0627\u062a"
+      },
+      {
+        "key": "special_regime_flags",
+        "label_en": "Special-regime flags",
+        "label_ar": "\u0639\u0644\u0627\u0645\u0627\u062a \u0627\u0644\u0623\u0646\u0638\u0645\u0629 \u0627\u0644\u062e\u0627\u0635\u0629"
+      },
+      {
+        "key": "variance_thresholds",
+        "label_en": "Variance review thresholds",
+        "label_ar": "\u062d\u062f\u0648\u062f \u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u0641\u0631\u0648\u0642\u0627\u062a",
+        "notes": "Advisory only \u2014 never automatic money rewrite."
+      }
+    ],
+    "advanced": [
+      {
+        "key": "enterprise_sod_strict",
+        "label_en": "Enterprise SOD (approver \u2260 finalizer)",
+        "label_ar": "\u0641\u0635\u0644 \u0635\u0644\u0627\u062d\u064a\u0627\u062a \u0627\u0644\u0645\u0624\u0633\u0633\u0627\u062a"
+      },
+      {
+        "key": "employee_allowlist",
+        "label_en": "Authoritative employee allowlist",
+        "label_ar": "\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0645\u0648\u0638\u0641\u064a\u0646 \u0627\u0644\u0645\u0633\u0645\u0648\u062d \u0628\u0647\u0645 \u0644\u0644\u0633\u0644\u0637\u0629",
+        "applies_when": "authoritative_allowlisted"
+      },
+      {
+        "key": "controlled_policy_overrides",
+        "label_en": "Controlled policy overrides",
+        "label_ar": "\u062a\u062c\u0627\u0648\u0632\u0627\u062a \u0633\u064a\u0627\u0633\u0629 \u0645\u0636\u0628\u0648\u0637\u0629",
+        "notes": "Actor/reason/audit only. Never for mandatory statutory uncertainty."
+      },
+      {
+        "key": "parallel_shadow_mode_b",
+        "label_en": "Parallel shadow / Mode B coexistence",
+        "label_ar": "\u0627\u0644\u062a\u0639\u0627\u064a\u0634 \u0645\u0639 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629"
+      }
+    ],
+    "sme_defaults": {
+      "payroll_mode": "native",
+      "payroll_frequency": "monthly",
+      "attendance_payroll_mode": "informational",
+      "require_review_step": true,
+      "require_distinct_approver": true,
+      "allow_approver_as_finalizer": true,
+      "hide_advanced_until_needed": true,
+      "entitlement_recommended": "preview_only_then_authoritative_allowlisted"
+    }
+  }
+}

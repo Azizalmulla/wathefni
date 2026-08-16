@@ -1,0 +1,27 @@
+== keyboard handling coverage ==
+-- employee mobile TextInput files --
+apps/wathefni-employee-mobile/src/principals/UnifiedSignInView.tsx
+apps/wathefni-employee-mobile/src/features/pin/PinView.tsx
+apps/wathefni-employee-mobile/src/features/bank/BankView.tsx
+apps/wathefni-employee-mobile/src/features/remaining/RemainingViews.tsx
+apps/wathefni-employee-mobile/src/hr/features/leave/LeaveApprovalView.tsx
+apps/wathefni-employee-mobile/src/features/activation/ActivationView.tsx
+apps/wathefni-employee-mobile/src/components/layout.tsx
+apps/wathefni-employee-mobile/src/hr/features/auth/SignInView.tsx
+apps/wathefni-employee-mobile/src/hr/features/recruiting/InterviewDetailView.tsx
+apps/wathefni-employee-mobile/src/hr/features/people/HRPeopleDirectoryView.tsx
+apps/wathefni-employee-mobile/src/hr/features/assistant/HRAssistantView.tsx
+apps/wathefni-employee-mobile/src/hr/features/operations/OperationalViews.tsx
+-- employee mobile KeyboardAvoidingView files --
+apps/wathefni-employee-mobile/src/components/layout.tsx
+apps/wathefni-employee-mobile/src/features/remaining/RemainingViews.tsx
+apps/wathefni-employee-mobile/src/features/bank/BankView.tsx
+apps/wathefni-employee-mobile/src/features/activation/ActivationView.tsx
+apps/wathefni-employee-mobile/src/principals/UnifiedSignInView.tsx
+apps/wathefni-employee-mobile/src/hr/features/assistant/HRAssistantView.tsx
+apps/wathefni-employee-mobile/src/features/pin/PinView.tsx
+-- hr mobile TextInput files --
+apps/wathefni-hr-mobile/src/features/auth/SignInView.tsx
+apps/wathefni-hr-mobile/src/features/leave/LeaveApprovalView.tsx
+apps/wathefni-hr-mobile/src/features/operations/OperationalViews.tsx
+-- hr mobile KeyboardAvoidingView files --

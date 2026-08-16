@@ -1,0 +1,96 @@
+    performance feedback c3 — prove
+      PASS  c3 module
+      PASS  charter stamp
+      PASS  check-ins canonical
+      PASS  no review required
+      PASS  no goals required
+      PASS  no talent required
+      PASS  no auto goal mutate
+      PASS  no auto rating mutate
+      PASS  competency versioned
+      PASS  assessment independent
+      PASS  mapping explicit
+      PASS  scores ≠ overall
+      PASS  dev durable
+      PASS  no L&D in c3
+      PASS  no hipo/9box
+      PASS  assistant out
+      PASS  task contract
+      PASS  EN completed
+      PASS  AR completed
+      PASS  rollback
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable company
+      PASS  require_reviews false
+      PASS  require_talent false
+      PASS  require_learning false
+      PASS  create check-in
+      PASS  no goal mutate on create
+      PASS  no rating mutate on create
+      PASS  check-in with objective link
+      PASS  link does not mutate progress
+      PASS  no progress entries from check-in
+      PASS  check-in without goals
+      PASS  commitment added
+      PASS  update open check-in
+      PASS  stale rejected
+      PASS  employee can view shared
+      PASS  employee sensitive redacted
+      PASS  hr sees sensitive
+      PASS  out-of-scope denied
+      PASS  manager in scope
+      PASS  out manager denied
+      PASS  complete check-in
+      PASS  completed immutable
+      PASS  amend via audit
+      PASS  amendment row retained
+      PASS  create framework
+      PASS  add competency
+      PASS  role-specific competency
+      PASS  empty assessment map rejected
+      PASS  explicit assessment map
+      PASS  self assessment
+      PASS  self not overall
+      PASS  manager assessment
+      PASS  layers separate
+      PASS  two assessment layers
+      PASS  scores not collapsed
+      PASS  framework versioned
+      PASS  historical assessment stays v1
+      PASS  deprecate competency
+      PASS  deprecated readable
+      PASS  assessments survive deprecate
+      PASS  competency without review cycle
+      PASS  reviews c2 honesty independent
+      PASS  create development plan
+      PASS  dev action from check-in
+      PASS  provenance check_in
+      PASS  source_id retained
+      PASS  dev action from competency gap
+      PASS  hr_task linked
+      PASS  task sot contract
+      PASS  accept action
+      PASS  in_progress action
+      PASS  complete action
+      PASS  task mirrors action SoT
+      PASS  action survives origin close
+      PASS  not buried
+      PASS  provenance retained
+      PASS  manual development action
+      PASS  close plan
+      PASS  actions retained on close
+      PASS  disable preserves history flag
+      PASS  check-ins remain after disable
+      PASS  dev actions remain after disable
+      PASS  assessments remain after disable
+      PASS  module-off blocks writes
+      PASS  cross-tenant write denied
+      PASS  goals c1 independent honesty
+      PASS  reviews c2 independent honesty
+
+    91 passed, 0 failed
+    PERFORMANCE_FEEDBACK_COMPETENCIES_FULL_PASS
+STAGING_RC=0

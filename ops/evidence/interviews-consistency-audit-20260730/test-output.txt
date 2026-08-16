@@ -1,0 +1,22 @@
+test_app_needs_feedback_uses_coalesce_human_first (test_interview_queue_contract.CurrentAppSourceDivergenceTests.test_app_needs_feedback_uses_coalesce_human_first) ... ok
+test_app_video_filter_lacks_terminal_exclusion (test_interview_queue_contract.CurrentAppSourceDivergenceTests.test_app_video_filter_lacks_terminal_exclusion) ... ok
+test_cancelled_video_with_pending_feedback_tab_matrix (test_interview_queue_contract.InterviewQueueContractTests.test_cancelled_video_with_pending_feedback_tab_matrix) ... ok
+test_canonical_scheduled_upcoming_only (test_interview_queue_contract.InterviewQueueContractTests.test_canonical_scheduled_upcoming_only) ... ok
+test_completed_video_stays_in_video_and_completed_not_needs_feedback (test_interview_queue_contract.InterviewQueueContractTests.test_completed_video_stays_in_video_and_completed_not_needs_feedback) ... ok
+test_current_production_counts_for_hamad_fixture_diverge (test_interview_queue_contract.InterviewQueueContractTests.test_current_production_counts_for_hamad_fixture_diverge)
+Document live user-visible inflation under CURRENT predicates. ... ok
+test_divergence_flags (test_interview_queue_contract.InterviewQueueContractTests.test_divergence_flags) ... ok
+test_hamad_four_row_company_matrix_under_contract (test_interview_queue_contract.InterviewQueueContractTests.test_hamad_four_row_company_matrix_under_contract) ... ok
+test_legacy_canceled_alias_is_cancelled_tab (test_interview_queue_contract.InterviewQueueContractTests.test_legacy_canceled_alias_is_cancelled_tab) ... ok
+test_legacy_feedback_conflict_not_needs_feedback_under_contract (test_interview_queue_contract.InterviewQueueContractTests.test_legacy_feedback_conflict_not_needs_feedback_under_contract)
+Either mirror complete ⇒ feedback complete (unlike COALESCE(human, legacy)). ... ok
+test_no_show_not_in_active_or_video (test_interview_queue_contract.InterviewQueueContractTests.test_no_show_not_in_active_or_video) ... ok
+test_normalize_legacy_aliases (test_interview_queue_contract.InterviewQueueContractTests.test_normalize_legacy_aliases) ... ok
+test_second_cancelled_hamad_same_matrix (test_interview_queue_contract.InterviewQueueContractTests.test_second_cancelled_hamad_same_matrix) ... ok
+test_sql_contract_excludes_terminal_from_video (test_interview_queue_contract.InterviewQueueContractTests.test_sql_contract_excludes_terminal_from_video) ... ok
+test_sql_contract_needs_feedback_uses_either_complete (test_interview_queue_contract.InterviewQueueContractTests.test_sql_contract_needs_feedback_uses_either_complete) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.004s
+
+OK

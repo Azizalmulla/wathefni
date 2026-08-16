@@ -1,0 +1,40 @@
+    pt7 assistant — unit prove
+      PASS  stamp
+      PASS  deterministic services
+      PASS  no prompt math
+      PASS  no mutation tools
+      PASS  same WHY as UI
+      PASS  registered list_role_fit_candidates
+      PASS  permission mapped list_role_fit_candidates
+      PASS  list_role_fit_candidates not confirm-mutate
+      PASS  registered list_uncovered_critical_roles
+      PASS  permission mapped list_uncovered_critical_roles
+      PASS  list_uncovered_critical_roles not confirm-mutate
+      PASS  registered list_model_classifications
+      PASS  permission mapped list_model_classifications
+      PASS  list_model_classifications not confirm-mutate
+      PASS  registered explain_talent_classification
+      PASS  permission mapped explain_talent_classification
+      PASS  explain_talent_classification not confirm-mutate
+      PASS  registered list_capability_gaps
+      PASS  permission mapped list_capability_gaps
+      PASS  list_capability_gaps not confirm-mutate
+      PASS  registered list_succession_replacements
+      PASS  permission mapped list_succession_replacements
+      PASS  list_succession_replacements not confirm-mutate
+      PASS  registered get_okr_alignment
+      PASS  permission mapped get_okr_alignment
+      PASS  get_okr_alignment not confirm-mutate
+      PASS  no mutation designate_hipo
+      PASS  no mutation set_potential
+      PASS  no mutation set_readiness
+      PASS  no mutation create_successor
+      PASS  no mutation promote
+      PASS  no mutation create_mobility_application
+      PASS  catalog posthire_talent
+      PASS  catalog posthire_performance
+      PASS  explain uses get_why
+      PASS  does not claim HiPo from derived
+
+    36 passed, 0 failed
+PT7_ASSISTANT_TALENT_INTELLIGENCE_UNIT_PASS

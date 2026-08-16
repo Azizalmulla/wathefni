@@ -1,0 +1,11 @@
+[release/bank-ess-ui-clean-20260806T155845Z 5509e64] feat: add Bank ESS review UI and onboarding completion strip
+ 19 files changed, 3476 insertions(+), 259 deletions(-)
+ create mode 100644 apps/wathefni-dashboard/src/posthire/employees360/BankReviewPanel.test.tsx
+ create mode 100644 apps/wathefni-dashboard/src/posthire/employees360/BankReviewPanel.tsx
+ create mode 100644 apps/wathefni-dashboard/src/posthire/employees360/OnboardingCompletionStrip.test.tsx
+ create mode 100644 apps/wathefni-dashboard/src/posthire/employees360/OnboardingCompletionStrip.tsx
+ create mode 100644 apps/wathefni-dashboard/src/posthire/employees360/bankReview.ts
+ create mode 100644 apps/wathefni-dashboard/src/posthire/employees360/onboardingCompletion.ts
+ create mode 100644 apps/wathefni-employee-mobile/app/bank.tsx
+ create mode 100644 apps/wathefni-employee-mobile/src/features/bank/BankView.tsx
+ create mode 100644 apps/wathefni-employee-mobile/src/features/onboarding/lifecycleProjection.ts

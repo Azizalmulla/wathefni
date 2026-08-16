@@ -1,0 +1,35 @@
+                            Table "public.compliance_documents"
+        Column         |           Type           | Collation | Nullable |     Default     
+-----------------------+--------------------------+-----------+----------+-----------------
+ employee_key          | text                     |           | not null | 
+ document_type         | text                     |           | not null | 
+ label                 | text                     |           |          | 
+ status                | text                     |           | not null | 'missing'::text
+ expiry_date           | date                     |           |          | 
+ days_until_expiry     | integer                  |           |          | 
+ last_reminded         | date                     |           |          | 
+ reminder_count        | integer                  |           | not null | 0
+ authority             | text                     |           |          | 
+ notes                 | text                     |           |          | 
+ raw_json              | jsonb                    |           | not null | '{}'::jsonb
+ updated_at            | timestamp with time zone |           | not null | now()
+ document_number       | text                     |           |          | 
+ issued_date           | date                     |           |          | 
+ extracted_at          | timestamp with time zone |           |          | 
+ extraction_status     | text                     |           |          | 
+ extraction_error      | text                     |           |          | 
+ extraction_confidence | numeric                  |           |          | 
+ last_checked_at       | timestamp with time zone |           |          | 
+ last_alerted_at       | timestamp with time zone |           |          | 
+ warning_days          | integer                  |           |          | 
+ renewal_status        | text                     |           |          | 
+ severity              | text                     |           |          | 
+ company_code          | text                     |           |          | 
+Indexes:
+    "compliance_documents_pkey" PRIMARY KEY, btree (employee_key, document_type)
+    "idx_compliance_documents_company" btree (company_code)
+    "idx_compliance_documents_lifecycle" btree (status, expiry_date, last_alerted_at)
+    "idx_compliance_expiry" btree (expiry_date)
+    "idx_compliance_status" btree (status)
+Foreign-key constraints:
+    "compliance_documents_employee_key_fkey" FOREIGN KEY (employee_key) REFERENCES employees(employee_key) ON DELETE CASCADE

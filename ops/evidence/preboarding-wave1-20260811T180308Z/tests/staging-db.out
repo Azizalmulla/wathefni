@@ -1,0 +1,49 @@
+    preboarding wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  settings default disabled
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  provisional pending_start created
+      PASS  provisional is_pending_start
+      PASS  resolve canonical employment
+      PASS  hub pending_start (non-active)
+      PASS  ESS not eligible for pending_start
+      PASS  employment_eligible false
+      PASS  create assignment
+      PASS  status not_started or in_progress
+      PASS  joining_date set
+      PASS  kuwait items seeded
+      PASS  civil_id required
+      PASS  bank_details required
+      PASS  idempotent create replay
+      PASS  cosmetic ready forbidden
+      PASS  start in_progress
+      PASS  ready rejected until required complete
+      PASS  manager scope denies other manager
+      PASS  recompute ok
+      PASS  readiness ready derived
+      PASS  assignment status ready
+      PASS  second assignment
+      PASS  item blocked
+      PASS  assignment blocked derived
+      PASS  cancel no_show
+      PASS  cancel reason audited
+      PASS  cancel event present
+      PASS  convert ready assignment
+      PASS  status converted
+      PASS  no duplicate employee row
+      PASS  handoff assignment create
+      PASS  handoff applied civil_id
+      PASS  civil_id done via handoff
+      PASS  offer auto-create off without offers module
+      PASS  offer auto-create skipped cleanly
+      PASS  cross-tenant blocked
+      PASS  module-off create denied
+      PASS  preboard_item tasks created or soft-zero
+      PASS  rollback guidance
+
+44 passed, 0 failed
+PREBOARDING_WAVE1_DB_FULL_PASS
+STAGING_DB_RC=0

@@ -8,8 +8,50 @@ Append one row (or section) per internal ship. Do not wait for owner review betw
 
 ---
 
+## 20260816T014800Z — Store-release closure (bootstrap + prod /ready + app links)
 
+| Field | Value |
+| --- | --- |
+| Scope | Owner-bootstrap grants, production Caddy `/ready`, HTTPS app links, clean canary, Maestro env bootstrap. No HR Web redesign. |
+| Owner bootstrap | Bundle `setup_owner_bootstrap_v1` (`employees.read` + `employees.manage`). Staging live + production `:8010` patched. |
+| Clean canary | **GREEN 18/0** `QA11D090` — Setup create company → owner → owner creates first employee via HR API. Evidence `ops/evidence/store-release-clean-canary-20260816T013513Z/` |
+| Production `/ready` | **200** after Caddy proxy to `:8010`. Cause was Caddy 404 fallback, not missing R8 handler. |
+| App links | Staging **84/0** · production HTTPS `/l/*` + AASA/assetlinks **200**. AASA details empty until Team ID / Play SHA256. |
+| Maestro | Java 17 installed. iOS 26.0.1 runtime downloading (8.05 GB). Android CLI cask in flight. **MOBILE_PASS = 0**. |
+| Physical RP | **UNPROVEN** — no USB devices. Checklist `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md`. |
+| Ledger | 1390 records · Web 34/34 · Web actions 614/614 · Setup 27/27 · Employee 74/74 · HR mobile 40/40 · Deep links 38/38 · API **158/535** · 379 inventoried |
+| Stamp | **`WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` not issued** |
 
+---
+
+## 20260816T010500Z — Store-release program (R9–R11 + E2E + canary + store gate)
+
+| Field | Value |
+| --- | --- |
+| Scope | Serial store-release: R9 live permission/tenant attack, E2E harness (`./ops/test-smoke`, `./ops/test-release`), R10 measured latency, R11 EN/AR catalogs, physical host check, clean Setup canary, store build gate. No HR Web redesign. |
+| R9 | **FROZEN** · unit 25/0 · staging attack 48/0 · live dashboard unauth 401 · `/app` 503 `employee_app_disabled` fail-closed |
+| R10 | **FROZEN** · 80-employee tenant directory 479ms · Home 202ms · live `/ready` 25ms · no 2.5s blockers |
+| R11 | **FROZEN** catalogs/RTL wiring · 53/0 · physical AR/RTL still UNPROVEN |
+| E2E | smoke GREEN · web structural 22/0 · cross-surface leave 12/0 · Maestro **BLOCKED** (no Java/runtime/device) |
+| Physical RP | **UNPROVEN** — no USB iOS/Android on this host |
+| Clean canary | **BLOCKED** — Setup creates company + owner + modules; owner roster create is `403 permission_denied` because `employees.*` is grant-only and Setup has no first-grant path |
+| Store config | local gate 19/0 · staging `/ready` 200 · production `https://api.wathefni.ai/ready` **404** · no associatedDomains |
+| Stamp | **`WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` not issued** |
+| Verdict | **Stop for owner** — physical matrix + clean-company first employee grant + production `/ready` |
+
+---
+
+## 20260811T142500Z — HR operator session contract (single-flight + atomic SecureStore)
+
+| Field | Value |
+| --- | --- |
+| Scope | Long-term HR auth session contract: global single-flight refresh across AuthProvider remounts, atomic `wathefni.hr.session.v1` blob, adopt-newer-on-`session_revoked`, request retry with rotated access; PIN/Face ID remains local lock only. Server refresh TTL **30d → 90d** (access 45m unchanged; replay protection unchanged). |
+| Ship | Backend `operator_mobile.py` live · OTA **`9d28b353-f1c9-4f4e-bc5c-a80c34c8ebac`** · runtime 0.3.0 · canary · iOS `019ff137-04d3-7086-87b3-b5266511dcea` |
+| Verify | `verify-hr-operator-session-contract.mjs` **8/8 PASS** · `verify-hr-operator-session-live.py` **20/20 PASS** |
+| Contract | `ops/HR_OPERATOR_MOBILE_SESSION_CONTRACT.md` |
+| Verdict | **Shipped canary** — routine access expiry / OTA / deploy must be invisible; explicit revoke & account/company termination still hard logout |
+
+---
 
 ## 20260811T103500Z — HR Settings live session/queue probe + pagination blockers logged
 
@@ -2711,6 +2753,17 @@ Append one row (or section) per internal ship. Do not wait for owner review betw
 - **Evidence:** `ops/evidence/employee-app-physical-qa-phaseF-20260808T192633Z/TECHNICAL_QA_RESULT.md`
 - **Closure:** owner elected to close with T10–T14 and T17 unrun. Recorded, not resolved — `ACCESSIBILITY_PHYSICAL` stays **not established** and is deliberately not folded into the pass. Run T13/T14 before any VoiceOver-dependent customer, ideally after the visual redesign moves focus order.
 - **Verdict:** `TECHNICAL_PHYSICAL_QA` = **PASS over the scope tested** (RTL, responsiveness, smoothness, transitions, Dynamic Type) · `EMPLOYEE_APP_READY_FOR_OWNER_FREEZE` = **NO** (visual direction owner-rejected; dedicated redesign phase follows)
+
+## 20260811T130500Z — HR detail visual: Attendance + Delivery Alerts (canary OTA)
+
+| Field | Value |
+| --- | --- |
+| Scope | Visual-only Editorial Entity Detail for Attendance exception detail (unboxed facts, powder-blue accent, absence attention, outline correction actions). Delivery Alerts monitor eyebrow + unboxed ledger rows (still read-only). Tasks attention now includes `urgent`. Document Review / Tasks / Onboarding already on Editorial language — verified green. Hardened contracts preserved (pagination, expected_status, RBAC). |
+| Ship | OTA **`284499e2-4467-4899-bf3c-55eb7d886e12`** · runtime 0.3.0 · canary · iOS `019ff0e7-4b5f-7798-89d8-ffcbc51141ff` · Android `019ff0e7-4b5f-79bb-b728-7fd68396f98f` · **rollback group `927e90c7-16db-4cd8-8957-29622942f35a`** |
+| Verify | documents / tasks / onboarding / attendance / delivery-alerts verify scripts GREEN · mobile tsc clean |
+| Verdict | **Shipped canary** — owner visual judge on Attendance detail + Delivery Alerts monitor |
+
+---
 
 ## 20260811T122043Z — Pre-Customer Architecture Hardening wave (production)
 

@@ -1,0 +1,6 @@
+SHELL_WAVE0 1
+MUTATIONS 0
+CAPTURE_INGEST off
+DASHBOARD_DIST /opt/wathefni/dashboard-dist
+MASW0B_MARKER=MASW0B
+flags_ok_shell_wave0b=true

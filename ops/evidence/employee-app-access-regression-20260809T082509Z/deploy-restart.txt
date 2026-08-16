@@ -1,0 +1,39 @@
+active
+healthz=404
+docs=200
+3315:def _is_transient_db_error(exc: BaseException) -> bool:
+3358:        if _is_transient_db_error(exc):
+67636:                if _is_transient_db_error(exc):
+67640:                            "error": "employee_app_temporarily_unavailable",
+67700:        if _is_transient_db_error(exc):
+67704:                    "error": "employee_app_temporarily_unavailable",
+Aug 09 08:17:49 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/auth/logout HTTP/1.1" 200 OK
+Aug 09 08:17:49 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/me HTTP/1.1" 200 OK
+Aug 09 08:17:49 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/notifications?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:49 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/auth/logout HTTP/1.1" 200 OK
+Aug 09 08:17:49 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/home?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/home?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/home?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/notifications?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/home?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "GET /app/notifications?locale=en HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/auth/refresh HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/auth/refresh HTTP/1.1" 401 Unauthorized
+Aug 09 08:17:50 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/auth/refresh HTTP/1.1" 401 Unauthorized
+Aug 09 08:22:37 srv1419988 uvicorn[2872058]: INFO:     127.0.0.1:34174 - "GET /health HTTP/1.1" 200 OK
+Aug 09 08:27:38 srv1419988 uvicorn[2872058]: INFO:     127.0.0.1:57418 - "GET /health HTTP/1.1" 200 OK
+Aug 09 08:28:27 srv1419988 systemd[1]: Stopping wathefni-orchestrator.service - Wathefni HR LangGraph Orchestrator...
+Aug 09 08:28:27 srv1419988 uvicorn[2872058]: INFO:     Shutting down
+Aug 09 08:28:27 srv1419988 uvicorn[2872058]: INFO:     Waiting for application shutdown.
+Aug 09 08:28:27 srv1419988 uvicorn[2872058]: INFO:     Application shutdown complete.
+Aug 09 08:28:27 srv1419988 uvicorn[2872058]: INFO:     Finished server process [2872058]
+Aug 09 08:28:27 srv1419988 systemd[1]: wathefni-orchestrator.service: Deactivated successfully.
+Aug 09 08:28:27 srv1419988 systemd[1]: Stopped wathefni-orchestrator.service - Wathefni HR LangGraph Orchestrator.
+Aug 09 08:28:27 srv1419988 systemd[1]: wathefni-orchestrator.service: Consumed 14.660s CPU time, 259.3M memory peak, 0B memory swap peak.
+Aug 09 08:28:27 srv1419988 systemd[1]: Started wathefni-orchestrator.service - Wathefni HR LangGraph Orchestrator.
+Aug 09 08:28:33 srv1419988 uvicorn[2880314]: INFO:     Started server process [2880314]
+Aug 09 08:28:33 srv1419988 uvicorn[2880314]: INFO:     Waiting for application startup.
+Aug 09 08:28:33 srv1419988 uvicorn[2880314]: INFO:     Application startup complete.
+Aug 09 08:28:33 srv1419988 uvicorn[2880314]: INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+Aug 09 08:28:45 srv1419988 uvicorn[2880314]: INFO:     127.0.0.1:46180 - "GET /healthz HTTP/1.1" 404 Not Found
+Aug 09 08:28:45 srv1419988 uvicorn[2880314]: INFO:     127.0.0.1:46192 - "GET /docs HTTP/1.1" 200 OK

@@ -1,0 +1,59 @@
+=== executing rollback ===
+active
+ROLLBACK_OK
+=== after rollback ===
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  /opt/wathefni/orchestrator/app.py
+wave2_removed=true
+WATHEFNI_ONBOARDING_SEED=off
+rollback_app_cmp=true
+=== re-deploy wave2b ===
+    "WATHEFNI-96550252254|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96566363363|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96566363363|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96566363363|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96566363363|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96566363363|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96566363363|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96597727743|bank_details|True|received|bad78241880ae6d5ae7d9512cb8bb321|0",
+    "WATHEFNI-96597727743|civil_id|True|received|fd1de835a88e1a642bc3fc17125e19e8|0",
+    "WATHEFNI-96597727743|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96597727743|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96597727743|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+    "WATHEFNI-96597727743|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+    "WATHEFNI-96599411617|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0"
+  ]
+}
+SEED False
+HR_MUTATE False
+flags_ok_off=true
+[01:20:45] backing up
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  /opt/wathefni/backups/production-pre-onboarding-wave2b-20260802T011738Z/app.py
+a87e5bfb44f5a896c25f9efc4d2d0e28addf5bcfcf85d97ee5519a8cb4417016  /opt/wathefni/backups/production-pre-onboarding-wave2b-20260802T011738Z/action_registry.py
+rollback_syntax_ok=true
+rollback_script=/opt/wathefni/backups/production-pre-onboarding-wave2b-20260802T011738Z/ROLLBACK.sh
+rollback_source_sha_app=a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a
+rollback_source_sha_action=a87e5bfb44f5a896c25f9efc4d2d0e28addf5bcfcf85d97ee5519a8cb4417016
+rollback_cmp_ok=true
+rollback_full_execute=deferred_unless_fail
+candidate_ok
+parse_ok
+[01:20:46] installing Wave 2B modules
+active
+=== SHAs after ===
+d160e9b2b28a2c9c5b67668231e5d0f027f48989d81600ef0d08c81ebbfc0c6c  /opt/wathefni/orchestrator/app.py
+7da46c9e4dd087b8ccf01264b0d25de8e36fbb46393f80a65d3d7152fe201cfc  /opt/wathefni/orchestrator/action_registry.py
+1d1334730936a3e119c3ad8a77e994dbca6ef7bac8f13844689b831e38b4ff8d  /opt/wathefni/orchestrator/onboarding_wave2.py
+=== flags after ===
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_ONBOARDING_HR_MUTATE=off
+WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_ONBOARDING_SYNTHETIC_CANARY=on
+WATHEFNI_ONBOARDING_SYNTHETIC_NAME_PREFIX=W2B-SYNTH|
+WATHEFNI_ONBOARDING_SYNTHETIC_PHONE_PREFIXES=965523
+SEED False
+HR_MUTATE False
+SYNTHETIC_CANARY False

@@ -1,0 +1,16 @@
+## Reference scan
+### app.json
+9:    "icon": "./assets/icon.png",
+19:    "splash": {
+20:      "image": "./assets/splash.png",
+39:      "adaptiveIcon": {
+40:        "foregroundImage": "./assets/adaptive-icon.png",
+65:          "icon": "./assets/notification-icon.png",
+### png inventory
+assets/adaptive-icon.png
+assets/brand/legacy/splash-legacy-serif-W-circle.png
+assets/brand/wathefni-app-icon-approved-master.png
+assets/icon.png
+assets/notification-icon.png
+assets/splash.png
+### code Image/logo requires

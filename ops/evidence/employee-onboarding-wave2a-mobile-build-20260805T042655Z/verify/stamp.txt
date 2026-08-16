@@ -1,0 +1,11 @@
+stamp=20260805T042655Z
+eas_build_id=98134143-5260-4575-b3a4-5c4946efa87c
+eas_status=finished
+install=https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/98134143-5260-4575-b3a4-5c4946efa87c
+build_number=3
+profile=production
+distribution=internal
+activation_phone_field=99338566
+activation_code=442512
+invite_id=d8a56811-2851-43a6-ba47-2717dcb87c22
+idempotency=PASS (replay pending_hr_review; same-bytes after replacement_required creates v2)

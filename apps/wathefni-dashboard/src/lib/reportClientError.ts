@@ -1,0 +1,22 @@
+const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
+const PHONE_RE = /\+?\d[\d\s-]{7,16}\d/g
+
+export type ClientErrorSurface = 'hr_web' | 'setup_console'
+
+export function redactClientText(value: string, limit = 400): string {
+  return String(value || '')
+    .replace(EMAIL_RE, '[redacted-email]')
+    .replace(PHONE_RE, '[redacted-phone]')
+    .slice(0, limit)
+}
+
+export function reportClientError(error: unknown, surface: ClientErrorSurface = 'hr_web'): void {
+  const name = error instanceof Error ? error.name : 'Error'
+  const message = redactClientText(error instanceof Error ? error.message : 'unspecified_client_error')
+  void fetch('/dashboard/telemetry/error', {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ surface, name, message }),
+    keepalive: true,
+  }).catch(() => undefined)
+}

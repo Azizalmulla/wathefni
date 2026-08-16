@@ -1,0 +1,22 @@
+{
+  "phase": "before",
+  "shots": [
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/before/before/before-candidates-desktop.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/before/before/before-candidates-tablet.png"
+  ],
+  "assertions": {
+    "headers": [
+      "CANDIDATE",
+      "JOB",
+      "ENTRY METHOD",
+      "STATUS",
+      "RECRUITER OWNER",
+      "CV PROCESSING",
+      "ASSESSMENT",
+      "COMMUNICATION"
+    ],
+    "page_snippet": "2 CVs need processing attention\nOPEN INTAKE OPERATIONS\nCandidate list\n\nOne Candidates table for Talent Pool and live Job applications. Authority differs by row state.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nActive applications\nTalent Pool\nHired\nArchived\nRestricted\nCLASSIFICATION FILTERS\nCAREER AREA\nAdd\u2026\nTechnology (broad)\nHuman Resources (broad)\nFinance (broad)\nEngineering (broad)\nSales & Marketing (broad)\nOperations (broad)\nLIKELY ROLE\nAdd\u2026\nSoftware Engineering\nData and AI\nCybersecurity\nIT Support\nHR Generalist\nAccounting\nFinancial Analysis\nAudit\nTreasury\nMechanical Engineer\nSales Executive\nMarketing Specialist\nOperations Coordinator\nSKILL\nAdd\u2026\nPython\nExcel\nSQL\nRecruiting\nAutoCAD\nINDUSTRY\nAdd\u2026\nBanking (broad)\nOil & Gas (broad)\nRetail (broad)\nSENIORITY\nAdd\u2026\nIntern (broad)\nJunior (broad)\nMid-level (broad)\nSenior (broad)\nEXPERIENCE BAND\nAdd\u2026\n0\u20131 years (broad)\n1\u20133 years (broad)\n3\u20135 years (broad)\n5\u201310 years (broad)\n10+ years (broad)\nConfirmed or High AI\nHR confirmed only\nAI suggested\nConfirmed or any AI\nAny confidence / state\nHigh\nMedium\nNeeds review\nUnclassified\nInclude Medium AI\nClear classification\n\nFilters use stable taxonomy node IDs. Within one dimension selections are OR; across dimensions they AND. Default authority is HR-confirmed or High-confidence AI. Medium requires opt-in.\n\nAll stages\nWaiting for CV\nProcessing CV\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nProcessing CV\nProcessing CV\nReady for review\nReady for review\nMore filters\nApply\nSave view\nCANDIDATE\tJOB\tENTRY METHOD\tSTATUS\tRECRUITER OWNER\tCV PROCESSING\tASSESSMENT\tCOMMUNICATION\n\nyasser al dossary\nTalent Pool\nyasser.aldossary@example.com\nAdvisory: Technology \u00b7 Software Engineering\n\tNot linked\tRecruiting email\tTalent Pool\tUnassigned\tReady\t\u2014\tNo outreach\n\nEsraa Aziz\nTalent Pool\nazizalmulla16@gmail.com\n\tNot linked\tRecruiting email\tTalent Pool\tUnassigned\tReceived\t\u2014\tNo outreach\n\nHamad Almulla\nh.almulla@almulla-media.com\n\tAccounting Excel\tSource not recorded\tReady for review\tUnassigned\tReady\texpired\tsent\n\nFaisal Almulla\nfslalmulla@gmail.comlocation\n\tSocial Media Manager\tSource not recorded\tShortlisted\tUnassigned\tReady\t\u2014\tsent\n\nHamad Almulla\nh.almulla@almulla-media.com\n\tHR\tSource not recorded\tShortlisted\tUnassigned\tReceived\texpired\tfailed\n\nTalal Fadhli\ntalalabdalla89@gmail.comlocation\n\tSocial Media Manager\tSource not recorded\tHired\tUnassigned\tReady\t\u2014\tintentionally_skipped\n\nAziz Almulla\nazizalmulla16@gmail.com\n\tFull Stack Developer\tSource not recorded\tReady for review\tUnassigned\tReceived\t\u2014\tintention",
+    "has_entry_method": false,
+    "has_recruiter_owner": false
+  }
+}

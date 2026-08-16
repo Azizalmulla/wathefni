@@ -1,0 +1,116 @@
+    workforce planning c7 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  ja hard
+      PASS  no shadow actual
+      PASS  actual≠plan≠scenario
+      PASS  planned never actual wave5
+      PASS  planned≠actual position
+      PASS  planned cost≠payroll
+      PASS  recruiting optional
+      PASS  comp optional
+      PASS  talent optional
+      PASS  approved≠execution
+      PASS  no auto post/hire
+      PASS  handoff idempotent
+      PASS  no universal gap score
+      PASS  no ai authority
+      PASS  assistant mutations out
+      PASS  no second analytics
+      PASS  employee no leak
+      PASS  setup wave6 wfp
+      PASS  setup honesty
+      PASS  setup not actual hc
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  no local job catalog
+      PASS  gate requires ja
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on with ja
+      PASS  tenant gate
+      PASS  schema plans
+      PASS  schema baselines
+      PASS  schema handoffs
+      PASS  no employment mutate
+      PASS  no headcount mutate
+      PASS  no job posted
+      PASS  no hire created
+      PASS  no wfp_grade ddl
+      PASS  truth_plane facts
+      PASS  ja must be enabled
+      PASS  enable ja
+      PASS  enable company
+      PASS  kwd default
+      PASS  setup policy get
+      PASS  ja profile
+      PASS  create plan
+      PASS  baseline freeze
+      PASS  not second sot
+      PASS  baseline hc
+      PASS  baseline immutable once frozen
+      PASS  baseline rows unchanged
+      PASS  scenario create
+      PASS  second scenario
+      PASS  assumption explicit
+      PASS  turnover must be explicit selected
+      PASS  comp optional off
+      PASS  talent optional off
+      PASS  ja profile required
+      PASS  replacement reason explicit
+      PASS  new headcount demand
+      PASS  planned≠actual position
+      PASS  replacement explicit
+      PASS  reduction demand
+      PASS  projection reproducible
+      PASS  planned hc formula
+      PASS  no ai black box
+      PASS  truth plane scenario
+      PASS  planned cost labeled
+      PASS  currency kwd
+      PASS  gap definition driven
+      PASS  no universal score
+      PASS  rejects universal gap
+      PASS  scenario compare compatible
+      PASS  employee no plan leak
+      PASS  submit plan
+      PASS  approve
+      PASS  actual unchanged
+      PASS  approved scenario immutable
+      PASS  handoff recruiting off
+      PASS  works recruiting off
+      PASS  no mutate employment
+      PASS  no mutate headcount
+      PASS  no auto post/hire
+      PASS  handoff idempotent retry
+      PASS  same handoff id
+      PASS  reduction not requisition
+      PASS  recruiting handoff governed
+      PASS  no job posted
+      PASS  no hire
+      PASS  recruiting off fail-closed path
+      PASS  handoff cancel
+      PASS  handoff after cancel
+      PASS  revision not overwrite
+      PASS  original preserved
+      PASS  original superseded not deleted
+      PASS  actual vs plan
+      PASS  variance
+      PASS  assistant read
+      PASS  assistant cannot generate req
+      PASS  assistant no ai forecast
+      PASS  wave5 planned demand fact
+      PASS  wave5 planned hc fact
+      PASS  wave5 planned cost fact
+      PASS  no bare actual plane for plan facts
+      PASS  planning facts not mixed as actual
+      PASS  comp optional on works
+      PASS  disable retains history
+      PASS  module off blocks
+      PASS  history kept
+      PASS  ja still healthy
+
+    WORKFORCE_PLANNING_FULL_PASS
+    111 passed, 0 failed
+STAGING_RC=0

@@ -1,0 +1,82 @@
+    payroll pifss eos wave5 UX EN/AR/mobile
+      PASS  posthire dir
+      PASS  ux file
+      PASS  workspace file
+      PASS  posthire file
+      PASS  EN title
+      PASS  AR title
+      PASS  honesty EN
+      PASS  honesty AR
+      PASS  payment disabled EN
+      PASS  payment disabled AR
+      PASS  no remittance EN
+      PASS  no remittance AR
+      PASS  counsel EN
+      PASS  counsel AR
+      PASS  workspace rtl
+      PASS  mobile hint
+      PASS  testid
+      PASS  posthire tab
+      PASS  review only
+
+    19 passed, 0 failed
+    payroll close export wave4 UX EN/AR/mobile
+      PASS  posthire dir
+      PASS  EN title
+      PASS  AR title
+      PASS  honesty EN
+      PASS  honesty AR
+      PASS  payment disabled EN
+      PASS  payment disabled AR
+      PASS  immutable
+      PASS  sod
+      PASS  workspace rtl
+      PASS  mobile hint
+      PASS  testid
+      PASS  posthire tab
+      PASS  no real bank claim
+
+    14 passed, 0 failed
+    payroll payslip wave3 UX EN/AR/mobile
+      PASS  posthire dir
+      PASS  EN title
+      PASS  AR title
+      PASS  honesty EN
+      PASS  honesty AR
+      PASS  payment disabled EN
+      PASS  payment disabled AR
+      PASS  history retained
+      PASS  workspace rtl
+      PASS  mobile hint
+      PASS  testid
+      PASS  posthire tab
+      PASS  tabPayslips copy
+
+    13 passed, 0 failed
+PASS  posthire src present
+PASS  workspace file present
+PASS  honesty strip
+PASS  not authoritative banner
+PASS  quarantine tab
+PASS  replace import
+PASS  rtl dir support
+PASS  mobile flex wrap
+PASS  sm grid breakpoint
+PASS  loading state
+PASS  error retry
+PASS  WorkflowEmpty usage
+PASS  EN copy title
+PASS  AR copy title
+PASS  EN honesty money authority
+PASS  AR honesty money authority
+PASS  EN not authoritative
+PASS  AR not authoritative
+PASS  EN fingerprint drift
+PASS  AR fingerprint drift
+PASS  PostHire wires workspace
+PASS  Payroll tabs external/timesheets
+PASS  API external workspace route
+PASS  API import route pattern
+
+24 passed, 0 failed
+UX_PROD_OK

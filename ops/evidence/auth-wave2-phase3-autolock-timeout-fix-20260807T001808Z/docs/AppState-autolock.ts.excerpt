@@ -1,0 +1,193 @@
+const clearAwayTimer = () => {
+      if (awayLockTimerRef.current) {
+        clearTimeout(awayLockTimerRef.current)
+        awayLockTimerRef.current = null
+      }
+    }
+
+    const sealLocalSession = (reason: string, meta: Record<string, unknown>) => {
+      if (statusRef.current !== 'signedIn' || !sessionRef.current) {
+        console.warn('[autolock] seal skipped', {
+          reason,
+          status: statusRef.current,
+          hasSession: Boolean(sessionRef.current),
+          ...meta,
+        })
+        return false
+      }
+      // Local seal only — never clear SecureStore session or PIN.
+      sealedSessionRef.current = sessionRef.current
+      sessionRef.current = null
+      setAccessState('active')
+      setStatus('locked')
+      console.warn('[autolock] SEALED', { reason, ...meta })
+      return true
+    }
+
+    const scheduleBackgroundLock = (startedAt: number) => {
+      clearAwayTimer()
+      const key = employeeKeyRef.current
+      const enabled = isLocalAutoLockEnabledFor(key)
+      const timeoutMs = autoLockTimeoutRef.current
+      const remainingMs = timeoutMs == null ? null : Math.max(0, timeoutMs - (Date.now() - startedAt))
+      console.warn('[autolock] schedule', {
+        enabled,
+        key: key || null,
+        timeoutMs,
+        never: timeoutMs == null,
+        startedAt,
+        remainingMs,
+        updateId: Updates.updateId ?? null,
+      })
+      if (!enabled || timeoutMs == null || remainingMs == null) return
+      awayLockTimerRef.current = setTimeout(() => {
+        const awayStartedAt = awayStartedAtRef.current ?? startedAt
+        const elapsedMs = Date.now() - awayStartedAt
+        console.warn('[autolock] timer fired', {
+          awayStartedAt,
+          resumeAt: Date.now(),
+          elapsedMs,
+          timeoutMs,
+          status: statusRef.current,
+        })
+        if (shouldAutoLockOnResume({ elapsedMs, timeoutMs, deviceWasLocked: false })) {
+          sealLocalSession('background_timer', { awayStartedAt, elapsedMs, timeoutMs })
+        }
+      }, remainingMs)
+    }
+
+    const probeDeviceLock = () => {
+      return isDeviceScreenLocked()
+        .then((locked) => {
+          if (locked) deviceLockedWhileAwayRef.current = true
+          return locked
+        })
+        .catch(() => false)
+    }
+
+    const onChange = (next: AppStateStatus) => {
+      const prev = appStateRef.current
+      appStateRef.current = next
+      const now = Date.now()
+      const key = employeeKeyRef.current
+      const enabled = isLocalAutoLockEnabledFor(key)
+      const timeoutMs = autoLockTimeoutRef.current
+
+      console.warn('[autolock] appState', {
+        prev,
+        next,
+        status: statusRef.current,
+        enabled,
+        key: key || null,
+        timeoutMs,
+        awayStartedAt: awayStartedAtRef.current,
+        hasSession: Boolean(sessionRef.current),
+        updateId: Updates.updateId ?? null,
+      })
+
+      // Leaving the foreground — start away clock + background timer.
+      if (prev === 'active' && (next === 'inactive' || next === 'background')) {
+        if (statusRef.current === 'signedIn' && sessionRef.current) {
+          if (awayStartedAtRef.current == null) awayStartedAtRef.current = now
+          console.warn('[autolock] away start', {
+            awayStartedAt: awayStartedAtRef.current,
+            enabled,
+            timeoutMs,
+            key: key || null,
+          })
+          if (enabled) {
+            scheduleBackgroundLock(awayStartedAtRef.current)
+            void probeDeviceLock().then((locked) => {
+              console.warn('[autolock] device probe', { locked, at: Date.now() })
+            })
+            // Screen-lock can lag AppState by a beat on iOS.
+            setTimeout(() => {
+              void probeDeviceLock()
+            }, 400)
+          }
+        } else {
+          console.warn('[autolock] away not armed', {
+            status: statusRef.current,
+            hasSession: Boolean(sessionRef.current),
+            enabled,
+          })
+        }
+        return
+      }
+
+      if (next !== 'active') return
+
+      // Returning to foreground.
+      clearAwayTimer()
+      const awayStartedAt = awayStartedAtRef.current
+      awayStartedAtRef.current = null
+      const elapsedMs = awayStartedAt != null ? now - awayStartedAt : null
+      const deviceWasLocked = deviceLockedWhileAwayRef.current
+      deviceLockedWhileAwayRef.current = false
+
+      const alreadyLocked = statusRef.current === 'locked'
+      const shouldLock =
+        !alreadyLocked &&
+        enabled &&
+        awayStartedAt != null &&
+        shouldAutoLockOnResume({
+          elapsedMs: elapsedMs ?? 0,
+          timeoutMs,
+          deviceWasLocked,
+        })
+
+      console.warn('[autolock] resume decision', {
+        prev,
+        next,
+        awayStartedAt,
+        resumeAt: now,
+        elapsedMs,
+        timeoutMs,
+        never: timeoutMs == null,
+        enabled,
+        deviceWasLocked,
+        alreadyLocked,
+        shouldLock,
+        status: statusRef.current,
+        hasSession: Boolean(sessionRef.current),
+        updateId: Updates.updateId ?? null,
+      })
+
+      if (alreadyLocked) return
+
+      if (shouldLock) {
+        sealLocalSession('resume_timeout_or_device_lock', {
+          awayStartedAt,
+          resumeAt: now,
+          elapsedMs,
+          timeoutMs,
+          deviceWasLocked,
+        })
+        return
+      }
+
+      // Soft refresh while unlocked — classifier handles failures (no wipe on soft errors).
+      if (
+        prev !== 'active' &&
+        statusRef.current === 'signedIn' &&
+        sessionRef.current
+      ) {
+        void refreshMeRef.current()
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', onChange)
+    return () => {
+      subscription.remove()
+      clearAwayTimer()
+    }
+    // Mount once — all live values read from refs so listener cannot go stale.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Keep refreshMe callable from the stable AppState listener.
+  useEffect(() => {
+    refreshMeRef.current = refreshMe
+  }, [refreshMe])
+
+  

@@ -1,0 +1,11 @@
+{
+  "branch": "canary",
+  "updateGroupId": "fdb4002c-d014-4cd1-aa12-0ff2f76aaa76",
+  "androidUpdateId": "019fd9a2-4496-70d3-a8f1-258fbde31df5",
+  "iosUpdateId": "019fd9a2-4496-7623-837b-5bbc0e65b4c2",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/fdb4002c-d014-4cd1-aa12-0ff2f76aaa76",
+  "message": "Auth Wave 2 Phase 3: crash fix \u2014 resume-only seal + delayed Face ID",
+  "rollbackRepublishGroup": "83fe64f6-a46f-4cfb-b6ed-6e7229a6c27a",
+  "rollbackSourceGroup": "fda08e77-f7a1-464c-8596-00cc4e4c6461",
+  "crashingGroup": "0ac5d3b9-442e-422d-8bcc-39d0b1027346"
+}

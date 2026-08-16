@@ -1,0 +1,15 @@
+{
+  "seed_enabled": false,
+  "hr_mutate_enabled": true,
+  "hr_mutate_companies": [
+    "WATHEFNI"
+  ],
+  "synthetic_canary": true,
+  "item_count": 150,
+  "checklist_unchanged": true,
+  "bank_forbidden": true,
+  "detail_has_manager_gate": true,
+  "list_uses_scope_where": true,
+  "cancel_registered": true,
+  "reschedule_registered": true
+}

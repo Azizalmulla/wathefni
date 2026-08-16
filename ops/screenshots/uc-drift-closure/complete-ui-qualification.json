@@ -1,0 +1,525 @@
+{
+  "prefix": "TPCUIFCC50C9F",
+  "marker": "talent_pool_classification_complete_ui_staging_v1",
+  "pass_count": 47,
+  "fail_count": 0,
+  "classifier_version": "classifier.deterministic_v1.2",
+  "taxonomy_version": "taxonomy_v1.1.0",
+  "results": [
+    {
+      "name": "classifier_frozen",
+      "pass": true,
+      "detail": "classifier.deterministic_v1.2"
+    },
+    {
+      "name": "workers_env_off",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "dashboard_marker_classification-filter-bar",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "dashboard_marker_classification-compact-chip",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "dashboard_marker_candidate-classification-section",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "dashboard_marker_classification-history",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "dashboard_marker_classification-add-correct",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "dashboard_marker_Include Medium AI",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "feature_on_wathefni",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true,
+        "schema_enabled": true,
+        "manual_enabled": true,
+        "workers_enabled": false,
+        "ui_enabled": true,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "taxonomy_dimensions",
+      "pass": true,
+      "detail": {
+        "got": [
+          "career_area",
+          "experience_band",
+          "industry",
+          "likely_role",
+          "seniority",
+          "skill"
+        ],
+        "expected": [
+          "career_area",
+          "experience_band",
+          "industry",
+          "likely_role",
+          "seniority",
+          "skill"
+        ]
+      }
+    },
+    {
+      "name": "taxonomy_bilingual_labels",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "run_tech",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "workers": false,
+        "ocr": false
+      }
+    },
+    {
+      "name": "run_finance",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "workers": false,
+        "ocr": false
+      }
+    },
+    {
+      "name": "run_skill_python",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "workers": false,
+        "ocr": false
+      }
+    },
+    {
+      "name": "run_medium",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "workers": false,
+        "ocr": false
+      }
+    },
+    {
+      "name": "run_unclear",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "workers": false,
+        "ocr": false
+      }
+    },
+    {
+      "name": "run_empty",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "workers": false,
+        "ocr": false
+      }
+    },
+    {
+      "name": "chip_high_tech",
+      "pass": true,
+      "detail": "Technology \u00b7 Software Engineering"
+    },
+    {
+      "name": "no_chip_medium",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no_chip_unclassified",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "node_ids_projected",
+      "pass": true,
+      "detail": [
+        "cert.aws",
+        "edu.computer_science",
+        "fn.technology",
+        "ind.banking",
+        "role.software_engineer",
+        "sen.senior",
+        "skill.python",
+        "skill.sql"
+      ]
+    },
+    {
+      "name": "filter_career_area",
+      "pass": true,
+      "detail": {
+        "tech_node": "fn.technology",
+        "ids": [
+          "TPCUIFCC50C9F-TECH"
+        ],
+        "total": 1
+      }
+    },
+    {
+      "name": "filter_finance",
+      "pass": true,
+      "detail": {
+        "finance_node": "fn.finance",
+        "ids": [
+          "TPCUIFCC50C9F-FINANCE"
+        ]
+      }
+    },
+    {
+      "name": "filter_combined_and",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "total": 2
+      }
+    },
+    {
+      "name": "filter_or_within_dimension",
+      "pass": true,
+      "detail": [
+        "TPCUIFCC50C9F-FINANCE",
+        "TPCUIFCC50C9F-MEDIUM",
+        "TPCUIFCC50C9F-SKILL_PYTHON",
+        "TPCUIFCC50C9F-TECH"
+      ]
+    },
+    {
+      "name": "filter_unclassified",
+      "pass": true,
+      "detail": [
+        "TPCUIFCC50C9F-EMPTY"
+      ]
+    },
+    {
+      "name": "filter_unclassified_excludes_classified",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "filter_high",
+      "pass": true,
+      "detail": 3
+    },
+    {
+      "name": "pagination_server_correct",
+      "pass": true,
+      "detail": {
+        "total": 62,
+        "page1": 10,
+        "page2": 10,
+        "overlap": []
+      }
+    },
+    {
+      "name": "profile_runs_history",
+      "pass": true,
+      "detail": {
+        "runs_total": 2,
+        "runs": 2
+      }
+    },
+    {
+      "name": "profile_current_stale",
+      "pass": true,
+      "detail": [
+        "current",
+        "stale"
+      ]
+    },
+    {
+      "name": "profile_actions",
+      "pass": true,
+      "detail": [
+        "confirm",
+        "reject",
+        "add",
+        "correct"
+      ]
+    },
+    {
+      "name": "review_preview",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "preview": true,
+        "event": {
+          "event_id": "f409cbc9-2cab-4dc4-a972-eeaa0bda3e16",
+          "action": "confirm",
+          "node_id": "cert.aws",
+          "previous_node_id": null,
+          "suggestion_id": null,
+          "reason": null,
+          "actor_user_id": "local",
+          "actor_email": "",
+          "supersedes_event_id": null,
+          "node_type": "certification",
+          "label_en": "AWS",
+          "label_ar": "\u0623\u0645\u0627\u0632\u0648\u0646 \u0648\u064a\u0628 \u0633\u064a\u0631\u0641\u064a\u0633\u0632",
+          "created_at": "now"
+        },
+        "message": "Preview only \u2014 confirm to append."
+      }
+    },
+    {
+      "name": "review_confirm_required",
+      "pass": true,
+      "detail": {
+        "status": 422,
+        "body": {
+          "detail": {
+            "error": "confirm_required"
+          }
+        }
+      }
+    },
+    {
+      "name": "review_confirm",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "preview": false,
+        "event": {
+          "event_id": "dcd92338-9be7-4c6a-80d6-ca3d50b570e1",
+          "action": "confirm",
+          "node_id": "cert.aws",
+          "previous_node_id": null,
+          "suggestion_id": null,
+          "reason": null,
+          "actor_user_id": "local",
+          "actor_email": "",
+          "supersedes_event_id": null,
+          "node_type": "certification",
+          "label_en": "AWS",
+          "label_ar": "\u0623\u0645\u0627\u0632\u0648\u0646 \u0648\u064a\u0628 \u0633\u064a\u0631\u0641\u064a\u0633\u0632",
+          "created_at": "now"
+        }
+      }
+    },
+    {
+      "name": "review_add",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "preview": false,
+        "event": {
+          "event_id": "4e8e5fcf-84f0-4d7c-bff6-896574dcbf78",
+          "action": "add",
+          "node_id": "skill.python",
+          "previous_node_id": null,
+          "suggestion_id": null,
+          "reason": null,
+          "actor_user_id": "local",
+          "actor_email": "",
+          "supersedes_event_id": null,
+          "node_type": "skill",
+          "label_en": "Python",
+          "label_ar": "\u0628\u0627\u064a\u062b\u0648\u0646",
+          "created_at": "now"
+        }
+      }
+    },
+    {
+      "name": "review_correct",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "preview": false,
+        "event": {
+          "event_id": "98cb9169-741f-4545-99ce-2de5c8e02b16",
+          "action": "correct",
+          "node_id": "fn.finance",
+          "previous_node_id": "fn.technology",
+          "suggestion_id": null,
+          "reason": null,
+          "actor_user_id": "local",
+          "actor_email": "",
+          "supersedes_event_id": null,
+          "node_type": "career_function",
+          "label_en": "Finance",
+          "label_ar": "\u0627\u0644\u0645\u0627\u0644\u064a\u0629",
+          "created_at": "now"
+        }
+      }
+    },
+    {
+      "name": "review_history_append_only",
+      "pass": true,
+      "detail": [
+        "confirm",
+        "add",
+        "correct"
+      ]
+    },
+    {
+      "name": "saved_view_create",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "view": {
+          "view_id": "85b66919-76bc-4766-a13a-e20b51b6c8ca",
+          "company_code": "WATHEFNI",
+          "actor_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+          "name": "TPCUIFCC50C9F-finance-view",
+          "filters": {
+            "view": "talent_pool",
+            "classification": {
+              "active": true,
+              "schema": "classification-filters-v1",
+              "node_ids": [],
+              "selected": [
+                {
+                  "node_id": "fn.finance",
+                  "dimension": "career_area"
+                }
+              ],
+              "authority": "confirmed_only",
+              "confidence": null,
+              "current_only": true,
+              "dimension_nodes": {
+                "career_area": [
+                  "fn.finance"
+                ]
+              },
+              "deprecated_nodes": [],
+              "include_medium_ai": false
+            },
+            "classification_schema": "classification-filters-v1"
+          },
+          "created_at": "2026-07-26T00:30:55.678819+00:00",
+          "updated_at": "2026-07-26T00:30:55.678819+00:00"
+        }
+      }
+    },
+    {
+      "name": "saved_view_versioned",
+      "pass": true,
+      "detail": {
+        "active": true,
+        "schema": "classification-filters-v1",
+        "node_ids": [],
+        "selected": [
+          {
+            "node_id": "fn.finance",
+            "dimension": "career_area"
+          }
+        ],
+        "authority": "confirmed_only",
+        "confidence": null,
+        "current_only": true,
+        "dimension_nodes": {
+          "career_area": [
+            "fn.finance"
+          ]
+        },
+        "deprecated_nodes": [],
+        "include_medium_ai": false
+      }
+    },
+    {
+      "name": "saved_view_deprecated_nodes",
+      "pass": true,
+      "detail": [
+        {
+          "status": "missing_or_deprecated",
+          "message": "This taxonomy node is no longer in the active pack and will not silently map to another node.",
+          "node_id": "does.not.exist.node",
+          "dimension": "career_area"
+        }
+      ]
+    },
+    {
+      "name": "feature_off_company",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": true,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "taxonomy_hidden_when_off",
+      "pass": true,
+      "detail": 404
+    },
+    {
+      "name": "list_no_chip_when_off",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "n": 5
+      }
+    },
+    {
+      "name": "cross_tenant_disabled",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "BOOTMIX01",
+        "enabled_for_company": false,
+        "schema_enabled": true,
+        "manual_enabled": true,
+        "workers_enabled": false,
+        "ui_enabled": true,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "zero_residue",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "production_dashboard_present",
+      "pass": true,
+      "detail": true
+    }
+  ]
+}

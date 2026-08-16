@@ -1,0 +1,9 @@
+{
+  "document_calls": 10,
+  "query_calls": 5,
+  "approx_doc_tokens": 7572,
+  "approx_query_tokens": 120,
+  "estimated_cost_usd": 0.000923,
+  "model": "voyage-4-large",
+  "voyage_current_chunks": 10
+}

@@ -1,0 +1,47 @@
+{
+  "company": "WATHEFNI",
+  "view_all_total": 14,
+  "talent_pool_rows": [
+    {
+      "app_key_suffix": "I-IMPORT",
+      "status": "needs_role",
+      "canonical_stage": "needs_role",
+      "record_state": "talent_pool",
+      "status_display": "Talent Pool",
+      "is_held": true,
+      "display_bucket": "none",
+      "display_is_new": false,
+      "display_is_none": true
+    },
+    {
+      "app_key_suffix": "I-IMPORT",
+      "status": "needs_role",
+      "canonical_stage": "needs_role",
+      "record_state": "talent_pool",
+      "status_display": "Talent Pool",
+      "is_held": true,
+      "display_bucket": "none",
+      "display_is_new": false,
+      "display_is_none": true
+    }
+  ],
+  "checks": {
+    "talent_pool_count": 2,
+    "talent_pool_none_not_new": true,
+    "new_filter_total": 2,
+    "new_filter_statuses": [
+      "awaiting_cv",
+      "screening"
+    ],
+    "new_filter_excludes_held": true,
+    "shortlisted_includes_offer_aliases": true,
+    "legacy_offer_display_shortlisted": true,
+    "shortlisted_api_total": 3,
+    "other_buckets": {
+      "ready_for_review": 3,
+      "interview": 0,
+      "hired": 4
+    }
+  },
+  "verdict": "PASS"
+}

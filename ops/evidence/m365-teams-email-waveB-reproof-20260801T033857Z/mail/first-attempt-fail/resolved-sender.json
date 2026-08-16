@@ -1,0 +1,22 @@
+{
+  "mode": "microsoft_mailbox",
+  "selected_mode": "microsoft_mailbox",
+  "from_address": "abdulazizalmulla@wathefni.onmicrosoft.com",
+  "reply_to": "hr@wathefni.ai",
+  "display_name": "Wathefni Evidence",
+  "provider": "microsoft_graph",
+  "mailbox_id": "e51803f4-c385-440f-a285-0f3088639be1",
+  "activatable": true,
+  "block_reason": null,
+  "purpose": "evidence_send",
+  "branding": {
+    "company_name_en": null,
+    "company_name_ar": null,
+    "logo_url": null
+  },
+  "emergency_fallback_used": false,
+  "intended_mode": "microsoft_mailbox",
+  "intended_from": "abdulazizalmulla@wathefni.onmicrosoft.com",
+  "user_status": "Accepted by Microsoft",
+  "hr_notice": null
+}

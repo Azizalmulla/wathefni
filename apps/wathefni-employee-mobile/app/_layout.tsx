@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Stack, useRouter, useSegments } from 'expo-router'
+import 'react-native-gesture-handler'
+import { useEffect, useRef, useState } from 'react'
+import { Redirect, Slot, Stack, useRouter, useSegments } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -22,13 +23,19 @@ import { PushLifecycle } from '@/push/PushLifecycle'
 import { ForegroundQueryRefresh } from '@/lib/refresh'
 import { colors } from '@/theme'
 import { PIN_MAX_FAILED_ATTEMPTS } from '@/auth/pinPolicy'
+import * as Linking from 'expo-linking'
+import { hrefFromHttpsAppLink } from '@/linking/httpsAppLink
+import {
+  PrincipalBootSplash,
+  PrincipalGateProvider,
+  usePrincipalGate,
+} from '@/principals/PrincipalGate'
+import { UnsignedEntry } from '@/principals/UnifiedSignInView'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000, refetchOnWindowFocus: false } },
 })
 
-// Routes the user between the auth stack and the app once the session resolves,
-// and declares the navigation stack (tabs + pushed detail screens with headers).
 function AuthGate() {
   const {
     status,
@@ -49,11 +56,11 @@ function AuthGate() {
   const [pinBusy, setPinBusy] = useState(false)
   const [pinError, setPinError] = useState<string | null>(null)
   const [bioBusy, setBioBusy] = useState(false)
+  const pendingHttpsHref = useRef<string | null>(null)
+  const consumedHttpsHref = useRef<string | null>(null)
 
-  // Keep EN=LTR / AR=RTL aligned on every auth transition (login, logout, blocked).
   useEffect(() => {
     if (status === 'loading') return
-    // Guard: older OTA bases without syncLayoutLocale must not fatal the app.
     if (typeof syncLayoutLocale === 'function') void syncLayoutLocale()
   }, [status, syncLayoutLocale])
 
@@ -67,6 +74,11 @@ function AuthGate() {
     ) {
       return
     }
+    // Employee principal must never host HR routes — hard redirect (no silent skip).
+    if (segments[0] === 'hr') {
+      router.replace('/(tabs)')
+      return
+    }
     const inAuthGroup = segments[0] === '(auth)'
     if (status === 'signedOut' && !inAuthGroup) {
       router.replace('/(auth)/activate')
@@ -74,6 +86,33 @@ function AuthGate() {
       router.replace('/(tabs)')
     }
   }, [status, segments, router])
+
+  useEffect(() => {
+    const capture = (url: string | null) => {
+      const href = hrefFromHttpsAppLink(url)
+      if (!href || href.startsWith('/hr')) return
+      if (status === 'signedIn') {
+        if (consumedHttpsHref.current === href) return
+        consumedHttpsHref.current = href
+        pendingHttpsHref.current = null
+        router.push(href as never)
+        return
+      }
+      pendingHttpsHref.current = href
+    }
+    void Linking.getInitialURL().then(capture)
+    const sub = Linking.addEventListener('url', (event) => capture(event.url))
+    return () => sub.remove()
+  }, [status, router])
+
+  useEffect(() => {
+    if (status !== 'signedIn' || !pendingHttpsHref.current) return
+    const href = pendingHttpsHref.current
+    pendingHttpsHref.current = null
+    if (consumedHttpsHref.current === href) return
+    consumedHttpsHref.current = href
+    router.push(href as never)
+  }, [status, router])
 
   useEffect(() => {
     if (status !== 'signedIn') return
@@ -186,6 +225,25 @@ function AuthGate() {
     )
   }
 
+  // Auth-only tree: signed-out must not keep authenticated routes in the navigator.
+  if (status === 'signedOut') {
+    return (
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          title: '',
+          headerTitle: '',
+          headerBackVisible: false,
+          contentStyle: { backgroundColor: colors.bg },
+          gestureEnabled: false,
+          animation: 'none',
+        }}
+      >
+        <Stack.Screen name="(auth)" options={{ headerShown: false, gestureEnabled: false }} />
+      </Stack>
+    )
+  }
+
   return (
     <Stack
       screenOptions={{
@@ -206,17 +264,21 @@ function AuthGate() {
       <Stack.Screen name="change-pin" options={{ headerShown: false }} />
       <Stack.Screen name="privacy-support" options={{ headerShown: false }} />
       <Stack.Screen name="leave/request" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="leave/history" options={{ headerShown: false }} />
+      <Stack.Screen name="schedule/history" options={{ headerShown: false }} />
+      {/* HR routes mount only under shell.kind === 'hr' via ModeRedirect Slot — never here. */}
     </Stack>
   )
 }
 
-function RuntimeProviders() {
+function EmployeeShell() {
   const { t } = useI18n()
   return (
     <AppErrorBoundary title={t('error.fatalTitle')} message={t('error.fatalMessage')} retryLabel={t('common.retry')}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <StatusBar style="dark" />
+          {/* HR must not register on /app/push — PushLifecycle stays employee-only. */}
           <PushLifecycle />
           <ForegroundQueryRefresh />
           <LocalUnlockShell>
@@ -226,6 +288,48 @@ function RuntimeProviders() {
       </QueryClientProvider>
     </AppErrorBoundary>
   )
+}
+
+function ModeRedirect() {
+  const { ready, shell } = usePrincipalGate()
+  const segments = useSegments()
+
+  if (!ready || !shell) return <PrincipalBootSplash />
+
+  // No startup principal chooser. Workspace comes from authenticated sessions.
+  if (shell.kind === 'unsigned') {
+    return <UnsignedEntry />
+  }
+
+  if (shell.kind === 'hr') {
+    // Post Work-email auth the URL is often still `/` because UnsignedEntry has no
+    // navigator. Mounting a root Stack on that URL focuses Employee `(tabs)` /
+    // `+not-found` without Employee AuthProvider → fatal:
+    //   Error: useAuth must be used within AuthProvider
+    //   at TabsLayout (app/(tabs)/_layout.tsx)
+    // Guard: never Slot until the route is already under /hr.
+    if (segments[0] !== 'hr') {
+      return (
+        <>
+          <Redirect href="/hr" />
+          <PrincipalBootSplash />
+        </>
+      )
+    }
+    return <Slot />
+  }
+
+  // Employee principal: synchronous hard-deny of /hr/* (no async race, no flag skip).
+  if (segments[0] === 'hr') {
+    return (
+      <>
+        <Redirect href="/(tabs)" />
+        <PrincipalBootSplash />
+      </>
+    )
+  }
+
+  return <EmployeeShell />
 }
 
 export default function RootLayout() {
@@ -242,7 +346,6 @@ export default function RootLayout() {
   }, [])
 
   if (!locale || (!fontsLoaded && !fontError)) {
-    // Pre-i18n: must not use any component that calls useI18n yet.
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color={colors.accent} />
@@ -253,7 +356,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <I18nProvider initialLocale={locale}>
-        <RuntimeProviders />
+        <PrincipalGateProvider>
+          <ModeRedirect />
+        </PrincipalGateProvider>
       </I18nProvider>
     </SafeAreaProvider>
   )

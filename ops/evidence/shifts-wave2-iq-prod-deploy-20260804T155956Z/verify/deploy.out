@@ -1,0 +1,23 @@
+BACKUP=/opt/wathefni/backups/production-pre-shifts-wave2-iq-20260804T155956Z
+DEPLOYED_POSTHIRE=/var/www/wathefni-dashboard/assets/PostHire-DWa5FLLn.js
+BACKUP=/opt/wathefni/backups/production-pre-shifts-wave2-iq-20260804T155956Z
+PASS data-shifts-iq-wave2
+PASS data-shifts-updating
+PASS Updating
+PASS expected_updated_at
+PASS approve_shift_swap
+PASS data-shifts-surfaces
+STATIC_GATES_OK
+PASS posthire_bundle_present — PostHire-DWa5FLLn.js
+PASS iq_wave2_marker
+PASS updating_overlay
+PASS updating_copy
+PASS surfaces_preserved
+PASS board_preserved
+PASS filters_preserved
+PASS mutation_concurrency
+PASS swap_actions
+PASS confirm_continue
+PASS wave1_primary
+PASS leave_still_present
+FAIL iq_shell_still

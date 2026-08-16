@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 
@@ -10,10 +11,16 @@ def assert_true(condition: bool, message: str) -> None:
 
 def main() -> None:
     root = Path(__file__).resolve().parent
-    app_source = (root / "app.py").read_text(encoding="utf-8")
-    toolcall_source = (root / "tool_call_orchestrator.py").read_text(encoding="utf-8")
-    frontend_source = (root.parent / "apps" / "wathefni-dashboard" / "src" / "App.tsx").read_text(encoding="utf-8")
-    api_source = (root.parent / "apps" / "wathefni-dashboard" / "src" / "lib" / "api.ts").read_text(encoding="utf-8")
+    orchestrator_source = Path(os.environ.get("WATHEFNI_ORCHESTRATOR_SOURCE_ROOT") or root)
+    app_source = (orchestrator_source / "app.py").read_text(encoding="utf-8")
+    toolcall_source = (orchestrator_source / "tool_call_orchestrator.py").read_text(encoding="utf-8")
+    dashboard_source = (
+        Path(os.environ["WATHEFNI_DASHBOARD_SOURCE_ROOT"])
+        if os.environ.get("WATHEFNI_DASHBOARD_SOURCE_ROOT")
+        else root.parent / "apps" / "wathefni-dashboard"
+    )
+    frontend_source = (dashboard_source / "src" / "App.tsx").read_text(encoding="utf-8")
+    api_source = (dashboard_source / "src" / "lib" / "api.ts").read_text(encoding="utf-8")
 
     for table in ("dashboard_users", "dashboard_user_sessions", "dashboard_user_permission_grants", "dashboard_user_invites", "dashboard_whatsapp_identities"):
         assert_true(f"CREATE TABLE IF NOT EXISTS {table}" in app_source, f"{table} table must exist")

@@ -1,0 +1,7 @@
+{
+  "lifecycle_mutation_blocked": true,
+  "outbound_messages": 0,
+  "production_access_blocked": true,
+  "ranking_writes": 0,
+  "shadow_tools_default_off": true
+}

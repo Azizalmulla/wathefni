@@ -50,10 +50,12 @@ Source of truth: `src/theme.ts`.
 
 Source of truth: `src/motion.ts` and `src/native/haptics.ts`.
 
+Semantic feedback only (`selection` · `weekSnap` · `tab` · `lightImpact` · `success` · `warning` · `error`). Screens call those events — never raw `expo-haptics`. Strengthened Soft/Medium/Heavy impacts; primary CTAs get light press feedback. **In-app = haptics only** (no custom UI tones). Push notification audio is separate (`assets/sounds/push/wathefni_default.wav`). Throttle/dedupe per kind; never block UI.
+
 - Durations: 120 ms instant, 180 ms quick, 280 ms enter, 420 ms progress.
 - Standard easing: cubic Bézier (0.2, 0.8, 0.2, 1). Springs use speed 28 and bounciness 3.
 - Reduced Motion removes lift and press-scale animation while retaining state changes.
-- Light impact is reserved for deliberate primary actions; success feedback follows completed native transfers.
+- Light impact is reserved for primary CTA press-in; success / warning / error follow completed or consequential native transfers.
 
 ## Components
 

@@ -1,0 +1,12 @@
+PASS More tab uses launcher view
+PASS Wordmark + EditorialHeading
+PASS operations modules present
+PASS no Candidates/Interviews on More
+PASS Hiring group removed
+PASS Account: settings + sign out
+PASS delivery alerts locked + gated
+PASS assistant under More + gated
+PASS workspace.enabled + capability gate
+PASS quiet ListRows not dashboard cards
+PASS hrMore keys EN+AR
+hr-more-launcher: GREEN

@@ -1,0 +1,65 @@
+1:                    """,
+2:                    (key, item),
+3:                )
+4:                live = cur.fetchone() or {}
+5:                st = _lc.normalize_status(dict(live).get("status") if live else item_status_raw)
+6:                prior = _lc.find_idempotent_pending_version(
+7:                    cur,
+8:                    company_code=company,
+9:                    employee_key=key,
+10:                    document_type=ctype,
+11:                    content_sha256=digest,
+12:                )
+13:                # Idempotent same-SHA short-circuit only while the item is already under review.
+14:                # After reset-to-pending (or replacement), the same bytes must re-enter validation.
+15:                if prior and st not in {_lc.STATE_SUBMITTED, _lc.STATE_PROCESSING}:
+16:                    prior = None
+17:                if prior:
+18:                    cur.execute(
+19:                        """
+20:                        SELECT file_id FROM file_registry
+21:                        WHERE company_code=%s AND subject_type='employee' AND subject_key=%s
+22:                          AND content_sha256=%s
+23:                        ORDER BY updated_at DESC NULLS LAST LIMIT 1
+24:                        """,
+25:                        (company, key, digest),
+26:                    )
+27:                    frow = cur.fetchone()
+28:                    fid = str((frow or {}).get("file_id") or prior.get("file_id") or "") or None
+29:                    _lc.apply_employee_document_submit(
+30:                        cur,
+31:                        employee_key=key,
+32:                        item_id=item,
+33:                        file_id=fid,
+34:                        version_id=str(prior.get("version_id") or "") or None,
+35:                        content_sha256=digest,
+36:                    )
+37:                    recompute_employee_onboarding_counts(cur, key)
+38:                elif st in {_lc.STATE_SUBMITTED, _lc.STATE_PROCESSING}:
+39:                    raise HTTPException(
+40:                        status_code=409,
+41:                        detail={
+42:                            "error": "item_under_review",
+43:                            "message": "This document is already with HR for review. You'll be able to replace it if they ask.",
+44:                        },
+45:                    )
+46:                elif not _lc.upload_allowed_for_status(st):
+47:                    raise HTTPException(
+48:                        status_code=409,
+49:                        detail={"error": "upload_not_allowed", "message": "This item can't be uploaded right now."},
+50:                    )
+51:                else:
+52:                    prior = None
+53:            conn.commit()
+54:        if prior:
+55:            return json_safe({
+56:                "ok": True,
+57:                "idempotent": True,
+58:                "item_id": item,
+59:                "file_id": str(prior.get("file_id") or "") or None,
+60:                "version_id": str(prior.get("version_id") or "") or None,
+61:                "status": _lc.STATE_PROCESSING,
+62:                "storage_status": "stored",
+63:            })
+64:    elif lifecycle_on:
+65:        # Empty body still must respect status gates.

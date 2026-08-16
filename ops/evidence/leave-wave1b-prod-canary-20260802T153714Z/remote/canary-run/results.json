@@ -1,0 +1,256 @@
+{
+  "pass": 50,
+  "fail": 0,
+  "results": [
+    {
+      "name": "schema version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authority enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty non-binding",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "vacation\u2192annual",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "time_off\u2192annual",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preflight real leaves=3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "seed employee 7490",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic marker 7490",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "seed employee 7490",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic marker 7490",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request annual",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "annual honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request sick",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "legacy vacation stores annual",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self-approve denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self-reject denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale version approve fails",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve annual ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve payroll_impact provisional",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance derived from leave",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manual correction stamped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel stale version fails",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "events preserve requested/approved/cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manual attendance correction preserved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "timesheet provisional invalidation only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no payroll money path in invalidate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale \u2192 expired_stale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real stale leave still requested",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle blocks request terminated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle blocks request suspended",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle blocks request future_start",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle blocks request notice_period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle subject request ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle decline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle reverse",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reverse not pending",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tenant isolation other company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope path exercised",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "legacy vacation \u2192 annual ledger",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "holiday chargeable path",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid: real leave count 3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid: real fp 51cd940f",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid: real fp dbf82ecf",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid: real fp e3217e0e",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid: real leave rows equal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mid: real leave_ids stable",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

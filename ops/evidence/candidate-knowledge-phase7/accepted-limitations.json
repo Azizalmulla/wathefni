@@ -1,0 +1,27 @@
+[
+  {
+    "gate_id": "search_tools_ranking_scale",
+    "status": "ACCEPTED_LIMITATION",
+    "detail": "1k/10k PASS; full 50k local index not executed (estimated ~844s)"
+  },
+  {
+    "gate_id": "voyage_real",
+    "status": "ACCEPTED_LIMITATION",
+    "detail": "Real Voyage not authorized/credentialed; mock provider used"
+  },
+  {
+    "gate_id": "staging_scale",
+    "status": "ACCEPTED_LIMITATION",
+    "detail": "Staging synthetic pool was 1,000 rows (not 10k/50k)"
+  },
+  {
+    "gate_id": "staging_live_service_cutover",
+    "status": "ACCEPTED_LIMITATION",
+    "detail": "CK modules not installed into live staging orchestrator; shadow/ranking proofs in-process from /tmp"
+  },
+  {
+    "gate_id": "staging_index_worker_unit",
+    "status": "ACCEPTED_LIMITATION",
+    "detail": "No index worker systemd unit installed"
+  }
+]

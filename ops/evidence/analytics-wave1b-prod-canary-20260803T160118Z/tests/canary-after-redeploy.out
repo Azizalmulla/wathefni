@@ -1,0 +1,50 @@
+[PASS] wave1 enabled
+[PASS] synthetic_only enforced
+[PASS] company allowlisted
+[PASS] read_only honesty
+[PASS] no money authority
+[PASS] no AI
+[PASS] no compliance metrics
+[PASS] no payroll cost analytics
+[PASS] hiring reports separate
+[PASS] ranked attention non-empty
+[PASS] severity rank high-first
+[PASS] deep link leave
+[PASS] deep link employees
+[PASS] deep link employee key
+[PASS] hours-above-schedule present
+[PASS] non-payroll wording
+[PASS] no scheduled-shifts attention
+[PASS] partial sources disclosed
+[PASS] attendance unavailable listed
+[PASS] no scheduled headline
+[PASS] pending review when leave available
+[PASS] best attendance removed
+[PASS] overtime risk removed
+[PASS] hours above schedule label
+[PASS] definitions EN/AR present
+[PASS] production db
+[PASS] live ok
+[PASS] live contract
+[PASS] live as_of
+[PASS] live timezone Kuwait
+[PASS] live freshness
+[PASS] live attention list
+[PASS] live definitions
+[PASS] live money_authority false
+[PASS] live synthetic_only
+[PASS] live no best attendance
+[PASS] live no overtime risk
+[PASS] live no scheduled headline
+[PASS] dashboard viewer_user_id
+[PASS] dashboard actor_role
+[PASS] manager scope probe returns
+[PASS] manager scope object present
+[PASS] UI Needs attention EN/AR
+[PASS] UI Headcount gone
+[PASS] UI responsive grid
+[PASS] canary ack deleted
+[PASS] residual 0
+[PASS] synthetic marker detection
+[PASS] real subject not synthetic
+{"pass": 49, "fail": 0, "tag": "4b104e46", "residual": 0}

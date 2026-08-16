@@ -1,0 +1,18 @@
+OK P5.1 honesty
+OK sftp catalog
+OK sftp connection ba21f676-e2cc-4aa4-9256-10315994e488
+OK initial file sync created=2 fetched=2
+OK unknown/custom fields retained
+OK duplicate same file → no duplicate apply
+OK second new file incremental sync
+OK source update classified update=1 review=0
+OK malformed file explicit + recoverable
+OK auth failure recorded
+OK transient failure retry/backoff
+OK pause prevents scheduled execution
+OK scheduled execution without manual trigger
+OK missed-run/restart recovery (single catch-up)
+OK sync-run history count=9
+OK deterministic next_sync_at
+OK P5 canary connector regression
+OK P5.1 smoke PASS

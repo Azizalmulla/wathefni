@@ -1,0 +1,8 @@
+{
+  "mutations_allowed": false,
+  "whatsapp_status": "mutations_disabled",
+  "whatsapp_msg_snip": "Mutations are disabled for this assistant session. I can summarize, explain, inv",
+  "dashboard_status": "permission_denied",
+  "dashboard_is_mutations_disabled": false
+}
+LIVE_CHANNEL_PROBE_OK

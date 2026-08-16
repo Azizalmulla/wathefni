@@ -1,0 +1,59 @@
+{
+  "taxonomy_version": "taxonomy_v1.1.0",
+  "immutable": true,
+  "label_en": "Wathefni Canonical Talent Taxonomy v1.1",
+  "label_ar": "تصنيف وثفني الأساسي للمواهب الإصدار 1.1",
+  "nodes": [
+    {"node_id": "fn.technology", "node_type": "career_function", "label_en": "Technology", "label_ar": "التكنولوجيا", "aliases": ["tech", "it", "software", "engineering", "تقنية", "تكنولوجيا", "برمجيات", "computer science"], "parent_ids": []},
+    {"node_id": "fn.hr", "node_type": "career_function", "label_en": "Human Resources", "label_ar": "الموارد البشرية", "aliases": ["hr", "people", "talent", "موارد بشرية", "توظيف"], "parent_ids": []},
+    {"node_id": "fn.finance", "node_type": "career_function", "label_en": "Finance", "label_ar": "المالية", "aliases": ["accounting", "audit", "treasury", "محاسبة", "مالية", "تدقيق"], "parent_ids": []},
+    {"node_id": "fn.engineering", "node_type": "career_function", "label_en": "Engineering", "label_ar": "الهندسة", "aliases": ["mechanical", "civil", "electrical", "هندسة", "مهندس"], "parent_ids": []},
+    {"node_id": "fn.sales_marketing", "node_type": "career_function", "label_en": "Sales & Marketing", "label_ar": "المبيعات والتسويق", "aliases": ["sales", "marketing", "commercial", "مبيعات", "تسويق"], "parent_ids": []},
+    {"node_id": "fn.operations", "node_type": "career_function", "label_en": "Operations", "label_ar": "التشغيل", "aliases": ["ops", "operations management", "supply chain", "تشغيل", "عمليات"], "parent_ids": []},
+
+    {"node_id": "role.software_engineer", "node_type": "likely_role", "label_en": "Software Engineering", "label_ar": "هندسة البرمجيات", "aliases": ["software engineer", "software developer", "backend", "frontend", "full stack", "مطور", "مبرمج", "مهندس برمجيات"], "parent_ids": ["fn.technology"]},
+    {"node_id": "role.data_ai", "node_type": "likely_role", "label_en": "Data and AI", "label_ar": "البيانات والذكاء الاصطناعي", "aliases": ["data scientist", "machine learning", "ai engineer", "محلل بيانات"], "parent_ids": ["fn.technology"]},
+    {"node_id": "role.cybersecurity", "node_type": "likely_role", "label_en": "Cybersecurity", "label_ar": "الأمن السيبراني", "aliases": ["security engineer", "infosec", "أمن معلومات"], "parent_ids": ["fn.technology"]},
+    {"node_id": "role.it_support", "node_type": "likely_role", "label_en": "IT Support", "label_ar": "دعم تقنية المعلومات", "aliases": ["helpdesk", "desktop support", "دعم فني"], "parent_ids": ["fn.technology"]},
+    {"node_id": "role.hr_generalist", "node_type": "likely_role", "label_en": "HR Generalist", "label_ar": "أخصائي موارد بشرية", "aliases": ["hr officer", "hr coordinator", "recruiter", "مسؤول موارد بشرية"], "parent_ids": ["fn.hr"]},
+    {"node_id": "role.accountant", "node_type": "likely_role", "label_en": "Accounting", "label_ar": "محاسبة", "aliases": ["accountant", "financial accountant", "bookkeeper", "محاسب", "محاسب مالي"], "parent_ids": ["fn.finance"]},
+    {"node_id": "role.financial_analysis", "node_type": "likely_role", "label_en": "Financial Analysis", "label_ar": "التحليل المالي", "aliases": ["financial analyst", "fp&a", "محلل مالي"], "parent_ids": ["fn.finance"]},
+    {"node_id": "role.audit", "node_type": "likely_role", "label_en": "Audit", "label_ar": "التدقيق", "aliases": ["internal audit", "auditor", "مدقق"], "parent_ids": ["fn.finance"]},
+    {"node_id": "role.treasury", "node_type": "likely_role", "label_en": "Treasury", "label_ar": "الخزينة", "aliases": ["treasury analyst", "cash management"], "parent_ids": ["fn.finance"]},
+    {"node_id": "role.mechanical_engineer", "node_type": "likely_role", "label_en": "Mechanical Engineer", "label_ar": "مهندس ميكانيكي", "aliases": ["mech engineer", "مهندس ميكانيكا"], "parent_ids": ["fn.engineering"]},
+    {"node_id": "role.sales_executive", "node_type": "likely_role", "label_en": "Sales Executive", "label_ar": "مسؤول مبيعات", "aliases": ["account executive", "business development", "مندوب مبيعات"], "parent_ids": ["fn.sales_marketing"]},
+    {"node_id": "role.marketing_specialist", "node_type": "likely_role", "label_en": "Marketing Specialist", "label_ar": "أخصائي تسويق", "aliases": ["digital marketing", "social media", "تسويق رقمي"], "parent_ids": ["fn.sales_marketing"]},
+    {"node_id": "role.operations_coordinator", "node_type": "likely_role", "label_en": "Operations Coordinator", "label_ar": "منسق عمليات", "aliases": ["operations officer", "ops coordinator", "منسق تشغيل"], "parent_ids": ["fn.operations"]},
+
+    {"node_id": "skill.python", "node_type": "skill", "label_en": "Python", "label_ar": "بايثون", "aliases": ["python3", "django", "fastapi", "بايثون"], "parent_ids": ["fn.technology"]},
+    {"node_id": "skill.excel", "node_type": "skill", "label_en": "Excel", "label_ar": "إكسل", "aliases": ["microsoft excel", "spreadsheets", "جداول بيانات"], "parent_ids": ["fn.finance"]},
+    {"node_id": "skill.sql", "node_type": "skill", "label_en": "SQL", "label_ar": "إس كيو إل", "aliases": ["postgres", "mysql", "t-sql", "قواعد بيانات", "قواعد البيانات"], "parent_ids": ["fn.technology"]},
+    {"node_id": "skill.recruiting", "node_type": "skill", "label_en": "Recruiting", "label_ar": "التوظيف", "aliases": ["talent acquisition", "hiring", "استقطاب"], "parent_ids": ["fn.hr"]},
+    {"node_id": "skill.autocad", "node_type": "skill", "label_en": "AutoCAD", "label_ar": "أوتوكاد", "aliases": ["cad", "solidworks"], "parent_ids": ["fn.engineering"]},
+
+    {"node_id": "ind.banking", "node_type": "industry", "label_en": "Banking", "label_ar": "الخدمات المصرفية", "aliases": ["bank", "financial services", "بنوك"], "parent_ids": []},
+    {"node_id": "ind.oil_gas", "node_type": "industry", "label_en": "Oil & Gas", "label_ar": "النفط والغاز", "aliases": ["petroleum", "energy", "نفط", "غاز"], "parent_ids": []},
+    {"node_id": "ind.retail", "node_type": "industry", "label_en": "Retail", "label_ar": "التجزئة", "aliases": ["commerce", "تجزئة"], "parent_ids": []},
+
+    {"node_id": "sen.intern", "node_type": "seniority", "label_en": "Intern", "label_ar": "متدرب", "aliases": ["internship", "trainee", "تدريب"], "parent_ids": []},
+    {"node_id": "sen.junior", "node_type": "seniority", "label_en": "Junior", "label_ar": "مبتدئ", "aliases": ["entry level", "associate", "مبتدئ", "graduate"], "parent_ids": []},
+    {"node_id": "sen.mid", "node_type": "seniority", "label_en": "Mid-level", "label_ar": "متوسط", "aliases": ["intermediate", "متوسط الخبرة"], "parent_ids": []},
+    {"node_id": "sen.senior", "node_type": "seniority", "label_en": "Senior", "label_ar": "خبير", "aliases": ["sr", "lead", "كبير"], "parent_ids": []},
+
+    {"node_id": "exp.0_1", "node_type": "experience_band", "label_en": "0–1 years", "label_ar": "٠–١ سنة", "aliases": ["less than 1 year", "أقل من سنة"], "parent_ids": []},
+    {"node_id": "exp.1_3", "node_type": "experience_band", "label_en": "1–3 years", "label_ar": "١–٣ سنوات", "aliases": ["1-3 years", "one to three"], "parent_ids": []},
+    {"node_id": "exp.3_5", "node_type": "experience_band", "label_en": "3–5 years", "label_ar": "٣–٥ سنوات", "aliases": ["3-5 years"], "parent_ids": []},
+    {"node_id": "exp.5_10", "node_type": "experience_band", "label_en": "5–10 years", "label_ar": "٥–١٠ سنوات", "aliases": ["5-10 years"], "parent_ids": []},
+    {"node_id": "exp.10_plus", "node_type": "experience_band", "label_en": "10+ years", "label_ar": "أكثر من ١٠ سنوات", "aliases": ["10+ years", "over 10"], "parent_ids": []},
+
+    {"node_id": "edu.computer_science", "node_type": "education_field", "label_en": "Computer Science", "label_ar": "علوم الحاسوب", "aliases": ["cs", "software engineering", "حاسوب"], "parent_ids": ["fn.technology"]},
+    {"node_id": "edu.accounting", "node_type": "education_field", "label_en": "Accounting", "label_ar": "المحاسبة", "aliases": ["bachelors in accounting", "بكالوريوس محاسبة"], "parent_ids": ["fn.finance"]},
+    {"node_id": "edu.mechanical", "node_type": "education_field", "label_en": "Mechanical Engineering", "label_ar": "هندسة ميكانيكية", "aliases": ["b.eng mechanical", "هندسة ميكانيكا"], "parent_ids": ["fn.engineering"]},
+
+    {"node_id": "cert.pmp", "node_type": "certification", "label_en": "PMP", "label_ar": "بي إم بي", "aliases": ["project management professional"], "parent_ids": []},
+    {"node_id": "cert.aws", "node_type": "certification", "label_en": "AWS", "label_ar": "أمازون ويب سيرفيسز", "aliases": ["amazon web services", "aws certified"], "parent_ids": ["fn.technology"]},
+
+    {"node_id": "lang.english", "node_type": "language", "label_en": "English", "label_ar": "الإنجليزية", "aliases": ["fluent english", "انجليزي", "إنجليزي"], "parent_ids": []},
+    {"node_id": "lang.arabic", "node_type": "language", "label_en": "Arabic", "label_ar": "العربية", "aliases": ["fluent arabic", "عربي", "العربي"], "parent_ids": []}
+  ]
+}

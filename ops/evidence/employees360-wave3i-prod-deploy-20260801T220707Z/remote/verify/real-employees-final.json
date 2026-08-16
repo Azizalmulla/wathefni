@@ -1,0 +1,75 @@
+{
+  "real_employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "name": "Talal Fadhli",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "name": "Fouad Burhamad",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "name": "mohammad alqattan",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "name": "Brian Saleh",
+      "employment_status": "active"
+    }
+  ],
+  "all_active": true,
+  "employments": [
+    {
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "employee_key": "WATHEFNI-96550252254",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null,
+      "contract_type": null,
+      "pay_frequency": null,
+      "probation_status": null,
+      "policy_pack_code": null
+    },
+    {
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "employee_key": "WATHEFNI-96599411617",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null,
+      "contract_type": null,
+      "pay_frequency": null,
+      "probation_status": null,
+      "policy_pack_code": null
+    },
+    {
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "employee_key": "WATHEFNI-96566363363",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null,
+      "contract_type": null,
+      "pay_frequency": null,
+      "probation_status": null,
+      "policy_pack_code": null
+    },
+    {
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "employee_key": "WATHEFNI-96597727743",
+      "policy_pack_status": "remediation",
+      "jurisdiction_code": null,
+      "worker_category": null,
+      "contract_type": null,
+      "pay_frequency": null,
+      "probation_status": null,
+      "policy_pack_code": null
+    }
+  ]
+}

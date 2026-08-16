@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/posthire/actionInboxWave1.test.ts
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  20:58:35
+   Duration  807ms (transform 26ms, setup 143ms, import 11ms, tests 2ms, environment 558ms)
+

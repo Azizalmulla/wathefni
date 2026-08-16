@@ -1,0 +1,174 @@
+{
+  "total": 21,
+  "pass": 21,
+  "fail": 0,
+  "results": [
+    {
+      "id": "API_overview",
+      "module": "overview",
+      "title": "GET /dashboard/prehire/summary",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"module\":\"pre_hiring\",\"enabled_modules\":[\"analytics\",\"assessments\",\"attendance\",\"calendar\",\"compliance\",\"employee_app\",\"employment_offers\",\"interviews\",\"leave\",\"onboarding\",\"payroll\",\"pre_hiring\",\"shifts\",\"video_i"
+    },
+    {
+      "id": "API_jobs",
+      "module": "jobs",
+      "title": "GET /dashboard/prehire/positions",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"positions\":[{\"job_id\":\"04a12fd6-85fb-4c8c-b716-566e3744a115\",\"company_code\":\"WATHEFNI\",\"company_display_name\":\"Wathefni\",\"position_code\":\"OCCTST_044035\",\"job_key\":\"OCCTST_044035\",\"title\":\"OCC status proof 044035\""
+    },
+    {
+      "id": "API_candidates",
+      "module": "candidates",
+      "title": "GET /dashboard/prehire/applications?limit=5",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"total\":17,\"limit\":5,\"offset\":0,\"next_cursor\":\"2026-07-26T15:44:18.708461+00:00|imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT\",\"ownership_counts\":{\"all\":17,\"mine\":0,\"unassigned\":17,\"assigned\":0},\"recruiters\":[{\"us"
+    },
+    {
+      "id": "API_interviews",
+      "module": "interviews",
+      "title": "GET /dashboard/prehire/interviews?limit=5",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"total\":4,\"limit\":5,\"offset\":0,\"status_counts\":[{\"status\":\"cancelled\",\"count\":2},{\"status\":\"completed\",\"count\":2}],\"feedback_counts\":[{\"feedback_status\":\"notes_pending\",\"count\":0},{\"feedback_status\":\"feedback_comp"
+    },
+    {
+      "id": "API_assessments",
+      "module": "assessments",
+      "title": "GET /dashboard/prehire/assessments?tab=reports&limit=5",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"ok\":true,\"total\":5,\"attempts_total\":5,\"limit\":5,\"offset\":0,\"status_counts\":[{\"status\":\"expired\",\"count\":3},{\"status\":\"completed\",\"count\":1},{\"status\":\"pending\",\"count\":1}],\"average_percent\":48.4,\"attempts\":[{\"att"
+    },
+    {
+      "id": "API_calendar",
+      "module": "calendar",
+      "title": "GET /dashboard/calendar/events?start=2026-08-01T00:00:00%2B03:00&end=2026-08-31T23:59:59%2B03:00",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"ok\":true,\"company_code\":\"WATHEFNI\",\"scope\":\"mine\",\"org_scope_id\":null,\"start\":\"2026-08-01T00:00:00+03:00\",\"end\":\"2026-08-31T23:59:59+03:00\",\"events\":[{\"event_id\":\"calproj-employee-start-WATHEFNI-96599411617\",\"company_code\":\"WATHEFNI\",\"eve"
+    },
+    {
+      "id": "API_employees",
+      "module": "employees",
+      "title": "GET /dashboard/posthire/employees?limit=5",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"count\":5,\"employees\":[{\"employee_key\":\"WATHEFNI-96599411617\",\"name\":\"Brian Saleh\",\"phone\":\"96599411617\",\"email\":\"briansaleh92@gmail.com\",\"position_title\":\"\",\"department\":\"\",\"onboarding_status\":\"cancelled\",\"employ"
+    },
+    {
+      "id": "API_onboarding",
+      "module": "onboarding",
+      "title": "GET /dashboard/posthire/onboarding",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"in_progress\":[{\"employee_key\":\"WATHEFNI-REALBLOCK-0F290BF7\",\"name\":\"Real Block 0F290BF7\",\"phone\":\"96599998877\",\"email\":\"\",\"position_title\":\"\",\"department\":\"\",\"onboarding_status\":\"not_started\",\"employment_status\":"
+    },
+    {
+      "id": "API_attendance",
+      "module": "attendance",
+      "title": "GET /dashboard/posthire/attendance",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"date\":\"2026-08-05\",\"start_date\":\"2026-08-05\",\"end_date\":\"2026-08-05\",\"is_today\":true,\"import_enabled\":false,\"ok\":true,\"employee\":null,\"status_filter\":null,\"attendance\":[],\"scope\":{\"restricted\":false,\"company_code"
+    },
+    {
+      "id": "API_leave",
+      "module": "leave",
+      "title": "GET /dashboard/posthire/leave",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"view\":\"active\",\"pending\":[],\"upcoming\":[{\"leave_id\":\"3b38885a-c9a6-44f3-9c5c-ea1ba0e15a80\",\"company_code\":\"WATHEFNI\",\"employee_key\":\"WATHEFNI-SHW1-d8ee5588\",\"employee_phone\":\"965528855880\",\"employee_name\":\"SHW1 S"
+    },
+    {
+      "id": "API_shifts",
+      "module": "shifts",
+      "title": "GET /dashboard/posthire/shifts",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"shifts\":[],\"swaps\":[],\"availability\":[],\"reconciliation_flags\":[],\"terminal_reminders\":[{\"reminder_id\":\"3fe4b024-83fe-482d-aacb-d83abdbcee2f\",\"company_code\":\"WATHEFNI\",\"shift_id\":\"264cc90c-1e48-4d39-bc7a-b255732c"
+    },
+    {
+      "id": "API_payroll",
+      "module": "payroll",
+      "title": "GET /dashboard/posthire/payroll",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"timesheets\":[{\"timesheet_id\":\"cc68a9fb-df72-4e13-a0db-cc13a3805380\",\"company_code\":\"WATHEFNI\",\"employee_key\":\"WATHEFNI-96566363363\",\"employee_phone\":\"96566363363\",\"employee_name\":\"Fouad Burhamad\",\"period_start\":\""
+    },
+    {
+      "id": "API_analytics",
+      "module": "analytics",
+      "title": "GET /dashboard/posthire/analytics",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"ok\":true,\"start_date\":\"2026-08-01\",\"end_date\":\"2026-08-05\",\"as_of\":\"2026-08-05T04:26:56.723378+03:00\",\"timezone\":\"Asia/Kuwait\",\"window\":{\"kind\":\"month_to_date\",\"label_en\":\"Kuwait month-to-date\",\"label_ar\":\"\u0645\u0646 \u0628\u062f\u0627"
+    },
+    {
+      "id": "API_compliance",
+      "module": "compliance",
+      "title": "GET /dashboard/posthire/compliance",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"summary\":{\"expired\":0,\"expiring_soon\":0,\"missing\":18,\"needs_review\":0,\"valid\":0,\"needs_attention\":18,\"total_documents\":18,\"employees_checked\":4,\"employees_total\":76},\"documents\":[{\"employee_key\":\"WATHEFNI-9659941"
+    },
+    {
+      "id": "API_needs_attention",
+      "module": "needs_attention",
+      "title": "GET /dashboard/posthire/action-inbox",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"ok\":true,\"as_of\":\"2026-08-05T04:26:58.195810+03:00\",\"timezone\":\"Asia/Kuwait\",\"kuwait_date\":\"2026-08-05\",\"window\":{\"kind\":\"kuwait_calendar_day\",\"label_en\":\"Kuwait calendar day (Asia/Kuwait)\",\"label_ar\":\"\u0627\u0644\u064a\u0648\u0645 \u062d\u0633\u0628 "
+    },
+    {
+      "id": "API_alerts_delivery",
+      "module": "alerts_delivery",
+      "title": "GET /dashboard/prehire/notifications?limit=5",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"enabled_modules\":[\"analytics\",\"assessments\",\"attendance\",\"calendar\",\"employee_app\",\"employment_offers\",\"interviews\",\"leave\",\"payroll\",\"pre_hiring\",\"shifts\",\"video_interviews\"],\"scope\":\"mine\",\"work_scope\":\"mine\",\""
+    },
+    {
+      "id": "API_activity",
+      "module": "activity",
+      "title": "GET /dashboard/activity?limit=5",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"total\":551,\"limit\":5,\"offset\":0,\"count\":5,\"has_more\":true,\"categories\":[\"Leave\",\"Payroll\",\"Employees\",\"Onboarding\",\"Documents\",\"Attendance\",\"Shifts\",\"Candidates\",\"Team & Access\",\"Other\"],\"actors\":[{\"user_id\":\"88b"
+    },
+    {
+      "id": "API_settings",
+      "module": "settings",
+      "title": "GET /dashboard/prehire/import/settings",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"auto_admit_explicit_imports\":true,\"version\":54,\"updated_at\":\"2026-08-04T02:37:39.516589+00:00\",\"last_updated_by\":\"Wave5 Proof\"}"
+    },
+    {
+      "id": "API_employee_profile",
+      "module": "employee_profile",
+      "title": "GET /dashboard/posthire/employees/WATHEFNI-96550252254",
+      "result": "PASS",
+      "severity": 200,
+      "detail": "{\"company_code\":\"WATHEFNI\",\"employee\":{\"employee_key\":\"WATHEFNI-96550252254\",\"name\":\"Talal Fadhli\",\"phone\":\"96550252254\",\"email\":\"talalabdalla89@gmail.com\",\"position_title\":\"Social Media Manager\",\"department\":\"\",\"onboarding_status\":\"in_prog"
+    },
+    {
+      "id": "API_tenant_invalid_token",
+      "module": "cross",
+      "title": "Invalid token fail-closed",
+      "result": "PASS",
+      "severity": 401
+    },
+    {
+      "id": "API_tenant_foreign_company",
+      "module": "cross",
+      "title": "Foreign X-Company-Code closed",
+      "result": "PASS",
+      "severity": 403,
+      "detail": "{\"detail\":{\"error\":\"dashboard_company_forbidden\",\"message\":\"Access needs to be verified.\"}}"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "build_id": "5e7ac74aa09b9363ff7182185d3cb9310ccee1f1",
+  "status": "passed",
+  "passed_sessions": 1,
+  "failed_sessions": 0,
+  "error_sessions": 0,
+  "sessions": [
+    {
+      "device": "iPhone 15",
+      "os_version": "17.5",
+      "session_id": "b9a44b777c0b0b07fa969694b822edb78fb07edb",
+      "status": "passed",
+      "duration": 44,
+      "testcases": {
+        "count": 1,
+        "status": {
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "timedout": 0,
+          "error": 0,
+          "running": 0,
+          "queued": 0
+        }
+      }
+    }
+  ],
+  "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/5e7ac74aa09b9363ff7182185d3cb9310ccee1f1",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786427136",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://c53db09aca19d94b7321a368717fe8ed0484b40d",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml"
+    ]
+  },
+  "poll_timeout": false,
+  "raw_status": "passed",
+  "execute": [
+    "bs-smoke/00-launch-unsigned.yaml"
+  ],
+  "app_url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+  "test_suite_url": "bs://c53db09aca19d94b7321a368717fe8ed0484b40d",
+  "evidence": "ops/evidence/mobile-e2e-bs-20260811T054531Z",
+  "MOBILE_PASS": 1,
+  "ui_runtime": "browserstack_real_device",
+  "hr_mobile": "SHIP",
+  "employee_mobile": "SHIP",
+  "ship_reason": "All BrowserStack sessions passed (smoke scope only \u2014 expand matrix before broad release)",
+  "rule": "API PASS \u2260 MOBILE PASS \u2014 BrowserStack real-device execution required"
+}

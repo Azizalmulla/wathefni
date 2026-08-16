@@ -1,0 +1,22 @@
+{
+  "stamp": "20260801T182124Z",
+  "purpose": "Confirm closure-pack P3 assessments orphan-route finding is stale after Wave A tombstone",
+  "host": "root@76.13.63.68",
+  "transport": "TestClient+real_owner_session",
+  "app_py_sha256": "27c7e2f0d8fe110b2683a0173b29122c5293411a64a71fcb865cdab8d079e790",
+  "prior_tombstone_deploy": "ops/evidence/assessments-queue-tombstone-waveA-deploy-20260801T033029Z",
+  "checks": {
+    "queue_status": 410,
+    "queue_error": "assessment_queue_route_removed",
+    "never_500": true,
+    "cohort_applications_overview_cohort_status": 200,
+    "cohort_applications_overview_cohort_count": 6,
+    "cohort_applications_assessment_cohort_status": 200,
+    "assessments_list_status": 200,
+    "assessments_config_status": 200,
+    "caller_audit_prod_dashboard_hits": 0,
+    "caller_audit_repo_src_hits": 0
+  },
+  "verdict": "PASS",
+  "conclusion": "P3_assessments_orphan_queue_500 is stale wording from prehire-e2e-prod-qual-20260801T031642Z (pre-tombstone). Live route is intentional 410 Gone; product cohort path remains 200; no product callers."
+}

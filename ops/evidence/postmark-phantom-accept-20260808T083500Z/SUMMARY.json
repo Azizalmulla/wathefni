@@ -1,0 +1,77 @@
+{
+  "verdict": "PHANTOM_ACCEPT_CONFIRMED",
+  "claimed_message_id": "c8f49944-f4af-4eee-8d70-81ca5f709916",
+  "postmark_lookup": {
+    "http": 422,
+    "ErrorCode": 701,
+    "Message": "This message was not found."
+  },
+  "transport": {
+    "path": "outbound_delivery EmailProvider -> send_outbound_email -> dispatch_outbound_email -> send_email_via_postmark",
+    "api": "POST https://api.postmarkapp.com/email",
+    "dry_run": false,
+    "local_stub": false,
+    "provider_env": "WATHEFNI_OUTBOUND_EMAIL_PROVIDER=postmark (via postgres.env load_env)",
+    "from": "hr@wathefni.ai",
+    "stream": "outbound"
+  },
+  "server": {
+    "id": 19430066,
+    "name": "My First Server",
+    "account_id_header": 524170,
+    "delivery_type": "Live",
+    "token_fingerprint": {
+      "len": 36,
+      "prefix8": "308cd3b9",
+      "suffix6": "839bd7"
+    },
+    "dashboard_url": "https://account.postmarkapp.com/servers/19430066/streams",
+    "same_server_user_is_checking": true
+  },
+  "message_id_origin": "Returned by Postmark /email JSON field MessageID \u2014 not generated locally. Live probe raw matched {ErrorCode:0, Message:OK, MessageID:uuid}.",
+  "live_probe": {
+    "note": "diagnostic to @example.invalid only (not an invite)",
+    "api_response": {
+      "ErrorCode": 0,
+      "Message": "OK",
+      "MessageID": "712e0e91-9e0b-4839-aa20-b8526a4ab0e6"
+    },
+    "immediate_details_lookup": {
+      "http": 422,
+      "ErrorCode": 701
+    },
+    "activity_totalcount_unchanged": 186,
+    "stats_sent_unchanged": 106
+  },
+  "boundary": {
+    "last_real_utc": "2026-08-08T05:50:30.696207Z",
+    "last_real_kuwait": "2026-08-08 08:50:30",
+    "last_real_message_id": "361516ce-b0dc-456c-9561-c9a597142eee",
+    "last_real_to": "invite-smoke-0dcc4d6f@example.invalid",
+    "first_phantom_utc": "2026-08-08T05:51:58.185553Z",
+    "first_phantom_message_id": "4a1de5f2-d895-4302-8966-cad994daf13b"
+  },
+  "quota_observation": {
+    "august_sent_stat": 106,
+    "august_bounced_stat": 50,
+    "bounce_rate_pct": 47.17,
+    "free_developer_limit_known": 100,
+    "documented_out_of_credits_error": "HTTP 422 ErrorCode 405 Not allowed to send",
+    "observed_after_boundary": "HTTP 200 ErrorCode 0 with MessageID that never appears in Activity",
+    "do_not_assume_quota_alone": true,
+    "likely_contributing_factors": [
+      "Production smoke tests flooding @example.invalid on the production Postmark server",
+      "August Sent~106 near/over Free Developer 100/mo",
+      "Very high bounce rate (~47%) from invalid recipients",
+      "Possible Postmark account/stream pause or credit exhaustion with non-standard ACK behavior \u2014 confirm in Postmark account UI / support email"
+    ]
+  },
+  "our_bug": "send_email_via_postmark treats any MessageID + ErrorCode 0 as success; dispatch_outbound_email stamps provider_accept_status=accepted_by_provider; raw Postmark body is stripped from outbound_delivery_events payload",
+  "fix": [
+    "After /email success, verify GET /messages/outbound/{MessageID}/details (retry briefly); if ErrorCode 701, fail the send",
+    "Persist raw Postmark response (ErrorCode, Message, MessageID, SubmittedAt) on delivery events",
+    "Surface ErrorCode 405 (out of credits) as hard failure if returned",
+    "Stop production smoke/eligibility tests from sending real Postmark mail to @example.invalid on server 19430066",
+    "In Postmark UI: confirm plan/credits, sending paused?, bounce/spam hold; restore sending before another real invite"
+  ]
+}

@@ -1,0 +1,63 @@
+3275:    expected_updated_at: str | None = None,
+3284:    send expected_version / expected_updated_at and never silently overwrite.
+3320:                        expected_updated_at=expected_updated_at,
+14731:INTEGRITY_SCAN_SPECS: tuple[dict[str, Any], ...] = tuple(
+14752:            for spec in INTEGRITY_SCAN_SPECS:
+33687:def employee_phone_alias_list(phone: str | None) -> list[str]:
+33694:    return [f"{company}-{alias}" for alias in employee_phone_alias_list(phone) if company and alias]
+33697:def find_employee_by_phone_aliases(
+33705:    aliases = employee_phone_alias_list(phone)
+33748:    aliases = employee_phone_alias_list(phone)
+33927:    return find_employee_by_phone_aliases(phone, company_code=company_code)
+38763:    expected_updated_at: str | None = None
+38933:    expected_updated_at: str | None = None
+44843:    expected_updated_at: str | None = None,
+44853:        expected_updated_at=expected_updated_at,
+45037:    "employee_mutation_denied": "Employees", "employee_identity_collision": "Employees",
+49912:    expected_updated_at = body.get("expected_updated_at")
+49923:        expected_updated_at=str(expected_updated_at) if expected_updated_at else None,
+50026:    expected_updated_at: str | None = None
+50058:    expected_updated_at: str | None = None
+50085:    expected_updated_at: str | None = None
+50252:    expected_updated_at: str | None = None
+50289:    expected_updated_at: str | None = None
+50363:    controls = {"save_as_draft", "expected_updated_at", "expected_version"}
+50377:            expected_updated_at=request.expected_updated_at,
+50419:            expected_updated_at=request.expected_updated_at,
+52369:    if request.expected_updated_at is not None:
+52370:        payload["expected_updated_at"] = request.expected_updated_at
+53307:            expected_updated_at=str(request.expected_updated_at or "") or None,
+54399:                    expected_updated_at=payload.expected_updated_at,
+59381:    expected_updated_at = body.get("expected_updated_at")
+59392:        expected_updated_at=str(expected_updated_at) if expected_updated_at else None,
+61407:                "employee_mutation_denied",
+61413:                    "reason": "manager_scope_or_orphan",
+63746:            alias_hit = find_employee_by_phone_aliases(phone_digits, company_code=company, cur=cur)
+63755:                    "identity_collision": collision,
+63786:                    "identity_collision": False,
+63814:    expected_updated_at: datetime | None = None,
+63821:    When `expected_updated_at` is provided (HTTP edits), the update is optimistic:
+63832:            if expected_updated_at is not None and current.get("updated_at") != expected_updated_at:
+63850:                    alias_hit = find_employee_by_phone_aliases(
+63883:            if expected_updated_at is not None:
+63885:                params.append(expected_updated_at)
+63987:def employee_status_canary_allowed(company_code: str | None) -> bool:
+64001:def require_employee_mutation_scope(
+64018:        "employee_mutation_denied",
+64061:        if result.get("identity_collision"):
+64064:                "employee_identity_collision",
+64100:    expected_updated_at: datetime
+64110:    require_employee_mutation_scope(context, employee_key, company_code=company, action="employee_update")
+64121:        expected_updated_at=request.expected_updated_at,
+64137:            "employee_identity_collision",
+64163:    expected_updated_at: datetime
+64188:        "expected_updated_at": request.expected_updated_at.isoformat(),
+64329:                    if not employee_status_canary_allowed(company):
+64373:                    if previous_status != request.expected_status or before.get("updated_at") != request.expected_updated_at:
+64479:    require_employee_mutation_scope(context, employee_key, company_code=company, action="employee_status")
+64480:    if request.approval_mode == "self_approved_internal_canary" and not employee_status_canary_allowed(company):
+64483:            "employee_mutation_denied",
+65736:    expected_updated_at: str
+65751:    if not str(request.expected_updated_at or "").strip():
+65752:        raise HTTPException(status_code=422, detail={"error": "expected_updated_at_required", "message": "Refresh the shift and confirm the current version before rescheduling."})
+65756:    expected = str(request.expected_updated_at).strip()

@@ -1,0 +1,70 @@
+PASS  Schedule is refused without either authority — 403 {'error': 'employee_feature_disabled', 'message': 'This feature is not available for your account.', 'feature': 'shifts+attendance', 'reason': 'module_disabled'}
+PASS  the refusal names both contributing authorities — shifts+attendance
+PASS  shifts alone opens Schedule — {'shifts': 'ready', 'attendance': 'disabled', 'shifts_upcoming': 'ready'}
+PASS  a disabled attendance authority carries no value — {'entries': [{'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}], 'scheduled_count': 1, 'recorded_count': None}
+PASS  today shows the scheduled shift with no invented record — [{'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}]
+PASS  the scheduled entry passes through the module's own values — {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}
+PASS  upcoming excludes today and stays inside the window — ['2026-08-10']
+PASS  a cancelled shift is never presented — ['2026-08-10']
+PASS  Schedule dates the projection in Kuwait time
+PASS  attendance alone opens Schedule — {'shifts': 'disabled', 'attendance': 'ready', 'shifts_upcoming': 'disabled'}
+PASS  a disabled shifts authority carries no value — {'entries': [{'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}}], 'scheduled_count': None, 'recorded_count': 1}
+PASS  today's record is presented without a shift to hang it on — [{'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}}]
+PASS  the record's stored lateness and notes are passed through verbatim — {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}
+PASS  today's record is not repeated in the recent list — ['2026-08-06', '2026-08-04']
+PASS  recent is the module's own window, newest first — ['2026-08-06', '2026-08-04']
+PASS  a row outside the window is not presented — ['2026-08-06', '2026-08-04']
+PASS  the window summary counts the module's rows, including today — {'days': 30, 'summary': {'present': 1, 'late': 1, 'absent': 1}}
+PASS  both authorities read as ready — {'shifts': 'ready', 'attendance': 'ready', 'shifts_upcoming': 'ready'}
+PASS  an unlinked record is its own entry, never guessed onto the shift — ['scheduled', 'recorded_only']
+PASS  the unpaired shift still reports no record rather than a wrong one — {'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}
+PASS  a record linked to a shift is paired into one entry — {'kind': 'scheduled', 'scheduled': {'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'start_time': '18:00:00', 'end_time': '22:00:00', 'status': 'assigned', 'role': None, 'location': None, 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': {'attendance_id': 'c9e0f46f-9361-46bc-8eab-9e17f73d8110', 'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'status': 'present', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T15:00:00+00:00', 'check_out_at': None, 'late_minutes': 0, 'early_leave_minutes': 0, 'notes': None}}
+PASS  pairing consumes the record so it is not shown twice — [{'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}, {'kind': 'scheduled', 'scheduled': {'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'start_time': '18:00:00', 'end_time': '22:00:00', 'status': 'assigned', 'role': None, 'location': None, 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': {'attendance_id': 'c9e0f46f-9361-46bc-8eab-9e17f73d8110', 'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'status': 'present', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T15:00:00+00:00', 'check_out_at': None, 'late_minutes': 0, 'early_leave_minutes': 0, 'notes': None}}, {'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}}]
+PASS  today's counts come from the modules, not from the entry list — {'entries': [{'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}, {'kind': 'scheduled', 'scheduled': {'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'start_time': '18:00:00', 'end_time': '22:00:00', 'status': 'assigned', 'role': None, 'location': None, 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': {'attendance_id': 'c9e0f46f-9361-46bc-8eab-9e17f73d8110', 'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'status': 'present', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T15:00:00+00:00', 'check_out_at': None, 'late_minutes': 0, 'early_leave_minutes': 0, 'notes': None}}, {'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}}], 'scheduled_count': 2, 'recorded_count': 2}
+PASS  the still-unpaired shift keeps an explicit missing record — [{'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}, {'kind': 'scheduled', 'scheduled': {'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'start_time': '18:00:00', 'end_time': '22:00:00', 'status': 'assigned', 'role': None, 'location': None, 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': {'attendance_id': 'c9e0f46f-9361-46bc-8eab-9e17f73d8110', 'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'status': 'present', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T15:00:00+00:00', 'check_out_at': None, 'late_minutes': 0, 'early_leave_minutes': 0, 'notes': None}}, {'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}}]app home module read failed module=attendance
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 67830, in _home_module_read
+    value = read()
+            ^^^^^^
+  File "/opt/wathefni/orchestrator/app.py", line 68188, in <lambda>
+    read=lambda: _employee_attendance_rows(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/smoke-test-employee-app-workday.py", line 428, in exploding_attendance
+    cur.execute("SELECT 1 FROM workday_smoke_missing_table")
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "workday_smoke_missing_table" does not exist
+LINE 1: SELECT 1 FROM workday_smoke_missing_table
+                      ^
+
+app home module read failed module=shifts
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 67830, in _home_module_read
+    value = read()
+            ^^^^^^
+  File "/opt/wathefni/orchestrator/app.py", line 68160, in <lambda>
+    read=lambda: _employee_shift_rows(
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/smoke-test-employee-app-workday.py", line 458, in exploding_shifts
+    cur.execute("SELECT 1 FROM workday_smoke_missing_table")
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "workday_smoke_missing_table" does not exist
+LINE 1: SELECT 1 FROM workday_smoke_missing_table
+                      ^
+
+
+PASS  a failed attendance read reports error — {'shifts': 'ready', 'attendance': 'error', 'shifts_upcoming': 'ready'}
+PASS  a failed read carries no value and no fabricated record — {'entries': [{'kind': 'scheduled', 'scheduled': {'shift_id': '69066273-a49d-4770-acd5-aec19baa8a20', 'date': '2026-08-08', 'start_time': '09:00:00', 'end_time': '17:00:00', 'status': 'assigned', 'role': None, 'location': 'Site 308cadb3', 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}, {'kind': 'scheduled', 'scheduled': {'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'start_time': '18:00:00', 'end_time': '22:00:00', 'status': 'assigned', 'role': None, 'location': None, 'timezone': 'Asia/Kuwait', 'notes': None}, 'recorded': None}], 'scheduled_count': 2, 'recorded_count': None}
+PASS  a failed read does not take the other authority down — {'shifts': 'ready', 'attendance': 'error', 'shifts_upcoming': 'ready'}
+PASS  a failed shifts read reports error and skips the upcoming window — {'shifts': 'error', 'attendance': 'ready', 'shifts_upcoming': 'error'}
+PASS  a failed shifts read leaves attendance readable — {'shifts': 'error', 'attendance': 'ready', 'shifts_upcoming': 'error'}
+PASS  today's records survive a failed schedule read — [{'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': '5f201eb3-b64a-45bf-8a7e-0d329ffc65e9', 'shift_id': None, 'date': '2026-08-08', 'status': 'late', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T06:12:00+00:00', 'check_out_at': '2026-01-01T14:00:00+00:00', 'late_minutes': 12, 'early_leave_minutes': 3, 'notes': 'note-308cadb3'}}, {'kind': 'recorded_only', 'scheduled': None, 'recorded': {'attendance_id': 'c9e0f46f-9361-46bc-8eab-9e17f73d8110', 'shift_id': '9c1e0930-a23c-4b46-a354-81f1da049e88', 'date': '2026-08-08', 'status': 'present', 'scheduled_start': None, 'scheduled_end': None, 'check_in_at': '2026-01-01T15:00:00+00:00', 'check_out_at': None, 'late_minutes': 0, 'early_leave_minutes': 0, 'notes': None}}]
+PASS  Schedule declares no clocking, no correction and no payroll effect — {'employee_clocking': False, 'attendance_correction': False, 'payroll_effect': False, 'authority': 'Schedule and attendance are recorded by your HR team.', 'authority_ar': 'يُسجّل فريق الموارد البشرية الجدول والحضور.'}
+PASS  Schedule names HR as the authority in both languages — {'employee_clocking': False, 'attendance_correction': False, 'payroll_effect': False, 'authority': 'Schedule and attendance are recorded by your HR team.', 'authority_ar': 'يُسجّل فريق الموارد البشرية الجدول والحضور.'}
+PASS  Schedule echoes the requested locale
+PASS  Schedule falls back to a supported locale
+---
+PASS employee app workday projection contract

@@ -1,0 +1,5 @@
+=== ENABLE compliance_expiry (min=0) ===
+Environment=WATHEFNI_CALENDAR_PROJECTION_COMPLIANCE=on
+health_ok
+SOURCE compliance_expiry meta {'enabled_sources': ['compliance_expiry'], 'injected': 1} count 1
+SMOKE_OK compliance_expiry 1

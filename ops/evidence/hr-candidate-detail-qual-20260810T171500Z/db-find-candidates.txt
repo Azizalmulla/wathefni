@@ -1,0 +1,37 @@
+MainPID=3729911
+APP_ROWS 25
+APP {"app_key": "imp-wathefni-3bda14696342799f-WATHEFNI-IMPORT", "status": "ready_for_review", "position_code": "IT_MANAGER", "updated_at": "2026-08-04"}
+APP {"app_key": "imp-wathefni-5f85c14072d6d15c-WATHEFNI-IMPORT", "status": "ready_for_review", "position_code": "HR", "updated_at": "2026-08-04"}
+APP {"app_key": "imp-wathefni-511c5f998f9f75cd-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-f9cb8d025ee15f97-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-20342b7d4aaf17c0-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-49baea486cfad076-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-2ca454a8e8140f52-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-3ee99b7add091da0-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-5ae70ca8aa80885b-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-386e62fe4ff524cd-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-e1cfae921cf84c3c-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-1cc94b198873bbc0-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-78ed30f6b8abc582-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT", "status": "ready_for_review", "position_code": "OCCTST_044035", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-fe1b596eb9134774-WATHEFNI-OCCTST_044035", "status": "import_archived", "position_code": "OCCTST_044035", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-6b743aeb78a66e4f-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-7130344c48c8bbf0-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-3673b2f6eeab34c8-WATHEFNI-IMPORT", "status": "needs_role", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT", "status": "ready_for_review", "position_code": "OCCTST_044035", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-a7cf1584a05ed837-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT", "status": "ready_for_review", "position_code": "OCCTST_044035", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-bbdb9ce92e54a57a-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-768906edf4f60aec-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT", "status": "ready_for_review", "position_code": "OCCTST_044035", "updated_at": "2026-08-01"}
+APP {"app_key": "imp-wathefni-3811499c88197618-WATHEFNI-IMPORT", "status": "import_archived", "position_code": "", "updated_at": "2026-08-01"}
+DETAIL_OK {"app_key": "imp-wathefni-3bda14696342799f-WATHEFNI-IMPORT", "status": "ready_for_review", "stage": "ready_for_review", "actions": ["shortlist", "reject", "preview_cv", "download_cv"], "name": "imp-wathefni-3bda14696342799f", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-5f85c14072d6d15c-WATHEFNI-IMPORT", "status": "ready_for_review", "stage": "ready_for_review", "actions": ["shortlist", "reject", "preview_cv", "download_cv"], "name": "imp-wathefni-5f85c14072d6d15c", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-511c5f998f9f75cd-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "zayd unique", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-f9cb8d025ee15f97-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "imp-wathefni-f9cb8d025ee15f97", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-20342b7d4aaf17c0-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "noor tahat", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-49baea486cfad076-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "imp-wathefni-49baea486cfad076", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-2ca454a8e8140f52-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "imp-wathefni-2ca454a8e8140f52", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-3ee99b7add091da0-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "mariam engineer", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-5ae70ca8aa80885b-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "noor tahat", "score": null, "cv": true}
+DETAIL_OK {"app_key": "imp-wathefni-386e62fe4ff524cd-WATHEFNI-IMPORT", "status": "import_archived", "stage": "import_archived", "actions": ["preview_cv", "download_cv"], "name": "zayd unique", "score": null, "cv": true}

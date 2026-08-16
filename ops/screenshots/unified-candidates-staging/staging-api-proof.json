@@ -1,0 +1,78 @@
+{
+  "captured_against": "staging http://127.0.0.1:8011 via SSH tunnel :18011",
+  "flag": {
+    "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL": "on",
+    "tenants": "WATHEFNI"
+  },
+  "talent_pool_sample": [
+    {
+      "app_key": "UCSHOT3B44B5-HELD",
+      "status": "needs_role",
+      "status_label": "Needs role",
+      "job_display": "Not linked",
+      "intake_source": "email",
+      "cv_processing": {
+        "status": "ready",
+        "received": true,
+        "automatic": true,
+        "label": "Ready",
+        "bucket": "ready"
+      },
+      "assessment": null,
+      "communication": {
+        "status": "intentionally_skipped",
+        "message_kind": "no_outreach",
+        "channel": null,
+        "sent_at": null,
+        "failed_at": null,
+        "last_error": null,
+        "stage_changed_without_contact": false
+      },
+      "canonical_stage": "needs_role",
+      "candidate": {
+        "name": "UC Shot Held",
+        "email": "ucshot-held@example.com"
+      }
+    },
+    {
+      "app_key": "imp-wathefni-79836cd85ba33d11-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "status_label": "Needs role",
+      "job_display": "Not linked",
+      "intake_source": "email",
+      "cv_processing": {
+        "status": "processed",
+        "received": true,
+        "automatic": true,
+        "label": "Ready",
+        "bucket": "ready"
+      },
+      "assessment": null,
+      "communication": {
+        "status": "intentionally_skipped",
+        "message_kind": "no_outreach",
+        "channel": null,
+        "sent_at": null,
+        "failed_at": null,
+        "last_error": null,
+        "stage_changed_without_contact": false
+      },
+      "canonical_stage": "needs_role",
+      "candidate": {
+        "name": "Noor Tahat"
+      }
+    }
+  ],
+  "all_unified": true,
+  "intake_bucket_keys": [
+    "queued",
+    "processing",
+    "incomplete_extraction",
+    "failed_dead_letter",
+    "unsupported",
+    "password_protected",
+    "quarantined_malware",
+    "ready_held"
+  ],
+  "intake_malware_release_forbidden": true
+}

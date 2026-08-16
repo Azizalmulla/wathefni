@@ -1,0 +1,29 @@
+    probation surfaces — wiring + freeze preservation
+      PASS  http register present
+      PASS  queue_payload
+      PASS  detail_payload
+      PASS  employee_self_payload
+      PASS  explain_status
+      PASS  list_cases surface-only
+      PASS  frozen SM active→under_review
+      PASS  frozen SM under_review→confirmed
+      PASS  frozen SM confirmed terminal
+      PASS  app registers probation_http
+      PASS  probation RBAC perms
+      PASS  employee feature probation
+      PASS  hr mobile capability probation_review
+      PASS  HR Web workspace
+      PASS  web RTL via dir
+      PASS  web decision framing
+      PASS  web not generic checklist-only
+      PASS  HR mobile queue
+      PASS  HR mobile detail
+      PASS  employee app screen
+      PASS  employee strips confidential
+      PASS  assistant deep link
+      PASS  EN i18n hrProbation
+      PASS  AR i18n hrProbation
+      PASS  backend freeze intact
+
+    25 passed, 0 failed
+PROBATION_SURFACES_UNIT_FULL_PASS

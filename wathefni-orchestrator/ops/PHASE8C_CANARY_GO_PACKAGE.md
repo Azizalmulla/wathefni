@@ -103,7 +103,7 @@ Role overlap (if any): roles overlapped ______ ; why acceptable ______ ; backup 
 
 | # | Requirement | Current status | Evidence location |
 |---|---|---|---|
-| P1 | Privacy URL `https://wathefni.ai/employee-app/privacy` returns final HTTP **200** | **INCOMPLETE** — live check still ends **404** (`https://www.wathefni.ai/employee-app/privacy`) | Private ops log after publish |
+| P1 | Privacy URL `https://wathefni.ai/employee-app/privacy` returns final HTTP **200** | **COMPLETE** (2026-07-12 live check → 200 at `https://www.wathefni.ai/employee-app/privacy`) | Live curl + page content |
 | P2 | Monitored role-based privacy/support mailbox (not a personal address) | **INCOMPLETE** | Private ops log |
 | P3 | Named privacy-request owner + response target/SLA | **INCOMPLETE** | Private ops log |
 | P4 | Versioned internal-canary notice finalized (not draft) | **INCOMPLETE** — draft `INTERNAL-CANARY-NOTICE-v1-DRAFT` exists in 8C2 package | Notice file + SHA-256 outside git or hashed in private record |
@@ -200,7 +200,7 @@ Mark complete only with evidence.
 | G7 | Exact one employee key recorded privately | **INCOMPLETE** |
 | G8 | Active status + company + unique phone proof | **INCOMPLETE** |
 | G9 | Zero invite/session proof for that employee | **INCOMPLETE** |
-| G10 | Privacy URL HTTP 200 | **INCOMPLETE** (404 today) |
+| G10 | Privacy URL HTTP 200 | **COMPLETE** (live 200 on 2026-07-12) |
 | G11 | Role mailbox + privacy-request owner | **INCOMPLETE** |
 | G12 | Notice version/hash finalized | **INCOMPLETE** |
 | G13 | Retention/deletion/post-employment wording approved | **INCOMPLETE** |

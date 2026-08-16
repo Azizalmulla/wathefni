@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "stamp": "20260809T035506Z",
+  "employee_key": "WATHEFNI-96550010001",
+  "name": "Noura Almutairi",
+  "phone": "96550010001",
+  "activation_code": "156807",
+  "invite_expires_at": "2026-08-10 03:55:28.992043+00:00",
+  "seeded_count": 32,
+  "projected_count": 31,
+  "unread": 8,
+  "flows": [
+    "app_activation",
+    "compliance",
+    "leave_decision",
+    "onboarding",
+    "payroll",
+    "shift"
+  ],
+  "protected_untouched": [
+    "WATHEFNI-96550252254",
+    "WATHEFNI-96599338566"
+  ],
+  "note": "Bank is not an Inbox flow; onboarding covers bank-step messaging when entitled."
+}

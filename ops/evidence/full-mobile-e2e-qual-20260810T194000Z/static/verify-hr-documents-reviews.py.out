@@ -1,0 +1,18 @@
+PASS queue route
+PASS detail route
+PASS default needs_review API
+PASS no submitted_at invent
+PASS normalize has expiry/confidence
+PASS preview before decide
+PASS mark reviewed + expected_status
+PASS no Send Reminder
+PASS onboarding fallback routes to onboarding
+PASS demo gated
+PASS demo has compliance + onboarding fallback
+PASS app.config documentsDemo
+PASS backend default needs_review
+PASS priorities emit document_reviews
+PASS no onboarding fan when compliance
+PASS hrDocuments keys EN+AR
+PASS More label is Document reviews
+hr-documents-reviews: GREEN

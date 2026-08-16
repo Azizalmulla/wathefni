@@ -1,0 +1,61 @@
+employee payslips p0.1 official pdf tag=b98fcbda
+[PASS] reportlab installed
+[PASS] native never official documented
+[PASS] external mirror not wathefni money authority
+[PASS] remaining gate present
+[PASS] native ineligible
+[PASS] external without seal ineligible
+[PASS] external sealed eligible (id present)
+[PASS] unit pdf magic
+[PASS] unit pdf no invented payment date string
+[PASS] unit pdf AR magic
+[PASS] contract draft
+[PASS] contract approve
+[PASS] period
+[PASS] native preview
+[PASS] native payslip
+[PASS] native money authority preview
+[PASS] native official ineligible
+[PASS] external export
+[PASS] external import
+[PASS] external payslip
+[PASS] external money authority
+[PASS] linked sealed authority
+[PASS] external official eligible
+[PASS] starts not_released
+[PASS] employee cannot view unreleased
+[PASS] pdf generate before release ok (immutable snapshot)
+[PASS] unreleased detail 404
+[PASS] unreleased download 404
+[PASS] HR release
+[PASS] released detail
+[PASS] official_document true
+[PASS] payment_date null
+[PASS] download PDF 200
+[PASS] official header true
+[PASS] content-type pdf
+[PASS] pdf contains net amount
+[PASS] pdf omits payment date label when unknown
+[PASS] stored totals_net matches API
+[PASS] download PDF AR
+[PASS] peer detail 404
+[PASS] peer download 404
+[PASS] native released viewable
+[PASS] native official_document false
+[PASS] native official download refused
+[PASS] replace ok
+[PASS] replacement not released
+[PASS] old version unavailable after replace
+[PASS] new version invisible until re-release
+[PASS] re-released new version visible
+[PASS] new version PDF
+[PASS] unrelease removes access
+[PASS] revoke removes access
+[PASS] pdf ensure idempotent for same fingerprint
+[PASS] cleanup
+{
+  "verdict": "PASS",
+  "pass": 54,
+  "fail": 0,
+  "evidence": "/opt/wathefni/ops/evidence/employee-payslips-p0_1-20260807T220018Z"
+}

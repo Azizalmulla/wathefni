@@ -1,0 +1,48 @@
+=== app.py syntax ===
+AST OK
+
+=== smoke-test-employee-app-phaseE.py ===
+      PASS  home attaches detail from rows the documents module already produced
+      PASS  home still counts renewals the documents module flagged
+      PASS  detail is optional: a task without it is still emitted
+
+    34 passed, 0 failed
+
+=== smoke-test-leave-policy-wave2.py ===
+      PASS  span year+holiday
+      PASS  sick tiers 15+5
+      PASS  kuwait date near midnight
+
+    13 passed, 0 failed (unit-only)
+
+=== smoke-test-leave-freeze-regression.py ===
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+35 passed, 0 failed
+
+=== smoke-test-leave-guardrails.py ===
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-leave-guardrails.py", line 6, in <module>
+    import app
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 37, in <module>
+    import psycopg2
+ModuleNotFoundError: No module named 'psycopg2'
+
+=== smoke-test-leave-workflow-wave3.py ===
+      PASS  unpaid handoff no money
+      PASS  money handoff rejected
+      PASS  sensitive masked
+
+    17 passed, 0 failed (unit-only)
+
+=== smoke-test-leave-authority-wave1.py ===
+      PASS  honesty observe_only
+      PASS  holiday path excludes weekend+holiday
+SKIP DB: psycopg2 not available locally
+
+    20 passed, 0 failed (unit-only)
+
+=== smoke-test-leave-balances.py ===
+    leave balances P1 — chargeable days + flag gate + accrual + observe-only consumption
+SKIP: psycopg2 not available locally; full run happens on staging.

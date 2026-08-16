@@ -1,0 +1,29 @@
+health_ok
+active
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SETUP_CONSOLE_ENABLED=true
+WATHEFNI_SETUP_CONSOLE_V2=on
+CAPTURE_INGEST_OFF_OK
+PASS  wave a version
+PASS  wathefni only constant
+PASS  honest states complete
+PASS  six stages
+PASS  refuses non-wathefni
+PASS  launch readiness page present
+PASS  UI overall status
+PASS  UI important blockers
+PASS  UI pause impact
+PASS  UI EN launch title
+PASS  UI AR launch title
+PASS  UI rtl
+PASS  UI mobile wrap
+PASS  app wires launch view
+PASS  no giant form in launch page
+PASS  route registered
+PASS  module imported in app
+FAIL  db evaluate path :: column "timezone" does not exist
+LINE 2:         SELECT company_code, name, country, timezone, curren...
+                                                    ^
+
+
+17 passed, 1 failed

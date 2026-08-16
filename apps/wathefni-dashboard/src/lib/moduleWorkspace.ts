@@ -14,6 +14,14 @@ export const CANONICAL_POSTHIRE_MODULES = [
   'attendance',
   'shifts',
   'leave',
+  'performance',
+  'talent',
+  'learning',
+  'benefits',
+  'employee_relations',
+  'engagement',
+  'comp_planning',
+  'workforce_planning',
   'payroll',
   'analytics',
 ] as const
@@ -24,15 +32,31 @@ export const CANONICAL_POSTHIRE_PEOPLE_MODULES = [
   'attendance',
   'shifts',
   'leave',
+  'performance',
+  'talent',
+  'learning',
   'payroll',
 ] as const
 
 /** Post-Hire sidebar pages (includes Employees people surface). */
 export const POSTHIRE_NAV_PAGES = [
   'employees',
+  'workforce',
+  'inbox',
+  'preboarding',
   'onboarding',
+  'probation',
   'attendance',
   'leave',
+  'performance',
+  'talent',
+  'learning',
+  'benefits',
+  'employee-relations',
+  'engagement',
+  'compensation-planning',
+  'workforce-planning',
+  'job-architecture',
   'shifts',
   'payroll',
   'analytics',
@@ -108,9 +132,147 @@ export function isPostHireNavPage(page: string): page is PostHireNavPage {
   return (POSTHIRE_NAV_PAGES as readonly string[]).includes(page)
 }
 
+/**
+ * Post-hire operational modules that can be a focused default landing.
+ * Employees / Workforce / Inbox are spine or composition surfaces — not SKUs.
+ */
+export const POSTHIRE_OPERATIONAL_LANDING_PRIORITY = [
+  'leave',
+  'attendance',
+  'shifts',
+  'payroll',
+  'onboarding',
+  'compliance',
+  'analytics',
+] as const
+
+export type PostHireOperationalLandingPage = (typeof POSTHIRE_OPERATIONAL_LANDING_PRIORITY)[number]
+
+export const PEOPLE_SURFACE_MODULE_KEYS = [
+  'onboarding',
+  'compliance',
+  'attendance',
+  'shifts',
+  'leave',
+  'payroll',
+] as const
+
+/** True when Action Inbox has at least one entitled compose source for this tenant/actor. */
+export function actionInboxHasEntitledSource(args: {
+  enabledModules: string[] | null | undefined
+  permissions?: string[] | null
+  catalog?: ModuleWorkspaceCatalog[] | null
+}): boolean {
+  const enabled = enabledModuleSet(args.enabledModules)
+  const perms = new Set((args.permissions || []).map(String))
+  const permOk = (p: string) => perms.has(p) || perms.has('*:*') || perms.size === 0
+  if (enabled.has('analytics') && permOk('analytics.read')) return true
+  if (enabled.has('compliance') && permOk('compliance.read')) return true
+  if (anyPeopleModuleEnabled(args.enabledModules, args.catalog)) {
+    if (permOk('employees.read') || permOk('settings.manage') || permOk('users.manage')) return true
+  }
+  return false
+}
+
+/**
+ * Focused Workforce Experience landing (Module-Aware Shell Wave 0).
+ * - Pre-Hiring Overview when pre_hiring + overview available
+ * - One operational module → that module
+ * - Several → Action Inbox when offerable and entitled source exists; else priority primary
+ * - Employees stays visible but is not the default when an ops module exists
+ */
+export function resolveFocusedPosthireLanding(args: {
+  enabledModules: string[] | null | undefined
+  availablePageIds: string[]
+  prehireEnabled: boolean
+  overviewAvailable: boolean
+  actionInboxOfferable: boolean
+  permissions?: string[] | null
+  catalog?: ModuleWorkspaceCatalog[] | null
+}): string {
+  const available = new Set(args.availablePageIds)
+  if (args.prehireEnabled && args.overviewAvailable && available.has('overview')) {
+    return 'overview'
+  }
+
+  const enabled = enabledModuleSet(args.enabledModules)
+  const operational = POSTHIRE_OPERATIONAL_LANDING_PRIORITY.filter(
+    (page) => enabled.has(page) && available.has(page),
+  )
+
+  if (operational.length === 1) {
+    return operational[0]
+  }
+
+  if (operational.length >= 2) {
+    if (
+      args.actionInboxOfferable &&
+      available.has('inbox') &&
+      actionInboxHasEntitledSource({
+        enabledModules: args.enabledModules,
+        permissions: args.permissions,
+        catalog: args.catalog,
+      })
+    ) {
+      return 'inbox'
+    }
+    return operational[0]
+  }
+
+  if (available.has('employees')) return 'employees'
+  if (available.has('inbox') && args.actionInboxOfferable) return 'inbox'
+  return args.availablePageIds[0] || 'settings'
+}
+
 export function filterHrNavModuleKey(moduleKey: string | null | undefined): string | null {
   if (!moduleKey || isHrNavExcludedModule(moduleKey)) return null
   return moduleKey
+}
+
+/** Scope Alerts delivery issue rows by enabled modules (Shell Wave 0). */
+export function scopeDeliveryNotificationRows<T extends Record<string, unknown>>(
+  rows: T[],
+  enabledModules?: string[] | null,
+): T[] {
+  if (!enabledModules?.length) return rows
+  if (enabledModules.includes('pre_hiring')) return rows
+  const posthireOn = enabledModules.some((key) =>
+    ['onboarding', 'compliance', 'attendance', 'leave', 'shifts', 'payroll', 'analytics'].includes(key),
+  )
+  if (!posthireOn) return []
+  return rows.filter((item) => {
+    const blob = [
+      item.last_error,
+      item.dashboard_status,
+      item.status,
+      item.app_key,
+      item.position_title,
+      item.candidate_name,
+    ]
+      .map((value) => String(value || '').toLowerCase())
+      .join(' ')
+    if (
+      blob.includes('assessment') ||
+      blob.includes('interview') ||
+      blob.includes('screening') ||
+      blob.includes('video_interview')
+    ) {
+      return false
+    }
+    if (
+      blob.includes('onboarding') ||
+      blob.includes('compliance') ||
+      blob.includes('employee') ||
+      blob.includes('leave') ||
+      blob.includes('shift') ||
+      blob.includes('attendance') ||
+      blob.includes('payroll')
+    ) {
+      return true
+    }
+    if (item.candidate_name || item.app_key || item.position_code) return false
+    return true
+  })
 }
 
 export type NavShapeProof = {
@@ -128,7 +290,7 @@ export function navShapeForModules(
   options: { auditRead?: boolean } = {},
 ): NavShapeProof {
   const visible = navItems.filter((item) => {
-    if (item.id === 'employees') return anyPeopleModuleEnabled(enabledModules, catalog)
+    if (item.id === 'employees' || item.id === 'workforce') return anyPeopleModuleEnabled(enabledModules, catalog)
     if (item.id === 'notifications') return isAlertsAndDeliveryRelevant(enabledModules, catalog)
     if (item.id === 'activity') return options.auditRead === true
     if (item.id === 'settings') return true

@@ -22,6 +22,7 @@ from typing import Any, Callable
 
 try:
     import app
+    import employee_app_access as access
     from psycopg2.extras import Json
 except ModuleNotFoundError as exc:
     if exc.name in {"psycopg2", "app"} or (exc.name or "").startswith("psycopg2"):
@@ -34,9 +35,11 @@ MARKER = "temporary_employee_app_harness"
 MODULES = ["onboarding", "leave", "compliance", "employee_app"]
 
 EMP_A = f"empapp-a-{COMPANY}"
-PHONE_A = "96550000000701"
 EMP_B = f"empapp-b-{COMPANY}"
-PHONE_B = "96550000000702"
+# Canonical Kuwait 965 + 8 digits. The local-8 alias check below only resolves when the
+# fixture is a real-shaped number, so these must stay 11 digits.
+PHONE_A = "96559990701"
+PHONE_B = "96559990702"
 
 
 class Checks:
@@ -66,6 +69,25 @@ def _flag(on: bool) -> None:
         app.os.environ["WATHEFNI_EMPLOYEE_APP"] = "on"
     else:
         app.os.environ.pop("WATHEFNI_EMPLOYEE_APP", None)
+
+
+_ALLOWLIST_ENV = "WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST"
+_ORIGINAL_ALLOWLIST: str | None = None
+
+
+def _allowlist_fixtures() -> None:
+    """Controlled rollout stays fail-closed; scope the allowlist to our own keys."""
+    global _ORIGINAL_ALLOWLIST
+    _ORIGINAL_ALLOWLIST = app.os.environ.get(_ALLOWLIST_ENV)
+    current = {k for k in (_ORIGINAL_ALLOWLIST or "").split(",") if k.strip()}
+    app.os.environ[_ALLOWLIST_ENV] = ",".join(sorted(current | {EMP_A, EMP_B}))
+
+
+def _restore_allowlist() -> None:
+    if _ORIGINAL_ALLOWLIST is None:
+        app.os.environ.pop(_ALLOWLIST_ENV, None)
+    else:
+        app.os.environ[_ALLOWLIST_ENV] = _ORIGINAL_ALLOWLIST
 
 
 def _push_flag(on: bool) -> None:
@@ -159,7 +181,42 @@ def setup() -> None:
                 (COMPANY, EMP_B, Json({"item_id": "civil_id", "label": "Civil ID"})),
             )
             globals()["_FILE_B"] = str(cur.fetchone()["file_id"])
+            access.ensure_access_schema(cur)
         conn.commit()
+    _grant_app_access()
+
+
+def _hr_context() -> dict[str, Any]:
+    return {
+        "company_code": COMPANY,
+        "user_id": "employee-app-harness",
+        "actor_user_id": "employee-app-harness",
+        "email": "employee-app-harness@wathefni.ai",
+        "permissions": ["employees.manage", "onboarding.manage"],
+    }
+
+
+def _grant_app_access() -> None:
+    """Employee App access is an explicit HR grant, never implied by employment.
+
+    The harness activates real invites, so it must go through the canonical grant
+    instead of writing the flag: that keeps this suite honest about the frozen
+    access policy while still exercising activation, session and self-scope paths.
+    """
+    _flag(True)
+    _allowlist_fixtures()
+    access.set_company_app_access_policy(
+        app, _hr_context(), module_enabled=True, access_mode="selected", sync_invites=False
+    )
+    for key in (EMP_A, EMP_B):
+        access.set_employee_app_access(
+            app,
+            _hr_context(),
+            employee_key=key,
+            enabled=True,
+            reason="employee-app-harness",
+            deliver_invite=False,
+        )
 
 
 def teardown() -> None:
@@ -167,6 +224,7 @@ def teardown() -> None:
     _exec("DELETE FROM companies WHERE company_code=%s", (COMPANY,))
     _flag(False)
     _push_flag(False)
+    _restore_allowlist()
 
 
 def _ctx(token: str) -> dict[str, Any]:
@@ -235,7 +293,69 @@ def run_checks(checks: Checks) -> None:
     rotated = app.rotate_employee_session(refresh_a)
     checks.check("refresh rotates the session", lambda: bool(rotated and rotated.get("token") and rotated["token"] != token_a))
     checks.check("old access token dead after rotation", lambda: app.employee_by_session(token_a) is None)
-    token_a = rotated["token"]
+    # HTTP refresh path (Wave 1 freeze) must match helper rotation.
+    http_rotated = app.app_auth_refresh(app.EmployeeAppRefreshRequest(refresh_token=rotated["refresh_token"]))
+    checks.check(
+        "HTTP /app/auth/refresh rotates tokens",
+        lambda: bool(http_rotated.get("token")) and http_rotated["token"] != rotated["token"],
+    )
+    token_a = http_rotated["token"]
+    refresh_a = http_rotated["refresh_token"]
+
+    # Kuwait local-8 activate against invite stored as 965… (Wave 1 freeze).
+    local8 = PHONE_A[-8:]
+    _invite_alias, code_alias = app.create_employee_app_invite(COMPANY, employee_a)
+    activated_alias = app.app_auth_activate(app.EmployeeAppActivateRequest(phone=local8, code=code_alias))
+    checks.check(
+        "Kuwait local-8 activate matches 965 invite",
+        lambda: bool(activated_alias.get("token")) and activated_alias["employee"]["employee_key"] == EMP_A,
+    )
+    checks.check(
+        "new-device activate revokes prior session",
+        lambda: app.employee_by_session(token_a) is None,
+    )
+    with app.db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT revoked_reason FROM employee_sessions
+                WHERE company_code=%s AND employee_key=%s AND status='revoked'
+                ORDER BY revoked_at DESC NULLS LAST
+                LIMIT 1
+                """,
+                (COMPANY, EMP_A),
+            )
+            row = dict(cur.fetchone() or {})
+    checks.check(
+        "new-device revoke reason is reactivated_via_invite",
+        lambda: row.get("revoked_reason") == "reactivated_via_invite",
+    )
+    token_a = activated_alias["token"]
+    refresh_a = activated_alias["refresh_token"]
+
+    # Logout (Wave 1 freeze).
+    logged_out = app.app_auth_logout(authorization=f"Bearer {token_a}")
+    checks.check("HTTP /app/auth/logout returns ok", lambda: logged_out.get("ok") is True)
+    checks.check("access token dead after logout", lambda: app.employee_by_session(token_a) is None)
+    checks.check(
+        "refresh dead after logout session revoke",
+        lambda: app.rotate_employee_session(refresh_a) is None,
+    )
+
+    # Re-activate for remaining checks.
+    _invite_re, code_re = app.create_employee_app_invite(COMPANY, employee_a)
+    reactivated = app.app_auth_activate(app.EmployeeAppActivateRequest(phone=PHONE_A, code=code_re))
+    token_a = reactivated["token"]
+    refresh_a = reactivated["refresh_token"]
+
+    # request-code is always generic and never self-registers strangers.
+    rc = app.app_auth_request_code(app.EmployeeAppRequestCodeRequest(phone=PHONE_A))
+    checks.check("request-code returns generic ok", lambda: rc.get("ok") is True and "registered" in str(rc.get("message") or "").lower())
+    stranger = app.app_auth_request_code(app.EmployeeAppRequestCodeRequest(phone="96550009999999"))
+    checks.check(
+        "request-code silent for unknown phone",
+        lambda: stranger.get("ok") is True and stranger.get("message") == rc.get("message"),
+    )
 
     # --- Current account/platform state remains authoritative ----------------
     _exec("UPDATE companies SET status='disabled' WHERE company_code=%s", (COMPANY,))

@@ -1,0 +1,13 @@
+[Unit]
+Description=Wathefni Shifts Wave 2 lifecycle reconciliation timer (DISABLED BY DEFAULT — synthetic-only)
+Documentation=file:///opt/wathefni/orchestrator/ops/runbooks/shifts-wave2b-operator-jobs.md
+
+[Timer]
+OnBootSec=7min
+OnCalendar=hourly
+Persistent=false
+RandomizedDelaySec=90
+Unit=wathefni-shifts-lifecycle-recon.service
+
+[Install]
+WantedBy=timers.target

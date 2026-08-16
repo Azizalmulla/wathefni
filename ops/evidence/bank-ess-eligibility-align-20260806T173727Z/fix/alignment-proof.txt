@@ -1,0 +1,8 @@
+syncLayoutLocale_in_i18n True
+typeof_guard_in_layout True
+bank_hasFeature True
+BankUnavailableView True
+onboarding_hasFeature_bank True
+open_bank_gate True
+feature_key_bank True
+ALIGNMENT_OK

@@ -1,0 +1,65 @@
+Leave Wave 1B canary tag=57b4df9d
+[PASS] schema version
+[PASS] authority enabled
+[PASS] synthetic only
+[PASS] company allowlisted
+[PASS] honesty non-binding
+[PASS] vacation→annual
+[PASS] time_off→annual
+[PASS] preflight real leaves=3
+[PASS] seed employee 7490
+[PASS] synthetic marker 7490
+[PASS] seed employee 7490
+[PASS] synthetic marker 7490
+[PASS] request annual
+[PASS] annual honesty
+[PASS] request sick
+[PASS] legacy vacation stores annual
+[PASS] self-approve denied
+[PASS] self-reject denied
+[PASS] stale version approve fails
+[PASS] approve annual ok
+[PASS] approve payroll_impact provisional
+[PASS] approve honesty
+[PASS] attendance derived from leave
+[PASS] manual correction stamped
+[PASS] cancel stale version fails
+[PASS] cancel ok
+[PASS] events preserve requested/approved/cancelled
+[PASS] manual attendance correction preserved
+[PASS] timesheet provisional invalidation only
+[PASS] no payroll money path in invalidate
+[PASS] stale → expired_stale
+[PASS] real stale leave still requested
+[PASS] lifecycle blocks request terminated
+[PASS] lifecycle blocks request suspended
+[PASS] lifecycle blocks request future_start
+[PASS] lifecycle blocks request notice_period
+[PASS] lifecycle subject request ok
+[PASS] lifecycle decline
+[PASS] lifecycle reverse
+[PASS] reverse not pending
+[PASS] tenant isolation other company
+[PASS] manager scope path exercised
+[PASS] legacy vacation → annual ledger
+[PASS] holiday chargeable path
+[PASS] mid: real leave count 3
+[PASS] mid: real fp 51cd940f
+[PASS] mid: real fp dbf82ecf
+[PASS] mid: real fp e3217e0e
+[PASS] mid: real leave rows equal
+[PASS] mid: real leave_ids stable
+[PASS] post-cleanup: real leave count 3
+[PASS] post-cleanup: real fp 51cd940f
+[PASS] post-cleanup: real fp dbf82ecf
+[PASS] post-cleanup: real fp e3217e0e
+[PASS] post-cleanup: real leave rows equal
+[PASS] post-cleanup: real leave_ids stable
+[PASS] synthetic leave residual 0
+[PASS] synthetic employee residual 0
+{
+  "pass": 58,
+  "fail": 0,
+  "tag": "57b4df9d",
+  "evid": "/opt/wathefni/production-evidence/leave-wave1b-prod-canary/20260802T153714Z/canary-run"
+}

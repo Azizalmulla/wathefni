@@ -1,0 +1,62 @@
+{
+  "orphans": [
+    {
+      "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+      "employee_key": "WATHEFNI-96596552203",
+      "employee_name": null,
+      "shift_date": "2026-08-11",
+      "status": "scheduled"
+    },
+    {
+      "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+      "employee_key": "WATHEFNI-96552202357",
+      "employee_name": null,
+      "shift_date": "2026-08-11",
+      "status": "scheduled"
+    },
+    {
+      "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+      "employee_key": "WATHEFNI-96552263564",
+      "employee_name": null,
+      "shift_date": "2026-08-11",
+      "status": "scheduled"
+    }
+  ],
+  "leave_hits": [
+    {
+      "shift_id": "1f74e534-9a35-4a85-a0d3-5ffcdb544eb1",
+      "employee_key": "WATHEFNI-96566363363",
+      "employee_name": "Fouad Burhamad",
+      "shift_date": "2026-05-11",
+      "start_time": "09:00:00",
+      "end_time": "17:00:00",
+      "status": "scheduled",
+      "leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4",
+      "leave_type": "sick",
+      "leave_status": "approved",
+      "start_date": "2026-05-11",
+      "end_date": "2026-05-11"
+    }
+  ],
+  "future_emps": [],
+  "emp_status": [
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "name": "Fouad Burhamad",
+      "employment_status": "active",
+      "n": 8
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "employment_status": "active",
+      "n": 7
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "employment_status": "active",
+      "n": 5
+    }
+  ]
+}

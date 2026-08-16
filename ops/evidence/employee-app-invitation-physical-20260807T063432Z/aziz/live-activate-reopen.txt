@@ -1,0 +1,12 @@
+allowlist_has_aziz True
+require on
+delivered delivered email code_len 6
+activate_status 200
+{"ok": true, "replaced_previous_device": false, "expires_at": "2026-08-14T06:35:12.434434+00:00"}
+me WATHEFNI-96599338566 status 200
+refresh_ok True status 200
+me2 WATHEFNI-96599338566
+stale_rejected 401
+hr_status activated access True pending_actions {'resend': False, 'reinvite': True, 'revoke_access': True, 'show_code_exception': False}
+pending 0
+PASS aziz_live_activate_reopen

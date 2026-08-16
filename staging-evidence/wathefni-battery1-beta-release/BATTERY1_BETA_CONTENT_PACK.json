@@ -1,0 +1,2038 @@
+{
+  "battery_content_version": "beta_v1",
+  "content_pack_sha256": "d0d617d5cbb5af4f5c64e15dd947ad2e78bd85fcb1ee5e8347832c033bc49d23",
+  "item_count": 25,
+  "items": [
+    {
+      "answer_key": "A",
+      "category": "verbal_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "على العميل الذي لا يستطيع الوصول إلى حسابه الساعة 7:00 صباحًا يوم السبت أن يرسل بريدًا إلكترونيًا إلى مكتب الدعم المناوب."
+            },
+            {
+              "key": "B",
+              "text": "ستظهر تنزيلات الفواتير المجدولة الساعة 7:00 صباحًا يوم السبت في الأرشيف بعد انتهاء الصيانة."
+            },
+            {
+              "key": "C",
+              "text": "ستُعالج تلقائيًا بعد انتهاء فترة الصيانة تغييرات الملف الشخصي المرسلة أثناء الصيانة."
+            },
+            {
+              "key": "D",
+              "text": "ستظل البوابة غير متاحة حتى تكتمل تنزيلات الفواتير."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "32f568fd5f7338e5f383e9c439d34b0475d0c292cd8d2a1e0357bb3e8cb85412",
+          "difficulty": "medium",
+          "draft_id": "e067ee1e-4d83-4955-8cf7-56b2b4697af7",
+          "draft_revision_id": "ec06a808-c330-401d-af84-1ddf07eed770",
+          "explanation": "ينص التحديث مباشرةً على أن مشكلات الوصول العاجلة إلى الحسابات خلال فترة الصيانة يجب إرسالها إلى مكتب الدعم المناوب عبر البريد الإلكتروني.",
+          "prompt_text": "تحديث الخدمة: ستكون بوابة العملاء غير متاحة يوم السبت من 6:00 إلى 8:00 صباحًا بسبب أعمال الصيانة. خلال هذه الفترة، لن تُعالج طلبات إعادة تعيين كلمات المرور أو تغييرات الملف الشخصي. أما تنزيلات الفواتير المجدولة قبل 6:00 صباحًا فستظهر في الأرشيف بعد انتهاء الصيانة. ويجب إرسال مشكلات الوصول العاجلة إلى الحسابات عبر البريد الإلكتروني إلى مكتب الدعم المناوب، الذي سيراقب الرسائل طوال هذه الفترة.\n\nأي استنتاج تدعمه المعلومات على أفضل وجه؟",
+          "proposed_answer_key": "A",
+          "rationale": "يقيس هذا السؤال القدرة على التمييز بدقة بين ما يذكره إشعار الخدمة صراحةً وما لا يذكره بشأن التوقيت أو ما يحدث بعد انتهاء الصيانة.",
+          "section": "Battery-1 verbal_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "A customer who cannot access an account at 7:00 a.m. Saturday should email the duty support desk."
+            },
+            {
+              "key": "B",
+              "text": "Billing downloads scheduled at 7:00 a.m. Saturday will appear in the archive after maintenance."
+            },
+            {
+              "key": "C",
+              "text": "Profile changes sent during maintenance will process once the window ends automatically."
+            },
+            {
+              "key": "D",
+              "text": "The portal will remain unavailable until billing downloads are complete."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "a91d6b5d3f12988335ffe5efbc817f45d881e9c285e6dd8081ec7bad95e67f52",
+          "difficulty": "medium",
+          "draft_id": "5d6b3e4a-8eaf-4e1a-9e13-977206b4bafe",
+          "draft_revision_id": "e223378f-41b3-4024-ab3a-fe592401bf8f",
+          "explanation": "The update directly states that urgent account access issues during the maintenance window should be emailed to the duty support desk.",
+          "prompt_text": "Service update: The customer portal will be unavailable from 6:00 to 8:00 a.m. Saturday for maintenance. During that window, password resets and profile changes will not process. Billing downloads scheduled before 6:00 a.m. will still appear in the archive after maintenance. Urgent account access issues should be emailed to the duty support desk, which will monitor messages throughout the window.\n\nWhich conclusion is best supported?",
+          "proposed_answer_key": "A",
+          "rationale": "This item targets careful separation of what the service note explicitly states from what it does not state about later processing or timing.",
+          "section": "Battery-1 verbal_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 1,
+      "translation_pair_id": "47abf8c7-d35a-406f-8777-81bba2d9cd15"
+    },
+    {
+      "answer_key": "A",
+      "category": "verbal_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "يجوز النظر في طلب دخول في اليوم نفسه لموظف يطلب منه مدير حضور اجتماع حضوري مع عميل."
+            },
+            {
+              "key": "B",
+              "text": "يجوز لأي موظف لديه اجتماع مع عميل دخول المقر الرئيسي في اليوم نفسه."
+            },
+            {
+              "key": "C",
+              "text": "بعد الموافقة، تظل صلاحية دخول المبنى سارية لمدة أسبوع واحد."
+            },
+            {
+              "key": "D",
+              "text": "يحتاج الموظفون العاملون عن بُعد دائمًا إلى موافقة مدير لزيارة المقر الرئيسي."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "84755b1fdbbeacc693357db5c6cd11ef9a25aa49e4c02d6dbc01d732d188d5d7",
+          "difficulty": "medium",
+          "draft_id": "41bc8883-1438-47ee-928d-fb83dfcbc1ec",
+          "draft_revision_id": "1fa7d05d-076c-4e2a-b7be-889b1cfa0ae6",
+          "explanation": "تنص المذكرة صراحةً على أن طلبات اليوم نفسه لا تُنظر إلا للموظفين الذين يطلب منهم مدير حضور اجتماع حضوري مع عميل؛ لذلك فهذا هو الاستنتاج المدعوم مباشرةً.",
+          "prompt_text": "مذكرة سياسة: «يجب على الموظفين العاملين عن بُعد تقديم طلبات دخول المبنى قبل زيارة المقر الرئيسي بما لا يقل عن يومي عمل. ولا تُنظر طلبات اليوم نفسه إلا للموظفين الذين يطلب منهم مدير حضور اجتماع حضوري مع عميل. وتبقى صلاحية الدخول المعتمدة لذلك اليوم فقط.» أي استنتاج تدعمه المذكرة على أفضل وجه؟",
+          "proposed_answer_key": "A",
+          "rationale": "يقيس هذا السؤال القدرة على تحديد الاستنتاج الذي تدعمه مذكرة سياسة تتضمن قاعدة عامة، واستثناءً ضيقًا، وحدًا زمنيًا واضحًا.",
+          "section": "Battery-1 verbal_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "A same-day access request may be considered for an employee a director asks to attend an in-person client meeting."
+            },
+            {
+              "key": "B",
+              "text": "Any employee with a client meeting may enter headquarters the same day."
+            },
+            {
+              "key": "C",
+              "text": "Once approved, building access remains active for one week."
+            },
+            {
+              "key": "D",
+              "text": "Remote staff always need a director’s approval to visit headquarters."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "e4fc65f3ec00f873990afebc2652c78b26c7d6f6c523df97e4491fd4f89db2d6",
+          "difficulty": "medium",
+          "draft_id": "8e1c5670-58ac-4167-b710-d2b86023d843",
+          "draft_revision_id": "97b2f279-d835-4340-9b48-ffdd1272fafd",
+          "explanation": "The memo explicitly states that same-day requests are considered only for employees asked by a director to attend an in-person client meeting, so that conclusion is directly supported.",
+          "prompt_text": "Policy memo: “Remote staff must submit building access requests at least two business days before visiting headquarters. Same-day requests are considered only for employees asked to attend an in-person client meeting by a director. Approved access lasts for that day only.” Which conclusion is best supported?",
+          "proposed_answer_key": "A",
+          "rationale": "Assesses the ability to identify a conclusion supported by a policy memo containing a standard rule, a narrow exception, and a time limit.",
+          "section": "Battery-1 verbal_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 2,
+      "translation_pair_id": "a243e3c1-212a-43aa-835d-0bc07b3e76c9"
+    },
+    {
+      "answer_key": "A",
+      "category": "situational_judgment",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "أوقف إخراج الدفعة المتأثرة للشحن، واعزل الوحدات المشتبه بها، وأبلغ ضمان الجودة والتخطيط، وكلف شخصًا بجمع الوقائع."
+            },
+            {
+              "key": "B",
+              "text": "واصل الشحن مع فحص بضع عينات إضافية حتى لا يفوت هدف اليوم."
+            },
+            {
+              "key": "C",
+              "text": "انتظر حتى يعود فريق ضمان الجودة قبل تغيير أي شيء حتى لا تبالغ في رد الفعل."
+            },
+            {
+              "key": "D",
+              "text": "أعد معالجة جميع الوحدات فورًا دون تأكيد النطاق أو إبلاغ أي طرف آخر."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "606b3ba3b1cf88971f44f50a6d8566689b019a08109f05e4475d9a874077de44",
+          "difficulty": "medium",
+          "draft_id": "f602370a-36c5-4226-b528-643270bcc2fc",
+          "draft_revision_id": "27d77a61-5238-4856-b39d-16672fa58982",
+          "explanation": "أقوى استجابة إشرافية هنا هي الاحتواء السريع مع التنسيق. فهي تمنع خروج منتج مشتبه به، وتكسب الفريق وقتًا للتحقق من النطاق، وتُنبه الجهات التي قد تحتاج إلى تعديل الخطط. كما أن هذا التصرف متوازن لا مبالغ فيه، لأنه يستهدف الدفعة المتأثرة بدلًا من إيقاف كل العمل أو إعادة المعالجة بشكل أعمى.",
+          "prompt_text": "أثناء التعبئة، أُبلغتَ بأن عدة وحدات من الساعة الماضية قد تحمل ملصقات غير صحيحة. المطلوب شحن الطلبات اليوم، وسيكون فريق ضمان الجودة متاحًا بعد نحو 15 دقيقة. ما أفضل خطوة أولى؟",
+          "proposed_answer_key": "A",
+          "rationale": "هذا الخيار هو الأفضل لأن احتمال وجود خطأ في الملصقات يخلق فورًا مخاطر على العميل والامتثال. الأولوية هي احتواء الدفعة المشتبه بها لمنع اتساع الأثر، مع إشراك ضمان الجودة والتخطيط سريعًا لأن قرارات الفحص والشحن قد تتغير. المفاضلة هنا هي قبول تأخير قصير في الشحن مقابل تقليل خطر إرسال منتج بملصقات خاطئة وما يترتب عليه من شكاوى أو أخطاء لاحقة.",
+          "section": "Battery-1 situational_judgment medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Pause release of the affected batch, separate suspect units, alert QA and planning, and assign someone to gather facts."
+            },
+            {
+              "key": "B",
+              "text": "Keep shipping while checking a few more samples so today’s target is not missed."
+            },
+            {
+              "key": "C",
+              "text": "Wait for QA to return before changing anything so you do not overreact."
+            },
+            {
+              "key": "D",
+              "text": "Rework all units immediately without confirming the scope or notifying anyone else."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "dc554d1789627983b092bbdefc932ce8e9ba19d594cd4cc7541dc344ded573f9",
+          "difficulty": "medium",
+          "draft_id": "6dacb122-197c-4838-93d4-6b805a2a81e8",
+          "draft_revision_id": "6f680ea7-8497-4bd3-94fe-2b7e6ce12ceb",
+          "explanation": "The strongest supervisory response is fast containment plus coordination. It prevents suspect product from leaving, preserves time to verify scope, and alerts stakeholders who may need to adjust plans. The option is measured rather than extreme because it targets the affected batch instead of stopping everything or reworking blindly.",
+          "prompt_text": "During packaging, you are told that several units from the last hour may have incorrect labels. Orders are due out today, and QA will be available in about 15 minutes. What is the best first step?",
+          "proposed_answer_key": "A",
+          "rationale": "A is best because a possible labeling defect creates immediate customer and compliance risk. Containing the suspect batch limits impact while QA and planning are engaged quickly. It balances shipment pressure against quality exposure; a short delay is safer than releasing incorrect product and widening the incident.",
+          "section": "Battery-1 situational_judgment medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 3,
+      "translation_pair_id": "130c84e2-6534-4c95-9e8c-fcc9715101a7"
+    },
+    {
+      "answer_key": "A",
+      "category": "situational_judgment",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "وضّح الحد الأدنى المطلوب والمخاطر مع الجهتين الطالبتين، ثم وزّع العمل وحدّد نقاط متابعة وفقًا لذلك."
+            },
+            {
+              "key": "B",
+              "text": "أبلغ المالية أن التقرير يجب أن ينتظر إلى ما بعد تسليم العرض."
+            },
+            {
+              "key": "C",
+              "text": "وجّه الجميع إلى تقرير الظهر لأنه الأسبق زمنيًا، حتى لو انخفضت جودة العرض."
+            },
+            {
+              "key": "D",
+              "text": "تولَّ المهمتين بنفسك حتى لا يضيع وقت في تنسيق الآخرين."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "74a5ef6afb0ae714721ecf6743204eecded3802ed85f69c27b2e38c5433210bd",
+          "difficulty": "medium",
+          "draft_id": "bd6df570-a7f2-496e-9f4f-340dc07c9429",
+          "draft_revision_id": "1d2a7a87-ba22-4bd6-b40c-fac1a2d58c0e",
+          "explanation": "عندما يتعارض موعدان نهائيان موثوقان، فإن أقوى خطوة أولى هي توضيح العواقب والحد الأدنى المقبول من المخرجات مع أصحاب المصلحة، ثم تخصيص الموارد عن قصد. هذا النهج يتجنب التخمين بناءً على الوقت فقط أو التسلسل الإداري فقط، ويمنع المشرف من أن يصبح عنق الزجاجة.",
+          "prompt_text": "أنت تقود محللَين. عند الساعة 10 صباحًا، يطلب قسم المالية تقريرًا بحلول الظهر لاجتماع مراجعة تنفيذية. وفي الوقت نفسه، يذكّرك مديرك بأن عرضًا للعميل مستحق عند الساعة 3 مساءً وما يزال يحتاج إلى المراجعات النهائية. كلا الأمرين مهم، وكلا الجهتين تنتظران توجيهك. ما الإجراء الأول الأكثر فاعلية؟",
+          "proposed_answer_key": "A",
+          "rationale": "الخيار A هو الأفضل لأنه يحدّد الأولوية الفعلية والأثر على كل جهة معًا قبل توزيع الموارد. فهو يميّز بين ما هو ثابت وما يمكن التفاوض بشأنه، ثم يستخدم التفويض ونقاط المتابعة لحماية المخرجين. والمقايضة هنا هي قضاء وقت قصير في التنسيق المبدئي مقابل تقليل خطر أكبر، وهو تفويت متطلب حاسم في أحد التسليمين.",
+          "section": "Battery-1 situational_judgment medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Clarify minimum deliverables and risks with both requesters, then assign work and checkpoints accordingly."
+            },
+            {
+              "key": "B",
+              "text": "Tell Finance the report must wait until after the proposal is submitted."
+            },
+            {
+              "key": "C",
+              "text": "Direct everyone to the noon report because it is earlier, even if proposal quality drops."
+            },
+            {
+              "key": "D",
+              "text": "Handle both tasks personally so no time is lost coordinating others."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "0d7264c3ba72cf4614aecedecbccf1f3488ec139465c4bc6ac5e63fda4ed3ee0",
+          "difficulty": "medium",
+          "draft_id": "69fab1b2-ece5-4553-9b01-9339a5d0e475",
+          "draft_revision_id": "29ec5d1b-cf61-4a13-ac91-aaee6b40f4ab",
+          "explanation": "When two credible deadlines collide, the strongest first move is to clarify consequences and minimum acceptable outputs with both stakeholders, then allocate resources deliberately. That approach avoids guessing based only on clock time or hierarchy and prevents the supervisor from becoming the bottleneck.",
+          "prompt_text": "You lead two analysts. At 10 a.m., Finance asks for a noon report needed for an executive review. At the same time, your manager reminds you a client proposal is due by 3 p.m. and still needs final checks. Both matter, and both groups are waiting for direction. What is the most effective first action?",
+          "proposed_answer_key": "A",
+          "rationale": "A best addresses priority, impact, stakeholders, and trade-offs. It quickly tests what is truly fixed versus flexible, then uses delegation and checkpoints to protect both outcomes. The trade-off is brief coordination time upfront, which reduces the larger risk of missing a critical requirement on either deliverable.",
+          "section": "Battery-1 situational_judgment medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 4,
+      "translation_pair_id": "f9ad78a7-0f6e-4277-aee6-aa3e2b0d90f3"
+    },
+    {
+      "answer_key": "B",
+      "category": "prioritization",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "اقضِ الساعة التالية في إعداد الشرائح بنفسك، ثم عالِج مهمة الامتثال قبل الظهر."
+            },
+            {
+              "key": "B",
+              "text": "أكمِل مهمة الامتثال وقدّمها الآن، ثم أعطِ أحد زملائك مخططًا موجزًا ليجمع بيانات الشرائح بينما تُنهي أنت الشرائح."
+            },
+            {
+              "key": "C",
+              "text": "أبلغ مديرك أن ملخص اللجنة التوجيهية سيتعين أن ينتظر حتى الغد لكي تركز على الامتثال فقط."
+            },
+            {
+              "key": "D",
+              "text": "اطلب من أحد أعضاء الفريق تقديم مهمة الامتثال بينما تبدأ أنت إعداد الشرائح."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "2f2f1f6902c6301c12897fead23fa096c2f83480c8a4b56292a94d41250f8be3",
+          "difficulty": "medium",
+          "draft_id": "a7044ad6-9f8a-45d7-b4b6-1f76b5212b73",
+          "draft_revision_id": "2f15efdd-2058-401c-bb22-ea5a6ab26882",
+          "explanation": "الاختيار القوي في ترتيب الأولويات يعالج أعلى خطر قريب المدى أولًا، خاصة عندما تكون المهمة سريعة وغير قابلة للتفويض بالكامل. كما يحافظ على التقدم في طلب المدير عبر استخدام دعم الفريق المتاح بدل التعامل مع المهمتين كأنهما متعارضتان تمامًا.",
+          "prompt_text": "الساعة الآن 10:30 صباحًا. أنت تشرف على فريق صغير. طلب منك مديرك إعداد ملخص من شريحتين بحلول 3:00 مساءً لاجتماع اللجنة التوجيهية الساعة 4:00 مساءً. لديك أيضًا إقرار امتثال إلزامي مستحق اليوم عند الظهر؛ وإذا لم يُقدَّم، فسيفقد اثنان من أعضاء الفريق تلقائيًا صلاحية الوصول إلى النظام غدًا. يستغرق نموذج الامتثال نحو 20 دقيقة ويتطلب موافقتك. يمكن لأحد أعضاء الفريق ذوي الخبرة جمع بيانات الشرائح إذا زودته بمخطط موجز. ما أفضل إجراء تالي؟",
+          "proposed_answer_key": "B",
+          "rationale": "الأولوية الأفضل هي إنجاز مهمة الامتثال أولًا لأنها الأقرب موعدًا ولها أثر تشغيلي مباشر إذا فاتت. إكمالها الآن يستغرق وقتًا قليلًا ويمنع فقدان موظفين اثنين صلاحية الوصول إلى النظام. بعد ذلك، يظل بإمكانك تلبية طلب المدير عبر تكليف زميل بجمع البيانات وإنهاء الشرائح قبل 3:00 مساءً. هذا يوازن بين المخاطر واحتياجات أصحاب المصلحة والاستفادة الفعالة من دعم الفريق.",
+          "section": "Battery-1 prioritization medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Spend the next hour building the slides yourself, then handle compliance before lunch."
+            },
+            {
+              "key": "B",
+              "text": "Complete and submit the compliance task now, then give a teammate an outline to gather slide data while you finish the slides."
+            },
+            {
+              "key": "C",
+              "text": "Tell your manager the steering summary will need to wait until tomorrow so you can focus only on compliance."
+            },
+            {
+              "key": "D",
+              "text": "Ask a team member to submit the compliance task while you start the slides."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "26c4b78f5efa4ab4aa58f9926e5889b4d0e004807db07b4f642c44ed57d59828",
+          "difficulty": "medium",
+          "draft_id": "156da4d9-7dca-4464-836c-d0032601eefb",
+          "draft_revision_id": "955235d5-8f87-4fe8-8e05-9dfa2f0c0bb8",
+          "explanation": "A strong prioritization choice addresses the highest near-term risk first, especially when that task is quick and non-delegable. It also preserves progress on the manager’s request by using available team support rather than treating the tasks as mutually exclusive.",
+          "prompt_text": "It is 10:30 a.m. You supervise a small team. Your manager asks for a two-slide summary by 3:00 p.m. for a 4:00 p.m. steering meeting. You also have a mandatory compliance submission due at noon today; if it is not submitted, two team members automatically lose system access tomorrow. The compliance form takes about 20 minutes and requires your approval. One experienced team member can gather the data for the slides if you provide a brief outline. What is the best next action?",
+          "proposed_answer_key": "B",
+          "rationale": "The best priority is the time-bound compliance task because it has a hard deadline and immediate operational risk. Finishing it now takes little time and prevents avoidable access loss for two employees. After that, you can still support the manager by delegating data gathering and completing the slides before 3:00 p.m. This balances risk, stakeholder needs, and efficient use of help.",
+          "section": "Battery-1 prioritization medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 5,
+      "translation_pair_id": "525440a9-e2b8-40fd-8e5f-c293321f2a54"
+    },
+    {
+      "answer_key": "B",
+      "category": "prioritization",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "أكمل تقريرك قبل التعامل مع أي مقاطعات حتى تحمي موعدك النهائي الشخصي."
+            },
+            {
+              "key": "B",
+              "text": "اقضِ 10 دقائق في تحديد القالب حتى يتمكن المحللان من البدء، ثم حدِّد وقتًا مركزًا لإكمال تقريرك."
+            },
+            {
+              "key": "C",
+              "text": "أبلغ المحللين أن يختارا أي قالب بأنفسهما حتى تتمكن من الحفاظ على وقت التقرير."
+            },
+            {
+              "key": "D",
+              "text": "انضم إلى المحللين طوال اجتماع إعداد الترحيل للتأكد من عدم ظهور مشكلات أخرى."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "b5b0d3346e35faca80228fafb9e2a5365bd96d0eefbeb237c4e8170d8cfdf450",
+          "difficulty": "medium",
+          "draft_id": "7a2b54b8-b92a-4055-af21-d1bc1a19033f",
+          "draft_revision_id": "73bc65d8-e553-48de-b1b6-8d09aae6aac4",
+          "explanation": "تحديد الأولويات الجيد يراعي الأثر الرافِع. فقرار قصير منك يفتح العمل أمام أكثر من شخص ويمنع تأخرًا أوسع، بينما يظل بالإمكان إنجاز تقريرك الفردي ضمن الوقت المتبقي.",
+          "prompt_text": "الساعة الآن 9:00 صباحًا. تقرير الأداء الأسبوعي الخاص بك مستحق لمدير العمليات عند 2:00 ظهرًا، وسيستغرق نحو 90 دقيقة باستخدام البيانات المتاحة لديك بالفعل. وفي الوقت نفسه، لا يستطيع محللان في فريقك بدء عملية ترحيل لعميل لأنهما يحتاجان إلى قرارك بشأن قالب البيانات الذي ينبغي استخدامه. سيستغرق هذا القرار نحو 10 دقائق. وإذا استمر تعطلهم بعد 10:00 صباحًا، فسيتأخر الترحيل يومًا واحدًا وسيتأثر 3 فرق لاحقة. ما أفضل إجراء تتخذه بعد ذلك؟",
+          "proposed_answer_key": "B",
+          "rationale": "ابدأ أولًا بفك تعطل المحللين. قرارك الذي يستغرق 10 دقائق يمنع تأخر ترحيل العميل يومًا كاملًا ويجنب 3 فرق لاحقة آثارًا متسلسلة. كما أن التقرير ما يزال مهمًا، لكن عند 9:00 صباحًا يبقى وقت كافٍ لإنجازه قبل 2:00 ظهرًا بعد اتخاذ القرار. أفضل اختيار يعالج أكبر اعتماد تشغيلي وأوسع أثر، مع الحفاظ على قدرتك على الوفاء بموعدك النهائي.",
+          "section": "Battery-1 prioritization medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Finish your report before taking interruptions so your own deadline is protected."
+            },
+            {
+              "key": "B",
+              "text": "Spend 10 minutes deciding the template so the analysts can start, then schedule focused time to complete your report."
+            },
+            {
+              "key": "C",
+              "text": "Tell the analysts to choose any template themselves so you can protect report time."
+            },
+            {
+              "key": "D",
+              "text": "Join the analysts for the full migration setup meeting to make sure no other issues appear."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "cffa9096867538284fa9822d35c43c496a429499eab71afc63534b544280ebdc",
+          "difficulty": "medium",
+          "draft_id": "2b618a60-b5ec-4a4a-9bc4-2c48ac3e7e20",
+          "draft_revision_id": "29b55319-0f91-4728-b265-5fa470534224",
+          "explanation": "Good prioritization considers leverage. A short decision from you unlocks work for multiple people and prevents a broader delay, whereas your individual report can still be completed within the remaining time.",
+          "prompt_text": "It is 9:00 a.m. Your weekly performance report is due to the operations director at 2:00 p.m. and will take about 90 minutes using data you already have. At the same time, two analysts on your team are blocked from starting a client migration because they need your decision on which data template to use. That decision will take about 10 minutes. If they are still blocked after 10:00 a.m., the migration slips by a day and affects three downstream teams. What is the best next action?",
+          "proposed_answer_key": "B",
+          "rationale": "First unblock the analysts. Your 10-minute decision prevents a one-day delay to the client migration and avoids knock-on effects for three downstream teams. Your report still matters, but at 9:00 a.m. there is enough time left to complete it afterward. The best choice resolves the biggest dependency and widest impact while preserving your ability to meet your own deadline.",
+          "section": "Battery-1 prioritization medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 6,
+      "translation_pair_id": "15724f1b-5aa9-4326-a821-291db6af80d2"
+    },
+    {
+      "answer_key": "C",
+      "category": "prioritization",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "اطلب من زميلك الاتصال بالمشرف بينما تبدأ أنت تقدير العمل الإضافي، لأن عمل المالية يستغرق وقتًا أطول."
+            },
+            {
+              "key": "B",
+              "text": "أنهِ جدول المناوبات أولًا حتى يتوقف ضغط العمليات، ثم عد إلى الموارد البشرية قبل الظهر."
+            },
+            {
+              "key": "C",
+              "text": "اتصل بالمشرف بنفسك الآن، وأرسل قائمة اللجنة المكتملة إلى الموارد البشرية، ثم ابدأ تقدير العمل الإضافي."
+            },
+            {
+              "key": "D",
+              "text": "أرسل إلى الموارد البشرية قائمة غير مكتملة الآن ووعدهم بالاسم الناقص بعد الغداء حتى تحمي وقت المالية."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "29dca6a23d15cea72b7818d20ce238217fa5468d0f476c68bc04f3ddfc948051",
+          "difficulty": "medium",
+          "draft_id": "7c7a143e-3a6b-4b0a-b91f-711d77d04880",
+          "draft_revision_id": "5b9ac5f5-2f98-4cda-af2a-79f21719ca6d",
+          "explanation": "أفضل إجراء أول هو ما لا يستطيع غيرك إنجازه قبل أقرب موعد نهائي عالي الأثر. بعد تأمين متطلب الموارد البشرية، تأتي المالية تاليًا لأن موعدها أسبق من جدول المناوبات.",
+          "prompt_text": "الساعة الآن 11:00 صباحًا. تحتاج الموارد البشرية إلى الأسماء النهائية لأعضاء لجنة المقابلات بحلول الظهر. ما زال تفرّغ أحد المشرفين غير مؤكد؛ ويمكنك وحدك الاتصال به، وعادةً تستغرق المكالمة نحو 10 دقائق. تحتاج المالية إلى تقدير ساعات العمل الإضافي بحلول 3:00 مساءً؛ والأرقام متوفرة لديك ويستغرق إنهاء الملف نحو 40 دقيقة. تحتاج العمليات إلى جدول المناوبات للأسبوع المقبل بحلول 5:00 مساءً؛ ومعظمه جاهز. إذا فات الموارد البشرية موعد الظهر، تتأخر المقابلات يومين وتتغير مواعيد المباشرة المخطط لها. يعرض أحد الزملاء التعامل مع أي مهمة تكلّفه بها. ما أفضل إجراء أول؟",
+          "proposed_answer_key": "C",
+          "rationale": "أنت وحدك من يستطيع حسم تفرّغ المشرف، ولدى الموارد البشرية أقرب موعد نهائي عالي الأثر. إكمال المكالمة وإرسال قائمة اللجنة أولًا يمنع تأخير المقابلات يومين، ثم يترك وقتًا كافيًا بعد الظهر لملف المالية الذي يحتاج نحو 40 دقيقة. التفويض لا يغني عن المكالمة، وإرسال قائمة غير مكتملة لا يُسقط خطر فوات موعد الظهر.",
+          "section": "Battery-1 prioritization medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Ask the teammate to call the supervisor while you start the overtime forecast, since finance work takes longer."
+            },
+            {
+              "key": "B",
+              "text": "Finalize the roster first so Operations stops chasing you, then return to HR before noon."
+            },
+            {
+              "key": "C",
+              "text": "Call the supervisor yourself now, send HR the completed panel list, then start the overtime forecast."
+            },
+            {
+              "key": "D",
+              "text": "Email HR the incomplete panel list now and promise the missing name after lunch so you can protect finance time."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "1ecbbe4778b3e1ddf4bf09257af3a9358834eb976ea7c673f7392c84b42f12d3",
+          "difficulty": "medium",
+          "draft_id": "2728ebb7-8115-479b-8f09-a637a73e29cd",
+          "draft_revision_id": "58b443fb-dfa0-47b8-a947-4721f2be3ae7",
+          "explanation": "The best first action is the one only you can complete before the nearest high-impact deadline. After HR is secured, finance is next because its deadline is earlier than the roster.",
+          "prompt_text": "It is 11:00 a.m. HR needs your final interview panel names by noon. One supervisor’s availability is still unconfirmed; only you can call them, and the call usually takes about 10 minutes. Finance needs your overtime forecast by 3:00 p.m.; you already have the numbers and finalizing the file takes about 40 minutes. Operations needs next week’s roster by 5:00 p.m.; most of it is ready. If HR misses noon, interviews slip two days and planned start dates move. A teammate offers to handle whatever you assign. What is the best first action?",
+          "proposed_answer_key": "C",
+          "rationale": "Only you can resolve the supervisor availability, and HR has the nearest high-impact deadline. Completing that call and sending the panel list first prevents a two-day interview slip, then leaves enough afternoon time for the 40-minute finance file. Delegation cannot substitute for the call, and incomplete HR submission still risks noon failure.",
+          "section": "Battery-1 prioritization medium"
+        }
+      },
+      "monitoring_flag": "revised_after_internal_pilot",
+      "order": 7,
+      "translation_pair_id": "0c2370bd-7370-4674-b133-c3dd58c7cac4"
+    },
+    {
+      "answer_key": "C",
+      "category": "numerical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "9:35"
+            },
+            {
+              "key": "B",
+              "text": "9:40"
+            },
+            {
+              "key": "C",
+              "text": "10:00"
+            },
+            {
+              "key": "D",
+              "text": "10:20"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "187602796053de62cc51f25ea781e30f40d67927882c984fb00fea57308084bc",
+          "difficulty": "medium",
+          "draft_id": "e966eebc-6e7a-4272-bc8a-925cca1631aa",
+          "draft_revision_id": "41951d31-f187-4db7-9987-13d64248ff6a",
+          "explanation": "اجمع مدد المراحل الثلاث، ثم أضف الزمن الكلي المنقضي إلى وقت البدء 8:40.",
+          "prompt_text": "يُرتّب قائد فريق في الفروانية عملية توصيل إلى متجر. يستغرق التحميل 25 دقيقة، وتستغرق القيادة 35 دقيقة، وتستغرق فحوصات البوابة 20 دقيقة. إذا بدأ التحميل عند 8:40، فمتى تصبح الشاحنة جاهزة للتفريغ؟",
+          "proposed_answer_key": "C",
+          "rationale": "يقيس هذا السؤال القدرة على حساب الزمن المنقضي في سيناريو توقيت تسليم يرتبط بمهام قائد فريق.",
+          "section": "Battery-1 numerical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "9:35"
+            },
+            {
+              "key": "B",
+              "text": "9:40"
+            },
+            {
+              "key": "C",
+              "text": "10:00"
+            },
+            {
+              "key": "D",
+              "text": "10:20"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "cbd7ebd60052f74de58e07fd240499c704ec756d62ea1a45fb73d2c883f7bf22",
+          "difficulty": "medium",
+          "draft_id": "fda23bdd-468d-4567-8f8e-a27368321dc3",
+          "draft_revision_id": "8c4a8e33-64a2-4f82-9f03-1eea090943c3",
+          "explanation": "Add all three stages, then add the total elapsed time to 8:40.",
+          "prompt_text": "A team lead in Farwaniya schedules a store delivery. Loading takes 25 minutes, the drive 35 minutes, and gate checks 20 minutes. If loading starts at 8:40, when is the van ready to unload?",
+          "proposed_answer_key": "C",
+          "rationale": "Assesses elapsed-time calculation in a delivery-timing scenario relevant to a team lead.",
+          "section": "Battery-1 numerical_reasoning medium"
+        }
+      },
+      "monitoring_flag": "difficulty_monitoring",
+      "order": 8,
+      "translation_pair_id": "6baa7712-4676-4df8-ba63-7c5926afcaaa"
+    },
+    {
+      "answer_key": "C",
+      "category": "numerical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "9:50 صباحًا"
+            },
+            {
+              "key": "B",
+              "text": "10:00 صباحًا"
+            },
+            {
+              "key": "C",
+              "text": "10:15 صباحًا"
+            },
+            {
+              "key": "D",
+              "text": "10:25 صباحًا"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "759c860f31aafc52b8b3d397b4fbc80ca7d251119772dc2ef6635333f03f7724",
+          "difficulty": "medium",
+          "draft_id": "28cb9bfd-e15a-4925-b5d1-5f27ca300f13",
+          "draft_revision_id": "abb527b7-cf70-4ccf-a99a-ce3129876a75",
+          "explanation": "نجمع جميع أزمنة القيادة والتفريغ مع وقت الانطلاق 8:10 صباحًا: 35 + 15 + 25 + 10 + 40 = 125 دقيقة، أي ساعتان و5 دقائق. وعند إضافة ساعتين و5 دقائق إلى 8:10 صباحًا، يكون وقت الوصول 10:15 صباحًا.",
+          "prompt_text": "يُنسّق قائد فريق في الشويخ 3 عمليات تسليم. تغادر الشاحنة عند 8:10 صباحًا. يستغرق الوصول إلى الموقع 1 مدة 35 دقيقة، ويستغرق التفريغ 15 دقيقة، ثم يستغرق الوصول إلى الموقع 2 مدة 25 دقيقة، ويستغرق التفريغ 10 دقائق، ثم يستغرق الوصول إلى الموقع 3 مدة 40 دقيقة. إذا لم تحدث أي تأخيرات، فمتى تصل الشاحنة إلى الموقع 3؟",
+          "proposed_answer_key": "C",
+          "rationale": "يقيس هذا السؤال القدرة على إجراء حساب زمني متعدد الخطوات في سياق واقعي لتخطيط التسليم لدى مشرف أو قائد فريق.",
+          "section": "Battery-1 numerical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "9:50 a.m."
+            },
+            {
+              "key": "B",
+              "text": "10:00 a.m."
+            },
+            {
+              "key": "C",
+              "text": "10:15 a.m."
+            },
+            {
+              "key": "D",
+              "text": "10:25 a.m."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "13c969871d925905feca1b02c25a5ccec367d228e4b25f78e8723fde41b83359",
+          "difficulty": "medium",
+          "draft_id": "1aaea1bf-1413-4ef9-943d-148424d7266c",
+          "draft_revision_id": "fa9bfe86-52c9-4e6a-b4ac-f92d6b65ca56",
+          "explanation": "Add all travel and unloading times to the 8:10 a.m. departure time: 35 + 15 + 25 + 10 + 40 = 125 minutes = 2 hours 5 minutes. 8:10 a.m. + 2:05 = 10:15 a.m.",
+          "prompt_text": "A team lead in Shuwaikh schedules 3 deliveries. The van leaves at 8:10 a.m. Travel to Site 1 takes 35 minutes, unloading takes 15 minutes, travel to Site 2 takes 25 minutes, unloading takes 10 minutes, and travel to Site 3 takes 40 minutes. If there are no delays, when does the van arrive at Site 3?",
+          "proposed_answer_key": "C",
+          "rationale": "Assesses multi-step time calculation in a realistic delivery-planning context for a supervisor or team lead.",
+          "section": "Battery-1 numerical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 9,
+      "translation_pair_id": "ba494246-bb3c-4921-9838-68df737bb38c"
+    },
+    {
+      "answer_key": "B",
+      "category": "numerical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "KWD 420 فوق الميزانية"
+            },
+            {
+              "key": "B",
+              "text": "KWD 120 فوق الميزانية"
+            },
+            {
+              "key": "C",
+              "text": "KWD 80 فوق الميزانية"
+            },
+            {
+              "key": "D",
+              "text": "KWD 120 أقل من الميزانية"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "da8d2e41a804e59e81b08350d167b39090f3996ccc902a417ef93eaabd5c3528",
+          "difficulty": "medium",
+          "draft_id": "e7812ec6-cbbc-41c7-8268-4364fd92a0f1",
+          "draft_revision_id": "74361c99-f33c-4d6e-9407-c76460f88c02",
+          "explanation": "الإنفاق الصافي هو KWD 5,220 - KWD 300 = KWD 4,920. وبمقارنته بميزانية قدرها KWD 4,800، يكون الانحراف KWD 4,920 - KWD 4,800 = KWD 120 فوق الميزانية.",
+          "prompt_text": "حدّد مشرف في الكويت ميزانية شهرية للمستلزمات قدرها KWD 4,800. بلغ الإنفاق الفعلي KWD 5,220، ثم أصدر المورد لاحقًا رصيدًا دائنًا بقيمة KWD 300. بعد تطبيق هذا الرصيد، ما انحراف الميزانية النهائي؟",
+          "proposed_answer_key": "B",
+          "rationale": "يقيس هذا السؤال القدرة على حساب انحراف الميزانية باستخدام الطرح وتفسير اتجاه الانحراف في سياق واقعي لعمل المشرف.",
+          "section": "Battery-1 numerical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "KWD 420 over budget"
+            },
+            {
+              "key": "B",
+              "text": "KWD 120 over budget"
+            },
+            {
+              "key": "C",
+              "text": "KWD 80 over budget"
+            },
+            {
+              "key": "D",
+              "text": "KWD 120 under budget"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "cd6fef2052d2edaf86bed151c0a31a7238c4756c53c4e92ae00a11f103be82e9",
+          "difficulty": "medium",
+          "draft_id": "c7eb596f-3163-4da8-9a6e-80b2aafc3226",
+          "draft_revision_id": "f3d63054-1e3f-4509-b48a-865219a8413c",
+          "explanation": "Net spending is KWD 5,220 - KWD 300 = KWD 4,920. Compared with the KWD 4,800 budget, the variance is KWD 4,920 - KWD 4,800 = KWD 120 over budget.",
+          "prompt_text": "A supervisor in Kuwait set a monthly supplies budget of KWD 4,800. Actual spending was KWD 5,220, and the supplier later issued a credit of KWD 300. After applying the credit, what is the final budget variance?",
+          "proposed_answer_key": "B",
+          "rationale": "Assesses budget variance calculation using subtraction and sign interpretation in a realistic supervisor context.",
+          "section": "Battery-1 numerical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 10,
+      "translation_pair_id": "dc7ddb27-86d3-4c21-afbd-e7f74e2c521f"
+    },
+    {
+      "answer_key": "B",
+      "category": "logical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "سيدر"
+            },
+            {
+              "key": "B",
+              "text": "ميبل"
+            },
+            {
+              "key": "C",
+              "text": "إما سيدر أو ميبل"
+            },
+            {
+              "key": "D",
+              "text": "لا يمكن التوصل إلى توزيع صالح"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "e1336c3b3fa64cba55b5167674c72f6f13ab78a2901ba247e88691d96b7a3ea2",
+          "difficulty": "medium",
+          "draft_id": "0221002a-8d40-45ef-ba98-afa99c2c2041",
+          "draft_revision_id": "83dbd237-01d4-49c9-9f61-6ec3faf4e6fc",
+          "explanation": "لا يمكن أن تكون مراجعة الميزانية في ميبل، لذا يجب أن تكون في سيدر. وبما أن اجتماعًا واحدًا فقط يستخدم سيدر، فلا بد أن تكون إحاطة العميل في ميبل.",
+          "prompt_text": "تتوفر يوم الجمعة غرفتان: سيدر وميبل. على مشرف أن يوزّع إحاطة العميل ومراجعة الميزانية، بحيث يكون كل اجتماع في غرفة واحدة. القواعد: (1) إذا كانت إحاطة العميل في سيدر، فستكون مراجعة الميزانية في ميبل. (2) لا يمكن أن تكون مراجعة الميزانية في ميبل. (3) يستخدم أحد الاجتماعين فقط غرفة سيدر. أي غرفة يجب أن تستخدمها إحاطة العميل؟",
+          "proposed_answer_key": "B",
+          "rationale": "يقيس هذا السؤال الاستدلال الشرطي والتخصيص المقيّد في سياق جدولة عمل.",
+          "section": "Battery-1 logical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Cedar"
+            },
+            {
+              "key": "B",
+              "text": "Maple"
+            },
+            {
+              "key": "C",
+              "text": "Either Cedar or Maple"
+            },
+            {
+              "key": "D",
+              "text": "No valid assignment is possible"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "ab5f960950492d1b2e9a5738ef6d73856c3a7636b3486d26e0d690b32688791c",
+          "difficulty": "medium",
+          "draft_id": "c73cca51-b71a-41f9-bdeb-51c243423760",
+          "draft_revision_id": "de9ac39c-d89d-40d9-ba9c-ce03b4303faa",
+          "explanation": "Budget review cannot be in Maple, so it must be in Cedar. If exactly one meeting uses Cedar, then the client briefing must be in Maple.",
+          "prompt_text": "Two rooms are available for Friday: Cedar and Maple. A supervisor must place the client briefing and the budget review, one per room. Rules: (1) If the client briefing uses Cedar, the budget review uses Maple. (2) The budget review cannot use Maple. (3) Exactly one of the two meetings uses Cedar. Which room must the client briefing use?",
+          "proposed_answer_key": "B",
+          "rationale": "This item assesses conditional reasoning and constrained assignment in a workplace scheduling context.",
+          "section": "Battery-1 logical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 11,
+      "translation_pair_id": "8f9744e8-e482-442e-9e19-d1e9c3fb8a8d"
+    },
+    {
+      "answer_key": "B",
+      "category": "logical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "الاتصال بالمورّد"
+            },
+            {
+              "key": "B",
+              "text": "إرسال جدول المناوبة"
+            },
+            {
+              "key": "C",
+              "text": "مراجعة العيوب"
+            },
+            {
+              "key": "D",
+              "text": "لا يمكن تحديد ذلك"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "2f568328ae8803f194182abd0c85b7997815492873f1339ffeb77be306228b74",
+          "difficulty": "medium",
+          "draft_id": "13c9e694-017f-4ee7-b1f9-a9cf737735ce",
+          "draft_revision_id": "8242e81d-d869-4b83-a25d-9335ad097c45",
+          "explanation": "تأتي مراجعة العيوب قبل الموافقة على العمل الإضافي، وتأتي الموافقة على العمل الإضافي قبل إرسال جدول المناوبة. كما أن الاتصال بالمورّد يسبق إرسال جدول المناوبة. لذلك يجب أن يكون إرسال جدول المناوبة هو المهمة الأخيرة.",
+          "prompt_text": "يجب على قائد فريق ترتيب أربع مهام اليوم: مراجعة العيوب، والاتصال بالمورّد، والموافقة على العمل الإضافي، وإرسال جدول المناوبة. القواعد: (1) الاتصال بالمورّد قبل إرسال جدول المناوبة. (2) الموافقة على العمل الإضافي بعد مراجعة العيوب. (3) إرسال جدول المناوبة بعد الموافقة على العمل الإضافي. أي مهمة يجب أن تكون أخيرًا؟",
+          "proposed_answer_key": "B",
+          "rationale": "يقيس هذا السؤال منطق الترتيب والاستدلال الانتقالي في سياق واقعي لتسلسل المهام في العمل.",
+          "section": "Battery-1 logical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Call the supplier"
+            },
+            {
+              "key": "B",
+              "text": "Send the shift schedule"
+            },
+            {
+              "key": "C",
+              "text": "Review defects"
+            },
+            {
+              "key": "D",
+              "text": "Cannot be determined"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "588f38c2314faaeb51dbc78c367354888335bfffa9da1dcdb95d72360435bdcf",
+          "difficulty": "medium",
+          "draft_id": "4349494f-73fa-44fd-8c07-8ebe04435595",
+          "draft_revision_id": "9eea4f6b-cb03-4427-945f-b3ec92b644ad",
+          "explanation": "Defect review comes before overtime approval, and overtime approval comes before the shift schedule. The supplier call is also before the shift schedule. Therefore the shift schedule must be last.",
+          "prompt_text": "A team lead must order four tasks today: review defects, call the supplier, approve overtime, and send the shift schedule. Rules: (1) The supplier call is before the shift schedule. (2) Overtime approval is after defect review. (3) The shift schedule is after overtime approval. Which task must be last?",
+          "proposed_answer_key": "B",
+          "rationale": "This item assesses ordering logic and transitive inference in a realistic task-sequencing scenario.",
+          "section": "Battery-1 logical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 12,
+      "translation_pair_id": "36fb39b9-80f0-48e9-ac9e-6235fd5b88a6"
+    },
+    {
+      "answer_key": "C",
+      "category": "logical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "التدقيق"
+            },
+            {
+              "key": "B",
+              "text": "مكالمة العميل"
+            },
+            {
+              "key": "C",
+              "text": "الإحاطة"
+            },
+            {
+              "key": "D",
+              "text": "مراجعة البيانات"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "beb855c4d4c0f250b3bc7593c15407f011a4c16d2c663874ca57d8865e9fd7c8",
+          "difficulty": "medium",
+          "draft_id": "0a469480-3efb-40e6-ad73-491e3d895795",
+          "draft_revision_id": "5603b797-b7e9-4428-a78f-d11608776d5a",
+          "explanation": "يجب أن تأتي الإحاطة بعد مكالمة العميل، ويجب أن تأتي مكالمة العميل بعد مراجعة البيانات. كما يجب أن يأتي التدقيق قبل الإحاطة. لذلك فالإحاطة هي المهمة الوحيدة التي لا بد أن تكون أخيرًا.",
+          "prompt_text": "يجب على قائد فريق توزيع أربع مهام على أربع فترات صباحية: التدقيق، ومكالمة العميل، والإحاطة، ومراجعة البيانات. القواعد: 1) تكون مكالمة العميل بعد مراجعة البيانات. 2) يكون التدقيق قبل الإحاطة. 3) تكون الإحاطة بعد مكالمة العميل. أي مهمة يجب أن تُجدول أخيرًا؟",
+          "proposed_answer_key": "C",
+          "rationale": "يقيس هذا السؤال الاستدلال التسلسلي الاستنباطي، إذ يتطلب من المجيب دمج ثلاث قواعد ترتيبية لتحديد المهمة الوحيدة المفروضة في الموضع الأخير.",
+          "section": "Battery-1 logical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Audit"
+            },
+            {
+              "key": "B",
+              "text": "Client call"
+            },
+            {
+              "key": "C",
+              "text": "Briefing"
+            },
+            {
+              "key": "D",
+              "text": "Data check"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "ac43a0b00be29116a35000676c9be7490d3540fdefe2d63100676df67f8b439e",
+          "difficulty": "medium",
+          "draft_id": "c195745a-956c-4d83-8ff1-bb1713f97fc1",
+          "draft_revision_id": "dbac4321-a258-498d-a2d1-ca4b98591118",
+          "explanation": "Briefing must be after the client call, and the client call must be after the data check. Audit must also be before Briefing. So Briefing is the only task that must come last.",
+          "prompt_text": "A team lead must place four tasks into four morning slots: Audit, Client call, Briefing, and Data check. Rules: 1) The client call is after the data check. 2) The audit is before the briefing. 3) The briefing is after the client call. Which task must be scheduled last?",
+          "proposed_answer_key": "C",
+          "rationale": "Measures deductive sequencing by requiring the test taker to combine three ordering rules and identify the only task forced into the final position.",
+          "section": "Battery-1 logical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 13,
+      "translation_pair_id": "ac007687-cedd-449c-a15d-413377f1ebf6"
+    },
+    {
+      "answer_key": "B",
+      "category": "logical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "عائشة"
+            },
+            {
+              "key": "B",
+              "text": "بلال"
+            },
+            {
+              "key": "C",
+              "text": "كارلا"
+            },
+            {
+              "key": "D",
+              "text": "ديباك"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "d0401090bff54ccb2c49a628c3476a8ca0990e3453799332dcdc8339d0e91a72",
+          "difficulty": "medium",
+          "draft_id": "7b321bf2-ecf3-4d43-994f-009243659ad8",
+          "draft_revision_id": "a79713b7-aa1a-45f6-8f94-c564bbbfde65",
+          "explanation": "تتطلب المهمة الاعتماد على الجهاز، والحضور في الموقع، وعدم وجود تعارض بسبب تدريب موظف جديد. بلال وحده يستوفي الشروط الثلاثة.",
+          "prompt_text": "يجب على مشرف تكليف فني واحد بإصلاح موقعي في اليوم نفسه. القواعد: 1) يجب أن يكون الفني معتمدًا على الجهاز. 2) يجب أن يكون الفني موجودًا في الموقع اليوم. 3) أي شخص يدرّب موظفًا جديدًا اليوم لا يمكنه تولي الإصلاح. عائشة معتمدة وموجودة في الموقع، لكنها تدرّب موظفًا جديدًا. بلال معتمد، وموجود في الموقع، ولا يدرّب أحدًا. كارلا موجودة في الموقع لكنها غير معتمدة. ديباك معتمد لكنه يعمل عن بُعد اليوم. من يمكنه تولي الإصلاح؟",
+          "proposed_answer_key": "B",
+          "rationale": "يقيس هذا السؤال الاستدلال القائم على الانتماء إلى مجموعة من خلال مطالبة الممتحَن بتمرير الخيارات عبر ثلاثة قيود مهنية صريحة وتحديد عضو الفريق الوحيد الذي يستوفيها.",
+          "section": "Battery-1 logical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Aisha"
+            },
+            {
+              "key": "B",
+              "text": "Bilal"
+            },
+            {
+              "key": "C",
+              "text": "Carla"
+            },
+            {
+              "key": "D",
+              "text": "Deepak"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "1178db6f8719768ab562612fc9017f4eb40b33dd510e22621e8ec63f65c2e975",
+          "difficulty": "medium",
+          "draft_id": "5608da66-56c5-48be-a6a0-32d1f49f2b75",
+          "draft_revision_id": "51610264-e56b-455e-bb47-a9bddbaad25a",
+          "explanation": "The role requires certification, on-site presence, and no mentoring conflict. Only Bilal meets all three conditions.",
+          "prompt_text": "A supervisor must assign one technician to a same-day site fix. Rules: 1) The technician must be certified on the device. 2) The technician must be on-site today. 3) Anyone mentoring a new starter today cannot take the fix. Aisha is certified and on-site, but mentoring. Bilal is certified, on-site, and not mentoring. Carla is on-site but not certified. Deepak is certified but remote today. Who can take the fix?",
+          "proposed_answer_key": "B",
+          "rationale": "Measures set-membership reasoning by asking the test taker to filter options through three explicit workplace constraints and identify the only qualifying team member.",
+          "section": "Battery-1 logical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 14,
+      "translation_pair_id": "f58be71f-3d66-4a92-a193-6efd8ce18a1a"
+    },
+    {
+      "answer_key": "A",
+      "category": "verbal_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "مايا تستوفي بالفعل متطلب التدريب لزيارة المستودع الخاصة بها في 8 يوليو."
+            },
+            {
+              "key": "B",
+              "text": "يجب على كل قائد فريق إكمال دورة التحديث مرة أخرى بحلول 30 يونيو، حتى لو كان قد أكملها في مارس."
+            },
+            {
+              "key": "C",
+              "text": "لا يمكن لمايا الإشراف على زيارة 8 يوليو لأن قادة الفرق غير مسموح لهم بالإشراف على زيارات المستودع."
+            },
+            {
+              "key": "D",
+              "text": "يعني الإشعار أن أي موظف لديه مهام في يوليو مُعفى من وجود دورة تحديث سارية مسجلة."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "f72bc68d609220a54c77786600846acbac7e215384ff50d29e7a81fab61b3e9b",
+          "difficulty": "medium",
+          "draft_id": "7db8a65e-c343-4193-9971-d20caa143001",
+          "draft_revision_id": "4f033d74-089e-4eca-ab82-8948ba4419c9",
+          "explanation": "تنص الفقرة على أن قادة الفرق الذين أكملوا دورة التحديث نفسها في مارس يستوفون بالفعل المتطلب الخاص بزيارات يوليو. ومايا قائدة فريق، وقد أكملت الدورة في مارس، وزيارتها تقع في يوليو، لذا فهي تستوفي المتطلب بالفعل.",
+          "prompt_text": "إشعار تدريبي: يجب على جميع المشرفين إكمال دورة التحديث الجديدة للسلامة بحلول 30 يونيو. ويُعد قادة الفرق الذين أكملوا الدورة نفسها في مارس مستوفين لهذا الشرط بالنسبة للزيارات التي تتم في يوليو. وكل من سيشرف على زيارة إلى المستودع بعد 1 يوليو يجب أن تكون لديه دورة تحديث سارية مسجلة قبل الزيارة. مايا قائدة فريق، أكملت الدورة في مارس، ومجدول لها الإشراف على زيارة إلى المستودع في 8 يوليو.\n\nأي استنتاج تدعمه الفقرة بأفضل صورة؟",
+          "proposed_answer_key": "A",
+          "rationale": "يقيس هذا السؤال قدرة القارئ على الجمع بين قاعدة عامة واستثناء محدد ثم تطبيقهما معًا على حالة فردية.",
+          "section": "Battery-1 verbal_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Maya already meets the training requirement for her 8 July warehouse visit."
+            },
+            {
+              "key": "B",
+              "text": "Every team lead must complete the refresher again by 30 June, even if they completed it in March."
+            },
+            {
+              "key": "C",
+              "text": "Maya cannot supervise the 8 July visit because team leads are not allowed to supervise warehouse visits."
+            },
+            {
+              "key": "D",
+              "text": "The notice means any employee with July duties is exempt from having a current refresher on file."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "826940dec8db8155c206129e917dedf01f489ac9ad25963400924fcf024989a3",
+          "difficulty": "medium",
+          "draft_id": "a696b055-7e71-48d3-8d3e-208b1f2e79f5",
+          "draft_revision_id": "0f53659a-6c63-4bc0-b050-dcef78ee7b3f",
+          "explanation": "The notice says March-completing team leads already meet the requirement for July visits. Maya is a team lead, completed the refresher in March, and her visit is in July, so she already meets the requirement.",
+          "prompt_text": "Training notice: All supervisors must complete the new safety refresher by 30 June. Team leads who completed the same refresher in March already meet this requirement for July visits. Anyone supervising a warehouse visit after 1 July must have a current refresher on file before the visit. Maya is a team lead, completed the refresher in March, and is scheduled to supervise a warehouse visit on 8 July.\n\nWhich conclusion is best supported?",
+          "proposed_answer_key": "A",
+          "rationale": "Tests whether the reader can combine a general requirement with a specific exception and apply both to an individual case.",
+          "section": "Battery-1 verbal_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 15,
+      "translation_pair_id": "5452a6ee-81e9-4396-9ac2-fa9f215f5640"
+    },
+    {
+      "answer_key": "A",
+      "category": "verbal_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "إذا تم الإطلاق يوم الجمعة، فقد لا تتأثر بعض حسابات العملاء بالقيد المرتبط بالخلل."
+            },
+            {
+              "key": "B",
+              "text": "إذا تم الإطلاق يوم الجمعة، فسيتعين أيضًا تعطيل الفوترة."
+            },
+            {
+              "key": "C",
+              "text": "لقد قرر الفريق بالفعل تأجيل التحديث الكامل."
+            },
+            {
+              "key": "D",
+              "text": "جميع العملاء يستخدمون التقارير المخصصة، لذا سيتأثر الجميع بإطلاق يوم الجمعة."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "528b6998505f250695f88a805f775a37755949cb1f63330f3aa2e3dde9bb0f61",
+          "difficulty": "medium",
+          "draft_id": "f03b0ec8-2049-4cc6-beb3-d26b4e040000",
+          "draft_revision_id": "383953ed-ab80-425a-85c2-5d94d14e81e1",
+          "explanation": "تدعم الفقرة أن أي قيد عند الإطلاق يوم الجمعة سينطبق على الحسابات التي تستخدم التقارير المخصصة، وليس بالضرورة على جميع العملاء. ولا تذكر الفقرة أن الفوترة يجب تعطيلها، أو أن الفريق حسم بالفعل قرار التأجيل، أو أن جميع العملاء يستخدمون التقارير المخصصة.",
+          "prompt_text": "أبلغ قائد الفريق العملاء بأن تحديثًا للخدمة مُخطط له يوم الجمعة. يوم الخميس، كشف الاختبار عن خلل يؤثر فقط في التقارير المخصصة. ولا تزال التقارير القياسية والفوترة تعملان بصورة طبيعية. ومن غير المؤكد إصلاح الخلل بحلول الجمعة. وطلب القائد من الدعم إعداد إشعار يطرح خيارين: تأجيل التحديث الكامل حتى إصلاح الخلل، أو الإطلاق يوم الجمعة مع تعطيل التقارير المخصصة مؤقتًا للحسابات التي تستخدمها.\n\nأي استنتاج تدعمه الفقرة بأفضل صورة؟",
+          "proposed_answer_key": "A",
+          "rationale": "يقيس هذا السؤال الاستدلال اللفظي من خلال تقييم الاستنتاج الأفضل دعمًا في فقرة قصيرة ضمن سياق العمل. وتتطلب الإجابة الصحيحة الجمع بين حقيقتين مذكورتين صراحة: أن الخلل يؤثر فقط في التقارير المخصصة، وأن الإطلاق يوم الجمعة يمكن أن يتم مع تعطيل التقارير المخصصة فقط للحسابات التي تستخدمها.",
+          "section": "Battery-1 verbal_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "If the Friday release goes ahead, some clients may be unaffected by the bug-related limitation."
+            },
+            {
+              "key": "B",
+              "text": "If the Friday release goes ahead, billing will also need to be disabled."
+            },
+            {
+              "key": "C",
+              "text": "The team has already decided to delay the full update."
+            },
+            {
+              "key": "D",
+              "text": "All clients use custom reports, so all would be affected by a Friday release."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "3dad39efd92bb65fb79d0facece14a63c084f2cbf327a5bc647e7e1af74bcda7",
+          "difficulty": "medium",
+          "draft_id": "68d8f811-5c9d-4d15-827c-1b882bf1bd6c",
+          "draft_revision_id": "1c62d133-d86c-4f31-83da-1048dfecc110",
+          "explanation": "The passage supports that any Friday release limitation would apply to accounts using custom reports, not necessarily to all clients. It does not say billing must be disabled, that the team already chose delay, or that all clients use custom reports.",
+          "prompt_text": "A team lead told clients a service update was planned for Friday. On Thursday, testing found a bug that affects only custom reports. Standard reporting and billing still work normally. Fixing the bug by Friday is uncertain. The lead asks support to prepare a notice offering two options: delay the full update until the bug is fixed, or release on Friday with custom reports temporarily disabled for accounts that use them.\n\nWhich conclusion is best supported?",
+          "proposed_answer_key": "A",
+          "rationale": "This item measures verbal reasoning through evaluation of the best-supported conclusion from a short workplace passage. The correct response requires combining two stated facts: the bug affects only custom reports, and a Friday release could proceed with custom reports disabled only for accounts that use them.",
+          "section": "Battery-1 verbal_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 16,
+      "translation_pair_id": "be21c501-fc7b-426a-8062-f8869a99456c"
+    },
+    {
+      "answer_key": "B",
+      "category": "situational_judgment",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "شحن الطلب في موعده وطلب مراجعة المشكلة من فريق ضمان الجودة لاحقًا إذا ظهرت شكاوى."
+            },
+            {
+              "key": "B",
+              "text": "إيقاف الإفراج عن الدفعة المتأثرة مؤقتًا، وعزل الوحدات المشتبه بها، وإبلاغ ضمان الجودة وخدمة العملاء، والتحقق مما إذا كان المخزون المُتحقَّق منه يمكنه تغطية جزء من الطلب."
+            },
+            {
+              "key": "C",
+              "text": "إيقاف جميع أعمال الإنتاج في المنطقة كلها حتى يعود فريق ضمان الجودة ويعطي توجيهًا كاملًا."
+            },
+            {
+              "key": "D",
+              "text": "تكليف الفريق بالبدء فورًا في إعادة العمل على جميع الوحدات النهائية حتى لا يتأخر الشحن."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "d7819c98230d7172c82ad1acce947611c9af91e7e371babb01f13284e0b04320",
+          "difficulty": "medium",
+          "draft_id": "0d38ba54-f17d-4518-99b4-7416aa1c2c35",
+          "draft_revision_id": "13278ffc-6847-4c22-ab15-15465e0b2aa2",
+          "explanation": "الاستجابة الأفضل تحمي العميل والعمل من خلال احتواء المشكلة المشتبه بها، وإشراك الأطراف المناسبة، والبحث عن طريقة منضبطة لتقليل أثر التأخير في التسليم. فهي تدير متطلبات الجودة والخدمة معًا بدلًا من اختيار السرعة فقط أو الإيقاف الشامل فقط.",
+          "prompt_text": "قبل الموعد النهائي للشحن بقليل، أبلغ أحد أفراد الفريق عن تزايد عيوب في الوحدات النهائية من دفعة إنتاج واحدة. تسأل خدمة العملاء عمّا إذا كان الطلب سيُشحن اليوم، وسيعود فريق ضمان الجودة بعد 20 دقيقة. بصفتك المشرف، ما أفضل خطوة تالية؟",
+          "proposed_answer_key": "B",
+          "rationale": "أفضل استجابة تبدأ باحتواء خطر الجودة فورًا، ثم تُبلغ الجهات المعنية، وتحافظ في الوقت نفسه على خيار تسليم مضبوط عبر فحص مخزون مُتحقَّق منه. هذا يوازن بين أثر الجودة على العميل، وحاجة خدمة العملاء إلى تحديث واضح، وكلفة تعطيل الشحن دون مبرر أو التوسع في الاستجابة قبل تأكيد نطاق المشكلة.",
+          "section": "Battery-1 situational_judgment medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Ship the order on time and ask QA to review the issue afterward if complaints arise."
+            },
+            {
+              "key": "B",
+              "text": "Pause release of the affected run, isolate suspect units, alert QA and customer service, and check whether verified stock can cover part of the order."
+            },
+            {
+              "key": "C",
+              "text": "Stop all production across the area until QA returns and gives full direction."
+            },
+            {
+              "key": "D",
+              "text": "Have the team begin reworking all finished units immediately so shipping is not delayed."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "27a04be5ba939442b6b9bdf64ddb55cbd36c7a3c06f806273f297198ab62753e",
+          "difficulty": "medium",
+          "draft_id": "72996d1d-e26f-4f34-a976-138ffe897963",
+          "draft_revision_id": "4a89fd8e-3de3-47db-82f3-ae0fdb13b9f2",
+          "explanation": "The best response protects customers and the business by containing the suspected issue, engaging the right functions, and exploring a controlled way to reduce delivery impact. It manages both quality and service, instead of choosing only speed or only shutdown.",
+          "prompt_text": "Near the shipping cutoff, a team member reports a defect trend in finished units from one production run. Customer service is asking whether the order will ship today, and QA will return in 20 minutes. As supervisor, what is the best next step?",
+          "proposed_answer_key": "B",
+          "rationale": "B contains quality risk first, informs affected stakeholders, and preserves delivery options through verified stock rather than guessing or overreacting.",
+          "section": "Battery-1 situational_judgment medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 17,
+      "translation_pair_id": "318b53f2-1816-48fc-a128-4d5ff263d870"
+    },
+    {
+      "answer_key": "A",
+      "category": "situational_judgment",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "أوقف شحنات الدفعة المتأثرة، وأكِّد نطاق المشكلة بمراجعة سجلات الجودة والمستودع، وأطلع الإدارة العليا وخدمة العملاء على خطة الاحتواء، ثم أعد توزيع الموظفين حيثما أمكن لحماية الطلب المستحق."
+            },
+            {
+              "key": "B",
+              "text": "أبقِ الشحنات مستمرة لتجنب تفويت طلب اليوم، واطلب من أحد أفراد الفريق مراجعة الملصقات لاحقًا، ثم حدِّث الإدارة بعد الاجتماع المجدول."
+            },
+            {
+              "key": "C",
+              "text": "اتصل بالعميل أولًا لطمأنته، ووعده بإجابة كاملة بنهاية اليوم، ثم انتظر تحقيق الجودة قبل إجراء أي تغيير في العمليات."
+            },
+            {
+              "key": "D",
+              "text": "أوقف جميع الشحنات الخارجة لبقية اليوم، وابدأ فحصًا يدويًا كاملًا قبل إبلاغ أي من أصحاب المصلحة."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "52479871999349ca2ada570f7eca5b95580a231cdc06e076efbe7a91c1a5c115",
+          "difficulty": "medium",
+          "draft_id": "bc227068-b275-4610-be4c-f6a576d6b62f",
+          "draft_revision_id": "be50bbea-3897-4048-8988-09fe618d07f0",
+          "explanation": "أقوى استجابة هي احتواء المشكلة المشتبه بها أولًا، وتحديد الحقائق سريعًا، ومواءمة أصحاب المصلحة قبل إجراء تعديلات تشغيلية أضيق نطاقًا. وهذا يُظهر حسن ترتيب الأولويات تحت ضغوط متنافسة تتعلق بالجودة والتسليم والتواصل.",
+          "prompt_text": "أنت تشرف على خط للتعبئة والتغليف. أبلغ عميل بأن دفعة شُحنت هذا الصباح قد تحمل ملصقات غير صحيحة. فريقك متأخر بالفعل عن طلب كبير مستحق اليوم، وتريد الإدارة العليا تحديثًا خلال 30 دقيقة. ما أفضل خطوة تالية؟",
+          "proposed_answer_key": "A",
+          "rationale": "الخيار A هو الأفضل لأنه يحتوي خطر الجودة الفوري، ويتحقق من نطاقه، ويبلغ أصحاب المصلحة الرئيسيين، مع حماية التسليم حيثما أمكن. وهو يوازن بين أثر العميل واستمرارية التشغيل ومسؤولية التصعيد.",
+          "section": "Battery-1 situational_judgment medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Pause shipments from the affected batch, confirm the scope with quality and warehouse records, brief management and customer service on the containment plan, then reassign staff where possible to protect the due order."
+            },
+            {
+              "key": "B",
+              "text": "Keep shipments moving to avoid missing today’s order, ask one team member to review labels later, and update management after the scheduled meeting."
+            },
+            {
+              "key": "C",
+              "text": "Call the customer first to reassure them, promise a full answer by end of day, and wait for quality to investigate before changing operations."
+            },
+            {
+              "key": "D",
+              "text": "Stop all outbound shipments for the rest of the day and begin a full manual inspection before updating any stakeholders."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "316da5942643623138d47fb8dec7a1abea78d499ccee8615acb7cc383c94b896",
+          "difficulty": "medium",
+          "draft_id": "225a694f-7df5-48a4-8561-b8099f2ff68c",
+          "draft_revision_id": "08dc9d4f-0b9a-44ba-b8e2-0f9414d376d8",
+          "explanation": "The strongest response is to contain the suspected issue first, quickly establish facts, and align stakeholders before making narrower operational adjustments. This shows sound prioritization under competing quality, delivery, and communication pressures.",
+          "prompt_text": "You supervise a packaging line. A customer reports that a batch shipped this morning may have incorrect labels. Your team is already behind on a large order due today, and senior management wants an update in 30 minutes. What is the best next step?",
+          "proposed_answer_key": "A",
+          "rationale": "A is best because it contains immediate quality risk, verifies scope, informs key stakeholders, and still protects delivery where feasible. It balances customer impact, operational continuity, and escalation responsibility.",
+          "section": "Battery-1 situational_judgment medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 18,
+      "translation_pair_id": "d66f662f-ea39-4b34-98ad-5c95d81fdfca"
+    },
+    {
+      "answer_key": "B",
+      "category": "prioritization",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "أبقِ المحلل على التقرير حتى الظهر وراجِع العطل بعد التسليم."
+            },
+            {
+              "key": "B",
+              "text": "انقل المحلل إلى معالجة العطل، وابدأ تحديث أصحاب المصلحة، وحدّث الموعد المتوقع لتسليم التقرير."
+            },
+            {
+              "key": "C",
+              "text": "قسّم وقت المحلل بين فحص العطل وتحرير التقرير."
+            },
+            {
+              "key": "D",
+              "text": "انتظر حتى يحدد مديرك أي المسألتين يجب أن تحظى بالأولوية."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "b3854830e2353739e5d3075e4f98c9843a583d08e179524117d89bf4ee0eb010",
+          "difficulty": "medium",
+          "draft_id": "295e2e8b-ac57-4f1f-81e6-12459b3f68d5",
+          "draft_revision_id": "9f76e99a-ada4-4ae6-a5e7-7d7256f1c52a",
+          "explanation": "يجب أن يتقدّم تعطل كامل يواجهه جميع العملاء على موعد داخلي مخطط له. وأقوى استجابة هي توجيه الخبرة المحدودة إلى استعادة الخدمة فورًا، مع إبلاغ أصحاب المصلحة مباشرة بموعد التقرير المحدّث.",
+          "prompt_text": "في الساعة 10:15 صباحًا، تعطّلت بوابة العملاء لجميع المستخدمين. ويعمل فريقك أيضًا على إنهاء تقرير أداء وُعِد به كبار القادة بحلول الظهر. يمكنك إعادة توجيه محلل أول واحد فقط فورًا. ما أفضل إجراء أول يجب اتخاذه؟",
+          "proposed_answer_key": "B",
+          "rationale": "هذا الخيار يقدّم المشكلة ذات الأثر الفوري الأعلى على العمل والعملاء، مع إدارة الموعد المخطط للتقرير عبر تواصل استباقي. وهو يوازن بين الإلحاح والأثر وتوقعات أصحاب المصلحة، بدل التعامل مع موعد التقرير كما لو كان مساويًا لتعطل خدمة قائم.",
+          "section": "Battery-1 prioritization medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Keep the analyst on the report until noon and review the outage after submission."
+            },
+            {
+              "key": "B",
+              "text": "Move the analyst to the outage, start stakeholder updates, and reset the report ETA."
+            },
+            {
+              "key": "C",
+              "text": "Split the analyst’s time between outage checks and report edits."
+            },
+            {
+              "key": "D",
+              "text": "Wait for your manager to say which issue should take priority."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "c02e5448d52828710e3035b88fd68a7493ade0f819f81a4a18ab389130d05184",
+          "difficulty": "medium",
+          "draft_id": "c4b1536c-8a90-43f4-9a05-4a56df504570",
+          "draft_revision_id": "892f59ef-1479-446f-828d-7def718b103a",
+          "explanation": "A full customer-facing outage should take priority over an internal planned deadline. The strongest response is to shift scarce expertise to restoration and immediately communicate a revised report timing.",
+          "prompt_text": "At 10:15 a.m., the customer portal goes down for all users. Your team is also finishing a performance report promised to senior leaders by noon. You can redirect only one senior analyst immediately. What is the best first action?",
+          "proposed_answer_key": "B",
+          "rationale": "This choice prioritizes the issue with the highest immediate business and customer impact while still managing the planned deadline through proactive communication. It balances urgency, impact, and stakeholder expectations rather than treating the report deadline as equal to an active service failure.",
+          "section": "Battery-1 prioritization medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 19,
+      "translation_pair_id": "b579c58b-519d-4115-a605-1d42f3e2ff52"
+    },
+    {
+      "answer_key": "B",
+      "category": "numerical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "840"
+            },
+            {
+              "key": "B",
+              "text": "750"
+            },
+            {
+              "key": "C",
+              "text": "720"
+            },
+            {
+              "key": "D",
+              "text": "125"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "a57cbb47034dbfc6d8f4fa5dd371170e0bccb0b80897c1083c037dd7a5051e16",
+          "difficulty": "medium",
+          "draft_id": "8137462c-d281-4489-9e38-a83ef96e1dc9",
+          "draft_revision_id": "60bc6ef7-17da-4480-85b3-474beb921cbe",
+          "explanation": "حوِّل مدة الوردية إلى دقائق، ثم اطرح وقت الأعمال غير المخصصة للالتقاط لكل موظف، ثم اقسم على عدد الدقائق لكل صندوق، ثم اضرب في عدد أفراد الفريق.",
+          "prompt_text": "في مستودع بيع بالتجزئة في الكويت، لدى قائد فريق 6 موظفين في وردية مدتها 7 ساعات. يقضي كل موظف 45 دقيقة إجمالًا في فحوص السلامة والاستراحات. يستغرق التقاط صندوق كرتوني واحد 3 دقائق. إذا استُخدم كل الوقت المتبقي في الالتقاط، فكم صندوقًا يمكن للفريق التقاطه خلال الوردية؟",
+          "proposed_answer_key": "B",
+          "rationale": "يقيس هذا السؤال الاستدلال العددي متعدد الخطوات في سياق تخطيط السعة التشغيلية في مكان عمل بالكويت لمشرف أو قائد فريق.",
+          "section": "Battery-1 numerical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "840"
+            },
+            {
+              "key": "B",
+              "text": "750"
+            },
+            {
+              "key": "C",
+              "text": "720"
+            },
+            {
+              "key": "D",
+              "text": "125"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "c92fb179f4f365975e56b92304604b9f777e3605f6f2eec92f925198622cf943",
+          "difficulty": "medium",
+          "draft_id": "5a65b056-c91c-4f18-a1d4-3fbe41039e88",
+          "draft_revision_id": "373462c0-34c5-4596-8381-d50e55cd5f22",
+          "explanation": "Convert shift time to minutes, subtract non-picking time for each worker, divide by minutes per carton, then multiply by team size.",
+          "prompt_text": "At a Kuwait retail warehouse, a team lead has 6 staff on a 7-hour shift. Each staff member spends 45 minutes total on safety checks and breaks. Picking one carton takes 3 minutes. If all remaining time is used for picking, how many cartons can the team pick in the shift?",
+          "proposed_answer_key": "B",
+          "rationale": "Measures multi-step numerical reasoning in a Kuwait workplace capacity-planning scenario for a supervisor or team lead.",
+          "section": "Battery-1 numerical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 20,
+      "translation_pair_id": "647f2d77-14ec-4434-9037-98b03228c939"
+    },
+    {
+      "answer_key": "C",
+      "category": "logical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "إحاطة الموظفين–أطلس؛ مكالمة المورّد–بيرش؛ جلسة التوجيه–سيدار"
+            },
+            {
+              "key": "B",
+              "text": "إحاطة الموظفين–بيرش؛ مكالمة المورّد–سيدار؛ جلسة التوجيه–أطلس"
+            },
+            {
+              "key": "C",
+              "text": "إحاطة الموظفين–سيدار؛ مكالمة المورّد–بيرش؛ جلسة التوجيه–أطلس"
+            },
+            {
+              "key": "D",
+              "text": "إحاطة الموظفين–أطلس؛ مكالمة المورّد–سيدار؛ جلسة التوجيه–بيرش"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "16059a6459ceaba73a94df6e627462b38264406089f5c562359ee9c31954c3d4",
+          "difficulty": "medium",
+          "draft_id": "55a26b8f-3a19-4403-bdfd-b074435e9a55",
+          "draft_revision_id": "c751b510-2bc6-4d75-82c0-6ac09f678625",
+          "explanation": "القاعدة 3 تستبعد أي جدول تكون فيه جلسة التوجيه في سيدار، لذا A غير صحيح. والقاعدة 1 تستبعد أي جدول تكون فيه مكالمة المورّد في سيدار، لذا B وD غير صحيحين. أما C فيُبقي مكالمة المورّد خارج سيدار، ويُبقي جلسة التوجيه خارج سيدار، ولا يفعّل القاعدة 2 لأن إحاطة الموظفين ليست في أطلس.",
+          "prompt_text": "يجب على قائد فريق توزيع ثلاث جلسات—إحاطة الموظفين، ومكالمة مع المورّد، وجلسة توجيه—على الغرف أطلس وبيرش وسيدار، بحيث تكون جلسة واحدة في كل غرفة. القواعد: 1) لا يمكن أن تكون مكالمة المورّد في سيدار. 2) إذا كانت إحاطة الموظفين في أطلس، فيجب أن تكون جلسة التوجيه في سيدار. 3) جلسة التوجيه ليست في سيدار. أي جدول يلتزم بجميع القواعد؟",
+          "proposed_answer_key": "C",
+          "rationale": "يقيس هذا السؤال الاستدلال المنطقي من خلال لغز قصير لجدولة غرف في بيئة عمل، ويتطلب تطبيق منع مباشر، وقاعدة شرطية، ومنعٍ آخر لاختبار كل خيار.",
+          "section": "Battery-1 logical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Staff briefing–Atlas; Vendor call–Birch; Coaching–Cedar"
+            },
+            {
+              "key": "B",
+              "text": "Staff briefing–Birch; Vendor call–Cedar; Coaching–Atlas"
+            },
+            {
+              "key": "C",
+              "text": "Staff briefing–Cedar; Vendor call–Birch; Coaching–Atlas"
+            },
+            {
+              "key": "D",
+              "text": "Staff briefing–Atlas; Vendor call–Cedar; Coaching–Birch"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "a4226310b8b38881d3a0291a9d24524013e003b03ab6c84b850d6c66dd50f171",
+          "difficulty": "medium",
+          "draft_id": "cdb2a47a-1a24-437b-8236-f055f9f1d9a1",
+          "draft_revision_id": "14534b73-9214-4bfc-8dad-0bdb16d3b106",
+          "explanation": "Rule 3 removes any schedule with coaching in Cedar, so A is invalid. Rule 1 removes any schedule with the vendor call in Cedar, so B and D are invalid. C keeps the vendor call out of Cedar, keeps coaching out of Cedar, and does not trigger Rule 2 because the staff briefing is not in Atlas.",
+          "prompt_text": "A team lead must place three sessions—staff briefing, vendor call, and coaching—into rooms Atlas, Birch, and Cedar, one session per room. Rules: 1) The vendor call cannot be in Cedar. 2) If the staff briefing is in Atlas, the coaching session must be in Cedar. 3) The coaching session is not in Cedar. Which schedule follows all the rules?",
+          "proposed_answer_key": "C",
+          "rationale": "This item measures logical reasoning through a short workplace scheduling puzzle that requires applying a direct prohibition, a conditional rule, and a second prohibition to test each option.",
+          "section": "Battery-1 logical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 21,
+      "translation_pair_id": "eec88f28-4120-4187-a99d-63fc5420e4f8"
+    },
+    {
+      "answer_key": "A",
+      "category": "verbal_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "يجب على مايا حضور التدريب، ويجوز لها حضور جلسة يوم الجمعة."
+            },
+            {
+              "key": "B",
+              "text": "يجب على كل قائد فريق حضور التدريب."
+            },
+            {
+              "key": "C",
+              "text": "الموظفون الذين أُصدرت بطاقات دخولهم بعد 1 يونيو مُعفون نهائيًا من التدريب."
+            },
+            {
+              "key": "D",
+              "text": "جلسة يوم الجمعة مخصصة للمشرفين فقط."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "9757b2e8ef8ffd6196bb6bf48c691d50787f0fe120f5ccfbc04ea47ef5f3251a",
+          "difficulty": "medium",
+          "draft_id": "6fdbcd7b-7390-4318-99b3-b9fbfaeb62b5",
+          "draft_revision_id": "0ce62278-45bd-48db-af27-b19f6dfe59aa",
+          "explanation": "ينص الإشعار على أن المشرفين الذين يعتمدون طلبات المخزون يجب عليهم حضور التدريب. كما ينص على أن جلسة يوم الجمعة مخصصة للموظفين الذين أُصدرت بطاقات دخولهم قبل 1 يونيو. وتنطبق الحالتان على مايا: فهي مشرفة تعتمد طلبات المخزون، وقد أُصدرت بطاقتها في أبريل. لذلك فالاستنتاج المدعوم هو أنها مطالبة بحضور التدريب ويجوز لها حضور جلسة يوم الجمعة.",
+          "prompt_text": "إشعار تدريب: تدريب نظام الجرد إلزامي للمشرفين الذين يعتمدون طلبات المخزون. يجوز لقادة الفرق الذين لا يعتمدون الطلبات حضور التدريب، لكنه غير إلزامي لهم. جلسة يوم الجمعة مخصصة للموظفين الذين أُصدرت بطاقات دخولهم قبل 1 يونيو لأن البطاقات الأحدث لم تُرحَّل بعد. مايا مشرفة تعتمد طلبات المخزون، وقد أُصدرت بطاقتها في أبريل. أي استنتاج تدعمه المعلومات على أفضل وجه؟",
+          "proposed_answer_key": "A",
+          "rationale": "يقيس هذا السؤال القدرة على تحديد الاستنتاج الوحيد المدعوم على أفضل وجه من إشعار قصير في بيئة عمل، وذلك بدمج قاعدتين مذكورتين صراحة مع مثال محدد لموظفة.",
+          "section": "Battery-1 verbal_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Maya is required to take the training and may attend Friday’s session."
+            },
+            {
+              "key": "B",
+              "text": "Every team lead must attend the training."
+            },
+            {
+              "key": "C",
+              "text": "Employees with access cards issued after June 1 are permanently excused from the training."
+            },
+            {
+              "key": "D",
+              "text": "Friday’s session is only for supervisors."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "3b32436c834d34c979f21f7f582909581d4c27c6445b4198cd4e37bcf57430f9",
+          "difficulty": "medium",
+          "draft_id": "c7e7eecd-60ef-4490-b873-72137b5a815e",
+          "draft_revision_id": "66ae230d-b52c-4f55-9959-e7b7ae95605b",
+          "explanation": "The notice states that supervisors who approve stock orders must take the training. It also states that Friday’s session is reserved for employees whose cards were issued before June 1. Maya meets both conditions: she is a supervisor who approves stock orders, and her card was issued in April. Therefore, the supported conclusion is that she must take the training and is permitted to attend Friday’s session.",
+          "prompt_text": "Training Notice: Inventory system training is mandatory for supervisors who approve stock orders. Team leads who do not approve orders may attend but are not required. Friday’s session is reserved for employees whose access cards were issued before June 1 because newer cards have not yet been migrated. Maya is a supervisor who approves stock orders, and her card was issued in April. Which conclusion is best supported?",
+          "proposed_answer_key": "A",
+          "rationale": "This item measures the ability to identify the single best-supported conclusion from a short workplace notice by combining two explicit rules with a specific employee example.",
+          "section": "Battery-1 verbal_reasoning medium"
+        }
+      },
+      "monitoring_flag": "ceiling_effect_monitoring",
+      "order": 22,
+      "translation_pair_id": "98feaa1f-44bc-492f-ad56-62d2ab2e0261"
+    },
+    {
+      "answer_key": "B",
+      "category": "situational_judgment",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "وزّع العمل وفق خطة الأمس حتى يبقى الفريق منشغلًا، ثم عدّل لاحقًا إذا أصبحت تفاصيل طلب العميل أوضح."
+            },
+            {
+              "key": "B",
+              "text": "اعقد اجتماعًا سريعًا لمدة 10 دقائق لتأكيد الأولويات والمخاطر والمسؤولين، وتوضيح طلب العميل، ثم وزّع المهام وأطلع المدير على أي أمر يتوقف على جهة أخرى."
+            },
+            {
+              "key": "C",
+              "text": "اطلب من أكثر أعضاء الفريق خبرةً أن يفسّر الملاحظات ويشرحها للآخرين بينما تُعِدّ أنت تحديث المدير."
+            },
+            {
+              "key": "D",
+              "text": "أوقف توزيع المهام وصعّد مسألة التسليم غير المكتمل إلى مشرف الفترة المسائية ومديرك قبل أن يبدأ الفريق العمل."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "1faf6e5a768ba0c32d2eb6ba5aa0203fd251188354fd22e2a4ee36df37792b72",
+          "difficulty": "medium",
+          "draft_id": "6118d0d7-1d75-4624-972e-a779690c19bc",
+          "draft_revision_id": "2052f28b-9ff7-4879-898c-5e8450392de2",
+          "explanation": "أقوى تصرف من المشرف هو تثبيت الأولويات أولًا، ثم تحريك الفريق مع مسؤوليات واضحة وتحديث مناسب لأصحاب المصلحة. والاجتماع السريع والمنظم إجراء متناسب مع المخاطر الناتجة عن تسليم غير مكتمل وطلب عاجل غير واضح.",
+          "prompt_text": "أنت تشرف على فريق الدوام النهاري الذي يتسلّم العمل من فريق الدوام المسائي. ملاحظات التسليم غير مكتملة، وهناك طلب عاجل من عميل ذُكر من دون موعد نهائي واضح، وعضوان من الفريق يسألان عمّا يجب البدء به أولًا. ويتوقع مدير أول تحديثًا عن التقدم خلال ساعة. ما أفضل إجراء أول تتخذه؟",
+          "proposed_answer_key": "B",
+          "rationale": "أفضل استجابة هي عقد اجتماع قصير يكوّن صورة مشتركة قبل بدء التنفيذ. فهذا يحدد الأولويات رغم نقص المعلومات، ويعالج طلب العميل العاجل، ويوزع المسؤوليات بوضوح، ثم يبقي المدير الأول على اطلاع. والمقايضة هي تأخير قصير جدًا، لكنه يقلل خطر توجيه الجهد إلى عمل غير صحيح ويمنع إعادة العمل أو مفاجآت أصحاب المصلحة.",
+          "section": "Battery-1 situational_judgment medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Assign work from yesterday’s plan so the team stays busy, then adjust later if the client request becomes clearer."
+            },
+            {
+              "key": "B",
+              "text": "Hold a 10-minute huddle to confirm priorities, risks, and owners, clarify the client request, then assign tasks and update the manager on any dependency."
+            },
+            {
+              "key": "C",
+              "text": "Ask the most experienced team member to interpret the notes and brief the others while you prepare the manager update."
+            },
+            {
+              "key": "D",
+              "text": "Pause task assignments and escalate the incomplete handover to the evening supervisor and your manager before the team starts."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "4ac6d443fe37a8871cb9192b0c735862a31a503a68e1a83e0ddd24f8a6ea93c4",
+          "difficulty": "medium",
+          "draft_id": "0d109b29-500a-4f95-ade6-316703be5b82",
+          "draft_revision_id": "3dfc5f90-02a5-4ecb-bb84-8e3ceb331366",
+          "explanation": "The strongest supervisor response is to stabilize priorities first, then mobilize the team with clear ownership and a stakeholder update. A short, structured huddle is proportionate to the risk created by an incomplete handover and an unclear urgent request.",
+          "prompt_text": "You supervise a day team taking over from an evening team. The handover notes are incomplete, one urgent client request is mentioned without a clear deadline, and two team members are asking what to start first. A senior manager expects a progress update in an hour. What is the best first action?",
+          "proposed_answer_key": "B",
+          "rationale": "B is best because it creates a quick shared picture before work starts, reducing the risk of acting on incomplete information. It addresses the urgent client request, sets ownership, and keeps the senior manager informed. The trade-off is a short delay, but it prevents larger rework and stakeholder surprises.",
+          "section": "Battery-1 situational_judgment medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 23,
+      "translation_pair_id": "27825c3b-7789-4cd6-80a7-b487b8eecae0"
+    },
+    {
+      "answer_key": "B",
+      "category": "numerical_reasoning",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "366"
+            },
+            {
+              "key": "B",
+              "text": "1098"
+            },
+            {
+              "key": "C",
+              "text": "1314"
+            },
+            {
+              "key": "D",
+              "text": "1464"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "8763121974f8928fbdc4ae85e418c4cd48dff047f42ffc860ca07b6e1db31dbb",
+          "difficulty": "medium",
+          "draft_id": "12325822-666e-4230-b689-3df3ea7acc1b",
+          "draft_revision_id": "59bb3377-ed6f-4197-bf05-6a20ac823740",
+          "explanation": "احسب طاقة كل وردية، ثم اجمع الناتجين، ثم احتفِظ بنسبة 25% لإعادة العمل، وخصّص النسبة المتبقية البالغة 75% للطلبات العادية.",
+          "prompt_text": "في موقع توزيع في الكويت، يخطط قائد فريق لطاقة العمل ليوم واحد. في الوردية الصباحية يوجد 8 عمّال مناولة، وينقل كل واحد 18 صندوقًا في الساعة لمدة 6 ساعات. وفي الوردية المسائية يوجد 6 عمّال، وينقل كل واحد 20 صندوقًا في الساعة لمدة 5 ساعات. إذا كان يجب تخصيص 25% من إجمالي الطاقة اليومية لإعادة العمل العاجلة، فكم صندوقًا يمكن تخصيصه للطلبات العادية؟",
+          "proposed_answer_key": "B",
+          "rationale": "يقيس هذا السؤال الاستدلال العددي في سياق إشرافي/قيادي من خلال طلب حساب طاقة إنتاجية متعددة الخطوات عبر ورديتين، ثم خصم نسبة مئوية من المجموع الكلي.",
+          "section": "Battery-1 numerical_reasoning medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "366"
+            },
+            {
+              "key": "B",
+              "text": "1098"
+            },
+            {
+              "key": "C",
+              "text": "1314"
+            },
+            {
+              "key": "D",
+              "text": "1464"
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "0fc08c74945b1b688cae57759d048149ef4d9cc8910c47d9ae54d59b2ef5a196",
+          "difficulty": "medium",
+          "draft_id": "1a9dd776-e58e-4569-b9c6-de883e7ea5fa",
+          "draft_revision_id": "c9b93126-caf2-42a7-8989-325f1bf2cd00",
+          "explanation": "Calculate both shift capacities, add them, then keep 25% aside for rework and allocate the remaining 75% to regular orders.",
+          "prompt_text": "At a Kuwait distribution site, a team lead plans one day’s shift capacity. The morning shift has 8 handlers, each moving 18 cartons per hour for 6 hours. The evening shift has 6 handlers, each moving 20 cartons per hour for 5 hours. If 25% of the combined daily capacity must be kept for urgent rework, how many cartons can be allocated to regular orders?",
+          "proposed_answer_key": "B",
+          "rationale": "Assesses numerical reasoning in a supervisor/team lead context by requiring multi-step capacity calculation across two shifts and a percentage deduction from the combined total.",
+          "section": "Battery-1 numerical_reasoning medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 24,
+      "translation_pair_id": "30909579-ec0f-4126-8a02-e52018e9d9e1"
+    },
+    {
+      "answer_key": "B",
+      "category": "prioritization",
+      "locales": {
+        "ar": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "أبقِ الفريق على العمل الخاص بالتسليم، وتحقق بنفسك من الانقطاع مرة أخرى عند الظهر حتى يبقى الموعد النهائي محميًا."
+            },
+            {
+              "key": "B",
+              "text": "كلّف فورًا بفرز سريع للانقطاع، وأرسل تحديثًا موجزًا إلى أصحاب المصلحة، ثم أعد تقييم مقدار سعة الفريق المتبقية للتسليم."
+            },
+            {
+              "key": "C",
+              "text": "اطلب من فريق نجاح العملاء التعامل مع الانقطاع بينما يبقى الفريق كله على التسليم لتجنّب تفويت الالتزام تجاه العميل."
+            },
+            {
+              "key": "D",
+              "text": "انقل الفريق كله أولًا إلى مراجعة تفصيلية للانقطاع، ثم قرر ما إذا كان ينبغي تحويل العمل بعيدًا عن التسليم."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "97478d3a06412383e25cbbf5412d38b217dcc8e676342d53978738e6e7b6926e",
+          "difficulty": "medium",
+          "draft_id": "f1925b00-19e2-4f3c-a48c-e0ce7eab4b86",
+          "draft_revision_id": "a63a1c35-bc2f-403b-8cd9-64631cc23ecd",
+          "explanation": "هذا الخيار يوازن على أفضل نحو بين الإلحاح والأثر وإدارة أصحاب المصلحة. فهو يعامل الانقطاع بوصفه الخطر التشغيلي الفوري، ويتواصل بسرعة، ثم يقرر بشأن التسليم المجدول استنادًا إلى معلومات محدثة عن سعة الفريق.",
+          "prompt_text": "في الساعة 9:00 صباحًا، تعرّضت الخدمة التي يديرها فريقك لانقطاع يؤثر في العملاء الحاليين. وبحلول الساعة 3:00 مساءً، على فريقك أيضًا تسليم عمل مخطط للعميل وهو يسير حاليًا وفق الخطة. بصفتك قائد الفريق، ما أفضل إجراء أول تتخذه؟",
+          "proposed_answer_key": "B",
+          "rationale": "أفضل استجابة تبدأ بالمشكلة الأكثر إلحاحًا وتأثيرًا مع الإبقاء على خيارات التسليم. فالانقطاع النشط يضر العملاء الحاليين الآن، لذا لا ينبغي تأجيل فرزه الأولي. كما أن تحديثًا موجزًا لأصحاب المصلحة يقلل الغموض ويُظهر السيطرة. وبعد بدء الفرز، تسمح إعادة تقييم السعة المتبقية بالموازنة بين استعادة الخدمة والموعد المخطط بدل ترك أيٍّ من المسؤوليتين.",
+          "section": "Battery-1 prioritization medium"
+        },
+        "en": {
+          "choices": [
+            {
+              "key": "A",
+              "text": "Keep the team on the deliverable, and personally check the outage again at noon so the deadline is protected."
+            },
+            {
+              "key": "B",
+              "text": "Immediately assign rapid outage triage, send a short stakeholder update, and then reassess how much team capacity remains for the deliverable."
+            },
+            {
+              "key": "C",
+              "text": "Ask Customer Success to handle the outage while the whole team stays on the deliverable to avoid missing the client commitment."
+            },
+            {
+              "key": "D",
+              "text": "Pull the full team into a detailed outage review first, then decide whether to shift work away from the deliverable."
+            }
+          ],
+          "compiled_scoring_json": {
+            "correct": 1.0,
+            "incorrect": 0.0,
+            "max_score": 1.0,
+            "type": "answer_key"
+          },
+          "compiled_scoring_sha256": "88f78700bd1fcd0e7f3177edbf56e267cf0f2b4ad50e4616826b864fe0c9ab01",
+          "content_sha256": "f872f36d1d8bbdf5236af7c74b815b524a97b3780a4070b25f9d37a39ae58878",
+          "difficulty": "medium",
+          "draft_id": "2417bcc1-b6de-4b3d-a782-ebcaa8c0c57f",
+          "draft_revision_id": "e037bfb7-de77-4bc2-b519-bacd8529cc38",
+          "explanation": "Option B best balances urgency, impact, and stakeholder management. It treats the outage as the immediate operational risk, communicates promptly, and then makes an informed decision about the scheduled deliverable with updated capacity information.",
+          "prompt_text": "At 9:00 a.m., your team’s service has an outage affecting active customers. By 3:00 p.m., your team also owes a planned client deliverable that is currently on track. As team lead, what is the best first action?",
+          "proposed_answer_key": "B",
+          "rationale": "The strongest response addresses the highest-impact urgent issue first while preserving delivery options. A live outage affects current customers immediately, so triage cannot wait. Brief stakeholder communication reduces uncertainty and shows control. Reassessing remaining capacity afterward balances service recovery with the planned deadline rather than abandoning either responsibility.",
+          "section": "Battery-1 prioritization medium"
+        }
+      },
+      "monitoring_flag": null,
+      "order": 25,
+      "translation_pair_id": "7bff6732-b36f-4df7-8d71-db9071515969"
+    }
+  ],
+  "manifest_sha256": "035a12a2e35c487d3588f2d3be8952cd3350f30f2b030cdf3d863c5490e39c62",
+  "pack_version": "wathefni_battery1_beta_content_pack_v1",
+  "report_logic_version": "wathefni_report_v1",
+  "scoring_version": "wathefni_gawj_deterministic_v1",
+  "source_battery_key": "wathefni_general_ability_workplace_judgment_v1",
+  "source_environment": "staging"
+}

@@ -1,0 +1,25 @@
+{
+  "resolved": {
+    "mode": "wathefni",
+    "selected_mode": "wathefni",
+    "from_address": "hr@wathefni.ai",
+    "reply_to": "hr@wathefni.ai",
+    "display_name": "Wathefni Evidence",
+    "provider": "postmark",
+    "mailbox_id": null,
+    "activatable": true,
+    "block_reason": null,
+    "purpose": "waveB_final",
+    "branding": {
+      "company_name_en": null,
+      "company_name_ar": null,
+      "logo_url": null
+    },
+    "emergency_fallback_used": false,
+    "intended_mode": null,
+    "intended_from": null,
+    "user_status": null,
+    "hr_notice": null
+  },
+  "branded_non_wathefni": []
+}

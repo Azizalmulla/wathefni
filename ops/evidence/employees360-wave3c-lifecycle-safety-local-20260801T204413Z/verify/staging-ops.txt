@@ -1,0 +1,7 @@
+28b316833a4d9fbb3e96f0e7375d3c925b1e5602b9608334064108b3abef040a  employee_lifecycle_wave3c.py
+b3548984055180b12f1197234708c22c0a545a58b3b1e87cc624f841ea92b6f7  lifecycle-effective-worker.py
+enabled
+active
+ls: cannot access '/opt/wathefni/orchestrator/employee_lifecycle_wave3c.py': No such file or directory
+prod_lifecycle_3c_absent_ok
+WATHEFNI_CANONICAL_LIFECYCLE=true

@@ -1,0 +1,8 @@
+PAYROLL_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW1', 'PYW1-SYNTH|')
+prefixes ('965539',)
+honesty {'payment_processing': 'disabled', 'money_authority': False, 'synthetic_only': True, 'annual_leave_eligibility_months': 6}
+flags_ok_synthetic=true

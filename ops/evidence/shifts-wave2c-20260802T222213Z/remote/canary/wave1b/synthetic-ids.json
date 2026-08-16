@@ -1,0 +1,35 @@
+{
+  "tag": "c7457cd4",
+  "marker": "SHW1B",
+  "phones": {
+    "a": "965529745740",
+    "b": "965529457409"
+  },
+  "employee_keys": {
+    "a": "WATHEFNI-SHW1B-c7457cd4",
+    "b": "WATHEFNI-SHW1B-B-c7457cd4"
+  },
+  "shift_ids": [
+    "12b9ec0e-b893-4976-885d-21468805d569",
+    "394baf3b-ea10-458f-a9c9-e3b530f96562",
+    "50057fff-d8fd-4c29-94f8-ebb55e3f802c",
+    "1bc1bcd7-7c9e-4692-8eaf-770b216cbae8",
+    "eea0397f-c82a-4aa8-a5db-786fa6799e1c",
+    "a679c9c0-ee50-4387-ba50-df26e702fb64",
+    "cd0cc086-040f-4da8-8347-7a17eff1eb8d",
+    "3b099fc2-bee3-4dc7-800b-6a38cf88226f"
+  ],
+  "swap_ids": [
+    "f96e0528-668b-4539-8079-9e0b980aa8d7",
+    "18fbaf68-38f7-4de3-9c5f-bf6029ffe01c"
+  ],
+  "leave_ids": [
+    "b701b9e2-2920-4c9f-a574-6a37d0ff3481"
+  ],
+  "quarantine_ids": [],
+  "orphan_shift_ids": [
+    "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+    "6a84a671-eb7f-43ea-870e-af859a440467",
+    "f9ebecf3-8838-456a-8124-c34c3c7600ca"
+  ]
+}

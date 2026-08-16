@@ -1,0 +1,124 @@
+[
+  {
+    "pageId": "jobs",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=jobs",
+    "hasOpen": true,
+    "hasDraft": true,
+    "hasPaused": true,
+    "loading": false,
+    "chips": [],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "jobs",
+    "locale": "ar",
+    "vp": "desktop",
+    "page": "?page=jobs",
+    "hasOpen": true,
+    "hasDraft": true,
+    "hasPaused": true,
+    "loading": false,
+    "chips": [],
+    "dir": "rtl"
+  },
+  {
+    "pageId": "candidates",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=candidates",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "calendar",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=calendar",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "assessments",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=assessments&assessment_cohort=assessment_ready_to_send&overview_cohort=assessment_ready_to_send&cohort_key=assessment_ready_to_send&tab=send",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "ranking",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=ranking",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "reports",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=reports",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "ai",
+    "locale": "en",
+    "vp": "desktop",
+    "page": "?page=ai",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [
+      "What should I work on today?",
+      "Create or update a job opening",
+      "Review candidates",
+      "Who needs an interview scheduled?",
+      "What's on the hiring calendar?",
+      "Who needs an assessment?"
+    ],
+    "dir": "ltr"
+  },
+  {
+    "pageId": "ai",
+    "locale": "ar",
+    "vp": "mobile",
+    "page": "?page=ai",
+    "hasOpen": false,
+    "hasDraft": false,
+    "hasPaused": false,
+    "loading": false,
+    "chips": [
+      "بماذا أبدأ اليوم؟",
+      "إنشاء أو تحديث وظيفة",
+      "مراجعة المرشحين",
+      "من يحتاج جدولة مقابلة؟",
+      "ماذا في تقويم التوظيف؟",
+      "من يحتاج تقييمًا؟"
+    ],
+    "dir": "rtl"
+  }
+]

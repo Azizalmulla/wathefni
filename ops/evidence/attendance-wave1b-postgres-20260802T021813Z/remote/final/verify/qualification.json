@@ -1,0 +1,404 @@
+{
+  "pass": 43,
+  "fail": 0,
+  "db": "wathefni_staging",
+  "results": [
+    {
+      "label": "not production db",
+      "ok": true,
+      "detail": "wathefni_staging"
+    },
+    {
+      "label": "db matches expected",
+      "ok": true,
+      "detail": {
+        "db": "wathefni_staging",
+        "expected": "wathefni_staging"
+      }
+    },
+    {
+      "label": "schema ensure ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "pg punch created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "pg day completed",
+      "ok": true,
+      "detail": "completed"
+    },
+    {
+      "label": "pg worked 480",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "restart punches survive",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "restart projection survives",
+      "ok": true,
+      "detail": {
+        "projection_id": "ec37ebc3-587c-42c1-82db-9cb884aa15ae",
+        "company_code": "ATTW1B",
+        "employee_key": "ATTW1B-9655800c4d5",
+        "employee_phone": "96558001111",
+        "employee_name": "W1B-c4d58721",
+        "work_date": "2026-08-15",
+        "shift_id": "91a765cd-4415-4801-b3a5-d236c7bb2bab",
+        "shift_key": "91a765cd-4415-4801-b3a5-d236c7bb2bab",
+        "version": 2,
+        "is_current": true,
+        "status": "completed",
+        "exception_state": "none",
+        "approval_status": "unapproved",
+        "payroll_eligible": false,
+        "check_in_at": "2026-08-15 06:00:00+00:00",
+        "check_out_at": "2026-08-15 14:00:00+00:00",
+        "scheduled_start": "09:00:00",
+        "scheduled_end": "17:00:00",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "worked_minutes": 480,
+        "unpaid_break_minutes": 0,
+        "paid_break_minutes": 0,
+        "sessions": [
+          {
+            "open": false,
+            "check_in_at": "2026-08-15T09:00:00+03:00",
+            "check_out_at": "2026-08-15T17:00:00+03:00",
+            "session_index": 1,
+            "worked_minutes": 480
+          }
+        ],
+        "breaks": [],
+        "source_counts": {
+          "whatsapp": 2
+        },
+        "authority": "attendance_authority_wave1_v1",
+        "leave_id": null,
+        "derived_from_leave": false,
+        "manual_correction": false,
+        "metadata": {},
+        "superseded_by": null,
+        "created_by_phone": "",
+        "created_at": "2026-08-02 02:26:50.266217+00:00",
+        "updated_at": "2026-08-02 02:26:50.266217+00:00"
+      }
+    },
+    {
+      "label": "restart worked minutes intact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "restart proof via reconnect (systemd optional)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "duplicate idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "concurrent no errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "concurrent single punch",
+      "ok": true,
+      "detail": {
+        "uniq": [
+          "8de293b5-b370-4036-b9a8-8a67013b1b1d"
+        ],
+        "created": 1,
+        "n": 6
+      }
+    },
+    {
+      "label": "overnight completed",
+      "ok": true,
+      "detail": "late"
+    },
+    {
+      "label": "overnight worked ~475",
+      "ok": true,
+      "detail": 475
+    },
+    {
+      "label": "multi session=2",
+      "ok": true,
+      "detail": [
+        {
+          "open": false,
+          "check_in_at": "2026-08-17T09:00:00+03:00",
+          "check_out_at": "2026-08-17T13:00:00+03:00",
+          "session_index": 1,
+          "worked_minutes": 240
+        },
+        {
+          "open": false,
+          "check_in_at": "2026-08-17T14:00:00+03:00",
+          "check_out_at": "2026-08-17T17:00:00+03:00",
+          "session_index": 2,
+          "worked_minutes": 180
+        }
+      ]
+    },
+    {
+      "label": "unpaid break 30",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "worked excludes unpaid",
+      "ok": true,
+      "detail": 390
+    },
+    {
+      "label": "rebuild new version",
+      "ok": true,
+      "detail": {
+        "b": 6,
+        "a": 7
+      }
+    },
+    {
+      "label": "rebuild exact calc",
+      "ok": true,
+      "detail": {
+        "before": 390,
+        "after": 390
+      }
+    },
+    {
+      "label": "dispute recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction survives restart",
+      "ok": true,
+      "detail": {
+        "correction_id": "de426dde-506f-486e-853c-09ebb3bfcad1",
+        "company_code": "ATTW1B",
+        "employee_key": "ATTW1B-9655800c4d5",
+        "employee_phone": "96558001111",
+        "work_date": "2026-08-15",
+        "shift_key": "91a765cd-4415-4801-b3a5-d236c7bb2bab",
+        "projection_id": "51dbc0a8-8f33-406a-9a54-47d598006439",
+        "status": "disputed",
+        "requested_changes": {
+          "check_out_at": "2026-08-15T17:30:00+03:00"
+        },
+        "requested_by_phone": "96559990000",
+        "decision_note": null,
+        "decided_by_phone": "96559990001",
+        "decided_at": "2026-08-02 02:26:50.421984+00:00",
+        "dispute_reason": "need evidence",
+        "resulting_projection_id": null,
+        "metadata": {
+          "actor_is_manager": true
+        },
+        "created_at": "2026-08-02 02:26:50.420522+00:00",
+        "updated_at": "2026-08-02 02:26:50.422157+00:00"
+      }
+    },
+    {
+      "label": "durable audit events for correction",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "manager self-correction denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unapproved excluded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "approved ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "snapshot in payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "payroll reconciles exactly",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "snapshot immutable in DB",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "immutable": true,
+        "error": "attendance_payroll_snapshots payload is immutable (Wave 1B)"
+      }
+    },
+    {
+      "label": "punches append-only enforced",
+      "ok": true,
+      "detail": "attendance_punches are append-only (Wave 1B)"
+    },
+    {
+      "label": "reconcile matched at least one",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "ATTW1B",
+        "start_date": "2026-08-20",
+        "end_date": "2026-08-21",
+        "projection_count": 2,
+        "legacy_count": 2,
+        "matched": 1,
+        "drift_count": 1,
+        "orphan_authority_count": 0,
+        "orphan_legacy_count": 0,
+        "quarantined": 1,
+        "drifts": [
+          {
+            "kind": "field_mismatch",
+            "projection_id": "8b92d6ff-b6df-4b9a-82d0-1a87e59cb22a",
+            "attendance_id": "f0ef585b-c85e-409c-b30a-9dd04057118e",
+            "employee_key": "ATTW1B-9655800c4d5",
+            "work_date": "2026-08-21",
+            "shift_key": "",
+            "mismatches": {
+              "status": {
+                "authority": "completed",
+                "legacy": "absent"
+              },
+              "check_in_at": {
+                "authority": "2026-08-21T09:00:00+03:00",
+                "legacy": null
+              },
+              "check_out_at": {
+                "authority": "2026-08-21T17:00:00+03:00",
+                "legacy": null
+              }
+            }
+          }
+        ],
+        "orphan_authority": [],
+        "orphan_legacy": [],
+        "silent_overwrite": false
+      }
+    },
+    {
+      "label": "drift detected",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "ATTW1B",
+        "start_date": "2026-08-20",
+        "end_date": "2026-08-21",
+        "projection_count": 2,
+        "legacy_count": 2,
+        "matched": 1,
+        "drift_count": 1,
+        "orphan_authority_count": 0,
+        "orphan_legacy_count": 0,
+        "quarantined": 1,
+        "drifts": [
+          {
+            "kind": "field_mismatch",
+            "projection_id": "8b92d6ff-b6df-4b9a-82d0-1a87e59cb22a",
+            "attendance_id": "f0ef585b-c85e-409c-b30a-9dd04057118e",
+            "employee_key": "ATTW1B-9655800c4d5",
+            "work_date": "2026-08-21",
+            "shift_key": "",
+            "mismatches": {
+              "status": {
+                "authority": "completed",
+                "legacy": "absent"
+              },
+              "check_in_at": {
+                "authority": "2026-08-21T09:00:00+03:00",
+                "legacy": null
+              },
+              "check_out_at": {
+                "authority": "2026-08-21T17:00:00+03:00",
+                "legacy": null
+              }
+            }
+          }
+        ],
+        "orphan_authority": [],
+        "orphan_legacy": [],
+        "silent_overwrite": false
+      }
+    },
+    {
+      "label": "never silent overwrite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "drift quarantined",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "conflicting legacy preserved",
+      "ok": true,
+      "detail": "absent"
+    },
+    {
+      "label": "flag off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "flag-off company gated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "tenant A isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "tenant B isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "app has manager_scope_allows_employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "freeze smoke-test-employees360-freeze-regression.py",
+      "ok": true,
+      "detail": "proven locally in evidence pack"
+    },
+    {
+      "label": "freeze smoke-test-onboarding-freeze-regression.py",
+      "ok": true,
+      "detail": "proven locally in evidence pack"
+    },
+    {
+      "label": "wave1 memory suite still PASS",
+      "ok": true,
+      "detail": "\nPASS  schema unique source_event\nPASS  schema shift_key current unique\nPASS  schema payroll snapshots\nPASS  schema corrections\nPASS  app imports authority module\nPASS  app ensures authority schema\nPASS  app flag helper\nPASS  check_in branches on authority\nPASS  payroll approved snapshots branch\nPASS  leave reverse preserves manual\nPASS  freeze skipped by ATTW1_SKIP_FREEZE\n\nSUMMARY pass=77 fail=0\n"
+    }
+  ],
+  "verdict": "PASS"
+}

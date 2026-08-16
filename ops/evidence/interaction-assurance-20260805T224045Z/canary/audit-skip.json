@@ -1,0 +1,3 @@
+{
+  "error": "relation \"admin_audit_events\" does not exist\nLINE 2:                         INSERT INTO admin_audit_events (\n                                            ^\n"
+}

@@ -1,0 +1,38 @@
+/opt/wathefni/dashboard-dist/assets/PostHire-CD44rHfT.js
+assets/dashboard-Dlbt9KQX.js
+assets/rolldown-runtime-ciTZEWaI.js
+assets/src-D-_AGQ9c.js
+assets/lucide-DXG-lAS2.js
+assets/react-query-C-0RpxWl.js
+PASS received maps to processing
+PASS accepted complete
+PASS processing not complete
+PASS replacement not complete
+PASS bank responsible employee
+PASS bank no upload action
+PASS doc upload action
+PASS processing has preview
+PASS processing no upload
+PASS processing group reviewed
+PASS replacement has resubmit
+PASS replacement your actions
+PASS hr item not employee visible
+PASS dormant optional hidden
+PASS optional with evidence visible
+PASS optional with due_date alone still hidden
+PASS optional assigned visible
+PASS offer with evidence visible
+PASS bank always visible
+PASS hr main hides dormant optional
+PASS hr available tasks has dormant
+PASS hr main shows required pending
+PASS hr projection has available_tasks
+PASS hr projection hides dormant from items
+PASS hr actions include mark_complete
+PASS flag on for aziz
+PASS flag off for unknown
+PASS upload allowed pending
+PASS upload allowed replacement
+PASS upload blocked processing
+PASS upload blocked accepted
+OK wave2a local smoke

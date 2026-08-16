@@ -1,0 +1,4 @@
+wave4 1.0.0
+connected_db wathefni_staging
+wave4_tables ['payroll_account_mappings', 'payroll_bank_export_drafts', 'payroll_close_dual_control', 'payroll_close_run_events', 'payroll_close_runs', 'payroll_finance_exports', 'payroll_journal_drafts', 'payroll_journal_lines']
+MIGRATE_OK payroll_close_export_wave4

@@ -1,0 +1,80 @@
+    PRODUCTION READINESS R5E — learning surface (staging DB)
+    tenant: R5E1A22DE
+      PASS  sync catalog entitlement
+      PASS  performance optional
+      PASS  talent optional
+      PASS  JA optional
+      PASS  learning enableable
+      PASS  workspace ready without optional modules
+      PASS  performance off
+      PASS  talent off
+      PASS  catalog item created
+      PASS  assignment created
+      PASS  assigned is not completed
+      PASS  overdue is not failure
+      PASS  employee sees assignment
+      PASS  web assignment converges
+      PASS  assignment ≠ enrollment on row
+      PASS  request created
+      PASS  rejection requires reason
+      PASS  approved request
+      PASS  approval is not completion
+      PASS  request ≠ approval ≠ enrollment
+      PASS  session created
+      PASS  enrolled
+      PASS  capacity is server-authoritative
+      PASS  attendance recorded
+      PASS  attendance ≠ completion
+      PASS  completion evidence-backed
+      PASS  completion ≠ competency
+      PASS  completion ≠ certification
+      PASS  employee mandatory self-complete forbidden
+      PASS  HR completion for cert
+      PASS  cert issued
+      PASS  expiry approaching is derived
+      PASS  renewal issued
+      PASS  prior certificate remains historical
+      PASS  expiry does not erase history
+      PASS  mandatory policy
+      PASS  mandatory first generate
+      PASS  mandatory replay idempotent
+      PASS  fulfillment link
+      PASS  did not silently close C3
+      PASS  C3 remains authority
+      PASS  C3 row unchanged or absent
+      PASS  history has completions
+      PASS  history has certificates
+      PASS  later policy does not rewrite history
+      PASS  manager empty scope fail-closed
+      PASS  manager not company-wide
+      PASS  no auto hipo in context
+      PASS  no learning talent score
+      PASS  learning HTTP routes registered
+      PASS  unauthenticated dashboard not public
+      PASS  unauthenticated employee not public
+      PASS  HR workspace HTTP
+      PASS  HR lists catalog
+      PASS  HR lists assignments
+      PASS  Web assignment present
+      PASS  tenant isolation empty or self-only
+      PASS  tenant isolation no foreign assignments
+      PASS  manager empty scope fail-closed
+      PASS  manager cannot catalog-author
+      PASS  HR without manage denied catalog write
+      PASS  employee sees own workspace
+      PASS  employee no HR admin
+      PASS  employee sees assignment
+      PASS  employee IDOR stays self
+      PASS  employee IDOR does not return other key
+      PASS  employee cannot enumerate another history
+      PASS  employee mandatory/self complete fail-closed or not-found
+      PASS  history retained after disable
+      PASS  new work blocked when disabled
+      PASS  disabled workspace unavailable
+      PASS  disabled counts are not fake zeros
+      PASS  company_modules learning off
+      PASS  notifications suppressed when module off
+
+    74 passed, 0 failed
+R5E_LEARNING_SURFACE_DB_PASS
+STAGING_RC=0

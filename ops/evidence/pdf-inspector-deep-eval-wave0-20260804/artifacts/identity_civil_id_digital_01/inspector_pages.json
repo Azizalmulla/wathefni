@@ -1,0 +1,14 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "CIVIL ID CARD — SYNTHETIC بطاقة المدنية\n\nName: Yousef Al-Ahmad Civil ID: 290123456789 Nationality: Kuwaiti Expiry: 2030-01-15\n",
+      "markdown_len": 126
+    }
+  ]
+}

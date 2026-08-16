@@ -36,14 +36,14 @@ export function SearchInput({
   const inputRef = useRef<HTMLInputElement>(null)
   return (
     <div className={cn('relative w-full max-w-xs', className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle/70" />
+      <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle/70" />
       <input
         ref={inputRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel || placeholder}
-        className="h-10 w-full rounded-full border border-line/60 bg-white/70 pl-9 pr-9 text-[13px] text-text outline-none transition focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
+        className="h-10 w-full rounded-full border border-line/60 bg-white/70 ps-9 pe-9 text-[13px] text-text outline-none transition focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
       />
       {value ? (
         <button
@@ -53,7 +53,7 @@ export function SearchInput({
             onChange('')
             inputRef.current?.focus()
           }}
-          className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-subtle/70 transition hover:bg-black/5 hover:text-text"
+          className="absolute end-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-subtle/70 transition hover:bg-black/5 hover:text-text"
         >
           <X className="h-3.5 w-3.5" />
         </button>

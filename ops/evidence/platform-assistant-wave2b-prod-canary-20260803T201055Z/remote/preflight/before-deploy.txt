@@ -1,0 +1,16 @@
+stamp=20260803T201055Z
+time_utc=2026-08-03T20:11:48Z
+active
+=== SHAs before ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+a644681eb02527904f53f9dc23a67bee33bef72340f07aea03882133b0264ddd  /opt/wathefni/orchestrator/action_registry.py
+2144878c3bd1c5f75b1ee5cc560883937cc9239997810072eb9345a0be46dafe  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+ls: cannot access '/opt/wathefni/orchestrator/platform_assistant_wave2_safe_ops_reads.py': No such file or directory
+-rw-r--r-- 1 root root 41500 Aug  3 19:44 /opt/wathefni/orchestrator/platform_assistant_spine_wave1.py
+=== flags before ===
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI

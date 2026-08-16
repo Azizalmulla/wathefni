@@ -1,0 +1,57 @@
+<stdin>:63: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+PRIORITY_SECTIONS [{"type": "prehire_priorities", "total": 11, "items": [{"type": "prehire_follow_up", "summary": "2 candidates need follow-up", "destination": "/candidates", "status": "follow_up_needed"}, {"type": "prehire_ready_for_review", "summary": "7 candidates ready for review", "destination": "/candidates", "status": "ready_for_review"}, {"type": "prehire_assessment_pending", "summary": "2 candidates awaiting assessment", "destination": "/candidates", "status": "assessment_pending"}, {"type": "prehire_role_priority", "summary": "HR: 2 candidates need follow-up; 1 ready for review; 2 with assessment attention; oldest ready ~161h", "destination": "/candidates", "status": "role_priority"}]}, {"type": "candidate_decisions", "total": 0, "items": []}]
+CANDS_UNSCOPED {"ok": true, "total": 0, "ranking_unavailable": true, "requires_position": true, "ranking_error": "job_required", "message": "Ranking requires an exact job/position"}
+CANDS_HR 3 2 False
+INTERVIEWS_COUNT 4 4
+IV {"id": "369997d8-0ea5-429a-b5b5-40db0634c632", "name": "Hamad Almulla", "status": "completed", "scheduled_at": null, "actions": ["read", "write"], "destination": "/interviews/369997d8-0ea5-429a-b5b5-40db0634c632", "notes_status": "notes_present", "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL"}
+IV {"id": "669366ae-ee04-49c1-aca7-c1a9550ee405", "name": "Hamad Almulla", "status": "completed", "scheduled_at": null, "actions": ["read", "write"], "destination": "/interviews/669366ae-ee04-49c1-aca7-c1a9550ee405", "notes_status": "complete", "app_key": "96597485758-WATHEFNI-HR"}
+IV {"id": "06e4a65d-1a03-4dc9-9ad7-eba1c80717f9", "name": "Hamad Almulla", "status": "cancelled", "scheduled_at": null, "actions": ["read", "write"], "destination": "/interviews/06e4a65d-1a03-4dc9-9ad7-eba1c80717f9", "notes_status": "pending", "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL"}
+IV {"id": "8552e251-0cac-4a7a-9f8b-9ffbf351e2d1", "name": "Hamad Almulla", "status": "cancelled", "scheduled_at": null, "actions": ["read", "write"], "destination": "/interviews/8552e251-0cac-4a7a-9f8b-9ffbf351e2d1", "notes_status": "pending", "app_key": "96597485758-WATHEFNI-HR"}
+POSITIONS_OPEN 9 ['OCCTST_044035', 'J2P2_PROD_TEST', 'IT_MANAGER', 'ACCOUNTING', 'FULLSTACK_DEVELOPER', 'HR', 'IT_MAINTENANCE', 'MARKETING_SPECIALIST']
+DETAIL_KEYS ['ai_advisory', 'ai_summary', 'allowed_actions', 'app_key', 'application_stage', 'application_stage_label', 'candidate', 'candidate_confirmation', 'communication', 'communication_status', 'destination', 'feedback_status', 'interview_id', 'interview_type', 'invitation_status', 'meeting', 'next_human_action', 'notes', 'notes_available', 'notes_status', 'position', 'scheduled_end', 'scheduled_start', 'status', 'timezone', 'updated_at']
+NOTES_REQ_FIELDS ['notes', 'transcript', 'status', 'generate_summary', 'expected_updated_at', 'expected_version']
+NOTES_FN_HAS_EXPECTED True
+NOTES_FN_SNIP @app.post("/dashboard/prehire/interviews/{interview_id}/notes")
+def dashboard_prehire_interview_notes(
+    interview_id: str,
+    request: DashboardInterviewNotesRequest,
+    context: dict[str, Any] = Depends(prehire_dashboard_context),
+):
+    company = context["company_code"]
+    require_interview_record(context, interview_id, "interview.manage")
+    import interview_service as _interview_service
+    import interview_lifecycle as _il
+
+    actor = {
+        "actor_user_id": str(context.get("actor_user_id") or (context.get("hr_user") or {}).get("user_id") or "") or None,
+        "actor_phone": digits(context.get("hr_phone")) or digits((context.get("hr_user") or {}).get("phone")),
+        "actor_role": str(context.get("actor_role") or ((context.get("access") or {}).get("role") if isinstance(context.get("access"), dict) else "") or ""),
+        "actor_type": "human",
+    }
+    try:
+        result = _interview_service.save_notes_only(
+            company_code=company,
+            interview_id=interview_id,
+            notes=str(request.notes or ""),
+            transcript=str(request.transcript or ""),
+            status=request.status,
+            generate_summary=bool(request.generate_summary),
+            actor=actor,
+            expected_updated_at=str(request.expected_updated_at or "") or None,
+            expected_version=request.expected_version,
+        )
+    except _il.InterviewAuthorityError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.as_detail()) from exc
+    reply = "Interview notes saved. AI summary is advisory. Human feedback remains separate from free-text notes."
+    result_payload = {
+        "interview": result.get("interview"),
+        "action": {"type": "interview_notes", "target": interview_id},
+        "company_code": company,
+        "requested_by": context.get("hr_user"),
+        "source": "dashboard",
+        "human_feedback_complete": False,
+        "ranking_updated": False,
+    }
+    dashboard_record_action_result("interview_feedback", "completed", result_payload, reply)
+    return {"company_code": company, "ok": True, "reply": reply, "interview": result.get("interview")}
+SAFE_BACK {'/hr/candidates': '/hr/hiring', '/hr/interviews': '/hr/hiring', '/hr/hiring': '/hr'}

@@ -1,0 +1,22 @@
+{
+  "probe_utc": "2026-08-04T02:38:58.827806+00:00",
+  "apply_allowed": false,
+  "counters": {
+    "apply_calls": 0,
+    "require_calls": 9,
+    "blocked_apply_attempts": 1
+  },
+  "fail_closed": {
+    "ok": true,
+    "error": "schema_not_migrated:prod_fail_closed:missing=wave1br_prod_missing_probe_zzz",
+    "missing": [
+      "wave1br_prod_missing_probe_zzz"
+    ]
+  },
+  "apply_blocked": true,
+  "hybrid_mode": "production_authority",
+  "gpt_auto_ocr_forbidden": true,
+  "contract": "wave1br-runtime-ddl-ban-v1",
+  "lock_id": 770911001
+}
+ZERO_DDL_OK

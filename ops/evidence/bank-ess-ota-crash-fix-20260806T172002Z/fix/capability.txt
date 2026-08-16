@@ -1,0 +1,41 @@
+PASS AuthProvider stores typed /app/me
+PASS AuthProvider revalidates on foreground
+PASS document download refreshes on 401
+PASS optional tabs are capability-driven
+PASS home queries are capability-driven
+PASS home actions are capability-driven
+PASS unsupported employee surfaces remain absent
+PASS temporary design preview does not ship
+PASS Wathefni branding is typography only
+PASS motion respects reduced-motion preference
+PASS leave types come from backend
+PASS documents do not read secure-store tokens directly
+PASS documents expose an explicit back control
+PASS settings expose an explicit back control
+PASS account deletion is capability-gated and repeat-locked
+PASS onboarding uploads are capability-gated
+PASS repeatable mobile mutations are locked
+PASS privacy URL is centralized
+PASS localized not-found route exists
+PASS bank screen reads the backend bank contract only
+PASS bank submissions are idempotent across retries
+PASS sensitive bank input is not retained after submit
+PASS bank evidence opens through the authorized stream, never a raw URL
+PASS bank screen separates verified, payroll-effective and submitted
+PASS bank screen states cover every submission state
+PASS bank rejection reason and next step are surfaced
+PASS controlled rollout renders an explained state, not an error loop
+PASS onboarding completion comes from the canonical contract
+PASS app never recomputes completion locally
+PASS checklist routes bank to the secure form instead of a dead end
+PASS app/(tabs)/shifts.tsx blocks direct access without shifts
+PASS app/(tabs)/leave.tsx blocks direct access without leave
+PASS app/onboarding.tsx blocks direct access without onboarding
+PASS app/documents.tsx blocks direct access without documents
+PASS app/attendance.tsx blocks direct access without attendance
+PASS app/leave/request.tsx blocks direct access without leave
+PASS English account/capability copy complete
+PASS Arabic account/capability copy complete
+PASS English/Arabic keysets match
+PASS translation keys have no scalar/object collisions
+employee mobile capability foundation: GREEN

@@ -1,0 +1,28 @@
+[
+  {
+    "employee_key": "WATHEFNI-96550252254",
+    "next_owner_group": "employee",
+    "next_item_label": "Signed employment contract",
+    "next_item_status": "pending",
+    "next_item_storage_status": null,
+    "primary": "remind"
+  },
+  {
+    "employee_key": "WATHEFNI-96566363363",
+    "next_owner_group": "employee",
+    "next_item_label": "Signed employment contract",
+    "next_item_status": "pending",
+    "next_item_storage_status": null,
+    "primary": "remind"
+  },
+  {
+    "employee_key": "WATHEFNI-96597727743",
+    "next_owner_group": "employee",
+    "next_item_label": "Signed employment contract",
+    "next_item_status": "pending",
+    "next_item_storage_status": null,
+    "primary": "remind"
+  }
+]
+COUNTS {'remind': 3}
+SYNTH {'employee_missing': 'remind', 'hr_owned': 'open_checklist', 'uploaded': 'review', 'none': 'view_details'}

@@ -1,0 +1,29 @@
+{
+  "ready": true,
+  "phase": "B_owner_canary_prepared",
+  "do_not_send_yet": true,
+  "production_health": 200,
+  "inbound_address": "92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com",
+  "tenant": "WATHEFNI",
+  "job_binding": null,
+  "default_behavior": "held_intake",
+  "flags": {
+    "classification_master": "off",
+    "tenants": "WATHEFNI",
+    "schema": "on",
+    "manual": "on",
+    "ui": "on",
+    "workers": "off",
+    "sender_acknowledgment": "off",
+    "unified_candidates_master": "off",
+    "unified_candidates_tenants": "WATHEFNI"
+  },
+  "dashboard": "https://api.wathefni.ai/dashboard (production complete-UI bundle dashboard-C0lgzkSg.js)",
+  "monitor_evidence": "/opt/wathefni/production-evidence/owner-manual-intake/20260726T005732Z",
+  "phase_a_evidence": "/opt/wathefni/production-evidence/talent-pool-classification-final-dark/20260726T005027Z",
+  "phase_b_evidence": "/opt/wathefni/production-evidence/talent-pool-classification-owner-canary/20260726T005732Z",
+  "rollback": "/opt/wathefni/backups/production-pre-tpc-final-dark-20260726T005027Z",
+  "cleanup": "forbidden_until_owner_confirms",
+  "external_tenants": "disabled",
+  "historical_backfill": "not_run"
+}

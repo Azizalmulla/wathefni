@@ -1,0 +1,22 @@
+{
+  "prefix": "ATTW4UI620656",
+  "capture_ops": {
+    "status": 200,
+    "ok": true
+  },
+  "capture_seed": {
+    "status": 200,
+    "ok": true
+  },
+  "ops_list": {
+    "status": 200,
+    "ok": true,
+    "count": 1,
+    "case_count": 0,
+    "has_cases_key": true
+  },
+  "attendance_sample": {
+    "status": 200,
+    "rows": 0
+  }
+}

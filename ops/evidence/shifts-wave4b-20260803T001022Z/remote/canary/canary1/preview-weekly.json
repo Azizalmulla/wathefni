@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "unchanged": 0,
+    "newly_generated": 16,
+    "updated_future": 0,
+    "conflict": 0,
+    "detached": 0,
+    "cancelled_held": 0
+  },
+  "window": {
+    "start": "2026-08-05",
+    "end": "2026-08-26"
+  }
+}

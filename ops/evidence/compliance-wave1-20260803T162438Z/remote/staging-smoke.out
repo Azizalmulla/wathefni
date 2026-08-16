@@ -1,0 +1,4 @@
+compliance-findings-wave1 smoke tests passed
+PASS  frozen module doc intact PAYROLL_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+31 passed, 3 failed

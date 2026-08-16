@@ -107,6 +107,7 @@ function AccessGate({ preview }: { preview: boolean }) {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.canvas } }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="sign-in" />
+      <Stack.Screen name="leave/index" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="leave/[id]" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="candidates/[appKey]" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="tasks" options={{ animation: 'slide_from_right' }} />
@@ -144,6 +145,7 @@ function Runtime({ preview }: { preview: boolean }) {
 export default function RootLayout() {
   const segments = useSegments()
   const preview =
+    process.env.EXPO_PUBLIC_WATHEFNI_PRODUCTION_RELEASE !== '1' &&
     process.env.EXPO_PUBLIC_HR_DESIGN_PREVIEW === '1' &&
     (segments[0] === 'design-preview' || Platform.OS === 'web')
   const [locale, setLocale] = useState<Locale | null>(preview ? 'en' : null)

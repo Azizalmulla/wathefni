@@ -1,0 +1,498 @@
+{
+  "tag": "b7978321",
+  "passed": 81,
+  "failed": 0,
+  "ids": {
+    "tag": "b7978321",
+    "employee_key": "WATHEFNI-PYW1-PYW5-W5B-b7978321",
+    "phones": {
+      "creator": "965541179783",
+      "approver": "965541279783",
+      "override2": "965541379783"
+    },
+    "worksheet_ids": [
+      "a63e74bd-fb3f-4ec6-978c-9ecd04a62fbe",
+      "8f98dabc-c702-4809-9aa0-3c224e5c1299",
+      "692ed493-bd90-446e-a7ad-77a72cc1fa38",
+      "4a0123a1-00fb-4f4c-9285-8368ea80b1f5",
+      "438ac58b-31a6-421d-bf7a-b47b6a9aafdd"
+    ],
+    "rule_table_ids": [
+      "ff79f33b-8e05-4fae-bec0-5f7d931aa0b3",
+      "8b4c4f9e-46d5-43f2-bed3-fd9adec52290",
+      "6d75e968-f45b-44c6-8402-58f86ac9cbcc"
+    ],
+    "cleanup": {
+      "deleted": {
+        "dual_control": 1,
+        "events": 20,
+        "pifss": 5,
+        "eos": 3,
+        "rules": 3,
+        "events_sweep": 0
+      },
+      "residual_total": 0
+    }
+  },
+  "results": [
+    {
+      "name": "version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave5 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no posts payment",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "remittance false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "statutory filing false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss remittance false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos_auto_payable false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no auto compliance claim",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss worksheets",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos worksheets",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wps false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ashal false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ai false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native non-auth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze category separation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze missing rule fail closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze effective dated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze dual override",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze approved immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze no remittance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze no auto payable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nonsynthetic refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "expat ok True",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "expat status unsupported",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "expat error",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gcc ok False",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gcc error counsel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gcc status counsel_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwaiti ok False",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwaiti error counsel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwaiti status counsel_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwaiti worksheet id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "upsert pifss v1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "resolve pending None",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "counsel approve v1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "resolve returns v1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "upsert pifss v2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "counsel approve v2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "as_of 2029 \u2192 v1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "as_of 2030 \u2192 v2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recalc after rule ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recalc draft status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recalc has rule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recalc new worksheet",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior counsel superseded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "submit ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self approve forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approved status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mutate_approved_forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recalc new salary ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new draft status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new draft distinct",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior approved superseded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history includes superseded approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history superseded status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history includes new draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos art blocked ok False",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos art blocked error",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos law17 blocked ok False",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos law17 blocked error",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "upsert eos rule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "counsel approve eos",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos generate ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos draft status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos review worksheet",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos automatic_payable false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos not payable instruction",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos termination reason preserved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "override initiate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dual action id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "override same actor deny",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "override confirm ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "override exception status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "override no remittance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "honesty": {
+    "payroll_wave5_version": "1.0.0",
+    "pifss_worksheet_schema": "payroll_pifss_worksheet@1.0.0",
+    "eos_worksheet_schema": "payroll_eos_worksheet@1.0.0",
+    "payment_processing": "disabled",
+    "posts_payment": false,
+    "remittance": false,
+    "statutory_filing": false,
+    "automatic_legal_compliance_claim": false,
+    "pifss_worksheets": true,
+    "pifss_remittance": false,
+    "eos_worksheets": true,
+    "eos_auto_payable": false,
+    "bank_files": false,
+    "wps": false,
+    "ashal": false,
+    "ai_calculations": false,
+    "native_results_authoritative": false,
+    "external_payroll_authority": "external",
+    "wave1_flows_unchanged": true,
+    "wave2a_flows_unchanged": true,
+    "wave2b_flows_unchanged": true,
+    "wave3_flows_unchanged": true,
+    "wave4_flows_unchanged": true,
+    "synthetic_only": true
+  },
+  "cleanup": {
+    "deleted": {
+      "dual_control": 1,
+      "events": 20,
+      "pifss": 5,
+      "eos": 3,
+      "rules": 3,
+      "events_sweep": 0
+    },
+    "residual_total": 0
+  },
+  "wave": "5-B",
+  "payment_processing": "disabled",
+  "posts_payment": false,
+  "remittance": false,
+  "statutory_filing": false,
+  "automatic_legal_compliance_claim": false,
+  "pifss_worksheets": true,
+  "pifss_remittance": false,
+  "eos_worksheets": true,
+  "eos_auto_payable": false,
+  "bank_files": false,
+  "wps": false,
+  "ashal": false,
+  "ai_calculations": false,
+  "native_results_authoritative": false,
+  "external_payroll_authority": "external",
+  "synthetic_only": true
+}

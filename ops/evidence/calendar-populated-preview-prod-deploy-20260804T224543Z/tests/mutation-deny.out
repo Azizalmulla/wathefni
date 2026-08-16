@@ -1,0 +1,9 @@
+PASS  app.py contains preview_event_readonly x3
+PASS  app.py contains is_preview_event_id x4
+PASS  app.py contains get_preview_event x1
+PASS  app.py contains merge_into_list_result x1
+PASS  app.py contains merge_into_overview x1
+PASS  instant kill-switch (process-local)
+MUTATION_GUARD_OK
+WATHEFNI_CALENDAR_POPULATED_PREVIEW=on
+WATHEFNI_CALENDAR_POPULATED_PREVIEW_COMPANIES=WATHEFNI

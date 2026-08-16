@@ -1,0 +1,18 @@
+{
+  "dashboard_chunk": "dashboard-CmztGRNg.js",
+  "dashboard_sha256": "3afa9f3d6114cbcab80280e5dd610b66893c91f94f974c08b80f67bb9ee0ed42",
+  "jobs_chunk": "JobsPage-G5aLBCKS.js",
+  "posthire_chunk": "PostHire-BoHDU-E2.js",
+  "nav_skeleton": true,
+  "mobile_prehire_rail": true,
+  "jobs_status_tiles": true,
+  "assistant_empty_loading": true,
+  "assistant_empty_chips": true,
+  "calendar_matchMedia": true,
+  "assessments_needs_review": true,
+  "candidates_list_or_skeleton": true,
+  "posthire_loading_null_data": false,
+  "authority_ready_or_bootstrap": true,
+  "wathefni_work_queue_scope": true,
+  "posthire_request_guard": false
+}

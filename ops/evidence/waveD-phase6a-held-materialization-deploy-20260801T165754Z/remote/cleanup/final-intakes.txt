@@ -1,0 +1,6 @@
+UPDATE 0
+              intake_id               |         label         | status 
+--------------------------------------+-----------------------+--------
+ 2493b577-09e3-45c2-b923-b0c382c251df | Postmark default test | active
+(1 row)
+

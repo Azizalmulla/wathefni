@@ -67,6 +67,13 @@ export default function DesignPreviewRoute() {
   const [mounted, setMounted] = useState(false)
   const params = useLocalSearchParams()
   useEffect(() => setMounted(true), [])
+  if (process.env.EXPO_PUBLIC_WATHEFNI_PRODUCTION_RELEASE === '1') {
+    return (
+      <View style={styles.disabled}>
+        <Text>Preview unavailable.</Text>
+      </View>
+    )
+  }
   if (process.env.EXPO_PUBLIC_HR_DESIGN_PREVIEW !== '1') {
     return (
       <View style={styles.disabled}>
@@ -335,12 +342,19 @@ function Preview({
                 company="NORTHSTAR"
                 eyebrow={locale === 'ar' ? 'سجل المقابلة' : 'Interview record'}
                 title={locale === 'ar' ? 'لينا الخالد' : 'Lina Al-Khaled'}
-                status={locale === 'ar' ? 'بانتظار الملاحظات' : 'feedback pending'}
+                status={locale === 'ar' ? 'المقابلة' : 'Interview'}
                 state={operationalState}
                 facts={[
+                  { label: locale === 'ar' ? 'مرحلة الطلب' : 'Application stage', value: locale === 'ar' ? 'المقابلة' : 'Interview' },
+                  { label: locale === 'ar' ? 'حالة المقابلة' : 'Interview status', value: locale === 'ar' ? 'مجدولة' : 'Scheduled' },
                   { label: locale === 'ar' ? 'الموعد' : 'Scheduled', value: locale === 'ar' ? '١٦ يوليو ٢٠٢٦، ١٠:٣٠ ص' : '16 July 2026, 10:30 am' },
-                  { label: locale === 'ar' ? 'حالة التواصل' : 'Communication', value: locale === 'ar' ? 'تم إرسال الدعوة' : 'Invite sent' },
+                  { label: locale === 'ar' ? 'القناة أو الموقع' : 'Channel or location', value: 'Google Meet' },
+                  { label: locale === 'ar' ? 'حالة الدعوة' : 'Invitation status', value: locale === 'ar' ? 'تم الإرسال' : 'Sent' },
+                  { label: locale === 'ar' ? 'تأكيد المرشح' : 'Candidate confirmation', value: locale === 'ar' ? 'لم يتم التأكيد' : 'Not confirmed' },
+                  { label: locale === 'ar' ? 'حالة الملاحظات' : 'Notes status', value: locale === 'ar' ? 'قيد الانتظار' : 'Pending' },
                   { label: locale === 'ar' ? 'ملاحظات المقابلة' : 'Interview notes', value: locale === 'ar' ? 'تفكير قوي في الأنظمة؛ يلزم التحقق من أمثلة القيادة.' : 'Strong systems thinking; validate leadership examples.' },
+                  { label: locale === 'ar' ? 'تحليل وظفني — استشاري فقط' : 'Wathefni analysis — advisory only', value: locale === 'ar' ? 'أظهرت الأدلة تفكيراً قوياً في الأنظمة، مع ضرورة التحقق من أمثلة القيادة.' : 'Evidence indicates strong systems thinking; leadership examples still require human verification.' },
+                  { label: locale === 'ar' ? 'الإجراء البشري المطلوب التالي' : 'Next required human action', value: locale === 'ar' ? 'تسجيل ملاحظات المقابلة' : 'Record interview notes' },
                 ]}
                 onLocale={() => select({ locale: locale === 'ar' ? 'en' : 'ar' })}
               />

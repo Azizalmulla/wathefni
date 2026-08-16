@@ -1,0 +1,35 @@
+    workflow_approvals phase A slice 1 — DB integration prove
+      PASS  migration tables present
+      PASS  migration second apply idempotent
+      PASS  company settings default disabled
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  policy create
+      PASS  policy update (new active)
+      PASS  active policy is v2 two-step
+      PASS  approval instance creation
+      PASS  self-approval SoD denial
+      PASS  stale row_version conflict
+      PASS  multi-step progression step1
+      FAIL  idempotent decision replay :: {'ok': False, 'error': 'actor_not_assignee'}
+      PASS  delegation out-of-scope grant created
+      PASS  out-of-scope delegation denial
+      PASS  expired delegation denial
+      PASS  revokable grant created
+      PASS  delegation revoke
+      PASS  revoked delegation denial
+      PASS  valid delegation grant
+      PASS  valid delegation decision
+      PASS  cross-tenant read denial
+      PASS  cross-tenant write denial
+      FAIL  audit events emitted correctly :: {'missing': ['idempotent_replay'], 'seen': {'concurrency_conflict': 1, 'delegation_activated': 3, 'delegation_created': 3, 'delegation_revoked': 1, 'instance_approved': 1, 'instance_created': 1, 'instance_submitted': 1, 'policy_upserted': 2, 'sod_denied': 1, 'step_decided': 2}}
+      PASS  disabling feature blocks new authority writes
+      PASS  offer path does not import workflow_approvals
+      PASS  leave authority paths do not import workflow_approvals
+      PASS  leave dual-control API still present
+      PASS  offer.approve permission untouched
+      PASS  synthetic canary cleanup
+
+    30 passed, 2 failed

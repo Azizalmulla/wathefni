@@ -1,0 +1,38 @@
+{
+  "WATHEFNI-96550252254": {
+    "planned_start_date": "2026-08-01",
+    "assignment_status": "in_progress",
+    "template_version": "2.0.0",
+    "overdue_count": 3,
+    "next_owner": "employee",
+    "next_owner_group": "employee",
+    "next_item_label": "Signed employment contract"
+  },
+  "WATHEFNI-96566363363": {
+    "planned_start_date": "2026-08-01",
+    "assignment_status": "in_progress",
+    "template_version": "2.0.0",
+    "overdue_count": 3,
+    "next_owner": "employee",
+    "next_owner_group": "employee",
+    "next_item_label": "Signed employment contract"
+  },
+  "WATHEFNI-96597727743": {
+    "planned_start_date": "2026-08-01",
+    "assignment_status": "in_progress",
+    "template_version": "2.0.0",
+    "overdue_count": 2,
+    "next_owner": "employee",
+    "next_owner_group": "employee",
+    "next_item_label": "Signed employment contract"
+  },
+  "WATHEFNI-96599411617": {
+    "planned_start_date": "2026-08-01",
+    "assignment_status": "in_progress",
+    "template_version": "2.0.0",
+    "overdue_count": 3,
+    "next_owner": "employee",
+    "next_owner_group": "employee",
+    "next_item_label": "Personal photo"
+  }
+}

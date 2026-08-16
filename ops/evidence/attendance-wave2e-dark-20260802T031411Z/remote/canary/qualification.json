@@ -1,0 +1,632 @@
+{
+  "pass": 30,
+  "fail": 0,
+  "results": [
+    {
+      "label": "capture ops enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "capture ingest off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "import off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "site registered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "wrong-tenant device denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_device_registration_denied",
+        "actor": "OTHERCO",
+        "company": "WATHEFNI"
+      }
+    },
+    {
+      "label": "device registered",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "device": {
+          "device_id": "f106b701-b957-4486-a9fc-b0b8c9f84038",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "terminal_sn": "LAB-SN-68073f41",
+          "vendor": "biotime",
+          "active": true,
+          "owned_by_company": "WATHEFNI",
+          "metadata": {}
+        }
+      }
+    },
+    {
+      "label": "wrong-tenant claim denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "device_owned_by_other_tenant",
+        "owner": "WATHEFNI"
+      }
+    },
+    {
+      "label": "connector registered secrets redacted",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "device_id": "f106b701-b957-4486-a9fc-b0b8c9f84038",
+          "status": "registered",
+          "connector_version": "wave2e",
+          "row_version": 1,
+          "created_at": "2026-08-02T06:16:11.074481+03:00",
+          "updated_at": "2026-08-02T06:16:11.074481+03:00",
+          "revoked_at": null,
+          "last_rotate_at": null,
+          "health": {},
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.074481+03:00",
+              "action": "register",
+              "actor_phone": "965524106807"
+            }
+          ]
+        },
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "connector activated",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "device_id": "f106b701-b957-4486-a9fc-b0b8c9f84038",
+          "status": "active",
+          "connector_version": "wave2e",
+          "row_version": 2,
+          "created_at": "2026-08-02T06:16:11.074481+03:00",
+          "updated_at": "2026-08-02T06:16:11.074543+03:00",
+          "revoked_at": null,
+          "last_rotate_at": null,
+          "health": {},
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.074481+03:00",
+              "action": "register",
+              "actor_phone": "965524106807"
+            },
+            {
+              "at": "2026-08-02T06:16:11.074543+03:00",
+              "action": "activate",
+              "actor_phone": "965524106807"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "rotate ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "device_id": "f106b701-b957-4486-a9fc-b0b8c9f84038",
+          "status": "rotated",
+          "connector_version": "wave2e",
+          "row_version": 3,
+          "created_at": "2026-08-02T06:16:11.074481+03:00",
+          "updated_at": "2026-08-02T06:16:11.074646+03:00",
+          "revoked_at": null,
+          "last_rotate_at": "2026-08-02T06:16:11.074646+03:00",
+          "health": {},
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.074481+03:00",
+              "action": "register",
+              "actor_phone": "965524106807"
+            },
+            {
+              "at": "2026-08-02T06:16:11.074543+03:00",
+              "action": "activate",
+              "actor_phone": "965524106807"
+            },
+            {
+              "at": "2026-08-02T06:16:11.074646+03:00",
+              "action": "rotate",
+              "actor_phone": "965524106807"
+            }
+          ]
+        },
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "reconnect after rotate",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector_id": "conn-wathefni-0ae09e0a24",
+        "status": "rotated",
+        "has_username": true,
+        "has_password": true,
+        "has_token": true,
+        "secrets": "[REDACTED]"
+      }
+    },
+    {
+      "label": "cross-tenant connector denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_denied"
+      }
+    },
+    {
+      "label": "revoke ok",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "connector": {
+          "connector_id": "conn-wathefni-3d76d3ef0d",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "device_id": "f106b701-b957-4486-a9fc-b0b8c9f84038",
+          "status": "revoked",
+          "connector_version": "wave2e",
+          "row_version": 3,
+          "created_at": "2026-08-02T06:16:11.080281+03:00",
+          "updated_at": "2026-08-02T06:16:11.080341+03:00",
+          "revoked_at": "2026-08-02T06:16:11.080341+03:00",
+          "last_rotate_at": null,
+          "health": {},
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.080281+03:00",
+              "action": "register",
+              "actor_phone": null
+            },
+            {
+              "at": "2026-08-02T06:16:11.080322+03:00",
+              "action": "activate",
+              "actor_phone": null
+            },
+            {
+              "at": "2026-08-02T06:16:11.080341+03:00",
+              "action": "revoke",
+              "actor_phone": "965524106807",
+              "reason": "canary"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "reconnect after revoke denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unknown remediation",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": false,
+        "item": {
+          "item_id": "cb2ec7d2-e095-42e2-b7e2-218c7feb291e",
+          "company_code": "WATHEFNI",
+          "kind": "unknown_employee",
+          "status": "open",
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "employee_key": null,
+          "device_id": null,
+          "device_user_id": "LABDU-68073f41",
+          "work_date": null,
+          "source_event_id": null,
+          "payload": {
+            "company_code": "WATHEFNI",
+            "source": "biotime",
+            "source_event_id": "biotime:w2e-68073f41",
+            "device_user_id": "LABDU-68073f41",
+            "punched_at": "2026-08-25T09:05:00+03:00",
+            "direction": "in",
+            "capture_method": "card"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T06:16:11.080392+03:00",
+          "updated_at": "2026-08-02T06:16:11.080392+03:00",
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.080392+03:00",
+              "action": "enqueue",
+              "idempotency_key": "w2e-unk-68073f41"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "enqueue idempotent",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "item": {
+          "item_id": "cb2ec7d2-e095-42e2-b7e2-218c7feb291e",
+          "company_code": "WATHEFNI",
+          "kind": "unknown_employee",
+          "status": "open",
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "employee_key": null,
+          "device_id": null,
+          "device_user_id": "LABDU-68073f41",
+          "work_date": null,
+          "source_event_id": null,
+          "payload": {
+            "company_code": "WATHEFNI",
+            "source": "biotime",
+            "source_event_id": "biotime:w2e-68073f41",
+            "device_user_id": "LABDU-68073f41",
+            "punched_at": "2026-08-25T09:05:00+03:00",
+            "direction": "in",
+            "capture_method": "card"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T06:16:11.080392+03:00",
+          "updated_at": "2026-08-02T06:16:11.080392+03:00",
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.080392+03:00",
+              "action": "enqueue",
+              "idempotency_key": "w2e-unk-68073f41"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "approve cross-tenant denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "cross_tenant_denied"
+      }
+    },
+    {
+      "label": "manager self-action denied",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "manager_self_action_denied"
+      }
+    },
+    {
+      "label": "approve mapping without ingest replay",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "item": {
+          "item_id": "cb2ec7d2-e095-42e2-b7e2-218c7feb291e",
+          "company_code": "WATHEFNI",
+          "kind": "unknown_employee",
+          "status": "approved_replayed",
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "employee_key": "WATHEFNI-ATTW2E-68073f41",
+          "device_id": null,
+          "device_user_id": "LABDU-68073f41",
+          "work_date": null,
+          "source_event_id": null,
+          "payload": {
+            "company_code": "WATHEFNI",
+            "source": "biotime",
+            "source_event_id": "biotime:w2e-68073f41",
+            "device_user_id": "LABDU-68073f41",
+            "punched_at": "2026-08-25T09:05:00+03:00",
+            "direction": "in",
+            "capture_method": "card"
+          },
+          "row_version": 2,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T06:16:11.080392+03:00",
+          "updated_at": "2026-08-02T06:16:11.080520+03:00",
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.080392+03:00",
+              "action": "enqueue",
+              "idempotency_key": "w2e-unk-68073f41"
+            },
+            {
+              "at": "2026-08-02T06:16:11.080520+03:00",
+              "action": "approve_mapping",
+              "actor_phone": "965524106807",
+              "employee_key": "WATHEFNI-ATTW2E-68073f41",
+              "row_version": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "ingest remains off so no authority punch from dark approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "missing/ambiguous enqueued",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "missing/ambiguous payroll excluded",
+      "ok": true,
+      "detail": [
+        {
+          "item_id": "d90259ce-95b2-4899-9c2f-be2769662962",
+          "company_code": "WATHEFNI",
+          "kind": "missing_check_out",
+          "status": "open",
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "employee_key": "WATHEFNI-ATTW2E-68073f41",
+          "device_id": null,
+          "device_user_id": null,
+          "work_date": "2026-08-25",
+          "source_event_id": null,
+          "payload": {
+            "projection": {
+              "status": "incomplete"
+            },
+            "exception_state": null,
+            "status": "incomplete"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T06:16:11.080557+03:00",
+          "updated_at": "2026-08-02T06:16:11.080557+03:00",
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.080557+03:00",
+              "action": "enqueue",
+              "idempotency_key": "WATHEFNI:missing_check_out:WATHEFNI-ATTW2E-68073f41:2026-08-25"
+            }
+          ]
+        },
+        {
+          "item_id": "29967714-be03-4185-895c-6b517f563929",
+          "company_code": "WATHEFNI",
+          "kind": "ambiguous_punch_order",
+          "status": "open",
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "employee_key": "WATHEFNI-ATTW2E-68073f41",
+          "device_id": null,
+          "device_user_id": null,
+          "work_date": "2026-08-25",
+          "source_event_id": null,
+          "payload": {
+            "projection": {
+              "status": "ambiguous"
+            },
+            "exception_state": null,
+            "status": "ambiguous"
+          },
+          "row_version": 1,
+          "payroll_excluded": true,
+          "created_at": "2026-08-02T06:16:11.080716+03:00",
+          "updated_at": "2026-08-02T06:16:11.080716+03:00",
+          "audit": [
+            {
+              "at": "2026-08-02T06:16:11.080716+03:00",
+              "action": "enqueue",
+              "idempotency_key": "WATHEFNI:ambiguous_punch_order:WATHEFNI-ATTW2E-68073f41:2026-08-25"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "offline health",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "health": {
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "status": "offline",
+          "last_sync_at": null,
+          "lag_seconds": null,
+          "failure_count": 2,
+          "last_error": "lab_timeout",
+          "quarantined_events": 0,
+          "open_remediation": 2,
+          "checkpoint": null,
+          "connector_version": null,
+          "alerts": [
+            "connector_offline",
+            "open_remediation"
+          ]
+        }
+      }
+    },
+    {
+      "label": "lag alert",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "health": {
+          "connector_id": "conn-wathefni-0ae09e0a24",
+          "company_code": "WATHEFNI",
+          "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+          "status": "degraded",
+          "last_sync_at": "2026-08-25T09:00:00+03:00",
+          "lag_seconds": 2000.0,
+          "failure_count": 0,
+          "last_error": null,
+          "quarantined_events": 0,
+          "open_remediation": 3,
+          "checkpoint": null,
+          "connector_version": null,
+          "alerts": [
+            "connector_lag_critical",
+            "open_remediation"
+          ]
+        }
+      }
+    },
+    {
+      "label": "health recovery",
+      "ok": true,
+      "detail": {
+        "connector_id": "conn-wathefni-0ae09e0a24",
+        "company_code": "WATHEFNI",
+        "site_id": "b3b7e0bf-fd45-4a22-96c6-29b665e86732",
+        "status": "online",
+        "last_sync_at": "2026-08-02T06:16:11.080988+03:00",
+        "lag_seconds": 0.0,
+        "failure_count": 0,
+        "last_error": null,
+        "quarantined_events": 0,
+        "open_remediation": 3,
+        "checkpoint": null,
+        "connector_version": null,
+        "alerts": [
+          "open_remediation"
+        ]
+      }
+    },
+    {
+      "label": "reject idempotent",
+      "ok": true,
+      "detail": {
+        "r1": {
+          "ok": true,
+          "item": {
+            "item_id": "b9604e04-6b61-414a-bd01-01260d3d81ac",
+            "company_code": "WATHEFNI",
+            "kind": "duplicate_conflict",
+            "status": "rejected",
+            "connector_id": "conn-wathefni-0ae09e0a24",
+            "employee_key": null,
+            "device_id": null,
+            "device_user_id": null,
+            "work_date": null,
+            "source_event_id": null,
+            "payload": {
+              "x": 1
+            },
+            "row_version": 2,
+            "payroll_excluded": true,
+            "created_at": "2026-08-02T06:16:11.080999+03:00",
+            "updated_at": "2026-08-02T06:16:11.081024+03:00",
+            "audit": [
+              {
+                "at": "2026-08-02T06:16:11.080999+03:00",
+                "action": "enqueue",
+                "idempotency_key": "w2e-dup-68073f41"
+              },
+              {
+                "at": "2026-08-02T06:16:11.081024+03:00",
+                "action": "reject",
+                "actor_phone": "965524106807",
+                "reason": null
+              }
+            ]
+          }
+        },
+        "r2": {
+          "ok": true,
+          "duplicate": true,
+          "item": {
+            "item_id": "b9604e04-6b61-414a-bd01-01260d3d81ac",
+            "company_code": "WATHEFNI",
+            "kind": "duplicate_conflict",
+            "status": "rejected",
+            "connector_id": "conn-wathefni-0ae09e0a24",
+            "employee_key": null,
+            "device_id": null,
+            "device_user_id": null,
+            "work_date": null,
+            "source_event_id": null,
+            "payload": {
+              "x": 1
+            },
+            "row_version": 2,
+            "payroll_excluded": true,
+            "created_at": "2026-08-02T06:16:11.080999+03:00",
+            "updated_at": "2026-08-02T06:16:11.081024+03:00",
+            "audit": [
+              {
+                "at": "2026-08-02T06:16:11.080999+03:00",
+                "action": "enqueue",
+                "idempotency_key": "w2e-dup-68073f41"
+              },
+              {
+                "at": "2026-08-02T06:16:11.081024+03:00",
+                "action": "reject",
+                "actor_phone": "965524106807",
+                "reason": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "label": "overview lists connectors",
+      "ok": true,
+      "detail": {
+        "sites": 1,
+        "connectors": 2,
+        "open_remediation": 4,
+        "payroll_excluded": 5,
+        "by_kind": {
+          "missing_check_out": 1,
+          "ambiguous_punch_order": 1,
+          "connector_offline": 1,
+          "connector_lag": 1
+        },
+        "online": 1,
+        "offline": 0,
+        "degraded": 0
+      }
+    },
+    {
+      "label": "attendance demo rows untouched",
+      "ok": true,
+      "detail": 42
+    },
+    {
+      "label": "evidence leak scan pass",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "blocked": false,
+        "files_scanned": 11
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,ATTW4B,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_ATTENDANCE_OPS=on
+WATHEFNI_ATTENDANCE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS=absence,early_leave
+WATHEFNI_ATTENDANCE_OPS_STORE=postgres
+WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_NAME_PREFIX=W5C-SYNTH|
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_PHONE_PREFIXES=965549
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_ONBOARDING_SYNTHETIC_CANARY=on
+WATHEFNI_ONBOARDING_SYNTHETIC_NAME_PREFIX=W2B-SYNTH|
+WATHEFNI_ONBOARDING_SYNTHETIC_PHONE_PREFIXES=965523
+cleanup ATTWFIN {'attendance_ops_disputes': 0, 'attendance_ops_cases': 0, 'attendance_ops_exceptions': 0, 'attendance_punches': 0, 'attendance_day_projections': 0, 'attendance_payroll_snapshots': 0, 'attendance_corrections': 0, 'attendance_ops_idempotency': 0, 'capture_remediation': 2, 'attendance_capture_health_events': 5, 'attendance_capture_health': 1, 'attendance_capture_checkpoints': 0, 'attendance_capture_idempotency': -1, 'attendance_capture_idempotency_err': 'column "connector_id" does not exist\nLINE 1: ...ure_idempotency WHERE company_code=\'WATHEFNI\' AND connector_...\n        ', 'attendance_capture_audit_events': -1, 'attendance_capture_audit_events_err': 'attendance_capture_audit_events are immutable (Wave 2F)\nCONTEXT:  PL/pgSQL function attendance_capture_audit_forbid_muta', 'attendance_capture_replay_ledger': -1, 'attendance_capture_replay_ledger_err': 'column "connector_id" does not exist\nLINE 1: ...e_replay_ledger WHERE company_code=\'WATHEFNI\' AND connector_...\n        ', 'attendance_capture_quarantine': 0, 'attendance_capture_mappings': -1, 'attendance_capture_mappings_err': 'column "connector_id" does not exist\nLINE 1: ...apture_mappings WHERE company_code=\'WATHEFNI\' AND connector_...\n        ', 'attendance_capture_credentials': 1, 'attendance_capture_connectors': 1, 'attendance_capture_devices': 1, 'attendance_capture_sites': 1, 'attendance_records_non_demo': 0}
+cleanup any ATTW4B {'attendance_ops_disputes': 0, 'attendance_ops_cases': 0, 'attendance_ops_exceptions': 0, 'attendance_punches': 0, 'attendance_day_projections': 0, 'attendance_payroll_snapshots': 0, 'attendance_corrections': 0, 'attendance_ops_idempotency': 0, 'attendance_records_non_demo': 0}
+[PASS] production env
+[PASS] capture ingest off
+[PASS] ops synthetic only
+[PASS] authority synthetic only
+[PASS] import off
+[PASS] db is wathefni
+[PASS] 42 attendance rows before
+[PASS] 42 demo_seed before
+[PASS] four reals present
+[PASS] wave4b prove failed=0
+[PASS] wave4b prove passed>=35
+[PASS] capture ops overview ok
+[PASS] capture ingest disabled in overview
+[PASS] capture synthetic seed ok
+[PASS] capture connectors present
+[PASS] connector simulate offline
+[PASS] connector simulate lag
+[PASS] connector mark recovered
+[PASS] unknown mapping remediation present
+[PASS] mapping remediation reject
+[PASS] http daily board rows >= 8
+[PASS] api/ui life-state counts match seed
+[PASS] ops list has cases key
+[PASS] real employee not synthetic-allowed
+[PASS] 42 attendance rows after cleanup
+[PASS] 42 demo_seed after cleanup
+[PASS] attendance fingerprint unchanged
+[PASS] four reals fingerprint unchanged
+[PASS] payroll timesheets unchanged
+[PASS] no leftover ATTW4B projections
+[PASS] no leftover ATTW4B exceptions
+[PASS] freeze smoke-test-employees360-freeze-regression.py
+[PASS] freeze smoke-test-onboarding-freeze-regression.py
+{
+  "wave": "attendance-final-prod",
+  "passed": 33,
+  "failed": 0,
+  "total": 33,
+  "tag": "98AA2996",
+  "capture_prefix": "ATTWFINB3B54A",
+  "work_date": "2026-08-02",
+  "evid": "/opt/wathefni/production-evidence/attendance-final/20260802T131146Z/canary-rerun"
+}
+CANARY_RERUN_OK

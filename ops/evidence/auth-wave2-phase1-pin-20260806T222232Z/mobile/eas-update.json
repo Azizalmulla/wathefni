@@ -1,0 +1,15 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "group": "9dc373a9-b9ce-4a7a-9877-5023454ecdc3",
+  "androidUpdateId": "019fd92c-4ca5-7d6d-b0f2-3f2c0ef811fb",
+  "iosUpdateId": "019fd92c-4ca5-753a-a943-25a2727ce877",
+  "message": "Auth Wave 2 Phase 1: locale restart must not wipe session (PIN fallback)",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1"
+  },
+  "nativeBuildRequired": false,
+  "priorGroup": "173506a4-e2ea-4a66-9d1e-d5b2860c426c",
+  "activationCodeIssued": "692269",
+  "rootCause": "skip-unlock /me failure called blockForError\u2192clearLocalAuthMaterial (session+PIN wipe \u2192 OTP)"
+}

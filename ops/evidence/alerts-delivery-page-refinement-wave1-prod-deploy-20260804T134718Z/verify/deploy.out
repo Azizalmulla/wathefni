@@ -1,0 +1,33 @@
+BACKUP=/opt/wathefni/backups/production-pre-alerts-delivery-page-refinement-wave1-20260804T134718Z
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-BD2c6nFG.js
+BACKUP=/opt/wathefni/backups/production-pre-alerts-delivery-page-refinement-wave1-20260804T134718Z
+PASS data-alerts-delivery
+PASS data-alerts-issues
+PASS data-alerts-filters
+PASS no Urgent HR alerts
+PASS no void issues
+PASS no DeliveryStatusStrip mount
+PASS compliance preserved
+STATIC_GATES_OK
+PASS posthire_bundle_present — PostHire-BD2c6nFG.js
+PASS alerts_marker
+PASS issues_marker
+PASS filters_marker
+PASS summary_marker
+PASS details_marker
+PASS purpose_copy
+PASS scoped_rows_rendered
+PASS no_void_issues
+PASS no_urgent_nested_card
+PASS mark_done_path
+PASS status_cta_path
+PASS arabic_surface
+PASS no_specialist_strip_mount
+PASS compliance_still_present
+PASS analytics_still_present
+ALERTS_DELIVERY_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ALERTS_DELIVERY_PAGE_WAVE1_SMOKE_OK
+SMOKE_OK
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backe
+DEPLOY_OK

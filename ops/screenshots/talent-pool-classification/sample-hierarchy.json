@@ -1,0 +1,27 @@
+{
+  "taxonomy_version": "taxonomy_v1.0.0",
+  "sample_parents": {
+    "fn.technology": [
+      "role.software_engineer",
+      "skill.python",
+      "skill.sql",
+      "edu.computer_science",
+      "cert.aws"
+    ],
+    "fn.hr": [
+      "role.hr_generalist",
+      "skill.recruiting"
+    ]
+  },
+  "node_type_counts": {
+    "career_function": 5,
+    "certification": 2,
+    "education_field": 3,
+    "experience_band": 5,
+    "industry": 3,
+    "language": 2,
+    "likely_role": 6,
+    "seniority": 4,
+    "skill": 5
+  }
+}

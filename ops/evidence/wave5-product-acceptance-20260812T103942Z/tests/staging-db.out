@@ -1,0 +1,101 @@
+    wave5 product acceptance — db
+      PASS  c7 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  acceptance only
+      PASS  no second evaluator
+      PASS  c6 stamp regression
+      PASS  c5 stamp regression
+      PASS  anti-duplication
+      PASS  product gate off
+      PASS  empty allowlist
+      PASS  product gate on
+      PASS  tenant gate
+      PASS  enable c1
+      PASS  enable c2
+      PASS  enable c3
+      PASS  enable c4
+      PASS  enable c5
+      PASS  enable c6
+      PASS  publish domain kpis
+      PASS  fte blocked on publish
+      PASS  platform spine publish
+      PASS  seed workforce P-A
+      PASS  seed workforce P-B
+      PASS  seed workforce P-C
+      PASS  seed workforce P-D
+      PASS  seed workforce P-E
+      PASS  draft payroll upsert
+      PASS  workforce headcount ok
+      PASS  headcount about bilingual
+      PASS  headcount drill match
+      PASS  headcount export parity
+      PASS  recruiting ttf ok
+      PASS  ttf drill reauthorized
+      PASS  leave utilization ok
+      PASS  payroll money sealed ok
+      PASS  payroll currency metadata
+      PASS  money uses sealed authority
+      PASS  draft is not money basis
+      PASS  goal attainment ok
+      PASS  succession coverage ok
+      PASS  succession drill reauthorized
+      PASS  platform spine ok
+      PASS  headcount monthly trend
+      PASS  demographic dimension rejected/hidden
+      PASS  unpublished unavailable
+      PASS  pinned view
+      PASS  pinned stores version
+      PASS  live re-evaluates
+      PASS  target correction preserves history
+      PASS  historical target versions retained
+      PASS  goal still governed after correction
+      PASS  attendance correction no audit rewrite
+      PASS  workforce hires governed
+      PASS  perf never becomes potential
+      PASS  time/payroll pop explainable
+      PASS  full overview has workforce
+      PASS  full overview no empty families only
+      PASS  module-off headcount omitted
+      PASS  stale publication module-off unavailable
+      PASS  talent without performance
+      PASS  performance without talent
+      PASS  sparse enable c1
+      PASS  sparse enable c2
+      PASS  sparse enable c6
+      PASS  sparse intentional composition
+      PASS  sparse no recruiting shell
+      PASS  analytics disabled fail closed
+      PASS  genuine zero distinct
+      PASS  manager scope headcount
+      PASS  manager analytics policy
+      PASS  payroll manager without permission
+      PASS  talent sensitive without permission
+      PASS  employee no company intelligence
+      PASS  sensitive def
+      PASS  suppressed no value
+      PASS  suppressed no population leak
+      PASS  compare suppressed fail closed
+      PASS  suppressed export empty people
+      PASS  assistant respects suppression
+      PASS  fte unavailable blocked
+      PASS  fte not on surface as number
+      PASS  assistant no inferred fte
+      PASS  no AI HiPo inference
+      PASS  demographics default off
+      PASS  setup-owned manager analytics setting
+      PASS  env are gates only
+      PASS  overview AR composes
+      PASS  about AR name
+      PASS  drill pagination
+      PASS  no evaluate-all on overview families only
+      PASS  assistant refuses invented
+      PASS  assistant resolves published
+      PASS  saved view unpublished fail closed
+      PASS  deterministic movement inputs governed
+      PASS  product off after prove
+      PASS  all gates off
+
+    96 passed, 0 failed
+WAVE5_PRODUCT_FULL_PASS
+STAGING_RC=0

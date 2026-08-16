@@ -1,0 +1,18 @@
+=== PREFLIGHT ===
+prod_health=200
+active
+WATHEFNI_ENV=production
+/etc/systemd/system/wathefni-orchestrator.service.d/20-assessment-authoring-off.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/assistant-hr-reads.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/assistant-remediation.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/candidate-knowledge.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/canonical-lifecycle.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/channel-presets.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/civil-id.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/cv-extraction-v2.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/cv-mistral-ocr.conf
+/etc/systemd/system/wathefni-orchestrator.service.d/dashboard-auth.conf
+27c7e2f0d8fe110b2683a0173b29122c5293411a64a71fcb865cdab8d079e790  /opt/wathefni/orchestrator/app.py
+de24a1a943a15d33980fec77782bd19a4c61e9e63bbf647c30b4641675fab8c7  /opt/wathefni/orchestrator/hire_operations.py
+employee_status_approval.py=ABSENT_PRE
+34

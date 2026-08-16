@@ -1,0 +1,62 @@
+{
+  "tag": "2bc43de3",
+  "marker": "SHW2B",
+  "phones": {
+    "a": "965530243300",
+    "b": "965530433009",
+    "c": "965530330077",
+    "gate": "965528243300"
+  },
+  "employee_keys": {
+    "a": "WATHEFNI-SHW2B-2bc43de3",
+    "b": "WATHEFNI-SHW2B-B-2bc43de3",
+    "c": "WATHEFNI-SHW2B-C-2bc43de3",
+    "gate": "WATHEFNI-W2GATECHK-2bc43de3"
+  },
+  "shift_ids": [
+    "876d207b-e6e3-40ae-8beb-3ac6859604c5",
+    "eba244a4-5c1a-4d32-a142-4c17bbb1db44",
+    "50909148-0b66-4634-891f-dda4d43ac180",
+    "2fe51a6e-cfde-4f6d-895f-874a0bcb5dc1",
+    "f4d5173f-7de4-4541-b149-d706a369d16c",
+    "48a07121-8813-411b-b64c-411bbb990c9c",
+    "5e953c88-8d52-4fb1-b506-9fa0df66d300",
+    "ed6b7534-7f59-4f72-ada5-98aebf70781a",
+    "a0c2f855-602d-4fce-8dbd-5a4e57ca8165",
+    "7fed4878-046c-4f9a-91d7-2bf52f2b52c0",
+    "794ac73b-bc6b-4afd-8323-c5e74da824c1",
+    "5680fe8e-2ca2-4ce3-85d6-2bef987882f3",
+    "ea840a49-48ad-4c99-bfd3-43dae257f483",
+    "b00bdd05-98fd-4c90-b0e7-f139be037d73",
+    "eab44f83-e4c5-4bd1-82b4-5f8472b1bb80",
+    "b3926738-71d8-43b9-99fe-cefe7ec65cf0",
+    "6ea02cc7-5460-40f8-9298-3b49ea22a98a",
+    "fadafa7b-1fb4-44ab-9a2a-f519a1f08b58"
+  ],
+  "swap_ids": [
+    "0a29215c-7856-4fa4-8a4b-9f0c5c1a7b97",
+    "d947f891-5dbc-4f8f-a467-a834f9c80421",
+    "c0f43f50-f9a7-486a-a0d7-e868fbb743b7",
+    "d71ac762-5990-43ca-bf3d-9d1a83747835",
+    "e2435960-3473-4c35-bf6c-bf5f3f234d2a"
+  ],
+  "availability_ids": [
+    "58dc1562-8dd6-41fb-ad32-235c746c9c17",
+    "d6240458-2a49-4473-afd3-065852146645"
+  ],
+  "leave_ids": [
+    "fa180bbd-ee7f-4888-bc76-cfb1f88c5049",
+    "eed394c2-e2b0-4905-873a-2ca2bd4835b4"
+  ],
+  "policy_ids": [
+    "d7ed9964-6212-4e60-9297-b51bdddaacff",
+    "0015ffb6-d186-4a00-ae49-304a59c7b7b4",
+    "21333191-cb23-4d3c-aa9c-0872cd957a39"
+  ],
+  "flag_ids": [
+    "a98ff472-421f-423d-a5f8-7a4c0c5049aa",
+    "bbd30c75-b47c-40f0-906b-c85dbd83d8f6",
+    "9602ddb7-921a-41b1-9833-a34e6bc803ab"
+  ],
+  "reminder_ids": []
+}

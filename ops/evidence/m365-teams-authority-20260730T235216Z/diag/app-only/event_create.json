@@ -1,0 +1,85 @@
+{
+  "ok": true,
+  "status": 201,
+  "json": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('ABDULAZIZALMULLA%40wathefni.onmicrosoft.com')/events/$entity",
+    "@odata.etag": "W/\"iRB78Onw7EaUm6TMsnqM7gAAAGKSvQ==\"",
+    "id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0ksAAA=",
+    "createdDateTime": "2026-07-30T23:39:51.3929769Z",
+    "lastModifiedDateTime": "2026-07-30T23:39:51.6293355Z",
+    "changeKey": "iRB78Onw7EaUm6TMsnqM7gAAAGKSvQ==",
+    "categories": [],
+    "transactionId": null,
+    "originalStartTimeZone": "Asia/Kuwait",
+    "originalEndTimeZone": "Asia/Kuwait",
+    "iCalUId": "040000008200E00074C5B7101A82E008000000005BED47B77C20DD0100000000000000001000000009DFED0B7DFC7949A93B9CEC91B81EFC",
+    "uid": "040000008200E00074C5B7101A82E008000000005BED47B77C20DD0100000000000000001000000009DFED0B7DFC7949A93B9CEC91B81EFC",
+    "reminderMinutesBeforeStart": 15,
+    "isReminderOn": true,
+    "hasAttachments": false,
+    "subject": "Wathefni Teams diag 20260730T233949Z",
+    "bodyPreview": "Teams authority diagnosis",
+    "importance": "normal",
+    "sensitivity": "normal",
+    "isAllDay": false,
+    "isCancelled": false,
+    "isOrganizer": true,
+    "responseRequested": true,
+    "seriesMasterId": null,
+    "showAs": "busy",
+    "type": "singleInstance",
+    "webLink": "https://outlook.office365.com/owa/?itemid=AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG%2Bod7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0ksAAA%3D&exvsurl=1&path=/calendar/item",
+    "onlineMeetingUrl": null,
+    "isOnlineMeeting": false,
+    "onlineMeetingProvider": "unknown",
+    "allowNewTimeProposals": true,
+    "occurrenceId": null,
+    "isDraft": false,
+    "hideAttendees": false,
+    "responseStatus": {
+      "response": "organizer",
+      "time": "0001-01-01T00:00:00Z"
+    },
+    "body": {
+      "contentType": "html",
+      "content": "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n</head>\r\n<body>\r\n<p>Teams authority diagnosis</p>\r\n</body>\r\n</html>\r\n"
+    },
+    "start": {
+      "dateTime": "2026-07-31T04:39:51.0000000",
+      "timeZone": "Asia/Kuwait"
+    },
+    "end": {
+      "dateTime": "2026-07-31T05:09:51.0000000",
+      "timeZone": "Asia/Kuwait"
+    },
+    "location": {
+      "displayName": "",
+      "locationType": "default",
+      "uniqueIdType": "unknown",
+      "address": {},
+      "coordinates": {}
+    },
+    "locations": [],
+    "recurrence": null,
+    "attendees": [
+      {
+        "type": "required",
+        "status": {
+          "response": "none",
+          "time": "0001-01-01T00:00:00Z"
+        },
+        "emailAddress": {
+          "name": "ABDULAZIZ ALMULLA",
+          "address": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com"
+        }
+      }
+    ],
+    "organizer": {
+      "emailAddress": {
+        "name": "ABDULAZIZ ALMULLA",
+        "address": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com"
+      }
+    },
+    "onlineMeeting": null
+  }
+}

@@ -1,0 +1,4 @@
+batch_already_absent_on_abort=true
+canary_process_absent_before_kill=true
+local_qualify_terminated=true
+orchestrator_not_restarted=true

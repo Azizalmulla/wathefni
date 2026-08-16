@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "Wathefni",
+    "slug": "wathefni-employee",
+    "scheme": "wathefni",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F2E8"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ai.wathefni.employee",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Wathefni uses the camera only when you choose to capture a document to upload to HR.",
+        "NSPhotoLibraryUsageDescription": "Wathefni accesses your photos only when you choose to attach a document to upload to HR."
+      }
+    },
+    "android": {
+      "package": "ai.wathefni.employee",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F8F2E8"
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1C1B19"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Wathefni accesses your photos only when you choose to attach a document to upload to HR.",
+          "cameraPermission": "Wathefni uses the camera only when you choose to capture a document to upload to HR."
+        }
+      ],
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+WAVE1 1
+VIEWER_RAW '96599338566'
+SUBJECT_RAW 'WATHEFNI-96550252254'
+EXCLUDE_PAYROLL True
+viewer_allowlist ['96599338566']
+subject_allowlist ['WATHEFNI-96550252254']
+real_canary_enabled True
+within_boundary True
+flags_ok_aziz_talal_canary=true

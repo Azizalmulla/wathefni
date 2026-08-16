@@ -1,0 +1,65 @@
+{
+  "id": "3bfc4a21dcceda33ce3dbf556f071a0ae4850367",
+  "framework": "maestro",
+  "duration": 162,
+  "status": "failed",
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786426937",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://4135db0ad586ee2a109730c207b9848f34a0fce3",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml"
+    ]
+  },
+  "start_time": "2026-08-11 05:42:19 UTC",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "test_suite_details": {
+    "url": "bs://4135db0ad586ee2a109730c207b9848f34a0fce3",
+    "bundle_id": null,
+    "version": null,
+    "name": "maestro-suite.zip",
+    "custom_id": "wathefni-bs-smoke-1786426932"
+  },
+  "devices": [
+    {
+      "device": "iPhone 15",
+      "os": "ios",
+      "os_version": "17.3",
+      "sharding": false,
+      "sessions": [
+        {
+          "id": "142ef0e7ab0fb02cf05375763fad9a9afe98bab9",
+          "status": "failed",
+          "start_time": "2026-08-11 05:42:43 +0000",
+          "duration": 137,
+          "testcases": {
+            "count": 1,
+            "status": {
+              "passed": 0,
+              "failed": 1,
+              "skipped": 0,
+              "timedout": 0,
+              "error": 0,
+              "running": 0,
+              "queued": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "Abdullah Al-Rashid Product Manager / مدير منتج Email: abdullah.rashid@example.com Phone: +96551234567 EXPERIENCE 2022-2026 Cross-border HR SaaS — roadmap and delivery. SKILLS Roadmapping, stakeholder management, bilingual documentation\n\nعبدهللا الراشد الخبرة العملية ٢٢٠٢-٦٢٠٢ أنظمة الموارد البشرية — إدارة المنتجات المهارات التخطيط، التواصل، الوثائق ثنائية اللغة\n",
+      "markdown_len": 364
+    }
+  ]
+}

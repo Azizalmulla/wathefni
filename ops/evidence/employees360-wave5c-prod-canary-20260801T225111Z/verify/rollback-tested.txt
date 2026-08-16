@@ -1,0 +1,8 @@
+rollback_syntax_ok=true
+rollback_executable=true
+backup_app_present=true
+backup_org_present=true
+backup_lifecycle_flags_present=true
+rollback_removes_ess_module=true
+rollback_removes_ess_dropin=true
+NOTE=full rollback not executed post-canary to preserve Wave 5C GO state; script validated

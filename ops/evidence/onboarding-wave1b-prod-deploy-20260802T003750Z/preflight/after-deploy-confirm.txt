@@ -1,0 +1,14 @@
+active
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  /opt/wathefni/orchestrator/app.py
+candidates_read_in_loader False
+has_load_onboarding_items True
+loader_repaired=true
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_ONBOARDING_SEED=off
+total 3136
+drwxr-xr-x   2 root root    4096 Aug  2 00:40 .
+drwx------ 326 root root   32768 Aug  2 00:40 ..
+-rwxr-xr-x   1 root root     413 Aug  2 00:40 ROLLBACK.sh
+-rw-r--r--   1  501 root 3161608 Aug  1 23:41 app.py
+-rw-r--r--   1 root root     145 Aug  2 00:40 app.py.sha256
+BACKUP_OK

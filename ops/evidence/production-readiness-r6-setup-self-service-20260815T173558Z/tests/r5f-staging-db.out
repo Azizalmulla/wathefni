@@ -1,0 +1,81 @@
+    PRODUCTION READINESS R5F — benefits surface (staging DB)
+    tenant: R5F94068F
+      PASS  sync catalog entitlement
+      PASS  payroll optional
+      PASS  benefits enableable
+      PASS  workspace ready without optional modules
+      PASS  learning off
+      PASS  talent off
+      PASS  JA off
+      PASS  payroll off
+      PASS  plan created
+      PASS  eligibility rule
+      PASS  eligible then started
+      PASS  eligibility is not enrollment
+      PASS  prepare did not create coverage
+      PASS  election recorded
+      PASS  election is not coverage
+      PASS  status elected not active
+      PASS  coverage via canonical confirm
+      PASS  provider not fabricated
+      PASS  internal recorded distinct
+      PASS  coverage plan version pinned
+      PASS  waiver recorded
+      PASS  waiver is not coverage
+      PASS  waiver is not ineligibility
+      PASS  waived employee remains eligible
+      PASS  waiver list explicit
+      PASS  canonical dependent exists
+      PASS  dependent exists is not covered
+      PASS  dependent coverage refs canonical
+      PASS  dependent now covered via relationship
+      PASS  contribution truth with payroll off
+      PASS  contribution is not deduction
+      PASS  handoff blocked when payroll option off
+      PASS  handoff setting on
+      PASS  handoff created
+      PASS  handoff not applied
+      PASS  payroll remains authority
+      PASS  finalized payroll not rewritten
+      PASS  plan version bumped
+      PASS  prior coverage retains original version
+      PASS  history reconstructable
+      PASS  later policy does not rewrite history
+      PASS  employee workspace ready
+      PASS  employee sees coverage
+      PASS  employee no HR admin keys
+      PASS  no claims engine
+      PASS  benefits HTTP routes registered
+      PASS  unauthenticated dashboard not public
+      PASS  unauthenticated employee not public
+      PASS  HR workspace HTTP
+      PASS  HR lists plans
+      PASS  HR lists enrollments
+      PASS  Web enrollment present
+      PASS  tenant isolation empty or self-only
+      PASS  tenant isolation no foreign enrollments
+      PASS  manager Benefits workspace forbidden
+      PASS  manager cannot list elections
+      PASS  HR without Benefits permission fail-closed
+      PASS  HR without manage denied plan write
+      PASS  HR without sensitive denied contributions
+      PASS  employee sees own workspace
+      PASS  employee no HR admin
+      PASS  employee self key
+      PASS  employee IDOR stays self
+      PASS  employee IDOR does not return other key
+      PASS  employee cannot enumerate another history
+      PASS  employee cannot confirm coverage via dashboard
+      PASS  employee plan detail
+      PASS  history retained after disable
+      PASS  new work blocked when disabled
+      PASS  disabled workspace unavailable
+      PASS  disabled counts are not fake zeros
+      PASS  disabled employee unavailable not empty
+      PASS  disabled employee plans are not fake empty
+      PASS  company_modules benefits off
+      PASS  notifications suppressed when module off
+
+    75 passed, 0 failed
+R5F_BENEFITS_SURFACE_DB_PASS
+STAGING_RC=0

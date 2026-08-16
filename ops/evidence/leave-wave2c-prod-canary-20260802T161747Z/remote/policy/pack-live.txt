@@ -1,0 +1,3 @@
+pack kw_private_sector_v2 2.1.0
+eligibility 6
+flags_ok_wave2c=true

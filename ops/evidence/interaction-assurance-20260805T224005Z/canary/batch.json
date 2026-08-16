@@ -1,0 +1,9 @@
+{
+  "batch": 0,
+  "proved": [
+    "fixture_create",
+    "fixture_idempotent_upsert",
+    "fixture_cleanup_contract"
+  ],
+  "deferred": "module destructive probes attach in IAX_BATCH>=1 using unproven-p1-register.json"
+}

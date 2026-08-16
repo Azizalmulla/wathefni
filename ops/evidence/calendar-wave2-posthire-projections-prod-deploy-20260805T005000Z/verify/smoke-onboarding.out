@@ -1,0 +1,5 @@
+=== ENABLE onboarding_deadline (min=1) ===
+Environment=WATHEFNI_CALENDAR_PROJECTION_ONBOARDING=on
+health_ok
+SOURCE onboarding_deadline meta {'enabled_sources': ['onboarding_deadline'], 'injected': 81} count 81
+SMOKE_OK onboarding_deadline 81

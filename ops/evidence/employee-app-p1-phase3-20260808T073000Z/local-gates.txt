@@ -1,0 +1,52 @@
+Employee App P1 release gate — 20260808T073840Z
+
+── mobile typecheck (tsc --noEmit)
+   PASS
+── mobile PIN crypto selftest
+   PASS
+── mobile entitlement composition shapes
+   PASS
+── mobile documents hierarchy
+   PASS
+── auth wave 2 phase 1 PIN unit
+   PASS
+── auth wave 2 phase 1 session hardening unit
+   PASS
+── auth wave 2 phase 2 biometric unit
+   PASS
+── auth wave 2 phase 3 auto-lock unit
+   PASS
+── auth wave 2 phase 4 PIN recovery unit
+   PASS
+── auth wave 2 phase 5 device security unit
+   PASS
+── mobile capability + composition contract
+   PASS
+── backend modules compile
+   PASS
+── employee app capability contract
+   PASS
+── employee app runtime access enforcement
+   SKIPPED — no production orchestrator database reachable from this host
+── employee app home projection contract
+   SKIPPED — no production orchestrator database reachable from this host
+── employee app workday projection contract
+   SKIPPED — no production orchestrator database reachable from this host
+── employee app profile projection contract
+   SKIPPED — no production orchestrator database reachable from this host
+── employee app access eligibility matrix
+   SKIPPED — no production orchestrator database reachable from this host
+── employee app invitation + delivery
+   SKIPPED — no production orchestrator database reachable from this host
+── employee payslips P0 release gate
+   SKIPPED — no production orchestrator database reachable from this host
+── employee payslips P0.1 official PDF
+   SKIPPED — no production orchestrator database reachable from this host
+── employee↔HR sync hardening
+   SKIPPED — no production orchestrator database reachable from this host
+── employee app session/self-scope regression
+   SKIPPED — no staging orchestrator database reachable from this host
+
+passed=13 failed=0 skipped=10
+SKIPPED: employee app runtime access enforcement employee app home projection contract employee app workday projection contract employee app profile projection contract employee app access eligibility matrix employee app invitation + delivery employee payslips P0 release gate employee payslips P0.1 official PDF employee↔HR sync hardening employee app session/self-scope regression
+EMPLOYEE_APP_P1_RELEASE_GATE: PARTIAL (skips acknowledged by ALLOW_DB_SKIP=1)

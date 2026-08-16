@@ -1,0 +1,21 @@
+staging_health=200
+      PASS  live benefits customer enableable
+      PASS  live learning still enableable
+      PASS  live JA still enableable
+      PASS  live talent still enableable
+      PASS  live performance still enableable
+      PASS  live ER still hidden
+      PASS  live engagement still hidden
+      PASS  live comp planning still hidden
+      PASS  live workforce planning still hidden
+      PASS  live health
+      PASS  live /dashboard/benefits/workspace not fail-closed
+      PASS  live /dashboard/benefits/workspace not public
+      PASS  live /dashboard/benefits/plans not fail-closed
+      PASS  live /dashboard/benefits/plans not public
+      PASS  live /app/benefits not fail-closed
+      PASS  live /app/benefits not public
+      PASS  live /dashboard/employee-relations/cases still unreleased
+      PASS  live /dashboard/compensation-planning still unreleased
+      PASS  live /dashboard/workforce-planning/plans still unreleased
+    LIVE_SERVICE 19 passed, 0 failed

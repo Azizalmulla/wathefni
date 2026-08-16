@@ -1,0 +1,73 @@
+{
+  "stamp": "20260810T201549Z",
+  "suite": "smoke",
+  "evidence": "ops/evidence/mobile-e2e-gate-20260810T201549Z",
+  "host": {
+    "app_id": "ai.wathefni.employee",
+    "repo_root": "/Users/azizalmulla/Desktop/claw",
+    "maestro_ok": true,
+    "java_ok": false,
+    "simctl_ok": true,
+    "ios_runtime_ok": false,
+    "ios_booted": false,
+    "app_installed_booted": false,
+    "adb_ok": false,
+    "usb_android_device": false,
+    "disk_free_gb": "0",
+    "ui_runtime_ready": false,
+    "blockers": [
+      "java_runtime_missing_for_maestro",
+      "ios_simulator_runtime_missing",
+      "adb_missing",
+      "disk_free_lt_9gb_for_ios_runtime",
+      "no_executable_ui_target"
+    ],
+    "rule": "API PASS \u2260 MOBILE PASS \u2014 ui_runtime_ready=false means MOBILE_PASS stays 0"
+  },
+  "counts": {
+    "BLOCKED": 4,
+    "API_SPINE": 1
+  },
+  "MOBILE_PASS": 0,
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "MOBILE_PASS=0 (no real UI execution succeeded)",
+  "rule": "API PASS \u2260 MOBILE PASS",
+  "selected_flows": [
+    "apps/wathefni-employee-mobile/.maestro/smoke/00-unsigned-entry.yaml",
+    "apps/wathefni-employee-mobile/.maestro/smoke/05-method-switch-en.yaml"
+  ],
+  "matrix": [
+    {
+      "id": "UI.00-unsigned-entry",
+      "flow": "apps/wathefni-employee-mobile/.maestro/smoke/00-unsigned-entry.yaml",
+      "verdict": "BLOCKED",
+      "detail": "No simulator/device UI runtime ready: java_runtime_missing_for_maestro, ios_simulator_runtime_missing, adb_missing, disk_free_lt_9gb_for_ios_runtime, no_executable_ui_target"
+    },
+    {
+      "id": "UI.05-method-switch-en",
+      "flow": "apps/wathefni-employee-mobile/.maestro/smoke/05-method-switch-en.yaml",
+      "verdict": "BLOCKED",
+      "detail": "No simulator/device UI runtime ready: java_runtime_missing_for_maestro, ios_simulator_runtime_missing, adb_missing, disk_free_lt_9gb_for_ios_runtime, no_executable_ui_target"
+    },
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_HR_EMAIL + MOBILE_E2E_HR_PASSWORD to run HR API spine"
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    }
+  ]
+}

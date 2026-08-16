@@ -1,0 +1,90 @@
+{
+  "evidence_coverage": {
+    "existing_legacy_fallback": true,
+    "adapter_legacy_fallback": false,
+    "adapter_unavailable": [],
+    "adapter_coverage": {
+      "canonical_cv": {
+        "state": "available",
+        "reason_codes": [],
+        "note": null
+      },
+      "effective_facts": {
+        "state": "available",
+        "reason_codes": [],
+        "note": null
+      }
+    }
+  },
+  "eligibility_parity": {
+    "match": true,
+    "held_exclusion_match": true,
+    "held_denied": "held_or_job_ranking_ineligible"
+  },
+  "scores": {
+    "existing": 10.71,
+    "adapter": 46.43,
+    "breakdown_existing": {
+      "skills_alignment": 7.5,
+      "experience_alignment": 0.0,
+      "education_cert_alignment": 0.0
+    },
+    "breakdown_adapter": {
+      "skills_alignment": 7.5,
+      "experience_alignment": 25.0,
+      "education_cert_alignment": 0.0
+    }
+  },
+  "differences": [
+    {
+      "field": "advisory_score",
+      "existing": 10.71,
+      "adapter": 46.43,
+      "class": "expected_evidence_improvement"
+    },
+    {
+      "field": "evidence_coverage",
+      "existing": 0.33,
+      "adapter": 0.67,
+      "class": "expected_evidence_improvement"
+    },
+    {
+      "field": "legacy_fallback",
+      "existing": true,
+      "adapter": false,
+      "class": "expected_authority_difference"
+    }
+  ],
+  "stale_version": {
+    "stale": true,
+    "reasons": [
+      "canonical_cv_version_id"
+    ],
+    "rewrites_historical": false,
+    "pinned_evidence_digest": "evd_04c7f455bb5aa4dcdd487e9a17231082"
+  },
+  "latency_ms": {
+    "existing_ms": 0.825,
+    "adapter_ms": 0.822,
+    "total_ms": 1.666
+  },
+  "missing_evidence_policy": "unknown_not_negative",
+  "arabic_bilingual_skills": [
+    "Excel",
+    "valuation",
+    "IFRS",
+    "\u0645\u062d\u0627\u0633\u0628\u0629"
+  ],
+  "zero_side_effects": {
+    "ranking_writes": 0,
+    "lifecycle_writes": 0,
+    "communication_writes": 0,
+    "identity_writes": 0,
+    "extraction_triggers": 0,
+    "indexing_writes": 0,
+    "external_calls": 0
+  },
+  "qualification_pass": true,
+  "production_cutover": false,
+  "live_tools_registered": false
+}

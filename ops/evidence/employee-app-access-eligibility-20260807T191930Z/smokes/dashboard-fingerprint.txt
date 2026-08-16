@@ -1,0 +1,4 @@
+PASS Enable access & invite
+PASS Disable eligibility
+PASS app-access/eligibility
+PASS Invites are sent only after app access

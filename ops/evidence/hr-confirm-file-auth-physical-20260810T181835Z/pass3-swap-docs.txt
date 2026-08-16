@@ -1,0 +1,7 @@
+cleaned ['a2226f83-b648-40e4-8bd3-cb8397b4c485']
+seeded 8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08 req_by 965529398000
+SWAP PASS confirm completed after rejected
+reseed_doc RealDictRow({'employee_key': 'WATHEFNI-96550010001', 'document_type': 'work_permit', 'status': 'needs_review'})
+mobile_docs_after_reseed 0 compliance 0
+payload_hist {'missing': 28} summary {'expired': 0, 'expiring_soon': 0, 'missing': 28, 'needs_review': 0, 'valid': 0, 'needs_attention': 28, 'total_documents': 28, 'employees_checked': 6, 'employees_total': 112}
+payload_row {'status': 'missing', 'file_id': 'ddf26fa5-c676-4894-a2cf-fa2da2bbc51c', 'label': None, 'has_file': None}

@@ -1,0 +1,2 @@
+EN_AR_API_SMOKE_OK lifecycle=2a visible= ['bank_details', 'civil_id', 'employment_contract', 'offer_letter', 'personal_photo']
+rejection_reason_once= Wave2A canary: please upload a clearer employment contract scan.

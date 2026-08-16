@@ -1,0 +1,15 @@
+needle                                        live base rel
+Extraction & validation                          1    1    1
+never overwrite                                  1    1    1
+data-document-extraction-summary                 1    1    1
+Bank details                                     1    1    1
+masked by default                                1    1    1
+Currently verified                               0    0    1
+Awaiting your review                             0    0    1
+data-completion-state                            0    0    1
+data-testid="bank-review"                        0    0    0
+bank-review                                      0    0    1
+sizes 494857 494857 507535
+OCR_PRESERVED_IN_RELEASE OK
+BANK_REVIEW_PRESENT_IN_RELEASE OK
+COMPLETION_STRIP_PRESENT_IN_RELEASE OK

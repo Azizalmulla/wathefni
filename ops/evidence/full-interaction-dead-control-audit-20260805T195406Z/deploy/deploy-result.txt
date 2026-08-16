@@ -1,0 +1,4 @@
+active
+WATHEFNI_DB_POOL_MAX=16
+bc3c6685815c69f890623c8416896c15d7d03428c4ff8bbdd92dbb653ee97e76  /opt/wathefni/orchestrator/talent_pool_classification_routes.py
+f6af76651ec63ca6707c9267207f0f093c1bbef48746892570de32f861c1584b  /var/www/wathefni-dashboard/index.html

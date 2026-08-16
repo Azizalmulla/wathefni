@@ -1,0 +1,16 @@
+    E2E cross-surface leave convergence
+    tenant: R9E222784
+      PASS  HR login
+      PASS  employee request accepted or validated
+      PASS  employee leave list readable
+      PASS  HR sees company leave
+      PASS  HR leave payload stays on this tenant
+      PASS  HR approve is a real domain result
+      PASS  HR approve succeeds for a valid pending request
+      PASS  HR leave list still 200 after approve
+      PASS  canonical leave is approved or decided
+      PASS  employee refresh stays on this tenant
+      PASS  employee payload does not leak another tenant
+      PASS  employee attendance is tenant-scoped or fail-closed
+
+    CROSS_SURFACE_PASS  12 passed, 0 failed

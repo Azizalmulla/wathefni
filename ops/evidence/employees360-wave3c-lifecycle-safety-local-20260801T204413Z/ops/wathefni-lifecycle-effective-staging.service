@@ -1,0 +1,26 @@
+[Unit]
+Description=Wathefni Employees 360 Wave 3C lifecycle effective scheduler (staging)
+After=network-online.target postgresql.service wathefni-orchestrator-staging.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/staging/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=WATHEFNI_ENV=staging
+Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
+Environment=WATHEFNI_EXPECTED_DATABASE_PORT=5432
+Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni_staging
+Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-staging-isolation-v1
+Environment=HOME=/root
+Environment=WATHEFNI_EMPLOYEE_AUTHORITY_V2=on
+Environment=WATHEFNI_EMPLOYEE_AUTHORITY_V2_COMPANIES=WATHEFNI
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+Environment=WATHEFNI_LIFECYCLE_COUNSEL_GATE=on
+EnvironmentFile=-/root/.openclaw/secrets/lifecycle-wave3c-staging.env
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python lifecycle-effective-worker.py
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

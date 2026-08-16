@@ -1,0 +1,7 @@
+DETAIL {"app_key": "imp-wathefni-3bda14696342799f-WATHEFNI-IMPORT", "name": "imp-wathefni-3bda14696342799f", "stage": "ready_for_review", "actions": ["shortlist", "reject", "preview_cv", "download_cv"], "cv_available": true, "cv_filename": "q2.pdf", "score": null, "ai_advisory": true, "evidence_n": 0, "waiting_for_hr": ["review_candidate"], "automatic_activity": ["cv_received", "cv_processed"], "payload_keys": ["allowed_actions", "app_key", "communication_status", "cv", "interview", "offer", "overview", "ranking"]}
+PREPARE_SHORTLIST {"status": "needs_confirmation", "summary": "imp-wathefni-3bda14696342799f · IT manager", "consequence": "Move imp-wathefni-3bda14696342799f to the shortlist for IT manager.", "current_state": "ready_for_review", "action": "shortlist_candidate"}
+PREPARE_ONLY_NO_CONFIRM True
+TERMINAL_DETAIL {"app_key": "imp-wathefni-511c5f998f9f75cd-WATHEFNI-IMPORT", "stage": "import_archived", "status": "import_archived", "actions": ["preview_cv", "download_cv"], "decide_actions": []}
+ALREADY_DECIDED_SERVER True
+RANKINGS_ITEMS 0 TOTAL 0
+VERDICT_BACKEND_PATH PASS

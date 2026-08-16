@@ -1,0 +1,15 @@
+Attendance Wave 2E — VERDICT
+Stamp: 20260802T031411Z
+
+Dark connector production foundation: GO (synthetic/lab only)
+HR capture-operations readiness: CONDITIONAL GO
+Customer read-only compatibility pilot: CONDITIONAL GO (API ready; customer site pending)
+Real punch ingestion: NO-GO
+
+Prod canary: 30/0
+HTTP API parity: PASS
+Leak scans: PASS
+Rollback + redeploy: PASS
+Prod freezes: E360 57/0 · Onboarding 54/0
+Flags: CAPTURE_OPS=on · CAPTURE_INGEST=off · IMPORT=off · AUTHORITY SYNTHETIC_ONLY=on
+Demo rows: 42 untouched

@@ -1,0 +1,19 @@
+{
+  "verdict": "PASS",
+  "stamp": "20260731T194941Z",
+  "dashboard_chunk": "dashboard-Btr3JHJY.js",
+  "dashboard_sha256": "502f79217accc5ae20ffd4f1605a1cb338a3c344de4f2c1731b13c66cd1c9ba2",
+  "calendar_shell_chunk": "CalendarShell-McJD9Ux2.js",
+  "calendar_shell_sha256": "9d3d626b22356e23559275f4e3b016e24e33202cd3fd928756b83e5d0e3d8659",
+  "calendar_projections_sha256": "4189a8f28761a2060562d6e528b83ec16ab9352ce5bd84625835e76416271698",
+  "health": 200,
+  "dashboard": 200,
+  "scope_query_wiring": true,
+  "hiring_team_hidden_without_org_scope": true,
+  "company_requires_calendar_company": true,
+  "invalid_snaps_to_mine": true,
+  "en_ar_rtl": true,
+  "overview_mine_only": true,
+  "vitest_ok": true,
+  "rollback_ok": true
+}

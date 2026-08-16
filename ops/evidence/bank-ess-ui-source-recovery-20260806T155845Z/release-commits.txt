@@ -1,0 +1,2 @@
+6547a25 fix: keep mobile capability verify scoped to bank/completion
+5509e64 feat: add Bank ESS review UI and onboarding completion strip

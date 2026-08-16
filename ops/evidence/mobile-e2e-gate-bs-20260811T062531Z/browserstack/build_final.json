@@ -1,0 +1,174 @@
+{
+  "id": "bac778d7fc9c39db8690e21437054191b0efc176",
+  "framework": "maestro",
+  "duration": 782,
+  "status": "failed",
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786429537",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://aabc2fea8b767a0f3ca9d1b4802ef2c9859e7b07",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml",
+      "bs-smoke/01-hr-login.yaml",
+      "bs-smoke/02-hr-tabs.yaml",
+      "bs-smoke/03-hr-leave-approve.yaml",
+      "bs-smoke/04-hr-leave-reject.yaml"
+    ],
+    "setEnvVariables": {
+      "MAESTRO_HR_COMPANY": "WATHEFNI",
+      "MAESTRO_HR_EMAIL": "e2e-hr+mobile@wathefni.internal",
+      "MAESTRO_HR_PASSWORD": "***REDACTED***",
+      "MAESTRO_LEAVE_ID": "60822864-fff9-4f22-a8c3-077a90907128",
+      "MAESTRO_LEAVE_REJECT_ID": "d42c4045-f96e-4b34-b338-c5480846d75f",
+      "MAESTRO_PIN": "246810"
+    }
+  },
+  "start_time": "2026-08-11 06:25:38 UTC",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "test_suite_details": {
+    "url": "bs://aabc2fea8b767a0f3ca9d1b4802ef2c9859e7b07",
+    "bundle_id": null,
+    "version": null,
+    "name": "maestro-suite.zip",
+    "custom_id": "wathefni-bs-smoke-1786429532"
+  },
+  "devices": [
+    {
+      "device": "iPhone 15",
+      "os": "ios",
+      "os_version": "17.3",
+      "sharding": false,
+      "sessions": [
+        {
+          "id": "41897b0c1e1d836e7ef1a79af62dcbb275a36aff",
+          "status": "failed",
+          "start_time": "2026-08-11 06:25:53 +0000",
+          "duration": 767,
+          "testcases": {
+            "count": 5,
+            "status": {
+              "passed": 1,
+              "failed": 4,
+              "skipped": 0,
+              "timedout": 0,
+              "error": 0,
+              "running": 0,
+              "queued": 0
+            },
+            "data": [
+              {
+                "class": "bs-smoke/00-launch-unsigned",
+                "testcases": [
+                  {
+                    "name": "bs-smoke/00-launch-unsigned",
+                    "start_time": "2026-08-11 06:25:56 +0000",
+                    "status": "passed",
+                    "duration": 17.465,
+                    "video": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148/video#t=0,18",
+                    "crash_logs_count": 0,
+                    "id": "41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148",
+                    "device_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148/devicelogs",
+                    "network_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148/networklogs",
+                    "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148/commandlogs",
+                    "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148/maestrologs",
+                    "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff5bbbf148/maestroScreenshot"
+                  }
+                ]
+              },
+              {
+                "class": "bs-smoke/01-hr-login",
+                "testcases": [
+                  {
+                    "name": "bs-smoke/01-hr-login",
+                    "start_time": "2026-08-11 06:25:56 +0000",
+                    "status": "failed",
+                    "duration": 172.679,
+                    "video": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3/video#t=22,195",
+                    "crash_logs_count": 0,
+                    "id": "41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3",
+                    "device_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3/devicelogs",
+                    "network_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3/networklogs",
+                    "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3/commandlogs",
+                    "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3/maestrologs",
+                    "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff6530af3/maestroScreenshot"
+                  }
+                ]
+              },
+              {
+                "class": "bs-smoke/02-hr-tabs",
+                "testcases": [
+                  {
+                    "name": "bs-smoke/02-hr-tabs",
+                    "start_time": "2026-08-11 06:25:56 +0000",
+                    "status": "failed",
+                    "duration": 174.694,
+                    "video": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a/video#t=200,374",
+                    "crash_logs_count": 0,
+                    "id": "41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a",
+                    "device_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a/devicelogs",
+                    "network_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a/networklogs",
+                    "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a/commandlogs",
+                    "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a/maestrologs",
+                    "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36aff183f346a/maestroScreenshot"
+                  }
+                ]
+              },
+              {
+                "class": "bs-smoke/03-hr-leave-approve",
+                "testcases": [
+                  {
+                    "name": "bs-smoke/03-hr-leave-approve",
+                    "start_time": "2026-08-11 06:25:56 +0000",
+                    "status": "failed",
+                    "duration": 174.687,
+                    "video": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e/video#t=379,554",
+                    "crash_logs_count": 0,
+                    "id": "41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e",
+                    "device_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e/devicelogs",
+                    "network_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e/networklogs",
+                    "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e/commandlogs",
+                    "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e/maestrologs",
+                    "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36affb6f0159e/maestroScreenshot"
+                  }
+                ]
+              },
+              {
+                "class": "bs-smoke/04-hr-leave-reject",
+                "testcases": [
+                  {
+                    "name": "bs-smoke/04-hr-leave-reject",
+                    "start_time": "2026-08-11 06:25:56 +0000",
+                    "status": "failed",
+                    "duration": 175.427,
+                    "video": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55/video#t=559,734",
+                    "crash_logs_count": 0,
+                    "id": "41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55",
+                    "device_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55/devicelogs",
+                    "network_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55/networklogs",
+                    "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55/commandlogs",
+                    "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55/maestrologs",
+                    "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/bac778d7fc9c39db8690e21437054191b0efc176/sessions/tests/41897b0c1e1d836e7ef1a79af62dcbb275a36afff878cf55/maestroScreenshot"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

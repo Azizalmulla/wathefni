@@ -1,0 +1,17 @@
+{
+  "settings_chunk": "SettingsPage-BmkZSLcI.js",
+  "api_chunk": "api-D8ThHkzi.js",
+  "dash_chunk": "dashboard-DLGjfF52.js",
+  "settings_sha256": "86e97c3575ee6855f971e493f7c9d036eb2d573d8a239b2784bbeda4bf286e35",
+  "api_sha256": "0ee058d67176508ca675b941f5d40657f9d911ca0242a9886cce667afa3b27dd",
+  "dash_sha256": "01e42977d6c4c7b62431d8a8262d8d2b9b3c5093fc512cab6298508f7a293d74",
+  "create_address": true,
+  "rotate": true,
+  "disable": true,
+  "last_received": true,
+  "intake_ar": true,
+  "setup_forward_en": true,
+  "no_intake_ops": true,
+  "api_create": true,
+  "api_rotate": true
+}

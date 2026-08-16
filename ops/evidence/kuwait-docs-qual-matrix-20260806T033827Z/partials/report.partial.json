@@ -1,0 +1,1861 @@
+{
+  "started_at": "2026-08-06T03:25:46.209958+00:00",
+  "mode": "live_http_uvicorn",
+  "base_url": "http://127.0.0.1:8010",
+  "request_timeout_s": 120.0,
+  "type_timeout_s": 360,
+  "max_retries": 1,
+  "template": "default_kuwait@2.0.0",
+  "employee_key": "WATHEFNI-96599338566",
+  "bank_ess": "out_of_scope_submission_not_live",
+  "types": {
+    "civil_id_dual_side_canary": {
+      "item_id": "civil_id_dual_side_canary",
+      "validation_item": "civil_id",
+      "started_at": "2026-08-06T03:25:46.431062+00:00",
+      "checks": {
+        "civil_untouched": {
+          "status": "accepted",
+          "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+          "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+        },
+        "linkage": {
+          "employee_key": "WATHEFNI-96599338566",
+          "item_id": "civil_id_dual_side_canary",
+          "document_type": "civil_id_dual_side_canary",
+          "status": "pending",
+          "required": false,
+          "owner": "employee",
+          "collection_mode": "document"
+        },
+        "wrong_document": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_instruction_screenshot",
+              "message": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_en": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0644\u0642\u0637\u0629 \u0634\u0627\u0634\u0629 \u0644\u0644\u062a\u0639\u0644\u064a\u0645\u0627\u062a \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0646\u0641\u0633\u0647. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0641\u0639\u0644\u064a.",
+              "reason": "instruction_screenshot",
+              "gate": "soft",
+              "detected_item": "instruction_screenshot",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.0,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "reject",
+                "reason": "glare_or_shadow",
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 351.994,
+                  "glare_frac": 0.4561,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "upload_front": {
+          "http": 200,
+          "kind": "ok",
+          "body": {
+            "ok": true,
+            "item_id": "civil_id_dual_side_canary",
+            "file_id": "e1dd3ce7-f9a2-4fb6-8fc7-b1a5fab0920d",
+            "storage_status": "stored",
+            "part": "front",
+            "attempt_id": "f720a75e-42c3-4923-b24a-a8b716e03fff",
+            "parts": {
+              "schema": "civil_id_v1",
+              "front": {
+                "present": true,
+                "file_id": "e1dd3ce7-f9a2-4fb6-8fc7-b1a5fab0920d",
+                "filename": "kuwait_paci_civil_id_front_v1.png",
+                "mime_type": "image/png",
+                "file_sha256": "ceb955cd7316b471bef942a03ef5002eaa50b305edbadc2d2a51879fae9dd4f3",
+                "detected_side": "front",
+                "hr_warning": false,
+                "uploaded_at": "2026-08-06T03:25:54.546894+00:00"
+              },
+              "back": {
+                "present": false,
+                "file_id": null,
+                "filename": null,
+                "detected_side": null,
+                "hr_warning": false
+              },
+              "parts_complete": false,
+              "missing": [
+                "back"
+              ]
+            },
+            "parts_complete": false,
+            "status": "in_progress",
+            "pair_gate": {
+              "ok": false,
+              "reason": "parts_incomplete",
+              "hr_review_recommended": false,
+              "hr_warnings": []
+            },
+            "lifecycle_version": "2a",
+            "validation": {
+              "gate": "soft",
+              "decision": "allow",
+              "reason": null,
+              "hr_review_recommended": false,
+              "message": null,
+              "message_en": null,
+              "message_ar": null,
+              "gpt_used": false
+            }
+          }
+        },
+        "upload_back": {
+          "http": 200,
+          "kind": "ok",
+          "body": {
+            "ok": true,
+            "item_id": "civil_id_dual_side_canary",
+            "file_id": "53f3ccdb-d82b-4a89-9c5c-c33152525c31",
+            "storage_status": "stored",
+            "part": "back",
+            "attempt_id": "f720a75e-42c3-4923-b24a-a8b716e03fff",
+            "parts": {
+              "schema": "civil_id_v1",
+              "front": {
+                "present": true,
+                "file_id": "e1dd3ce7-f9a2-4fb6-8fc7-b1a5fab0920d",
+                "filename": "kuwait_paci_civil_id_front_v1.png",
+                "mime_type": "image/png",
+                "file_sha256": "ceb955cd7316b471bef942a03ef5002eaa50b305edbadc2d2a51879fae9dd4f3",
+                "detected_side": "front",
+                "hr_warning": false,
+                "uploaded_at": "2026-08-06T03:25:54.546894+00:00"
+              },
+              "back": {
+                "present": true,
+                "file_id": "53f3ccdb-d82b-4a89-9c5c-c33152525c31",
+                "filename": "kuwait_paci_civil_id_back_v1.png",
+                "mime_type": "image/png",
+                "file_sha256": "d8ba8ecd299e96d5d5f72fe6acafd346abd6678a30b32ab60d2d433a9eb80c5d",
+                "detected_side": "back",
+                "hr_warning": false,
+                "uploaded_at": "2026-08-06T03:25:59.697277+00:00"
+              },
+              "parts_complete": true,
+              "missing": []
+            },
+            "parts_complete": true,
+            "status": "processing",
+            "pair_gate": {
+              "ok": true,
+              "reason": null,
+              "hr_review_recommended": false,
+              "hr_warnings": []
+            },
+            "lifecycle_version": "2a",
+            "validation": {
+              "gate": "soft",
+              "decision": "allow",
+              "reason": null,
+              "hr_review_recommended": false,
+              "message": null,
+              "message_en": null,
+              "message_ar": null,
+              "gpt_used": false
+            }
+          }
+        },
+        "version": {
+          "version_id": "f720a75e-42c3-4923-b24a-a8b716e03fff",
+          "review_status": "pending_hr_review",
+          "parts_complete": true,
+          "document_number": "290000001234",
+          "expiry_date": null,
+          "issue_date": null,
+          "file_id": "e1dd3ce7-f9a2-4fb6-8fc7-b1a5fab0920d"
+        },
+        "identity": null,
+        "expiry": "2030-01-14",
+        "hr_journey_hit": true,
+        "hr_projection": {
+          "review_status": "pending_hr_review",
+          "expiry_date": null,
+          "issue_date": null,
+          "has_ocr_proposal": true,
+          "ocr_keys": [
+            "authoritative",
+            "document_number",
+            "expiry_date",
+            "hr_review_recommended",
+            "hr_warnings",
+            "issue_date",
+            "pair_validated_at",
+            "parts",
+            "parts_schema"
+          ],
+          "versions_count": 1
+        },
+        "hr_fields_shown_in_ui": [
+          "expiry_date",
+          "issue_date",
+          "review_status",
+          "rejection_reason",
+          "versions"
+        ],
+        "hr_fields_in_api_not_ui": [
+          "document_number"
+        ],
+        "preview_file_id": "e1dd3ce7-f9a2-4fb6-8fc7-b1a5fab0920d",
+        "preview_http": 200,
+        "employee_status_after_approve": "accepted",
+        "employee_status_after_reject": "replacement_required",
+        "cross_employee_upload": {
+          "http": 404,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "item_not_found",
+              "message": "We couldn't find that document on your checklist."
+            }
+          }
+        }
+      },
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "identity_matching",
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "extracted_schema": {
+        "document_number": "290000001234",
+        "expiry_date": "2030-01-14",
+        "_top_level_keys": [
+          "authoritative",
+          "document_number",
+          "expiry_date",
+          "hr_review_recommended",
+          "hr_warnings",
+          "issue_date",
+          "pair_validated_at",
+          "parts",
+          "parts_schema"
+        ],
+        "_field_keys": []
+      },
+      "errors": [],
+      "failing_request": null,
+      "parts_extracted_schema": {
+        "front": {
+          "detected_side": "front",
+          "hr_warning": false,
+          "sha": "ceb955cd7316b471bef942a03ef5002eaa50b305edbadc2d2a51879fae9dd4f3",
+          "schema": {
+            "document_type": "civil_id",
+            "side": "front",
+            "document_relationship": {
+              "value": "standalone",
+              "confidence": 0.985
+            },
+            "full_name": "ABDULAZIZ H R ALMULLA",
+            "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0631\u0627\u0634\u062f \u0627\u0644\u0645\u0644\u0627",
+            "full_name_en": "ABDULAZIZ H R ALMULLA",
+            "document_number": "290000001234",
+            "nationality": "Kuwaiti",
+            "date_of_birth": "1990-01-15",
+            "issue_date": {
+              "value": null,
+              "confidence": 0.985
+            },
+            "issued_date": {
+              "value": null,
+              "confidence": 0.985
+            },
+            "expiry_date": "2030-01-14",
+            "employer_or_sponsor": {
+              "value": null,
+              "confidence": 0.985
+            },
+            "confidence": 0.0,
+            "extraction_status": "needs_review",
+            "_top_level_keys": [
+              "authoritative",
+              "canary_identity_alias_applied",
+              "canonical_document_type",
+              "channel",
+              "confidence",
+              "content_sha256",
+              "cost_usd",
+              "country_code",
+              "date_of_birth",
+              "date_of_birth_parsed",
+              "delegated_to",
+              "doc_validation",
+              "document_number",
+              "document_type",
+              "employer_or_sponsor",
+              "envelope",
+              "expiry_date",
+              "expiry_date_parsed",
+              "extraction_error",
+              "extraction_status",
+              "fields",
+              "full_name",
+              "full_name_ar",
+              "full_name_en",
+              "gpt_used",
+              "hr_confirmation_required",
+              "identity_check",
+              "issued_date",
+              "issued_date_parsed",
+              "issuing_authority",
+              "jurisdiction",
+              "latency_ms",
+              "model",
+              "nationality",
+              "provider",
+              "side",
+              "validation",
+              "verification"
+            ],
+            "_field_keys": [
+              "date_of_birth",
+              "document_number",
+              "document_relationship",
+              "document_type",
+              "employer_or_sponsor",
+              "expiry_date",
+              "full_name",
+              "full_name_ar",
+              "full_name_en",
+              "issue_date",
+              "issued_date",
+              "nationality",
+              "side"
+            ]
+          }
+        },
+        "back": {
+          "detected_side": "back",
+          "hr_warning": false,
+          "sha": "d8ba8ecd299e96d5d5f72fe6acafd346abd6678a30b32ab60d2d433a9eb80c5d",
+          "schema": {
+            "document_type": "civil_id",
+            "side": "back",
+            "document_relationship": {
+              "value": "pair_with_front",
+              "confidence": 0.97
+            },
+            "full_name": "ABDULAZIZ H R ALMULLA",
+            "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0627\u0644\u0631\u0641\u0627\u0639\u064a \u0627\u0644\u0645\u0637\u0648\u0639",
+            "full_name_en": "ABDULAZIZ H R ALMULLA",
+            "document_number": "290000001234",
+            "nationality": {
+              "value": null,
+              "confidence": 0.97
+            },
+            "date_of_birth": {
+              "value": null,
+              "confidence": 0.97
+            },
+            "issue_date": {
+              "value": null,
+              "confidence": 0.97
+            },
+            "issued_date": {
+              "value": null,
+              "confidence": 0.97
+            },
+            "expiry_date": {
+              "value": null,
+              "confidence": 0.97
+            },
+            "employer_or_sponsor": {
+              "value": null,
+              "confidence": 0.97
+            },
+            "confidence": 0.0,
+            "extraction_status": "needs_review",
+            "_top_level_keys": [
+              "authoritative",
+              "canary_identity_alias_applied",
+              "canonical_document_type",
+              "channel",
+              "confidence",
+              "content_sha256",
+              "cost_usd",
+              "country_code",
+              "date_of_birth",
+              "date_of_birth_parsed",
+              "delegated_to",
+              "doc_validation",
+              "document_number",
+              "document_type",
+              "employer_or_sponsor",
+              "envelope",
+              "expiry_date",
+              "expiry_date_parsed",
+              "extraction_error",
+              "extraction_status",
+              "fields",
+              "full_name",
+              "full_name_ar",
+              "full_name_en",
+              "gpt_used",
+              "hr_confirmation_required",
+              "identity_check",
+              "issued_date",
+              "issued_date_parsed",
+              "issuing_authority",
+              "jurisdiction",
+              "latency_ms",
+              "model",
+              "nationality",
+              "provider",
+              "side",
+              "validation",
+              "verification"
+            ],
+            "_field_keys": [
+              "date_of_birth",
+              "document_number",
+              "document_relationship",
+              "document_type",
+              "employer_or_sponsor",
+              "expiry_date",
+              "full_name",
+              "full_name_ar",
+              "full_name_en",
+              "issue_date",
+              "issued_date",
+              "nationality",
+              "side"
+            ]
+          }
+        }
+      },
+      "verdict": "partially proven",
+      "finished_at": "2026-08-06T03:25:59.812513+00:00",
+      "subprocess_exit": 0
+    },
+    "docs_qual_passport": {
+      "item_id": "docs_qual_passport",
+      "validation_item": "passport",
+      "started_at": "2026-08-06T03:26:00.298196+00:00",
+      "checks": {
+        "civil_untouched": {
+          "status": "accepted",
+          "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+          "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+        },
+        "linkage": {
+          "employee_key": "WATHEFNI-96599338566",
+          "item_id": "docs_qual_passport",
+          "document_type": "docs_qual_passport",
+          "status": "pending",
+          "required": false,
+          "owner": "employee",
+          "collection_mode": "document"
+        },
+        "wrong_document": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_instruction_screenshot",
+              "message": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_en": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0644\u0642\u0637\u0629 \u0634\u0627\u0634\u0629 \u0644\u0644\u062a\u0639\u0644\u064a\u0645\u0627\u062a \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0646\u0641\u0633\u0647. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0641\u0639\u0644\u064a.",
+              "reason": "instruction_screenshot",
+              "gate": "soft",
+              "detected_item": "instruction_screenshot",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.0,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "reject",
+                "reason": "glare_or_shadow",
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 351.994,
+                  "glare_frac": 0.4561,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "cross_type_rejection": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_wrong_media_item",
+              "message": "This file doesn't look like the document we asked for. Please upload the correct document and try again.",
+              "message_en": "This file doesn't look like the document we asked for. Please upload the correct document and try again.",
+              "message_ar": "\u0647\u0630\u0627 \u0627\u0644\u0645\u0644\u0641 \u0644\u0627 \u064a\u0628\u062f\u0648 \u0643\u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0635\u062d\u064a\u062d \u0648\u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.",
+              "reason": "wrong_media_item",
+              "gate": "soft",
+              "detected_item": "civil_id",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.98,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "clean",
+                "reason": null,
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 665.808,
+                  "glare_frac": 0.008,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "upload": {
+          "http": 200,
+          "kind": "ok",
+          "body": {
+            "ok": true,
+            "item_id": "docs_qual_passport",
+            "file_id": "1a786653-ee1a-4a9e-a214-76ddd3a3c49e",
+            "storage_status": "stored",
+            "status": "processing",
+            "lifecycle_version": "2a",
+            "validation": {
+              "gate": "soft",
+              "decision": "allow",
+              "reason": null,
+              "hr_review_recommended": false,
+              "message": null,
+              "message_en": null,
+              "message_ar": null,
+              "gpt_used": false
+            }
+          }
+        },
+        "version": {
+          "version_id": "404d4d52-9187-420e-9cc8-930cbd8d4025",
+          "review_status": "pending_hr_review",
+          "parts_complete": false,
+          "document_number": "A12345678",
+          "expiry_date": "2032-05-31",
+          "issue_date": "2022-06-01",
+          "file_id": "1a786653-ee1a-4a9e-a214-76ddd3a3c49e"
+        },
+        "identity": null,
+        "expiry": "2032-05-31",
+        "hr_journey_hit": true,
+        "hr_projection": {
+          "review_status": "pending_hr_review",
+          "expiry_date": "2032-05-31",
+          "issue_date": "2022-06-01",
+          "has_ocr_proposal": true,
+          "ocr_keys": [
+            "authoritative",
+            "confidence",
+            "date_of_birth",
+            "document_number",
+            "document_type",
+            "expiry_date",
+            "extraction_status",
+            "full_name",
+            "full_name_ar",
+            "full_name_en",
+            "issue_date",
+            "name",
+            "nationality",
+            "side"
+          ],
+          "versions_count": 1
+        },
+        "hr_fields_shown_in_ui": [
+          "expiry_date",
+          "issue_date",
+          "review_status",
+          "rejection_reason",
+          "versions"
+        ],
+        "hr_fields_in_api_not_ui": [
+          "full_name",
+          "full_name_en",
+          "full_name_ar",
+          "name",
+          "document_number",
+          "nationality",
+          "date_of_birth",
+          "side",
+          "confidence"
+        ],
+        "preview_file_id": "1a786653-ee1a-4a9e-a214-76ddd3a3c49e",
+        "preview_http": 200,
+        "employee_status_after_approve": "accepted",
+        "employee_status_after_reject": "replacement_required",
+        "cross_employee_upload": {
+          "http": 404,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "item_not_found",
+              "message": "We couldn't find that document on your checklist."
+            }
+          }
+        }
+      },
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "extracted_schema": {
+        "document_type": "passport",
+        "side": "front",
+        "full_name": "ABDULAZIZ H R ALMULLA",
+        "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0631\u0627\u0634\u062f \u0627\u0644\u0645\u0644\u0627",
+        "full_name_en": "ABDULAZIZ H R ALMULLA",
+        "document_number": "A12345678",
+        "nationality": "Kuwaiti",
+        "date_of_birth": "1990-01-15",
+        "issue_date": "2022-06-01",
+        "expiry_date": "2032-05-31",
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "date_of_birth",
+          "document_number",
+          "document_type",
+          "expiry_date",
+          "extraction_status",
+          "full_name",
+          "full_name_ar",
+          "full_name_en",
+          "issue_date",
+          "name",
+          "nationality",
+          "side"
+        ],
+        "_field_keys": []
+      },
+      "errors": [],
+      "failing_request": null,
+      "verdict": "partially proven",
+      "finished_at": "2026-08-06T03:26:11.760896+00:00",
+      "subprocess_exit": 0
+    },
+    "docs_qual_residence": {
+      "item_id": "docs_qual_residence",
+      "validation_item": "residence",
+      "started_at": "2026-08-06T03:26:12.167073+00:00",
+      "checks": {
+        "civil_untouched": {
+          "status": "accepted",
+          "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+          "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+        },
+        "linkage": {
+          "employee_key": "WATHEFNI-96599338566",
+          "item_id": "docs_qual_residence",
+          "document_type": "docs_qual_residence",
+          "status": "pending",
+          "required": false,
+          "owner": "employee",
+          "collection_mode": "document"
+        },
+        "wrong_document": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_instruction_screenshot",
+              "message": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_en": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0644\u0642\u0637\u0629 \u0634\u0627\u0634\u0629 \u0644\u0644\u062a\u0639\u0644\u064a\u0645\u0627\u062a \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0646\u0641\u0633\u0647. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0641\u0639\u0644\u064a.",
+              "reason": "instruction_screenshot",
+              "gate": "soft",
+              "detected_item": "instruction_screenshot",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.0,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "reject",
+                "reason": "glare_or_shadow",
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 351.994,
+                  "glare_frac": 0.4561,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "cross_type_rejection": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_looks_like_photo_not_document",
+              "message": "That looks like a personal photo, not the requested document. Please upload the correct document.",
+              "message_en": "That looks like a personal photo, not the requested document. Please upload the correct document.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0635\u0648\u0631\u0629 \u0634\u062e\u0635\u064a\u0629 \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0635\u062d\u064a\u062d.",
+              "reason": "looks_like_photo_not_document",
+              "gate": "soft",
+              "detected_item": "personal_photo",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.98,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "clean",
+                "reason": null,
+                "signal_reason": null,
+                "metrics": {
+                  "width": 900,
+                  "height": 1200,
+                  "short_side": 900,
+                  "long_side": 1200,
+                  "laplacian_var": 264.547,
+                  "glare_frac": 0.0,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "upload": {
+          "http": 200,
+          "kind": "ok",
+          "body": {
+            "ok": true,
+            "item_id": "docs_qual_residence",
+            "file_id": "3f2bbd41-5f00-4bbf-ab04-c27d03aad266",
+            "storage_status": "stored",
+            "status": "processing",
+            "lifecycle_version": "2a",
+            "validation": {
+              "gate": "soft",
+              "decision": "allow",
+              "reason": null,
+              "hr_review_recommended": false,
+              "message": null,
+              "message_en": null,
+              "message_ar": null,
+              "gpt_used": false
+            }
+          }
+        },
+        "version": {
+          "version_id": "2b99dfaf-f99f-4df0-ac51-80fdc0896512",
+          "review_status": "pending_hr_review",
+          "parts_complete": false,
+          "document_number": "RES-889900",
+          "expiry_date": "2026-12-31",
+          "issue_date": "2024-01-10",
+          "file_id": "3f2bbd41-5f00-4bbf-ab04-c27d03aad266"
+        },
+        "identity": "not_applicable_for_item",
+        "expiry": "2026-12-31",
+        "hr_journey_hit": true,
+        "hr_projection": {
+          "review_status": "pending_hr_review",
+          "expiry_date": "2026-12-31",
+          "issue_date": "2024-01-10",
+          "has_ocr_proposal": true,
+          "ocr_keys": [
+            "authoritative",
+            "confidence",
+            "document_number",
+            "document_type",
+            "employer_or_sponsor",
+            "expiry_date",
+            "extraction_status",
+            "full_name",
+            "full_name_ar",
+            "full_name_en",
+            "issue_date",
+            "name",
+            "nationality",
+            "side"
+          ],
+          "versions_count": 1
+        },
+        "hr_fields_shown_in_ui": [
+          "expiry_date",
+          "issue_date",
+          "review_status",
+          "rejection_reason",
+          "versions"
+        ],
+        "hr_fields_in_api_not_ui": [
+          "full_name",
+          "full_name_en",
+          "full_name_ar",
+          "name",
+          "document_number",
+          "nationality",
+          "side",
+          "employer_or_sponsor",
+          "confidence"
+        ],
+        "preview_file_id": "3f2bbd41-5f00-4bbf-ab04-c27d03aad266",
+        "preview_http": 200,
+        "employee_status_after_approve": "accepted",
+        "employee_status_after_reject": "replacement_required",
+        "cross_employee_upload": {
+          "http": 404,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "item_not_found",
+              "message": "We couldn't find that document on your checklist."
+            }
+          }
+        }
+      },
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "extracted_schema": {
+        "document_type": "residence",
+        "side": "single",
+        "full_name": "ABDULAZIZ H R ALMULLA",
+        "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0631\u0627\u0634\u062f \u0627\u0644\u0645\u0644\u0627",
+        "full_name_en": "ABDULAZIZ H R ALMULLA",
+        "document_number": "RES-889900",
+        "nationality": "Non-Kuwaiti sample",
+        "issue_date": "2024-01-10",
+        "expiry_date": "2026-12-31",
+        "employer_or_sponsor": "WATHEFNI CO",
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "document_number",
+          "document_type",
+          "employer_or_sponsor",
+          "expiry_date",
+          "extraction_status",
+          "full_name",
+          "full_name_ar",
+          "full_name_en",
+          "issue_date",
+          "name",
+          "nationality",
+          "side"
+        ],
+        "_field_keys": []
+      },
+      "errors": [],
+      "failing_request": null,
+      "verdict": "partially proven",
+      "finished_at": "2026-08-06T03:26:23.450047+00:00",
+      "subprocess_exit": 0
+    },
+    "docs_qual_work_permit": {
+      "item_id": "docs_qual_work_permit",
+      "validation_item": "work_permit",
+      "started_at": "2026-08-06T03:26:23.832512+00:00",
+      "checks": {
+        "civil_untouched": {
+          "status": "accepted",
+          "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+          "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+        },
+        "linkage": {
+          "employee_key": "WATHEFNI-96599338566",
+          "item_id": "docs_qual_work_permit",
+          "document_type": "docs_qual_work_permit",
+          "status": "pending",
+          "required": false,
+          "owner": "employee",
+          "collection_mode": "document"
+        },
+        "wrong_document": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_instruction_screenshot",
+              "message": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_en": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0644\u0642\u0637\u0629 \u0634\u0627\u0634\u0629 \u0644\u0644\u062a\u0639\u0644\u064a\u0645\u0627\u062a \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0646\u0641\u0633\u0647. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0641\u0639\u0644\u064a.",
+              "reason": "instruction_screenshot",
+              "gate": "soft",
+              "detected_item": "instruction_screenshot",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.0,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "reject",
+                "reason": "glare_or_shadow",
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 351.994,
+                  "glare_frac": 0.4561,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "cross_type_rejection": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_looks_like_photo_not_document",
+              "message": "That looks like a personal photo, not the requested document. Please upload the correct document.",
+              "message_en": "That looks like a personal photo, not the requested document. Please upload the correct document.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0635\u0648\u0631\u0629 \u0634\u062e\u0635\u064a\u0629 \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0635\u062d\u064a\u062d.",
+              "reason": "looks_like_photo_not_document",
+              "gate": "soft",
+              "detected_item": "personal_photo",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.98,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "clean",
+                "reason": null,
+                "signal_reason": null,
+                "metrics": {
+                  "width": 900,
+                  "height": 1200,
+                  "short_side": 900,
+                  "long_side": 1200,
+                  "laplacian_var": 264.547,
+                  "glare_frac": 0.0,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "upload": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_expired_document",
+              "message": "This document appears expired. Please upload a valid document, or contact HR if you need help.",
+              "message_en": "This document appears expired. Please upload a valid document, or contact HR if you need help.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0627 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0645\u0646\u062a\u0647\u064d. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0645\u0633\u062a\u0646\u062f \u0633\u0627\u0631\u064a\u060c \u0623\u0648 \u062a\u0648\u0627\u0635\u0644 \u0645\u0639 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0644\u0644\u0645\u0633\u0627\u0639\u062f\u0629.",
+              "reason": "expired_document",
+              "gate": "soft",
+              "detected_item": "work_permit",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.98,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "clean",
+                "reason": null,
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 854.187,
+                  "glare_frac": 0.0014,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              }
+            }
+          }
+        },
+        "version": {
+          "version_id": null,
+          "review_status": null,
+          "parts_complete": null,
+          "document_number": null,
+          "expiry_date": null,
+          "issue_date": null,
+          "file_id": null
+        },
+        "identity": "not_applicable_for_item",
+        "expiry": null,
+        "hr_journey_hit": false,
+        "preview_file_id": null,
+        "cross_employee_upload": {
+          "http": 404,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "item_not_found",
+              "message": "We couldn't find that document on your checklist."
+            }
+          }
+        }
+      },
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "identity_matching_na",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "expiry_extraction"
+      ],
+      "missing": [
+        "supported_upload",
+        "ocr_stored",
+        "hr_receives_submission",
+        "version_history",
+        "preview",
+        "hr_approve_roundtrip"
+      ],
+      "extracted_schema": {
+        "_top_level_keys": [],
+        "_field_keys": []
+      },
+      "errors": [],
+      "failing_request": null,
+      "verdict": "partially proven",
+      "finished_at": "2026-08-06T03:26:34.268217+00:00",
+      "subprocess_exit": 0
+    },
+    "docs_qual_employment_contract": {
+      "item_id": "docs_qual_employment_contract",
+      "validation_item": "employment_contract",
+      "started_at": "2026-08-06T03:26:34.842825+00:00",
+      "checks": {
+        "civil_untouched": {
+          "status": "accepted",
+          "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+          "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+        },
+        "linkage": {
+          "employee_key": "WATHEFNI-96599338566",
+          "item_id": "docs_qual_employment_contract",
+          "document_type": "docs_qual_employment_contract",
+          "status": "pending",
+          "required": false,
+          "owner": "employee",
+          "collection_mode": "document"
+        },
+        "wrong_document": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_glare_or_shadow",
+              "message": "Glare or heavy shadow is covering parts of the document. Please retake in even light without flash reflection.",
+              "message_en": "Glare or heavy shadow is covering parts of the document. Please retake in even light without flash reflection.",
+              "message_ar": "\u0648\u0647\u062c \u0623\u0648 \u0638\u0644 \u0643\u062b\u064a\u0641 \u064a\u063a\u0637\u064a \u0623\u062c\u0632\u0627\u0621 \u0645\u0646 \u0627\u0644\u0645\u0633\u062a\u0646\u062f. \u064a\u0631\u062c\u0649 \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0642\u0627\u0637 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0625\u0636\u0627\u0621\u0629 \u0645\u062a\u0633\u0627\u0648\u064a\u0629 \u0648\u062f\u0648\u0646 \u0627\u0646\u0639\u0643\u0627\u0633 \u0627\u0644\u0641\u0644\u0627\u0634.",
+              "reason": "glare_or_shadow",
+              "gate": "soft",
+              "detected_item": "unknown",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.0,
+                "route": {
+                  "document_class": "contract",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "mistral_or_shared",
+                  "gpt_auto_ocr_fallback": false,
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "reject",
+                "reason": "glare_or_shadow",
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 351.994,
+                  "glare_frac": 0.4561,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              },
+              "quality_issues": [
+                "glare_or_shadow"
+              ]
+            }
+          }
+        },
+        "cross_type_rejection": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_too_blurry",
+              "message": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+              "message_en": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+              "message_ar": "\u0647\u0630\u0647 \u0627\u0644\u0635\u0648\u0631\u0629 \u063a\u064a\u0631 \u0648\u0627\u0636\u062d\u0629 \u0644\u0644\u0642\u0631\u0627\u0621\u0629. \u064a\u0631\u062c\u0649 \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0642\u0627\u0637\u0647\u0627 \u0639\u0646 \u0642\u0631\u0628 \u0648\u0628\u062a\u0631\u0643\u064a\u0632 \u0623\u0648\u0636\u062d\u060c \u062b\u0645 \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.",
+              "reason": "too_blurry",
+              "gate": "soft",
+              "detected_item": "unknown",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.0,
+                "route": {
+                  "document_class": "contract",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "mistral_or_shared",
+                  "gpt_auto_ocr_fallback": false,
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "clean",
+                "reason": null,
+                "signal_reason": null,
+                "metrics": {
+                  "width": 900,
+                  "height": 1200,
+                  "short_side": 900,
+                  "long_side": 1200,
+                  "laplacian_var": 264.547,
+                  "glare_frac": 0.0,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              },
+              "quality_issues": [
+                "too_blurry"
+              ]
+            }
+          }
+        },
+        "upload": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_glare_or_shadow",
+              "message": "Glare or heavy shadow is covering parts of the document. Please retake in even light without flash reflection.",
+              "message_en": "Glare or heavy shadow is covering parts of the document. Please retake in even light without flash reflection.",
+              "message_ar": "\u0648\u0647\u062c \u0623\u0648 \u0638\u0644 \u0643\u062b\u064a\u0641 \u064a\u063a\u0637\u064a \u0623\u062c\u0632\u0627\u0621 \u0645\u0646 \u0627\u0644\u0645\u0633\u062a\u0646\u062f. \u064a\u0631\u062c\u0649 \u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0642\u0627\u0637 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0625\u0636\u0627\u0621\u0629 \u0645\u062a\u0633\u0627\u0648\u064a\u0629 \u0648\u062f\u0648\u0646 \u0627\u0646\u0639\u0643\u0627\u0633 \u0627\u0644\u0641\u0644\u0627\u0634.",
+              "reason": "glare_or_shadow",
+              "gate": "soft",
+              "detected_item": "employment_contract",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.95,
+                "route": {
+                  "document_class": "contract",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "mistral_or_shared",
+                  "gpt_auto_ocr_fallback": false,
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              },
+              "capture_quality": {
+                "status": "reject",
+                "reason": "glare_or_shadow",
+                "signal_reason": null,
+                "metrics": {
+                  "width": 1400,
+                  "height": 1000,
+                  "short_side": 1000,
+                  "long_side": 1400,
+                  "laplacian_var": 1230.799,
+                  "glare_frac": 0.4401,
+                  "crop_hot_sides": 0,
+                  "crop_signal": "none"
+                },
+                "engine": "pil_numpy_v1"
+              },
+              "quality_issues": [
+                "glare_or_shadow"
+              ]
+            }
+          }
+        },
+        "version": {
+          "version_id": null,
+          "review_status": null,
+          "parts_complete": null,
+          "document_number": null,
+          "expiry_date": null,
+          "issue_date": null,
+          "file_id": null
+        },
+        "identity": "not_applicable_for_item",
+        "hr_journey_hit": true,
+        "hr_projection": {
+          "review_status": "rejected_reupload",
+          "expiry_date": null,
+          "issue_date": null,
+          "has_ocr_proposal": true,
+          "ocr_keys": [
+            "authoritative",
+            "document_number",
+            "expiry_date",
+            "extraction_status",
+            "issue_date",
+            "name"
+          ],
+          "versions_count": 1
+        },
+        "hr_fields_shown_in_ui": [
+          "expiry_date",
+          "issue_date",
+          "review_status",
+          "rejection_reason",
+          "versions"
+        ],
+        "hr_fields_in_api_not_ui": [
+          "name",
+          "document_number"
+        ],
+        "preview_file_id": null,
+        "cross_employee_upload": {
+          "http": 404,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "item_not_found",
+              "message": "We couldn't find that document on your checklist."
+            }
+          }
+        }
+      },
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [
+        "supported_upload",
+        "ocr_stored",
+        "preview",
+        "hr_approve_roundtrip"
+      ],
+      "extracted_schema": {
+        "_top_level_keys": [],
+        "_field_keys": []
+      },
+      "errors": [],
+      "failing_request": null,
+      "verdict": "partially proven",
+      "finished_at": "2026-08-06T03:26:44.629558+00:00",
+      "subprocess_exit": 0
+    },
+    "docs_qual_personal_photo": {
+      "item_id": "docs_qual_personal_photo",
+      "validation_item": "personal_photo",
+      "started_at": "2026-08-06T03:26:45.041663+00:00",
+      "checks": {
+        "civil_untouched": {
+          "status": "accepted",
+          "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+          "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+        },
+        "linkage": {
+          "employee_key": "WATHEFNI-96599338566",
+          "item_id": "docs_qual_personal_photo",
+          "document_type": "docs_qual_personal_photo",
+          "status": "pending",
+          "required": false,
+          "owner": "employee",
+          "collection_mode": "document"
+        },
+        "wrong_document": {
+          "http": 422,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "document_validation_looks_like_id_not_photo",
+              "message": "That looks like an ID document. Please upload a clear personal photo of yourself instead.",
+              "message_en": "That looks like an ID document. Please upload a clear personal photo of yourself instead.",
+              "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0627 \u0645\u0633\u062a\u0646\u062f \u0647\u0648\u064a\u0629. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0635\u0648\u0631\u0629 \u0634\u062e\u0635\u064a\u0629 \u0648\u0627\u0636\u062d\u0629 \u0644\u0643 \u0628\u062f\u0644\u0627\u064b \u0645\u0646\u0647.",
+              "reason": "looks_like_id_not_photo",
+              "gate": "soft",
+              "detected_item": "civil_id",
+              "validation": {
+                "decision": "block",
+                "confidence": 0.97,
+                "route": {
+                  "document_class": "identity",
+                  "file_type": "png",
+                  "extension": ".png",
+                  "reading_route": "shared_envelope_intake",
+                  "gpt_auto_ocr_fallback": false,
+                  "file_types": [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "pdf",
+                    "tif",
+                    "tiff",
+                    "webp"
+                  ],
+                  "fallback_reading": "needs_review",
+                  "structuring": "identity_document_extraction_mistral",
+                  "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                  "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                  "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                  "gpt_fallback_forbidden": true
+                },
+                "gpt_used": false
+              }
+            }
+          }
+        },
+        "upload": {
+          "http": 200,
+          "kind": "ok",
+          "body": {
+            "ok": true,
+            "item_id": "docs_qual_personal_photo",
+            "file_id": "8497a707-fda4-4177-a260-9891c69d91f3",
+            "storage_status": "stored",
+            "status": "processing",
+            "lifecycle_version": "2a",
+            "validation": {
+              "gate": "soft",
+              "decision": "allow",
+              "reason": null,
+              "hr_review_recommended": false,
+              "message": null,
+              "message_en": null,
+              "message_ar": null,
+              "gpt_used": false
+            }
+          }
+        },
+        "version": {
+          "version_id": "8551a7e8-2ab6-47cc-84df-6d768664c170",
+          "review_status": "pending_hr_review",
+          "parts_complete": false,
+          "document_number": null,
+          "expiry_date": null,
+          "issue_date": null,
+          "file_id": "8497a707-fda4-4177-a260-9891c69d91f3"
+        },
+        "identity": "not_applicable_for_item",
+        "hr_journey_hit": true,
+        "hr_projection": {
+          "review_status": "pending_hr_review",
+          "expiry_date": null,
+          "issue_date": null,
+          "has_ocr_proposal": true,
+          "ocr_keys": [
+            "authoritative",
+            "confidence",
+            "extraction_status"
+          ],
+          "versions_count": 1
+        },
+        "hr_fields_shown_in_ui": [
+          "expiry_date",
+          "issue_date",
+          "review_status",
+          "rejection_reason",
+          "versions"
+        ],
+        "hr_fields_in_api_not_ui": [
+          "confidence"
+        ],
+        "preview_file_id": "8497a707-fda4-4177-a260-9891c69d91f3",
+        "preview_http": 200,
+        "employee_status_after_approve": "accepted",
+        "employee_status_after_reject": "replacement_required",
+        "cross_employee_upload": {
+          "http": 404,
+          "kind": "http_error",
+          "body": {
+            "detail": {
+              "error": "item_not_found",
+              "message": "We couldn't find that document on your checklist."
+            }
+          }
+        }
+      },
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "extracted_schema": {
+        "confidence": 0.0,
+        "extraction_status": "needs_review",
+        "_top_level_keys": [
+          "authoritative",
+          "confidence",
+          "extraction_status"
+        ],
+        "_field_keys": []
+      },
+      "errors": [],
+      "failing_request": null,
+      "verdict": "partially proven",
+      "finished_at": "2026-08-06T03:26:51.415445+00:00",
+      "subprocess_exit": 0
+    }
+  },
+  "matrix": {
+    "civil_id_dual_side_canary": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "identity_matching",
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_passport": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_residence": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_work_permit": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "identity_matching_na",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "expiry_extraction"
+      ],
+      "missing": [
+        "supported_upload",
+        "ocr_stored",
+        "hr_receives_submission",
+        "version_history",
+        "preview",
+        "hr_approve_roundtrip"
+      ],
+      "failing_request": null
+    },
+    "docs_qual_employment_contract": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [
+        "supported_upload",
+        "ocr_stored",
+        "preview",
+        "hr_approve_roundtrip"
+      ],
+      "failing_request": null
+    },
+    "docs_qual_personal_photo": {
+      "verdict": "partially proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [
+        "hr_ocr_summary_ui_hidden"
+      ],
+      "missing": [],
+      "failing_request": null
+    }
+  },
+  "hr_fields_shown": [
+    "expiry_date",
+    "issue_date",
+    "review_status",
+    "rejection_reason",
+    "versions"
+  ],
+  "hr_fields_api_but_ui_hidden": [
+    "ocr_proposal.full_name*",
+    "ocr_proposal.document_number",
+    "ocr_proposal.nationality",
+    "ocr_proposal.date_of_birth",
+    "ocr_proposal.side",
+    "ocr_proposal.employer_or_sponsor",
+    "ocr_proposal.confidence"
+  ],
+  "civil_id_before": {
+    "status": "accepted",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+  }
+}

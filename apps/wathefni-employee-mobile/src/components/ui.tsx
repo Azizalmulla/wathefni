@@ -2,7 +2,7 @@ import { type ReactNode } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-import { colors, font, radius, spacing, typeScaling } from '@/theme'
+import { colors, ambient, font, radius, scheduleComposition, spacing, typeScaling } from '@/theme'
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
@@ -12,27 +12,98 @@ export function SectionTitle({ children }: { children: ReactNode }) {
   )
 }
 
-export type StatusTone = 'neutral' | 'success' | 'warning' | 'danger'
+export type StatusTone =
+  | 'neutral'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'yellow'
+  | 'blue'
+  | 'pink'
+  | 'green'
 
-const toneStyle: Record<StatusTone, { fg: string; icon: keyof typeof Ionicons.glyphMap | null }> = {
-  neutral: { fg: colors.subtle, icon: null },
-  success: { fg: colors.success, icon: 'checkmark-circle-outline' },
-  warning: { fg: colors.warning, icon: 'time-outline' },
-  danger: { fg: colors.danger, icon: 'alert-circle-outline' },
+type ToneStyle = {
+  fg: string
+  bg: string
+  border: string
+  icon: keyof typeof Ionicons.glyphMap | null
+  filled: boolean
+}
+
+const toneStyle: Record<StatusTone, ToneStyle> = {
+  // Semantic outline chips (Employee lists / forms).
+  neutral: { fg: colors.subtle, bg: colors.surface, border: colors.border, icon: null, filled: false },
+  success: {
+    fg: colors.success,
+    bg: colors.surface,
+    border: colors.success,
+    icon: 'checkmark-circle-outline',
+    filled: false,
+  },
+  warning: {
+    fg: colors.warning,
+    bg: colors.surface,
+    border: colors.warning,
+    icon: 'time-outline',
+    filled: false,
+  },
+  danger: {
+    fg: colors.danger,
+    bg: colors.surface,
+    border: colors.danger,
+    icon: 'alert-circle-outline',
+    filled: false,
+  },
+  // Home progress — filled Wathefni pastels (Employee dashboard colour language).
+  yellow: {
+    fg: colors.ink,
+    bg: ambient.onboarding.fill,
+    border: ambient.onboarding.fill,
+    icon: null,
+    filled: true,
+  },
+  blue: {
+    fg: colors.ink,
+    bg: scheduleComposition.planned.fill,
+    border: scheduleComposition.planned.fill,
+    icon: null,
+    filled: true,
+  },
+  pink: {
+    fg: colors.ink,
+    bg: ambient.schedule.fill,
+    border: ambient.schedule.fill,
+    icon: null,
+    filled: true,
+  },
+  green: {
+    fg: colors.ink,
+    bg: ambient.leave.fill,
+    border: ambient.leave.fill,
+    icon: null,
+    filled: true,
+  },
 }
 
 /**
- * Status is a bordered chip on `surface`, never an ambient pastel fill.
+ * Status chip.
  *
- * The app uses soft green, pink and butter decoratively, so a soft green blob
- * cannot also mean "approved". Drawing status as outline + semantic text + icon
- * keeps it legible on top of any ambient card and keeps meaning off colour
- * alone: the label always carries the state in words.
+ * - `success` / `warning` / `danger` / `neutral`: bordered on surface (semantic).
+ * - `yellow` / `blue` / `pink` / `green`: filled pastels for Home progress.
  */
 export function StatusChip({ label, tone = 'neutral' }: { label: string; tone?: StatusTone }) {
-  const { fg, icon } = toneStyle[tone]
+  const { fg, bg, border, icon, filled } = toneStyle[tone]
   return (
-    <View style={[styles.chip, { borderColor: tone === 'neutral' ? colors.border : fg }]}>
+    <View
+      style={[
+        styles.chip,
+        {
+          backgroundColor: bg,
+          borderColor: border,
+          borderWidth: filled ? 0 : StyleSheet.hairlineWidth * 2,
+        },
+      ]}
+    >
       {icon ? <Ionicons name={icon} size={12} color={fg} /> : null}
       <Text
         maxFontSizeMultiplier={typeScaling.chip}
@@ -58,10 +129,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth * 2,
-    backgroundColor: colors.surface,
     alignSelf: 'flex-start',
     flexShrink: 1,
   },

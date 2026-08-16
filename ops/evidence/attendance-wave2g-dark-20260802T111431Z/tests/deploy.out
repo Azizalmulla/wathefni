@@ -1,0 +1,97 @@
+stamp=20260802T111431Z
+time_utc=2026-08-02T11:15:03Z
+active
+=== SHAs before ===
+481abf11c8ada15939e3796753c5693b22a6a175099beaaeb43e95261cc2bfb5  /opt/wathefni/orchestrator/app.py
+834f5220b5ca6b0443794af8ab5db5d072c9a4d45a52589b64b3df28ba41260f  /opt/wathefni/orchestrator/attendance_authority_hooks.py
+28fd2cde37d7f4751589839a0a4e4fc20887fb4386ec129c019bea9ec1332203  /opt/wathefni/orchestrator/attendance_authority_postgres.py
+f285bc1da763878d3fc429d26ae43eda3a44432c69aa262476a6a4072c8f487d  /opt/wathefni/orchestrator/attendance_authority_wave1.py
+d5f6cede392e1a01131bb3d6da1e1302138bf514d045733a325bf7504946d0b5  /opt/wathefni/orchestrator/attendance_capture_agent.py
+d02a9630f61ea0cb83d81fec6f631369273d33f2729fbfaac6bf449a6989bda6  /opt/wathefni/orchestrator/attendance_capture_biotime.py
+a491a5b1419d57e68b5d42646b9acbefeace1d8bf856148bc1986caee513d367  /opt/wathefni/orchestrator/attendance_capture_compat.py
+26d17a986ce2d1d1fd2a388ecf7b9671386588642985dd18ed4be052acb4cde3  /opt/wathefni/orchestrator/attendance_capture_contract.py
+e5803ff1321b356d6f6c1c11078615f9164d35cf3218a28154d5074641fc5cbe  /opt/wathefni/orchestrator/attendance_capture_csv.py
+f2ad9544b9b5f5d2d3d58a1150246ad589c2563e111024b1b83211b362df8eba  /opt/wathefni/orchestrator/attendance_capture_health.py
+aea68270ddbbd1bb4169e5bdc5aaa706f9e889ef9b96230ff689f4d0aca2c785  /opt/wathefni/orchestrator/attendance_capture_lab_biotime.py
+8c1a2eea90662158431fd5d142d47520e86d93a0677ceb3de0349a7942b941e6  /opt/wathefni/orchestrator/attendance_capture_ops.py
+4efc5400d97e66310e20e312b3f8c68825c941998427537ef70d91913602f603  /opt/wathefni/orchestrator/attendance_capture_ops_http.py
+049d8d1b4ed6879b135254c5b55112454e991d9a443cbedacb4ff13ba48ea812  /opt/wathefni/orchestrator/attendance_capture_pipeline.py
+9065410c612ab173668ce0c62f4a0e140ec6219c1776372c33b0b771bd18ec21  /opt/wathefni/orchestrator/attendance_capture_registry.py
+fb1fdabb5b1810a979dcf9b67a1dbcfc720b962a24223f8337bfecfe5195fec9  /opt/wathefni/orchestrator/attendance_capture_remediation.py
+62735da6cf70f26d15cc2bcb5c5bbb333468453a38c70bb9bbadadcf56e3f5ec  /opt/wathefni/orchestrator/attendance_capture_secrets.py
+=== flags before ===
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_CAPTURE_CREDENTIAL_KEY=[REDACTED]
+WATHEFNI_DB_POOL_MAX=8
+=== capture_store before ===
+CAPTURE_STORE_unset (process-local memory expected)
+{
+  "db": "wathefni",
+  "wathefni_rows": 42,
+  "demo_seed": 42,
+  "four_reals": 4
+}
+{
+  "capture_store_env": null,
+  "process_local_expected": true,
+  "note": "pre-deploy: Wave 2E process-local memory (CAPTURE_STORE unset)"
+}
+[11:15:06] backing up
+481abf11c8ada15939e3796753c5693b22a6a175099beaaeb43e95261cc2bfb5  /opt/wathefni/backups/production-pre-attendance-wave2g-20260802T111431Z/app.py
+bfbdb6020e5afea84cbd3c4a54dd9a52e5d1d1672ea40eceda37214bff5f2fbc  /opt/wathefni/backups/production-pre-attendance-wave2g-20260802T111431Z/attendance-records-fingerprint.csv
+secrets_path=/root/.openclaw/secrets/attendance-capture.env
+secrets_mode=600
+credential_key_absent_from_evidence=true
+rollback_ready=true
+[11:15:06] deploying modules
+APP_PATCHED_WAVE2G_SCHEMA
+[11:15:06] migrate schema
+env production
+expected_db wathefni
+connected_db wathefni
+tables ['attendance_capture_audit_events', 'attendance_capture_checkpoints', 'attendance_capture_connectors', 'attendance_capture_credentials', 'attendance_capture_devices', 'attendance_capture_health', 'attendance_capture_health_events', 'attendance_capture_idempotency', 'attendance_capture_mappings', 'attendance_capture_quarantine', 'attendance_capture_remediation', 'attendance_capture_replay_ledger', 'attendance_capture_sites']
+triggers ['trg_att_cap_audit_immutable', 'trg_att_cap_replay_immutable']
+MIGRATE_OK
+authority_model=durable_postgres_capture_ops_wave2g_v1
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_CAPTURE_CREDENTIAL_KEY=[REDACTED]
+WATHEFNI_DB_POOL_MAX=8
+c472087acbe5d02ca1cab4adc6d7c910e5ef0047f210a373a6f546fca6fbb44d  /opt/wathefni/orchestrator/app.py
+d5f6cede392e1a01131bb3d6da1e1302138bf514d045733a325bf7504946d0b5  /opt/wathefni/orchestrator/attendance_capture_agent.py
+d02a9630f61ea0cb83d81fec6f631369273d33f2729fbfaac6bf449a6989bda6  /opt/wathefni/orchestrator/attendance_capture_biotime.py
+a491a5b1419d57e68b5d42646b9acbefeace1d8bf856148bc1986caee513d367  /opt/wathefni/orchestrator/attendance_capture_compat.py
+26d17a986ce2d1d1fd2a388ecf7b9671386588642985dd18ed4be052acb4cde3  /opt/wathefni/orchestrator/attendance_capture_contract.py
+e5803ff1321b356d6f6c1c11078615f9164d35cf3218a28154d5074641fc5cbe  /opt/wathefni/orchestrator/attendance_capture_csv.py
+f2ad9544b9b5f5d2d3d58a1150246ad589c2563e111024b1b83211b362df8eba  /opt/wathefni/orchestrator/attendance_capture_health.py
+aea68270ddbbd1bb4169e5bdc5aaa706f9e889ef9b96230ff689f4d0aca2c785  /opt/wathefni/orchestrator/attendance_capture_lab_biotime.py
+0ac71abd7e21c151b88797f4b1b46b0ce57fee72fc78d9efcc44b707f2220a1e  /opt/wathefni/orchestrator/attendance_capture_ops.py
+4efc5400d97e66310e20e312b3f8c68825c941998427537ef70d91913602f603  /opt/wathefni/orchestrator/attendance_capture_ops_http.py
+049d8d1b4ed6879b135254c5b55112454e991d9a443cbedacb4ff13ba48ea812  /opt/wathefni/orchestrator/attendance_capture_pipeline.py
+0fc1edc1b5ed6801153dc3c0dd1eae22c4af0f7c34b3077482d4217f4e5cb61f  /opt/wathefni/orchestrator/attendance_capture_postgres.py
+9065410c612ab173668ce0c62f4a0e140ec6219c1776372c33b0b771bd18ec21  /opt/wathefni/orchestrator/attendance_capture_registry.py
+fb1fdabb5b1810a979dcf9b67a1dbcfc720b962a24223f8337bfecfe5195fec9  /opt/wathefni/orchestrator/attendance_capture_remediation.py
+62735da6cf70f26d15cc2bcb5c5bbb333468453a38c70bb9bbadadcf56e3f5ec  /opt/wathefni/orchestrator/attendance_capture_secrets.py
+4b85d6c57803b359d2c2cefe8310879b6add15f750b5a829038cdc5179e7b313  /opt/wathefni/orchestrator/canary-prod-attendance-wave2g.py
+bcaaf2cb087094fd33d7306df59b746b05c97f413fd0a285ea90724b3de60474  /opt/wathefni/dashboard-dist/index.html
+gates_ok store=postgres ingest=off
+DEPLOY_OK REMOTE_EVID=/opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z BACKUP=/opt/wathefni/backups/production-pre-attendance-wave2g-20260802T111431Z

@@ -1,0 +1,34 @@
+{
+  "id": "two_modules",
+  "label": "Two modules (pre_hiring + assessments)",
+  "modules": [
+    "pre_hiring",
+    "assessments"
+  ],
+  "role": "owner",
+  "nav_groups": [
+    "prehire",
+    "settings"
+  ],
+  "nav_ids": [
+    "overview",
+    "ai",
+    "jobs",
+    "candidates",
+    "interviews",
+    "assessments",
+    "ranking",
+    "reports",
+    "notifications",
+    "activity",
+    "settings"
+  ],
+  "overview_layout": "three",
+  "offerable_tabs": {
+    "video_interviews": false
+  },
+  "settings": {
+    "team": true,
+    "integrations": true
+  }
+}

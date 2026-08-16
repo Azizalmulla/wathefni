@@ -1,0 +1,9 @@
+schema_version 2.0.0
+connected_db wathefni
+shift_integrity_settings ok
+shift_assignment_versions ok
+shift_reminder_queue ok
+shift_seasonal_policies ok
+shift_reconciliation_flags ok
+shift_assignment_wave2_cols ['current_version_no', 'lineage_json', 'schedule_reason_code']
+SHIFTS_W2B_PROD_MIGRATE_OK

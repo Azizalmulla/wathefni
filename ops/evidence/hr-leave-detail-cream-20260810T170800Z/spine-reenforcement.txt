@@ -1,0 +1,11 @@
+MainPID=3729911
+APPLICATION_ENVIRONMENT None
+FOUAD_STATUS requested
+FOUAD_CONFLICTS 1
+FOUAD_BALANCE_ROWS 1
+FOUAD_BALANCE {"available": 17.5, "current_balance": 17.5, "entitlement_days": 30.0, "observe_only": true, "enforced": false}
+CREATED 44098cea-5630-4774-8f87-e43a2628effa
+PREPARE_CONSEQUENCE Approve Talal Fadhli's leave and notify the employee.
+CONFIRM_OK True completed
+AFTER_STATUS approved ACTIONS []
+SPINE_REENFORCE: PASS

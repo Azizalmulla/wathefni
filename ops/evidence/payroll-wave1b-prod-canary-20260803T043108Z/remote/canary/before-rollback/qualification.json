@@ -1,0 +1,65 @@
+{
+  "stamp_tag": "92090e6a",
+  "passed": 37,
+  "failed": 0,
+  "ids": {
+    "tag": "92090e6a",
+    "employee_key": "WATHEFNI-PYW1-92090e6a",
+    "phones": {
+      "creator": "965539192090",
+      "approver": "965539292090",
+      "subject": "965539392090"
+    },
+    "contract_ids": [
+      "6d625589-20d6-4489-8864-b78f16977eb4",
+      "da2b0fef-55ff-4708-9b4d-50ab88550c53",
+      "f294faaf-9529-4677-a96a-ab2199e9c369",
+      "a62cb6b9-25b3-4ee7-880c-53ddfef7fd74"
+    ],
+    "period_ids": [
+      "4ba17805-9a0f-486a-83b8-892a17b48819"
+    ],
+    "cleanup": {
+      "contracts": 4,
+      "periods": 1,
+      "components": 4,
+      "events": 10
+    },
+    "residual_total": 0
+  },
+  "honesty": {
+    "payroll_wave1_version": "1.0.0",
+    "payment_processing": "disabled",
+    "gross_to_net": false,
+    "pifss": false,
+    "bank_wps": false,
+    "eos_auto": false,
+    "payslips_as_money": false,
+    "journals": false,
+    "xbrl": false,
+    "money_authority": false,
+    "modes": [
+      "native",
+      "external",
+      "parallel_shadow"
+    ],
+    "input_export_schema": "payroll_input_export@1.0.0",
+    "result_import_schema": "payroll_result_import@1.0.0",
+    "annual_leave_eligibility_months": 6,
+    "synthetic_only": true
+  },
+  "cleanup": {
+    "residual_total": 0,
+    "contracts": 4,
+    "periods": 1,
+    "components": 4,
+    "events": 10
+  },
+  "smoke_ids": [
+    "cc68a9fb-df72-4e13-a0db-cc13a3805380",
+    "7950dafd-6cf7-44b1-9f92-26f685c34ab5"
+  ],
+  "payment_processing": "disabled",
+  "money_authority": false,
+  "wave": "payroll_wave1b_prod_synthetic"
+}

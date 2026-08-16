@@ -1,0 +1,75 @@
+PASS  production database
+PASS  authority on
+PASS  synthetic only on
+PASS  companies WATHEFNI
+PASS  store postgres
+PASS  import off
+PASS  real denied WATHEFNI-96566363363
+PASS  real denied WATHEFNI-96550252254
+PASS  real denied WATHEFNI-96597727743
+PASS  real denied WATHEFNI-96599411617
+PASS  baseline 42 rows
+PASS  synthetic allowed
+PASS  lab fixture synthetic only
+PASS  privacy reject images/templates
+PASS  biotime pagination
+PASS  biotime pulled 4
+PASS  metadata card+face+biometric types
+PASS  no biometric payloads retained
+PASS  authority ingest biotime
+PASS  duplicate pull idempotent
+PASS  normal projection 480
+PASS  overnight projection 480
+PASS  checkpoint resume
+PASS  agent poll enqueue
+PASS  agent offline queue
+PASS  agent reconnect replay
+PASS  credentials sealed durable
+PASS  restart outbox empty
+PASS  checkpoint durable
+PASS  invalid credentials fail
+PASS  credential rotation recovers
+PASS  connector health model
+PASS  health tracks errors
+PASS  unknown quarantined
+PASS  mapped quarantine replay
+PASS  csv same content same ids
+PASS  csv duplicate across files
+PASS  xlsx ingest
+PASS  sftp drop parse
+PASS  interrupted import resume
+PASS  csv day projection 480
+PASS  day approved + snapshot
+PASS  payroll reconcile exact
+PASS  correction after snapshot
+PASS  correction approved
+PASS  reimport idempotent after correction
+PASS  reversal does not alter approved snapshot
+PASS  cross-tenant isolation
+PASS  secrets absent from evidence
+PASS  synthetic punches cleaned
+PASS  synthetic projections cleaned
+PASS  demo rows untouched count
+PASS  demo fingerprint unchanged
+PASS  four reals still present
+{
+  "summary": {
+    "pass": 54,
+    "fail": 0
+  },
+  "synthetic_ids": {
+    "tag": "312feae3",
+    "employee_key": "WATHEFNI-ATTW2C-312feae3",
+    "phone": "965524312fea",
+    "device_user_id": "9312",
+    "terminal_sn": "LAB-W2C-312FEA",
+    "connector_id": "w2c-lab-312feae3",
+    "shift_id": "5acbd482-ba82-4336-8092-45414fd6343a",
+    "oshift_id": "32004437-8a47-41ce-a97b-e58dafeb9065",
+    "projection_id": "8aad537f-ae64-4896-8b44-f7f114f95c8d",
+    "checkpoint": "biotime:2302",
+    "quarantine_id": "49f04e4f-3661-4902-bc8e-f23bdc5f6430",
+    "snapshot_id": "41ee89c4-9de8-4bca-ae01-4b9b68d658c3"
+  }
+}
+SUMMARY pass=54 fail=0

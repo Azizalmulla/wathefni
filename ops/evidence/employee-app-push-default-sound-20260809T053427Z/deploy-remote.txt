@@ -1,0 +1,6 @@
+19244:            # Custom Wathefni default sound (bundled as wathefni_default.wav).
+19246:            # (channelId wathefni_default). Urgent sound is intentionally separate later.
+19247:            "sound": "wathefni_default.wav",
+19248:            "channelId": "wathefni_default",
+active
+200

@@ -1,0 +1,70 @@
+    exit close c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  rollback
+      PASS  EN closed
+      PASS  AR ready
+      PASS  assistant out
+      PASS  sole left authority
+      PASS  finalized ≠ paid
+      PASS  real term dark
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  real canary blocked
+      PASS  enable company
+      PASS  interview hidden when disabled
+      PASS  incomplete path resign draft
+      PASS  incomplete path notice
+      PASS  incomplete path exit ready
+      PASS  incomplete offboarding started
+      PASS  incomplete required clearance blocks close
+      PASS  completed clearance → close case
+      PASS  Payroll absent + settlement not required → ready/closable
+      PASS  ready to close (no payroll)
+      PASS  duplicate open idempotent
+      PASS  SoD self-close forbidden
+      PASS  stale close rejected
+      PASS  canonical employment becomes left only at close
+      PASS  employment_status left
+      PASS  active workforce domains stop
+      PASS  duplicate close idempotent
+      PASS  no silent reopen
+      PASS  rehire eligibility + audit
+      PASS  same person preserved
+      PASS  last-working-date gate blocks
+      PASS  LWD override by HR
+      PASS  settlement required blocks before finalize/ack
+      PASS  unauthorized settlement waiver denied
+      PASS  wave2 packet seeded
+      PASS  wave2 settlement created
+      PASS  wave2 settlement finalized
+      PASS  bind finalized settlement
+      PASS  finalized but ack absent still blocked/distinct
+      PASS  settlement finalized but required acknowledgement absent → blocked
+      PASS  payment status distinct from settlement ack
+      PASS  Payroll enabled + settlement finalized/acknowledged → ready
+      PASS  close with settlement ack
+      PASS  settlement waiver authorized
+      PASS  no fake settlement row on waiver
+      PASS  optional IdP/access ack gate blocks until ack
+      PASS  unauthorized access waiver denied
+      PASS  access acknowledgement semantics
+      PASS  exit interview visible when enabled
+      PASS  exit interview non-blocking default
+      PASS  exit interview complete
+      PASS  exit interview decline
+      PASS  exit interview skip
+      PASS  interview confidentiality RBAC
+      PASS  EN/AR contracts
+      PASS  no fake settlement invent
+      PASS  disable preserves history
+      PASS  rollback preserves closed truth
+      PASS  closed employment truth intact
+      PASS  real termination gate remains OFF
+
+    64 passed, 0 failed
+EXIT_CLOSE_HANDOFF_UNIT_PASS
+EXIT_CLOSE_HANDOFF_FULL_PASS
+STAGING_RC=0

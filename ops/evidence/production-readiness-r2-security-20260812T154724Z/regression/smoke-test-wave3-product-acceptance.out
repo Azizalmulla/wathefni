@@ -1,0 +1,46 @@
+    wave3 product acceptance — unit
+      PASS  setup wave3 policies module
+      PASS  setup patch wave3
+      PASS  modularity matrix configs
+      PASS  setup owns wave3
+      PASS  not env-only ownership
+      PASS  EN employment_change label
+      PASS  AR offboarding label
+      PASS  sole left authority declared
+      PASS  C1 module-off
+      PASS  C2 module-off
+      PASS  C3 module-off
+      PASS  C4 module-off
+      PASS  C5 module-off
+      PASS  real termination dark
+      PASS  C3 assert dark
+      PASS  C5 sole left
+      PASS  C5 finalized ≠ paid
+      PASS  C4 completion ≠ left
+      PASS  assistant mutations explicit off
+      PASS  assistant mutations denied when spine wave on
+      PASS  app merges wave3 policies
+      PASS  Setup Wave3 card
+      PASS  Setup wires Wave3 card
+      PASS  HR web setup console
+      PASS  employee mobile app
+      PASS  HR mobile features
+      PASS  manager/HR mobile present
+      PASS  EN/AR/RTL surface markers
+      PASS  freeze/stamp EMPLOYMENT_CHANGE_FULL_PASS.md
+      PASS  freeze/stamp ESS_LETTERS_DEPENDENTS_FULL_PASS.md
+      PASS  freeze/stamp RESIGNATION_TERMINATION_FULL_PASS.md
+      PASS  freeze/stamp OFFBOARDING_FULL_PASS.md
+      PASS  freeze/stamp EXIT_CLOSE_HANDOFF_FULL_PASS.md
+      PASS  freeze/stamp WAVE1_PRODUCT_FULL_PASS.md
+      PASS  freeze/stamp WAVE2_PRODUCT_FULL_PASS.md
+      PASS  freeze/stamp WATHEFNI_HCM_WAVE3_EMPLOYEE_LIFECYCLE_BUILD_CHARTER.md
+      PASS  product db smoke present
+      PASS  regression smoke smoke-test-employment-change-c1.py
+      PASS  regression smoke smoke-test-ess-letters-dependents-c2.py
+      PASS  regression smoke smoke-test-exit-intent-c3.py
+      PASS  regression smoke smoke-test-offboarding-c4.py
+      PASS  regression smoke smoke-test-exit-close-c5.py
+
+    42 passed, 0 failed
+WAVE3_PRODUCT_UNIT_PASS

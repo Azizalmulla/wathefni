@@ -1,0 +1,48 @@
+stamp=20260803T204936Z
+time_utc=2026-08-03T20:54:55Z
+active
+=== SHAs before ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+b8fae8984984f40547454ef31353345134b2d67d106b4c634563f419edc6af5c  /opt/wathefni/orchestrator/assistant_capability_catalog.py
+c7c7a8727c20b80f5e024189eca7511fb17569e10a0d4540ff60ea261f29edd0  /opt/wathefni/orchestrator/workspace_capability.py
+=== flags before ===
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[20:54:55] backing up modules + dashboard + dropins
+93189dd028114f69f677ed01df2552249a20b49991f82ecb8f258a90cd68250c  modules/test_workspace_composition_matrix.py
+c7c7a8727c20b80f5e024189eca7511fb17569e10a0d4540ff60ea261f29edd0  modules/workspace_capability.py
+b8fae8984984f40547454ef31353345134b2d67d106b4c634563f419edc6af5c  modules/assistant_capability_catalog.py
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  modules/app.py
+[20:54:55] deploying shell wave0 modules + dashboard
+DASHBOARD_DIST_DEPLOYED
+[20:54:55] writing Wave 0-B production drop-in (mutations off; ingest off)
+[20:54:55] migrate ACK
+ack_event_id 3a370331-fca9-4f56-8372-880de0394068
+ACK_PRODUCTION_MODULE_AWARE_SHELL_W0B=YES
+residual_policy=canary_tagged_cleaned_ack_retained
+MIGRATE_OK
+health_ok
+active
+=== SHAs after ===
+3d4d237e3bbe0ddb28a19af925e4d5eb11d30ef9ef5c2ec94455f5a384180d45  /opt/wathefni/orchestrator/app.py
+9ea7b2589105b312083b06db91d61181ed64aa2506e1ab6a112e78ad1913ed72  /opt/wathefni/orchestrator/assistant_capability_catalog.py
+8ec9d775e3676bb4b049b278c11980eaaf0aa4f65ab6826e5e3f10f598466804  /opt/wathefni/orchestrator/workspace_capability.py
+=== flags after ===
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_MODULE_AWARE_SHELL_WAVE0=1
+SHELL_WAVE0 1
+MUTATIONS 0
+CAPTURE_INGEST off
+DASHBOARD_DIST /opt/wathefni/dashboard-dist
+MASW0B_MARKER=MASW0B
+flags_ok_shell_wave0b=true
+DEPLOY_OK stamp=20260803T204936Z backup=/opt/wathefni/backups/production-pre-module-aware-shell-wave0b-20260803T204936Z evid=/opt/wathefni/production-evidence/module-aware-shell-wave0b-prod-canary/20260803T204936Z

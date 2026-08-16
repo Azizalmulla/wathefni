@@ -1,0 +1,87 @@
+payroll pifss eos wave5b production synthetic canary
+tag c496064e employee WATHEFNI-PYW1-PYW5-W5B-c496064e
+[PASS] version
+[PASS] wave5 enabled
+[PASS] synthetic_only
+[PASS] payment disabled
+[PASS] no posts payment
+[PASS] remittance false
+[PASS] statutory filing false
+[PASS] pifss remittance false
+[PASS] eos_auto_payable false
+[PASS] no auto compliance claim
+[PASS] pifss worksheets
+[PASS] eos worksheets
+[PASS] bank false
+[PASS] wps false
+[PASS] ashal false
+[PASS] ai false
+[PASS] native non-auth
+[PASS] external authority
+[PASS] freeze category separation
+[PASS] freeze missing rule fail closed
+[PASS] freeze effective dated
+[PASS] freeze dual override
+[PASS] freeze approved immutable
+[PASS] freeze no remittance
+[PASS] freeze no auto payable
+connected_db wathefni
+[PASS] production db
+[PASS] nonsynthetic refused
+[PASS] expat ok True
+[PASS] expat status unsupported
+[PASS] expat error
+[PASS] gcc ok False
+[PASS] gcc error counsel
+[PASS] gcc status counsel_required
+[PASS] kuwaiti ok False
+[PASS] kuwaiti error counsel
+[PASS] kuwaiti status counsel_required
+[PASS] kuwaiti worksheet id
+[PASS] upsert pifss v1
+[PASS] resolve pending None
+[PASS] counsel approve v1
+[PASS] resolve returns v1
+[PASS] upsert pifss v2
+[PASS] counsel approve v2
+[PASS] as_of 2029 → v1
+[PASS] as_of 2030 → v2
+[PASS] recalc after rule ok
+[PASS] recalc draft status
+[PASS] recalc has rule
+[PASS] recalc new worksheet
+[PASS] prior counsel superseded
+[PASS] submit ok
+[PASS] self approve forbidden
+[PASS] approve ok
+[PASS] approved status
+[PASS] mutate_approved_forbidden
+[PASS] recalc new salary ok
+[PASS] new draft status
+[PASS] new draft distinct
+[PASS] prior approved superseded
+[PASS] history includes superseded approved
+[PASS] history superseded status
+[PASS] history includes new draft
+[PASS] eos art blocked ok False
+[PASS] eos art blocked error
+[PASS] eos law17 blocked ok False
+[PASS] eos law17 blocked error
+[PASS] upsert eos rule
+[PASS] counsel approve eos
+[PASS] eos generate ok
+[PASS] eos draft status
+[PASS] eos review worksheet
+[PASS] eos automatic_payable false
+[PASS] eos not payable instruction
+[PASS] eos termination reason preserved
+[PASS] override initiate
+[PASS] dual action id
+[PASS] override same actor deny
+[PASS] override confirm ok
+[PASS] override exception status
+[PASS] override no remittance
+[PASS] residual zero
+
+81 passed, 0 failed
+QUALIFICATION_JSON /opt/wathefni/production-evidence/payroll-wave5b-prod-canary/20260803T144248Z/canary/before-rollback/qualification.json

@@ -238,13 +238,31 @@ def mistral_ocr_enabled() -> bool:
 
 
 def gpt_vision_rescue_enabled() -> bool:
-    """Bounded GPT-5.4 vision rescue after Mistral OCR quality failure. Default ON when OCR on."""
-    if not mistral_ocr_enabled():
-        return False
-    raw = (os.environ.get("WATHEFNI_CV_GPT_VISION_RESCUE") or "").strip().lower()
-    if not raw:
-        return True
-    return raw in _ON
+    """CV GPT vision rescue is retired.
+
+    Document GPT Rescue Retirement wave: automatic GPT vision rescue is hard-off
+    for CV PDF / DOCX / image paths. Hybrid authority, Poppler, Mistral OCR,
+    retries, circuit breaker, and needs_review remain. The env flag
+    WATHEFNI_CV_GPT_VISION_RESCUE is ignored (kept only so stale configs cannot
+    re-enable rescue).
+    """
+
+    return False
+
+
+def cv_gpt_rescue_retired() -> bool:
+    return True
+
+
+_CV_GPT_RESCUE_RUNTIME: dict[str, int] = {"blocked_attempts": 0}
+
+
+def record_blocked_cv_gpt_rescue_attempt() -> None:
+    _CV_GPT_RESCUE_RUNTIME["blocked_attempts"] = int(_CV_GPT_RESCUE_RUNTIME.get("blocked_attempts") or 0) + 1
+
+
+def cv_gpt_rescue_runtime() -> dict[str, int]:
+    return dict(_CV_GPT_RESCUE_RUNTIME)
 
 
 def normalize_digits(text: str) -> str:
@@ -987,6 +1005,30 @@ def ensure_cv_extraction_schema(execute: DbExecute) -> None:
           ON cv_extraction_runs(company_code, created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_cv_extraction_runs_document
           ON cv_extraction_runs(document_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS cv_extraction_finalizations (
+          finalization_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          company_code text NOT NULL,
+          document_id text NOT NULL,
+          app_key text NOT NULL,
+          source_content_sha256 text NOT NULL,
+          extracted_text_hash text NOT NULL,
+          extraction_method text,
+          quality_ok boolean NOT NULL DEFAULT false,
+          status text NOT NULL,
+          error text,
+          metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+          finalized_at timestamptz NOT NULL DEFAULT now(),
+          created_at timestamptz NOT NULL DEFAULT now(),
+          UNIQUE (
+            company_code, app_key, document_id, source_content_sha256,
+            extracted_text_hash
+          )
+        );
+        CREATE INDEX IF NOT EXISTS idx_cv_extraction_finalizations_app
+          ON cv_extraction_finalizations(company_code, app_key, finalized_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_cv_extraction_finalizations_document
+          ON cv_extraction_finalizations(company_code, document_id, finalized_at DESC);
         """
     )
 
@@ -1166,6 +1208,64 @@ def record_extraction_run(execute: DbExecute, **fields: Any) -> None:
     )
 
 
+def record_extraction_finalization(
+    execute: DbExecute,
+    *,
+    company_code: str,
+    document_id: str,
+    app_key: str,
+    source_content_sha256: str,
+    extracted_text: str,
+    extraction_method: str | None,
+    quality_ok: bool,
+    error: str | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Record the final accepted output, separate from engine-stage audit rows."""
+    company = str(company_code or "").strip().upper()
+    document = str(document_id or "").strip()
+    application = str(app_key or "").strip()
+    source_hash = str(source_content_sha256 or "").strip().lower()
+    text_hash = hashlib.sha256(str(extracted_text or "").encode("utf-8")).hexdigest()
+    if not all((company, document, application, source_hash)):
+        raise ValueError("cv_extraction_finalization_fields_required")
+    status = "completed" if quality_ok and extracted_text else "failed"
+    row = execute(
+        """
+        INSERT INTO cv_extraction_finalizations(
+          company_code, document_id, app_key, source_content_sha256,
+          extracted_text_hash, extraction_method, quality_ok, status, error,
+          metadata, finalized_at, created_at
+        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,now(),now())
+        ON CONFLICT (
+          company_code, app_key, document_id, source_content_sha256,
+          extracted_text_hash
+        ) DO UPDATE SET
+          extraction_method=EXCLUDED.extraction_method,
+          quality_ok=EXCLUDED.quality_ok,
+          status=EXCLUDED.status,
+          error=EXCLUDED.error,
+          metadata=EXCLUDED.metadata,
+          finalized_at=now()
+        RETURNING finalization_id, status, quality_ok, extracted_text_hash
+        """,
+        (
+            company,
+            document,
+            application,
+            source_hash,
+            text_hash,
+            extraction_method,
+            bool(quality_ok),
+            status,
+            error,
+            json.dumps(metadata or {}, ensure_ascii=False),
+        ),
+        fetchone=True,
+    )
+    return dict(row or {})
+
+
 def extract_image_with_mistral(path: Path, mime_type: str) -> tuple[str, list[dict[str, Any]], EngineCallMeta]:
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
     data_uri = f"data:{mime_type};base64,{encoded}"
@@ -1268,10 +1368,118 @@ def extract_cv_document(
     is_image = guessed.startswith("image/") or suffix in {".jpg", ".jpeg", ".png", ".webp"}
 
     if is_pdf:
+        # Production Authority Wave 1: hybrid authoritative with automatic Poppler fallback.
+        hybrid_diag: dict[str, Any] | None = None
+        try:
+            from document_processing_foundation import cv_pdf_authority_enabled
+            from cv_pdf_reading_authority import try_hybrid_cv_pdf_authority
+
+            if cv_pdf_authority_enabled():
+                hybrid_result, hybrid_diag = try_hybrid_cv_pdf_authority(
+                    path,
+                    company_code=company,
+                    document_id=document_id,
+                    app_key=app_key,
+                    allow_paid_ocr=mistral_ocr_enabled(),
+                )
+                if hybrid_result is not None:
+                    if db_execute is not None:
+                        try:
+                            record_extraction_run(
+                                db_execute,
+                                company_code=company,
+                                document_id=document_id,
+                                app_key=app_key,
+                                content_sha256=content_sha,
+                                stage="cv_pdf_reading_authority",
+                                tier="local_hybrid_pdf_engine",
+                                provider="local+mistral",
+                                actual_request_model="pdf-inspector+mistral-ocr-4-0",
+                                provider_response_model=None,
+                                pages_requested=list(
+                                    (hybrid_result.metadata or {})
+                                    .get("document_envelope", {})
+                                    .get("processing", {})
+                                    .get("pages_ocr")
+                                    or []
+                                ),
+                                pages_processed=len(hybrid_result.page_assessments or []),
+                                billable_pages=int(
+                                    (hybrid_result.engine_calls[0].billable_pages if hybrid_result.engine_calls else 0)
+                                    or 0
+                                ),
+                                estimated_cost_usd=float(
+                                    (hybrid_result.engine_calls[0].estimated_cost_usd if hybrid_result.engine_calls else 0)
+                                    or 0
+                                ),
+                                latency_ms=int(
+                                    (hybrid_result.engine_calls[0].latency_ms if hybrid_result.engine_calls else 0)
+                                    or 0
+                                ),
+                                provider_request_id=None,
+                                quality_ok=hybrid_result.quality_ok,
+                                cache_hit=False,
+                                error=hybrid_result.error,
+                                metadata={
+                                    "authority": "hybrid",
+                                    "fallback_used": False,
+                                    "gpt_vision_invoked": False,
+                                    "diag": hybrid_diag,
+                                },
+                            )
+                        except Exception:
+                            logger.exception("hybrid_authority_record_failed")
+                    return hybrid_result
+        except Exception:
+            logger.exception("hybrid_authority_outer_fallback_to_poppler")
+            hybrid_diag = {"accepted": False, "reason": "outer_exception", "fallback_required": True}
+
         assessments = assess_pdf_pages(path)
+        # Shadow advisor only — must not influence needs/accepted/OCR routing.
+        pdf_inspector_shadow: dict[str, Any] | None = None
+        try:
+            import pdf_inspector_shadow as _pdf_inspector_shadow
+
+            if _pdf_inspector_shadow.shadow_enabled():
+                pdf_inspector_shadow = _pdf_inspector_shadow.run_pdf_inspector_shadow(
+                    path,
+                    assessments,
+                    page_count_hint=len(assessments),
+                )
+                if db_execute is not None:
+                    _pdf_inspector_shadow.record_shadow_run(
+                        lambda **fields: record_extraction_run(db_execute, **fields),
+                        company_code=company,
+                        document_id=document_id,
+                        app_key=app_key,
+                        content_sha256=content_sha,
+                        shadow=pdf_inspector_shadow,
+                    )
+        except Exception:  # noqa: BLE001 — fail-open; never block CV extraction
+            logger.exception("pdf_inspector_shadow_outer_fail_open")
+            pdf_inspector_shadow = {
+                "contract": "pdf_inspector_shadow_advisor_wave1",
+                "enabled": True,
+                "ok": False,
+                "fail_open": True,
+                "error": "outer_exception",
+                "influences_ocr_routing": False,
+            }
         needs = [p for p in assessments if p.disposition == "needs_ocr" or force_ocr]
         accepted = [p for p in assessments if p.disposition == "accepted_local" and not force_ocr]
         page_hashes = [p.page_hash for p in assessments]
+
+        def _with_shadow(meta: dict[str, Any]) -> dict[str, Any]:
+            out = dict(meta or {})
+            if pdf_inspector_shadow is not None:
+                out["pdf_inspector_shadow"] = pdf_inspector_shadow
+            if hybrid_diag is not None:
+                out["hybrid_authority_fallback"] = {
+                    **hybrid_diag,
+                    "fallback_used": True,
+                    "authoritative_reader": "poppler_mistral",
+                }
+            return out
 
         # Clean digital PDF — all pages accepted locally.
         if not needs and assessments:
@@ -1314,7 +1522,7 @@ def extract_cv_document(
                     quality_ok=ok,
                     cache_hit=False,
                     error=None if ok else "low_quality_text",
-                    metadata={"page_dispositions": [p.disposition for p in assessments]},
+                    metadata=_with_shadow({"page_dispositions": [p.disposition for p in assessments]}),
                 )
             return ExtractionResult(
                 text=full_text if ok else full_text,
@@ -1324,16 +1532,18 @@ def extract_cv_document(
                 page_assessments=assessments,
                 engine_calls=engine_calls,
                 content_sha256=content_sha,
-                metadata={
-                    "stage": "local_extract",
-                    "tier": "poppler",
-                    "provider": "local",
-                    "actual_request_model": "pdftotext",
-                    "provider_response_model": "pdftotext",
-                    "pages_accepted_local": len(accepted),
-                    "pages_needs_ocr": 0,
-                    "mixed_pdf": False,
-                },
+                metadata=_with_shadow(
+                    {
+                        "stage": "local_extract",
+                        "tier": "poppler",
+                        "provider": "local",
+                        "actual_request_model": "pdftotext",
+                        "provider_response_model": "pdftotext",
+                        "pages_accepted_local": len(accepted),
+                        "pages_needs_ocr": 0,
+                        "mixed_pdf": False,
+                    }
+                ),
             )
 
         # Mixed / scanned — OCR only failed pages when flag enabled.
@@ -1347,6 +1557,7 @@ def extract_cv_document(
                     quality_ok=True,
                     page_assessments=assessments,
                     content_sha256=content_sha,
+                    metadata=_with_shadow({"stage": "local_extract", "tier": "poppler"}),
                 )
             return ExtractionResult(
                 text=local_only,
@@ -1355,12 +1566,14 @@ def extract_cv_document(
                 quality_ok=False,
                 page_assessments=assessments,
                 content_sha256=content_sha,
-                metadata={
-                    "stage": "local_extract",
-                    "tier": "poppler",
-                    "pages_needs_ocr": [p.page_number for p in needs],
-                    "hint": "Enable WATHEFNI_CV_MISTRAL_OCR after staging proof + privacy approval",
-                },
+                metadata=_with_shadow(
+                    {
+                        "stage": "local_extract",
+                        "tier": "poppler",
+                        "pages_needs_ocr": [p.page_number for p in needs],
+                        "hint": "Enable WATHEFNI_CV_MISTRAL_OCR after staging proof + privacy approval",
+                    }
+                ),
             )
 
         cache_key = build_cache_key(
@@ -1413,7 +1626,7 @@ def extract_cv_document(
                     quality_ok=meta.quality_ok,
                     cache_hit=True,
                     error=None,
-                    metadata={"cache_key": cache_key},
+                    metadata=_with_shadow({"cache_key": cache_key}),
                 )
                 return ExtractionResult(
                     text=text,
@@ -1425,14 +1638,16 @@ def extract_cv_document(
                     content_sha256=content_sha,
                     cache_key=cache_key,
                     cache_hit=True,
-                    metadata={
-                        "stage": "ocr",
-                        "tier": "mistral_ocr",
-                        "provider": "mistral",
-                        "actual_request_model": MISTRAL_OCR_MODEL,
-                        "provider_response_model": meta.provider_response_model,
-                        "cache_hit": True,
-                    },
+                    metadata=_with_shadow(
+                        {
+                            "stage": "ocr",
+                            "tier": "mistral_ocr",
+                            "provider": "mistral",
+                            "actual_request_model": MISTRAL_OCR_MODEL,
+                            "provider_response_model": meta.provider_response_model,
+                            "cache_hit": True,
+                        }
+                    ),
                 )
 
         page_indexes = [p.page_index for p in needs]
@@ -1459,7 +1674,7 @@ def extract_cv_document(
                 quality_ok=ocr_meta.quality_ok,
                 cache_hit=False,
                 error=ocr_meta.error,
-                metadata={"mixed_pdf": bool(accepted and needs)},
+                metadata=_with_shadow({"mixed_pdf": bool(accepted and needs)}),
             )
 
         merged = merge_page_texts(assessments, ocr_by_page)
@@ -1469,49 +1684,15 @@ def extract_cv_document(
             if not ocr_quality_ok(ocr_by_page.get(p.page_number, ""), pages=1)[0]
         ]
 
-        # GPT rescue only for pages that still fail after Mistral.
+        # GPT vision rescue retired — failed OCR pages remain needs_review / extraction_failed.
         if failed_pages and gpt_vision_rescue_enabled() and vision_rescue is not None:
-            import tempfile
-
-            with tempfile.TemporaryDirectory(prefix="cv-ocr-rescue-") as tmp:
-                rendered = render_pdf_pages_to_png(path, failed_pages, Path(tmp))
-                for page_number, png_path in rendered.items():
-                    rescue_text, rescue_meta = vision_rescue(png_path, "image/png")
-                    rescue_meta.stage = "vision_rescue"
-                    rescue_meta.tier = "gpt_vision_rescue"
-                    rescue_meta.pages = [page_number - 1]
-                    engine_calls.append(rescue_meta)
-                    if db_execute is not None:
-                        record_extraction_run(
-                            db_execute,
-                            company_code=company,
-                            document_id=document_id,
-                            app_key=app_key,
-                            content_sha256=content_sha,
-                            stage=rescue_meta.stage,
-                            tier=rescue_meta.tier,
-                            provider=rescue_meta.provider,
-                            actual_request_model=rescue_meta.actual_request_model,
-                            provider_response_model=rescue_meta.provider_response_model,
-                            pages_requested=rescue_meta.pages,
-                            pages_processed=1 if rescue_text else 0,
-                            billable_pages=None,
-                            estimated_cost_usd=None,
-                            latency_ms=rescue_meta.latency_ms,
-                            provider_request_id=rescue_meta.provider_request_id,
-                            quality_ok=bool(rescue_text and cv_text_quality_ok(rescue_text, min_chars=40, min_words=6)),
-                            cache_hit=False,
-                            error=rescue_meta.error,
-                            metadata={"rescued_page": page_number},
-                        )
-                    if rescue_text and cv_text_quality_ok(rescue_text, min_chars=40, min_words=6):
-                        ocr_by_page[page_number] = rescue_text
-            merged = merge_page_texts(assessments, ocr_by_page)
+            record_blocked_cv_gpt_rescue_attempt()
+        elif failed_pages and vision_rescue is not None:
+            # Defense: adapter must never run even if a caller still wires it.
+            record_blocked_cv_gpt_rescue_attempt()
 
         ok = cv_text_quality_ok(merged)
         method = "mistral-ocr-4-0"
-        if any(c.tier == "gpt_vision_rescue" and c.quality_ok for c in engine_calls):
-            method = "mistral-ocr-4-0+gpt-rescue"
         if accepted and needs:
             method = f"pdftotext+{method}"
 
@@ -1543,22 +1724,24 @@ def extract_cv_document(
             blocks=blocks,
             content_sha256=content_sha,
             cache_key=cache_key,
-            metadata={
-                "stage": "ocr" if needs else "local_extract",
-                "tier": "mistral_ocr" if needs else "poppler",
-                "provider": "mistral" if needs else "local",
-                "actual_request_model": MISTRAL_OCR_MODEL if needs else "pdftotext",
-                "provider_response_model": ocr_meta.provider_response_model if needs else "pdftotext",
-                "pages_accepted_local": len(accepted),
-                "pages_ocr": [p.page_number for p in needs],
-                "pages_rescue": failed_pages if gpt_vision_rescue_enabled() else [],
-                "mixed_pdf": bool(accepted and needs),
-                "billable_pages": ocr_meta.billable_pages,
-                "estimated_cost_usd": ocr_meta.estimated_cost_usd,
-                "latency_ms": ocr_meta.latency_ms,
-                "provider_request_id": ocr_meta.provider_request_id,
-                "retention": ocr_meta.retention,
-            },
+            metadata=_with_shadow(
+                {
+                    "stage": "ocr" if needs else "local_extract",
+                    "tier": "mistral_ocr" if needs else "poppler",
+                    "provider": "mistral" if needs else "local",
+                    "actual_request_model": MISTRAL_OCR_MODEL if needs else "pdftotext",
+                    "provider_response_model": ocr_meta.provider_response_model if needs else "pdftotext",
+                    "pages_accepted_local": len(accepted),
+                    "pages_ocr": [p.page_number for p in needs],
+                    "pages_rescue": failed_pages if gpt_vision_rescue_enabled() else [],
+                    "mixed_pdf": bool(accepted and needs),
+                    "billable_pages": ocr_meta.billable_pages,
+                    "estimated_cost_usd": ocr_meta.estimated_cost_usd,
+                    "latency_ms": ocr_meta.latency_ms,
+                    "provider_request_id": ocr_meta.provider_request_id,
+                    "retention": ocr_meta.retention,
+                }
+            ),
         )
 
     if is_image:
@@ -1657,83 +1840,42 @@ def extract_cv_document(
                         "retention": meta.retention,
                     },
                 )
-            # Rescue after OCR failure.
-            if gpt_vision_rescue_enabled() and vision_rescue is not None:
-                rescue_text, rescue_meta = vision_rescue(path, mime)
-                rescue_meta.stage = "vision_rescue"
-                rescue_meta.tier = "gpt_vision_rescue"
-                engine_calls.append(rescue_meta)
-                if db_execute is not None:
-                    record_extraction_run(
-                        db_execute,
-                        company_code=company,
-                        document_id=document_id,
-                        app_key=app_key,
-                        content_sha256=content_sha,
-                        stage=rescue_meta.stage,
-                        tier=rescue_meta.tier,
-                        provider=rescue_meta.provider,
-                        actual_request_model=rescue_meta.actual_request_model,
-                        provider_response_model=rescue_meta.provider_response_model,
-                        pages_requested=[0],
-                        pages_processed=1 if rescue_text else 0,
-                        billable_pages=None,
-                        estimated_cost_usd=None,
-                        latency_ms=rescue_meta.latency_ms,
-                        provider_request_id=rescue_meta.provider_request_id,
-                        quality_ok=bool(rescue_text and cv_text_quality_ok(rescue_text)),
-                        cache_hit=False,
-                        error=rescue_meta.error,
-                        metadata={"after": "mistral_ocr_failed"},
-                    )
-                ok = bool(rescue_text and cv_text_quality_ok(rescue_text))
-                return ExtractionResult(
-                    text=rescue_text,
-                    method="gpt-vision-rescue",
-                    error=None if ok else (rescue_meta.error or "rescue_failed"),
-                    quality_ok=ok,
-                    engine_calls=engine_calls,
-                    content_sha256=content_sha,
-                    metadata={
-                        "stage": "vision_rescue",
-                        "tier": "gpt_vision_rescue",
-                        "provider": rescue_meta.provider,
-                        "actual_request_model": rescue_meta.actual_request_model,
-                        "provider_response_model": rescue_meta.provider_response_model,
-                    },
-                )
+            # GPT vision rescue retired — durable needs_review only.
+            if vision_rescue is not None:
+                record_blocked_cv_gpt_rescue_attempt()
             return ExtractionResult(
                 text=text,
                 method="mistral-ocr-4-0",
-                error=meta.error or "ocr_failed",
+                error=meta.error or "extraction_failed_needs_review",
                 quality_ok=False,
                 engine_calls=engine_calls,
                 content_sha256=content_sha,
-            )
-
-        # Flag off: legacy image path via vision_rescue callback if provided.
-        if vision_rescue is not None:
-            text, meta = vision_rescue(path, mime)
-            # Rewrite misleading labels at the source.
-            if meta.actual_request_model and "vision" in (meta.tier or ""):
-                pass
-            engine_calls.append(meta)
-            ok = bool(text and cv_text_quality_ok(text))
-            return ExtractionResult(
-                text=text,
-                method=meta.tier or "gpt_vision_legacy",
-                error=None if ok else (meta.error or "vision_failed"),
-                quality_ok=ok,
-                engine_calls=engine_calls,
-                content_sha256=content_sha,
                 metadata={
-                    "stage": meta.stage or "vision_legacy",
-                    "tier": meta.tier,
-                    "provider": meta.provider,
-                    "actual_request_model": meta.actual_request_model,
-                    "provider_response_model": meta.provider_response_model,
+                    "stage": "ocr",
+                    "tier": "mistral_ocr",
+                    "authority_label": "needs_review",
+                    "gpt_vision_invoked": False,
+                    "gpt_auto_ocr_fallback": False,
+                    "cv_gpt_rescue_retired": True,
                 },
             )
-        return ExtractionResult(text="", method="image", error="mistral_ocr_disabled_no_rescue", content_sha256=content_sha)
+
+        # OCR off or unavailable: never invoke GPT.
+        if vision_rescue is not None:
+            record_blocked_cv_gpt_rescue_attempt()
+        return ExtractionResult(
+            text="",
+            method="image",
+            error="ocr_required_mistral_disabled_or_failed_needs_review",
+            quality_ok=False,
+            content_sha256=content_sha,
+            metadata={
+                "stage": "local_extract",
+                "tier": "needs_review",
+                "gpt_vision_invoked": False,
+                "gpt_auto_ocr_fallback": False,
+                "cv_gpt_rescue_retired": True,
+            },
+        )
 
     return ExtractionResult(text="", method="unsupported", error=f"unsupported_mime:{guessed or suffix}", content_sha256=content_sha)

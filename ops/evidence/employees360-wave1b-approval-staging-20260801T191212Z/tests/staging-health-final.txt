@@ -1,0 +1,36 @@
+● wathefni-orchestrator-staging.service - Wathefni HR Orchestrator (STAGING — dry-run delivery, internal/localhost only)
+     Loaded: loaded (/etc/systemd/system/wathefni-orchestrator-staging.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/wathefni-orchestrator-staging.service.d
+             └─assessment-ai.conf, assistant-hr-reads.conf, assistant-remediation.conf, candidate-knowledge.conf, civil-id.conf, durable-email-ingress.conf, employee-next-actions.conf, leave-balances.conf, offer-token.conf, outbound-layer.conf, prehire-registry.conf, ranking-retrieval.conf, setup-console-v2.conf, setup-console.conf, setup-operator-credentials.conf, talent-pool-classification.conf, tool-agent-terra.conf, toolcall-responses.conf, unified-candidates.conf, unified-inbound-cv.conf
+     Active: activating (auto-restart) (Result: exit-code) since Sat 2026-08-01 19:22:55 UTC; 2s ago
+    Process: 1851962 ExecStart=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8011 (code=exited, status=3)
+   Main PID: 1851962 (code=exited, status=3)
+        CPU: 1.736s
+
+Aug 01 19:22:55 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Failed with result 'exit-code'.
+Aug 01 19:22:55 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Consumed 1.736s CPU time.
+Aug 01 19:22:50 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED
+Aug 01 19:22:50 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Failed with result 'exit-code'.
+Aug 01 19:22:50 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Consumed 1.764s CPU time.
+Aug 01 19:22:53 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Scheduled restart job, restart counter is at 5.
+Aug 01 19:22:53 srv1419988 systemd[1]: Started wathefni-orchestrator-staging.service - Wathefni HR Orchestrator (STAGING — dry-run delivery, internal/localhost only).
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]: INFO:     Started server process [1851962]
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]: INFO:     Waiting for application startup.
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]: ERROR:    Traceback (most recent call last):
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/starlette/routing.py", line 638, in lifespan
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:     async with self.lifespan_context(app) as maybe_state:
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 241, in __aenter__
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:     await self._router._startup()
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/routing.py", line 4886, in _startup
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:     handler()
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:   File "/opt/wathefni/staging/orchestrator/app.py", line 38051, in on_startup
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:     ensure_schema()
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:   File "/opt/wathefni/staging/orchestrator/app.py", line 1251, in ensure_schema
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:     _ensure_schema_impl()
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:   File "/opt/wathefni/staging/orchestrator/app.py", line 3013, in _ensure_schema_impl
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]:     import calendar_schema as _calendar_schema
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]: ModuleNotFoundError: No module named 'calendar_schema'
+Aug 01 19:22:55 srv1419988 uvicorn[1851962]: ERROR:    Application startup failed. Exiting.
+Aug 01 19:22:55 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED
+Aug 01 19:22:55 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Failed with result 'exit-code'.
+Aug 01 19:22:55 srv1419988 systemd[1]: wathefni-orchestrator-staging.service: Consumed 1.736s CPU time.

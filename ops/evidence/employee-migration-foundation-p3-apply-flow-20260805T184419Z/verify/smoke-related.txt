@@ -1,0 +1,13 @@
+OK preview retry 1: one active identity card
+OK preview retry 2: one active identity card
+OK preview retry 3: one active identity card
+OK history/ledger retains repeated conflict rows
+OK approve moves to Approved (still in queue until apply)
+OK approve preserves older ledger conflict rows
+OK apply clears active queue for that identity
+OK history/batch detail retains review rows
+OK employee migration foundation P3 review queue smoke
+OK route order import-batches before {employee_key}
+OK approve keeps batch, moves out of review, apply/confirm still required
+OK review/history helpers
+OK employee migration foundation P3 flow clarity smoke

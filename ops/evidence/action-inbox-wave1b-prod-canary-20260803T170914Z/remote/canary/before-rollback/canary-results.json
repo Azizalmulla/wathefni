@@ -1,0 +1,394 @@
+{
+  "tag": "e3303a11",
+  "pass": 65,
+  "fail": 0,
+  "results": [
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_only enforced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company allowlisted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "read_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "composes_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no mutations",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hiring reports separate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "alerts own notifications",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no compliance wave2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no analytics wave2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no payroll money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no attendance ingest",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no shifts manager expand",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "analytics freeze no compliance metrics",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance freeze no legal claims",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cross-source item count",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "e360 compliance deduped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "high severity first",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "all three streams present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "owner label EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "owner label AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deadline present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deadline label EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "escalation label EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "escalation label AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "evidence label EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authority label EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authority label AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deep link compliance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "what AR present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "never gov verified",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "analytics deep link leave",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "e360 deep link onboarding",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "clears on resolve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dedupe in clear proof",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "after clear remaining 1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "as_of present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "timezone Kuwait",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freshness stale_after",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "definitions EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty mutates false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live contract",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live as_of",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live timezone Kuwait",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live items list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live honesty no mutate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "live synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payload viewer_phone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payload actor_role",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "e360 manager_scope",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "route uses dashboard_context",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope probe returns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager probe has items list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager scope isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI Action Inbox EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI SoA EN/AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI honesty hiring reports",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI owner/deadline labels",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "UI responsive mobile",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "canary ack deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic marker detection",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real subject not synthetic",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "proof": {
+    "before_total": 3,
+    "after_total": 1,
+    "deduped": 1,
+    "cleared": true,
+    "remaining_ids": [
+      "employees:E1:onboarding:incomplete"
+    ]
+  },
+  "honesty": {
+    "wave": "action_inbox_wave1",
+    "version": "1.0.0",
+    "contract": "action_inbox_wave1",
+    "read_only": true,
+    "composes_only": true,
+    "mutates_records": false,
+    "ai": false,
+    "hiring_reports_separate": true,
+    "alerts_delivery_owns_notifications": true,
+    "compliance_wave2": false,
+    "analytics_wave2": false,
+    "payroll_money": false,
+    "attendance_ingest": false,
+    "shifts_manager_expansion": false,
+    "systems_of_action": [
+      "analytics",
+      "compliance",
+      "employees",
+      "onboarding",
+      "attendance",
+      "leave",
+      "shifts",
+      "payroll"
+    ],
+    "synthetic_only": true,
+    "enabled": true,
+    "companies": [
+      "WATHEFNI"
+    ],
+    "synthetic_key_markers": [
+      "AIW1",
+      "AIW1-SYNTH|"
+    ],
+    "synthetic_phone_prefixes": [
+      "965542"
+    ]
+  },
+  "pack_summary": {
+    "total": 3,
+    "by_stream": {
+      "analytics": 1,
+      "compliance": 1,
+      "employees": 1
+    },
+    "by_severity": {
+      "critical": 0,
+      "high": 2,
+      "medium": 1,
+      "low": 0
+    },
+    "deduped_e360_compliance": 1
+  }
+}

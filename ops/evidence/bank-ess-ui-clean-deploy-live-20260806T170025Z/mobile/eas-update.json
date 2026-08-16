@@ -1,0 +1,85 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:44401) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44405) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44403) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44406) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44407) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:44408) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] iOS Bundled 4312ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (967 modules)
+[expo-cli] Android Bundled 6331ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (1308 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] 
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-0f8400d9ed70d906430415b0ba02a801.hbc (1.79 MB)
+[expo-cli] _expo/static/js/ios/entry-0f8400d9ed70d906430415b0ba02a801.hbc.map (6.78 MB)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-e3e160dddbdf10536e04348d2010bb23.hbc (1.79 MB)
+[expo-cli] _expo/static/js/android/entry-e3e160dddbdf10536e04348d2010bb23.hbc.map (6.78 MB)
+[expo-cli] 
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.76 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 7.6 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fd80f-3cc8-75bd-8b6e-d7cfed86c919",
+    "createdAt": "2026-08-06T17:11:45.096Z",
+    "group": "326e2040-6603-4c34-a6db-1022ff8095a6",
+    "branch": "canary",
+    "message": "Bank ESS + onboarding completion UI 20260806T170025Z (release 6547a25)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd80f-3cc8-75bd-8b6e-d7cfed86c919",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "f5632bdb417b15a4a5eea404024c917df37d2e93"
+  },
+  {
+    "id": "019fd80f-3cc8-7905-8863-2c4cefed9e4b",
+    "createdAt": "2026-08-06T17:11:45.096Z",
+    "group": "326e2040-6603-4c34-a6db-1022ff8095a6",
+    "branch": "canary",
+    "message": "Bank ESS + onboarding completion UI 20260806T170025Z (release 6547a25)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd80f-3cc8-7905-8863-2c4cefed9e4b",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "f5632bdb417b15a4a5eea404024c917df37d2e93"
+  }
+]

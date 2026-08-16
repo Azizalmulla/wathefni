@@ -1,0 +1,15 @@
+{
+  "leave_attachment_audit": 4,
+  "leave_request_attachments": 3,
+  "leave_payroll_handoff_events": 1,
+  "leave_events": 19,
+  "leave_ledger": 21,
+  "leave_requests": 12,
+  "leave_balances": 1,
+  "attendance_events": 2,
+  "attendance_records": 1,
+  "shift_assignments": 7,
+  "attendance_day_projections": 3,
+  "payroll_timesheets": 0,
+  "employees": 1
+}

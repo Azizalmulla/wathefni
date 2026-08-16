@@ -1,0 +1,43 @@
+[PASS] production env
+[PASS] capture ingest off
+[PASS] ops synthetic only
+[PASS] authority synthetic only
+[PASS] import off
+[PASS] db is wathefni
+[PASS] 42 attendance rows before
+[PASS] 42 demo_seed before
+[PASS] four reals present
+[PASS] wave4b prove failed=0
+[PASS] wave4b prove passed>=35
+[PASS] capture ops overview ok
+[PASS] capture ingest disabled in overview
+[PASS] capture synthetic seed ok
+[PASS] capture connectors present
+[PASS] connector simulate offline
+[PASS] connector simulate lag
+[PASS] connector mark recovered
+[PASS] unknown mapping remediation present
+[PASS] mapping remediation reject
+[PASS] http daily board rows >= 8
+[PASS] api/ui life-state counts match seed
+[PASS] ops list has cases key
+[PASS] real employee not synthetic-allowed
+[PASS] 42 attendance rows after cleanup
+[PASS] 42 demo_seed after cleanup
+[PASS] attendance fingerprint unchanged
+[PASS] four reals fingerprint unchanged
+[PASS] payroll timesheets unchanged
+[PASS] no leftover ATTW4B projections
+[PASS] no leftover ATTW4B exceptions
+[PASS] freeze smoke-test-employees360-freeze-regression.py
+[PASS] freeze smoke-test-onboarding-freeze-regression.py
+{
+  "wave": "attendance-final-prod",
+  "passed": 33,
+  "failed": 0,
+  "total": 33,
+  "tag": "98AA2996",
+  "capture_prefix": "ATTWFINB3B54A",
+  "work_date": "2026-08-02",
+  "evid": "/opt/wathefni/production-evidence/attendance-final/20260802T131146Z/canary-rerun"
+}

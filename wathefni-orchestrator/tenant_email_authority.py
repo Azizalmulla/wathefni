@@ -646,7 +646,14 @@ def should_skip_interview_email_for_calendar(
     return True, "calendar_invite_already_sent"
 
 
-def public_email_sending_view(legacy: Any, company_code: str, *, intake_addresses: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+def public_email_sending_view(
+    legacy: Any,
+    company_code: str,
+    *,
+    intake_addresses: list[dict[str, Any]] | None = None,
+    intake_feature: dict[str, Any] | None = None,
+    intake_setup: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Company-facing Settings projection — no internal architecture language."""
     company = _company(company_code)
     settings = get_email_settings(legacy, company)
@@ -712,7 +719,43 @@ def public_email_sending_view(legacy: Any, company_code: str, *, intake_addresse
             domain = row.get("domain") or "inbound.wathefni.ai"
             addr = f"{row.get('local_part')}@{domain}"
         if addr:
-            intake_public.append({"address": addr, "label": row.get("label") or row.get("position_title")})
+            entry = {
+                "intake_id": row.get("intake_id"),
+                "address": addr,
+                "label": row.get("label") or row.get("position_title"),
+                "status": row.get("status") or "active",
+                "position_code": row.get("position_code"),
+                "position_title": row.get("position_title"),
+                "role_bound": bool(row.get("role_bound") if "role_bound" in row else row.get("position_code")),
+                "hold_policy": row.get("hold_policy") or ("role_bound" if row.get("position_code") else "needs_role"),
+                "health": row.get("health") if isinstance(row.get("health"), dict) else None,
+                "created_at": row.get("created_at"),
+                "updated_at": row.get("updated_at"),
+            }
+            intake_public.append(entry)
+
+    setup = intake_setup if isinstance(intake_setup, dict) else {}
+    primary = next((r.get("address") for r in intake_public if r.get("status") == "active"), None)
+    if not setup:
+        try:
+            import inbound_intake_product as _iip
+
+            setup = _iip.setup_instructions(primary_address=primary)
+        except Exception:
+            setup = {
+                "forward_instructions_en": (
+                    "Forward CVs and documents to your Wathefni intake address. "
+                    "Wathefni does not read your Microsoft inbox for documents in this phase."
+                ),
+                "forward_instructions_ar": (
+                    "قم بتحويل السير الذاتية والمستندات إلى عنوان استقبال وظفني. "
+                    "وظفني لا يقرأ صندوق بريد مايكروسوفت للمستندات في هذه المرحلة."
+                ),
+                "setup_steps_en": [],
+                "setup_steps_ar": [],
+            }
+
+    feature = intake_feature if isinstance(intake_feature, dict) else {"enabled": bool(intake_public), "domain": "inbound.wathefni.ai"}
 
     return {
         "company_code": company,
@@ -733,18 +776,28 @@ def public_email_sending_view(legacy: Any, company_code: str, *, intake_addresse
         "primary_action": primary_action,
         "hr_notice": resolved.get("hr_notice"),
         "intake": {
+            "feature": feature,
             "addresses": intake_public,
             "public_forward_address": settings.get("public_forward_address"),
-            "forward_instructions_en": (
-                "Forward CVs and documents to your Wathefni intake address. "
-                "Wathefni does not read your Microsoft inbox for documents in this phase."
-            ),
-            "forward_instructions_ar": (
-                "قم بتحويل السير الذاتية والمستندات إلى عنوان استقبال وظفني. "
-                "وظفني لا يقرأ صندوق بريد مايكروسوفت للمستندات في هذه المرحلة."
-            ),
+            "forward_instructions_en": setup.get("forward_instructions_en") or "",
+            "forward_instructions_ar": setup.get("forward_instructions_ar") or "",
+            "setup_steps_en": list(setup.get("setup_steps_en") or []),
+            "setup_steps_ar": list(setup.get("setup_steps_ar") or []),
+            "inbound_forwarding_enabled": company_settings_flag(legacy, company),
         },
     }
+
+
+def company_settings_flag(legacy: Any, company_code: str) -> bool | None:
+    try:
+        settings = legacy.get_company_settings(company_code) if hasattr(legacy, "get_company_settings") else {}
+        if not isinstance(settings, dict):
+            return None
+        if "inbound_forwarding_enabled" not in settings:
+            return None
+        return bool(settings.get("inbound_forwarding_enabled"))
+    except Exception:
+        return None
 
 
 def admin_email_snapshot(legacy: Any, company_code: str) -> dict[str, Any]:

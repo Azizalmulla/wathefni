@@ -1,0 +1,15 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "group": "02919c30-f663-4471-a8a6-058dbdf37054",
+  "androidUpdateId": "019fd94e-72f3-7c79-bb6f-d7acd8ba8131",
+  "iosUpdateId": "019fd94e-72f3-7e81-8d1a-244616e81e8f",
+  "message": "Auth Wave 2 Phase 2: Face ID/Touch ID over PIN (canary)",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1"
+  },
+  "nativeBuildRequired": true,
+  "priorGroup": "41239180-9b5a-4cc1-88f7-7a2f8d2ad7f8",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/02919c30-f663-4471-a8a6-058dbdf37054"
+}

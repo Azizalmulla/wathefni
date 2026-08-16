@@ -1,0 +1,63 @@
+PASS  privacy hard-fail biotime
+PASS  privacy hard-fail csv
+PASS  biotime pagination pages
+PASS  biotime pulled 4
+PASS  capture methods card+face+biometric
+PASS  no biometric payloads in raw_ref
+PASS  authority ingest biotime
+PASS  duplicate pull idempotent
+PASS  normal day projection 480
+PASS  overnight projection
+PASS  checkpoint skips old ids
+PASS  agent poll enqueue
+PASS  agent offline enqueue
+PASS  agent flush delivered
+PASS  credentials persisted sealed
+PASS  restart outbox empty
+PASS  checkpoint durable
+PASS  invalid credentials fail
+PASS  credential rotation recovers
+PASS  connector health present
+PASS  unknown maps to canonical
+PASS  unknown quarantined
+PASS  mapping replay accepted
+PASS  csv same content same event ids
+PASS  csv duplicate across files idempotent
+PASS  xlsx parsed
+PASS  xlsx ingest
+PASS  sftp batch files
+PASS  interrupted import resume skips file
+PASS  csv day projection
+PASS  day approved
+PASS  payroll reconcile exact
+PASS  payroll eligible after approve
+PASS  correction requested after snapshot
+PASS  safe reversal/reimport still idempotent
+PASS  punches immutable count
+PASS  locked payroll snapshot unchanged
+PASS  other tenant ingest
+PASS  tenant isolation company punches
+PASS  other tenant has punch
+PASS  canonical has capture_method
+PASS  canonical has no zkteco fields
+PASS  freeze skipped
+{
+  "summary": {
+    "pass": 43,
+    "fail": 0,
+    "tag": "90554fba",
+    "company": "ATTW2B",
+    "employee_key": "ATTW2B-ATTW2B-90554fba"
+  }
+}
+SUMMARY pass=43 fail=0
+SUMMARY pass=43 fail=0
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+57 passed, 0 failed
+54 passed, 0 failed
+REMOTE_EVID=/opt/wathefni/staging-evidence/attendance-wave2b-capture-20260802T025320Z

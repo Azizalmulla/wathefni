@@ -1,0 +1,20 @@
+{
+  "eligible": 2,
+  "invalidated_chunks": 10,
+  "enqueued": [
+    {
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "version_id": "44cfbc94-9220-4d11-8af7-fd7823376079",
+      "job_id": "2cf4c352-3d97-4e9e-9601-9d586d7e4919",
+      "nchars": 15611,
+      "status": "needs_role"
+    },
+    {
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "version_id": "c36c0291-ceec-4697-91d8-02e4c108d5b5",
+      "job_id": "32be2058-d9ef-4718-8dda-dfe3ba465e8f",
+      "nchars": 6680,
+      "status": "needs_role"
+    }
+  ]
+}

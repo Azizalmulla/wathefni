@@ -1,0 +1,15 @@
+{
+  "wave": "pdf_inspector_corpus_wave2",
+  "mode": "research_staging_offline",
+  "valid_pdf_count": 560,
+  "paid_ocr": false,
+  "production_intake": false,
+  "routing_influence": "FORBIDDEN",
+  "agreement_rate_pct": 95.89,
+  "high_risk_false_skip_docs": 23,
+  "confirmed_broken_encoding_false_skip_if_inspector_used": 20,
+  "guarded_advisor_canary": "NO-GO",
+  "staging_subset_count": 26,
+  "staging_subset_intake": "REQUIRES_OWNER_GO",
+  "report": "ops/PDF_INSPECTOR_CORPUS_WAVE2.md"
+}

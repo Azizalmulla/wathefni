@@ -1,0 +1,12 @@
+{
+  "rollback_start_utc": "2026-08-04T01:58:55.560745+00:00"
+}
+{"pre_cancel_error": "_cancel_active_extraction_jobs() got an unexpected keyword argument 'reason'"}
+{
+  "rollback": {
+    "ok": false,
+    "error": "batch_not_found",
+    "rollback_attempts": 1
+  },
+  "rollback_end_utc": "2026-08-04T01:58:55.602905+00:00"
+}

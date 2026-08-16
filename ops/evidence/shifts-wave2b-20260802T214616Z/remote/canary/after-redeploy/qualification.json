@@ -1,0 +1,628 @@
+{
+  "passed": 108,
+  "failed": 0,
+  "tag": "d253b563",
+  "marker": "SHW2B",
+  "ids": {
+    "tag": "d253b563",
+    "marker": "SHW2B",
+    "phones": {
+      "a": "965530253563",
+      "b": "965530535639",
+      "c": "965530356377",
+      "gate": "965528253563"
+    },
+    "employee_keys": {
+      "a": "WATHEFNI-SHW2B-d253b563",
+      "b": "WATHEFNI-SHW2B-B-d253b563",
+      "c": "WATHEFNI-SHW2B-C-d253b563",
+      "gate": "WATHEFNI-W2GATECHK-d253b563"
+    },
+    "shift_ids": [
+      "56572a3f-0f93-4378-b1e5-03e06a9a489e",
+      "728295fc-bfb1-49b2-b08d-d3539ca77b4a",
+      "c9311b5d-82a7-420a-8f4d-7d42887bada1",
+      "47369899-cced-4047-964a-781f234d0792",
+      "15234f85-5f83-46a0-b310-21ce939473eb",
+      "0de263f8-dcdc-48ab-a621-78ecd59ac263",
+      "99c25392-141e-41d9-a102-03b668b83830",
+      "86b586b6-9196-4331-b3bb-1ef76854d823",
+      "38a44383-94fd-4a09-acbf-e2330f9ad987",
+      "d1a2956d-94f1-48b5-84ed-e824a462683d",
+      "12d22152-b0be-4c9d-beed-a2b85ce09689",
+      "5739265f-38ff-4a5c-b575-7c1b6b0f2bdd",
+      "9d399eb4-db4c-4a27-bc57-2d0cd1957853",
+      "e17765b0-603e-4969-8273-76a2baa7c38c",
+      "c707e722-546b-4c87-bcbd-a5b79304a580",
+      "23f725f8-8c2f-4beb-a234-58ce38458355",
+      "c81c57ce-591b-4924-9dcb-32dc09627a92",
+      "c4989505-f50e-4202-9d9e-e525f4f06e34"
+    ],
+    "swap_ids": [
+      "6cb2be1e-e944-4243-a098-9caf9f48300e",
+      "a14c5ba0-b3c3-4728-a82b-b8eb0bd2c15f",
+      "88add21e-2a4c-4f3b-9929-b68eff105a94",
+      "72a2f827-1aa6-444c-a22f-1aac4b9efd07",
+      "40f4dc5b-6deb-468f-91f8-595c3cb74acb"
+    ],
+    "availability_ids": [
+      "cf8a4ce5-fe3d-4cb0-8630-5de403e7caa2",
+      "175af9d5-16e5-4516-9576-16842b8056d3"
+    ],
+    "leave_ids": [
+      "3b225995-a2d0-4ac3-befe-402cb835fdc1",
+      "dfc1e7ef-58ee-45ce-8aa5-8671488ea82f"
+    ],
+    "policy_ids": [
+      "85599f69-c329-4418-a4d5-cad5b0505192",
+      "e63c5609-a3a4-4169-b68d-8cfa6643681d",
+      "45484342-6954-4f8d-a07e-de35f1a35e54"
+    ],
+    "flag_ids": [
+      "a29ebc43-b353-4a95-ad4c-39361579e48a",
+      "eebc573a-ef37-46ad-a7c1-dfaa935c1c75",
+      "1488ef44-265d-4968-ab5a-41fd926a66a1"
+    ],
+    "reminder_ids": []
+  },
+  "cleanup": {
+    "assignments": 0,
+    "versions": 0,
+    "reminders": 0,
+    "reconciliation_flags": 0,
+    "swaps": 0,
+    "availability": 0,
+    "leave": 0,
+    "seasonal_policies": 0,
+    "employees": 0,
+    "total": 0
+  },
+  "fingerprints": {
+    "before_count": 23,
+    "after_count": 23,
+    "drift": [],
+    "extra": []
+  },
+  "results": [
+    {
+      "name": "wave1 version 1.1.0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 version 2.0.0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 company WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 other company gated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "SHW2B marker synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real employee not wave2 synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty payroll_money false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty leave_balances_mutated false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "CAPTURE_INGEST off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create records assignment version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create enqueues reminder",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create does not touch leave_balances",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create does not touch payroll bank_transfer",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 reminder scan wired to claim_due_reminders",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 reminder scan exposes terminal failures",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 module has no leave_balances SQL",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2 module has no payroll money calc",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "db is wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create returns shift_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reschedule #1 ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reschedule #2 ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale update denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "version history length >= 3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exactly one current version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "priors immutable superseded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "current-row version_no matches",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "current authority start 11:00",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reason codes audited",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability request ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pending availability does not block",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability approve ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability approve replay idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability require_ack mode",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability ack allows create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability block mode ignores ack",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability warn mode allows create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "availability warn attaches warnings",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap fixture requester",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap fixture target",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overlap fixture for swap",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap request (overlap case) ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap overlap denial",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap leave denial",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap lifecycle denial",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap self-denial",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap approve ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap approve replay idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap reassigned requester shift to B",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap reassigned target shift to A",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap lineage version recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap preserves previous_employee_key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap reject ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap reject replay idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance fixtures created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance normal match",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance split without time fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance split with punch time",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance overnight next-day attribution",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder fixture created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder enqueue idempotent (no duplicate)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder claimed once",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder retry claim",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder terminal_failed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "terminal failure ops visibility",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder sent status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no duplicate after sent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reschedule-reminder fixture created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reschedule fixture has a pending reminder before reschedule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reschedule for reminder-cancel proof ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale reminder lane cancelled on reschedule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fresh reminder lane enqueued on reschedule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ramadan policy upserted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "midday policy upserted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ramadan outside effective dates quiet",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ramadan inside effective dates warns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "midday restriction site hit warns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "midday other site not matched",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "midday block mode denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ramadan warn allows create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ramadan create carries warnings",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "midday block denies create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon subject created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle recon flags without cancel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no silent lifecycle cancel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave recon flags without cancel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no silent leave cancel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon acknowledge audited",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon cancel is audited soft-cancel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon cancel sets cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon cancel reason code",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gate-check availability request ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real employee blocked by wave2 synthetic-only gate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gate-blocked decision rolled back (still requested)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle reconciliation job job_lock or ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave reconciliation job job_lock or ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill switch disables operator jobs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "jobs re-enabled after kill switch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "operator job resumes after kill switch cleared",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder scan dry_run ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reminder scan exposes terminal_failures",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tenant isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual synthetic zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real assignment fingerprints unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no leftover assignment rows beyond baseline",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

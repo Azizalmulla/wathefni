@@ -1,0 +1,16 @@
+PASS People tab uses directory view
+PASS Wordmark + EditorialHeading
+PASS search is primary control
+PASS dense ListRow not ActionableCard
+PASS exception chips via composition
+PASS row always opens employee profile
+PASS onboarding chip separate path
+PASS row does not hijack to onboarding
+PASS no Active chip for normal employees
+PASS default status filter active
+PASS no attendance states on People
+PASS API search+paging
+PASS onboarding_status normalized
+PASS backend forwards onboarding_status
+PASS hrPeople keys EN+AR
+hr-people-directory: GREEN

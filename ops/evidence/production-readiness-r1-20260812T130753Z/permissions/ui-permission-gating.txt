@@ -1,0 +1,67 @@
+== nav permission map ==
+5: * deep-link allowlisting. Inputs: tenant effective modules + actor permissions
+21:  | 'permission_denied'
+35:  permission?: string | null
+36:  permissionAnyOf?: string[]
+61:  permissions: string[]
+79:    permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export'],
+88:    permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export', 'leave.read', 'attendance.read', 'onboarding.read', 'payroll.read'],
+106:    permission: 'requisitions.read',
+115:    permission: 'candidates.read',
+124:    permission: 'prehire.read',
+133:    permission: 'calendar.read',
+142:    permission: 'assessment.manage',
+151:    permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export'],
+160:    permission: 'report.export',
+169:    permission: 'employees.read',
+177:    permission: 'employees.read',
+194:    permissionAnyOf: [
+212:    permission: 'preboarding.read',
+221:    permission: 'onboarding.read',
+230:    permission: 'probation.read',
+239:    permission: 'attendance.read',
+248:    permission: 'leave.read',
+257:    permission: 'shifts.read',
+266:    permission: 'payroll.read',
+275:    permission: 'analytics.read',
+284:    permission: 'compliance.read',
+300:    permission: 'audit.read',
+308:    permissionAnyOf: ['settings.manage', 'users.manage'],
+316:    permission: 'candidates.read',
+323:    permission: 'assessment.manage',
+330:    permission: 'candidates.read',
+337:    permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export', 'candidates.read'],
+344:    permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export'],
+351:    permission: 'calendar.read',
+359:    permission: 'interview.manage',
+366:    permission: 'assessment.manage',
+373:    permission: 'users.manage',
+379:    permission: 'settings.manage',
+385:    permission: 'settings.manage',
+429:    return { ...surface, status: 'permission_denied', offerable: false }
+431:  if (surface.permission && !permOk(access, surface.permission)) {
+432:    return { ...surface, status: 'permission_denied', offerable: false }
+434:  if (surface.permissionAnyOf && !anyPermOk(access, surface.permissionAnyOf)) {
+435:    return { ...surface, status: 'permission_denied', offerable: false }
+493:  const permissions = Array.isArray(args.access?.permissions) ? args.access!.permissions.map(String) : []
+504:        status: 'permission_denied',
+515:    const perms = new Set(permissions)
+524:      surfaces['nav.employees'] = { ...surfaces['nav.employees'], status: 'permission_denied', offerable: false }
+558:    permissions,
+708:  const permissions = ROLE_PERMISSIONS_FIXTURE[row.role]
+711:    access: { role: row.role, permissions },
+
+== client-side role-string checks ==
+apps/wathefni-dashboard/src/pages/AdminAIPage.tsx:285:                    message.role === 'user'
+apps/wathefni-dashboard/src/pages/AdminAIPage.tsx:291:                  {message.role === 'assistant' ? (
+apps/wathefni-dashboard/src/pages/AdminAIPage.tsx:296:                  <div className={message.role === 'assistant' ? 'min-w-0 flex-1' : ''}>
+apps/wathefni-dashboard/src/pages/AdminAIPage.tsx:298:                      className={`whitespace-pre-wrap text-base ${message.role === 'assistant' ? 'leading-7 text-text' : 'leading-6 text-white'}`}
+apps/wathefni-dashboard/src/prehire/RequisitionsWorkspace.tsx:133:    permissions.includes('requisitions.manage') || ['hr', 'admin', 'owner', 'manager'].includes(String(role || ''))
+apps/wathefni-dashboard/src/prehire/RequisitionsWorkspace.tsx:135:    permissions.includes('requisitions.approve') || ['hr', 'admin', 'owner'].includes(String(role || ''))
+apps/wathefni-dashboard/src/lib/workspaceCapability.ts:713:    urgentCount: row.role === 'owner' ? 3 : 0,
+apps/wathefni-dashboard/src/components/candidates/CandidatesTable.tsx:40:  if (role === 'owner' || role === 'admin') return true
+apps/wathefni-dashboard/src/posthire/PreboardingWorkspace.tsx:180:  const canManage = permissions.includes('preboarding.manage') || ['hr', 'admin', 'owner'].includes(String(role || ''))
+apps/wathefni-dashboard/src/posthire/PreboardingWorkspace.tsx:181:  const canWaive = permissions.includes('preboarding.waive_item') || ['hr', 'admin', 'owner'].includes(String(role || ''))
+apps/wathefni-dashboard/src/posthire/ProbationWorkspace.tsx:178:    permissions.includes('probation.decide') || ['hr', 'admin', 'owner'].includes(String(role || ''))
+apps/wathefni-dashboard/src/posthire/ProbationWorkspace.tsx:181:    ['hr', 'admin', 'owner', 'manager'].includes(String(role || ''))
+apps/wathefni-dashboard/src/posthire/ProbationWorkspace.tsx:184:    ['hr', 'admin', 'owner', 'manager'].includes(String(role || ''))

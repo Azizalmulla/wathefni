@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_ar_digital_02",
+  "category": "arabic_digital_cv",
+  "language": "ar",
+  "layout": "single_column_rtl",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "فهد الشمري",
+    "fahad.shamri@example.com",
+    "+96557778899",
+    "الخبرة العملية",
+    "المهارات"
+  ],
+  "expected_fields": {
+    "full_name": "فهد الشمري",
+    "email": "fahad.shamri@example.com",
+    "phone": "+96557778899",
+    "title": "أخصائي امتثال"
+  },
+  "notes": "Structurally valid Arabic CV with embedded Noto Kufi TrueType (shaped+bidi).",
+  "sha256": "4e69799218352305beab9962c736b766b6857f091727ba5c54fda6399752bdaa",
+  "bytes": 45613
+}

@@ -5,7 +5,7 @@
       "observed": {
         "response": {
           "body": {
-            "file_id": "9370b08e-e450-49c9-90d3-d8778b456bc1",
+            "file_id": "e66f7a2d-98e8-47b3-b0a5-d0de03d73849",
             "item_id": "r1b_valid_pdf",
             "ok": true,
             "storage_status": "stored"
@@ -29,7 +29,7 @@
       "observed": {
         "response": {
           "body": {
-            "file_id": "5b601073-0273-4348-b250-300c923e37ad",
+            "file_id": "30a2de3a-a492-444d-8733-9c4c1aef7762",
             "item_id": "r1b_valid_png",
             "ok": true,
             "storage_status": "stored"

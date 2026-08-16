@@ -1,0 +1,9 @@
+PAYROLL_WAVE3 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW3', 'PYW3-SYNTH|', 'PYW2B', 'PYW2B-SYNTH|', 'PYW2A', 'PYW2ACB', 'PYW1', 'PYW1-SYNTH|', 'W2BB', 'W3B')
+prefixes ('965541', '965540', '965539')
+honesty {'payment_processing': 'disabled', 'payslips_as_money': False, 'native_payslips_authoritative': False, 'external_payslips_authority': 'external', 'ai_calculations': False, 'bank_files': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK

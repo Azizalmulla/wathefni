@@ -1,0 +1,20 @@
+{
+  "quarantined": [
+    {
+      "timesheet_id": "7950dafd-6cf7-44b1-9f92-26f685c34ab5",
+      "employee_key": "WATHEFNI-96597727743",
+      "status": "draft",
+      "payroll_status": "quarantined",
+      "quarantine_status": "wave0_smoke_quarantined"
+    },
+    {
+      "timesheet_id": "cc68a9fb-df72-4e13-a0db-cc13a3805380",
+      "employee_key": "WATHEFNI-96566363363",
+      "status": "draft",
+      "payroll_status": "quarantined",
+      "quarantine_status": "wave0_smoke_quarantined"
+    }
+  ],
+  "hard_deleted": false,
+  "count": 2
+}

@@ -1,0 +1,24 @@
+{
+  "fixture_id": "cv_scanned_ar_01",
+  "category": "scanned_image_only_cv",
+  "language": "ar",
+  "layout": "single_column",
+  "pdf_nature": "scanned_image_only",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [
+    1
+  ],
+  "expected_text_needles": [
+    "سيرة ذاتية ممسوحة — خالد المنصور",
+    "البريد: khaled.mansour@example.com",
+    "الهاتف: +96552220000"
+  ],
+  "expected_fields": {
+    "full_name": "خالد المنصور",
+    "email": "khaled.mansour@example.com",
+    "phone": "+96552220000"
+  },
+  "notes": "Rendered text embedded as image-only page; native extractors should miss needles.",
+  "sha256": "8dc5cec5d1314a378c5c2256fb277b010f70a3d1556438b05de98f87e2c3f5b1",
+  "bytes": 32240
+}

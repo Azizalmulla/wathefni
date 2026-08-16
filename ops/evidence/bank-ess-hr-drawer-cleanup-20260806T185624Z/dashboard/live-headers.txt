@@ -1,0 +1,11 @@
+HTTP/2 200 
+accept-ranges: bytes
+alt-svc: h3=":443"; ma=2592000
+cache-control: public, max-age=31536000, immutable
+content-type: text/javascript; charset=utf-8
+etag: "tjd3acbgqw"
+last-modified: Thu, 06 Aug 2026 18:56:36 GMT
+server: Caddy
+content-length: 534920
+date: Thu, 06 Aug 2026 18:57:38 GMT
+

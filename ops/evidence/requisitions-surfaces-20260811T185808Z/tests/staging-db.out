@@ -1,0 +1,19 @@
+    requisitions surfaces — DB integration prove
+      PASS  create+submit via authority
+      PASS  queue ok
+      PASS  queue has attention
+      PASS  counts.attention
+      PASS  detail ok
+      PASS  detail events
+      PASS  explain
+      PASS  SoD blocks creator
+      PASS  approver succeeds
+      PASS  stale concurrency conflict
+      PASS  open succeeds
+      PASS  tenant isolation
+      PASS  module-off denied
+      PASS  works without pre_hiring
+
+    14 passed, 0 failed
+REQUISITIONS_SURFACES_DB_FULL_PASS
+STAGING_DB_RC=0

@@ -1,0 +1,67 @@
+[
+  {
+    "row": "Attendance correction prepare\u2192confirm",
+    "verdict": "PASS",
+    "detail": "att=bd743aa2-bc85-4d66-b21f-60a27e7ff0c6; in_exceptions=False; prepare=needs_confirmation; confirm=completed; refresh_ok=True"
+  },
+  {
+    "row": "Shift swap approve/reject confirm",
+    "verdict": "FAIL",
+    "detail": "relation \"shift_swaps\" does not exist\nLINE 2:                 SELECT * FROM shift_swaps\n                                      ^\n"
+  },
+  {
+    "row": "Onboarding Accept/Waive confirm",
+    "verdict": "BLOCKED",
+    "detail": "no being_reviewed/hr_actionable fixtures; list_total=0; hr_mutate=True"
+  },
+  {
+    "row": "Onboarding file preview",
+    "verdict": "BLOCKED",
+    "detail": "no onboarding checklist fixture with preview_path"
+  },
+  {
+    "row": "Document Mark reviewed confirm",
+    "verdict": "BLOCKED",
+    "detail": "no needs_review documents in live queue"
+  },
+  {
+    "row": "Document file preview/download",
+    "verdict": "BLOCKED",
+    "detail": "no document fixture with preview/download path"
+  },
+  {
+    "row": "HR Task Mark done confirm",
+    "verdict": "PASS",
+    "detail": "task=3e293340-5735-4fd9-a695-8bdeab93eacf; status=done"
+  },
+  {
+    "row": "Candidate CV open",
+    "verdict": "PASS",
+    "detail": "path=/dashboard/mobile/candidates/96597485758-WATHEFNI-HR/cv/preview; available=True; size_bytes_meta=37143; fetched=0; http=401"
+  },
+  {
+    "row": "Face ID enable/unlock + cancel\u2192PIN fallback",
+    "verdict": "BLOCKED",
+    "detail": "no iOS simulator/USB device on build host; cannot exercise biometric UI"
+  },
+  {
+    "row": "auto-lock/background lock",
+    "verdict": "BLOCKED",
+    "detail": "no device; static local-lock verify previously GREEN \u2014 physical pending owner device"
+  },
+  {
+    "row": "Forgot PIN \u2192 operator email/password recovery",
+    "verdict": "BLOCKED",
+    "detail": "no device; recovery is operator email/password (not OTP) per freeze \u2014 UI not exercised"
+  },
+  {
+    "row": "safe-back and state refresh after each flow",
+    "verdict": "BLOCKED",
+    "detail": "API refresh after attendance/swap/task exercised where fixtures existed; UI safe-back needs device"
+  },
+  {
+    "row": "EN/AR on confirmation/auth/file states",
+    "verdict": "BLOCKED",
+    "detail": "static matrix GREEN; physical locale toggle needs device"
+  }
+]

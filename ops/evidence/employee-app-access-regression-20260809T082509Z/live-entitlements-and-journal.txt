@@ -1,0 +1,119 @@
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "/opt/wathefni/orchestrator/app.py", line 37230, in find_employee_by_key
+    with db_connect() as conn:
+  File "/opt/wathefni/orchestrator/app.py", line 258, in __enter__
+    self._conn = _get_db_pool().getconn()
+                 ^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/app.py", line 235, in _get_db_pool
+    binding = runtime_binding()
+              ^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/app.py", line 224, in runtime_binding
+    assert_runtime_environment_binding()
+  File "/opt/wathefni/orchestrator/app.py", line 202, in assert_runtime_environment_binding
+    binding = _runtime_environment.resolve_runtime_binding(os.environ)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/runtime_environment.py", line 101, in resolve_runtime_binding
+    raise RuntimeEnvironmentError("application_environment_missing_or_invalid")
+runtime_environment.RuntimeEnvironmentError: application_environment_missing_or_invalid
+---JOURNAL---
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 403 Forbidden
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:30 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 403 Forbidden
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:31 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 403 Forbidden
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 403 Forbidden
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:32 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:33 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 403 Forbidden
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]:     raise PoolError("connection pool exhausted")
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 200 OK
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 403 Forbidden
+Aug 09 08:17:34 srv1419988 uvicorn[2872058]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error

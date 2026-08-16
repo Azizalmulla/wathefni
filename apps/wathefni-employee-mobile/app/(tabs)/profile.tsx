@@ -39,6 +39,8 @@ export default function ProfileScreen() {
       onRetryProfile={() => void query.refetch()}
       onSettings={() => router.push('/settings')}
       onBank={hasFeature('bank') ? () => router.push('/bank') : undefined}
+      onPreboarding={hasFeature('preboarding') ? () => router.push('/preboarding') : undefined}
+      onProbation={hasFeature('probation') ? () => router.push('/probation') : undefined}
       onPrivacySupport={() => router.push('/privacy-support')}
       onSignOut={() => void signOut()}
     />

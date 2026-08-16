@@ -1,0 +1,4 @@
+invite_get:401
+has_invite True
+has_resend True
+has_activate True

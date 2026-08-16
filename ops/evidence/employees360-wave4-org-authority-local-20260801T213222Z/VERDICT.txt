@@ -1,0 +1,4 @@
+PASS (local/staging)
+Production deploy: NOT DONE
+Real employee lifecycle: NOT ENABLED
+Wave 5: NOT STARTED

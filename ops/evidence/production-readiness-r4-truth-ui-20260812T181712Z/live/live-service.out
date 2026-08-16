@@ -1,0 +1,7 @@
+staging_health=200
+      PASS  live leave_decision maps to leave
+      PASS  live shift maps to shifts
+      PASS  live app_activation maps to employee_app
+      PASS  live unmapped flow is allowed (None)
+      PASS  live helper is on deliver path
+    LIVE_SERVICE 5 passed, 0 failed

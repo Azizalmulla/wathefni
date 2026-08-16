@@ -1,0 +1,274 @@
+{
+  "marker": "kuwait-first-client-foundation-staging-v1",
+  "gates": [
+    {
+      "gate": "normalize_residence_from_residency_iqama",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "normalize_residence_from_residency",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "normalize_residence_canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "no_iqama_canonical_token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "gov_attachments_blocked_as_master",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "national_seed_no_residence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "expat_seed_has_residence_and_work_permit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_core_tables_country_neutral_names",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_sql_default_kw_on_legal_entities",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_kw_profile_scoped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_saudi_uae_country_profiles_enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_leave_eos_pifss_enforcement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_no_gov_filing_or_api_verify",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_article_18_not_universal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_pam_not_universal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arch_sa_currency_bootstrap_only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "default_legal_entity_exactly_one",
+      "ok": true,
+      "detail": "['b4242be2-c80a-4a7d-b286-09619d0a74ad']"
+    },
+    {
+      "gate": "arabic_and_english_legal_names",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "multiple_legal_entities_allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "default_entity_uniqueness_after_switch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "accepted_offer_hire_ok",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation_id\": \"4e4bbdf9-c16b-4625-bc8b-b3bdf8d837c2\", \"employee_key\": \"KWPILOT-965886300101\", \"application_app_key\": \"KWPILOT-NAT-1\", \"employment_applicability_snapshot_id\": \"1762432c-ef43-4067-b10b-c32b1d580c35\"}"
+    },
+    {
+      "gate": "snapshot_created_for_national",
+      "ok": true,
+      "detail": "{'snapshot_id': '1762432c-ef43-4067-b10b-c32b1d580c35', 'company_code': 'KWPILOT', 'employee_key': 'KWPILOT-965886300101', 'legal_entity_id': 'b4242be2-c80a-4a7d-b286-09619d0a74ad', 'country_of_employment': 'KW', 'currency': 'KWD', 'source_path': 'accepted_offer', 'accepted_offer_id': '234ed355-e40e-4e0f-ade5-556c099b1998', 'accepted_offer_version': 1, 'template_id': 'KW-CONTRACT-PILOT', 'template_version': '2026.7', 'template_approval_ref': 'COUNSEL-PILOT-1', 'document_language': 'ar', 'employer_policy_version': 'HR-POLICY-KW-1', 'configuration_effective_date': datetime.date(2026, 7, 1), 'proposed_start_date': datetime.date(2026, 8, 8), 'probation_days': 90, 'compensation_snapshot': {'currency': 'KWD', 'allowances': [], 'base_salary': '900.000', 'authorized_signatory': 'Pilot Signatory', 'employing_legal_entity_text': 'Pilot Trading Co. W.L.L.'}, 'hire_operation_id': '4e4bbdf9-c16b-4625-bc8b-b3bdf8d837c2', 'app_key': 'KWPILOT-NAT-1', 'arabic_contract_file_id': None, 'arabic_contract_metadata': {}, 'snapshot_hash': '93838f2090dafbba84fd990dc9af14c988ccbaee560d3a064d9adaea2b3e6b85', 'created_at': datetime.datetime(2026, 7, 25, 3, 29, 42, 331943, tzinfo=datetime.timezone.utc)}"
+    },
+    {
+      "gate": "snapshot_from_accepted_offer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "snapshot_binds_legal_entity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "snapshot_has_offer_version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "ocr_not_authoritative_until_confirm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "civil_id_masked_by_default",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "civil_id_full_reveal_privileged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "national_compliance_no_residence_or_work_permit",
+      "ok": true,
+      "detail": "{'passport', 'civil_id'}"
+    },
+    {
+      "gate": "expat_hire_ok",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation_id\": \"55e27148-d2a2-426f-b5ad-dee81f85b2e6\", \"employee_key\": \"KWPILOT-965886300202\", \"application_app_key\": \"KWPILOT-EXP-1\", \"employment_applicability_snapshot_id\": \"c717d4e0-c784-4f34-963b-d05e96ed0749\"}"
+    },
+    {
+      "gate": "expat_residence_metadata_canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "expat_work_permit_metadata",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "police_certificate_not_master_metadata",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "expat_compliance_has_residence_and_work_permit",
+      "ok": true,
+      "detail": "{'work_permit', 'passport', 'residence', 'civil_id'}"
+    },
+    {
+      "gate": "historical_residency_iqama_still_readable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "compat_maps_legacy_to_residence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arabic_contract_linked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "arabic_contract_metadata_complete",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "snapshot_core_immutable_after_contract_link",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "replay_hire_one_employee",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "replay_hire_one_snapshot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "replay_reported_ok_or_idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "concurrent_hire_single_employee",
+      "ok": true,
+      "detail": "[{'ok': True, 'operation_id': '2b8fd7f4-0910-4c42-ab9e-8ea762fa2a83', 'employee_key': 'KWPILOT-965886300303', 'application_app_key': 'KWPILOT-CONC-1', 'employment_applicability_snapshot_id': 'a25bded8-a569-4ec8-af75-3815fe13de08'}, {'ok': True, 'operation_id': '05abb406-73eb-48a3-a6f3-f7bc0e3facd4',"
+    },
+    {
+      "gate": "concurrent_hire_single_snapshot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "tenant_isolation_legal_entities",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "tenant_isolation_identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "entity_switch_does_not_rewrite_snapshot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "offers_disabled_hire_ok",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation_id\": \"a0bcb4f6-ad97-4fc4-a0a0-c893ead7227e\", \"employee_key\": \"KWNOOFF-965886300404\", \"application_app_key\": \"KWNOOFF-OFF-1\", \"employment_applicability_snapshot_id\": \"1ac248e0-bdf4-487d-aae2-3f4daf37c1be\"}"
+    },
+    {
+      "gate": "offers_disabled_source_path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "offers_disabled_uses_default_entity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "offers_disabled_template_from_defaults",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "hire_override_ok",
+      "ok": true,
+      "detail": "{\"ok\": true, \"operation_id\": \"050e08f7-c896-4006-a12d-625dcfe26a17\", \"employee_key\": \"KWOVR-965886300505\", \"application_app_key\": \"KWOVR-OVR-1\", \"employment_applicability_snapshot_id\": \"e4c425bb-b4a2-4918-ba4a-efe9a5ae949c\"}"
+    },
+    {
+      "gate": "hire_override_source_path",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "started_at": "2026-07-25T03:29:41.877501+00:00",
+  "passed": 53,
+  "failed": 0,
+  "finished_at": "2026-07-25T03:29:43.720078+00:00"
+}

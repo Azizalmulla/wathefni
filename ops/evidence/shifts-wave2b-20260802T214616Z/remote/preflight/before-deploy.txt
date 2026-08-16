@@ -1,0 +1,16 @@
+stamp=20260802T214616Z
+time_utc=2026-08-02T21:46:56Z
+active
+=== SHAs before ===
+4b55894a7a9249bb5a86276095fd44f49d2c8c2a1ac15ff942a3202375702ee1  /opt/wathefni/orchestrator/app.py
+82262f2e0e7b6e9dc04c7a6e3305d50eef4816659a6b931bb40742d8160f0da7  /opt/wathefni/orchestrator/shifts_authority_wave1.py
+ls: cannot access '/opt/wathefni/orchestrator/shifts_schedule_integrity_wave2.py': No such file or directory
+shifts_schedule_integrity_wave2.py absent
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SHIFTS_ALLOW_OVERNIGHT=1
+WATHEFNI_SHIFTS_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_KEY_MARKERS=SHW1B,SHW1B-SYNTH|
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965529
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1

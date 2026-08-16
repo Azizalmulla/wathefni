@@ -1,0 +1,22 @@
+SHW3B prod browser canary tag=D443FD67
+PASS  prod_db_wathefni
+PASS  unsupported_actions_plural_405
+PASS  canonical_create_post_ok
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-board-before.png
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-filters.png
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-nav.png
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-after-same-day.png
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-after-split.png
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-after-overnight.png
+SHOT /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-mobile-rtl.png
+PASS  browser_composer_create_posts
+PASS  list_after_create_ok
+PASS  db_scheduled_count_ge_3
+PASS  split_two_authority_rows
+PASS  overnight_ends_next_day_row
+PASS  overnight_single_authority_row
+PASS  soft_cancel_ok
+PASS  residual_zero
+
+11 passed, 0 failed
+RESULTS /opt/wathefni/production-evidence/shifts-wave3b-prod-canary/20260802T230936Z/browser/browser1/w3b-prod-create-path.json

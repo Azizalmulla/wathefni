@@ -1,0 +1,131 @@
+{
+  "fixture_id": "contract_kuwait_labor_law_real_01",
+  "category": "contract",
+  "language": "ar",
+  "pdf_nature": "digital_text_real_world",
+  "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/contract_kuwait_labor_law_real_01.pdf",
+  "page_count": 3,
+  "poppler": {
+    "elapsed_ms": 124,
+    "pages_needing_ocr_1idx": [],
+    "false_skips_vs_expected": [],
+    "unnecessary_vs_expected": [],
+    "needle_score": {
+      "mode": "native_should_hit",
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0,
+      "missing": [
+        "قانون",
+        "العمل"
+      ]
+    },
+    "arabic_integrity": {
+      "applicable": true,
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0,
+      "missing": [
+        "قانون",
+        "العمل"
+      ]
+    },
+    "field_score": {
+      "checks": {
+        "document_type": false,
+        "source": false
+      },
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0
+    },
+    "encoding_signal": false
+  },
+  "pdf_inspector": {
+    "process_wall_ms": 7,
+    "library_processing_time_ms": 7,
+    "pdf_type": "text_based",
+    "confidence": 1.0,
+    "has_encoding_issues": false,
+    "is_complex_layout": true,
+    "pages_with_tables": [],
+    "pages_with_columns": [
+      2
+    ],
+    "pages_needing_ocr_1idx": [],
+    "false_skips_vs_expected": [],
+    "unnecessary_vs_expected": [],
+    "needle_score_markdown": {
+      "mode": "native_should_hit",
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0,
+      "missing": [
+        "قانون",
+        "العمل"
+      ]
+    },
+    "needle_score_plain": {
+      "mode": "native_should_hit",
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0,
+      "missing": [
+        "قانون",
+        "العمل"
+      ]
+    },
+    "arabic_integrity_markdown": {
+      "applicable": true,
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0,
+      "missing": [
+        "قانون",
+        "العمل"
+      ]
+    },
+    "arabic_integrity_plain": {
+      "applicable": true,
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0,
+      "missing": [
+        "قانون",
+        "العمل"
+      ]
+    },
+    "field_score": {
+      "checks": {
+        "document_type": false,
+        "source": false
+      },
+      "hit": 0,
+      "total": 2,
+      "ratio": 0.0
+    },
+    "detect_pdf_type": "text_based",
+    "classify_confidence": 1.0
+  },
+  "routing_agreement_with_expected": {
+    "poppler_exact": true,
+    "inspector_exact": true,
+    "poppler_vs_inspector": true
+  },
+  "projected_cost": {
+    "pages_total": 3,
+    "ocr_pages_expected": [],
+    "ocr_pages_poppler": [],
+    "ocr_pages_inspector": [],
+    "cost_if_all_pages_usd": 0.012,
+    "cost_if_poppler_ocr_usd": 0.0,
+    "cost_if_inspector_ocr_usd": 0.0,
+    "cost_if_expected_ocr_usd": 0.0,
+    "inspector_vs_all_pages_savings_usd": 0.012,
+    "inspector_vs_poppler_delta_pages": 0
+  },
+  "mistral_reference": {
+    "called": false,
+    "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+  }
+}

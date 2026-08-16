@@ -1,0 +1,867 @@
+{
+  "stamp": "20260727T013033Z",
+  "tag": "final_enforce_freeze_canary",
+  "ok": true,
+  "passed": 37,
+  "failed": 0,
+  "assertions": [
+    {
+      "name": "health_200_pre",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "freeze_email_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "freeze_wa_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "freeze_manual_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "freeze_tenants_wathefni",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_or_enforce_gate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "enforce_scoped_wathefni",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "worker_wathefni-orchestrator.service",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "name": "worker_wathefni-ck-index.service",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": "verified-job-binding-gate-v1"
+    },
+    {
+      "name": "external_tenant_enforce_off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wathefni_enforce_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ranking_gate_uses_cursor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage_b_dual_write_present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "baseline_counts",
+      "ok": true,
+      "detail": "{\"apps\": 21, \"candidates\": 24, \"job_bindings\": 14, \"cv_bindings\": 3, \"cv_versions\": 18, \"tp\": 14}"
+    },
+    {
+      "name": "observation_complete",
+      "ok": true,
+      "detail": "{\"allow_verified\": 14, \"enforce_deny:expected_quarantined_smoke\": 5, \"enforce_deny:expected_held_talent_pool\": 2}"
+    },
+    {
+      "name": "bugs_zero",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unexplained_zero",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "legitimate_job_apps_allow",
+      "ok": true,
+      "detail": "14"
+    },
+    {
+      "name": "held_and_smoke_deny",
+      "ok": true,
+      "detail": "held=2,smoke=5"
+    },
+    {
+      "name": "no_false_denials",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no_duplicate_bindings_or_cvs",
+      "ok": true,
+      "detail": "job=0,cvb=0,cv=0,tp=0"
+    },
+    {
+      "name": "stage_b_job_present",
+      "ok": true,
+      "detail": "APPLY-WATHEFNI-J2P2_PROD_TEST"
+    },
+    {
+      "name": "stage_b_convert_ok",
+      "ok": true,
+      "detail": "96555573001-WATHEFNI-J2P2_PROD_TEST"
+    },
+    {
+      "name": "stage_b_replay_idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage_b_exact_apply_binding",
+      "ok": true,
+      "detail": "APPLY-WATHEFNI-J2P2_PROD_TEST"
+    },
+    {
+      "name": "stage_b_cv_binding_pinned",
+      "ok": true,
+      "detail": "2f917d4e-ee23-53df-97c2-1cfdbb873126"
+    },
+    {
+      "name": "stage_b_reusable_cv_version",
+      "ok": true,
+      "detail": "2f917d4e-ee23-53df-97c2-1cfdbb873126"
+    },
+    {
+      "name": "stage_b_no_duplicate_application",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "stage_b_compatible_marker",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "enforce_allow_all_actions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "enforce_deny_held_all_actions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "enforce_deny_unverified_all_actions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ranking_http_probe_skipped_auth_surface",
+      "ok": true,
+      "detail": "in_process_gate_proven"
+    },
+    {
+      "name": "bounded_canary_mutations",
+      "ok": true,
+      "detail": "apps+0,candidates+0"
+    },
+    {
+      "name": "zero_unrelated_app_mutations",
+      "ok": true,
+      "detail": "total=21 canary_phone_apps=1 delta_total=0"
+    },
+    {
+      "name": "health_200_post",
+      "ok": true,
+      "detail": "200"
+    }
+  ],
+  "cases": {
+    "baseline": {
+      "apps": 21,
+      "candidates": 24,
+      "job_bindings": 14,
+      "cv_bindings": 3,
+      "cv_versions": 18,
+      "tp": 14
+    },
+    "observation": {
+      "classifications": {
+        "allow_verified": 14,
+        "enforce_deny:expected_quarantined_smoke": 5,
+        "enforce_deny:expected_held_talent_pool": 2
+      },
+      "samples": [
+        {
+          "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+          "status": "awaiting_cv",
+          "classification": "expected_quarantined_smoke",
+          "mode": "enforce_deny",
+          "reasons": [
+            "verified_job_binding_missing"
+          ]
+        },
+        {
+          "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+          "status": "screening",
+          "classification": "expected_quarantined_smoke",
+          "mode": "enforce_deny",
+          "reasons": [
+            "verified_job_binding_missing"
+          ]
+        },
+        {
+          "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+          "status": "awaiting_cv",
+          "classification": "expected_quarantined_smoke",
+          "mode": "enforce_deny",
+          "reasons": [
+            "verified_job_binding_missing"
+          ]
+        },
+        {
+          "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+          "status": "awaiting_cv",
+          "classification": "expected_quarantined_smoke",
+          "mode": "enforce_deny",
+          "reasons": [
+            "verified_job_binding_missing"
+          ]
+        },
+        {
+          "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+          "status": "awaiting_cv",
+          "classification": "expected_quarantined_smoke",
+          "mode": "enforce_deny",
+          "reasons": [
+            "verified_job_binding_missing"
+          ]
+        },
+        {
+          "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+          "status": "needs_role",
+          "classification": "expected_held_talent_pool",
+          "mode": "enforce_deny",
+          "reasons": [
+            "held_or_unassigned_talent_pool_record"
+          ]
+        },
+        {
+          "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+          "status": "needs_role",
+          "classification": "expected_held_talent_pool",
+          "mode": "enforce_deny",
+          "reasons": [
+            "held_or_unassigned_talent_pool_record"
+          ]
+        }
+      ],
+      "app_count": 21
+    },
+    "stage_b_convert": {
+      "ok": true,
+      "application_created": false,
+      "existing_application": true,
+      "application": {
+        "app_key": "96555573001-WATHEFNI-J2P2_PROD_TEST",
+        "phone": "96555573001",
+        "company_code": "WATHEFNI",
+        "position_code": "J2P2_PROD_TEST",
+        "apply_code": "APPLY-WATHEFNI-J2P2_PROD_TEST",
+        "position_title": "Wathefni Jobs Phase 2 Production Test",
+        "company_name": null,
+        "status": "awaiting_cv",
+        "current_step": "cv_request",
+        "cv_received": false,
+        "cv_received_at": null,
+        "screening_status": "not_started",
+        "screening_completed_at": null,
+        "sheet_sync_status": null,
+        "drive_sync_status": null,
+        "raw_json": {
+          "account_id": "final_enforce_freeze_canary",
+          "data_source": "production",
+          "job_context_id": "29bf14db-e9b2-4d6b-9c56-d69c727722d2",
+          "source_channel": null,
+          "stage_b_canary": true,
+          "stage_b_marker": "final_enforce_freeze_canary",
+          "convert_trigger": "apply_confirm",
+          "source_campaign": null,
+          "candidate_locale": "en",
+          "source_ref_token": null,
+          "jobs_phase2_stage": "B",
+          "data_source_detail": null,
+          "source_conversation_id": "conv-final_enforce_freeze_canary-20260727T012939Z",
+          "stage_b_canary_position": "J2P2_PROD_TEST",
+          "stage_b_canary_apply_code": "APPLY-WATHEFNI-J2P2_PROD_TEST"
+        },
+        "created_at": "2026-07-27",
+        "updated_at": "2026-07-27",
+        "ingested_at": "2026-07-27T01:29:40.454961+00:00",
+        "data_source": "production",
+        "data_source_detail": null,
+        "import_batch_id": null,
+        "source_ref": null,
+        "lifecycle_version": 0,
+        "owner_user_id": null,
+        "ownership_version": 0,
+        "owner_assigned_at": null,
+        "owner_assigned_by_user_id": null,
+        "person_id": null,
+        "membership_id": null
+      },
+      "job_context": {
+        "context_id": "8cc53250-979f-44df-bd3d-fde5ac8f775b",
+        "phone": "96555573001",
+        "account_id": "final_enforce_freeze_canary",
+        "conversation_id": "conv-final_enforce_freeze_canary-20260727T013033Z",
+        "company_code": "WATHEFNI",
+        "position_code": "J2P2_PROD_TEST",
+        "job_id": null,
+        "apply_code": "APPLY-WATHEFNI-J2P2_PROD_TEST",
+        "status": "converted",
+        "preview_rendered_at": null,
+        "preview_sent_at": "2026-07-27T01:30:34.415058+00:00",
+        "preview_locale": null,
+        "preview_template_version": null,
+        "source_channel": null,
+        "source_ref_token": null,
+        "source_campaign": null,
+        "metadata": {
+          "stamp": "20260727T013033Z",
+          "canary": "final_enforce_freeze_canary",
+          "stage_b_marker": "final_enforce_freeze_canary",
+          "convert_outcome": "existing_application",
+          "convert_trigger": "apply_confirm"
+        },
+        "data_source": null,
+        "created_at": "2026-07-27T01:30:34.415058+00:00",
+        "updated_at": "2026-07-27T01:30:34.433462+00:00",
+        "expires_at": "2026-07-27T07:30:34.416172+00:00",
+        "converted_at": "2026-07-27T01:30:34.433462+00:00",
+        "application_app_key": "96555573001-WATHEFNI-J2P2_PROD_TEST",
+        "convert_idempotency_key": "jobctx-convert:final_enforce_freeze_canary:20260727T013033Z",
+        "preview_delivery_id": null
+      },
+      "role": {
+        "job_id": "81bd4fd1-14ec-4b65-a141-a0c51b852ea6",
+        "company_code": "WATHEFNI",
+        "company_display_name": "Wathefni",
+        "position_code": "J2P2_PROD_TEST",
+        "job_key": "J2P2_PROD_TEST",
+        "title": "Wathefni Jobs Phase 2 Production Test",
+        "title_en": "Wathefni Jobs Phase 2 Production Test",
+        "title_ar": "\u0627\u062e\u062a\u0628\u0627\u0631 \u0648\u0638\u0627\u0626\u0641 \u0627\u0644\u0645\u0631\u062d\u0644\u0629 \u0627\u0644\u062b\u0627\u0646\u064a\u0629 J2P2PROD-00F06757",
+        "position_title": "Wathefni Jobs Phase 2 Production Test",
+        "description": "J2P2PROD-00F06757 controlled Jobs Phase 2 production verification role.",
+        "description_en": "J2P2PROD-00F06757 controlled Jobs Phase 2 production verification role.",
+        "description_ar": "",
+        "short_summary_en": "J2P2PROD-00F06757 controlled production qualification role.",
+        "short_summary_ar": "J2P2PROD-00F06757 \u0648\u0638\u064a\u0641\u0629 \u062a\u0623\u0647\u064a\u0644 \u0625\u0646\u062a\u0627\u062c\u064a\u0629 \u0645\u062d\u0643\u0648\u0645\u0629.",
+        "benefits_en": "",
+        "benefits_ar": "",
+        "content_approved_en": true,
+        "content_approved_ar": true,
+        "content_approved_en_at": "2026-07-21T03:03:17.910650+00:00",
+        "content_approved_ar_at": "2026-07-21T03:03:17.910650+00:00",
+        "requirements": [
+          "Controlled Jobs Phase 2 production verification"
+        ],
+        "requirements_en": [
+          "Controlled Jobs Phase 2 production verification"
+        ],
+        "requirements_ar": [
+          "\u0627\u062e\u062a\u0628\u0627\u0631 \u0645\u062d\u0643\u0648\u0645 \u0644\u0644\u0645\u0631\u062d\u0644\u0629 \u0627\u0644\u062b\u0627\u0646\u064a\u0629"
+        ],
+        "department": null,
+        "location": "Kuwait City",
+        "employment_type": "full_time",
+        "work_arrangement": "onsite",
+        "contract_type": null,
+        "visibility": "public",
+        "currency": "KD",
+        "salary_visibility": "hr_only",
+        "vacancies": 25,
+        "filled_vacancies": 0,
+        "remaining_vacancies": 25,
+        "application_deadline": null,
+        "expected_start_date": null,
+        "hiring_manager_user_id": null,
+        "recruiter_user_id": null,
+        "status": "open",
+        "accepts_applications": true,
+        "eligibility_reason": null,
+        "shareable": true,
+        "publish_ready": true,
+        "publish_blockers": [],
+        "apply_code": "APPLY-WATHEFNI-J2P2_PROD_TEST",
+        "application_key": "APPLY-WATHEFNI-J2P2_PROD_TEST",
+        "application_link": "https://wa.me/96597453460?text=APPLY-WATHEFNI-J2P2_PROD_TEST",
+        "qr_value": "https://wa.me/96597453460?text=APPLY-WATHEFNI-J2P2_PROD_TEST",
+        "application_count": 0,
+        "active_count": 0,
+        "created_at": "2026-07-21T03:03:17.925902+00:00",
+        "updated_at": "2026-07-21T03:03:17.935228+00:00",
+        "published_at": "2026-07-21T03:03:17.936284+00:00",
+        "closed_at": null,
+        "created_by_user_id": "00000000-0000-4000-8000-000000000001",
+        "updated_by_user_id": "00000000-0000-4000-8000-000000000001",
+        "version": 2,
+        "stage_counts": [],
+        "recent_applicants": [],
+        "notifications": [],
+        "latest_applicant": null,
+        "latest_applicant_app_key": null,
+        "latest_application_at": null,
+        "authority_source": "positions",
+        "salary_min": null,
+        "salary_max": null,
+        "eligibility": {
+          "eligible": true,
+          "reason": null,
+          "status": "open",
+          "visibility": "public"
+        }
+      },
+      "cv_attach": null,
+      "trigger": "apply_confirm"
+    },
+    "stage_b_bindings": {
+      "job": {
+        "verified": true,
+        "position_code": "J2P2_PROD_TEST",
+        "apply_code": "APPLY-WATHEFNI-J2P2_PROD_TEST"
+      },
+      "cv": [
+        {
+          "cv_version_id": "2f917d4e-ee23-53df-97c2-1cfdbb873126"
+        },
+        {
+          "cv_version_id": "3b32f8eb-786f-55d4-900e-6a753ce392be"
+        }
+      ],
+      "app_key": "96555573001-WATHEFNI-J2P2_PROD_TEST"
+    },
+    "enforce_matrix": {
+      "verified_app": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "held_app": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "unverified_app": "96555550132-WATHEFNI-ACCOUNTING",
+      "allow": {
+        "ranking": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "ranking",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "screening": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "screening",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "assessment": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "assessment",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "interview": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "interview",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "communication": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "communication",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "lifecycle_transition": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "lifecycle_transition",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "shortlist": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "shortlist",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "reject": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "reject",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "offer": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "offer",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "hire": {
+          "allowed": true,
+          "mode": "allow",
+          "action": "hire",
+          "reason_codes": [
+            "verified_job_binding"
+          ],
+          "binding": {
+            "binding_id": "c213a7d6-a506-56a0-b24b-efd326d0f017",
+            "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "position_code": "SOCIAL_MEDIA_MANAGER",
+            "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "verified": true,
+            "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b",
+            "membership_id": "8b650c6a-4d9b-48b9-98a7-b0b187d8d3cf",
+            "subject_id": null
+          },
+          "gate_version": "verified-job-binding-gate-v1"
+        }
+      },
+      "deny_held": {
+        "ranking": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "ranking",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "screening": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "screening",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "assessment": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "assessment",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "interview": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "interview",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "communication": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "communication",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "lifecycle_transition": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "lifecycle_transition",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "shortlist": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "shortlist",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "reject": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "reject",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "offer": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "offer",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "hire": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "hire",
+          "reason_codes": [
+            "held_or_unassigned_talent_pool_record"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        }
+      },
+      "deny_unverified": {
+        "ranking": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "ranking",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "screening": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "screening",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "assessment": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "assessment",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "interview": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "interview",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "communication": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "communication",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "lifecycle_transition": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "lifecycle_transition",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "shortlist": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "shortlist",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "reject": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "reject",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "offer": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "offer",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        },
+        "hire": {
+          "allowed": false,
+          "mode": "enforce_deny",
+          "action": "hire",
+          "reason_codes": [
+            "verified_job_binding_missing"
+          ],
+          "binding": null,
+          "gate_version": "verified-job-binding-gate-v1"
+        }
+      }
+    },
+    "after": {
+      "apps": 21,
+      "candidates": 24,
+      "canary_phone_apps": 1
+    }
+  }
+}

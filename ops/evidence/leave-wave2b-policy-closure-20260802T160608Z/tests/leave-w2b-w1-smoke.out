@@ -1,0 +1,55 @@
+    leave authority wave1 — catalogue + gates + concurrency + honesty
+      PASS  schema version pinned
+      PASS  vacation → annual
+      PASS  time_off → annual
+      PASS  sick stays sick
+      PASS  unknown → other
+      PASS  annual ledger-eligible
+      PASS  unpaid not ledger-eligible
+      PASS  self-approve denied
+      PASS  self-reject denied
+      PASS  self-cancel allowed
+      PASS  other-actor approve not self-banned
+      PASS  lifecycle blocks terminated
+      PASS  lifecycle blocks suspended
+      PASS  lifecycle blocks future_start
+      PASS  lifecycle blocks notice_period
+      PASS  lifecycle allows active
+      PASS  honesty balances_enforced=false
+      PASS  honesty legal_reviewed=false
+      PASS  honesty observe_only
+      PASS  holiday path excludes weekend+holiday
+      PASS  manager lacks leave.request
+      PASS  manager has leave.decide
+      PASS  infer vacation → annual
+      PASS  infer time off → annual
+      PASS  invalidate_provisional does not pay
+      PASS  no payroll_payment in invalidate
+      PASS  no bank transfer in invalidate
+    using company WATHEFNI
+      PASS  temp employee created/exists
+      PASS  request ok
+      PASS  request stores annual not vacation
+      PASS  request honesty flags
+      PASS  self-approve denied at API
+      PASS  self-reject denied at API
+      PASS  stale version approve fails closed
+      PASS  approve with matching version
+      PASS  approve honesty
+      PASS  approve payroll_impact provisional only
+      PASS  cancel with stale version fails
+      PASS  cancel preserves history ok
+      PASS  events preserve request/approve/cancel
+      PASS  stale pending resolved
+      PASS  stale audit event
+      PASS  approve past-start returns stale resolved
+      PASS  terminated cannot request
+      PASS  lifecycle decline recorded
+      PASS  lifecycle reverse recorded
+      PASS  reverse never pending
+      PASS  reverse restores requested
+      PASS  legacy vacation maps into annual ledger
+      PASS  dashboard-equivalent honesty flags
+      PASS  list leave ok
+
+    51 passed, 0 failed

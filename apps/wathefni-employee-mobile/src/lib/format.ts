@@ -13,12 +13,15 @@ const KNOWN_STATUSES = new Set([
   'cancelled',
   'absent',
   'in_progress',
+  'not_started',
   'submitted',
   'processing',
   'accepted',
   'replacement_required',
   'waived',
   'blocked',
+  'open',
+  'high',
 ])
 
 export function statusTone(status: string | null | undefined): Tone {
@@ -34,10 +37,13 @@ export function statusTone(status: string | null | undefined): Tone {
     case 'submitted':
     case 'processing':
     case 'in_progress':
+    case 'not_started':
     case 'requested':
     case 'pending':
+    case 'open':
     case 'late':
     case 'scheduled':
+    case 'high':
       return 'warning'
     case 'rejected':
     case 'replacement_required':
@@ -64,6 +70,17 @@ export function formatDate(value: string | null | undefined, locale: string): st
   if (Number.isNaN(d.getTime())) return String(value)
   return new Intl.DateTimeFormat(locale === 'ar' ? 'ar' : 'en-GB', {
     day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(d)
+}
+
+/** Month + year for payslip list rows (e.g. Aug 2026). */
+export function formatMonthYear(value: string | null | undefined, locale: string): string {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return String(value)
+  return new Intl.DateTimeFormat(locale === 'ar' ? 'ar' : 'en-GB', {
     month: 'short',
     year: 'numeric',
   }).format(d)
@@ -137,6 +154,27 @@ export function kuwaitToday(now: Date = new Date()): string {
     day: '2-digit',
     timeZone: 'Asia/Kuwait',
   }).format(now)
+}
+
+export type KuwaitDayPart = 'morning' | 'afternoon' | 'evening'
+
+/**
+ * Morning / afternoon / evening from the Kuwait clock, not the device zone.
+ *
+ * Boundaries match ordinary Gulf workplace hours: morning before noon,
+ * afternoon until 17:00, evening after that.
+ */
+export function kuwaitDayPart(now: Date = new Date()): KuwaitDayPart {
+  const hour = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      hour: 'numeric',
+      hour12: false,
+      timeZone: 'Asia/Kuwait',
+    }).format(now),
+  )
+  if (hour < 12) return 'morning'
+  if (hour < 17) return 'afternoon'
+  return 'evening'
 }
 
 /**

@@ -1,0 +1,317 @@
+{
+  "stamp": "20260727T002446Z",
+  "passed": 28,
+  "failed": 0,
+  "results": [
+    {
+      "name": "health_200",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "production_env",
+      "ok": true,
+      "detail": "production"
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "enforce_off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production_db_connect",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "name": "email_intake_parity",
+      "ok": true,
+      "detail": "48df828e-bd29-5745-a14c-e54a967492a4"
+    },
+    {
+      "name": "person_identity_outcome",
+      "ok": true,
+      "detail": "linked"
+    },
+    {
+      "name": "talent_pool_entry",
+      "ok": true,
+      "detail": "c205abdb-7bc4-5e0b-ab70-4a702d0d44d7"
+    },
+    {
+      "name": "cv_version_parity",
+      "ok": true,
+      "detail": "2b574e66-1044-5ba0-a606-1cd9f8215520"
+    },
+    {
+      "name": "manual_upload_adapter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "whatsapp_unsolicited",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "whatsapp_job",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ck_person_ref",
+      "ok": true,
+      "detail": "person:c5d443e4-e219-5cb8-b1ac-2ef53eda1bea"
+    },
+    {
+      "name": "ck_subject_ref",
+      "ok": true,
+      "detail": "subject:fc5637fa-3d77-5219-8ee6-72dba07feb29"
+    },
+    {
+      "name": "ck_app_compat",
+      "ok": true,
+      "detail": "app:x"
+    },
+    {
+      "name": "ck_non_actionable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ck_index_meta",
+      "ok": true,
+      "detail": "person"
+    },
+    {
+      "name": "shadow_deny_classified",
+      "ok": true,
+      "detail": "{\"expected_missing_verified_binding\": 2, \"valid_legacy_application_needing_audited_backfill\": 16}"
+    },
+    {
+      "name": "shadow_no_bugs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_no_unexplained",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cross_tenant_isolation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kill_switch_flag_off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "enforce_lab_only_not_service",
+      "ok": true,
+      "detail": "enforce_deny"
+    },
+    {
+      "name": "zero_downstream_mutation",
+      "ok": true,
+      "detail": "candidates 21->21; apps 18->18"
+    },
+    {
+      "name": "zero_duplicate_cv_versions",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "email_path_authoritative",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production_dark_commit",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "parity": {
+    "before": {
+      "candidates": 21,
+      "applications": 18,
+      "cv_versions": 0,
+      "persons": 7,
+      "talent_pool_entries": 0,
+      "intake_source_events": 0
+    },
+    "after_core": {
+      "candidates": 21,
+      "applications": 18
+    }
+  },
+  "shadow_classifications": {
+    "expected_missing_verified_binding": 2,
+    "valid_legacy_application_needing_audited_backfill": 16
+  },
+  "shadow_samples": [
+    {
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "position_code": "",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "held_or_unassigned_talent_pool_record"
+      ],
+      "classification": "expected_missing_verified_binding"
+    },
+    {
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "position_code": "",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "held_or_unassigned_talent_pool_record"
+      ],
+      "classification": "expected_missing_verified_binding"
+    },
+    {
+      "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+      "status": "awaiting_cv",
+      "position_code": "ACCOUNTING",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "position_code": "ACCOUNTING_EXCEL",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "position_code": "ACCOUNTING_EXCEL",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "position_code": "ACCOUNTING_EXCEL",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+      "status": "screening",
+      "position_code": "ACCOUNTING",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "screening_complete",
+      "position_code": "ACCOUNTING_EXCEL",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "status": "hired",
+      "position_code": "IT_MAINTENANCE",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-HR",
+      "status": "shortlisted",
+      "position_code": "HR",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "status": "review_pending",
+      "position_code": "ACCOUNTING",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-FINANCE",
+      "status": "screening",
+      "position_code": "FINANCE",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-HR",
+      "status": "shortlisted",
+      "position_code": "HR",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "status": "shortlisted",
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    },
+    {
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "status": "hired",
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "mode": "shadow_deny",
+      "reason_codes": [
+        "verified_job_binding_missing"
+      ],
+      "classification": "valid_legacy_application_needing_audited_backfill"
+    }
+  ]
+}

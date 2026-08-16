@@ -1,0 +1,31 @@
+{
+  "blocker": false,
+  "category": "authorization",
+  "detail": "backend_current, permission, actor/tenant mismatch, and cross-tenant non-leak proven",
+  "gate_id": "auth_matrix",
+  "metrics": {
+    "cases": [
+      {
+        "case": "empty_permissions",
+        "code": "permission_denied"
+      },
+      {
+        "case": "missing_prehire",
+        "code": "permission_denied"
+      },
+      {
+        "case": "actor_mismatch",
+        "code": "permission_subject_mismatch"
+      },
+      {
+        "case": "tenant_subject_mismatch",
+        "code": "permission_subject_mismatch"
+      },
+      {
+        "case": "not_backend_current",
+        "code": "backend_current_permission_required"
+      }
+    ]
+  },
+  "status": "PASS"
+}

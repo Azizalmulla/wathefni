@@ -1,0 +1,41 @@
+    pt3 role fit — db journeys
+      PASS  enable talent
+      PASS  enable succession
+      PASS  critical role
+      PASS  A create set without JA
+      PASS  A draft
+      PASS  A publish
+      PASS  B missing evaluate
+      PASS  B not_assessed
+      PASS  B no 0%
+      PASS  B no 100%
+      PASS  B suggestion unassessed not not_ready
+      PASS  B C6 not written
+      PASS  C claim skill
+      PASS  C claimed is not_permitted/not strong
+      PASS  C claimed not silently verified
+      PASS  D verify skill
+      PASS  D strong fit
+      PASS  D suggestion informs only
+      PASS  D human readiness still none
+      PASS  D C6 still not written
+      PASS  E plan
+      PASS  E human readiness
+      PASS  E human readiness authoritative
+      PASS  E fit did not overwrite C6
+      PASS  E C6 write flag false
+      PASS  E C6 band unchanged
+      PASS  F JA-linked set
+      PASS  F JA off → unavailable
+      PASS  F Talent continues
+      FAIL  F no JA write :: {'ok': True, 'evaluation': {'evaluation_id': 'b959fd05-c119-458c-a00d-50543e602648', 'company_code': 'PT391692', 'employee_key': 'PT391692-PT3-cbc9ac4c', 'set_id': 'cee0b3b0-a0de-4a33-80e4-f9db956215a0', 'version_id': '1d0a390a-7bc9-4ea3-8c09-cc68568baa07', 'version': 1, 'overall_fit': 'unavailable', 'weighted_pct': None, 'requirement_results': [], 'readiness_suggestion': 'unassessed', 'human_readiness': None, 'human_readiness_authoritative': True, 'ja_written': False, 'c6_readiness_written': False, 'why': {'reason': 'job_architecture_off', 'set_id': 'cee0b3b0-a0de-4a33-80e4-f9db956215a0', 'subject': 'role_fit', 'version': 1, 'ja_written': False, 'version_id': '1d0a390a-7bc9-4ea3-8c09-cc68568baa07', 'overall_fit': 'unavailable', 'weighted_pct': None, 'job_profile_id': 'b40835eb-e3e7-44b2-bedb-cc725ec80032', 'missing_evidence': [{'reason': 'ja_off'}], 'requirement_results': [], 'contradictions_reconciled': False}, 'as_of': datetime.datetime(2026, 8, 15, 22, 33, 53, 432254, tzinfo=datetime.timezone.utc)}, 'overall_fit': 'unavailable', 'why': {'subject': 'role_fit', 'set_id': 'cee0b3b0-a0de-4a33-80e4-f9db956215a0', 'version_id': '1d0a390a-7bc9-4ea3-8c09-cc68568baa07', 'version': 1, 'job_profile_id': 'b40835eb-e3e7-44b2-bedb-cc725ec80032', 'overall_fit': 'unavailable', 'reason': 'job_architecture_off', 'requirement_results': [], 'missing_evidence': [{'reason': 'ja_off'}], 'contradictions_reconciled': False, 'ja_written': False, 'weighted_pct': None}, 'talent_continues': True, 'phase': 'talent_role_fit_pt3', 'contract_version': 'talent_role_fit_pt3_v1', 'pass_stamp': 'PT3_ROLE_FIT_READINESS_FULL_PASS', 'role_fit_is_not_readiness': True, 'role_fit_is_not_promotion_eligibility': True, 'readiness_is_not_promotion_eligibility': True, 'human_c6_readiness_authoritative': True, 'no_write_back_to_ja': True, 'no_universal_fit_percent': True, 'missing_is_not_zero': True, 'missing_is_not_one_hundred': True, 'ja_off_fit_unavailable': True, 'talent_works_without_ja': True, 'company_code': 'PT391692'}
+      PASS  F Talent fit still works
+      PASS  G enable JA
+      PASS  G JA profile
+      PASS  G import draft
+      PASS  G import does not write JA
+      PASS  G JA profile count unchanged
+      PASS  H tenant isolation
+      PASS  I weighted refused
+
+    37 passed, 1 failed

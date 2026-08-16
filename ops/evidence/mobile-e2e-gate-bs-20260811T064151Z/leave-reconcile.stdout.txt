@@ -1,0 +1,31 @@
+{
+  "checks": {
+    "approve": {
+      "pass": false,
+      "expect": "approved",
+      "leave_id": "60822864-fff9-4f22-a8c3-077a90907128",
+      "status": "cancelled",
+      "decision_note": " | e2e_reset",
+      "allowed_actions": [],
+      "employee_key": "WATHEFNI-96550252254",
+      "start_date": "2026-09-01",
+      "leave_type": "annual",
+      "reason": "[wathefni_mobile_e2e_leave_fixture_v1:approve] disposable BrowserStack leave fixture \u2014 safe to decide/cleanup"
+    },
+    "reject_reason_persisted": true,
+    "reject": {
+      "pass": false,
+      "expect": "rejected",
+      "leave_id": "d42c4045-f96e-4b34-b338-c5480846d75f",
+      "status": "cancelled",
+      "decision_note": " | e2e_reset",
+      "allowed_actions": [],
+      "employee_key": "WATHEFNI-96550252254",
+      "start_date": "2026-09-08",
+      "leave_type": "annual",
+      "reason": "[wathefni_mobile_e2e_leave_fixture_v1:reject] disposable BrowserStack leave fixture \u2014 safe to decide/cleanup"
+    }
+  },
+  "ok": false,
+  "rule": "API/DB reconcile supports MOBILE_PASS but cannot replace it"
+}

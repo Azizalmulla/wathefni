@@ -1,0 +1,6 @@
+{
+  "schedule_uses_interview_service": true,
+  "schedule_no_run_gog": true,
+  "microsoft_sync_wired": true,
+  "meeting_types_include_teams": true
+}

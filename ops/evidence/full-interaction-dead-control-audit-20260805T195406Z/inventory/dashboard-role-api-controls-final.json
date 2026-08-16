@@ -1,0 +1,3924 @@
+[
+  {
+    "screen": "/dashboard/attendance/ops/cases/{case_id}/apply",
+    "control": "Attendance Ops Apply Case",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=400 hr_manager=400 viewer=400; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:attendance_ops_apply_case_dashboard_attendance_ops_cases__case_id__apply_post",
+    "method": "POST",
+    "route_template": "/dashboard/attendance/ops/cases/{case_id}/apply",
+    "probe_route": "/dashboard/attendance/ops/cases/00000000-0000-0000-0000-000000000000/apply",
+    "statuses": {
+      "owner": 400,
+      "hr_manager": 400,
+      "viewer": 400
+    },
+    "repeated_owner_status": 400,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/attendance/ops/cases/{case_id}/review",
+    "control": "Attendance Ops Review Case",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=400 hr_manager=400 viewer=400; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:attendance_ops_review_case_dashboard_attendance_ops_cases__case_id__review_post",
+    "method": "POST",
+    "route_template": "/dashboard/attendance/ops/cases/{case_id}/review",
+    "probe_route": "/dashboard/attendance/ops/cases/00000000-0000-0000-0000-000000000000/review",
+    "statuses": {
+      "owner": 400,
+      "hr_manager": 400,
+      "viewer": 400
+    },
+    "repeated_owner_status": 400,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/attendance/ops/disputes/{dispute_id}/resolve",
+    "control": "Attendance Ops Resolve Dispute",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=400 hr_manager=400 viewer=400; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:attendance_ops_resolve_dispute_dashboard_attendance_ops_disputes__dispute_id__resolve_post",
+    "method": "POST",
+    "route_template": "/dashboard/attendance/ops/disputes/{dispute_id}/resolve",
+    "probe_route": "/dashboard/attendance/ops/disputes/00000000-0000-0000-0000-000000000000/resolve",
+    "statuses": {
+      "owner": 400,
+      "hr_manager": 400,
+      "viewer": 400
+    },
+    "repeated_owner_status": 400,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/attendance/ops/exceptions/{exception_id}/assign",
+    "control": "Attendance Ops Assign",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=400 hr_manager=400 viewer=400; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:attendance_ops_assign_dashboard_attendance_ops_exceptions__exception_id__assign_post",
+    "method": "POST",
+    "route_template": "/dashboard/attendance/ops/exceptions/{exception_id}/assign",
+    "probe_route": "/dashboard/attendance/ops/exceptions/00000000-0000-0000-0000-000000000000/assign",
+    "statuses": {
+      "owner": 400,
+      "hr_manager": 400,
+      "viewer": 400
+    },
+    "repeated_owner_status": 400,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/attendance/ops/exceptions/{exception_id}/reopen",
+    "control": "Attendance Ops Reopen",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=400 hr_manager=400 viewer=400; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:attendance_ops_reopen_dashboard_attendance_ops_exceptions__exception_id__reopen_post",
+    "method": "POST",
+    "route_template": "/dashboard/attendance/ops/exceptions/{exception_id}/reopen",
+    "probe_route": "/dashboard/attendance/ops/exceptions/00000000-0000-0000-0000-000000000000/reopen",
+    "statuses": {
+      "owner": 400,
+      "hr_manager": 400,
+      "viewer": 400
+    },
+    "repeated_owner_status": 400,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/calendar/events/{event_id}",
+    "control": "Dashboard Calendar Event Update",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_event_update_dashboard_calendar_events__event_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/calendar/events/{event_id}",
+    "probe_route": "/dashboard/calendar/events/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/calendar/events/{event_id}/cancel",
+    "control": "Dashboard Calendar Event Cancel",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_event_cancel_dashboard_calendar_events__event_id__cancel_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/events/{event_id}/cancel",
+    "probe_route": "/dashboard/calendar/events/00000000-0000-0000-0000-000000000000/cancel",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/calendar/events/{event_id}/guests/{guest_id}/invite",
+    "control": "Dashboard Calendar Guest Invite",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_guest_invite_dashboard_calendar_events__event_id__guests__guest_id__invite_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/events/{event_id}/guests/{guest_id}/invite",
+    "probe_route": "/dashboard/calendar/events/00000000-0000-0000-0000-000000000000/guests/00000000-0000-0000-0000-000000000000/invite",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/calendar/events/{event_id}/rsvp",
+    "control": "Dashboard Calendar Event Rsvp",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=422; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_event_rsvp_dashboard_calendar_events__event_id__rsvp_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/events/{event_id}/rsvp",
+    "probe_route": "/dashboard/calendar/events/00000000-0000-0000-0000-000000000000/rsvp",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 422
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/calendar/events/{event_id}/sync/retry",
+    "control": "Dashboard Calendar Event Sync Retry",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=200 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_event_sync_retry_dashboard_calendar_events__event_id__sync_retry_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/events/{event_id}/sync/retry",
+    "probe_route": "/dashboard/calendar/events/00000000-0000-0000-0000-000000000000/sync/retry",
+    "statuses": {
+      "owner": 200,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": null,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/calendar/reschedule-requests/{request_id}/resolve",
+    "control": "Dashboard Calendar Reschedule Resolve",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_reschedule_resolve_dashboard_calendar_reschedule_requests__request_id__resolve_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/reschedule-requests/{request_id}/resolve",
+    "probe_route": "/dashboard/calendar/reschedule-requests/00000000-0000-0000-0000-000000000000/resolve",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/calendar/sync/connections/{connection_id}",
+    "control": "Dashboard Calendar Sync Update Connection",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_sync_update_connection_dashboard_calendar_sync_connections__connection_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/calendar/sync/connections/{connection_id}",
+    "probe_route": "/dashboard/calendar/sync/connections/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/calendar/sync/connections/{connection_id}/disconnect",
+    "control": "Dashboard Calendar Sync Disconnect",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_sync_disconnect_dashboard_calendar_sync_connections__connection_id__disconnect_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/sync/connections/{connection_id}/disconnect",
+    "probe_route": "/dashboard/calendar/sync/connections/00000000-0000-0000-0000-000000000000/disconnect",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/calendar/sync/connections/{connection_id}/reconnect",
+    "control": "Dashboard Calendar Sync Reconnect",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_calendar_sync_reconnect_dashboard_calendar_sync_connections__connection_id__reconnect_post",
+    "method": "POST",
+    "route_template": "/dashboard/calendar/sync/connections/{connection_id}/reconnect",
+    "probe_route": "/dashboard/calendar/sync/connections/00000000-0000-0000-0000-000000000000/reconnect",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/hr-tasks/{task_id}/resolve",
+    "control": "Dashboard Hr Task Resolve",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_hr_task_resolve_dashboard_hr_tasks__task_id__resolve_post",
+    "method": "POST",
+    "route_template": "/dashboard/hr-tasks/{task_id}/resolve",
+    "probe_route": "/dashboard/hr-tasks/00000000-0000-0000-0000-000000000000/resolve",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/attendance/{attendance_id}/resolve",
+    "control": "Mobile Attendance Resolve",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_attendance_resolve_dashboard_mobile_attendance__attendance_id__resolve_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/attendance/{attendance_id}/resolve",
+    "probe_route": "/dashboard/mobile/attendance/00000000-0000-0000-0000-000000000000/resolve",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/candidates/{app_key}/decision",
+    "control": "Mobile Candidate Decision",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_candidate_decision_dashboard_mobile_candidates__app_key__decision_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/candidates/{app_key}/decision",
+    "probe_route": "/dashboard/mobile/candidates/interaction-audit-app_key/decision",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/documents/{employee_key}/{document_type}/review",
+    "control": "Mobile Compliance Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_compliance_review_dashboard_mobile_documents__employee_key___document_type__review_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/documents/{employee_key}/{document_type}/review",
+    "probe_route": "/dashboard/mobile/documents/interaction-audit-employee_key/interaction-audit-document_type/review",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/interviews/{interview_id}/notes",
+    "control": "Mobile Interview Notes",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_interview_notes_dashboard_mobile_interviews__interview_id__notes_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/interviews/{interview_id}/notes",
+    "probe_route": "/dashboard/mobile/interviews/00000000-0000-0000-0000-000000000000/notes",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/leave/{leave_id}/decision",
+    "control": "Mobile Leave Decision",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_leave_decision_dashboard_mobile_leave__leave_id__decision_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/leave/{leave_id}/decision",
+    "probe_route": "/dashboard/mobile/leave/00000000-0000-0000-0000-000000000000/decision",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/offers/{offer_id}/action",
+    "control": "Mobile Offer Action",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_offer_action_dashboard_mobile_offers__offer_id__action_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/offers/{offer_id}/action",
+    "probe_route": "/dashboard/mobile/offers/00000000-0000-0000-0000-000000000000/action",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/onboarding/{employee_key}/review",
+    "control": "Mobile Onboarding Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_onboarding_review_dashboard_mobile_onboarding__employee_key__review_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/onboarding/{employee_key}/review",
+    "probe_route": "/dashboard/mobile/onboarding/interaction-audit-employee_key/review",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/mobile/shift-swaps/{swap_id}/decision",
+    "control": "Mobile Shift Swap Decision",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:mobile_shift_swap_decision_dashboard_mobile_shift_swaps__swap_id__decision_post",
+    "method": "POST",
+    "route_template": "/dashboard/mobile/shift-swaps/{swap_id}/decision",
+    "probe_route": "/dashboard/mobile/shift-swaps/00000000-0000-0000-0000-000000000000/decision",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/org/managers/{scope_id}",
+    "control": "Dashboard Org Delete Manager",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=404",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_org_delete_manager_dashboard_org_managers__scope_id__delete",
+    "method": "DELETE",
+    "route_template": "/dashboard/org/managers/{scope_id}",
+    "probe_route": "/dashboard/org/managers/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 404
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/platform/integrations/{integration_id}/disconnect",
+    "control": "Dashboard Platform Integrations Disconnect",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_platform_integrations_disconnect_dashboard_platform_integrations__integration_id__disconnect_post",
+    "method": "POST",
+    "route_template": "/dashboard/platform/integrations/{integration_id}/disconnect",
+    "probe_route": "/dashboard/platform/integrations/00000000-0000-0000-0000-000000000000/disconnect",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/platform/integrations/{integration_id}/health",
+    "control": "Dashboard Platform Integration Health",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_platform_integration_health_dashboard_platform_integrations__integration_id__health_post",
+    "method": "POST",
+    "route_template": "/dashboard/platform/integrations/{integration_id}/health",
+    "probe_route": "/dashboard/platform/integrations/00000000-0000-0000-0000-000000000000/health",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/platform/integrations/{integration_id}/rotate",
+    "control": "Dashboard Platform Integration Rotate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_platform_integration_rotate_dashboard_platform_integrations__integration_id__rotate_post",
+    "method": "POST",
+    "route_template": "/dashboard/platform/integrations/{integration_id}/rotate",
+    "probe_route": "/dashboard/platform/integrations/00000000-0000-0000-0000-000000000000/rotate",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/activate",
+    "control": "Capture Ops Activate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_activate_dashboard_posthire_attendance_capture_ops_connectors__connector_id__activate_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/activate",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/connectors/00000000-0000-0000-0000-000000000000/activate",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/health",
+    "control": "Capture Ops Health Update",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_health_update_dashboard_posthire_attendance_capture_ops_connectors__connector_id__health_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/health",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/connectors/00000000-0000-0000-0000-000000000000/health",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/revoke",
+    "control": "Capture Ops Revoke",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_revoke_dashboard_posthire_attendance_capture_ops_connectors__connector_id__revoke_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/revoke",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/connectors/00000000-0000-0000-0000-000000000000/revoke",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/rotate",
+    "control": "Capture Ops Rotate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_rotate_dashboard_posthire_attendance_capture_ops_connectors__connector_id__rotate_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/rotate",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/connectors/00000000-0000-0000-0000-000000000000/rotate",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/remediation/{item_id}/approve-mapping",
+    "control": "Capture Ops Approve Mapping",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_approve_mapping_dashboard_posthire_attendance_capture_ops_remediation__item_id__approve_mapping_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/remediation/{item_id}/approve-mapping",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/remediation/00000000-0000-0000-0000-000000000000/approve-mapping",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/remediation/{item_id}/reject",
+    "control": "Capture Ops Reject",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_reject_dashboard_posthire_attendance_capture_ops_remediation__item_id__reject_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/remediation/{item_id}/reject",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/remediation/00000000-0000-0000-0000-000000000000/reject",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/capture-ops/remediation/{item_id}/replay",
+    "control": "Capture Ops Replay",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:capture_ops_replay_dashboard_posthire_attendance_capture_ops_remediation__item_id__replay_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/capture-ops/remediation/{item_id}/replay",
+    "probe_route": "/dashboard/posthire/attendance/capture-ops/remediation/00000000-0000-0000-0000-000000000000/replay",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/attendance/import/batches/{batch_id}/reverse",
+    "control": "Attendance Import Reverse",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=404",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:attendance_import_reverse_dashboard_posthire_attendance_import_batches__batch_id__reverse_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/attendance/import/batches/{batch_id}/reverse",
+    "probe_route": "/dashboard/posthire/attendance/import/batches/00000000-0000-0000-0000-000000000000/reverse",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 404
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employee-ess/bank/{employee_key}/rotate",
+    "control": "Dashboard Employee Ess Bank Rotate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_ess_bank_rotate_dashboard_posthire_employee_ess_bank__employee_key__rotate_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-ess/bank/{employee_key}/rotate",
+    "probe_route": "/dashboard/posthire/employee-ess/bank/interaction-audit-employee_key/rotate",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-ess/requests/{request_id}/apply",
+    "control": "Dashboard Employee Ess Request Apply",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_ess_request_apply_dashboard_posthire_employee_ess_requests__request_id__apply_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-ess/requests/{request_id}/apply",
+    "probe_route": "/dashboard/posthire/employee-ess/requests/00000000-0000-0000-0000-000000000000/apply",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-ess/requests/{request_id}/decide",
+    "control": "Dashboard Employee Ess Request Decide",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=422; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_ess_request_decide_dashboard_posthire_employee_ess_requests__request_id__decide_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-ess/requests/{request_id}/decide",
+    "probe_route": "/dashboard/posthire/employee-ess/requests/00000000-0000-0000-0000-000000000000/decide",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 422
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-ess/requests/{request_id}/submit",
+    "control": "Dashboard Employee Ess Request Submit",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_ess_request_submit_dashboard_posthire_employee_ess_requests__request_id__submit_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-ess/requests/{request_id}/submit",
+    "probe_route": "/dashboard/posthire/employee-ess/requests/00000000-0000-0000-0000-000000000000/submit",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 404
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-ess/requests/{request_id}/withdraw",
+    "control": "Dashboard Employee Ess Request Withdraw",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_ess_request_withdraw_dashboard_posthire_employee_ess_requests__request_id__withdraw_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-ess/requests/{request_id}/withdraw",
+    "probe_route": "/dashboard/posthire/employee-ess/requests/00000000-0000-0000-0000-000000000000/withdraw",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 404
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-lifecycle/downstream-actions/{action_id}/decide",
+    "control": "Dashboard Employee Lifecycle Downstream Decide",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_lifecycle_downstream_decide_dashboard_posthire_employee_lifecycle_downstream_actions__action_id__decide_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-lifecycle/downstream-actions/{action_id}/decide",
+    "probe_route": "/dashboard/posthire/employee-lifecycle/downstream-actions/00000000-0000-0000-0000-000000000000/decide",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-lifecycle/requests/{request_id}/cancel",
+    "control": "Dashboard Employee Lifecycle Cancel Request",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_lifecycle_cancel_request_dashboard_posthire_employee_lifecycle_requests__request_id__cancel_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-lifecycle/requests/{request_id}/cancel",
+    "probe_route": "/dashboard/posthire/employee-lifecycle/requests/00000000-0000-0000-0000-000000000000/cancel",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-lifecycle/requests/{request_id}/decide",
+    "control": "Dashboard Employee Lifecycle Decide Request",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_lifecycle_decide_request_dashboard_posthire_employee_lifecycle_requests__request_id__decide_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-lifecycle/requests/{request_id}/decide",
+    "probe_route": "/dashboard/posthire/employee-lifecycle/requests/00000000-0000-0000-0000-000000000000/decide",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/commit",
+    "control": "Dashboard Employee Org Migration Commit",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_org_migration_commit_dashboard_posthire_employee_org_migration_batches__batch_id__commit_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/commit",
+    "probe_route": "/dashboard/posthire/employee-org/migration-batches/00000000-0000-0000-0000-000000000000/commit",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/dry-run",
+    "control": "Dashboard Employee Org Migration Dry Run",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_org_migration_dry_run_dashboard_posthire_employee_org_migration_batches__batch_id__dry_run_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/dry-run",
+    "probe_route": "/dashboard/posthire/employee-org/migration-batches/00000000-0000-0000-0000-000000000000/dry-run",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/pause",
+    "control": "Dashboard Employee Org Migration Pause",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=409 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_org_migration_pause_dashboard_posthire_employee_org_migration_batches__batch_id__pause_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/pause",
+    "probe_route": "/dashboard/posthire/employee-org/migration-batches/00000000-0000-0000-0000-000000000000/pause",
+    "statuses": {
+      "owner": 409,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 409,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/rollback",
+    "control": "Dashboard Employee Org Migration Rollback",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_org_migration_rollback_dashboard_posthire_employee_org_migration_batches__batch_id__rollback_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-org/migration-batches/{batch_id}/rollback",
+    "probe_route": "/dashboard/posthire/employee-org/migration-batches/00000000-0000-0000-0000-000000000000/rollback?idempotency_key=interaction-audit-idempotency_ke",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employee-status/requests/{request_id}/cancel",
+    "control": "Dashboard Employee Status Cancel Request",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_status_cancel_request_dashboard_posthire_employee_status_requests__request_id__cancel_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-status/requests/{request_id}/cancel",
+    "probe_route": "/dashboard/posthire/employee-status/requests/00000000-0000-0000-0000-000000000000/cancel",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employee-status/requests/{request_id}/decide",
+    "control": "Dashboard Employee Status Decide Request",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_status_decide_request_dashboard_posthire_employee_status_requests__request_id__decide_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employee-status/requests/{request_id}/decide",
+    "probe_route": "/dashboard/posthire/employee-status/requests/00000000-0000-0000-0000-000000000000/decide",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/import-batches/{batch_id}/repair-side-effects",
+    "control": "Dashboard Posthire Import Batch Repair",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=200 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_import_batch_repair_dashboard_posthire_employees_import_batches__batch_id__repair_side_effects_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/import-batches/{batch_id}/repair-side-effects",
+    "probe_route": "/dashboard/posthire/employees/import-batches/00000000-0000-0000-0000-000000000000/repair-side-effects",
+    "statuses": {
+      "owner": 200,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": null,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/import-batches/{batch_id}/rollback",
+    "control": "Dashboard Posthire Import Batch Rollback",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_import_batch_rollback_dashboard_posthire_employees_import_batches__batch_id__rollback_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/import-batches/{batch_id}/rollback",
+    "probe_route": "/dashboard/posthire/employees/import-batches/00000000-0000-0000-0000-000000000000/rollback",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employees/import-batches/{batch_id}/rows/{row_id}/apply-approved-name-change",
+    "control": "Dashboard Posthire Import Apply Approved Name Change",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_import_apply_approved_name_change_dashboard_posthire_employees_import_batches__batch_id__rows__row_id__apply_approved_name_change_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/import-batches/{batch_id}/rows/{row_id}/apply-approved-name-change",
+    "probe_route": "/dashboard/posthire/employees/import-batches/00000000-0000-0000-0000-000000000000/rows/00000000-0000-0000-0000-000000000000/apply-approved-name-change",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/import-batches/{batch_id}/rows/{row_id}/approve-name-change",
+    "control": "Dashboard Posthire Import Approve Name Change",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_import_approve_name_change_dashboard_posthire_employees_import_batches__batch_id__rows__row_id__approve_name_change_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/import-batches/{batch_id}/rows/{row_id}/approve-name-change",
+    "probe_route": "/dashboard/posthire/employees/import-batches/00000000-0000-0000-0000-000000000000/rows/00000000-0000-0000-0000-000000000000/approve-name-change",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}",
+    "control": "Dashboard Posthire Update Employee",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_update_employee_dashboard_posthire_employees__employee_key__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/posthire/employees/{employee_key}",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/app-invite",
+    "control": "Dashboard Posthire App Invite",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=422; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_app_invite_dashboard_posthire_employees__employee_key__app_invite_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/app-invite",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/app-invite",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 422
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/documents",
+    "control": "Dashboard Posthire Employee Document Upload",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=422; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_employee_document_upload_dashboard_posthire_employees__employee_key__documents_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/documents",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/documents",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 422
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/documents/{document_type}/review",
+    "control": "Dashboard Document Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_document_review_dashboard_posthire_employees__employee_key__documents__document_type__review_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/documents/{document_type}/review",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/documents/interaction-audit-document_type/review",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/lifecycle/downstream-actions",
+    "control": "Dashboard Employee Lifecycle Downstream Create",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_lifecycle_downstream_create_dashboard_posthire_employees__employee_key__lifecycle_downstream_actions_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/lifecycle/downstream-actions",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/lifecycle/downstream-actions",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/lifecycle/requests",
+    "control": "Dashboard Employee Lifecycle Create Request",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_lifecycle_create_request_dashboard_posthire_employees__employee_key__lifecycle_requests_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/lifecycle/requests",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/lifecycle/requests",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/status",
+    "control": "Dashboard Posthire Set Employee Status",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_set_employee_status_dashboard_posthire_employees__employee_key__status_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/status",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/status",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/employees/{employee_key}/status/requests",
+    "control": "Dashboard Employee Status Create Request",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_employee_status_create_request_dashboard_posthire_employees__employee_key__status_requests_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/employees/{employee_key}/status/requests",
+    "probe_route": "/dashboard/posthire/employees/interaction-audit-employee_key/status/requests",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/approve",
+    "control": "Dashboard Payroll Close Approve",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_approve_dashboard_posthire_payroll_close_export_runs__close_run_id__approve_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/approve",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/approve",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/bank-contract",
+    "control": "Dashboard Payroll Close Bank Contract",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_bank_contract_dashboard_posthire_payroll_close_export_runs__close_run_id__bank_contract_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/bank-contract",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/bank-contract",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/close",
+    "control": "Dashboard Payroll Close Seal",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_seal_dashboard_posthire_payroll_close_export_runs__close_run_id__close_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/close",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/close",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/journal",
+    "control": "Dashboard Payroll Close Journal",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_journal_dashboard_posthire_payroll_close_export_runs__close_run_id__journal_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/journal",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/journal",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/reopen/confirm",
+    "control": "Dashboard Payroll Close Reopen Confirm",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_reopen_confirm_dashboard_posthire_payroll_close_export_runs__close_run_id__reopen_confirm_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/reopen/confirm",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/reopen/confirm",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/reopen/initiate",
+    "control": "Dashboard Payroll Close Reopen Initiate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_reopen_initiate_dashboard_posthire_payroll_close_export_runs__close_run_id__reopen_initiate_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/reopen/initiate",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/reopen/initiate",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/submit",
+    "control": "Dashboard Payroll Close Submit",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_close_submit_dashboard_posthire_payroll_close_export_runs__close_run_id__submit_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/close-export/runs/{close_run_id}/submit",
+    "probe_route": "/dashboard/posthire/payroll/close-export/runs/00000000-0000-0000-0000-000000000000/submit",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/external/exports/{export_run_id}/import",
+    "control": "Dashboard Payroll External Import",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=422; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_external_import_dashboard_posthire_payroll_external_exports__export_run_id__import_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/external/exports/{export_run_id}/import",
+    "probe_route": "/dashboard/posthire/payroll/external/exports/00000000-0000-0000-0000-000000000000/import",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 422
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/external/exports/{export_run_id}/reconcile",
+    "control": "Dashboard Payroll External Reconcile",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_external_reconcile_dashboard_posthire_payroll_external_exports__export_run_id__reconcile_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/external/exports/{export_run_id}/reconcile",
+    "probe_route": "/dashboard/posthire/payroll/external/exports/00000000-0000-0000-0000-000000000000/reconcile",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/external/exports/{export_run_id}/rollback",
+    "control": "Dashboard Payroll External Rollback",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_external_rollback_dashboard_posthire_payroll_external_exports__export_run_id__rollback_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/external/exports/{export_run_id}/rollback",
+    "probe_route": "/dashboard/posthire/payroll/external/exports/00000000-0000-0000-0000-000000000000/rollback",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/external/quarantine/{quarantine_id}/acknowledge",
+    "control": "Dashboard Payroll External Quarantine Acknowledge",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_external_quarantine_acknowledge_dashboard_posthire_payroll_external_quarantine__quarantine_id__acknowledge_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/external/quarantine/{quarantine_id}/acknowledge",
+    "probe_route": "/dashboard/posthire/payroll/external/quarantine/00000000-0000-0000-0000-000000000000/acknowledge",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/payslips/{payslip_id}/replace",
+    "control": "Dashboard Payroll Payslip Replace",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_payslip_replace_dashboard_posthire_payroll_payslips__payslip_id__replace_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/payslips/{payslip_id}/replace",
+    "probe_route": "/dashboard/posthire/payroll/payslips/00000000-0000-0000-0000-000000000000/replace",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/payslips/{payslip_id}/revoke",
+    "control": "Dashboard Payroll Payslip Revoke",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_payslip_revoke_dashboard_posthire_payroll_payslips__payslip_id__revoke_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/payslips/{payslip_id}/revoke",
+    "probe_route": "/dashboard/posthire/payroll/payslips/00000000-0000-0000-0000-000000000000/revoke",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/preview/{preview_run_id}/rollback",
+    "control": "Dashboard Payroll Native Preview Rollback",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_native_preview_rollback_dashboard_posthire_payroll_preview__preview_run_id__rollback_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/preview/{preview_run_id}/rollback",
+    "probe_route": "/dashboard/posthire/payroll/preview/00000000-0000-0000-0000-000000000000/rollback",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/approve",
+    "control": "Dashboard Payroll Statutory Approve",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_statutory_approve_dashboard_posthire_payroll_statutory__kind___worksheet_id__approve_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/approve",
+    "probe_route": "/dashboard/posthire/payroll/statutory/interaction-audit-kind/00000000-0000-0000-0000-000000000000/approve",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/override/confirm",
+    "control": "Dashboard Payroll Statutory Override Confirm",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_statutory_override_confirm_dashboard_posthire_payroll_statutory__kind___worksheet_id__override_confirm_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/override/confirm",
+    "probe_route": "/dashboard/posthire/payroll/statutory/interaction-audit-kind/00000000-0000-0000-0000-000000000000/override/confirm",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/override/initiate",
+    "control": "Dashboard Payroll Statutory Override Initiate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_statutory_override_initiate_dashboard_posthire_payroll_statutory__kind___worksheet_id__override_initiate_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/override/initiate",
+    "probe_route": "/dashboard/posthire/payroll/statutory/interaction-audit-kind/00000000-0000-0000-0000-000000000000/override/initiate",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/submit",
+    "control": "Dashboard Payroll Statutory Submit",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_payroll_statutory_submit_dashboard_posthire_payroll_statutory__kind___worksheet_id__submit_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/submit",
+    "probe_route": "/dashboard/posthire/payroll/statutory/interaction-audit-kind/00000000-0000-0000-0000-000000000000/submit",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/open-shifts/claims/{claim_id}/decide",
+    "control": "Dashboard Posthire Decide Open Shift Claim",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_decide_open_shift_claim_dashboard_posthire_shifts_open_shifts_claims__claim_id__decide_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/open-shifts/claims/{claim_id}/decide",
+    "probe_route": "/dashboard/posthire/shifts/open-shifts/claims/00000000-0000-0000-0000-000000000000/decide",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/open-shifts/{open_shift_id}/assign",
+    "control": "Dashboard Posthire Assign Open Shift",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_assign_open_shift_dashboard_posthire_shifts_open_shifts__open_shift_id__assign_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/open-shifts/{open_shift_id}/assign",
+    "probe_route": "/dashboard/posthire/shifts/open-shifts/00000000-0000-0000-0000-000000000000/assign",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/open-shifts/{open_shift_id}/claim",
+    "control": "Dashboard Posthire Claim Open Shift",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_claim_open_shift_dashboard_posthire_shifts_open_shifts__open_shift_id__claim_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/open-shifts/{open_shift_id}/claim",
+    "probe_route": "/dashboard/posthire/shifts/open-shifts/00000000-0000-0000-0000-000000000000/claim",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/reconciliation/{flag_id}/resolve",
+    "control": "Dashboard Posthire Shift Recon Resolve",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_shift_recon_resolve_dashboard_posthire_shifts_reconciliation__flag_id__resolve_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/reconciliation/{flag_id}/resolve",
+    "probe_route": "/dashboard/posthire/shifts/reconciliation/00000000-0000-0000-0000-000000000000/resolve",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}",
+    "control": "Dashboard Posthire Patch Shift Recurrence",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_patch_shift_recurrence_dashboard_posthire_shifts_recurrences__recurrence_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/end",
+    "control": "Dashboard Posthire End Shift Recurrence",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=409 hr_manager=409 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_end_shift_recurrence_dashboard_posthire_shifts_recurrences__recurrence_id__end_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/end",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000/end",
+    "statuses": {
+      "owner": 409,
+      "hr_manager": 409,
+      "viewer": 403
+    },
+    "repeated_owner_status": 409,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/exceptions",
+    "control": "Dashboard Posthire Shift Recurrence Exception",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_shift_recurrence_exception_dashboard_posthire_shifts_recurrences__recurrence_id__exceptions_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/exceptions",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000/exceptions",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/materialize",
+    "control": "Dashboard Posthire Materialize Shift Recurrence",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_materialize_shift_recurrence_dashboard_posthire_shifts_recurrences__recurrence_id__materialize_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/materialize",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000/materialize",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/pause",
+    "control": "Dashboard Posthire Pause Shift Recurrence",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=409 hr_manager=409 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_pause_shift_recurrence_dashboard_posthire_shifts_recurrences__recurrence_id__pause_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/pause",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000/pause",
+    "statuses": {
+      "owner": 409,
+      "hr_manager": 409,
+      "viewer": 403
+    },
+    "repeated_owner_status": 409,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/preview",
+    "control": "Dashboard Posthire Preview Shift Recurrence",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_preview_shift_recurrence_dashboard_posthire_shifts_recurrences__recurrence_id__preview_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/preview",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000/preview",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/resume",
+    "control": "Dashboard Posthire Resume Shift Recurrence",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=409 hr_manager=409 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_resume_shift_recurrence_dashboard_posthire_shifts_recurrences__recurrence_id__resume_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/recurrences/{recurrence_id}/resume",
+    "probe_route": "/dashboard/posthire/shifts/recurrences/00000000-0000-0000-0000-000000000000/resume",
+    "statuses": {
+      "owner": 409,
+      "hr_manager": 409,
+      "viewer": 403
+    },
+    "repeated_owner_status": 409,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/rotations/assignments/{assignment_id}/preview",
+    "control": "Dashboard Posthire Preview Rotation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_preview_rotation_dashboard_posthire_shifts_rotations_assignments__assignment_id__preview_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/rotations/assignments/{assignment_id}/preview",
+    "probe_route": "/dashboard/posthire/shifts/rotations/assignments/00000000-0000-0000-0000-000000000000/preview",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-periods/{period_id}/generate-draft",
+    "control": "Dashboard Posthire Generate Schedule Draft",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_generate_schedule_draft_dashboard_posthire_shifts_schedule_periods__period_id__generate_draft_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-periods/{period_id}/generate-draft",
+    "probe_route": "/dashboard/posthire/shifts/schedule-periods/00000000-0000-0000-0000-000000000000/generate-draft",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-periods/{period_id}/generate-from-rotation",
+    "control": "Dashboard Posthire Generate From Rotation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_generate_from_rotation_dashboard_posthire_shifts_schedule_periods__period_id__generate_from_rotation_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-periods/{period_id}/generate-from-rotation",
+    "probe_route": "/dashboard/posthire/shifts/schedule-periods/00000000-0000-0000-0000-000000000000/generate-from-rotation",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-periods/{period_id}/new-draft",
+    "control": "Dashboard Posthire Schedule New Draft",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_schedule_new_draft_dashboard_posthire_shifts_schedule_periods__period_id__new_draft_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-periods/{period_id}/new-draft",
+    "probe_route": "/dashboard/posthire/shifts/schedule-periods/00000000-0000-0000-0000-000000000000/new-draft",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-periods/{period_id}/rollback",
+    "control": "Dashboard Posthire Schedule Rollback",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_schedule_rollback_dashboard_posthire_shifts_schedule_periods__period_id__rollback_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-periods/{period_id}/rollback",
+    "probe_route": "/dashboard/posthire/shifts/schedule-periods/00000000-0000-0000-0000-000000000000/rollback",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-versions/{version_id}/pam-export",
+    "control": "Dashboard Posthire Pam Export",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_pam_export_dashboard_posthire_shifts_schedule_versions__version_id__pam_export_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-versions/{version_id}/pam-export",
+    "probe_route": "/dashboard/posthire/shifts/schedule-versions/00000000-0000-0000-0000-000000000000/pam-export",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-versions/{version_id}/publish",
+    "control": "Dashboard Posthire Schedule Publish",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_schedule_publish_dashboard_posthire_shifts_schedule_versions__version_id__publish_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-versions/{version_id}/publish",
+    "probe_route": "/dashboard/posthire/shifts/schedule-versions/00000000-0000-0000-0000-000000000000/publish",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-versions/{version_id}/resolve-conflicts",
+    "control": "Dashboard Posthire Schedule Resolve Conflicts",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_schedule_resolve_conflicts_dashboard_posthire_shifts_schedule_versions__version_id__resolve_conflicts_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-versions/{version_id}/resolve-conflicts",
+    "probe_route": "/dashboard/posthire/shifts/schedule-versions/00000000-0000-0000-0000-000000000000/resolve-conflicts",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/schedule-versions/{version_id}/transition",
+    "control": "Dashboard Posthire Schedule Transition",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_schedule_transition_dashboard_posthire_shifts_schedule_versions__version_id__transition_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/schedule-versions/{version_id}/transition",
+    "probe_route": "/dashboard/posthire/shifts/schedule-versions/00000000-0000-0000-0000-000000000000/transition",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/templates/{template_id}",
+    "control": "Dashboard Posthire Patch Shift Template",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_patch_shift_template_dashboard_posthire_shifts_templates__template_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/posthire/shifts/templates/{template_id}",
+    "probe_route": "/dashboard/posthire/shifts/templates/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/templates/{template_id}/archive",
+    "control": "Dashboard Posthire Archive Shift Template",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_archive_shift_template_dashboard_posthire_shifts_templates__template_id__archive_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/templates/{template_id}/archive",
+    "probe_route": "/dashboard/posthire/shifts/templates/00000000-0000-0000-0000-000000000000/archive",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/{shift_id}/cancel",
+    "control": "Dashboard Posthire Cancel Shift",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_cancel_shift_dashboard_posthire_shifts__shift_id__cancel_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/{shift_id}/cancel",
+    "probe_route": "/dashboard/posthire/shifts/00000000-0000-0000-0000-000000000000/cancel",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/posthire/shifts/{shift_id}/reschedule",
+    "control": "Dashboard Posthire Reschedule Shift",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_posthire_reschedule_shift_dashboard_posthire_shifts__shift_id__reschedule_post",
+    "method": "POST",
+    "route_template": "/dashboard/posthire/shifts/{shift_id}/reschedule",
+    "probe_route": "/dashboard/posthire/shifts/00000000-0000-0000-0000-000000000000/reschedule",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/assessment",
+    "control": "Dashboard Prehire Assessment",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_assessment_dashboard_prehire_applications__app_key__assessment_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/assessment",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/assessment",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/classification/review",
+    "control": "Review Classification",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:review_classification_dashboard_prehire_applications__app_key__classification_review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/classification/review",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/classification/review",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/classification/run",
+    "control": "Run Classification",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:run_classification_dashboard_prehire_applications__app_key__classification_run_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/classification/run",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/classification/run",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/confirmations",
+    "control": "Dashboard Prepare Candidate Confirmation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prepare_candidate_confirmation_dashboard_prehire_applications__app_key__confirmations_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/confirmations",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/confirmations",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/evaluation",
+    "control": "Dashboard Prehire Application Evaluation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_application_evaluation_dashboard_prehire_applications__app_key__evaluation_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/evaluation",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/evaluation",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/facts/review",
+    "control": "Dashboard Prehire Application Fact Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_application_fact_review_dashboard_prehire_applications__app_key__facts_review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/facts/review",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/facts/review",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/hire",
+    "control": "Dashboard Prehire Hire",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_hire_dashboard_prehire_applications__app_key__hire_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/hire",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/hire",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/notes",
+    "control": "Dashboard Candidate Note Create",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_candidate_note_create_dashboard_prehire_applications__app_key__notes_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/notes",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/notes",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/notes/{note_id}",
+    "control": "Dashboard Candidate Note Update",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_candidate_note_update_dashboard_prehire_applications__app_key__notes__note_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/prehire/applications/{app_key}/notes/{note_id}",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/notes/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/notify",
+    "control": "Dashboard Prehire Notify",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_notify_dashboard_prehire_applications__app_key__notify_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/notify",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/notify",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/offers",
+    "control": "Dashboard Create Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_create_offer_dashboard_prehire_applications__app_key__offers_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/offers",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/offers",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/owner",
+    "control": "Dashboard Candidate Owner",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_candidate_owner_dashboard_prehire_applications__app_key__owner_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/owner",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/owner",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/person-profile/add-to-job",
+    "control": "Dashboard Prehire Application Person Add To Job",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_application_person_add_to_job_dashboard_prehire_applications__app_key__person_profile_add_to_job_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/person-profile/add-to-job",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/person-profile/add-to-job",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/reject",
+    "control": "Dashboard Prehire Reject",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_reject_dashboard_prehire_applications__app_key__reject_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/reject",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/reject",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/shortlist",
+    "control": "Dashboard Prehire Shortlist",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_shortlist_dashboard_prehire_applications__app_key__shortlist_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/shortlist",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/shortlist",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/tags/{action}",
+    "control": "Dashboard Candidate Tag Mutation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_candidate_tag_mutation_dashboard_prehire_applications__app_key__tags__action__post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/tags/{action}",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/tags/add",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/tasks",
+    "control": "Dashboard Candidate Task Create",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_candidate_task_create_dashboard_prehire_applications__app_key__tasks_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/tasks",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/tasks",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/tasks/{task_id}",
+    "control": "Dashboard Candidate Task Update",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_candidate_task_update_dashboard_prehire_applications__app_key__tasks__task_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/prehire/applications/{app_key}/tasks/{task_id}",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/tasks/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/applications/{app_key}/video-interview",
+    "control": "Dashboard Prehire Video Interview",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_video_interview_dashboard_prehire_applications__app_key__video_interview_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/applications/{app_key}/video-interview",
+    "probe_route": "/dashboard/prehire/applications/interaction-audit-app_key/video-interview",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/drafts/{draft_id}/automated-review",
+    "control": "Dashboard Assessment Item Draft Automated Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_assessment_item_draft_automated_review_dashboard_prehire_assessments_authoring_drafts__draft_id__automated_review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/drafts/{draft_id}/automated-review",
+    "probe_route": "/dashboard/prehire/assessments/authoring/drafts/00000000-0000-0000-0000-000000000000/automated-review",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/drafts/{draft_id}/transition",
+    "control": "Dashboard Assessment Item Draft Transition",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_assessment_item_draft_transition_dashboard_prehire_assessments_authoring_drafts__draft_id__transition_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/drafts/{draft_id}/transition",
+    "probe_route": "/dashboard/prehire/assessments/authoring/drafts/00000000-0000-0000-0000-000000000000/transition",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/adapt",
+    "control": "Enqueue Adaptation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:enqueue_adaptation_dashboard_prehire_assessments_authoring_product2_drafts__draft_id__adapt_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/adapt",
+    "probe_route": "/dashboard/prehire/assessments/authoring/product2/drafts/00000000-0000-0000-0000-000000000000/adapt",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/rewrite",
+    "control": "Human Rewrite",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:human_rewrite_dashboard_prehire_assessments_authoring_product2_drafts__draft_id__rewrite_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/rewrite",
+    "probe_route": "/dashboard/prehire/assessments/authoring/product2/drafts/00000000-0000-0000-0000-000000000000/rewrite",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/secondary-review",
+    "control": "Enqueue Secondary Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:enqueue_secondary_review_dashboard_prehire_assessments_authoring_product2_drafts__draft_id__secondary_review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/secondary-review",
+    "probe_route": "/dashboard/prehire/assessments/authoring/product2/drafts/00000000-0000-0000-0000-000000000000/secondary-review",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/product2/model-registry/{registry_version_id}/activate",
+    "control": "Activate Model Registry",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:activate_model_registry_dashboard_prehire_assessments_authoring_product2_model_registry__registry_version_id__activate_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/product2/model-registry/{registry_version_id}/activate",
+    "probe_route": "/dashboard/prehire/assessments/authoring/product2/model-registry/00000000-0000-0000-0000-000000000000/activate",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/product2/translation-pairs/{translation_pair_id}/human-review",
+    "control": "Bilingual Human Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:bilingual_human_review_dashboard_prehire_assessments_authoring_product2_translation_pairs__translation_pair_id__human_review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/product2/translation-pairs/{translation_pair_id}/human-review",
+    "probe_route": "/dashboard/prehire/assessments/authoring/product2/translation-pairs/00000000-0000-0000-0000-000000000000/human-review",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/authoring/product2/translation-pairs/{translation_pair_id}/review",
+    "control": "Enqueue Translation Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=403 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:enqueue_translation_review_dashboard_prehire_assessments_authoring_product2_translation_pairs__translation_pair_id__review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/authoring/product2/translation-pairs/{translation_pair_id}/review",
+    "probe_route": "/dashboard/prehire/assessments/authoring/product2/translation-pairs/00000000-0000-0000-0000-000000000000/review",
+    "statuses": {
+      "owner": 403,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 403,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/{attempt_id}/cancel",
+    "control": "Dashboard Prehire Assessment Cancel",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_assessment_cancel_dashboard_prehire_assessments__attempt_id__cancel_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/{attempt_id}/cancel",
+    "probe_route": "/dashboard/prehire/assessments/00000000-0000-0000-0000-000000000000/cancel",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/{attempt_id}/resend",
+    "control": "Dashboard Prehire Assessment Resend",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_assessment_resend_dashboard_prehire_assessments__attempt_id__resend_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/{attempt_id}/resend",
+    "probe_route": "/dashboard/prehire/assessments/00000000-0000-0000-0000-000000000000/resend",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/assessments/{attempt_id}/review",
+    "control": "Dashboard Prehire Assessment Review",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_assessment_review_dashboard_prehire_assessments__attempt_id__review_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/assessments/{attempt_id}/review",
+    "probe_route": "/dashboard/prehire/assessments/00000000-0000-0000-0000-000000000000/review",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/candidates/saved-views/{view_id}",
+    "control": "Dashboard Prehire Delete Saved View",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_delete_saved_view_dashboard_prehire_candidates_saved_views__view_id__delete",
+    "method": "DELETE",
+    "route_template": "/dashboard/prehire/candidates/saved-views/{view_id}",
+    "probe_route": "/dashboard/prehire/candidates/saved-views/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 404
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager",
+      "viewer"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/integrations/intake/{intake_id}",
+    "control": "Dashboard Intake Delete",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_intake_delete_dashboard_prehire_integrations_intake__intake_id__delete",
+    "method": "DELETE",
+    "route_template": "/dashboard/prehire/integrations/intake/{intake_id}",
+    "probe_route": "/dashboard/prehire/integrations/intake/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/integrations/intake/{intake_id}/disable",
+    "control": "Dashboard Intake Disable",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_intake_disable_dashboard_prehire_integrations_intake__intake_id__disable_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/integrations/intake/{intake_id}/disable",
+    "probe_route": "/dashboard/prehire/integrations/intake/00000000-0000-0000-0000-000000000000/disable",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/integrations/intake/{intake_id}/rotate",
+    "control": "Dashboard Intake Rotate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_intake_rotate_dashboard_prehire_integrations_intake__intake_id__rotate_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/integrations/intake/{intake_id}/rotate",
+    "probe_route": "/dashboard/prehire/integrations/intake/00000000-0000-0000-0000-000000000000/rotate",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/integrations/mailbox/{mailbox_id}",
+    "control": "Dashboard Mailbox Update",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_mailbox_update_dashboard_prehire_integrations_mailbox__mailbox_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/prehire/integrations/mailbox/{mailbox_id}",
+    "probe_route": "/dashboard/prehire/integrations/mailbox/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/integrations/mailbox/{mailbox_id}",
+    "control": "Dashboard Mailbox Disconnect",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_mailbox_disconnect_dashboard_prehire_integrations_mailbox__mailbox_id__delete",
+    "method": "DELETE",
+    "route_template": "/dashboard/prehire/integrations/mailbox/{mailbox_id}",
+    "probe_route": "/dashboard/prehire/integrations/mailbox/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/integrations/mailbox/{mailbox_id}/check-now",
+    "control": "Dashboard Mailbox Check Now",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_mailbox_check_now_dashboard_prehire_integrations_mailbox__mailbox_id__check_now_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/integrations/mailbox/{mailbox_id}/check-now",
+    "probe_route": "/dashboard/prehire/integrations/mailbox/00000000-0000-0000-0000-000000000000/check-now",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/feedback/{submission_id}/reopen",
+    "control": "Dashboard Prehire Interview Feedback Reopen",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_feedback_reopen_dashboard_prehire_interviews_feedback__submission_id__reopen_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/feedback/{submission_id}/reopen",
+    "probe_route": "/dashboard/prehire/interviews/feedback/00000000-0000-0000-0000-000000000000/reopen",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}",
+    "control": "Dashboard Prehire Interview Update",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_update_dashboard_prehire_interviews__interview_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}/actions/assign-interviewer",
+    "control": "Dashboard Prehire Interview Assign Interviewer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_assign_interviewer_dashboard_prehire_interviews__interview_id__actions_assign_interviewer_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}/actions/assign-interviewer",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000/actions/assign-interviewer",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}/actions/send-video-invitation",
+    "control": "Dashboard Prehire Interview Send Video Invitation",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_send_video_invitation_dashboard_prehire_interviews__interview_id__actions_send_video_invitation_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}/actions/send-video-invitation",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000/actions/send-video-invitation",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}/feedback",
+    "control": "Dashboard Prehire Interview Feedback Submit",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_feedback_submit_dashboard_prehire_interviews__interview_id__feedback_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}/feedback",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000/feedback",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}/notes",
+    "control": "Dashboard Prehire Interview Notes",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_notes_dashboard_prehire_interviews__interview_id__notes_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}/notes",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000/notes",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}/reschedule",
+    "control": "Dashboard Prehire Interview Reschedule",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_interview_reschedule_dashboard_prehire_interviews__interview_id__reschedule_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}/reschedule",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000/reschedule",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/interviews/{interview_id}/transcripts/retry",
+    "control": "Dashboard Prehire Video Interview Transcript Retry",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager",
+    "status": "broken",
+    "severity": "P2",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_video_interview_transcript_retry_dashboard_prehire_interviews__interview_id__transcripts_retry_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/interviews/{interview_id}/transcripts/retry",
+    "probe_route": "/dashboard/prehire/interviews/00000000-0000-0000-0000-000000000000/transcripts/retry",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": [
+      "owner",
+      "hr_manager"
+    ]
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}",
+    "control": "Dashboard Update Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_update_offer_dashboard_prehire_offers__offer_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/prehire/offers/{offer_id}",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}/approve",
+    "control": "Dashboard Approve Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_approve_offer_dashboard_prehire_offers__offer_id__approve_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/offers/{offer_id}/approve",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000/approve",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}/record-response",
+    "control": "Dashboard Record Offer Response",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_record_offer_response_dashboard_prehire_offers__offer_id__record_response_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/offers/{offer_id}/record-response",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000/record-response",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}/return",
+    "control": "Dashboard Return Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_return_offer_dashboard_prehire_offers__offer_id__return_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/offers/{offer_id}/return",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000/return",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}/send",
+    "control": "Dashboard Send Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_send_offer_dashboard_prehire_offers__offer_id__send_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/offers/{offer_id}/send",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000/send",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}/submit-approval",
+    "control": "Dashboard Submit Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_submit_offer_dashboard_prehire_offers__offer_id__submit_approval_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/offers/{offer_id}/submit-approval",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000/submit-approval",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/offers/{offer_id}/withdraw",
+    "control": "Dashboard Withdraw Offer",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_withdraw_offer_dashboard_prehire_offers__offer_id__withdraw_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/offers/{offer_id}/withdraw",
+    "probe_route": "/dashboard/prehire/offers/00000000-0000-0000-0000-000000000000/withdraw",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/positions/{position_code}",
+    "control": "Dashboard Prehire Update Position",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=404 hr_manager=404 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_update_position_dashboard_prehire_positions__position_code__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/prehire/positions/{position_code}",
+    "probe_route": "/dashboard/prehire/positions/interaction-audit-position_code",
+    "statuses": {
+      "owner": 404,
+      "hr_manager": 404,
+      "viewer": 403
+    },
+    "repeated_owner_status": 404,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/positions/{position_code}/ranking-evidence-policy",
+    "control": "Dashboard Approve Ranking Evidence Policy",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=200 hr_manager=200 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_approve_ranking_evidence_policy_dashboard_prehire_positions__position_code__ranking_evidence_policy_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/positions/{position_code}/ranking-evidence-policy",
+    "probe_route": "/dashboard/prehire/positions/interaction-audit-position_code/ranking-evidence-policy",
+    "statuses": {
+      "owner": 200,
+      "hr_manager": 200,
+      "viewer": 403
+    },
+    "repeated_owner_status": null,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/prehire/positions/{position_code}/status",
+    "control": "Dashboard Prehire Set Position Status",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=422 viewer=422; viewer permission denial not reached with generated fixture",
+    "status": "unproven",
+    "severity": "P1",
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_prehire_set_position_status_dashboard_prehire_positions__position_code__status_post",
+    "method": "POST",
+    "route_template": "/dashboard/prehire/positions/{position_code}/status",
+    "probe_route": "/dashboard/prehire/positions/interaction-audit-position_code/status",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 422,
+      "viewer": 422
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/channel-account",
+    "control": "Setup Console Upsert Channel Account",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_upsert_channel_account_dashboard_superadmin_setup_companies__company_code__channel_account_put",
+    "method": "PUT",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/channel-account",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/channel-account",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/channel-account",
+    "control": "Setup Console Disable Channel Account",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_disable_channel_account_dashboard_superadmin_setup_companies__company_code__channel_account_delete",
+    "method": "DELETE",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/channel-account",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/channel-account",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/config/drafts",
+    "control": "Create Config Draft",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:create_config_draft_dashboard_superadmin_setup_companies__company_code__config_drafts_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/config/drafts",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/config/drafts",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/config/drafts/{document_id}/validate",
+    "control": "Validate Config Draft",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:validate_config_draft_dashboard_superadmin_setup_companies__company_code__config_drafts__document_id__validate_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/config/drafts/{document_id}/validate",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/config/drafts/00000000-0000-0000-0000-000000000000/validate",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/config/publish",
+    "control": "Publish Config",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:publish_config_dashboard_superadmin_setup_companies__company_code__config_publish_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/config/publish",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/config/publish",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/config/rollback",
+    "control": "Rollback Config",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:rollback_config_dashboard_superadmin_setup_companies__company_code__config_rollback_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/config/rollback",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/config/rollback",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/cutover/activate",
+    "control": "Cutover Activate",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:cutover_activate_dashboard_superadmin_setup_companies__company_code__cutover_activate_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/cutover/activate",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/cutover/activate",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/cutover/parity/{boundary_key}",
+    "control": "Cutover Parity",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:cutover_parity_dashboard_superadmin_setup_companies__company_code__cutover_parity__boundary_key__post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/cutover/parity/{boundary_key}",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/cutover/parity/interaction-audit-boundary_key",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/cutover/rollback/{boundary_key}",
+    "control": "Cutover Rollback",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:cutover_rollback_dashboard_superadmin_setup_companies__company_code__cutover_rollback__boundary_key__post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/cutover/rollback/{boundary_key}",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/cutover/rollback/interaction-audit-boundary_key",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/email/domains",
+    "control": "Setup Console Email Domain Create",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_email_domain_create_dashboard_superadmin_setup_companies__company_code__email_domains_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/email/domains",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/email/domains",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/email/domains/{domain_id}/refresh",
+    "control": "Setup Console Email Domain Refresh",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_email_domain_refresh_dashboard_superadmin_setup_companies__company_code__email_domains__domain_id__refresh_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/email/domains/{domain_id}/refresh",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/email/domains/00000000-0000-0000-0000-000000000000/refresh",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/email/force-wathefni",
+    "control": "Setup Console Email Force Wathefni",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_email_force_wathefni_dashboard_superadmin_setup_companies__company_code__email_force_wathefni_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/email/force-wathefni",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/email/force-wathefni",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/seed",
+    "control": "Setup Console Email Seed Mailboxes",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_email_seed_mailboxes_dashboard_superadmin_setup_companies__company_code__email_mailboxes_seed_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/seed",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/email/mailboxes/seed",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}",
+    "control": "Setup Console Email Mailbox Patch",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_email_mailbox_patch_dashboard_superadmin_setup_companies__company_code__email_mailboxes__mailbox_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/email/mailboxes/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}/probe",
+    "control": "Setup Console Email Mailbox Probe",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_email_mailbox_probe_dashboard_superadmin_setup_companies__company_code__email_mailboxes__mailbox_id__probe_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}/probe",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/email/mailboxes/00000000-0000-0000-0000-000000000000/probe",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/impact-preview",
+    "control": "Impact Preview",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:impact_preview_dashboard_superadmin_setup_companies__company_code__impact_preview_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/impact-preview",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/impact-preview",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/imports",
+    "control": "Create Import",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:create_import_dashboard_superadmin_setup_companies__company_code__imports_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/imports",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/imports",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/integrations",
+    "control": "Upsert Integration",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:upsert_integration_dashboard_superadmin_setup_companies__company_code__integrations_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/integrations",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/integrations",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/integrations/test",
+    "control": "Test Integration",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:test_integration_dashboard_superadmin_setup_companies__company_code__integrations_test_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/integrations/test",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/integrations/test",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/integrations/{provider_key}/pause",
+    "control": "Pause Integration",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:pause_integration_dashboard_superadmin_setup_companies__company_code__integrations__provider_key__pause_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/integrations/{provider_key}/pause",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/integrations/interaction-audit-provider_key/pause",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/integrations/{provider_key}/reconnect",
+    "control": "Reconnect Integration",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:reconnect_integration_dashboard_superadmin_setup_companies__company_code__integrations__provider_key__reconnect_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/integrations/{provider_key}/reconnect",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/integrations/interaction-audit-provider_key/reconnect",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/lifecycle",
+    "control": "Setup Console Set Company Lifecycle",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_set_company_lifecycle_dashboard_superadmin_setup_companies__company_code__lifecycle_patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/lifecycle",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/lifecycle",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/modules",
+    "control": "Setup Console Set Modules",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_set_modules_dashboard_superadmin_setup_companies__company_code__modules_patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/modules",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/modules",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/modules/{module_key}/lifecycle",
+    "control": "Module Lifecycle",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:module_lifecycle_dashboard_superadmin_setup_companies__company_code__modules__module_key__lifecycle_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/modules/{module_key}/lifecycle",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/modules/interaction-audit-module_key/lifecycle",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/offboarding/preview",
+    "control": "Offboarding Preview",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:offboarding_preview_dashboard_superadmin_setup_companies__company_code__offboarding_preview_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/offboarding/preview",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/offboarding/preview",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/owner",
+    "control": "Setup Console Seed Owner",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_seed_owner_dashboard_superadmin_setup_companies__company_code__owner_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/owner",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/owner",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/profile",
+    "control": "Setup Console Set Profile",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_set_profile_dashboard_superadmin_setup_companies__company_code__profile_patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/profile",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/profile",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/readiness/run",
+    "control": "Run Readiness",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:run_readiness_dashboard_superadmin_setup_companies__company_code__readiness_run_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/readiness/run",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/readiness/run",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/settings",
+    "control": "Setup Console Set Settings",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_set_settings_dashboard_superadmin_setup_companies__company_code__settings_patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/settings",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/settings",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/companies/{company_code}/whatsapp-link",
+    "control": "Setup Console Link Whatsapp",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:setup_console_link_whatsapp_dashboard_superadmin_setup_companies__company_code__whatsapp_link_post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/companies/{company_code}/whatsapp-link",
+    "probe_route": "/dashboard/superadmin/setup/companies/WATHEFNI/whatsapp-link",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/wizard/drafts/{draft_id}",
+    "control": "Save Wizard Draft",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:save_wizard_draft_dashboard_superadmin_setup_wizard_drafts__draft_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/superadmin/setup/wizard/drafts/{draft_id}",
+    "probe_route": "/dashboard/superadmin/setup/wizard/drafts/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/superadmin/setup/wizard/drafts/{draft_id}/validate/{step}",
+    "control": "Validate Wizard Step",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=401 hr_manager=401 viewer=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:validate_wizard_step_dashboard_superadmin_setup_wizard_drafts__draft_id__validate__step__post",
+    "method": "POST",
+    "route_template": "/dashboard/superadmin/setup/wizard/drafts/{draft_id}/validate/{step}",
+    "probe_route": "/dashboard/superadmin/setup/wizard/drafts/00000000-0000-0000-0000-000000000000/validate/0",
+    "statuses": {
+      "owner": 401,
+      "hr_manager": 401,
+      "viewer": 401
+    },
+    "repeated_owner_status": 401,
+    "raw_error_roles": []
+  },
+  {
+    "screen": "/dashboard/team/users/{user_id}",
+    "control": "Dashboard Team Update User",
+    "expected_behavior": "Fail safely for a nonexistent target; permission and error behavior are consistent by role; repeated failed clicks are stable.",
+    "actual_result": "owner=422 hr_manager=403 viewer=403",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:dashboard_team_update_user_dashboard_team_users__user_id__patch",
+    "method": "PATCH",
+    "route_template": "/dashboard/team/users/{user_id}",
+    "probe_route": "/dashboard/team/users/00000000-0000-0000-0000-000000000000",
+    "statuses": {
+      "owner": 422,
+      "hr_manager": 403,
+      "viewer": 403
+    },
+    "repeated_owner_status": 422,
+    "raw_error_roles": []
+  }
+]

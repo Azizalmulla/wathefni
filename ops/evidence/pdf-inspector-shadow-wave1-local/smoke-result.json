@@ -1,0 +1,488 @@
+{
+  "ok": true,
+  "verdict": "PASS",
+  "fixtures": 24,
+  "p95_shadow_wall_ms": 13,
+  "max_shadow_wall_ms": 14,
+  "mean_shadow_wall_ms": 2.33,
+  "behavioral_invariance": true,
+  "fail_open_timeout": true,
+  "fail_open_error": true,
+  "broken_encoding_observation": {
+    "false_skip_candidates": [],
+    "high_risk_false_skip_candidate": false,
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "influences_ocr_routing": false
+  },
+  "rows": [
+    {
+      "file": "contract_employment_en_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 14,
+      "extract_wall_ms": 62,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "contract_kuwait_labor_law_real_01.pdf",
+      "pages": 3,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 12,
+      "extract_wall_ms": 127,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_ar_digital_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 3,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [
+        1
+      ],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_ar_digital_02.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [
+        1
+      ],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_ar_digital_03.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 47,
+      "false_skip_candidates": [
+        1
+      ],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_bilingual_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_bilingual_02.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_broken_encoding_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 45,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": true,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_en_digital_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 46,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_en_digital_02.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 47,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_en_digital_03.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_en_digital_multipage_01.pdf",
+      "pages": 2,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 77,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_mixed_01.pdf",
+      "pages": 2,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 75,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "mixed"
+    },
+    {
+      "file": "cv_mixed_02.pdf",
+      "pages": 2,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 75,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "mixed"
+    },
+    {
+      "file": "cv_multicolumn_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 49,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_multicolumn_02.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 1,
+      "extract_wall_ms": 46,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "cv_scanned_ar_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 0,
+      "extract_wall_ms": 45,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "scanned"
+    },
+    {
+      "file": "cv_scanned_en_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 0,
+      "extract_wall_ms": 44,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "scanned"
+    },
+    {
+      "file": "cv_scanned_en_02.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 0,
+      "extract_wall_ms": 45,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "scanned"
+    },
+    {
+      "file": "cv_tounicode_proper_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 49,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": true,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "identity_civil_id_digital_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 47,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "identity_passport_scanned_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 0,
+      "extract_wall_ms": 45,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "scanned"
+    },
+    {
+      "file": "table_compensation_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    },
+    {
+      "file": "table_experience_matrix_01.pdf",
+      "pages": 1,
+      "method": "pdftotext",
+      "shadow_ok": true,
+      "fail_open": false,
+      "wall_ms": 2,
+      "extract_wall_ms": 48,
+      "false_skip_candidates": [],
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based"
+    }
+  ]
+}

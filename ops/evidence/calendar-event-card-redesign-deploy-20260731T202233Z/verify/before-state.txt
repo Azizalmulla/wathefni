@@ -1,0 +1,4 @@
+health_before=200
+dashboard_before=200
+/var/www/wathefni-dashboard/assets/CalendarShell-McJD9Ux2.js
+/var/www/wathefni-dashboard/assets/dashboard-Btr3JHJY.js

@@ -1,0 +1,146 @@
+{
+  "passed": 28,
+  "failed": 0,
+  "results": [
+    {
+      "gate": "action_schedule_interview_module",
+      "ok": true,
+      "detail": "interviews"
+    },
+    {
+      "gate": "all_live_tools_module_interviews",
+      "ok": true,
+      "detail": "[('schedule_interview', 'interviews'), ('reschedule_interview', 'interviews'), ('cancel_interview', 'interviews'), ('send_interview_invite', 'interviews'), ('get_interview_invite_status', 'interviews')]"
+    },
+    {
+      "gate": "interview_tools_hidden_when_interviews_off",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "interview_tools_visible_when_interviews_on",
+      "ok": true,
+      "detail": "['cancel_interview', 'get_interview_invite_status', 'reschedule_interview', 'schedule_interview', 'send_interview_invite']"
+    },
+    {
+      "gate": "video_tool_still_when_live_off",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "schedule_interview_blocked_when_off",
+      "ok": true,
+      "detail": "{'status': 'module_disabled', 'tool': 'schedule_interview', 'required_module': 'interviews', 'message': 'This module is not enabled for this company.', 'company_id': 'PROOF'}"
+    },
+    {
+      "gate": "schedule_interview_allowed_when_on",
+      "ok": true,
+      "detail": "None"
+    },
+    {
+      "gate": "mobile_omits_assessments_when_off",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration', 'kanban_stage_management', 'new_candidate_push']"
+    },
+    {
+      "gate": "mobile_exposes_assessments_when_on",
+      "ok": true,
+      "detail": "{'enabled': True, 'actions': ['read'], 'advisory': True}"
+    },
+    {
+      "gate": "nav_hides_interviews_for_bare_pre_hiring",
+      "ok": true,
+      "detail": "['overview', 'ai', 'jobs', 'candidates', 'ranking', 'reports', 'notifications', 'activity', 'settings']"
+    },
+    {
+      "gate": "nav_hides_assessments_for_bare_pre_hiring",
+      "ok": true,
+      "detail": "['overview', 'ai', 'jobs', 'candidates', 'ranking', 'reports', 'notifications', 'activity', 'settings']"
+    },
+    {
+      "gate": "nav_shows_interviews_for_video_module",
+      "ok": true,
+      "detail": "['overview', 'ai', 'jobs', 'candidates', 'interviews', 'ranking', 'reports', 'notifications', 'activity', 'settings']"
+    },
+    {
+      "gate": "expired_offer_preview_source_guards",
+      "ok": true,
+      "detail": "expire helpers present"
+    },
+    {
+      "gate": "expired_offer_preview_invalid_token_fail_closed",
+      "ok": true,
+      "detail": "application_environment_missing_or_invalid"
+    },
+    {
+      "gate": "expired_offer_preview_rejected",
+      "ok": true,
+      "detail": "{'type': 'OfferAuthorityError', 'detail': 'This offer link has expired.', 'err_code': 'token_expired', 'called': {'n': 1}}"
+    },
+    {
+      "gate": "dashboard_js_moduleAnyOf_video",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "dashboard_js_no_old_nav_pattern",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "dashboard_js_pageAvailable_video",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "former_tool_schedule_interview_gated_by_interviews",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "former_assistant_live_tools_follow_interviews_module",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "former_mobile_omits_assessments_when_off",
+      "ok": true,
+      "detail": "True"
+    },
+    {
+      "gate": "former_15_family_tool_x8_logic",
+      "ok": true,
+      "detail": "8 tenants covered by module contract"
+    },
+    {
+      "gate": "former_15_family_live_tools_logic",
+      "ok": true,
+      "detail": "hidden when off"
+    },
+    {
+      "gate": "former_15_family_mobile_logic",
+      "ok": true,
+      "detail": "omit when off"
+    },
+    {
+      "gate": "assistant_email_configured_when_wathefni_ready",
+      "ok": true,
+      "detail": "API email enabled_and_available; integrations wathefni/ready; systemd _email_configured True"
+    },
+    {
+      "gate": "branded_microsoft_fail_closed_when_not_ready",
+      "ok": true,
+      "detail": "systemd: microsoft_mailbox + postmark_company_domain setup_required => False"
+    },
+    {
+      "gate": "health_200",
+      "ok": true,
+      "detail": "health_after=200 dashboard_after=200"
+    },
+    {
+      "gate": "rollback_verified",
+      "ok": true,
+      "detail": "rollback to pre_hiring then restore interviews; health 200 after restore; poll reached 200"
+    }
+  ]
+}

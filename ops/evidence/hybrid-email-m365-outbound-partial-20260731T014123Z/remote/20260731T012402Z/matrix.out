@@ -1,0 +1,17 @@
+=== hybrid email microsoft outbound live matrix ===
+outdir= /opt/wathefni/production-evidence/hybrid-email-m365-outbound/20260731T012402Z
+PASS mail_sp_configured {}
+PASS mail_sp_differs_from_calendar {"mail_client_suffix": "5c95b496", "calendar_suffix": "13de3131"}
+PASS mail_sp_token_mint {"roles": ["Mail.Send"]}
+PASS mail_sp_has_mail_send_role_or_rbacfa {"note": "RBACfA may omit roles claim"}
+PASS mail_sp_no_mail_read_roles {"roles": ["Mail.Send"]}
+PASS calendar_sp_cannot_send_mail {"http": 403}
+PASS email_sp_cannot_use_calendar_authority {"http": 403}
+PASS mailbox_probe_ok {"mailbox_id": "e51803f4-c385-440f-a285-0f3088639be1"}
+PASS microsoft_mode_activated_evidence_only {}
+PASS only_evidence_tenant_microsoft {"branded": [{"company_code": "WATHEFNI", "outbound_mode": "microsoft_mailbox"}]}
+PASS approved_mailbox_send {"ok": true, "provider_accept_status": "accepted_by_provider", "error": null, "raw": {"http_status": 202, "body": ""}}
+PASS accept_status_not_delivered {}
+PASS resolve_microsoft_activatable {}
+PASS dispatch_accepted_by_provider {"ok": true, "provider": "microsoft_graph", "provider_accept_status": "accepted_by_provider", "error": null, "sender_mode": "microsoft_mailbox"}
+FAIL outside_scope_send_denied {"error": null, "raw": {"http_status": 202, "body": ""}}

@@ -1,0 +1,266 @@
+{
+  "pass": 35,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "id_match_ignores_renamed_and_duplicate_names",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ambiguous_name_migration_fail_closed",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_departments_by_id",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_selected_no_auto",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_everyone_auto",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "scale_matcher_100",
+      "detail": {
+        "ms": 0.06
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "scale_matcher_1000",
+      "detail": {
+        "ms": 0.66
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "scale_matcher_10000",
+      "detail": {
+        "ms": 6.0
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "source:selected_department_org_unit_ids",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:migrate_selected_department_names_to_ids",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:preview_access_policy_drilldown",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:resolve_department_policy_attention",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:measure_access_scale",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:allow_invite=False",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:department_org_unit_id",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:PHASE_2C",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:page_size_max",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-phase=\"2c\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:selectedOrgUnitIds",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-employee-picker=\"paged\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-access-drilldown",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-policy-attention",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Select page",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Who should have access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_internal_jargon",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_get_policy_phase2c",
+      "detail": {
+        "ux_mode": "employees"
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_departments_empty_ok",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_employee_search_paged",
+      "detail": {
+        "rows": 40,
+        "total": 98
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_scale_endpoint",
+      "detail": {
+        "search_page_ms": 24.79,
+        "search_page_rows": 50,
+        "search_total_count": 98,
+        "preview_everyone_ms": 43.9,
+        "preview_active_employees": 98
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_preview_departments_by_id",
+      "detail": "0 will gain access, 0 will lose access."
+    },
+    {
+      "status": "PASS",
+      "name": "live_preview_drilldown_paged",
+      "detail": {
+        "total": 98,
+        "rows": 20
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_apply_batch",
+      "detail": {
+        "gained": 3,
+        "lost": 0,
+        "invites_issued": 0,
+        "invites_skipped": 3,
+        "revokes": 0,
+        "sessions_touch_attempts": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_apply_idempotent",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_restore_attempted",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_tenant_404",
+      "detail": null
+    }
+  ],
+  "scale": {
+    "synthetic_matcher": [
+      {
+        "n": 100,
+        "matcher_ms": 0.06,
+        "gain": 33,
+        "lose": 17,
+        "unchanged": 50
+      },
+      {
+        "n": 1000,
+        "matcher_ms": 0.66,
+        "gain": 333,
+        "lose": 167,
+        "unchanged": 500
+      },
+      {
+        "n": 10000,
+        "matcher_ms": 6.0,
+        "gain": 3333,
+        "lose": 1667,
+        "unchanged": 5000
+      }
+    ],
+    "live": {
+      "search_page_ms": 24.79,
+      "search_page_rows": 50,
+      "search_total_count": 98,
+      "preview_everyone_ms": 43.9,
+      "preview_active_employees": 98
+    },
+    "synthetic_from_api": [
+      {
+        "n": 100,
+        "matcher_ms": 0.11,
+        "gain": 33,
+        "lose": 17,
+        "unchanged": 50,
+        "loads_full_roster_client_side": false
+      },
+      {
+        "n": 1000,
+        "matcher_ms": 5.06,
+        "gain": 333,
+        "lose": 167,
+        "unchanged": 500,
+        "loads_full_roster_client_side": false
+      },
+      {
+        "n": 10000,
+        "matcher_ms": 10.41,
+        "gain": 3333,
+        "lose": 1667,
+        "unchanged": 5000,
+        "loads_full_roster_client_side": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,441 @@
+{
+  "stamp": "20260807T203541Z",
+  "tag": "56a7e0ae",
+  "pass": 85,
+  "fail": 0,
+  "verdict": "PASS",
+  "authority_model": {
+    "employee_visible_iff": "status=active AND employee_visibility=released",
+    "period_status_never_implies_visibility": true,
+    "official_employee_pdf": false,
+    "payment_date": null,
+    "download": "statement_summary_txt_non_official"
+  },
+  "results": [
+    {
+      "name": "sql release migration",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "release_payslip_to_employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee list gate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period never implies visibility",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee /app/payslips route",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "HR release route",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslips feature implemented",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave3 gate on detail",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mobile ScrollView",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mobile deep link param",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mobile hasFeature gate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "i18n EN payslips",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "i18n AR payslips",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no invented payment date UI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "HR release UI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "HR EN/AR release copy",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip_ready catalog AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif deep link payslips",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave3 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emp A synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emp B synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official pdf false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "release gate documented",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "feature payslips on with payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "feature payslips off without payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "catalog label EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "catalog label AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "generate payslip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "starts not_released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee_facing not_released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee cannot view draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft invisible in employee list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unreleased stays invisible regardless of period lifecycle",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http list before release",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http draft absent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http HR release",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "release ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "facing released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http release idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "duplicate release idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http list after release",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http released visible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "released visible to owner",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http official_document false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http list AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http detail owner",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "summary ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http detail no payment_date",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no payment_date",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official_document false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no approval workflow leak",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "summary AR honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http peer detail 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "peer detail denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "peer list empty for A slip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http download owner",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http download header honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http peer download 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http notifications EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http notifications AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notify title EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notify deep_link",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notify title AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http /app/me",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "me.features.payslips enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior status replaced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior not employee-visible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replacement starts not_released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "old id invisible after replace",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new id invisible until re-release",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "re-release replacement",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history retained after replace",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unrelease ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unreleased invisible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "revoke ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "revoked facing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "revoked invisible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http revoked detail 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup residual",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

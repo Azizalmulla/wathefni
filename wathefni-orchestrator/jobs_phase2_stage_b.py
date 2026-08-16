@@ -277,6 +277,42 @@ def _pending_media_rows(
     return [dict(row) for row in cur.fetchall()]
 
 
+def _dual_write_verified_bindings_after_stage_b(
+    cur: Any,
+    *,
+    company_code: str,
+    app_key: str,
+    position_code: str,
+    apply_code: str | None,
+    trigger: str,
+    subject_id: str | None = None,
+    person_id: str | None = None,
+    membership_id: str | None = None,
+    cv_version_id: str | None = None,
+) -> dict[str, Any]:
+    """Additive Wave 4 dual-write after Stage B convert. Never invents applications."""
+
+    try:
+        import inbound_cv_wave4 as _wave4
+
+        return _wave4.promote_with_verified_job_binding(
+            cur,
+            company_code=company_code,
+            app_key=app_key,
+            position_code=position_code,
+            apply_code=apply_code,
+            human_confirmed=True,
+            subject_id=subject_id,
+            person_id=person_id,
+            membership_id=membership_id,
+            cv_version_id=cv_version_id,
+            actor_type="system",
+            actor_id=f"stage_b:{trigger}",
+        )
+    except Exception as exc:
+        return {"ok": False, "error": type(exc).__name__, "detail": str(exc)[:200]}
+
+
 def convert_job_context_to_application(
     legacy: Any,
     request: Any,
@@ -504,6 +540,18 @@ def convert_job_context_to_application(
                             """,
                             ([row["pending_id"] for row in pending_rows],),
                         )
+                # UNIFIED_STAGE_B_VERIFIED_BINDING_DUAL_WRITE
+                _dual_write_verified_bindings_after_stage_b(
+                    cur,
+                    company_code=company,
+                    app_key=str(existing.get("app_key") or ""),
+                    position_code=str(existing.get("position_code") or context.get("position_code") or ""),
+                    apply_code=str(existing.get("apply_code") or context.get("apply_code") or "")
+                    or None,
+                    trigger=trigger_key,
+                    person_id=str(existing.get("person_id") or "") or None,
+                    membership_id=str(existing.get("membership_id") or "") or None,
+                )
                 conn.commit()
                 return {
                     "ok": True,
@@ -595,6 +643,20 @@ def convert_job_context_to_application(
                 ),
             )
             application = dict(cur.fetchone())
+            try:
+                import prehire_ownership as _own
+
+                _own.apply_application_owner_inherit(
+                    cur,
+                    company_code=company,
+                    app_key=app_key,
+                    position_code=position,
+                    actor_user_id=None,
+                    reason="inherit_from_job_recruiter_on_public_apply",
+                )
+                application["owner_user_id"] = _own.lookup_job_recruiter(cur, company_code=company, position_code=position)
+            except Exception:
+                pass
             cur.execute(
                 """
                 INSERT INTO application_lifecycle_events
@@ -711,6 +773,18 @@ def convert_job_context_to_application(
                         """,
                         ([row["pending_id"] for row in pending_rows],),
                     )
+
+            # UNIFIED_STAGE_B_VERIFIED_BINDING_DUAL_WRITE
+            _dual_write_verified_bindings_after_stage_b(
+                cur,
+                company_code=company,
+                app_key=app_key,
+                position_code=position,
+                apply_code=apply_code or None,
+                trigger=trigger_key,
+                person_id=str(application.get("person_id") or "") or None,
+                membership_id=str(application.get("membership_id") or "") or None,
+            )
 
         conn.commit()
 

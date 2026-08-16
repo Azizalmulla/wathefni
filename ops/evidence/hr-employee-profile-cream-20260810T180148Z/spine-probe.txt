@@ -1,0 +1,6 @@
+KEY WATHEFNI-96599411617
+HAS_MANAGER False
+KEYS ['allowed_actions', 'email', 'employee', 'employee_key', 'phone', 'started_on']
+STATUS active
+MISSING 404 employee_not_found
+SPINE_OK True

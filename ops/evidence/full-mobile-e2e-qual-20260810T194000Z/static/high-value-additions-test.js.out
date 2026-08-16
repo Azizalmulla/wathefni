@@ -1,0 +1,26 @@
+    employee app phase E — high-value additions (balance, duration, contact, expiry)
+      PASS  balance is silent when the company has balances switched off
+      PASS  balance is silent for a leave type with no row
+      PASS  the regression that started this: absent number never becomes 0
+      PASS  real balance reads current_balance
+      PASS  available wins over current_balance when the server sends it
+      PASS  a genuine zero balance is still shown
+      PASS  null available falls back to current rather than reading as zero
+      PASS  non-numeric balances are refused
+      PASS  leave type matching ignores case and padding
+      PASS  can_take_from is carried so eligibility is not implied away
+      PASS  balances are informational while the server says not enforced
+      PASS  kuwait 8-digit number dials internationally
+      PASS  number already carrying 965 is not double-prefixed
+      PASS  no contact action for a number that is not dialable
+      PASS  manager phone is displayed grouped, never invented
+      PASS  days until expiry counts calendar days from a canonical date
+      PASS  expiry counting crosses months and years correctly
+      PASS  a missing or malformed expiry yields no day count at all
+      PASS  a timestamped expiry is read as its calendar date
+      PASS  today is a Kuwait date, not the device date
+      PASS  expiry day count does not drift across the Kuwait day boundary
+      PASS  exact timestamp is available in both locales
+      PASS  exact timestamp is empty rather than wrong when absent
+
+    23 passed, 0 failed

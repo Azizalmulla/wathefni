@@ -1,0 +1,44 @@
+---
+description: Freeze Attendance controlled WATHEFNI UX/ops; block unsafe clocking and ingest enablement
+globs: wathefni-orchestrator/attendance_*.py,wathefni-orchestrator/canary-prod-attendance*.py,wathefni-orchestrator/seed-and-prove-attendance*.py,wathefni-orchestrator/ops/deploy-attendance*.sh,apps/wathefni-dashboard/src/posthire/Attendance*.tsx,apps/wathefni-dashboard/src/posthire/attendanceUx.ts,apps/wathefni-dashboard/src/posthire/PostHire.tsx,ops/ATTENDANCE*.md,ops/evidence/attendance-*/**
+alwaysApply: false
+---
+
+# Attendance freeze
+
+Attendance is **production-qualified for controlled WATHEFNI HR/manager UX + synthetic ops** and **frozen** against broadening into real clocking/devices. See `ops/ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- HR production Attendance use: **GO** (synthetic-backed)
+- Manager production Attendance use: **scoped GO**
+- Real employee clocking: **disabled**
+- Real device ingestion: **off** (`CAPTURE_INGEST=off`)
+- QR / GPS / kiosk: **off**
+- Authority + ops: **SYNTHETIC_ONLY=on**
+- Attendance→Payroll money impact: **NO-GO**
+- Employees 360 / Onboarding: **unchanged freezes**
+
+## Hard bans for future post-hiring PRs
+
+1. **Do not rewrite raw punches** — corrections create new projection versions only.
+2. **Do not merge approve into apply** — keep dual approval and separate apply.
+3. **Do not remove manager self-denial or scope checks**.
+4. **Do not bypass payroll locks / eligibility** or post real payroll money from incomplete days.
+5. **Do not disable synthetic-only or enable CAPTURE_INGEST** without an explicit owner-approved wave.
+   - Wave 2 C1 amendment: `ops/ATTENDANCE_TRUTH_C1_FREEZE_AMENDMENT.md` — company allowlist fail-closed; global ingest remains off.
+6. **Do not weaken tenant isolation or leak connector secrets** in API payloads.
+7. **Do not change frozen Employees 360 or Onboarding** to unblock Attendance.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- `smoke-test-attendance-freeze-regression.py`
+- Rollback via production backup `ROLLBACK.sh`
+
+## Not allowed without owner change-control
+
+- Real biometric/device ingest
+- Broad employee clocking, QR, GPS, kiosk
+- Real payroll money posting from attendance

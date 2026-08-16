@@ -1,0 +1,2409 @@
+[
+  {
+    "command": {
+      "defineVariablesCommand": {
+        "env": {
+          "PERCY_SESSION_ID": "8643d11dd904971c5525ad9ecadf0759d59420dc",
+          "PERCY_SERVER": "http://127.0.0.1:58083",
+          "PERCY_DEVICE_NAME": "iPhone 15-17.5",
+          "PERCY_OS_VERSION": "17.5",
+          "MAESTRO_INSTALL_APP_PORT": "45671",
+          "MAESTRO_CLI_NO_ANALYTICS": "1",
+          "MAESTRO_FILENAME": "00-launch-unsigned"
+        },
+        "optional": false
+      }
+    },
+    "metadata": {
+      "description": "Define variables",
+      "status": "COMPLETED",
+      "timestamp": 1786426511496,
+      "duration": 7,
+      "sourceDescription": "00-launch-unsigned.yaml",
+      "commandIndex": 0
+    }
+  },
+  {
+    "command": {
+      "applyConfigurationCommand": {
+        "config": {
+          "appId": "ai.wathefni.employee",
+          "tags": [
+            "smoke",
+            "browserstack",
+            "unsigned"
+          ]
+        },
+        "optional": false
+      }
+    },
+    "metadata": {
+      "description": "Apply configuration",
+      "status": "COMPLETED",
+      "timestamp": 1786426511503,
+      "duration": 0,
+      "sourceDescription": "00-launch-unsigned.yaml",
+      "commandIndex": 1
+    }
+  },
+  {
+    "command": {
+      "launchAppCommand": {
+        "appId": "ai.wathefni.employee",
+        "clearState": true,
+        "optional": false
+      }
+    },
+    "metadata": {
+      "description": "Launch app \"ai.wathefni.employee\" with clear state",
+      "status": "COMPLETED",
+      "timestamp": 1786426511503,
+      "duration": 1667,
+      "sourceDescription": "00-launch-unsigned.yaml",
+      "commandIndex": 2
+    }
+  },
+  {
+    "command": {
+      "assertConditionCommand": {
+        "condition": {
+          "visible": {
+            "textRegex": "Phone",
+            "optional": false
+          }
+        },
+        "timeout": "90000",
+        "optional": false
+      }
+    },
+    "metadata": {
+      "description": "Assert that \"Phone\" is visible",
+      "status": "FAILED",
+      "timestamp": 1786426513171,
+      "duration": 91893,
+      "error": {
+        "message": "Assertion is false: \"Phone\" is visible",
+        "hierarchyRoot": {
+          "attributes": {
+            "bounds": "[0,0][0,0]",
+            "enabled": "false",
+            "focused": "false",
+            "selected": "false",
+            "checked": "false"
+          },
+          "children": [
+            {
+              "attributes": {
+                "accessibilityText": " ",
+                "bounds": "[0,0][393,852]",
+                "enabled": "true",
+                "focused": "false",
+                "selected": "false",
+                "checked": "false"
+              },
+              "children": [
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[134,11][259,48]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[134,11][259,48]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][393,852]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[105,11][280,48]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[103,9][282,49]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[105,11][280,48]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[105,11][280,48]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "children": [
+                                        {
+                                          "attributes": {
+                                            "bounds": "[105,11][280,48]",
+                                            "enabled": "true",
+                                            "focused": "false",
+                                            "selected": "false",
+                                            "checked": "false"
+                                          },
+                                          "enabled": true,
+                                          "focused": false,
+                                          "checked": false,
+                                          "selected": false
+                                        }
+                                      ],
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[106,12][279,47]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            },
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][393,852]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[105,11][280,48]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[106,12][280,47]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                },
+                                {
+                                  "attributes": {
+                                    "bounds": "[134,11][259,48]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[134,11][259,48]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            },
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][393,852]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "resource-id": "jindo-container-view:1,client-identifier:com.apple.springboard,element-identifier:SBSystemApertureStatusBarPillElement - ScreenReplayRecording",
+                                    "bounds": "[105,11][280,48]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[95,10][290,59]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[105,11][280,48]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "children": [
+                                        {
+                                          "attributes": {
+                                            "bounds": "[105,11][280,48]",
+                                            "enabled": "true",
+                                            "focused": "false",
+                                            "selected": "false",
+                                            "checked": "false"
+                                          },
+                                          "children": [
+                                            {
+                                              "attributes": {
+                                                "bounds": "[105,11][280,48]",
+                                                "enabled": "true",
+                                                "focused": "false",
+                                                "selected": "false",
+                                                "checked": "false"
+                                              },
+                                              "children": [
+                                                {
+                                                  "attributes": {
+                                                    "bounds": "[105,11][280,48]",
+                                                    "enabled": "true",
+                                                    "focused": "false",
+                                                    "selected": "false",
+                                                    "checked": "false"
+                                                  },
+                                                  "children": [
+                                                    {
+                                                      "attributes": {
+                                                        "accessibilityText": "Screen Recording",
+                                                        "resource-id": "regular.view",
+                                                        "bounds": "[105,11][280,48]",
+                                                        "enabled": "true",
+                                                        "focused": "false",
+                                                        "selected": "false",
+                                                        "checked": "false"
+                                                      },
+                                                      "children": [
+                                                        {
+                                                          "attributes": {
+                                                            "bounds": "[105,11][280,48]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "attributes": {
+                                                                "accessibilityText": "Screen Recording",
+                                                                "resource-id": "record.circle",
+                                                                "bounds": "[114,20][134,39]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            }
+                                                          ],
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        },
+                                                        {
+                                                          "attributes": {
+                                                            "bounds": "[114,20][134,39]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "attributes": {
+                                                                "bounds": "[114,20][134,39]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            }
+                                                          ],
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        },
+                                                        {
+                                                          "attributes": {
+                                                            "bounds": "[114,20][134,39]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "attributes": {
+                                                                "bounds": "[114,20][134,39]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            }
+                                                          ],
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        }
+                                                      ],
+                                                      "enabled": true,
+                                                      "focused": false,
+                                                      "checked": false,
+                                                      "selected": false
+                                                    }
+                                                  ],
+                                                  "enabled": true,
+                                                  "focused": false,
+                                                  "checked": false,
+                                                  "selected": false
+                                                }
+                                              ],
+                                              "enabled": true,
+                                              "focused": false,
+                                              "checked": false,
+                                              "selected": false
+                                            }
+                                          ],
+                                          "enabled": true,
+                                          "focused": false,
+                                          "checked": false,
+                                          "selected": false
+                                        }
+                                      ],
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][1179,2556]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][1179,2556]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][1179,2556]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][1179,2556]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][1179,2556]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][1179,2556]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[0,0][1179,2556]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        },
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][1179,2556]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][1179,2556]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[0,0][1179,2556]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        },
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][1179,2556]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][1179,2556]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[0,0][1179,2556]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][1179,2556]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "resource-id": "SBSwitcherWindow:Main",
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][393,852]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[0,0][393,852]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][393,852]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    },
+                                    {
+                                      "attributes": {
+                                        "resource-id": "AppSwitcherContentView",
+                                        "bounds": "[0,0][393,852]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "children": [
+                                        {
+                                          "attributes": {
+                                            "bounds": "[0,0][393,852]",
+                                            "enabled": "true",
+                                            "focused": "false",
+                                            "selected": "false",
+                                            "checked": "false"
+                                          },
+                                          "children": [
+                                            {
+                                              "attributes": {
+                                                "bounds": "[0,0][393,852]",
+                                                "enabled": "true",
+                                                "focused": "false",
+                                                "selected": "false",
+                                                "checked": "false"
+                                              },
+                                              "children": [
+                                                {
+                                                  "attributes": {
+                                                    "bounds": "[0,0][393,852]",
+                                                    "enabled": "true",
+                                                    "focused": "false",
+                                                    "selected": "false",
+                                                    "checked": "false"
+                                                  },
+                                                  "enabled": true,
+                                                  "focused": false,
+                                                  "checked": false,
+                                                  "selected": false
+                                                }
+                                              ],
+                                              "enabled": true,
+                                              "focused": false,
+                                              "checked": false,
+                                              "selected": false
+                                            }
+                                          ],
+                                          "enabled": true,
+                                          "focused": false,
+                                          "checked": false,
+                                          "selected": false
+                                        },
+                                        {
+                                          "attributes": {
+                                            "accessibilityText": "Wathefni",
+                                            "resource-id": "card:ai.wathefni.employee:sceneID:ai.wathefni.employee-default",
+                                            "bounds": "[0,0][393,852]",
+                                            "enabled": "true",
+                                            "focused": "false",
+                                            "selected": "false",
+                                            "checked": "false"
+                                          },
+                                          "children": [
+                                            {
+                                              "attributes": {
+                                                "bounds": "[0,0][393,852]",
+                                                "enabled": "true",
+                                                "focused": "false",
+                                                "selected": "false",
+                                                "checked": "false"
+                                              },
+                                              "children": [
+                                                {
+                                                  "attributes": {
+                                                    "bounds": "[0,-426][393,852]",
+                                                    "enabled": "true",
+                                                    "focused": "false",
+                                                    "selected": "false",
+                                                    "checked": "false"
+                                                  },
+                                                  "children": [
+                                                    {
+                                                      "attributes": {
+                                                        "bounds": "[0,0][393,852]",
+                                                        "enabled": "true",
+                                                        "focused": "false",
+                                                        "selected": "false",
+                                                        "checked": "false"
+                                                      },
+                                                      "children": [
+                                                        {
+                                                          "attributes": {
+                                                            "bounds": "[0,0][393,852]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "attributes": {
+                                                                "bounds": "[0,0][393,852]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "children": [
+                                                                {
+                                                                  "attributes": {
+                                                                    "bounds": "[0,0][393,852]",
+                                                                    "enabled": "true",
+                                                                    "focused": "false",
+                                                                    "selected": "false",
+                                                                    "checked": "false"
+                                                                  },
+                                                                  "children": [
+                                                                    {
+                                                                      "attributes": {
+                                                                        "bounds": "[0,0][393,852]",
+                                                                        "enabled": "true",
+                                                                        "focused": "false",
+                                                                        "selected": "false",
+                                                                        "checked": "false"
+                                                                      },
+                                                                      "children": [
+                                                                        {
+                                                                          "attributes": {
+                                                                            "bounds": "[0,0][393,852]",
+                                                                            "enabled": "true",
+                                                                            "focused": "false",
+                                                                            "selected": "false",
+                                                                            "checked": "false"
+                                                                          },
+                                                                          "children": [
+                                                                            {
+                                                                              "attributes": {
+                                                                                "bounds": "[0,0][393,852]",
+                                                                                "enabled": "true",
+                                                                                "focused": "false",
+                                                                                "selected": "false",
+                                                                                "checked": "false"
+                                                                              },
+                                                                              "children": [
+                                                                                {
+                                                                                  "attributes": {
+                                                                                    "bounds": "[0,0][393,852]",
+                                                                                    "enabled": "true",
+                                                                                    "focused": "false",
+                                                                                    "selected": "false",
+                                                                                    "checked": "false"
+                                                                                  },
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "attributes": {
+                                                                                        "bounds": "[0,0][393,852]",
+                                                                                        "enabled": "true",
+                                                                                        "focused": "false",
+                                                                                        "selected": "false",
+                                                                                        "checked": "false"
+                                                                                      },
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "attributes": {
+                                                                                            "bounds": "[0,0][393,54]",
+                                                                                            "enabled": "true",
+                                                                                            "focused": "false",
+                                                                                            "selected": "false",
+                                                                                            "checked": "false"
+                                                                                          },
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "attributes": {
+                                                                                                "bounds": "[0,0][393,54]",
+                                                                                                "enabled": "true",
+                                                                                                "focused": "false",
+                                                                                                "selected": "false",
+                                                                                                "checked": "false"
+                                                                                              },
+                                                                                              "children": [
+                                                                                                {
+                                                                                                  "attributes": {
+                                                                                                    "bounds": "[0,0][393,54]",
+                                                                                                    "enabled": "true",
+                                                                                                    "focused": "false",
+                                                                                                    "selected": "false",
+                                                                                                    "checked": "false"
+                                                                                                  },
+                                                                                                  "children": [
+                                                                                                    {
+                                                                                                      "attributes": {
+                                                                                                        "bounds": "[39,11][76,48]",
+                                                                                                        "enabled": "true",
+                                                                                                        "focused": "false",
+                                                                                                        "selected": "false",
+                                                                                                        "checked": "false"
+                                                                                                      },
+                                                                                                      "enabled": true,
+                                                                                                      "focused": false,
+                                                                                                      "checked": false,
+                                                                                                      "selected": false
+                                                                                                    },
+                                                                                                    {
+                                                                                                      "attributes": {
+                                                                                                        "bounds": "[314,11][350,48]",
+                                                                                                        "enabled": "true",
+                                                                                                        "focused": "false",
+                                                                                                        "selected": "false",
+                                                                                                        "checked": "false"
+                                                                                                      },
+                                                                                                      "enabled": true,
+                                                                                                      "focused": false,
+                                                                                                      "checked": false,
+                                                                                                      "selected": false
+                                                                                                    },
+                                                                                                    {
+                                                                                                      "attributes": {
+                                                                                                        "accessibilityText": "05:36",
+                                                                                                        "bounds": "[36,19][81,38]",
+                                                                                                        "enabled": "true",
+                                                                                                        "focused": "false",
+                                                                                                        "selected": "false",
+                                                                                                        "checked": "false"
+                                                                                                      },
+                                                                                                      "enabled": true,
+                                                                                                      "focused": false,
+                                                                                                      "checked": false,
+                                                                                                      "selected": false
+                                                                                                    },
+                                                                                                    {
+                                                                                                      "attributes": {
+                                                                                                        "accessibilityText": "Mobile Service",
+                                                                                                        "value": "No signal",
+                                                                                                        "text": "No signal",
+                                                                                                        "bounds": "[304,23][322,34]",
+                                                                                                        "enabled": "true",
+                                                                                                        "focused": "false",
+                                                                                                        "selected": "false",
+                                                                                                        "checked": "false"
+                                                                                                      },
+                                                                                                      "enabled": true,
+                                                                                                      "focused": false,
+                                                                                                      "checked": false,
+                                                                                                      "selected": false
+                                                                                                    },
+                                                                                                    {
+                                                                                                      "attributes": {
+                                                                                                        "accessibilityText": "100% battery power",
+                                                                                                        "value": "Charging",
+                                                                                                        "text": "Charging",
+                                                                                                        "bounds": "[328,23][354,35]",
+                                                                                                        "enabled": "true",
+                                                                                                        "focused": "false",
+                                                                                                        "selected": "false",
+                                                                                                        "checked": "false"
+                                                                                                      },
+                                                                                                      "enabled": true,
+                                                                                                      "focused": false,
+                                                                                                      "checked": false,
+                                                                                                      "selected": false
+                                                                                                    }
+                                                                                                  ],
+                                                                                                  "enabled": true,
+                                                                                                  "focused": false,
+                                                                                                  "checked": false,
+                                                                                                  "selected": false
+                                                                                                }
+                                                                                              ],
+                                                                                              "enabled": true,
+                                                                                              "focused": false,
+                                                                                              "checked": false,
+                                                                                              "selected": false
+                                                                                            }
+                                                                                          ],
+                                                                                          "enabled": true,
+                                                                                          "focused": false,
+                                                                                          "checked": false,
+                                                                                          "selected": false
+                                                                                        }
+                                                                                      ],
+                                                                                      "enabled": true,
+                                                                                      "focused": false,
+                                                                                      "checked": false,
+                                                                                      "selected": false
+                                                                                    }
+                                                                                  ],
+                                                                                  "enabled": true,
+                                                                                  "focused": false,
+                                                                                  "checked": false,
+                                                                                  "selected": false
+                                                                                }
+                                                                              ],
+                                                                              "enabled": true,
+                                                                              "focused": false,
+                                                                              "checked": false,
+                                                                              "selected": false
+                                                                            },
+                                                                            {
+                                                                              "attributes": {
+                                                                                "bounds": "[0,0][393,852]",
+                                                                                "enabled": "true",
+                                                                                "focused": "false",
+                                                                                "selected": "false",
+                                                                                "checked": "false"
+                                                                              },
+                                                                              "children": [
+                                                                                {
+                                                                                  "attributes": {
+                                                                                    "bounds": "[0,0][393,852]",
+                                                                                    "enabled": "true",
+                                                                                    "focused": "false",
+                                                                                    "selected": "false",
+                                                                                    "checked": "false"
+                                                                                  },
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "attributes": {
+                                                                                        "bounds": "[0,0][393,852]",
+                                                                                        "enabled": "true",
+                                                                                        "focused": "false",
+                                                                                        "selected": "false",
+                                                                                        "checked": "false"
+                                                                                      },
+                                                                                      "enabled": true,
+                                                                                      "focused": false,
+                                                                                      "checked": false,
+                                                                                      "selected": false
+                                                                                    }
+                                                                                  ],
+                                                                                  "enabled": true,
+                                                                                  "focused": false,
+                                                                                  "checked": false,
+                                                                                  "selected": false
+                                                                                }
+                                                                              ],
+                                                                              "enabled": true,
+                                                                              "focused": false,
+                                                                              "checked": false,
+                                                                              "selected": false
+                                                                            }
+                                                                          ],
+                                                                          "enabled": true,
+                                                                          "focused": false,
+                                                                          "checked": false,
+                                                                          "selected": false
+                                                                        }
+                                                                      ],
+                                                                      "enabled": true,
+                                                                      "focused": false,
+                                                                      "checked": false,
+                                                                      "selected": false
+                                                                    }
+                                                                  ],
+                                                                  "enabled": true,
+                                                                  "focused": false,
+                                                                  "checked": false,
+                                                                  "selected": false
+                                                                }
+                                                              ],
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            },
+                                                            {
+                                                              "attributes": {
+                                                                "bounds": "[0,0][393,852]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            },
+                                                            {
+                                                              "attributes": {
+                                                                "bounds": "[0,0][393,852]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            }
+                                                          ],
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        }
+                                                      ],
+                                                      "enabled": true,
+                                                      "focused": false,
+                                                      "checked": false,
+                                                      "selected": false
+                                                    }
+                                                  ],
+                                                  "enabled": true,
+                                                  "focused": false,
+                                                  "checked": false,
+                                                  "selected": false
+                                                }
+                                              ],
+                                              "enabled": true,
+                                              "focused": false,
+                                              "checked": false,
+                                              "selected": false
+                                            }
+                                          ],
+                                          "enabled": true,
+                                          "focused": false,
+                                          "checked": false,
+                                          "selected": false
+                                        },
+                                        {
+                                          "attributes": {
+                                            "bounds": "[0,0][393,852]",
+                                            "enabled": "true",
+                                            "focused": "false",
+                                            "selected": "false",
+                                            "checked": "false"
+                                          },
+                                          "children": [
+                                            {
+                                              "attributes": {
+                                                "bounds": "[0,0][393,852]",
+                                                "enabled": "true",
+                                                "focused": "false",
+                                                "selected": "false",
+                                                "checked": "false"
+                                              },
+                                              "children": [
+                                                {
+                                                  "attributes": {
+                                                    "bounds": "[0,0][393,852]",
+                                                    "enabled": "true",
+                                                    "focused": "false",
+                                                    "selected": "false",
+                                                    "checked": "false"
+                                                  },
+                                                  "children": [
+                                                    {
+                                                      "attributes": {
+                                                        "bounds": "[0,0][393,852]",
+                                                        "enabled": "true",
+                                                        "focused": "false",
+                                                        "selected": "false",
+                                                        "checked": "false"
+                                                      },
+                                                      "children": [
+                                                        {
+                                                          "attributes": {
+                                                            "resource-id": "Home Grabber",
+                                                            "bounds": "[0,0][393,852]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "children": [
+                                                            {
+                                                              "attributes": {
+                                                                "bounds": "[126,839][266,844]",
+                                                                "enabled": "true",
+                                                                "focused": "false",
+                                                                "selected": "false",
+                                                                "checked": "false"
+                                                              },
+                                                              "enabled": true,
+                                                              "focused": false,
+                                                              "checked": false,
+                                                              "selected": false
+                                                            }
+                                                          ],
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        }
+                                                      ],
+                                                      "enabled": true,
+                                                      "focused": false,
+                                                      "checked": false,
+                                                      "selected": false
+                                                    }
+                                                  ],
+                                                  "enabled": true,
+                                                  "focused": false,
+                                                  "checked": false,
+                                                  "selected": false
+                                                }
+                                              ],
+                                              "enabled": true,
+                                              "focused": false,
+                                              "checked": false,
+                                              "selected": false
+                                            }
+                                          ],
+                                          "enabled": true,
+                                          "focused": false,
+                                          "checked": false,
+                                          "selected": false
+                                        }
+                                      ],
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,54]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                },
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                }
+              ],
+              "enabled": true,
+              "focused": false,
+              "checked": false,
+              "selected": false
+            },
+            {
+              "attributes": {
+                "accessibilityText": "Wathefni",
+                "bounds": "[0,0][393,852]",
+                "enabled": "true",
+                "focused": "false",
+                "selected": "false",
+                "checked": "false"
+              },
+              "children": [
+                {
+                  "attributes": {
+                    "bounds": "[0,0][393,852]",
+                    "enabled": "true",
+                    "focused": "false",
+                    "selected": "false",
+                    "checked": "false"
+                  },
+                  "children": [
+                    {
+                      "attributes": {
+                        "bounds": "[0,0][393,852]",
+                        "enabled": "true",
+                        "focused": "false",
+                        "selected": "false",
+                        "checked": "false"
+                      },
+                      "children": [
+                        {
+                          "attributes": {
+                            "bounds": "[0,0][393,852]",
+                            "enabled": "true",
+                            "focused": "false",
+                            "selected": "false",
+                            "checked": "false"
+                          },
+                          "children": [
+                            {
+                              "attributes": {
+                                "bounds": "[0,0][393,852]",
+                                "enabled": "true",
+                                "focused": "false",
+                                "selected": "false",
+                                "checked": "false"
+                              },
+                              "children": [
+                                {
+                                  "attributes": {
+                                    "bounds": "[0,0][393,852]",
+                                    "enabled": "true",
+                                    "focused": "false",
+                                    "selected": "false",
+                                    "checked": "false"
+                                  },
+                                  "children": [
+                                    {
+                                      "attributes": {
+                                        "bounds": "[0,0][393,852]",
+                                        "enabled": "true",
+                                        "focused": "false",
+                                        "selected": "false",
+                                        "checked": "false"
+                                      },
+                                      "children": [
+                                        {
+                                          "attributes": {
+                                            "bounds": "[0,0][393,852]",
+                                            "enabled": "true",
+                                            "focused": "false",
+                                            "selected": "false",
+                                            "checked": "false"
+                                          },
+                                          "children": [
+                                            {
+                                              "attributes": {
+                                                "bounds": "[0,0][393,852]",
+                                                "enabled": "true",
+                                                "focused": "false",
+                                                "selected": "false",
+                                                "checked": "false"
+                                              },
+                                              "children": [
+                                                {
+                                                  "attributes": {
+                                                    "bounds": "[0,0][393,852]",
+                                                    "enabled": "true",
+                                                    "focused": "false",
+                                                    "selected": "false",
+                                                    "checked": "false"
+                                                  },
+                                                  "children": [
+                                                    {
+                                                      "attributes": {
+                                                        "bounds": "[0,0][393,852]",
+                                                        "enabled": "true",
+                                                        "focused": "false",
+                                                        "selected": "false",
+                                                        "checked": "false"
+                                                      },
+                                                      "children": [
+                                                        {
+                                                          "attributes": {
+                                                            "accessibilityText": "WATHEFNI",
+                                                            "bounds": "[24,120][369,134]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        },
+                                                        {
+                                                          "attributes": {
+                                                            "accessibilityText": "Choose how to continue",
+                                                            "bounds": "[24,146][369,180]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        },
+                                                        {
+                                                          "attributes": {
+                                                            "accessibilityText": "Employee and HR use separate accounts. Signing into one never links or unlocks the other.",
+                                                            "bounds": "[24,192][369,236]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        },
+                                                        {
+                                                          "attributes": {
+                                                            "accessibilityText": "Continue as employee",
+                                                            "bounds": "[24,260][369,311]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        },
+                                                        {
+                                                          "attributes": {
+                                                            "accessibilityText": "Continue as HR",
+                                                            "bounds": "[24,323][369,376]",
+                                                            "enabled": "true",
+                                                            "focused": "false",
+                                                            "selected": "false",
+                                                            "checked": "false"
+                                                          },
+                                                          "enabled": true,
+                                                          "focused": false,
+                                                          "checked": false,
+                                                          "selected": false
+                                                        }
+                                                      ],
+                                                      "enabled": true,
+                                                      "focused": false,
+                                                      "checked": false,
+                                                      "selected": false
+                                                    }
+                                                  ],
+                                                  "enabled": true,
+                                                  "focused": false,
+                                                  "checked": false,
+                                                  "selected": false
+                                                }
+                                              ],
+                                              "enabled": true,
+                                              "focused": false,
+                                              "checked": false,
+                                              "selected": false
+                                            }
+                                          ],
+                                          "enabled": true,
+                                          "focused": false,
+                                          "checked": false,
+                                          "selected": false
+                                        }
+                                      ],
+                                      "enabled": true,
+                                      "focused": false,
+                                      "checked": false,
+                                      "selected": false
+                                    }
+                                  ],
+                                  "enabled": true,
+                                  "focused": false,
+                                  "checked": false,
+                                  "selected": false
+                                }
+                              ],
+                              "enabled": true,
+                              "focused": false,
+                              "checked": false,
+                              "selected": false
+                            }
+                          ],
+                          "enabled": true,
+                          "focused": false,
+                          "checked": false,
+                          "selected": false
+                        }
+                      ],
+                      "enabled": true,
+                      "focused": false,
+                      "checked": false,
+                      "selected": false
+                    }
+                  ],
+                  "enabled": true,
+                  "focused": false,
+                  "checked": false,
+                  "selected": false
+                }
+              ],
+              "enabled": true,
+              "focused": false,
+              "checked": false,
+              "selected": false
+            }
+          ],
+          "enabled": false,
+          "focused": false,
+          "checked": false,
+          "selected": false
+        },
+        "stackTrace": [
+          {
+            "classLoaderName": "app",
+            "methodName": "assertConditionCommand",
+            "fileName": "Orchestra.kt",
+            "lineNumber": 366,
+            "nativeMethod": false,
+            "className": "maestro.orchestra.Orchestra"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "executeCommand",
+            "fileName": "Orchestra.kt",
+            "lineNumber": 296,
+            "nativeMethod": false,
+            "className": "maestro.orchestra.Orchestra"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "executeCommands",
+            "fileName": "Orchestra.kt",
+            "lineNumber": 217,
+            "nativeMethod": false,
+            "className": "maestro.orchestra.Orchestra"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "executeCommands$default",
+            "fileName": "Orchestra.kt",
+            "lineNumber": 168,
+            "nativeMethod": false,
+            "className": "maestro.orchestra.Orchestra"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runFlow",
+            "fileName": "Orchestra.kt",
+            "lineNumber": 142,
+            "nativeMethod": false,
+            "className": "maestro.orchestra.Orchestra"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runFlow",
+            "fileName": "TestSuiteInteractor.kt",
+            "lineNumber": 307,
+            "nativeMethod": false,
+            "className": "maestro.cli.runner.TestSuiteInteractor"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runTestSuite",
+            "fileName": "TestSuiteInteractor.kt",
+            "lineNumber": 97,
+            "nativeMethod": false,
+            "className": "maestro.cli.runner.TestSuiteInteractor"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runMultipleFlows",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 463,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "access$runMultipleFlows",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 65,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "invoke",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 391,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand$runShardSuite$2"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "invoke",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 370,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand$runShardSuite$2"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "newSession",
+            "fileName": "MaestroSessionManager.kt",
+            "lineNumber": 109,
+            "nativeMethod": false,
+            "className": "maestro.cli.session.MaestroSessionManager"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "newSession$default",
+            "fileName": "MaestroSessionManager.kt",
+            "lineNumber": 57,
+            "nativeMethod": false,
+            "className": "maestro.cli.session.MaestroSessionManager"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runShardSuite",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 370,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "access$runShardSuite",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 65,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "invokeSuspend",
+            "fileName": "TestCommand.kt",
+            "lineNumber": 337,
+            "nativeMethod": false,
+            "className": "maestro.cli.command.TestCommand$handleSessions$1$results$1$1"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "resumeWith",
+            "fileName": "ContinuationImpl.kt",
+            "lineNumber": 33,
+            "nativeMethod": false,
+            "className": "kotlin.coroutines.jvm.internal.BaseContinuationImpl"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "run",
+            "fileName": "DispatchedTask.kt",
+            "lineNumber": 104,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.DispatchedTask"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "run",
+            "fileName": "LimitedDispatcher.kt",
+            "lineNumber": 111,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.internal.LimitedDispatcher$Worker"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "run",
+            "fileName": "Tasks.kt",
+            "lineNumber": 99,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.scheduling.TaskImpl"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runSafely",
+            "fileName": "CoroutineScheduler.kt",
+            "lineNumber": 585,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.scheduling.CoroutineScheduler"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "executeTask",
+            "fileName": "CoroutineScheduler.kt",
+            "lineNumber": 802,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "runWorker",
+            "fileName": "CoroutineScheduler.kt",
+            "lineNumber": 706,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker"
+          },
+          {
+            "classLoaderName": "app",
+            "methodName": "run",
+            "fileName": "CoroutineScheduler.kt",
+            "lineNumber": 693,
+            "nativeMethod": false,
+            "className": "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker"
+          }
+        ],
+        "localizedMessage": "Assertion is false: \"Phone\" is visible"
+      },
+      "sourceDescription": "00-launch-unsigned.yaml",
+      "commandIndex": 3
+    }
+  }
+]

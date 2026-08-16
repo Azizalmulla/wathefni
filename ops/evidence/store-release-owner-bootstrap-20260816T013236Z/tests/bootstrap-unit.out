@@ -1,0 +1,21 @@
+    SETUP OWNER BOOTSTRAP — unit
+      PASS  bundle version is explicit
+      PASS  employees.read is in the bundle
+      PASS  employees.manage is in the bundle
+      PASS  bundle does not infer from role
+      PASS  employees.manage remains grant-only
+      PASS  bundle excludes assessment.publish
+      PASS  bundle excludes er.sensitive
+      PASS  bundle excludes employees.ess.unmask
+      PASS  bundle excludes performance.sensitive
+      PASS  bundle excludes offer.hire_override
+      PASS  bundle excludes payroll.export
+      PASS  bundle excludes talent.sensitive
+      PASS  bootstrap_permissions() validates
+      PASS  Setup owner seed writes bootstrap grants
+      PASS  invite accept writes bootstrap grants for owner
+      PASS  bootstrap grants are audited
+      PASS  seed still does not grant payroll.export via bootstrap
+
+    SETUP_OWNER_BOOTSTRAP_UNIT_PASS
+    17 passed, 0 failed

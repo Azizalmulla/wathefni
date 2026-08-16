@@ -1,0 +1,7 @@
+wave1_version 1.0.0
+contract analytics_attention_wave1
+honesty_ok {'read_only': True, 'money_authority': False, 'synthetic_only': True, 'ai': False}
+connected_db wathefni
+ack_id 1
+ACK_PRODUCTION_ANALYTICS_W1B=YES
+MIGRATE_OK

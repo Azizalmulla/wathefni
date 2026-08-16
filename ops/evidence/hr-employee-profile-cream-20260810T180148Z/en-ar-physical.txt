@@ -1,0 +1,27 @@
+PASS EN/AR key parity
+PASS AR arabic · hrEmployee.eyebrow · ملف مختصر
+PASS AR arabic · hrEmployee.title · ملف الموظف
+PASS AR arabic · hrEmployee.sectionFacts · الملف
+PASS AR arabic · hrEmployee.statusActive · نشط
+PASS AR arabic · hrEmployee.statusLeft · غادر
+PASS AR arabic · hrEmployee.statusTerminated · منتهي
+PASS AR arabic · hrEmployee.notFoundTitle · الموظف غير موجود
+PASS AR arabic · hrEmployee.notFoundBody · هذا الملف مفقود أو خارج نطاقك أو لم يعد 
+PASS AR arabic · hrEmployee.unavailableTitle · لم يُحدد موظف
+PASS AR arabic · hrEmployee.unavailableBody · افتح شخصاً من الأشخاص لعرض ملفه.
+PASS AR arabic · hrEmployee.permissionTitle · ملف الموظف غير متاح
+PASS AR arabic · common.position · المنصب
+PASS AR arabic · common.department · القسم
+PASS AR arabic · common.email · البريد الإلكتروني
+PASS AR arabic · common.phone · الهاتف
+PASS AR arabic · common.startDate · تاريخ البدء
+PASS EN active
+PASS AR active localized
+PASS EN left
+PASS AR left localized
+PASS no raw status chip
+PASS localizeEmploymentStatus wired
+PASS cream + no manager
+PASS unavailable + not_found states
+PASS never blank ready without item
+hr-employee-profile-en-ar-physical: PASS

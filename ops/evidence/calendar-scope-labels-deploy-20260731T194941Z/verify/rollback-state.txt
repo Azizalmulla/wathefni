@@ -1,0 +1,8 @@
+cal ['CalendarShell-QuoDX7qv.js']
+dash ['dashboard-C2UeV2r7.js']
+Hiring_team_in_cal False
+old_Team_short True
+show_team_old True
+show_team_new False
+health=200
+dashboard=200

@@ -1,0 +1,15 @@
+{
+  "db": "wathefni",
+  "attendance_rows": 42,
+  "demo_seed": 42,
+  "four_reals": 4,
+  "leftover_w3_exceptions": 0,
+  "audit_immutable_trigger": [
+    "trg_att_ops_audit_immutable"
+  ],
+  "w3_devices": 0,
+  "audit_events_total": 179,
+  "capture_ingest_env": "off",
+  "ops_synthetic_only": "on",
+  "ops_companies": "WATHEFNI"
+}

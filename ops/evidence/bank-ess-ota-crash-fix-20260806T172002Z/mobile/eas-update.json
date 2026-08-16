@@ -1,0 +1,68 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:52108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] iOS Bundled 2207ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (690 modules)
+[expo-cli] 
+[expo-cli] Android Bundled 3638ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (791 modules)
+[expo-cli] 
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] Exporting 15 assets:
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-3912335e3d9c3611cec73af07268f229.hbc (1.16 MB)
+[expo-cli] 
+[expo-cli] _expo/static/js/ios/entry-3912335e3d9c3611cec73af07268f229.hbc.map (4.82 MB)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-e115be08a38cbed8433e7e8e7527cc6c.hbc (1.16 MB)
+[expo-cli] _expo/static/js/android/entry-e115be08a38cbed8433e7e8e7527cc6c.hbc.map (4.82 MB)
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (5.71 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.5 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 5.6 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 11 iOS assets, 11 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fd819-2b41-797c-bbde-267359090356",
+    "createdAt": "2026-08-06T17:22:35.969Z",
+    "group": "f65e46d0-50ae-41c6-b4ce-d75233f87168",
+    "branch": "canary",
+    "message": "Fix Bank ESS OTA crash syncLayoutLocale 20260806T172002Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd819-2b41-797c-bbde-267359090356",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "5015fb8633af624dbf5bf38a821ba34f59567837"
+  },
+  {
+    "id": "019fd819-2b41-7bd6-b039-cf1df250b135",
+    "createdAt": "2026-08-06T17:22:35.969Z",
+    "group": "f65e46d0-50ae-41c6-b4ce-d75233f87168",
+    "branch": "canary",
+    "message": "Fix Bank ESS OTA crash syncLayoutLocale 20260806T172002Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd819-2b41-7bd6-b039-cf1df250b135",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "5015fb8633af624dbf5bf38a821ba34f59567837"
+  }
+]

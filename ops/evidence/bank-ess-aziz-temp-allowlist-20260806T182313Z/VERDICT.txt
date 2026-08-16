@@ -1,0 +1,7 @@
+deployed
+
+Temporary Aziz Bank ESS allowlist via systemd drop-in (normal env mechanism).
+Live me/onboarding/bank ALIGNED enabled PASS.
+OTA not required (existing eligibility tip sufficient).
+Cleanup: cleanup/REMOVE_AZIZ_AFTER_PHASE2.sh after Phase 2.
+Auth Wave 2 not started.

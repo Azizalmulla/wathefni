@@ -1,0 +1,52 @@
+Employee App P1 release gate — 20260808T073719Z
+
+── mobile typecheck (tsc --noEmit)
+   SKIPPED — no mobile node toolchain on this host
+── mobile PIN crypto selftest
+   SKIPPED — no mobile node toolchain on this host
+── mobile entitlement composition shapes
+   SKIPPED — no mobile node toolchain on this host
+── mobile documents hierarchy
+   SKIPPED — no mobile node toolchain on this host
+── auth wave 2 phase 1 PIN unit
+   SKIPPED — no mobile node toolchain on this host
+── auth wave 2 phase 1 session hardening unit
+   SKIPPED — no mobile node toolchain on this host
+── auth wave 2 phase 2 biometric unit
+   SKIPPED — no mobile node toolchain on this host
+── auth wave 2 phase 3 auto-lock unit
+   SKIPPED — no mobile node toolchain on this host
+── auth wave 2 phase 4 PIN recovery unit
+   SKIPPED — no mobile node toolchain on this host
+── auth wave 2 phase 5 device security unit
+   SKIPPED — no mobile node toolchain on this host
+── mobile capability + composition contract
+   PASS
+── backend modules compile
+   PASS
+── employee app capability contract
+   PASS
+── employee app runtime access enforcement
+   PASS
+── employee app home projection contract
+   PASS
+── employee app workday projection contract
+   PASS
+── employee app profile projection contract
+   PASS
+── employee app access eligibility matrix
+   PASS
+── employee app invitation + delivery
+   PASS
+── employee payslips P0 release gate
+   PASS
+── employee payslips P0.1 official PDF
+   PASS
+── employee↔HR sync hardening
+   PASS
+── employee app session/self-scope regression
+   PASS
+
+passed=13 failed=0 skipped=10
+SKIPPED: mobile typecheck (tsc --noEmit) mobile PIN crypto selftest mobile entitlement composition shapes mobile documents hierarchy auth wave 2 phase 1 PIN unit auth wave 2 phase 1 session hardening unit auth wave 2 phase 2 biometric unit auth wave 2 phase 3 auto-lock unit auth wave 2 phase 4 PIN recovery unit auth wave 2 phase 5 device security unit
+EMPLOYEE_APP_P1_RELEASE_GATE: PARTIAL (skips acknowledged by ALLOW_DB_SKIP=1)

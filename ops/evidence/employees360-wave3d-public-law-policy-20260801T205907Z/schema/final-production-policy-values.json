@@ -1,0 +1,43 @@
+{
+  "schema_version": "employees360-wave3d-public-law-policy-v1",
+  "default_policy": {
+    "tier": "small",
+    "timezone": "Asia/Kuwait",
+    "notice_hint_monthly_days": 90,
+    "notice_hint_other_days": 30,
+    "show_notice_hints": false,
+    "notice_hint_label": "Configurable policy guidance only (not a legal determination). When enabled, monthly/other day hints mirror Law No. 6 of 2010 Art. 44 for unlimited contracts (3 months / 1 month) as published in Official Gazette Issue 963 (21 Feb 2010). Fixed-term, probation, and summary-dismissal cases are not covered by these hints. HR must enter effective date and last working day.",
+    "require_last_working_day": true,
+    "allow_reinstate_after_effective": false,
+    "jurisdiction_mode": "kuwait_private_sector_only",
+    "document_retention_mode": "retain",
+    "auto_cancel_shifts": false,
+    "auto_decline_leave": false,
+    "monetary_calculations_owner": "payroll",
+    "settlement_packet_mode": "inputs_only",
+    "revoke_mode": "end_of_last_working_day",
+    "effective_time_mode": "start_of_effective_date",
+    "downstream_mode": "warn_first",
+    "require_impact_ack": true,
+    "require_counsel_gate": true,
+    "allow_self_approval": false,
+    "rehire_same_employee_key": true,
+    "scheduler_cadence": "hourly",
+    "lag_alert_seconds": 7200,
+    "disclaimer": "Configurable policy only. Not legal advice. Employees 360 never calculates EOSB, notice pay, garden leave, or leave encashment \u2014 Payroll owns monetary calculations."
+  },
+  "wave3d_policy_json_keys": [
+    "show_notice_hints",
+    "notice_hint_label",
+    "require_last_working_day",
+    "allow_reinstate_after_effective",
+    "jurisdiction_mode",
+    "document_retention_mode",
+    "auto_cancel_shifts",
+    "auto_decline_leave",
+    "monetary_calculations_owner",
+    "settlement_packet_mode",
+    "disclaimer",
+    "wave"
+  ]
+}

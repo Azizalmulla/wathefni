@@ -1,0 +1,328 @@
+=== REG C smoke-test-employment-change-c1.py ===
+    employment change c1 — prove
+      PASS  c1 module
+      PASS  rollback guidance
+      PASS  EN promotion
+      PASS  AR transfer
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  offboarding not required
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  create transfer case
+      PASS  submit → pending
+      PASS  SoD self-approve forbidden
+      PASS  stale approval fails
+      PASS  approve transfer
+      PASS  apply transfer mutates employment
+      PASS  append-only history id
+      PASS  department updated
+      PASS  position updated
+      PASS  history retained
+      PASS  reject path
+      PASS  cancel draft
+      PASS  promotion applied
+      PASS  promotion position
+      PASS  secondment create requires end
+      PASS  secondment applied
+      PASS  secondment active
+      PASS  secondment return applied
+      PASS  secondment returned
+      PASS  home department restored
+      PASS  salary without payroll link
+      PASS  payroll independence (link off)
+      PASS  salary links payroll contract when OPTIONAL on
+      PASS  EN/AR case labels
+      PASS  independent of offboarding module
+      PASS  independent of attendance_truth
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  history intact after rollback
+
+    42 passed, 0 failed
+EMPLOYMENT_CHANGE_UNIT_PASS
+EMPLOYMENT_CHANGE_FULL_PASS
+=== REG C smoke-test-ess-letters-dependents-c2.py ===
+    ess letters + dependents c2 — prove
+      PASS  c2 module
+      PASS  rollback guidance
+      PASS  EN salary cert
+      PASS  AR employment cert
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  benefits not required
+      PASS  no silent invent
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  letters visible when on
+      PASS  dependents hidden when off
+      PASS  employee requests letter
+      PASS  status requested
+      PASS  under_review
+      PASS  SoD self-approve forbidden
+      PASS  stale approval fails
+      PASS  approved
+      PASS  no silent invent when fulfill off
+      PASS  HR fulfills and issues
+      PASS  status issued
+      PASS  artifact content hash
+      PASS  employee downloads issued
+      PASS  download body tied to employment
+      PASS  self-scope blocks other employee
+      PASS  issued cannot silently change
+      PASS  hash unchanged after mutate attempt
+      PASS  correction creates new request
+      PASS  corrected letter new version
+      PASS  version number incremented
+      PASS  prior version still immutable
+      PASS  AR experience letter issued
+      PASS  AR body path
+      PASS  reject path
+      PASS  cancel path
+      PASS  salary cert without payroll
+      PASS  payroll independence (link off)
+      PASS  payroll draft for salary cert
+      PASS  payroll contract approved
+      PASS  salary cert with optional payroll
+      PASS  salary uses payroll truth when on
+      PASS  dependent add
+      PASS  duplicate protection
+      PASS  dependent edit
+      PASS  stale/concurrent edit blocked
+      PASS  employee-requested dependent change
+      PASS  dependent SoD self-approve forbidden
+      PASS  HR reviews dependent change
+      PASS  dependent applied after review
+      PASS  list dependents
+      PASS  dependent archive
+      PASS  tenant isolation dependents
+      PASS  dependents hide when disabled
+      PASS  dependents disabled blocks create
+      PASS  independent of offboarding
+      PASS  independent of benefits
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  issued history intact after rollback
+      PASS  dependent history intact after rollback
+      PASS  module-off hides letter list
+
+    65 passed, 0 failed
+ESS_LETTERS_DEPENDENTS_UNIT_PASS
+ESS_LETTERS_DEPENDENTS_FULL_PASS
+=== REG C smoke-test-exit-intent-c3.py ===
+    exit intent c3 — prove
+      PASS  c3 module
+      PASS  charter stamp name
+      PASS  rollback guidance
+      PASS  EN resignation
+      PASS  AR notice
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  offboarding not required
+      PASS  clearance not in c3
+      PASS  real termination dark
+      PASS  real canary off
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  real canary blocked in C3
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  resignation visible
+      PASS  employee resignation submit draft
+      PASS  resignation pending_approval
+      PASS  submit does not mark left
+      PASS  resignation SoD self-approve forbidden
+      PASS  stale/concurrent decision
+      PASS  resignation approve
+      PASS  resignation reject
+      PASS  permitted withdrawal
+      PASS  notice period entered
+      PASS  employment still active in notice
+      PASS  withdraw blocked after notice
+      PASS  notice dates/change audit
+      PASS  notice versions retained
+      PASS  ready_for_offboarding
+      PASS  no premature employment=left
+      PASS  handoff without Offboarding
+      PASS  handoff deferred when Offboarding absent
+      PASS  not clearance/paid
+      PASS  employee sees canonical status
+      PASS  employer termination initiation
+      PASS  termination SoD
+      PASS  termination approve
+      PASS  termination reject
+      PASS  termination cancel
+      PASS  termination requires HR auth
+      PASS  EOC case + task
+      PASS  EOC renewal
+      PASS  EOC renewal keeps employment active
+      PASS  EOC not silent termination
+      PASS  EOC non-renewal
+      PASS  EOC non-renewal notice
+      PASS  EOC ready_for_offboarding
+      PASS  still not employment=left after EOC ready
+      PASS  non-synthetic blocked
+      PASS  no invented legal pack notice
+      PASS  independent of payroll module
+      PASS  independent of offboarding module
+      PASS  EN/AR contracts present
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  history intact after rollback
+      PASS  notice history intact
+      PASS  global real-termination gate remains OFF
+      PASS  employment truth active after full path
+
+    63 passed, 0 failed
+RESIGNATION_TERMINATION_UNIT_PASS
+RESIGNATION_TERMINATION_FULL_PASS
+=== REG C smoke-test-offboarding-c4.py ===
+    offboarding + clearance c4 — prove
+      PASS  c4 module
+      PASS  charter stamp
+      PASS  commercial key offboarding
+      PASS  clearance is subworkflow
+      PASS  rollback guidance
+      PASS  EN ready_to_close
+      PASS  AR blocked
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  identity not required
+      PASS  AM not required
+      PASS  real termination dark
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  real canary blocked in C4
+      PASS  exit intent ready
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  exit intent → one offboarding case
+      PASS  required/optional items materialized
+      PASS  case in_progress or blocked/ready
+      PASS  duplicate handoff does not create duplicate case
+      PASS  handover item present
+      PASS  it depends on assets
+      PASS  dependency blocking
+      PASS  manager/dept scoped completion RBAC
+      PASS  handover flow
+      PASS  asset clearance reference
+      PASS  assets completed
+      PASS  dependency unblocking
+      PASS  reject path
+      PASS  blocked case after required reject
+      PASS  blocked cannot become ready_to_close
+      PASS  blocked case cannot complete
+      PASS  return path
+      PASS  department scoped completion
+      PASS  unauthorized waiver denied
+      PASS  authorized waiver + reason
+      PASS  manual IT confirmation without identity adapter
+      PASS  manual confirm ≠ access_revoked
+      PASS  IT item completed
+      PASS  optional identity adapter request
+      PASS  revoke requested ≠ revoked
+      PASS  case access_revoked still false after request
+      PASS  identity adapter ack semantics
+      PASS  stale/concurrent protection
+      PASS  HR completion
+      PASS  all required items satisfied → ready_to_close
+      PASS  required clearance satisfied
+      PASS  offboarding completed
+      PASS  no false settlement/paid
+      PASS  no false exit interview
+      PASS  employment not left on C4 complete
+      PASS  employment truth still active
+      PASS  independent of payroll settle module
+      PASS  EN/AR contracts
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  history intact after rollback
+      PASS  clearance history intact
+      PASS  real termination gate remains OFF
+
+    63 passed, 0 failed
+OFFBOARDING_UNIT_PASS
+OFFBOARDING_FULL_PASS
+=== REG C smoke-test-exit-close-c5.py ===
+    exit close c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  rollback
+      PASS  EN closed
+      PASS  AR ready
+      PASS  assistant out
+      PASS  sole left authority
+      PASS  finalized ≠ paid
+      PASS  real term dark
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  real canary blocked
+      PASS  enable company
+      PASS  interview hidden when disabled
+      PASS  incomplete path resign draft
+      PASS  incomplete path notice
+      PASS  incomplete path exit ready
+      PASS  incomplete offboarding started
+      PASS  incomplete required clearance blocks close
+      PASS  completed clearance → close case
+      PASS  Payroll absent + settlement not required → ready/closable
+      PASS  ready to close (no payroll)
+      PASS  duplicate open idempotent
+      PASS  SoD self-close forbidden
+      PASS  stale close rejected
+      PASS  canonical employment becomes left only at close
+      PASS  employment_status left
+      PASS  active workforce domains stop
+      PASS  duplicate close idempotent
+      PASS  no silent reopen
+      PASS  rehire eligibility + audit
+      PASS  same person preserved
+      PASS  last-working-date gate blocks
+      PASS  LWD override by HR
+      PASS  settlement required blocks before finalize/ack
+      PASS  unauthorized settlement waiver denied
+      PASS  wave2 packet seeded
+      PASS  wave2 settlement created
+      PASS  wave2 settlement finalized
+      PASS  bind finalized settlement
+      PASS  finalized but ack absent still blocked/distinct
+      PASS  settlement finalized but required acknowledgement absent → blocked
+      PASS  payment status distinct from settlement ack
+      PASS  Payroll enabled + settlement finalized/acknowledged → ready
+      PASS  close with settlement ack
+      PASS  settlement waiver authorized
+      PASS  no fake settlement row on waiver
+      PASS  optional IdP/access ack gate blocks until ack
+      PASS  unauthorized access waiver denied
+      PASS  access acknowledgement semantics
+      PASS  exit interview visible when enabled
+      PASS  exit interview non-blocking default
+      PASS  exit interview complete
+      PASS  exit interview decline
+      PASS  exit interview skip
+      PASS  interview confidentiality RBAC
+      PASS  EN/AR contracts
+      PASS  no fake settlement invent
+      PASS  disable preserves history
+      PASS  rollback preserves closed truth
+      PASS  closed employment truth intact
+      PASS  real termination gate remains OFF
+
+    64 passed, 0 failed
+EXIT_CLOSE_HANDOFF_UNIT_PASS
+EXIT_CLOSE_HANDOFF_FULL_PASS
+REG_C_FAILS=0

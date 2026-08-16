@@ -1,0 +1,3 @@
+/opt/wathefni/orchestrator/operator_mobile.py
+/opt/wathefni/orchestrator/operator_mobile_assistant.py
+/opt/wathefni/orchestrator/operator_mobile_data.py

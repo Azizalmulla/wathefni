@@ -1,0 +1,46 @@
+AUDITED owner-en-desktop-overview controls=72 exercised=8
+AUDITED owner-en-desktop-jobs controls=57 exercised=8
+AUDITED owner-en-desktop-candidates controls=23 exercised=8
+AUDITED owner-en-desktop-interviews controls=41 exercised=10
+AUDITED owner-en-desktop-assessments controls=49 exercised=8
+AUDITED owner-en-desktop-ranking controls=25 exercised=9
+AUDITED owner-en-desktop-calendar controls=54 exercised=8
+AUDITED owner-en-desktop-employees controls=29 exercised=8
+AUDITED owner-en-desktop-workforce controls=25 exercised=8
+AUDITED owner-en-desktop-inbox controls=28 exercised=8
+AUDITED owner-en-desktop-onboarding controls=38 exercised=11
+AUDITED owner-en-desktop-attendance controls=34 exercised=8
+AUDITED owner-en-desktop-leave controls=22 exercised=8
+AUDITED owner-en-desktop-shifts controls=38 exercised=8
+AUDITED owner-en-desktop-payroll controls=22 exercised=8
+AUDITED owner-en-desktop-analytics controls=22 exercised=8
+AUDITED owner-en-desktop-compliance controls=31 exercised=8
+AUDITED owner-en-desktop-notifications controls=23 exercised=8
+AUDITED owner-en-desktop-activity controls=82 exercised=8
+AUDITED owner-en-desktop-settings controls=33 exercised=8
+AUDITED owner-ar-desktop-overview controls=23 exercised=4
+AUDITED owner-ar-desktop-jobs controls=23 exercised=4
+AUDITED owner-ar-desktop-candidates controls=1 exercised=1
+AUDITED owner-ar-desktop-interviews controls=1 exercised=1
+AUDITED owner-ar-desktop-assessments controls=23 exercised=4
+AUDITED owner-ar-desktop-ranking controls=1 exercised=1
+AUDITED owner-ar-desktop-calendar controls=34 exercised=4
+AUDITED owner-ar-desktop-employees controls=22 exercised=4
+AUDITED owner-ar-desktop-workforce controls=22 exercised=4
+AUDITED owner-ar-desktop-inbox controls=28 exercised=4
+AUDITED owner-ar-desktop-onboarding controls=22 exercised=4
+AUDITED owner-ar-desktop-attendance controls=0 exercised=0
+AUDITED owner-ar-desktop-leave controls=0 exercised=0
+AUDITED owner-ar-desktop-shifts controls=22 exercised=4
+AUDITED owner-ar-desktop-payroll controls=22 exercised=4
+AUDITED owner-ar-desktop-analytics controls=23 exercised=5
+AUDITED owner-ar-desktop-compliance controls=0 exercised=0
+FAILED owner-ar-desktop-notifications Error: page.goto: net::ERR_ABORTED at https://api.wathefni.ai/dashboard/?page=notifications
+Call log:
+  - navigating to "https://api.wathefni.ai/dashboard/?page
+FAILED owner-ar-desktop-activity Error: page.goto: Target page, context or browser has been closed
+FAILED owner-ar-desktop-settings Error: page.goto: Target page, context or browser has been closed
+browser.newContext: Target page, context or browser has been closed
+    at async run (/Users/azizalmulla/Desktop/claw/ops/full-web-e2e/run-control-audit.cjs:334:25) {
+  log: []
+}

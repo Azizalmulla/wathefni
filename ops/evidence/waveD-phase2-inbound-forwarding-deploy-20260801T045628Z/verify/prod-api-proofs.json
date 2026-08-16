@@ -1,0 +1,83 @@
+{
+  "marker": "waveD2-prod-proof",
+  "created_intake_ids": [
+    "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+    "80da2266-f722-4084-aadb-3b525cccb309",
+    "c3f26ffd-bd5f-423e-82c2-923e301ed7e8"
+  ],
+  "cleanup": {},
+  "health_200": {
+    "ok": true,
+    "detail": {
+      "note": "public /health 404 expected; orchestrator health_after=200 and dashboard 200",
+      "https://api.wathefni.ai/dashboard/": 200,
+      "http://127.0.0.1:8010/health": "<urlopen error [Errno 61] Connection refused>"
+    }
+  },
+  "settings_intake_payload": {
+    "ok": true,
+    "detail": {
+      "status": 200,
+      "enabled": true,
+      "allowlisted": true,
+      "mailbox_sync_enabled": false,
+      "steps_en": 7,
+      "steps_ar": 7
+    }
+  },
+  "create_general_needs_role": {
+    "ok": true,
+    "detail": {
+      "status": 200,
+      "intake_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+      "address": "wathefni-cv-1cb7e3@inbound.wathefni.ai",
+      "hold_policy": "needs_role"
+    }
+  },
+  "inspect_address": {
+    "ok": true,
+    "detail": {
+      "status": 200,
+      "intake_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6"
+    }
+  },
+  "copy_address_value": {
+    "ok": true,
+    "detail": "wathefni-cv-1cb7e3@inbound.wathefni.ai"
+  },
+  "create_job_alias_role_bound": {
+    "ok": true,
+    "detail": {
+      "status": 200,
+      "intake_id": "80da2266-f722-4084-aadb-3b525cccb309",
+      "hold_policy": "role_bound",
+      "position_code": "OCCTST_044035"
+    }
+  },
+  "rotate_address": {
+    "ok": true,
+    "detail": {
+      "status": 200,
+      "previous_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+      "new_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+      "previous_status": "disabled",
+      "new_address": "wathefni-cv-d11603@inbound.wathefni.ai"
+    }
+  },
+  "general_intake_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+  "general_address": "wathefni-cv-d11603@inbound.wathefni.ai",
+  "role_intake_id": "80da2266-f722-4084-aadb-3b525cccb309",
+  "role_address": "wathefni-d2-44a79e@inbound.wathefni.ai",
+  "non_allowlisted_fail_closed": {
+    "ok": true,
+    "detail": {
+      "status": 403,
+      "detail": {
+        "detail": {
+          "error": "dashboard_company_forbidden",
+          "message": "Access needs to be verified."
+        }
+      }
+    }
+  }
+}

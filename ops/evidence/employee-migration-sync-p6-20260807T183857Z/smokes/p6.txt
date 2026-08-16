@@ -1,0 +1,13 @@
+OK P6 honesty
+OK seeded employees n=3
+OK active app session seeded
+OK default/review-required termination → Needs Review
+OK termination applied · history preserved · session revoked offboarded · app ineligible
+OK trusted-source termination auto-apply
+OK duplicate/repeated lifecycle event idempotent
+OK rehire/reactivation preserves identity · no duplicate
+OK stale/lower-authority termination does not override newer native state
+OK conflicting systems → Needs Review
+OK paused connection cannot sync/apply lifecycle
+OK disconnected connection cannot apply lifecycle
+OK P6 smoke PASS

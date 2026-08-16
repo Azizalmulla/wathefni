@@ -1,0 +1,60 @@
+{
+  "intake_ids": [
+    "f93b1e8f-394a-4189-9e0a-beab8379f996",
+    "f30537d0-dccd-403a-a968-bfe16ae107e2",
+    "910c254f-9c4c-49d2-aee4-b408a05d7694",
+    "c41ba4e6-9d6f-48f6-8cea-6846e290e27d"
+  ],
+  "inbound_ids": [
+    "e9190158-42e4-514a-a369-bff2f659a326",
+    "75b81d02-c01a-511e-9230-bc8782b9e63b",
+    "f1f7895f-fcc6-5110-9306-37aee27a9b15",
+    "6b17e793-dd2a-57e8-99f7-f5b5f54b05fc",
+    "62b8c8ad-443e-5478-a24a-873e1ccd9db1",
+    "6b089687-7348-5905-bce4-5d8ca85bdf55",
+    "a87f1463-b57d-5a62-90fc-36c0808093a7",
+    "22eed13d-92a6-582e-aea2-fdd87f8a9ff2",
+    "c6ace312-e302-546d-a428-4d6f239c4215",
+    "ac712e91-83b5-5a01-9b51-6e17e77276d7",
+    "c4d3531b-f0eb-5d29-ba9d-71f521b19b49",
+    "054b1afe-dc79-57b1-8231-5d1c6645e9de",
+    "60753f89-d8f7-53df-896a-18d4b6888071",
+    "a3d609aa-54e7-5d69-992b-5c8c729a2304"
+  ],
+  "job_ids": [
+    "80472ad7-f1e7-4a20-96c0-a85288642cbb"
+  ],
+  "mailbox_ids": [],
+  "app_keys": [
+    "imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT",
+    "imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT",
+    "imp-wathefni-fe1b596eb9134774-WATHEFNI-OCCTST_044035"
+  ],
+  "enterprise_restored": true,
+  "override_cleared": true,
+  "proof_intakes": [
+    {
+      "intake_id": "f93b1e8f-394a-4189-9e0a-beab8379f996",
+      "label": "wave_d6_ga_proof-08343d30-general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "f30537d0-dccd-403a-a968-bfe16ae107e2",
+      "label": "wave_d6_ga_proof-08343d30-job",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "c41ba4e6-9d6f-48f6-8cea-6846e290e27d",
+      "label": "wave_d6_ga_proof-08343d30-gen-cont",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "910c254f-9c4c-49d2-aee4-b408a05d7694",
+      "label": "wave_d6_ga_proof-08343d30-job-cont",
+      "status": "disabled"
+    }
+  ],
+  "active_intake_count": 1,
+  "leftover_d6_mailboxes": 0,
+  "held_seed_batch_id": "a90dd388-8f3b-43e7-ae0b-1cedb50c6c27"
+}

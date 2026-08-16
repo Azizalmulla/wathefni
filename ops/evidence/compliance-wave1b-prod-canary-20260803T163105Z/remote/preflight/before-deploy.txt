@@ -1,0 +1,15 @@
+stamp=20260803T163105Z
+time_utc=2026-08-03T16:34:34Z
+active
+=== SHAs before ===
+0269396aa7b64221ad8dd50dd93cec5e95f9f7511b0f564317141321b58979d2  /opt/wathefni/orchestrator/app.py
+ls: cannot access '/opt/wathefni/orchestrator/compliance_findings_wave1.py': No such file or directory
+compliance_findings_wave1.py absent
+=== flags before ===
+WATHEFNI_ANALYTICS_WAVE1=1
+WATHEFNI_ANALYTICS_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_KEY_MARKERS=ANW1,ANW1-SYNTH|
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_PHONE_PREFIXES=965540
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist

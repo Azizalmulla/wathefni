@@ -1,0 +1,40 @@
+{
+  "wathefni_owned_kuwait_statutory_baseline": [
+    "Ordinary OT premium (Art.66 +25%)",
+    "Rest-day work premium (Art.67 \u226550% + compensatory day)",
+    "Public-holiday work premium (Art.68 double + day off)",
+    "Sick-leave statutory day bands (Art.69)",
+    "EOS indemnity structure Arts 51\u201353 (settlement)",
+    "PIFSS Kuwaiti contribution % and caps (FAQ table)",
+    "PIFSS remittance timing notes (reporting prep)",
+    "Statutory policy version + source provenance"
+  ],
+  "company_provided_never_kuwait_law": [
+    "Payroll operating mode (preview / synthetic / future modes)",
+    "Employee statutory classification (kuwaiti / gcc / expatriate)",
+    "PIFSS insurable wage base by fund (classified components \u2014 not auto BASIC)",
+    "Salary/allowance structures and custom earnings/deductions",
+    "OT eligibility groups / who may be ordered OT",
+    "Attendance-pay and lateness policy",
+    "Payroll cut-off and period settings",
+    "Approval workflow",
+    "Working-day calendar / weekly rest definition for divisor operations",
+    "Annual public-holiday calendar additions beyond Art.68 list",
+    "Sick-leave year basis choice when required by operations",
+    "EOS last-remuneration classified input",
+    "Special regime flags (oil / GCC extension / Law17 interaction resolution)"
+  ],
+  "never_ask_company": [
+    "What is Kuwait OT premium?",
+    "What is Kuwait sick-leave band table?",
+    "What are Kuwaiti PIFSS contribution percentages?"
+  ],
+  "review_gated_exception_layer": [
+    "GCC extension home-scheme rates",
+    "Oil/special-sector regimes",
+    "PIFSS wage-element mapping disputes",
+    "EOS \u00d7 PIFSS Law 17/2018",
+    "Night OT +50% (unsupported in baseline)",
+    "Financial remuneration 2.5% eligibility"
+  ]
+}

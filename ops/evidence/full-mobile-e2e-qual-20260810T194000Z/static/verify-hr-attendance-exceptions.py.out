@@ -1,0 +1,18 @@
+PASS queue route wired
+PASS detail route wired
+PASS cream queue chrome (PageScreen + EditorialHeading)
+PASS Today + Unresolved tabs
+PASS status=exceptions filter
+PASS filters is_exception client-side
+PASS 92-day unresolved lookback
+PASS canonical Ops kinds
+PASS no invented exception_type
+PASS honest request_correction labels
+PASS actionsHint pending review
+PASS no Resolve as day-fixed label
+PASS demo gated + prefixed
+PASS demo kinds covered
+PASS app.config attendanceDemo
+PASS no attendance.excuse in HR i18n
+PASS hrAttendance keys EN+AR
+hr-attendance-exceptions: GREEN

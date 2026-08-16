@@ -1,0 +1,28 @@
+staging_health=200
+      PASS  live health imported
+      PASS  live fail-closed registrar present
+      PASS  live performance not customer enableable
+      PASS  live talent not customer enableable
+      PASS  live analytics still catalog enableable
+      PASS  live /dashboard/performance 404
+      PASS  live /dashboard/performance not released
+      PASS  live /dashboard/posthire/talent 404
+      PASS  live /dashboard/posthire/talent not released
+      PASS  live /dashboard/job-architecture 404
+      PASS  live /dashboard/job-architecture not released
+      PASS  live /dashboard/learning 404
+      PASS  live /dashboard/learning not released
+      PASS  live /dashboard/benefits 404
+      PASS  live /dashboard/benefits not released
+      PASS  live /dashboard/employee-relations 404
+      PASS  live /dashboard/employee-relations not released
+      PASS  live /dashboard/engagement 404
+      PASS  live /dashboard/engagement not released
+      PASS  live /dashboard/compensation-planning 404
+      PASS  live /dashboard/compensation-planning not released
+      PASS  live /dashboard/workforce-planning 404
+      PASS  live /dashboard/workforce-planning not released
+      PASS  live /app/performance 404
+      PASS  live /app/performance not released
+      PASS  live Intelligence namespace not stolen
+    LIVE_SERVICE 26 passed, 0 failed

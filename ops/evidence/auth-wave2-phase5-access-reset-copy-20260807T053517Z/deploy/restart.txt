@@ -1,0 +1,5 @@
+health:200 after 1s
+active
+66115:                        "error": "app_access_revoked",
+68776:                  AND action_type='employee_app_access_revoked'
+68806:                  AND action_type='employee_app_access_revoked'

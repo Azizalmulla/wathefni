@@ -1,0 +1,316 @@
+# --- Employees 360 Wave 3/3C: employment lifecycle (flag-gated, WATHEFNI allowlist) ---
+
+
+class DashboardEmployeeLifecycleRequest(BaseModel):
+    case_type: Literal[
+        "termination",
+        "cancel_scheduled",
+        "reinstate",
+        "rehire",
+        "notice",
+        "suspension",
+        "unsuspend",
+        "activate_start",
+    ]
+    reason: str = Field(min_length=3, max_length=500)
+    approval_reference: str = Field(min_length=1, max_length=200)
+    designated_approver_user_id: str
+    idempotency_key: str = Field(min_length=8, max_length=200)
+    expected_lifecycle_state: str
+    expected_lifecycle_version: int
+    expected_updated_at: datetime
+    payload: dict[str, Any] | None = None
+    impact_ack: bool = False
+    impact_ack_text: str | None = Field(default=None, max_length=500)
+
+
+class DashboardEmployeeLifecycleDecision(BaseModel):
+    action: Literal["approve", "reject"]
+    decision_reason: str | None = Field(default=None, max_length=500)
+
+
+class DashboardEmployeeLifecyclePolicyPatch(BaseModel):
+    tier: Literal["small", "medium", "enterprise"] | None = None
+    timezone: str | None = None
+    notice_hint_monthly_days: int | None = None
+    notice_hint_other_days: int | None = None
+    revoke_mode: Literal["end_of_last_working_day", "start_of_effective_date", "immediate_on_summary"] | None = None
+    downstream_mode: Literal["warn_first", "block_submitted_payroll", "enterprise_configurable"] | None = None
+    require_impact_ack: bool | None = None
+    require_counsel_gate: bool | None = None
+    rehire_same_employee_key: bool | None = None
+    scheduler_cadence: str | None = None
+    lag_alert_seconds: int | None = None
+
+
+class DashboardEmployeeLifecycleCounselSign(BaseModel):
+    answers: dict[str, Any]
+    signed_by_name: str = Field(min_length=2, max_length=200)
+    signed_by_role: str = Field(min_length=2, max_length=120)
+    signed_reference: str = Field(min_length=2, max_length=200)
+    notes: str | None = Field(default=None, max_length=1000)
+
+
+class DashboardEmployeeLifecycleDownstreamRequest(BaseModel):
+    action_type: Literal[
+        "cancel_future_shifts",
+        "decline_open_leave",
+        "resolve_attendance_hold",
+        "abandon_onboarding",
+        "revoke_app_access",
+        "restore_app_access",
+        "reverse_cancel_future_shifts",
+        "reverse_decline_open_leave",
+        "reverse_abandon_onboarding",
+    ]
+    reason: str = Field(min_length=3, max_length=500)
+    designated_approver_user_id: str
+    idempotency_key: str = Field(min_length=8, max_length=200)
+    payload: dict[str, Any] | None = None
+    impact_ack: bool = False
+    impact_ack_text: str | None = Field(default=None, max_length=500)
+
+
+@app.get("/dashboard/posthire/employee-lifecycle/policy")
+def dashboard_employee_lifecycle_policy_get(context: dict[str, Any] = Depends(dashboard_context)):
+    company = require_employee_roster_admin(context, "employees.manage")
+    import employee_lifecycle_wave3 as _w3
+    import employee_lifecycle_wave3c as _lifecycle
+
+    if not _w3.lifecycle_v3_enabled(company):
+        raise HTTPException(status_code=403, detail={"error": "lifecycle_disabled"})
+    return json_safe({"ok": True, "policy": _lifecycle.get_or_create_company_policy(sys.modules[__name__], company_code=company)})
+
+
+@app.patch("/dashboard/posthire/employee-lifecycle/policy")
+def dashboard_employee_lifecycle_policy_patch(
+    body: DashboardEmployeeLifecyclePolicyPatch,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_employee_roster_admin(context, "employees.manage")
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        {
+            "ok": True,
+            "policy": _lifecycle.upsert_company_policy(
+                sys.modules[__name__], context, patch=body.model_dump(exclude_none=True)
+            ),
+        }
+    )
+
+
+@app.get("/dashboard/posthire/employee-lifecycle/counsel-gate")
+def dashboard_employee_lifecycle_counsel_gate(context: dict[str, Any] = Depends(dashboard_context)):
+    company = require_employee_roster_admin(context, "employees.manage")
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe({"ok": True, **_lifecycle.counsel_gate_status(sys.modules[__name__], company_code=company)})
+
+
+@app.post("/dashboard/posthire/employee-lifecycle/counsel-gate/sign")
+def dashboard_employee_lifecycle_counsel_sign(
+    body: DashboardEmployeeLifecycleCounselSign,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_employee_roster_admin(context, "employees.manage")
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        _lifecycle.sign_counsel_checklist(
+            sys.modules[__name__],
+            context,
+            answers=body.answers,
+            signed_by_name=body.signed_by_name,
+            signed_by_role=body.signed_by_role,
+            signed_reference=body.signed_reference,
+            notes=body.notes,
+        )
+    )
+
+
+@app.get("/dashboard/posthire/employees/{employee_key}/lifecycle")
+def dashboard_employee_lifecycle_get(
+    employee_key: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context, "employees.manage")
+    require_employee_mutation_scope(context, employee_key, company_code=company, action="lifecycle_read")
+    import employee_lifecycle_wave3 as _w3
+    import employee_lifecycle_wave3c as _lifecycle
+
+    if not _w3.lifecycle_v3_enabled(company):
+        raise HTTPException(status_code=403, detail={"error": "lifecycle_disabled", "message": "Employment lifecycle is not enabled for this company."})
+    proj = _lifecycle.get_lifecycle_projection(sys.modules[__name__], company_code=company, employee_key=employee_key)
+    if not proj:
+        raise HTTPException(status_code=404, detail={"error": "employee_not_found", "message": "We couldn't find that employee."})
+    return json_safe({"ok": True, "lifecycle": proj})
+
+
+@app.get("/dashboard/posthire/employees/{employee_key}/lifecycle/impact-preview")
+def dashboard_employee_lifecycle_impact_preview(
+    employee_key: str,
+    as_of_date: str | None = None,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context, "employees.manage")
+    require_employee_mutation_scope(context, employee_key, company_code=company, action="lifecycle_impact_preview")
+    import employee_lifecycle_wave3 as _w3
+    import employee_lifecycle_wave3c as _lifecycle
+
+    if not _w3.lifecycle_v3_enabled(company):
+        raise HTTPException(status_code=403, detail={"error": "lifecycle_disabled"})
+    as_of = date.fromisoformat(as_of_date) if as_of_date else None
+    preview = _lifecycle.preview_downstream_impact(
+        sys.modules[__name__], company_code=company, employee_key=employee_key, as_of_date=as_of
+    )
+    return json_safe({"ok": True, "preview": preview})
+
+
+@app.get("/dashboard/posthire/employee-lifecycle/pending")
+def dashboard_employee_lifecycle_pending(
+    employee_key: str | None = None,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = context["company_code"]
+    if not any(company_has_module(company, m) for m in POSTHIRE_PEOPLE_MODULES):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
+    if not (
+        dashboard_context_has_permission(context, "employees.manage")
+        or dashboard_context_has_permission(context, "employees.status.approve")
+    ):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
+    import employee_lifecycle_wave3 as _w3
+    import employee_lifecycle_wave3c as _lifecycle
+
+    if not _w3.lifecycle_v3_enabled(company):
+        raise HTTPException(status_code=403, detail={"error": "lifecycle_disabled"})
+    rows = _lifecycle.list_pending_lifecycle_for_actor(
+        sys.modules[__name__],
+        company_code=company,
+        actor_user_id=str(context.get("actor_user_id") or ""),
+        employee_key=employee_key,
+    )
+    return {"ok": True, "company_code": company, "count": len(rows), "requests": rows}
+
+
+@app.post("/dashboard/posthire/employees/{employee_key}/lifecycle/requests")
+def dashboard_employee_lifecycle_create_request(
+    employee_key: str,
+    request: DashboardEmployeeLifecycleRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context, "employees.manage")
+    require_employee_mutation_scope(context, employee_key, company_code=company, action="lifecycle_request")
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        _lifecycle.create_lifecycle_request(
+            sys.modules[__name__],
+            context,
+            employee_key=employee_key,
+            case_type=request.case_type,
+            reason=request.reason,
+            approval_reference=request.approval_reference,
+            designated_approver_user_id=request.designated_approver_user_id,
+            idempotency_key=request.idempotency_key,
+            expected_lifecycle_state=request.expected_lifecycle_state,
+            expected_lifecycle_version=request.expected_lifecycle_version,
+            expected_hub_updated_at=request.expected_updated_at,
+            payload=request.payload,
+            impact_ack=request.impact_ack,
+            impact_ack_text=request.impact_ack_text,
+        )
+    )
+
+
+@app.post("/dashboard/posthire/employee-lifecycle/requests/{request_id}/cancel")
+def dashboard_employee_lifecycle_cancel_request(
+    request_id: str,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    require_employee_roster_admin(context, "employees.manage")
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        _lifecycle.cancel_lifecycle_request(
+            sys.modules[__name__],
+            context,
+            request_id=request_id,
+        )
+    )
+
+
+@app.post("/dashboard/posthire/employee-lifecycle/requests/{request_id}/decide")
+def dashboard_employee_lifecycle_decide_request(
+    request_id: str,
+    body: DashboardEmployeeLifecycleDecision,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = context["company_code"]
+    if not any(company_has_module(company, m) for m in POSTHIRE_PEOPLE_MODULES):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled", "message": "This module is not enabled for your company."})
+    if not dashboard_context_has_permission(context, "employees.status.approve"):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied", "message": "You do not have access to do that."})
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        _lifecycle.decide_lifecycle_request(
+            sys.modules[__name__],
+            context,
+            request_id=request_id,
+            action=body.action,
+            decision_reason=body.decision_reason,
+        )
+    )
+
+
+@app.post("/dashboard/posthire/employees/{employee_key}/lifecycle/downstream-actions")
+def dashboard_employee_lifecycle_downstream_create(
+    employee_key: str,
+    request: DashboardEmployeeLifecycleDownstreamRequest,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = require_employee_roster_admin(context, "employees.manage")
+    require_employee_mutation_scope(context, employee_key, company_code=company, action="lifecycle_downstream")
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        _lifecycle.create_downstream_action_request(
+            sys.modules[__name__],
+            context,
+            employee_key=employee_key,
+            action_type=request.action_type,
+            reason=request.reason,
+            designated_approver_user_id=request.designated_approver_user_id,
+            idempotency_key=request.idempotency_key,
+            payload=request.payload,
+            impact_ack=request.impact_ack,
+            impact_ack_text=request.impact_ack_text,
+        )
+    )
+
+
+@app.post("/dashboard/posthire/employee-lifecycle/downstream-actions/{action_id}/decide")
+def dashboard_employee_lifecycle_downstream_decide(
+    action_id: str,
+    body: DashboardEmployeeLifecycleDecision,
+    context: dict[str, Any] = Depends(dashboard_context),
+):
+    company = context["company_code"]
+    if not any(company_has_module(company, m) for m in POSTHIRE_PEOPLE_MODULES):
+        raise HTTPException(status_code=403, detail={"error": "module_disabled"})
+    if not dashboard_context_has_permission(context, "employees.status.approve"):
+        raise HTTPException(status_code=403, detail={"error": "permission_denied"})
+    import employee_lifecycle_wave3c as _lifecycle
+
+    return json_safe(
+        _lifecycle.decide_downstream_action(
+            sys.modules[__name__],
+            context,
+            action_id=action_id,
+            action=body.action,
+            decision_reason=body.decision_reason,
+        )
+    )
+

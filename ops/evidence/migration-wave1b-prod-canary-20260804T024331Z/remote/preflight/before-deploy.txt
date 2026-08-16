@@ -1,0 +1,14 @@
+stamp=20260804T024331Z
+time_utc=2026-08-04T02:43:53Z
+active
+=== SHAs before ===
+1ee4db61474e965e8d97004e327043b8f17c234da74631d0ee6c81071e454c0d  /opt/wathefni/orchestrator/app.py
+4a243518c7434a183d3bc323655d8df38c1fcc62396332b912e0725e1ed4f136  /opt/wathefni/orchestrator/migration_wave1_cv_foundation.py
+43f59efef077de4757622088173b2b345f02ed0303c2fe1814a597cf757c6ef9  /opt/wathefni/orchestrator/smoke-test-migration-wave1.py
+=== flags before ===
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_MIGRATION_WAVE1=1
+WATHEFNI_MIGRATION_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_MIGRATION_WAVE1_SYNTHETIC_ONLY=1

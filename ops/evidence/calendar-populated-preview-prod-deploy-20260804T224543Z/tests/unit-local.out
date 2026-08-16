@@ -1,0 +1,20 @@
+PASS  flag off → disabled
+PASS  flag on + WATHEFNI → enabled
+PASS  other tenant denied
+PASS  dense synthetic set (12)
+PASS  all preview_only
+PASS  calprev- ids
+PASS  Preview in titles
+PASS  leave preview category
+PASS  cancelled status sample
+PASS  overlap pair present
+PASS  range overlap injects events (9)
+PASS  list merge marks preview
+PASS  list merge adds events
+PASS  real events preserved
+PASS  non-WATHEFNI unchanged
+PASS  ACME gets no inject
+PASS  preview id detect
+PASS  detail lookup
+PASS  instant kill switch
+CALENDAR_POPULATED_PREVIEW_SMOKE_OK

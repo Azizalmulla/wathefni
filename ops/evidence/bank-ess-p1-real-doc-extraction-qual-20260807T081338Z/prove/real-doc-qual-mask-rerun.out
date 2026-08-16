@@ -1,0 +1,23 @@
+{
+  "run_at": "2026-08-07T08:27:40.047124+00:00",
+  "iban_masked": "KW35\u20269548",
+  "bank_name": "Gulf Bank",
+  "confidence": 0.98,
+  "hr_proposed_iban": "**************************9548",
+  "checks": {
+    "rich_extraction": "PASS",
+    "kw_iban_valid": "PASS",
+    "optional_fields": "PASS",
+    "confidence": "PASS",
+    "authoritative_false": "PASS",
+    "employee_confirm_submit": "PASS",
+    "evidence_private": "PASS",
+    "hr_compare": "PASS",
+    "hr_extraction_status": "PASS",
+    "hr_extraction_iban_masked": "PASS",
+    "hr_view_masked_by_default": "PASS",
+    "effective_unchanged": "PASS",
+    "aziz_unchanged": "PASS"
+  },
+  "verdict": "PASS"
+}

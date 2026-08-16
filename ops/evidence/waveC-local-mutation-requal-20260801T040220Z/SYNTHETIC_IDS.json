@@ -1,0 +1,189 @@
+{
+  "marker": "waveC-local-mutation-requal-v1",
+  "tenants": [
+    "WCAVLO",
+    "WCALXO",
+    "WCAXVO",
+    "WCAXXO",
+    "WCXVLO",
+    "WCXXXO",
+    "WCNOOF",
+    "WCPEER"
+  ],
+  "phone_prefix": "+9658869",
+  "position": "WC_ROLE",
+  "by_tenant": {
+    "WCAVLO": {
+      "combo": "asm_ON__live_ON__video_ON__offers_ON",
+      "apps": {
+        "main": "WCAVLO-WC-main",
+        "bare": "WCAVLO-WC-bare",
+        "ardoc": "WCAVLO-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886987660",
+        "bare": "+965886994394",
+        "ardoc": "+965886938357"
+      },
+      "apply_code": "APPLY-WCAVLO-WC_ROLE",
+      "assessment_cancelled": "cc0fef98-958e-4aed-8e07-8e04447d5cad",
+      "assessment_retry": "3edd641a-c027-4390-a332-38c1c2ad3fa6",
+      "live_interview_cancel": "PASS",
+      "video_interview_id": "f098e951-16a2-426e-b1e6-f957d76a88d5",
+      "offer_id": "b9985c8f-6e0b-41e0-9aec-f21c9b896af7",
+      "employee_key": "WCAVLO-965886987660"
+    },
+    "WCALXO": {
+      "combo": "asm_ON__live_ON__video_OFF__offers_ON",
+      "apps": {
+        "main": "WCALXO-WC-main",
+        "bare": "WCALXO-WC-bare",
+        "ardoc": "WCALXO-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886930961",
+        "bare": "+965886938129",
+        "ardoc": "+965886933639"
+      },
+      "apply_code": "APPLY-WCALXO-WC_ROLE",
+      "assessment_cancelled": "b4d05a1f-bb35-4654-9b18-87de52221fcf",
+      "assessment_retry": "87ad240c-78c3-4e4b-91d1-4685a1c257ac",
+      "live_interview_cancel": "PASS",
+      "offer_id": "b03c8a30-5602-46dc-9bda-e2ea733687e4",
+      "employee_key": "WCALXO-965886930961"
+    },
+    "WCAXVO": {
+      "combo": "asm_ON__live_OFF__video_ON__offers_ON",
+      "apps": {
+        "main": "WCAXVO-WC-main",
+        "bare": "WCAXVO-WC-bare",
+        "ardoc": "WCAXVO-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886971985",
+        "bare": "+965886937138",
+        "ardoc": "+965886999364"
+      },
+      "apply_code": "APPLY-WCAXVO-WC_ROLE",
+      "assessment_cancelled": "04bb9351-3dc8-4d70-9b10-74e714bb837f",
+      "assessment_retry": "a66ecdf9-e86d-4dd0-b9e1-0752f403a687",
+      "video_interview_id": "e55ee2f2-de88-48e2-8ffc-95c1f9ea292e",
+      "offer_id": "0d2724ee-bf98-4f5d-8e81-f22f62a18dcc",
+      "employee_key": "WCAXVO-965886971985"
+    },
+    "WCAXXO": {
+      "combo": "asm_ON__live_OFF__video_OFF__offers_ON",
+      "apps": {
+        "main": "WCAXXO-WC-main",
+        "bare": "WCAXXO-WC-bare",
+        "ardoc": "WCAXXO-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886906789",
+        "bare": "+965886944209",
+        "ardoc": "+965886969718"
+      },
+      "apply_code": "APPLY-WCAXXO-WC_ROLE",
+      "assessment_cancelled": "a3660712-dd20-4616-ab83-2cf9a41ceb1a",
+      "assessment_retry": "9becf669-6d65-4c92-b2eb-5dee29ce1270",
+      "offer_id": "75885d53-5795-481e-bbf2-23ae0d96ac53",
+      "employee_key": "WCAXXO-965886906789"
+    },
+    "WCXVLO": {
+      "combo": "asm_OFF__live_ON__video_ON__offers_ON",
+      "apps": {
+        "main": "WCXVLO-WC-main",
+        "bare": "WCXVLO-WC-bare",
+        "ardoc": "WCXVLO-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886925965",
+        "bare": "+965886922297",
+        "ardoc": "+965886986913"
+      },
+      "apply_code": "APPLY-WCXVLO-WC_ROLE",
+      "live_interview_cancel": "PASS",
+      "video_interview_id": "1076b2fa-a310-43be-b3a4-cd05a14b7e85",
+      "offer_id": "a1db3265-58bd-4224-bfb0-f1222d31266e",
+      "employee_key": "WCXVLO-965886925965"
+    },
+    "WCXXXO": {
+      "combo": "asm_OFF__live_OFF__video_OFF__offers_ON",
+      "apps": {
+        "main": "WCXXXO-WC-main",
+        "bare": "WCXXXO-WC-bare",
+        "ardoc": "WCXXXO-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886998751",
+        "bare": "+965886972838",
+        "ardoc": "+965886955408"
+      },
+      "apply_code": "APPLY-WCXXXO-WC_ROLE",
+      "offer_id": "d1ad8e5a-a66b-4d78-aea8-9ad23e3875b8",
+      "employee_key": "WCXXXO-965886998751"
+    },
+    "WCNOOF": {
+      "combo": "all_optional_OFF",
+      "apps": {
+        "main": "WCNOOF-WC-main",
+        "bare": "WCNOOF-WC-bare",
+        "ardoc": "WCNOOF-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886975933",
+        "bare": "+965886974058",
+        "ardoc": "+965886915617"
+      },
+      "apply_code": "APPLY-WCNOOF-WC_ROLE",
+      "employee_key": "WCNOOF-965886975933"
+    },
+    "WCPEER": {
+      "combo": "peer_isolation_and_history",
+      "apps": {
+        "main": "WCPEER-WC-main",
+        "bare": "WCPEER-WC-bare",
+        "ardoc": "WCPEER-WC-ardoc"
+      },
+      "phones": {
+        "main": "+965886986856",
+        "bare": "+965886938242",
+        "ardoc": "+965886990013"
+      },
+      "apply_code": "APPLY-WCPEER-WC_ROLE",
+      "assessment_cancelled": "b2947924-2504-4545-8a59-84f6db994ec1",
+      "assessment_retry": "52221c15-a753-466f-a918-fb1c12a08613",
+      "live_interview_cancel": "PASS",
+      "video_interview_id": "db7b9861-d184-4721-9bd6-1ed272bdaae7",
+      "offer_id": "0101d7e7-749a-4448-ae12-0627769218d8",
+      "employee_key": "WCPEER-965886986856"
+    }
+  },
+  "isolation_and_permissions": [
+    {
+      "gate": "cross_tenant_application_not_visible",
+      "ok": true,
+      "scope": "cross_cutting"
+    },
+    {
+      "gate": "cross_tenant_confirmation_mint_rejected",
+      "ok": true,
+      "scope": "cross_cutting"
+    },
+    {
+      "gate": "cross_tenant_transition_rejected",
+      "ok": true,
+      "scope": "cross_cutting"
+    },
+    {
+      "gate": "cross_tenant_offer_read_blocked",
+      "ok": true,
+      "scope": "cross_cutting"
+    }
+  ],
+  "summary": {
+    "passed": 546,
+    "failed": 15,
+    "gates": 561
+  }
+}

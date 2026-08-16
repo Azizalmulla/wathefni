@@ -1,0 +1,332 @@
+[
+  {
+    "name": "wave1 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wathefni company",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutations off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no payroll money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no attendance ingest",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no whatsapp widen",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no ck wiring",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no mutations honesty",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "default inbox entry",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "hr dashboard only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ingest env off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "production db",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "audit event written",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tool action inbox",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tool employee 360",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tool setup readiness",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation approve_leave hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation export_payroll hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "whatsapp spine tools hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external spine tools hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox tool ran",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox freshness",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox authority label",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox citations list",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox no mutate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox proposed actions prepare-only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup readiness ran",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup freshness",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup authority",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup payroll money false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "setup attendance ingest false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 asks for subject or returns envelope",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 missing/partial authority",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 keyed summary",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 citations",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "e360 no mutate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tenant isolation inbox",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "permission denial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en missing",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar missing",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en stale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar stale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en unavailable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar unavailable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en unsupported",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar unsupported",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en mutations_killed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar mutations_killed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation denial status",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "approve_leave is mutation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "inbox not mutation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "orchestrator has pending block",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill engaged",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill intent",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill ar",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill cleared",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "whatsapp executor denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "canary events deleted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "residual canary 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "durable ack retained",
+    "ok": true,
+    "detail": null
+  }
+]

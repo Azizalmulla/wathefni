@@ -1,0 +1,912 @@
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/app/bank.tsx /tmp/wf-bank-ess-ota-p2-20260806T184542Z/app/bank.tsx
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/app/bank.tsx	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/app/bank.tsx	2026-08-06 23:41:27
+@@ -6,6 +6,7 @@
+ import { useAuth } from '@/auth/AuthProvider'
+ import { useI18n } from '@/i18n'
+ import { useAppQuery } from '@/lib/hooks'
++import { ApiError } from '@/api/client'
+ import { approvedErrorMessage } from '@/api/errors'
+ import { openPrivateFile } from '@/lib/documents'
+ import { pickDocument, pickImageFromLibrary, UploadPickError } from '@/lib/uploadDocument'
+@@ -18,7 +19,13 @@
+   type BankField,
+   type BankFormValues,
+ } from '@/features/bank/BankView'
+-import { validateBankForm } from '@/features/bank/validation'
++import {
++  bankProblemField,
++  bankProblemMessageKey,
++  fieldErrorsFromApi,
++  validateBankForm,
++  type BankFieldErrors,
++} from '@/features/bank/validation'
+ import type { BankEvidenceRow, BankMutationResponse, BankStatusResponse } from '@/api/types'
+ 
+ export default function BankScreen() {
+@@ -36,6 +43,8 @@
+ 
+   const [form, setForm] = useState<BankFormValues>({})
+   const [formOpen, setFormOpen] = useState(false)
++  const [fieldErrors, setFieldErrors] = useState<BankFieldErrors>({})
++  const [formError, setFormError] = useState<string | null>(null)
+   const [submitting, setSubmitting] = useState(false)
+   const [savingDraft, setSavingDraft] = useState(false)
+   const [withdrawing, setWithdrawing] = useState(false)
+@@ -58,6 +67,13 @@
+ 
+   const onChangeField = useCallback((field: BankField, value: string) => {
+     setForm((prev) => ({ ...prev, [field]: value }))
++    setFieldErrors((prev) => {
++      if (!prev[field]) return prev
++      const next = { ...prev }
++      delete next[field]
++      return next
++    })
++    setFormError(null)
+   }, [])
+ 
+   const send = useCallback(
+@@ -66,21 +82,20 @@
+       const iban = String(form.iban || '').trim()
+       const accountNumber = String(form.account_number || '').trim()
+       if (!iban && !accountNumber) {
+-        Alert.alert(t('common.error'), t('bank.identifierRequired'))
++        setFieldErrors({ iban: t('bank.identifierRequired') })
++        setFormError(t('bank.identifierRequired'))
+         return
+       }
+       const formProblem = validateBankForm(form, query.data?.validation_scheme)
+       if (formProblem) {
+-        const key = {
+-          iban_characters: 'bank.validation.ibanCharacters',
+-          kw_iban_format: 'bank.validation.kwIbanFormat',
+-          account_number_format: 'bank.validation.accountNumber',
+-          swift_format: 'bank.validation.swift',
+-        }[formProblem]
+-        Alert.alert(t('common.error'), t(key))
++        const message = t(bankProblemMessageKey(formProblem))
++        setFieldErrors({ [bankProblemField(formProblem)]: message })
++        setFormError(message)
+         return
+       }
+       busy.current = true
++      setFormError(null)
++      setFieldErrors({})
+       if (draft) setSavingDraft(true)
+       else setSubmitting(true)
+       if (!idempotencyKey.current) {
+@@ -105,13 +120,24 @@
+         applyResult(result)
+         // Sensitive values never linger in component state after they are sealed.
+         setForm({})
++        setFieldErrors({})
++        setFormError(null)
+         setFormOpen(false)
+         Alert.alert(
+           draft ? t('bank.draftSavedTitle') : t('bank.submittedTitle'),
+           draft ? t('bank.draftSavedMessage') : t('bank.submittedMessage'),
+         )
+       } catch (error) {
+-        Alert.alert(t('common.error'), approvedErrorMessage(error, t))
++        // Keep entered values so the employee can correct the failing field.
++        if (error instanceof ApiError && error.code === 'bank_account_invalid') {
++          const nextErrors = fieldErrorsFromApi(error.problems, error.fields, t)
++          setFieldErrors(nextErrors)
++          setFormError(approvedErrorMessage(error, t))
++        } else if (error instanceof ApiError && error.code === 'bank_request_already_active') {
++          setFormError(approvedErrorMessage(error, t))
++        } else {
++          setFormError(approvedErrorMessage(error, t))
++        }
+       } finally {
+         busy.current = false
+         setSavingDraft(false)
+@@ -246,9 +272,15 @@
+       form={form}
+       onChangeField={onChangeField}
+       formOpen={formOpen}
+-      onOpenForm={() => setFormOpen(true)}
++      onOpenForm={() => {
++        setFieldErrors({})
++        setFormError(null)
++        setFormOpen(true)
++      }}
+       onCloseForm={() => {
+         setForm({})
++        setFieldErrors({})
++        setFormError(null)
+         setFormOpen(false)
+       }}
+       submitting={submitting}
+@@ -265,6 +297,8 @@
+       refreshing={refreshing}
+       onRefresh={() => void onRefresh()}
+       onBack={() => router.back()}
++      fieldErrors={fieldErrors}
++      formError={formError}
+     />
+   )
+ }
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/api/client.ts /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/api/client.ts
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/api/client.ts	2026-08-06 23:41:56
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/api/client.ts	2026-08-06 23:41:56
+@@ -8,11 +8,18 @@
+   code: string
+   messageEn?: string
+   messageAr?: string
++  problems?: string[]
++  fields?: string[]
+   constructor(
+     status: number,
+     code: string,
+     message: string,
+-    extras?: { messageEn?: string; messageAr?: string },
++    extras?: {
++      messageEn?: string
++      messageAr?: string
++      problems?: string[]
++      fields?: string[]
++    },
+   ) {
+     super(message)
+     this.name = 'ApiError'
+@@ -20,6 +27,8 @@
+     this.code = code
+     this.messageEn = extras?.messageEn
+     this.messageAr = extras?.messageAr
++    this.problems = extras?.problems
++    this.fields = extras?.fields
+   }
+ }
+ 
+@@ -36,6 +45,8 @@
+   message: string
+   messageEn?: string
+   messageAr?: string
++  problems?: string[]
++  fields?: string[]
+ } {
+   const detail = (payload as { detail?: unknown })?.detail ?? payload
+   if (detail && typeof detail === 'object') {
+@@ -44,12 +55,18 @@
+       message?: string
+       message_en?: string
+       message_ar?: string
++      problems?: unknown
++      fields?: unknown
+     }
++    const problems = Array.isArray(d.problems) ? d.problems.map((item) => String(item)) : undefined
++    const fields = Array.isArray(d.fields) ? d.fields.map((item) => String(item)) : undefined
+     return {
+       code: d.error || 'error',
+       message: d.message || d.message_en || d.message_ar || fallback,
+       messageEn: d.message_en,
+       messageAr: d.message_ar,
++      problems,
++      fields,
+     }
+   }
+   return { code: 'error', message: fallback }
+@@ -85,11 +102,11 @@
+   }
+ 
+   if (!response.ok) {
+-    const { code, message, messageEn, messageAr } = detailMessage(
++    const { code, message, messageEn, messageAr, problems, fields } = detailMessage(
+       parsed,
+       'Something went wrong. Please try again.',
+     )
+-    throw new ApiError(response.status, code, message, { messageEn, messageAr })
++    throw new ApiError(response.status, code, message, { messageEn, messageAr, problems, fields })
+   }
+   return parsed as T
+ }
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/api/errors.ts /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/api/errors.ts
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/api/errors.ts	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/api/errors.ts	2026-08-06 23:41:27
+@@ -83,6 +83,12 @@
+       const correction = localeCorrection(error, activeAppLocale())
+       return correction || t('bank.validation.kwIbanFormat')
+     }
++    case 'bank_request_already_active': {
++      const correction = localeCorrection(error, activeAppLocale())
++      return correction || t('bank.validation.requestActive')
++    }
++    case 'account_identifier_required':
++      return t('bank.identifierRequired')
+     case 'storage_failed':
+     case 'upload_failed':
+       return t('upload.failed')
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/bank/BankView.tsx /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/bank/BankView.tsx
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/bank/BankView.tsx	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/bank/BankView.tsx	2026-08-06 23:41:27
+@@ -57,6 +57,8 @@
+   refreshing?: boolean
+   onRefresh?: () => void
+   onBack: () => void
++  fieldErrors?: Partial<Record<BankField, string>>
++  formError?: string | null
+ }
+ 
+ function chipTone(state: string): 'neutral' | 'success' | 'warning' | 'danger' {
+@@ -95,6 +97,8 @@
+   refreshing,
+   onRefresh,
+   onBack,
++  fieldErrors = {},
++  formError = null,
+ }: BankViewProps) {
+   const { t, isRTL, locale } = useI18n()
+   const align = { textAlign: isRTL ? 'right' : 'left' } as const
+@@ -198,7 +202,9 @@
+             <FieldList values={proposedDisplay} t={t} align={align} />
+             {submission?.submitted_at ? (
+               <Text style={[styles.note, align]}>
+-                {t('bank.submittedOn')} {formatDate(submission.submitted_at, locale)}
++                {/* Compose outside i18n interpolation — returned/resubmitted states
++                    previously showed the literal "{date}" placeholder on device. */}
++                {`${t('bank.submittedOn')} ${formatDate(submission.submitted_at, locale)}`}
+               </Text>
+             ) : null}
+             {needsFix ? (
+@@ -271,7 +277,11 @@
+                   {field === 'iban' ? ` ${t('bank.orAccountNumber')}` : ''}
+                 </Text>
+                 <TextInput
+-                  style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
++                  style={[
++                    styles.input,
++                    { textAlign: isRTL ? 'right' : 'left' },
++                    fieldErrors[field] ? styles.inputError : null,
++                  ]}
+                   value={form[field] || ''}
+                   onChangeText={(value) => onChangeField(field, value)}
+                   placeholder={t(`bank.placeholder.${field}`)}
+@@ -280,12 +290,19 @@
+                   autoCorrect={false}
+                   keyboardType={field === 'account_number' ? 'number-pad' : 'default'}
+                   accessibilityLabel={t(`bank.field.${field}`)}
++                  editable={!submitting && !savingDraft}
+                 />
++                {fieldErrors[field] ? (
++                  <Text style={[styles.reasonText, align]} accessibilityLiveRegion="polite">
++                    {fieldErrors[field]}
++                  </Text>
++                ) : null}
+               </View>
+             ))}
+             {requiredMissing ? (
+               <Text style={[styles.reasonText, align]}>{t('bank.identifierRequired')}</Text>
+             ) : null}
++            {formError ? <Text style={[styles.reasonText, align]}>{formError}</Text> : null}
+             <View style={styles.actionRow}>
+               <PremiumButton
+                 label={t('bank.submitForReview')}
+@@ -299,7 +316,12 @@
+                 busy={savingDraft}
+                 disabled={requiredMissing || submitting || savingDraft}
+               />
+-              <Pressable accessibilityRole="button" onPress={onCloseForm} style={styles.linkButton}>
++              <Pressable
++                accessibilityRole="button"
++                onPress={onCloseForm}
++                disabled={submitting || savingDraft}
++                style={styles.linkButton}
++              >
+                 <Text style={styles.linkText}>{t('common.cancel')}</Text>
+               </Pressable>
+             </View>
+@@ -492,6 +514,10 @@
+     paddingHorizontal: spacing.md,
+     color: colors.ink,
+     fontSize: font.body,
++  },
++  inputError: {
++    borderColor: colors.danger,
++    borderWidth: 1,
+   },
+   reasonBox: {
+     marginTop: spacing.sm,
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/bank/validation.ts /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/bank/validation.ts
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/bank/validation.ts	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/bank/validation.ts	2026-08-06 23:41:27
+@@ -1,4 +1,4 @@
+-import type { BankFormValues } from './BankView'
++import type { BankField, BankFormValues } from './BankView'
+ 
+ export type BankFormProblem =
+   | 'iban_characters'
+@@ -6,6 +6,8 @@
+   | 'account_number_format'
+   | 'swift_format'
+ 
++export type BankFieldErrors = Partial<Record<BankField, string>>
++
+ function schemeKey(scheme: unknown): string {
+   if (typeof scheme === 'string') return scheme.toLowerCase()
+   if (scheme && typeof scheme === 'object') {
+@@ -35,4 +37,56 @@
+   if (account && !/^[A-Z0-9]{4,34}$/i.test(account)) return 'account_number_format'
+   if (swift && !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(swift)) return 'swift_format'
+   return null
++}
++
++export function bankProblemMessageKey(problem: BankFormProblem): string {
++  switch (problem) {
++    case 'iban_characters':
++      return 'bank.validation.ibanCharacters'
++    case 'kw_iban_format':
++      return 'bank.validation.kwIbanFormat'
++    case 'account_number_format':
++      return 'bank.validation.accountNumber'
++    case 'swift_format':
++      return 'bank.validation.swift'
++  }
++}
++
++export function bankProblemField(problem: BankFormProblem): BankField {
++  switch (problem) {
++    case 'iban_characters':
++    case 'kw_iban_format':
++      return 'iban'
++    case 'account_number_format':
++      return 'account_number'
++    case 'swift_format':
++      return 'swift'
++  }
++}
++
++/** Map backend problem/field codes onto form fields. */
++export function fieldErrorsFromApi(
++  problems: string[] | undefined,
++  fields: string[] | undefined,
++  t: (key: string) => string,
++): BankFieldErrors {
++  const errors: BankFieldErrors = {}
++  const targets =
++    fields?.length
++      ? fields
++      : (problems || []).flatMap((problem) => {
++          if (problem.startsWith('iban_') || problem === 'account_identifier_required') return ['iban']
++          if (problem.startsWith('account_number_')) return ['account_number']
++          if (problem.startsWith('swift_')) return ['swift']
++          return []
++        })
++  for (const field of targets) {
++    if (field === 'iban') errors.iban = t('bank.validation.kwIbanFormat')
++    if (field === 'account_number') errors.account_number = t('bank.validation.accountNumber')
++    if (field === 'swift') errors.swift = t('bank.validation.swift')
++  }
++  if (!Object.keys(errors).length && problems?.length) {
++    errors.iban = t('bank.validation.kwIbanFormat')
++  }
++  return errors
+ }
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/onboarding/OnboardingView.tsx /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/onboarding/OnboardingView.tsx
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/onboarding/OnboardingView.tsx	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/onboarding/OnboardingView.tsx	2026-08-06 23:41:27
+@@ -301,29 +301,18 @@
+           </Section>
+         ) : null}
+ 
++        {/* The employee's list stays to their own work: what they must do, what
++            is under review, and what is done. Work owned by HR or payroll is
++            reported as a count so nothing looks missing, without filling the
++            screen with rows they cannot act on. */}
+         {handledByOthers.length ? (
+-          <Section title={t('onboarding.handledByOthers')} align={align}>
+-            {handledByOthers.map((item, index) => (
+-              <ChecklistCard
+-                key={itemKey(item, index)}
+-                item={item}
+-                tone={index % 2 ? 'sky' : 'lilac'}
+-                canUpload={false}
+-                uploading={false}
+-                uploadingId={null}
+-                uploadProgress={0}
+-                uploadFailed={false}
+-                failedUploadId={null}
+-                opening={openingId === item.item_id}
+-                versions={item.item_id ? versionsByItem[item.item_id] : undefined}
+-                versionsLoading={Boolean(item.item_id && versionsLoadingId === item.item_id)}
+-                onUpload={onUpload}
+-                onPreview={onPreview}
+-                onViewVersions={onViewVersions}
+-                onOpenBank={onOpenBank}
+-              />
+-            ))}
+-          </Section>
++          <PastelCard tone="sky" style={styles.progressCard}>
++            <Text style={[styles.taskDescription, align]}>
++              {t('onboarding.handledByOthersNote', {
++                count: formatNumber(handledByOthers.length, locale, 0),
++              })}
++            </Text>
++          </PastelCard>
+         ) : null}
+ 
+         {completed.length ? (
+@@ -443,8 +432,11 @@
+     isDocument &&
+     Boolean(item.item_id) &&
+     (actions.has('upload') || actions.has('replace') || actions.has('resubmit'))
+-  const allowPreview = Boolean(item.file_id) && (actions.has('preview') || Boolean(item.file_id))
+-  const allowVersions = Boolean(onViewVersions) && (actions.has('view_versions') || Boolean(item.file_id))
++  // Respect the API action list when it is present: offering Preview or History
++  // for a file the backend will not serve is a dead end.
++  const allowPreview = Boolean(item.file_id) && (actions.size ? actions.has('preview') : true)
++  const allowVersions =
++    Boolean(onViewVersions) && Boolean(item.file_id) && (actions.size ? actions.has('view_versions') : true)
+   const align = { textAlign: isRTL ? 'right' : 'left' } as const
+   const rowDirection = isRTL ? styles.rowReverse : undefined
+   const photo = (item.item_id || item.document_type) === 'personal_photo'
+@@ -455,12 +447,13 @@
+   const canOpenBank =
+     isBank && Boolean(onOpenBank) && !isAccepted && actions.has('open_bank')
+   const needsReplacement = ['replacement_required', 'rejected'].includes(normalizedStatus)
++  // One line per item, and never a restatement of the status chip. Every review
++  // status shares the same sentence: "processing" used to claim we were still
++  // preparing the file while the chip already said HR was reviewing it.
+   const guidance = dualParts
+     ? t('onboarding.civilId.bothRequired')
+     : needsReplacement
+-    ? t('onboarding.rejectionTitle')
+-    : normalizedStatus === 'processing'
+-      ? t('onboarding.processingGuidance')
++      ? t('onboarding.rejectionTitle')
+       : awaitingReview
+         ? t('onboarding.reviewGuidance')
+         : isAccepted
+@@ -468,7 +461,7 @@
+           : isBank
+             ? canOpenBank
+               ? t('onboarding.bankGuidance')
+-              : t('onboarding.bankComingSoon')
++              : t('onboarding.bankHandledByHr')
+             : allowUpload
+               ? t('onboarding.uploadGuidance')
+               : t('onboarding.uploadUnavailable')
+@@ -525,7 +518,7 @@
+                 const canSideUpload =
+                   canUpload &&
+                   (actions.has(`upload_${side}`) || actions.has(`replace_${side}`))
+-                const canSidePreview = present && (actions.has(`preview_${side}`) || present)
++                const canSidePreview = present && (actions.size ? actions.has(`preview_${side}`) : true)
+                 const sideUploading = side === 'front' ? uploadingFront : uploadingBack
+                 const sideFailed = side === 'front' ? failedFront : failedBack
+                 return (
+@@ -602,6 +595,9 @@
+                 </Text>
+               ))}
+             </View>
++          ) : versions ? (
++            // Loaded and empty: say so rather than silently removing the control.
++            <Text style={[styles.versionMeta, align]}>{t('onboarding.versionEmpty')}</Text>
+           ) : null}
+         </View>
+         <View style={styles.taskArt}>
+@@ -617,7 +613,9 @@
+         <View style={styles.transfer}>
+           <View style={[styles.transferHead, rowDirection]}>
+             <Text style={[styles.transferText, align]}>{t('onboarding.uploading')}</Text>
+-            <Text style={styles.transferText}>{Math.round(uploadProgress * 100)}%</Text>
++            <Text style={styles.transferText}>
++              {formatNumber(Math.round(uploadProgress * 100), locale, 0)}%
++            </Text>
+           </View>
+           <MotionProgressBar value={uploadProgress} />
+           {onCancelUpload ? (
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/onboarding/lifecycleProjection.ts /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/onboarding/lifecycleProjection.ts
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/features/onboarding/lifecycleProjection.ts	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/features/onboarding/lifecycleProjection.ts	2026-08-06 23:41:27
+@@ -184,8 +184,10 @@
+ }
+ 
+ /**
+- * "What happens next" for a canonical state. Falls back to the backend-supplied
+- * message so a newly added state is never rendered as a dead end.
++ * "What happens next". The backend message wins: a state alone cannot say who
++ * owns the work (`reopened` can be waiting on the employee or on HR), so a
++ * local state→copy table contradicts the canonical contract. The per-state
++ * string is only the offline/older-payload fallback, never a second source.
+  */
+ export function completionNextActionMessage(
+   completion: OnboardingCompletion | null,
+@@ -193,11 +195,11 @@
+   locale: string,
+   t: (key: string) => string,
+ ): string {
+-  if (state) return t(`onboarding.next.${state}`)
+   const action = completion?.next_action
+-  if (!action) return ''
+   const arabic = String(locale).toLowerCase().startsWith('ar')
+-  return String((arabic ? action.message_ar : action.message_en) || action.message || '')
++  const fromServer = String((arabic ? action?.message_ar : action?.message_en) || action?.message || '')
++  if (fromServer) return fromServer
++  return state ? t(`onboarding.next.${state}`) : ''
+ }
+ 
+ /** Chip label from canonical item.status only — never review_status. */
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/i18n/ar.json /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/i18n/ar.json
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/i18n/ar.json	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/i18n/ar.json	2026-08-06 23:41:27
+@@ -1,6 +1,5 @@
+ {
+   "app.name": "وظفني",
+-
+   "common.retry": "حاول مرة أخرى",
+   "common.loading": "جارٍ التحميل…",
+   "common.empty": "لا يوجد شيء بعد",
+@@ -11,11 +10,9 @@
+   "common.back": "رجوع",
+   "common.continue": "متابعة",
+   "common.today": "اليوم",
+-
+   "error.generic": "تعذر تحميل المحتوى الآن. حاول مرة أخرى.",
+   "error.fatalTitle": "يحتاج التطبيق إلى بداية جديدة",
+   "error.fatalMessage": "حدث أمر غير متوقع. حاول مرة أخرى، أو أغلق التطبيق وافتحه إذا استمرت المشكلة.",
+-
+   "access.offline.title": "لا يوجد اتصال بالإنترنت",
+   "access.offline.message": "تحقق من اتصالك ثم حاول مرة أخرى.",
+   "access.app_disabled.title": "غير متاح مؤقتاً",
+@@ -38,14 +35,11 @@
+   "access.rtlRestart.title": "يلزم إعادة التشغيل",
+   "access.rtlRestart.message": "تخطيط العربية والإنجليزية يحتاج إعادة تشغيل سريعة ليُطبَّق بالكامل. سيُعاد فتح التطبيق إن أمكن، وإلا أغلق وظّفني ثم افتحه مجدداً.",
+   "access.rtlRestart.ok": "حسناً",
+-
+   "feature.unavailable.title": "الميزة غير متاحة",
+   "feature.unavailable.message": "هذه الميزة غير متاحة لحسابك.",
+   "feature.backHome": "العودة إلى الرئيسية",
+-
+   "notFound.title": "الصفحة غير موجودة",
+   "notFound.message": "هذه الصفحة غير موجودة أو لم تعد متاحة.",
+-
+   "auth.title": "تسجيل الدخول",
+   "auth.employeeApp": "تطبيق الموظف",
+   "auth.activationEyebrow": "يوم عملك، ببساطة",
+@@ -61,13 +55,11 @@
+   "auth.invalidCode": "الرمز غير صحيح. اطلب رمزاً جديداً من فريق الموارد البشرية.",
+   "auth.tooManyAttempts": "تم تجاوز عدد المحاولات. اطلب رمزاً جديداً من فريق الموارد البشرية.",
+   "auth.alreadyActivated": "تم تفعيل هذا الحساب مسبقاً. سجّل الدخول من جديد أو تواصل مع الموارد البشرية.",
+-
+   "tabs.home": "الرئيسية",
+   "tabs.notifications": "الوارد",
+   "tabs.shifts": "المناوبات",
+   "tabs.leave": "الإجازات",
+   "tabs.profile": "الملف",
+-
+   "home.greeting": "مرحباً {{name}}",
+   "home.employee": "موظف",
+   "home.todayAtWork": "يومك في العمل",
+@@ -96,16 +88,13 @@
+   "home.attendanceHint": "راجع سجل حضورك الأخير",
+   "home.requestLeave": "طلب إجازة",
+   "home.leaveHint": "أرسل طلباً إلى الموارد البشرية",
+-
+   "notifications.title": "الوارد",
+   "notifications.empty": "لا توجد إشعارات بعد",
+-
+   "shifts.title": "المناوبات",
+   "shifts.today": "اليوم",
+   "shifts.upcoming": "القادمة",
+   "shifts.empty": "لا توجد مناوبات قادمة",
+   "shifts.location": "الموقع",
+-
+   "leave.title": "الإجازات",
+   "leave.balance": "الرصيد",
+   "leave.notEnforced": "يُعرض الرصيد للاطلاع فقط وغير مُطبَّق.",
+@@ -124,7 +113,6 @@
+   "leave.typeSick": "مرضية",
+   "leave.typeOther": "إجازة أخرى",
+   "leave.typeUnavailable": "نوع الإجازة هذا لم يعد متاحاً. حدّث الصفحة واختر نوعاً آخر.",
+-
+   "onboarding.title": "الانضمام",
+   "onboarding.checklistTitle": "قائمة مهامك",
+   "onboarding.checklistSubtitle": "خطوات واضحة ومختصرة لتكون جاهزاً للبدء.",
+@@ -160,13 +148,11 @@
+   "onboarding.uploadUnavailable": "يتولى فريق الموارد البشرية إدارة هذا العنصر.",
+   "onboarding.uploadGuidance": "ارفع الملف المطلوب بأمان عندما تكون جاهزاً.",
+   "onboarding.reviewGuidance": "تم الإرسال بأمان، وفريق الموارد البشرية يراجعه الآن.",
+-  "onboarding.processingGuidance": "نجهّز ملفك لمراجعة الموارد البشرية.",
+   "onboarding.acceptedGuidance": "قبلته الموارد البشرية. الملف محفوظ في سجلك.",
+-  "onboarding.rejectionTitle": "يلزم ملف جديد",
++  "onboarding.rejectionTitle": "أرسل ملفاً جديداً للمتابعة.",
+   "onboarding.versionHistory": "سجل الإصدارات",
+   "onboarding.versionLine": "الإصدار {{no}} · {{status}}",
+   "onboarding.versionEmpty": "لا توجد إصدارات بعد.",
+-  "onboarding.bankComingSoon": "ستتوفر بيانات البنك عبر نموذج آمن قريباً. يمكن للموارد البشرية مساعدتك حالياً.",
+   "onboarding.dueDate": "الاستحقاق {{date}}",
+   "onboarding.secureTitle": "بياناتك خاصة وآمنة",
+   "onboarding.secureMessage": "المستندات مشفّرة ولا يراها إلا موظفو الموارد البشرية المصرح لهم.",
+@@ -197,14 +183,12 @@
+   "onboarding.item.genericDescription": "قدّم المعلومات المطلوبة بأمان لمراجعتها من الموارد البشرية.",
+   "onboarding.contractErrorTitle": "يلزم تحديث قائمة المهام",
+   "onboarding.contractErrorMessage": "هذا الإصدار يتوقع انضمام Wave 2A (النسخة {{version}} / {{reason}}). اسحب للتحديث أو ثبّت أحدث نسخة داخلية.",
+-
+   "upload.unsupportedType": "اختر ملف PDF أو JPG أو PNG أو WebP أو HEIC.",
+   "upload.emptyFile": "هذا الملف فارغ. اختر ملفاً آخر.",
+   "upload.fileTooLarge": "يجب ألا يتجاوز حجم الملف 15 ميغابايت.",
+   "upload.invalidContent": "محتوى الملف لا يطابق نوعه. اختر ملفاً آخر.",
+   "upload.itemUnavailable": "عنصر قائمة المهام هذا لم يعد متاحاً. حدّث الصفحة وحاول مرة أخرى.",
+   "upload.failed": "تعذر رفع الملف. حاول مرة أخرى.",
+-
+   "documents.title": "المستندات",
+   "documents.empty": "لا توجد مستندات بعد",
+   "documents.view": "عرض",
+@@ -232,18 +216,15 @@
+   "documents.item.employment_contract": "عقد العمل",
+   "documents.item.medical": "الشهادة الطبية",
+   "documents.item.education_cert": "الشهادة التعليمية",
+-
+   "onboarding.item.residence": "الإقامة",
+   "onboarding.item.work_permit": "إذن العمل",
+   "onboarding.item.medical": "الشهادة الطبية",
+   "onboarding.item.education_cert": "الشهادة التعليمية",
+-
+   "attendance.title": "الحضور",
+   "attendance.present": "حاضر",
+   "attendance.late": "متأخر",
+   "attendance.absent": "غائب",
+   "attendance.empty": "لا توجد سجلات حضور بعد",
+-
+   "profile.title": "الملف الشخصي",
+   "profile.details": "بيانات الموظف",
+   "profile.account": "الحساب",
+@@ -251,7 +232,6 @@
+   "profile.department": "القسم",
+   "profile.company": "الشركة",
+   "profile.phone": "الهاتف",
+-
+   "settings.title": "الإعدادات",
+   "settings.language": "اللغة",
+   "settings.push": "الإشعارات",
+@@ -264,7 +244,6 @@
+   "settings.version": "الإصدار",
+   "settings.english": "English",
+   "settings.arabic": "العربية",
+-
+   "remaining.inboxEyebrow": "رسائل من فريقك",
+   "remaining.inboxUnread": "{{count}} رسائل غير مقروءة",
+   "remaining.inboxClear": "اطّلعت على كل الرسائل والتحديثات.",
+@@ -298,7 +277,6 @@
+   "remaining.contactSupport": "التواصل مع الدعم",
+   "remaining.stateEyebrow": "الوصول إلى وظفني",
+   "remaining.featureEyebrow": "تحديث الصلاحيات",
+-
+   "status.pending": "قيد الانتظار",
+   "status.requested": "قيد الانتظار",
+   "status.in_progress": "قيد التنفيذ",
+@@ -319,7 +297,6 @@
+   "status.late": "متأخر",
+   "status.absent": "غائب",
+   "status.unknown": "الحالة غير متاحة",
+-
+   "bank.title": "البيانات البنكية",
+   "bank.subtitle": "يُصرف راتبك إلى الحساب الذي وثّقته الموارد البشرية.",
+   "bank.nextStepTitle": "ما الخطوة التالية",
+@@ -331,7 +308,7 @@
+   "bank.maskedNote": "يتم إخفاء جزء من رقم الحساب دائمًا لحمايتك.",
+   "bank.submittedTitle": "ما قمت بإرساله",
+   "bank.submittedMessage": "ستراجع الموارد البشرية بياناتك البنكية وتبلغك بالنتيجة.",
+-  "bank.submittedAt": "أُرسل في {{date}}",
++  "bank.submittedAt": "أُرسل في",
+   "bank.submittedOn": "أُرسل في",
+   "bank.verifiedUnchangedNote": "تبقى بياناتك الموثقة مستخدمة حتى توافق الموارد البشرية على التغيير.",
+   "bank.rejectionReasonTitle": "سبب الإرجاع",
+@@ -352,6 +329,7 @@
+   "bank.validation.kwIbanFormat": "أدخل آيبان كويتي يبدأ بـ KW ويتكون من 30 حرفًا ورقمًا.",
+   "bank.validation.accountNumber": "استخدم من 4 إلى 34 حرفًا ورقمًا لرقم الحساب.",
+   "bank.validation.swift": "أدخل رمز SWIFT/BIC من 8 أو 11 حرفًا ورقمًا.",
++  "bank.validation.requestActive": "يوجد طلب تغيير بنكي قيد المعالجة. اسحب الطلب أو انتظر الموارد البشرية ثم حاول مرة أخرى.",
+   "bank.submitForReview": "إرسال للمراجعة",
+   "bank.saveDraft": "حفظ كمسودة",
+   "bank.submitDraft": "إرسال المسودة للمراجعة",
+@@ -392,7 +370,6 @@
+   "bank.placeholder.swift": "مثال: NBOKKWKW",
+   "bank.unavailableTitle": "الخدمة الذاتية للبيانات البنكية غير متاحة بعد",
+   "bank.unavailableMessage": "لم تُفعّل الموارد البشرية الخدمة الذاتية للبيانات البنكية لحسابك. تواصل معهم لإضافة أو تغيير بياناتك البنكية.",
+-
+   "onboarding.openBankForm": "فتح البيانات البنكية",
+   "onboarding.bankGuidance": "أضف أو غيّر بياناتك البنكية في نموذج آمن. تراجع الموارد البشرية كل تغيير.",
+   "onboarding.completionTitle": "موقفك الحالي",
+@@ -409,5 +386,7 @@
+   "onboarding.next.waiting_on_hr": "الموارد البشرية تراجع ما أرسلته. لا يلزم إجراء منك.",
+   "onboarding.next.blocked": "يجب على الموارد البشرية معالجة أمر قبل أن تتابع.",
+   "onboarding.next.completed": "تم إكمال الالتحاق. لا يلزم شيء إضافي.",
+-  "onboarding.next.reopened": "تم إعادة فتح الالتحاق — يلزم بنود جديدة أو مصححة."
++  "onboarding.next.reopened": "تم إعادة فتح الالتحاق — يلزم بنود جديدة أو مصححة.",
++  "onboarding.bankHandledByHr": "يتولى فريق الموارد البشرية إعداد هذا — لا يلزم شيء منك هنا.",
++  "onboarding.handledByOthersNote": "{{count}} من البنود تتولاها الموارد البشرية أو الرواتب. لا يلزم منك شيء بشأنها."
+ }
+diff -ru --ex /tmp/wf-ota-lane-backup-20260806T200247Z/src/i18n/en.json /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/i18n/en.json
+--- /tmp/wf-ota-lane-backup-20260806T200247Z/src/i18n/en.json	2026-08-06 23:41:27
++++ /tmp/wf-bank-ess-ota-p2-20260806T184542Z/src/i18n/en.json	2026-08-06 23:41:27
+@@ -1,6 +1,5 @@
+ {
+   "app.name": "Wathefni",
+-
+   "common.retry": "Try again",
+   "common.loading": "Loading…",
+   "common.empty": "Nothing here yet",
+@@ -11,11 +10,9 @@
+   "common.back": "Back",
+   "common.continue": "Continue",
+   "common.today": "Today",
+-
+   "error.generic": "We couldn't load this right now. Please try again.",
+   "error.fatalTitle": "The app needs a fresh start",
+   "error.fatalMessage": "Something unexpected happened. Try again, or close and reopen the app if the issue continues.",
+-
+   "access.offline.title": "You're offline",
+   "access.offline.message": "Check your connection and try again.",
+   "access.app_disabled.title": "Temporarily unavailable",
+@@ -38,14 +35,11 @@
+   "access.rtlRestart.title": "Restart needed",
+   "access.rtlRestart.message": "Arabic and English layouts need a quick restart to apply fully. The app will reopen when possible — otherwise close and open Wathefni again.",
+   "access.rtlRestart.ok": "Got it",
+-
+   "feature.unavailable.title": "Feature unavailable",
+   "feature.unavailable.message": "This feature is not available for your account.",
+   "feature.backHome": "Back to Home",
+-
+   "notFound.title": "Page not found",
+   "notFound.message": "This page doesn't exist or is no longer available.",
+-
+   "auth.title": "Sign in",
+   "auth.employeeApp": "Employee app",
+   "auth.activationEyebrow": "Your work, in one place",
+@@ -61,13 +55,11 @@
+   "auth.invalidCode": "That code didn't work. Ask your HR team for a new one.",
+   "auth.tooManyAttempts": "Too many attempts. Ask your HR team for a new code.",
+   "auth.alreadyActivated": "This account is already activated. Sign in again or contact HR.",
+-
+   "tabs.home": "Home",
+   "tabs.notifications": "Inbox",
+   "tabs.shifts": "Shifts",
+   "tabs.leave": "Leave",
+   "tabs.profile": "Profile",
+-
+   "home.greeting": "Hi {{name}}",
+   "home.employee": "Employee",
+   "home.todayAtWork": "Today at work",
+@@ -96,16 +88,13 @@
+   "home.attendanceHint": "Review your recent record",
+   "home.requestLeave": "Request leave",
+   "home.leaveHint": "Send a request to HR",
+-
+   "notifications.title": "Inbox",
+   "notifications.empty": "No notifications yet",
+-
+   "shifts.title": "Shifts",
+   "shifts.today": "Today",
+   "shifts.upcoming": "Upcoming",
+   "shifts.empty": "No upcoming shifts",
+   "shifts.location": "Location",
+-
+   "leave.title": "Leave",
+   "leave.balance": "Balance",
+   "leave.notEnforced": "Balances are shown for reference and are not enforced.",
+@@ -124,7 +113,6 @@
+   "leave.typeSick": "Sick",
+   "leave.typeOther": "Other leave",
+   "leave.typeUnavailable": "That leave type is no longer available. Refresh and choose another type.",
+-
+   "onboarding.title": "Onboarding",
+   "onboarding.checklistTitle": "Your checklist",
+   "onboarding.checklistSubtitle": "A few clear steps to get you set up and ready to go.",
+@@ -160,13 +148,11 @@
+   "onboarding.uploadUnavailable": "This item is managed by your HR team.",
+   "onboarding.uploadGuidance": "Upload the requested file securely when you're ready.",
+   "onboarding.reviewGuidance": "Submitted securely. Your HR team is reviewing it.",
+-  "onboarding.processingGuidance": "We're preparing your file for HR review.",
+   "onboarding.acceptedGuidance": "Accepted by HR. Your file is kept on record.",
+-  "onboarding.rejectionTitle": "Needs a new file",
++  "onboarding.rejectionTitle": "Send a new file to continue.",
+   "onboarding.versionHistory": "Version history",
+   "onboarding.versionLine": "v{{no}} · {{status}}",
+   "onboarding.versionEmpty": "No versions yet.",
+-  "onboarding.bankComingSoon": "Bank details will open in a secure form soon. HR can still help you in the meantime.",
+   "onboarding.dueDate": "Due {{date}}",
+   "onboarding.secureTitle": "Your data is private and secure",
+   "onboarding.secureMessage": "Documents are encrypted and visible only to authorized HR staff.",
+@@ -197,14 +183,12 @@
+   "onboarding.item.genericDescription": "Provide the requested information securely for HR review.",
+   "onboarding.contractErrorTitle": "Checklist update required",
+   "onboarding.contractErrorMessage": "This app build expects Wave 2A onboarding (got {{version}} / {{reason}}). Pull to refresh or install the latest internal build.",
+-
+   "upload.unsupportedType": "Choose a PDF, JPG, PNG, WebP, or HEIC file.",
+   "upload.emptyFile": "That file is empty. Choose another file.",
+   "upload.fileTooLarge": "Files must be 15 MB or smaller.",
+   "upload.invalidContent": "The file content doesn't match its file type. Choose another file.",
+   "upload.itemUnavailable": "This checklist item is no longer available. Refresh and try again.",
+   "upload.failed": "The file could not be uploaded. Try again.",
+-
+   "documents.title": "Documents",
+   "documents.empty": "No documents yet",
+   "documents.view": "View",
+@@ -232,18 +216,15 @@
+   "documents.item.employment_contract": "Employment contract",
+   "documents.item.medical": "Medical certificate",
+   "documents.item.education_cert": "Education certificate",
+-
+   "onboarding.item.residence": "Residence",
+   "onboarding.item.work_permit": "Work permit",
+   "onboarding.item.medical": "Medical certificate",
+   "onboarding.item.education_cert": "Education certificate",
+-
+   "attendance.title": "Attendance",
+   "attendance.present": "Present",
+   "attendance.late": "Late",
+   "attendance.absent": "Absent",
+   "attendance.empty": "No attendance records yet",
+-
+   "profile.title": "Profile",
+   "profile.details": "Employee details",
+   "profile.account": "Account",
+@@ -251,7 +232,6 @@
+   "profile.department": "Department",
+   "profile.company": "Company",
+   "profile.phone": "Phone",
+-
+   "settings.title": "Settings",
+   "settings.language": "Language",
+   "settings.push": "Push notifications",
+@@ -264,7 +244,6 @@
+   "settings.version": "Version",
+   "settings.english": "English",
+   "settings.arabic": "العربية",
+-
+   "remaining.inboxEyebrow": "Messages from your team",
+   "remaining.inboxUnread": "{{count}} unread messages",
+   "remaining.inboxClear": "Everything is read and up to date.",
+@@ -298,7 +277,6 @@
+   "remaining.contactSupport": "Contact support",
+   "remaining.stateEyebrow": "Wathefni access",
+   "remaining.featureEyebrow": "Capability update",
+-
+   "status.pending": "Pending",
+   "status.requested": "Pending",
+   "status.in_progress": "In progress",
+@@ -319,7 +297,6 @@
+   "status.late": "Late",
+   "status.absent": "Absent",
+   "status.unknown": "Status unavailable",
+-
+   "bank.title": "Bank details",
+   "bank.subtitle": "Your salary is paid to the account HR has verified.",
+   "bank.nextStepTitle": "What happens next",
+@@ -331,7 +308,7 @@
+   "bank.maskedNote": "Account numbers are always partly hidden for your safety.",
+   "bank.submittedTitle": "What you submitted",
+   "bank.submittedMessage": "HR will review your bank details and let you know.",
+-  "bank.submittedAt": "Submitted on {{date}}",
++  "bank.submittedAt": "Submitted on",
+   "bank.submittedOn": "Submitted on",
+   "bank.verifiedUnchangedNote": "Your verified details stay in use until HR approves the change.",
+   "bank.rejectionReasonTitle": "Why it was returned",
+@@ -352,6 +329,7 @@
+   "bank.validation.kwIbanFormat": "Enter a Kuwait IBAN beginning with KW and containing 30 letters and numbers.",
+   "bank.validation.accountNumber": "Use 4–34 letters and numbers for the account number.",
+   "bank.validation.swift": "Enter an 8- or 11-character SWIFT/BIC using letters and numbers.",
++  "bank.validation.requestActive": "A bank change request is already in progress. Withdraw or wait for HR, then try again.",
+   "bank.submitForReview": "Submit for review",
+   "bank.saveDraft": "Save as draft",
+   "bank.submitDraft": "Submit draft for review",
+@@ -392,7 +370,6 @@
+   "bank.placeholder.swift": "e.g. NBOKKWKW",
+   "bank.unavailableTitle": "Bank self-service is not available yet",
+   "bank.unavailableMessage": "Your HR team has not enabled bank self-service for your account. Contact HR to add or change your bank details.",
+-
+   "onboarding.openBankForm": "Open bank details",
+   "onboarding.bankGuidance": "Add or change your bank details in a secure form. HR reviews every change.",
+   "onboarding.completionTitle": "Where you stand",
+@@ -409,5 +386,7 @@
+   "onboarding.next.waiting_on_hr": "HR is reviewing what you submitted. Nothing is needed from you.",
+   "onboarding.next.blocked": "HR needs to resolve something before you can continue.",
+   "onboarding.next.completed": "Onboarding is complete. Nothing further is required.",
+-  "onboarding.next.reopened": "Onboarding reopened — new or corrected items are required."
++  "onboarding.next.reopened": "Onboarding reopened — new or corrected items are required.",
++  "onboarding.bankHandledByHr": "Your HR team sets this up for you — nothing to do here.",
++  "onboarding.handledByOthersNote": "{{count}} items are handled by HR or payroll. Nothing is needed from you on those."
+ }

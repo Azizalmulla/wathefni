@@ -1,0 +1,4 @@
+OK name compatibility helpers
+TOTALS create=1 update=2 skip=1 review=1
+OK exact fixture preview 1/2/1/1 + approve preserves mapping
+OK employee migration foundation P3 name-identity guard smoke

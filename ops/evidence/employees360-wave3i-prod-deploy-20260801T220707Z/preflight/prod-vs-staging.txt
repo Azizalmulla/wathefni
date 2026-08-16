@@ -1,0 +1,5 @@
+PROD
+SCHEMA_VERSION = "employees360-wave3d-public-law-policy-v1"
+STAGING
+SCHEMA_VERSION = "employees360-wave3h-jurisdiction-packs-v1"
+STAGING_PACKS

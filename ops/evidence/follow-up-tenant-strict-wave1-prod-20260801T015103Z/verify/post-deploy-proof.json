@@ -1,0 +1,42 @@
+{
+  "predicate_strict": true,
+  "predicate_snippet": "EXISTS ( SELECT 1 FROM outbound_delivery_events ode WHERE ode.subject_key=a.app_key AND ode.company_code=a.company_code AND COALESCE(ode.status, '') NOT IN ('sent','recovered') AND ode.recovered_at IS NULL AND (ode.status='failed' OR ode.last_error IS NOT NULL) )",
+  "wathefni": {
+    "apps": 4,
+    "people": 2
+  },
+  "null_company_qualify_count": 0,
+  "qualified_without_matching_company_event": 0,
+  "migration_state": {
+    "still_null": 690,
+    "backfilled_stamped": 32,
+    "quarantined_stamped": 690
+  },
+  "cross_tenant_equality_leak": 0,
+  "same_app_key_cross_tenant_qualify": 0,
+  "sent_recovered": {
+    "sent_only_not_qualified": 2,
+    "recovered_only_not_qualified": 1
+  },
+  "write_path_requires_company": true,
+  "rollback": {
+    "code_script_exists": true,
+    "migration_script_exists": true,
+    "db_dump_exists": true,
+    "pre_csv_exists": true,
+    "pre_app_sha_matches_backup": true
+  },
+  "health_ok": true,
+  "checks": {
+    "predicate_strict": true,
+    "wathefni_2_4": true,
+    "null_cannot_qualify": true,
+    "no_qualify_without_company_match": true,
+    "backfilled_32": true,
+    "quarantined_690": true,
+    "cross_tenant_blocked": true,
+    "write_path_requires_company": true,
+    "rollback_artifacts": true
+  },
+  "verdict": "PASS"
+}

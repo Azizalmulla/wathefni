@@ -1,0 +1,14 @@
+{
+  "verdict": "PASS",
+  "build_id": "78bb78be-dde2-4d8c-b7db-449e6d97a59f",
+  "status": "finished",
+  "logs": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/78bb78be-dde2-4d8c-b7db-449e6d97a59f",
+  "ipa": "https://expo.dev/artifacts/eas/YyYyjtQ7LFZXZlsEnzRQ2gnD9KNPr3Rbv1l5YmInZlY.ipa",
+  "build_number": "19",
+  "icon_included": true,
+  "sound_included": true,
+  "icon_sha256": "9066753bb2c5c6940b3a9074859b8f5258c15ec9d1431ba783dee6f2ae08c4b4",
+  "sound": "wathefni_default.wav",
+  "quota_preflight": "AVAILABLE",
+  "plan": "Starter active"
+}

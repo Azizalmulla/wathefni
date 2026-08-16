@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "before_current": 3,
+  "invalidated": 3,
+  "after_current": 0,
+  "restored_current": 3,
+  "restored_voyage_chunks": 3
+}

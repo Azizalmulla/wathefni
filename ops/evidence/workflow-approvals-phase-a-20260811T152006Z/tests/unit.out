@@ -1,0 +1,36 @@
+    workflow_approvals phase A slice 1 — SM + SoD + gates + delegation
+      PASS  schema version pinned
+      PASS  sql pack exists
+      PASS  instance draft→pending
+      PASS  instance pending→approved
+      PASS  instance approved terminal
+      PASS  step pending→approved
+      PASS  step approved terminal
+      PASS  delegation active→revoked
+      PASS  delegation revoked terminal
+      PASS  empty policy steps rejected
+      PASS  policy steps normalize
+      PASS  SoD blocks same user
+      PASS  SoD blocks same phone
+      PASS  SoD allows other actor
+      PASS  SoD optional when policy allows
+      PASS  delegation covers scoped subject
+      PASS  delegation rejects out-of-scope
+      PASS  delegation null scope = all
+      PASS  delegation expired window
+      PASS  scheduled becomes active when started
+      PASS  direct assignee may decide
+      PASS  delegate may decide as acting_as
+      PASS  stranger may not decide
+      PASS  reject ends instance
+      PASS  approve with remaining stays pending
+      PASS  approve final → approved
+      PASS  runtime flag default off
+      PASS  runtime flag on
+      PASS  allowlist parsed
+      PASS  allowlist excludes others
+      PASS  rollback has runtime steps
+      PASS  rollback retains tables
+SKIP DB: no DATABASE_URL (unit gates only)
+
+    32 passed, 0 failed

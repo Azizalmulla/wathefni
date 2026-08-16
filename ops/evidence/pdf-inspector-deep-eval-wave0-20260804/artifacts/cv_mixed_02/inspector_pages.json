@@ -1,0 +1,22 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [
+    2
+  ],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "Hybrid Resume Case Email: mixed02@example.com DIGITAL PAGE — readable native text Skills: Python, Postgres, OCR routing\n",
+      "markdown_len": 120
+    },
+    {
+      "page_0idx": 1,
+      "needs_ocr": true,
+      "markdown": "",
+      "markdown_len": 0
+    }
+  ]
+}

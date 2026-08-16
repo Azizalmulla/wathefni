@@ -1,0 +1,153 @@
+{
+  "schema_version": "payroll_setup_console_contract_v1",
+  "purpose": "Exact required/optional/advanced payroll setup contract for future Setup Console. P6 defines the contract only — no broad Setup Console redesign.",
+  "adaptation": {
+    "sme": "Show required + sensible defaults; hide advanced until needed.",
+    "medium": "Surface optional policies and statutory classification fields.",
+    "enterprise": "Expose advanced SOD, allowlists, overrides, Mode B coexistence."
+  },
+  "wathefni_owned": [
+    {
+      "key": "kuwait_statutory_baseline_version",
+      "label_en": "Kuwait statutory baseline version",
+      "label_ar": "إصدار خط الأساس القانوني الكويتي",
+      "company_editable": false
+    },
+    {
+      "key": "calculation_engine",
+      "label_en": "Calculation engine",
+      "company_editable": false
+    },
+    {
+      "key": "authority_sealing_rules",
+      "label_en": "Authority / sealing rules",
+      "company_editable": false
+    },
+    {
+      "key": "statutory_provenance",
+      "label_en": "Statutory provenance",
+      "company_editable": false
+    }
+  ],
+  "required": [
+    {
+      "key": "payroll_mode",
+      "label_en": "Payroll money authority mode",
+      "label_ar": "وضع سلطة الرواتب",
+      "values": ["native", "external", "parallel_shadow"],
+      "notes": "native=Mode A eligible; external=Mode B; never inferred from module enablement alone."
+    },
+    {
+      "key": "payroll_frequency",
+      "label_en": "Payroll frequency / cycle",
+      "label_ar": "دورة الرواتب",
+      "values": ["monthly"],
+      "default": "monthly"
+    },
+    {
+      "key": "period_cutoff",
+      "label_en": "Period / cut-off settings",
+      "label_ar": "إعدادات فترة القطع"
+    },
+    {
+      "key": "attendance_payroll_mode",
+      "label_en": "Attendance payroll mode",
+      "label_ar": "وضع حضور الرواتب",
+      "values": ["informational", "deduct_unexcused", "deduct_all_unpaid"]
+    },
+    {
+      "key": "salary_component_structure",
+      "label_en": "Salary / component structure",
+      "label_ar": "هيكل الراتب والمكونات"
+    },
+    {
+      "key": "approval_sod_chain",
+      "label_en": "Approval / SOD chain",
+      "label_ar": "سلسلة الاعتماد وفصل الصلاحيات",
+      "sme_default": {
+        "require_review_step": true,
+        "require_distinct_approver": true,
+        "allow_approver_as_finalizer": true
+      }
+    },
+    {
+      "key": "mode_a_entitlement_opt_in",
+      "label_en": "Explicit Mode A opt-in",
+      "label_ar": "تفعيل صريح لسلطة وظفني",
+      "values": ["disabled", "preview_only", "authoritative_allowlisted", "authoritative"],
+      "notes": "Required for money_authority=wathefni. Never auto-inferred."
+    }
+  ],
+  "optional": [
+    {
+      "key": "working_calendar",
+      "label_en": "Working calendar",
+      "label_ar": "تقويم العمل"
+    },
+    {
+      "key": "lateness_absence_policies",
+      "label_en": "Lateness / absence policies",
+      "label_ar": "سياسات التأخير والغياب"
+    },
+    {
+      "key": "ot_eligibility",
+      "label_en": "OT eligibility",
+      "label_ar": "أهلية العمل الإضافي"
+    },
+    {
+      "key": "employee_statutory_classifications",
+      "label_en": "Employee statutory classifications",
+      "label_ar": "تصنيفات الموظفين النظامية"
+    },
+    {
+      "key": "pifss_wage_bases",
+      "label_en": "PIFSS wage bases / classification",
+      "label_ar": "أوعية أجور التأمينات"
+    },
+    {
+      "key": "special_regime_flags",
+      "label_en": "Special-regime flags",
+      "label_ar": "علامات الأنظمة الخاصة"
+    },
+    {
+      "key": "variance_thresholds",
+      "label_en": "Variance review thresholds",
+      "label_ar": "حدود مراجعة الفروقات",
+      "notes": "Advisory only — never automatic money rewrite."
+    }
+  ],
+  "advanced": [
+    {
+      "key": "enterprise_sod_strict",
+      "label_en": "Enterprise SOD (approver ≠ finalizer)",
+      "label_ar": "فصل صلاحيات المؤسسات"
+    },
+    {
+      "key": "employee_allowlist",
+      "label_en": "Authoritative employee allowlist",
+      "label_ar": "قائمة الموظفين المسموح بهم للسلطة",
+      "applies_when": "authoritative_allowlisted"
+    },
+    {
+      "key": "controlled_policy_overrides",
+      "label_en": "Controlled policy overrides",
+      "label_ar": "تجاوزات سياسة مضبوطة",
+      "notes": "Actor/reason/audit only. Never for mandatory statutory uncertainty."
+    },
+    {
+      "key": "parallel_shadow_mode_b",
+      "label_en": "Parallel shadow / Mode B coexistence",
+      "label_ar": "التعايش مع الرواتب الخارجية"
+    }
+  ],
+  "sme_defaults": {
+    "payroll_mode": "native",
+    "payroll_frequency": "monthly",
+    "attendance_payroll_mode": "informational",
+    "require_review_step": true,
+    "require_distinct_approver": true,
+    "allow_approver_as_finalizer": true,
+    "hide_advanced_until_needed": true,
+    "entitlement_recommended": "preview_only_then_authoritative_allowlisted"
+  }
+}

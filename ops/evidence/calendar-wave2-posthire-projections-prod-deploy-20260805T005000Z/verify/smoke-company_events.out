@@ -1,0 +1,3 @@
+SOURCE company_events meta {'enabled_sources': ['company_events'], 'injected': 3} count 3
+TITLES ['Company · Gregorian New Year', 'Company · National Day', 'Company · Liberation Day']
+SMOKE_OK company_events 3

@@ -1,0 +1,38 @@
+{
+  "en_collapsed": {
+    "open": false,
+    "display": "grid",
+    "height": 0,
+    "summary": "Assessment configuration Needs attention · 22 questions · 21 evidence indicators · Last refreshed Jul 31, 2026, 10:34 PM Admin details",
+    "bodyHasContentSource": false,
+    "bodyHasRefresh": false,
+    "oldLabel": false
+  },
+  "en_expanded": {
+    "open": true,
+    "display": "grid",
+    "height": 217,
+    "summary": "Assessment configuration Needs attention · 22 questions · 21 evidence indicators · Last refreshed Jul 31, 2026, 10:34 PM Admin details",
+    "bodyHasContentSource": false,
+    "bodyHasRefresh": true,
+    "oldLabel": false
+  },
+  "ar_collapsed": {
+    "open": false,
+    "display": "grid",
+    "height": 0,
+    "summary": "إعداد التقييم يحتاج انتباه · 22 أسئلة · 21 مؤشر دليل · آخر تحديث 31‏/07‏/2026، 10:34 م التفاصيل للإداريين",
+    "bodyHasContentSource": false,
+    "bodyHasRefresh": false,
+    "oldLabel": false
+  },
+  "ar_expanded": {
+    "open": true,
+    "display": "grid",
+    "height": 217,
+    "summary": "إعداد التقييم يحتاج انتباه · 22 أسئلة · 21 مؤشر دليل · آخر تحديث 31‏/07‏/2026، 10:34 م التفاصيل للإداريين",
+    "bodyHasContentSource": true,
+    "bodyHasRefresh": true,
+    "oldLabel": false
+  }
+}

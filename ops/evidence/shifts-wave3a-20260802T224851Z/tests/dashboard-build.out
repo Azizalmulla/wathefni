@@ -1,0 +1,6 @@
+
+> wathefni-dashboard@0.0.0 build
+> tsc -b && vite build
+
+src/posthire/PostHire.tsx(207,10): error TS6133: 'formatTime' is declared but its value is never read.
+src/posthire/ShiftsWorkspace.tsx(420,66): error TS2554: Expected 2 arguments, but got 3.

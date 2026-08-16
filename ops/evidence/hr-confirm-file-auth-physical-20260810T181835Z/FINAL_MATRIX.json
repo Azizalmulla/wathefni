@@ -1,0 +1,67 @@
+[
+  {
+    "row": "Attendance correction prepare\u2192confirm",
+    "verdict": "PASS",
+    "detail": "SOD prepare\u2192confirm completed; restored"
+  },
+  {
+    "row": "Shift swap approve/reject confirm",
+    "verdict": "PASS",
+    "detail": "reject completed\u2192rejected (non-self requested_by)"
+  },
+  {
+    "row": "Onboarding Accept/Waive confirm",
+    "verdict": "PASS",
+    "detail": "waive passport completed; queue discoverability FAIL separately"
+  },
+  {
+    "row": "Document Mark reviewed confirm",
+    "verdict": "PASS",
+    "detail": "compliance_mark_reviewed completed; queue empty residual"
+  },
+  {
+    "row": "HR Task Mark done confirm",
+    "verdict": "PASS",
+    "detail": "task resolve done"
+  },
+  {
+    "row": "Onboarding file preview",
+    "verdict": "PASS",
+    "detail": "allowlist + auth GET 200"
+  },
+  {
+    "row": "Document file preview/download",
+    "verdict": "PASS",
+    "detail": "allowlist path present"
+  },
+  {
+    "row": "Candidate CV open",
+    "verdict": "PASS",
+    "detail": "auth GET 200/40044 bytes"
+  },
+  {
+    "row": "Face ID enable/unlock + cancel\u2192PIN fallback",
+    "verdict": "BLOCKED",
+    "detail": "no device"
+  },
+  {
+    "row": "auto-lock/background lock",
+    "verdict": "BLOCKED",
+    "detail": "no device"
+  },
+  {
+    "row": "Forgot PIN \u2192 operator email/password recovery",
+    "verdict": "BLOCKED",
+    "detail": "no device"
+  },
+  {
+    "row": "safe-back and state refresh after each flow",
+    "verdict": "PARTIAL",
+    "detail": "API refresh OK; UI needs device"
+  },
+  {
+    "row": "EN/AR on confirmation/auth/file states",
+    "verdict": "PARTIAL",
+    "detail": "static OK; physical locale needs device"
+  }
+]

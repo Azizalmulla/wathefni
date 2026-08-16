@@ -1,0 +1,468 @@
+{
+  "pass": 42,
+  "fail": 0,
+  "results": [
+    {
+      "name": "production_health_200",
+      "pass": true,
+      "detail": 200
+    },
+    {
+      "name": "production_db_binding",
+      "pass": true,
+      "detail": {
+        "application_environment": "production",
+        "database_environment": "production",
+        "database_environment_marker": "2646585bbedb",
+        "database_logical_name": "b1f1a54885f2",
+        "database_host": "aaf075b7b4bf",
+        "match": true
+      }
+    },
+    {
+      "name": "flag_WATHEFNI_TALENT_POOL_CLASSIFICATION_off",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "name": "flag_WATHEFNI_TALENT_POOL_CLASSIFICATION_TENANTS_off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "flag_WATHEFNI_TALENT_POOL_CLASSIFICATION_SCHEMA_off",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "name": "flag_WATHEFNI_TALENT_POOL_CLASSIFICATION_MANUAL_off",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "name": "flag_WATHEFNI_TALENT_POOL_CLASSIFICATION_WORKERS_off",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "name": "flag_WATHEFNI_TALENT_POOL_CLASSIFICATION_UI_off",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "name": "classification_no_tenant_enabled",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_company_disabled",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_master_runtime_off",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_workers_runtime_off",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_manual_runtime_off",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_ui_runtime_off",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_schema_runtime_off",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "unified_canary_config_unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "unified_wathefni_canary_still_enabled",
+      "pass": true,
+      "detail": {
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true,
+        "activation_mode": "tenant_canary_override"
+      }
+    },
+    {
+      "name": "classification_routes_mounted",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "classification_feature_reports_dark",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "schema_enabled": false,
+        "manual_enabled": false,
+        "workers_enabled": false,
+        "ui_enabled": false,
+        "classifier_version": "classifier.deterministic_v1.2",
+        "coupled_to_unified_candidates": false
+      }
+    },
+    {
+      "name": "classification_taxonomy_route_dark",
+      "pass": true,
+      "detail": {
+        "status": 404,
+        "detail": {
+          "error": "talent_pool_classification_disabled",
+          "status": {
+            "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+            "master_enabled": false,
+            "allowed_tenants": [],
+            "company_code": "WATHEFNI",
+            "enabled_for_company": false,
+            "schema_enabled": false,
+            "manual_enabled": false,
+            "workers_enabled": false,
+            "ui_enabled": false,
+            "classifier_version": "classifier.deterministic_v1.2",
+            "coupled_to_unified_candidates": false
+          }
+        }
+      }
+    },
+    {
+      "name": "classification_run_route_dark",
+      "pass": true,
+      "detail": {
+        "status": 404,
+        "detail": {
+          "error": "talent_pool_classification_disabled",
+          "status": {
+            "flag": "WATHEFNI_TALENT_POOL_CLASSIFICATION",
+            "master_enabled": false,
+            "allowed_tenants": [],
+            "company_code": "WATHEFNI",
+            "enabled_for_company": false,
+            "schema_enabled": false,
+            "manual_enabled": false,
+            "workers_enabled": false,
+            "ui_enabled": false,
+            "classifier_version": "classifier.deterministic_v1.2",
+            "coupled_to_unified_candidates": false
+          }
+        }
+      }
+    },
+    {
+      "name": "classification_ui_absent",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "classification_tables_present",
+      "pass": true,
+      "detail": [
+        "candidate_classification_review_events",
+        "candidate_classification_runs",
+        "candidate_classification_suggestions",
+        "talent_pool_classification_jobs",
+        "taxonomy_nodes",
+        "taxonomy_releases",
+        "taxonomy_tenant_nodes"
+      ]
+    },
+    {
+      "name": "taxonomy_release_present",
+      "pass": true,
+      "detail": {
+        "taxonomy_releases": 1,
+        "taxonomy_nodes": 43,
+        "taxonomy_tenant_nodes": 0,
+        "candidate_classification_runs": 0,
+        "candidate_classification_suggestions": 0,
+        "candidate_classification_review_events": 0,
+        "talent_pool_classification_jobs": 0
+      }
+    },
+    {
+      "name": "taxonomy_nodes_present",
+      "pass": true,
+      "detail": {
+        "taxonomy_releases": 1,
+        "taxonomy_nodes": 43,
+        "taxonomy_tenant_nodes": 0,
+        "candidate_classification_runs": 0,
+        "candidate_classification_suggestions": 0,
+        "candidate_classification_review_events": 0,
+        "talent_pool_classification_jobs": 0
+      }
+    },
+    {
+      "name": "taxonomy_tenant_assignments_empty",
+      "pass": true,
+      "detail": {
+        "taxonomy_releases": 1,
+        "taxonomy_nodes": 43,
+        "taxonomy_tenant_nodes": 0,
+        "candidate_classification_runs": 0,
+        "candidate_classification_suggestions": 0,
+        "candidate_classification_review_events": 0,
+        "talent_pool_classification_jobs": 0
+      }
+    },
+    {
+      "name": "empty_candidate_classification_runs",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "empty_candidate_classification_suggestions",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "empty_candidate_classification_review_events",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "empty_talent_pool_classification_jobs",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "no_company_feature_flags_table",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "candidate_job_lifecycle_outbound_unchanged",
+      "pass": true,
+      "detail": {
+        "applications": 17,
+        "candidates": 20,
+        "positions": 11,
+        "application_lifecycle_events": 2,
+        "outbound_delivery_events": 721
+      }
+    },
+    {
+      "name": "no_ocr_extraction_embedding_reruns",
+      "pass": true,
+      "detail": {
+        "cv_extraction_cache": 0,
+        "cv_extraction_finalizations": 0,
+        "cv_extraction_leases": 0,
+        "cv_extraction_runs": 0,
+        "embedding_reindex_events": 0,
+        "embedding_reindex_runs": 0,
+        "semantic_documents": 0
+      }
+    },
+    {
+      "name": "held_archived_restricted_fail_closed",
+      "pass": true,
+      "detail": {
+        "needs_role": "held_record_communication_forbidden",
+        "import_review": "held_record_communication_forbidden",
+        "import_archived": "held_record_communication_forbidden",
+        "restricted": "restricted_record_communication_forbidden"
+      }
+    },
+    {
+      "name": "valid_live_application_authorized",
+      "pass": true,
+      "detail": {
+        "allowed": true,
+        "code": null,
+        "reason": "live_application",
+        "message": "ok",
+        "status_code": 200,
+        "app_key": "READONLY-AUTHORITY-PROBE",
+        "company_code": "WATHEFNI",
+        "status": "ready_for_review",
+        "data_source": "production"
+      }
+    },
+    {
+      "name": "communication_tenant_isolation",
+      "pass": true,
+      "detail": {
+        "allowed": false,
+        "code": "candidate_communication_tenant_mismatch",
+        "reason": "tenant_mismatch",
+        "message": "Candidate communication is limited to the authenticated tenant.",
+        "status_code": 403,
+        "app_key": "READONLY-AUTHORITY-PROBE",
+        "company_code": "WATHEFNI",
+        "expected_company_code": "OTHER"
+      }
+    },
+    {
+      "name": "direct_api_needs_role_fails_closed",
+      "pass": true,
+      "detail": {
+        "error": "held_record_communication_forbidden",
+        "message": "Talent Pool held records cannot receive outreach, notifications, assessments, or interview invitations until linked to a live Job application.",
+        "reason": "held_status:needs_role",
+        "authority": "candidate_communication_live_application",
+        "app_key": "READONLY-AUTHORITY-PROBE",
+        "company_code": "WATHEFNI",
+        "status": "needs_role"
+      }
+    },
+    {
+      "name": "direct_api_import_review_fails_closed",
+      "pass": true,
+      "detail": {
+        "error": "held_record_communication_forbidden",
+        "message": "Talent Pool held records cannot receive outreach, notifications, assessments, or interview invitations until linked to a live Job application.",
+        "reason": "held_status:import_review",
+        "authority": "candidate_communication_live_application",
+        "app_key": "READONLY-AUTHORITY-PROBE",
+        "company_code": "WATHEFNI",
+        "status": "import_review"
+      }
+    },
+    {
+      "name": "direct_api_import_archived_fails_closed",
+      "pass": true,
+      "detail": {
+        "error": "held_record_communication_forbidden",
+        "message": "Talent Pool held records cannot receive outreach, notifications, assessments, or interview invitations until linked to a live Job application.",
+        "reason": "held_status:import_archived",
+        "authority": "candidate_communication_live_application",
+        "app_key": "READONLY-AUTHORITY-PROBE",
+        "company_code": "WATHEFNI",
+        "status": "import_archived"
+      }
+    },
+    {
+      "name": "direct_api_no_provider_or_registry_call",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "direct_api_gate_precedes_registry",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no_queue_claim_implementation",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "failed": [],
+  "mutation_counts": {
+    "applications": 17,
+    "candidates": 20,
+    "positions": 11,
+    "application_lifecycle_events": 2,
+    "outbound_delivery_events": 721
+  },
+  "verdict": "GO_PRODUCTION_DARK"
+}

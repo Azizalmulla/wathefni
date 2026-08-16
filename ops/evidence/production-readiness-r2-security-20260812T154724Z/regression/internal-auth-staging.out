@@ -1,0 +1,16 @@
+    internal-auth lockdown — require_internal_access + whatsapp-link anti-hijack
+      PASS  secret unset -> 401 (fail-closed, never open)
+      PASS  no token provided -> 401
+      PASS  wrong token -> 401
+      PASS  correct token via Authorization Bearer -> allowed
+      PASS  correct token via X-Internal-Token -> allowed
+      PASS  owner A links a fresh number -> ok
+      PASS  owner A re-links their own number -> ok (idempotent)
+      PASS  user B cannot steal A's active linked number -> 409
+      PASS  user B links a different fresh number -> ok
+      PASS  A's number is still owned by A after the blocked hijack
+
+    10 passed, 0 failed
+
+    INTERNAL-AUTH LOCKDOWN: ALL CHECKS PASSED
+STAGING_RC=0

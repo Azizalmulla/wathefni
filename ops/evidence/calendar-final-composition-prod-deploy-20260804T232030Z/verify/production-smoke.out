@@ -1,0 +1,7 @@
+health_ok
+SERVED=assets/dashboard-DW294Kf9.js
+-rw-r--r-- 1 501 staff  47653 Aug  4 23:20 /opt/wathefni/dashboard-dist/assets/CalendarShell-DWbjBZuG.js
+-rw-r--r-- 1 501 staff 246450 Aug  4 23:20 /opt/wathefni/dashboard-dist/assets/dashboard-DW294Kf9.js
+PROD_BUNDLE_SMOKE_OK {'bundle': 'CalendarShell-DWbjBZuG.js', 'composition': True, 'controls': True, 'detail_accent': True, 'detail_close': True, 'calendar_event': True, 'escape': True, 'cascade': True, 'wide_grid': True, 'nowrap': True, 'no_inert_overlay': True, 'compact_drawer': True, 'preview_banner': True}
+WATHEFNI_CALENDAR_POPULATED_PREVIEW=on
+WATHEFNI_CALENDAR_POPULATED_PREVIEW_COMPANIES=WATHEFNI

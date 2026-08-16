@@ -1,0 +1,50 @@
+=== SHAs after ===
+1c33707f3ede082b47a6a48f46f91717511bc256dba2dedb1e26ca171549f193  /opt/wathefni/orchestrator/app.py
+942a440a404284cbac0bd7e3193db205150e878ee63a35ab87d135b2157fc7ca  /opt/wathefni/orchestrator/employee_selfservice_wave5.py
+31a2224d008255cda33428bb83340e7fbe56daf52f41e9315152a1dccaa2551c  /opt/wathefni/orchestrator/canary-prod-wave5c-ess.py
+2828df20cbedca6905ec15adf602994abfa96f678648947ffdf1d3577f2bb5f5  /opt/wathefni/orchestrator/employee_org_wave4.py
+dad7fbc7aabb8d2eb859ce697a6459b4ce54ca5414077992ced77a8f3637d696  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+31e0a7c5f8ea0ce61814363956e3bcbc321513a80112a1da946e5a5cb7fc3b19  /opt/wathefni/orchestrator/employee_policy_packs_wave3h.py
+=== FLAGS after ===
+WATHEFNI_EMPLOYEE_APP=off
+WATHEFNI_EMPLOYEE_AUTHORITY_V2=on
+WATHEFNI_EMPLOYEE_AUTHORITY_V2_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_ESS_V5=on
+WATHEFNI_EMPLOYEE_ESS_V5_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_NAME_PREFIX=W5C-SYNTH|
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_ESS_V5_SYNTHETIC_PHONE_PREFIXES=965549
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_EMPLOYEE_ORG_V4=on
+WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_DUE=on
+WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_LOOKBACK_DAYS=7
+WATHEFNI_EMPLOYEE_ORG_V4_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H=on
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H_COMPANIES=WATHEFNI
+WATHEFNI_ESS_BANK_SECRET_KEY=<redacted>
+WATHEFNI_ESS_BANK_SECRET_KEY_PREVIOUS=<redacted>
+=== TIMER still ===
+enabled
+active
+=== ESS ROUTES AFTER ===
+13
+/dashboard/posthire/employee-ess/bank/{employee_key}/rotate
+/dashboard/posthire/employee-ess/identity/bind
+/dashboard/posthire/employee-ess/identity/revoke-sessions
+/dashboard/posthire/employee-ess/me/{employee_key}
+/dashboard/posthire/employee-ess/policy
+/dashboard/posthire/employee-ess/reconcile
+/dashboard/posthire/employee-ess/reports
+/dashboard/posthire/employee-ess/requests
+/dashboard/posthire/employee-ess/requests/{request_id}
+/dashboard/posthire/employee-ess/requests/{request_id}/apply
+/dashboard/posthire/employee-ess/requests/{request_id}/decide
+/dashboard/posthire/employee-ess/requests/{request_id}/submit
+/dashboard/posthire/employee-ess/requests/{request_id}/withdraw
+=== BANK KEY IN PROC (presence only) ===
+1
+1

@@ -58,6 +58,10 @@ TEMPLATES: dict[str, dict[str, str]] = {
         "en": "I am holding this file temporarily, but I need one exact job before an application can start. Send the APPLY code or tell me which role you mean.",
         "ar": "سأحتفظ بالملف مؤقتاً، لكن أحتاج تحديد وظيفة واحدة بالضبط قبل بدء طلب التوظيف. أرسل رمز APPLY أو اكتب اسم الوظيفة المقصودة.",
     },
+    "cv_received_talent_pool": {
+        "en": "We received your CV and saved it to the Talent Pool for HR review. No job application was started. You do not need an APPLY code unless you want to apply to a specific open role.",
+        "ar": "استلمنا سيرتك الذاتية وحفظناها في قائمة المواهب لمراجعة الموارد البشرية. لم يبدأ أي طلب توظيف. لا تحتاج رمز APPLY إلا إذا أردت التقديم على وظيفة محددة ومفتوحة.",
+    },
     "cv_held_for_job_context": {
         "en": "I am holding this CV temporarily for {role}. Your application has not started yet.",
         "ar": "سأحتفظ بالسيرة الذاتية مؤقتاً لوظيفة {role}. لم يبدأ طلب التوظيف بعد.",

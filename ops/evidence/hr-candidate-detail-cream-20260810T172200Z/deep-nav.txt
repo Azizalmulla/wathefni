@@ -1,0 +1,23 @@
+PASS Employee Stack does not register hr screen
+PASS ModeRedirect sync hard-deny /hr for employee
+PASS AuthGate redirects employee away from /hr
+PASS No async hrWorkspaceEnabled employee/hr bounce
+PASS no /ranking destination emit
+PASS no soft-dead emit /candidates?follow_up=
+PASS no soft-dead emit /candidates?review_status=
+PASS no soft-dead emit /candidates?assessment_status=
+PASS prehire priorities use /candidates
+PASS destinationAvailable helper exists
+PASS Hiring open uses destinationAvailable
+PASS Hiring filters priority sections by destinationAvailable
+PASS Delivery Alerts open uses destinationAvailable
+PASS candidate detail gates routeAvailable
+PASS leave detail surfaces permission state
+PASS leave list requires mobile feature action
+PASS leave detail requires mobile feature action
+PASS leave decision requires approve/reject feature action
+PASS candidate rankings requires feature action
+PASS candidate detail requires feature action
+PASS candidate CV requires feature action
+PASS candidate decision maps to feature actions
+hr-deep-nav-blockers: GREEN

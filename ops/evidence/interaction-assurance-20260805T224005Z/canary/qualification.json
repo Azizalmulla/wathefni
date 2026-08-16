@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "pass": 11,
+  "fail": 0,
+  "batch": 0,
+  "tag": "84b8c4b7",
+  "company_code": "WATHEFNI",
+  "results": [
+    {
+      "label": "pre-clean residual zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "created synthetic employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic phone prefix",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic name marker",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cleanup refuses empty markers",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "refuse non-WATHEFNI non-IAX company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "create upsert idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "audit breadcrumb optional",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-clean residual zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-clean deleted synthetic employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cleanup idempotent residual zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "finished_at": "2026-08-05T22:40:22.253475+00:00"
+}

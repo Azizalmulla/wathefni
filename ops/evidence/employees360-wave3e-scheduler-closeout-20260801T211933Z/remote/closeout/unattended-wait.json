@@ -1,0 +1,187 @@
+{
+  "emp": {
+    "lifecycle_state": "terminated",
+    "termination_effective_on": "2026-07-31",
+    "access_revoke_status": "revoked",
+    "access_revoked_at": "2026-08-01 21:21:02.470544+00:00"
+  },
+  "runs": [
+    {
+      "run_id": "90e77bab-5fe6-4212-924d-b008e03bb61f",
+      "status": "succeeded",
+      "started_at": "2026-08-01 21:21:02.436303+00:00",
+      "finished_at": "2026-08-01 21:21:02.505301+00:00",
+      "terminations_executed": 1,
+      "revokes_executed": 1,
+      "lag_seconds": 0,
+      "error_text": null,
+      "evidence": {
+        "lag": {
+          "alert": false,
+          "as_of": "2026-08-02T00:21:02.496772+03:00",
+          "due_count": 0,
+          "lag_seconds": 0,
+          "company_code": "WATHEFNI"
+        },
+        "term": {
+          "ok": true,
+          "count": 1,
+          "skipped": [],
+          "executed": [
+            {
+              "reason": "w3e unattended timer",
+              "case_id": null,
+              "payload": {
+                "scheduler": true
+              },
+              "event_id": "f7d2db86-7b01-4e6f-b718-7013c9938766",
+              "to_state": "terminated",
+              "person_id": "f99a9769-e29a-5bbb-afc5-114eacc10e39",
+              "created_at": "2026-08-01T21:21:02.447167+00:00",
+              "event_type": "termination_effective",
+              "from_state": "notice_period",
+              "request_id": null,
+              "company_code": "WATHEFNI",
+              "effective_on": "2026-07-31",
+              "employee_key": "WATHEFNI-96552295759",
+              "actor_user_id": null,
+              "employment_id": "b1f47042-1b34-5049-aac2-65f3c2588b0e",
+              "last_working_day": "2026-08-01",
+              "termination_type": "resignation"
+            }
+          ]
+        },
+        "revoke": {
+          "ok": true,
+          "as_of": "2026-08-02T00:21:02.470437+03:00",
+          "count": 1,
+          "revoked": [
+            {
+              "invites": 0,
+              "sessions": 1,
+              "employee_key": "WATHEFNI-96552295759"
+            }
+          ],
+          "skipped": []
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "event_id": "f7d2db86-7b01-4e6f-b718-7013c9938766",
+      "event_type": "termination_effective",
+      "created_at": "2026-08-01 21:21:02.447167+00:00",
+      "payload": {
+        "run_id": "90e77bab-5fe6-4212-924d-b008e03bb61f",
+        "scheduler": true
+      }
+    },
+    {
+      "event_id": "73e4905b-34c4-4d41-85bc-69aac920b1d8",
+      "event_type": "access_revoked",
+      "created_at": "2026-08-01 21:21:02.470544+00:00",
+      "payload": {
+        "at": "2026-08-02T00:21:02.470437+03:00",
+        "invites": 0,
+        "sessions": 1
+      }
+    }
+  ],
+  "polls": [
+    {
+      "at": "2026-08-01T21:20:06.677188+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:11.679391+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:16.685444+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:21.688009+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:26.691397+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:31.693214+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:36.697059+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:41.698369+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:46.701216+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:51.704610+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:20:56.714665+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:21:01.721889+00:00",
+      "lifecycle_state": "notice_period",
+      "access_revoke_status": "scheduled",
+      "runs": 0,
+      "events": []
+    },
+    {
+      "at": "2026-08-01T21:21:06.728508+00:00",
+      "lifecycle_state": "terminated",
+      "access_revoke_status": "revoked",
+      "runs": 1,
+      "events": [
+        "termination_effective",
+        "access_revoked"
+      ]
+    }
+  ]
+}

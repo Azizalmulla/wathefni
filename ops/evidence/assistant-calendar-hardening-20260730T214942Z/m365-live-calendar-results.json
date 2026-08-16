@@ -1,0 +1,20 @@
+{
+  "stamp": "20260730T215004Z",
+  "proofs": {
+    "cert_token_mint": {
+      "ok": true
+    },
+    "outlook_create": {
+      "ok": false,
+      "status": 403,
+      "error": "http_403",
+      "has_event_id": false,
+      "web_link_present": false
+    },
+    "teams_meeting": {
+      "ok": false,
+      "has_join_url": false,
+      "join_host": null
+    }
+  }
+}

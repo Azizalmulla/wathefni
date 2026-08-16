@@ -1,0 +1,37 @@
+# Smoke: HR work-email sign-in → HR home tab.
+# Requires env: MAESTRO_HR_COMPANY, MAESTRO_HR_EMAIL, MAESTRO_HR_PASSWORD
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - hr
+  - auth
+  - requires_credentials
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.methodSwitch"
+    timeout: 45000
+- tapOn:
+    id: "e2e.auth.method.workEmail"
+- assertVisible:
+    id: "e2e.auth.hr.company"
+- tapOn:
+    id: "e2e.auth.hr.company"
+- inputText: ${MAESTRO_HR_COMPANY}
+- tapOn:
+    id: "e2e.auth.hr.email"
+- inputText: ${MAESTRO_HR_EMAIL}
+- tapOn:
+    id: "e2e.auth.hr.password"
+- inputText: ${MAESTRO_HR_PASSWORD}
+- tapOn:
+    id: "e2e.auth.hr.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000
+- assertVisible:
+    id: "e2e.tab.hr.home"
+- takeScreenshot: hr-home-after-login

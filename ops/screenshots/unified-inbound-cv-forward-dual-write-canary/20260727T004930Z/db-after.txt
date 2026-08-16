@@ -1,0 +1,16 @@
+ apps 
+------
+   20
+(1 row)
+
+               app_key               | position_code  |                   data_source_detail                   
+-------------------------------------+----------------+--------------------------------------------------------
+ 96555570003-WATHEFNI-J2P2_PROD_TEST | J2P2_PROD_TEST | forward_dual_write_canary:20260727T004937Z:quarantined
+ 96555570004-WATHEFNI-J2P2_PROD_TEST | J2P2_PROD_TEST | forward_dual_write_canary:20260727T004937Z:quarantined
+(2 rows)
+
+ verified_bindings 
+-------------------
+                13
+(1 row)
+

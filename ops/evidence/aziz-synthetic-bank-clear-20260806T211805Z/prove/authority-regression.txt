@@ -1,0 +1,167 @@
+PASS applied outranks an older rejected request :: {"status": "accepted", "rejection_reason": null, "updated_at": "2026-08-06 21:19:52.296999+00:00"}
+PASS reconcile reports the applied request :: {"request_id": "20ca9480-1820-44b6-bfd8-f03c0cf75f90", "state": "applied", "changed": true}
+PASS a second reconcile does not rewrite an already-correct row :: {"request_id": "20ca9480-1820-44b6-bfd8-f03c0cf75f90", "state": "applied", "changed": false}
+PASS bank counts as satisfied in canonical completion :: {"state": "waiting_on_employee", "satisfied_count": 1, "required_total": 2}
+PASS one Apply completes onboarding with no second action :: {"state": "completed", "next_owner": null}
+PASS an open correction request owns the item and its reason :: {"status": "replacement_required", "rejection_reason": "Fix the account holder name.", "updated_at": "2026-08-06 21:19:52.343830+00:00"}
+PASS queue next owner is the employee, not the payroll rail :: {"next_owner": "employee", "next_owner_group": "employee", "completion_state": "waiting_on_employee", "next_item_label": "Recon bank_details"}
+PASS queue completion state matches the contract :: "waiting_on_employee"
+PASS an open review request shows Needs HR with no stale reason :: {"status": "processing", "rejection_reason": null, "updated_at": "2026-08-06 21:19:52.373396+00:00"}
+PASS queue owner for a bank request under review is HR :: {"next_owner": "hr", "next_owner_group": "hr", "completion_state": "waiting_on_hr"}
+PASS a live effective bank record satisfies the item without an applied row :: {"status": "accepted", "rejection_reason": null, "updated_at": "2026-08-06 21:19:52.390682+00:00"}
+PASS no bank request leaves the checklist untouched :: {"reconcile": null, "item": {"status": "pending", "rejection_reason": null, "updated_at": "2026-08-06 21:19:52.398049+00:00"}}
+PASS persisted completion agrees with the computed snapshot :: "completed"
+PASS next action owner and next item owner agree on every state :: [{"case": "reopened while HR reviews", "state": "reopened", "next_action_owner": "hr", "next_item": "b", "next_item_owner": "hr", "agrees": true}, {"case": "reopened while the employee corrects", "state": "reopened", "next_action_owner": "employee", "next_item": "b", "next_item_owner": "employee", "agrees": true}]
+PASS the named next item is required and open, never an optional one
+{
+  "cases": [
+    {
+      "case": "applied outranks an older rejected request",
+      "status": "proven",
+      "detail": {
+        "status": "accepted",
+        "rejection_reason": null,
+        "updated_at": "2026-08-06 21:19:52.296999+00:00"
+      }
+    },
+    {
+      "case": "reconcile reports the applied request",
+      "status": "proven",
+      "detail": {
+        "request_id": "20ca9480-1820-44b6-bfd8-f03c0cf75f90",
+        "state": "applied",
+        "changed": true
+      }
+    },
+    {
+      "case": "a second reconcile does not rewrite an already-correct row",
+      "status": "proven",
+      "detail": {
+        "request_id": "20ca9480-1820-44b6-bfd8-f03c0cf75f90",
+        "state": "applied",
+        "changed": false
+      }
+    },
+    {
+      "case": "bank counts as satisfied in canonical completion",
+      "status": "proven",
+      "detail": {
+        "state": "waiting_on_employee",
+        "satisfied_count": 1,
+        "required_total": 2
+      }
+    },
+    {
+      "case": "one Apply completes onboarding with no second action",
+      "status": "proven",
+      "detail": {
+        "state": "completed",
+        "next_owner": null
+      }
+    },
+    {
+      "case": "an open correction request owns the item and its reason",
+      "status": "proven",
+      "detail": {
+        "status": "replacement_required",
+        "rejection_reason": "Fix the account holder name.",
+        "updated_at": "2026-08-06 21:19:52.343830+00:00"
+      }
+    },
+    {
+      "case": "queue next owner is the employee, not the payroll rail",
+      "status": "proven",
+      "detail": {
+        "next_owner": "employee",
+        "next_owner_group": "employee",
+        "completion_state": "waiting_on_employee",
+        "next_item_label": "Recon bank_details"
+      }
+    },
+    {
+      "case": "queue completion state matches the contract",
+      "status": "proven",
+      "detail": "waiting_on_employee"
+    },
+    {
+      "case": "an open review request shows Needs HR with no stale reason",
+      "status": "proven",
+      "detail": {
+        "status": "processing",
+        "rejection_reason": null,
+        "updated_at": "2026-08-06 21:19:52.373396+00:00"
+      }
+    },
+    {
+      "case": "queue owner for a bank request under review is HR",
+      "status": "proven",
+      "detail": {
+        "next_owner": "hr",
+        "next_owner_group": "hr",
+        "completion_state": "waiting_on_hr"
+      }
+    },
+    {
+      "case": "a live effective bank record satisfies the item without an applied row",
+      "status": "proven",
+      "detail": {
+        "status": "accepted",
+        "rejection_reason": null,
+        "updated_at": "2026-08-06 21:19:52.390682+00:00"
+      }
+    },
+    {
+      "case": "no bank request leaves the checklist untouched",
+      "status": "proven",
+      "detail": {
+        "reconcile": null,
+        "item": {
+          "status": "pending",
+          "rejection_reason": null,
+          "updated_at": "2026-08-06 21:19:52.398049+00:00"
+        }
+      }
+    },
+    {
+      "case": "persisted completion agrees with the computed snapshot",
+      "status": "proven",
+      "detail": "completed"
+    },
+    {
+      "case": "next action owner and next item owner agree on every state",
+      "status": "proven",
+      "detail": [
+        {
+          "case": "reopened while HR reviews",
+          "state": "reopened",
+          "next_action_owner": "hr",
+          "next_item": "b",
+          "next_item_owner": "hr",
+          "agrees": true
+        },
+        {
+          "case": "reopened while the employee corrects",
+          "state": "reopened",
+          "next_action_owner": "employee",
+          "next_item": "b",
+          "next_item_owner": "employee",
+          "agrees": true
+        }
+      ]
+    },
+    {
+      "case": "the named next item is required and open, never an optional one",
+      "status": "proven",
+      "detail": null
+    }
+  ],
+  "failed": 0,
+  "created": [
+    "WATHEFNI-999901",
+    "WATHEFNI-999902",
+    "WATHEFNI-999903",
+    "WATHEFNI-999904",
+    "WATHEFNI-999905"
+  ]
+}
+RECONCILE_AUTHORITY_OK

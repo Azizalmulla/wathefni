@@ -1,0 +1,14 @@
+onboarding-queue: True
+onboarding-filters: True
+onboarding-page: True
+Open in Onboarding: True
+Cancel onboarding: True
+Send onboarding reminder: True
+Change start date?: True
+needs-attention-board: True
+Alerts & Delivery owns communication failures: True
+From accepted offer to ready-to-start: True
+exclude_pattern_found True employees`||e===`inbox`||e===`onboarding
+absent_'ما بعد التوظيف' False
+absent_'System of action' False
+absent_'still onboarding' True

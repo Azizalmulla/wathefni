@@ -1,0 +1,43 @@
+    pt3 role fit — db journeys
+      PASS  enable talent
+      PASS  enable succession
+      PASS  critical role
+      PASS  A create set without JA
+      PASS  A draft
+      PASS  A publish
+      PASS  B missing evaluate
+      PASS  B not_assessed
+      PASS  B no 0%
+      PASS  B no 100%
+      PASS  B suggestion unassessed not not_ready
+      PASS  B C6 not written
+      PASS  C claim skill
+      PASS  C claimed is not_permitted/not strong
+      PASS  C claimed not silently verified
+      PASS  D verify skill
+      PASS  D strong fit
+      PASS  D suggestion informs only
+      PASS  D human readiness still none
+      PASS  D C6 still not written
+      PASS  E plan
+      PASS  E human readiness
+      PASS  E human readiness authoritative
+      PASS  E fit did not overwrite C6
+      PASS  E C6 write flag false
+      PASS  E C6 band unchanged
+      PASS  F JA-linked set
+      PASS  F JA off → unavailable
+      PASS  F Talent continues
+      PASS  F no JA write
+      PASS  F Talent fit still works
+      PASS  G enable JA
+      PASS  G JA profile
+      PASS  G import draft
+      PASS  G import does not write JA
+      PASS  G JA profile count unchanged
+      PASS  H tenant isolation
+      PASS  I weighted refused
+
+    38 passed, 0 failed
+PT3_ROLE_FIT_READINESS_DB_PASS
+STAGING_RC=0

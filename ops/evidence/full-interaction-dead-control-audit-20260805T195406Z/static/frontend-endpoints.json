@@ -1,0 +1,2306 @@
+[
+  {
+    "file": "apps/wathefni-dashboard/src/setup-console/api.ts",
+    "line": 16,
+    "route": "/dashboard/superadmin/setup",
+    "normalized_route": "/dashboard/superadmin/setup",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/setup-console/api.ts:16"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/posthire/PayslipWorkspace.tsx",
+    "line": 364,
+    "route": "/dashboard/posthire/payroll/payslips/${encodeURIComponent(selectedId)}/download?locale=${locale}",
+    "normalized_route": "/dashboard/posthire/payroll/payslips/{param}/download",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/posthire/PayslipWorkspace.tsx:364"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 155,
+    "route": "/dashboard/auth/login",
+    "normalized_route": "/dashboard/auth/login",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:155"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 172,
+    "route": "/dashboard/team/invites/accept",
+    "normalized_route": "/dashboard/team/invites/accept",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:172"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 183,
+    "route": "/dashboard/auth/logout",
+    "normalized_route": "/dashboard/auth/logout",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:183"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 187,
+    "route": "/dashboard/team",
+    "normalized_route": "/dashboard/team",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:187"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 217,
+    "route": "/dashboard/team/people?${search.toString()}",
+    "normalized_route": "/dashboard/team/people",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:217"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 241,
+    "route": "/dashboard/activity?${search.toString()}",
+    "normalized_route": "/dashboard/activity",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:241"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 258,
+    "route": "/dashboard/team/invites",
+    "normalized_route": "/dashboard/team/invites",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:258"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 265,
+    "route": "/dashboard/team/users/${encodeURIComponent(userId)}",
+    "normalized_route": "/dashboard/team/users/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:265"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 272,
+    "route": "/dashboard/team/whatsapp-link",
+    "normalized_route": "/dashboard/team/whatsapp-link",
+    "method_hint": "PATCH",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:272"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 279,
+    "route": "/dashboard/prehire/summary",
+    "normalized_route": "/dashboard/prehire/summary",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:279"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 291,
+    "route": "/dashboard/prehire/overview/work-queue?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/overview/work-queue",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:291"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 302,
+    "route": "/dashboard/bootstrap",
+    "normalized_route": "/dashboard/bootstrap",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:302"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 316,
+    "route": "/dashboard/prehire/visibility-policy",
+    "normalized_route": "/dashboard/prehire/visibility-policy",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:316"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 331,
+    "route": "/dashboard/prehire/visibility-policy",
+    "normalized_route": "/dashboard/prehire/visibility-policy",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:331"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 412,
+    "route": "/dashboard/prehire/positions",
+    "normalized_route": "/dashboard/prehire/positions",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:412"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 420,
+    "route": "/dashboard/prehire/positions/${encodeURIComponent(positionCode)}",
+    "normalized_route": "/dashboard/prehire/positions/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:420"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 435,
+    "route": "/dashboard/prehire/positions/${encodeURIComponent(positionCode)}/status",
+    "normalized_route": "/dashboard/prehire/positions/{param}/status",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:435"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 449,
+    "route": "/dashboard/setup/readiness",
+    "normalized_route": "/dashboard/setup/readiness",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:449"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 460,
+    "route": "/dashboard/prehire/reports?locale=${encodeURIComponent(locale)}",
+    "normalized_route": "/dashboard/prehire/reports",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:460"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 467,
+    "route": "/dashboard/prehire/reports/export?type=${encodeURIComponent(type)}",
+    "normalized_route": "/dashboard/prehire/reports/export",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:467"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 487,
+    "route": "/dashboard/prehire/chat/sessions",
+    "normalized_route": "/dashboard/prehire/chat/sessions",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:487"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 492,
+    "route": "/dashboard/prehire/assistant/capabilities?locale=${encodeURIComponent(locale)}",
+    "normalized_route": "/dashboard/prehire/assistant/capabilities",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:492"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 499,
+    "route": "/dashboard/prehire/chat/sessions/${encodeURIComponent(conversationId)}",
+    "normalized_route": "/dashboard/prehire/chat/sessions/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:499"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 505,
+    "route": "/dashboard/prehire/chat/sessions/new",
+    "normalized_route": "/dashboard/prehire/chat/sessions/new",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:505"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 524,
+    "route": "/dashboard/prehire/chat/stream",
+    "normalized_route": "/dashboard/prehire/chat/stream",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:524"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 644,
+    "route": "/dashboard/prehire/applications?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/applications",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:644"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 649,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/profile",
+    "normalized_route": "/dashboard/prehire/applications/{param}/profile",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:649"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 657,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/person-profile",
+    "normalized_route": "/dashboard/prehire/applications/{param}/person-profile",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:657"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 669,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/person-profile/add-to-job",
+    "normalized_route": "/dashboard/prehire/applications/{param}/person-profile/add-to-job",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:669"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 691,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/facts/review",
+    "normalized_route": "/dashboard/prehire/applications/{param}/facts/review",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:691"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 705,
+    "route": "/dashboard/prehire/candidates/feature",
+    "normalized_route": "/dashboard/prehire/candidates/feature",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:705"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 720,
+    "route": "/dashboard/prehire/classification/feature",
+    "normalized_route": "/dashboard/prehire/classification/feature",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:720"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 746,
+    "route": "/dashboard/prehire/classification/taxonomy",
+    "normalized_route": "/dashboard/prehire/classification/taxonomy",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:746"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 759,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/classification${suffix}",
+    "normalized_route": "/dashboard/prehire/applications/{param}/classification{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:759"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 770,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/classification/review",
+    "normalized_route": "/dashboard/prehire/applications/{param}/classification/review",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:770"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 778,
+    "route": "/dashboard/prehire/candidates/saved-views",
+    "normalized_route": "/dashboard/prehire/candidates/saved-views",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:778"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 788,
+    "route": "/dashboard/prehire/candidates/saved-views",
+    "normalized_route": "/dashboard/prehire/candidates/saved-views",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:788"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 796,
+    "route": "/dashboard/prehire/candidates/saved-views/${encodeURIComponent(viewId)}",
+    "normalized_route": "/dashboard/prehire/candidates/saved-views/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:796"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 812,
+    "route": "/dashboard/prehire/rank?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/rank",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:812"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 823,
+    "route": "/dashboard/prehire/notifications?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/notifications",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:823"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 843,
+    "route": "/dashboard/prehire/assessments?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/assessments",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:843"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 859,
+    "route": "/dashboard/prehire/interviews?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/interviews",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:859"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 863,
+    "route": "/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}",
+    "normalized_route": "/dashboard/prehire/interviews/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:863"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 870,
+    "route": "/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/actions/assign-interviewer",
+    "normalized_route": "/dashboard/prehire/interviews/{param}/actions/assign-interviewer",
+    "method_hint": "PATCH",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:870"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 877,
+    "route": "/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/actions/send-video-invitation",
+    "normalized_route": "/dashboard/prehire/interviews/{param}/actions/send-video-invitation",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:877"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 884,
+    "route": "/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/reschedule",
+    "normalized_route": "/dashboard/prehire/interviews/{param}/reschedule",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:884"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 902,
+    "route": "/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/notes",
+    "normalized_route": "/dashboard/prehire/interviews/{param}/notes",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:902"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 909,
+    "route": "/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/transcripts/retry",
+    "normalized_route": "/dashboard/prehire/interviews/{param}/transcripts/retry",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:909"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 926,
+    "route": "/dashboard/prehire/assessments/config",
+    "normalized_route": "/dashboard/prehire/assessments/config",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:926"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 929,
+    "route": "/dashboard/prehire/assessments/authoring/product2",
+    "normalized_route": "/dashboard/prehire/assessments/authoring/product2",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:929"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1035,
+    "route": "/dashboard/prehire/assessments/authoring/drafts?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/assessments/authoring/drafts",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1035"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1051,
+    "route": "/dashboard/prehire/assessments/authoring/drafts/${encodeURIComponent(draftId)}/transition",
+    "normalized_route": "/dashboard/prehire/assessments/authoring/drafts/{param}/transition",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1051"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1059,
+    "route": "/dashboard/prehire/assessments/norms/recalculate?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/assessments/norms/recalculate",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1059"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1066,
+    "route": "/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}",
+    "normalized_route": "/dashboard/prehire/assessments/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1066"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1077,
+    "route": "/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/report",
+    "normalized_route": "/dashboard/prehire/assessments/{param}/report",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1077"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1097,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/cv/preview",
+    "normalized_route": "/dashboard/prehire/applications/{param}/cv/preview",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1097"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1123,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/cv/preview",
+    "normalized_route": "/dashboard/prehire/applications/{param}/cv/preview",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1123"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1180,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(application.app_key)}/confirmations",
+    "normalized_route": "/dashboard/prehire/applications/{param}/confirmations",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1180"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1226,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/notify",
+    "normalized_route": "/dashboard/prehire/applications/{param}/notify",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1226"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1233,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/assessment",
+    "normalized_route": "/dashboard/prehire/applications/{param}/assessment",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1233"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1240,
+    "route": "/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/resend",
+    "normalized_route": "/dashboard/prehire/assessments/{param}/resend",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1240"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1247,
+    "route": "/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/cancel",
+    "normalized_route": "/dashboard/prehire/assessments/{param}/cancel",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1247"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1259,
+    "route": "/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/review",
+    "normalized_route": "/dashboard/prehire/assessments/{param}/review",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1259"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1270,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/video-interview",
+    "normalized_route": "/dashboard/prehire/applications/{param}/video-interview",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1270"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1288,
+    "route": "/dashboard/prehire/import/upload",
+    "normalized_route": "/dashboard/prehire/import/upload",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1288"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1295,
+    "route": "/dashboard/prehire/import/batches?limit=${limit}",
+    "normalized_route": "/dashboard/prehire/import/batches",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1295"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1302,
+    "route": "/dashboard/prehire/import/review?${search.toString()}",
+    "normalized_route": "/dashboard/prehire/import/review",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1302"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1310,
+    "route": "/dashboard/prehire/import/items/assign",
+    "normalized_route": "/dashboard/prehire/import/items/assign",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1310"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1317,
+    "route": "/dashboard/prehire/import/intake?limit=${limit}",
+    "normalized_route": "/dashboard/prehire/import/intake",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1317"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1324,
+    "route": "/dashboard/prehire/import/items/bulk",
+    "normalized_route": "/dashboard/prehire/import/items/bulk",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1324"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1331,
+    "route": "/dashboard/prehire/import/settings",
+    "normalized_route": "/dashboard/prehire/import/settings",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1331"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1335,
+    "route": "/dashboard/prehire/import/settings",
+    "normalized_route": "/dashboard/prehire/import/settings",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1335"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1342,
+    "route": "/dashboard/prehire/import/batches/${encodeURIComponent(batchId)}/report.csv",
+    "normalized_route": "/dashboard/prehire/import/batches/{param}/report.csv",
+    "method_hint": "PUT",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1342"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1359,
+    "route": "/dashboard/prehire/integrations/email",
+    "normalized_route": "/dashboard/prehire/integrations/email",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1359"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1375,
+    "route": "/dashboard/prehire/integrations/intake",
+    "normalized_route": "/dashboard/prehire/integrations/intake",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1375"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1387,
+    "route": "/dashboard/prehire/integrations/intake",
+    "normalized_route": "/dashboard/prehire/integrations/intake",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1387"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1395,
+    "route": "/dashboard/prehire/integrations/intake/${encodeURIComponent(intakeId)}/disable",
+    "normalized_route": "/dashboard/prehire/integrations/intake/{param}/disable",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1395"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1403,
+    "route": "/dashboard/prehire/integrations/intake/${encodeURIComponent(intakeId)}/rotate",
+    "normalized_route": "/dashboard/prehire/integrations/intake/{param}/rotate",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1403"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1423,
+    "route": "/dashboard/prehire/integrations/email",
+    "normalized_route": "/dashboard/prehire/integrations/email",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1423"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1430,
+    "route": "/dashboard/prehire/integrations/email/action",
+    "normalized_route": "/dashboard/prehire/integrations/email/action",
+    "method_hint": "PUT",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1430"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1437,
+    "route": "/dashboard/prehire/integrations/mailbox",
+    "normalized_route": "/dashboard/prehire/integrations/mailbox",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1437"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1441,
+    "route": "/dashboard/prehire/integrations/mailbox/connect",
+    "normalized_route": "/dashboard/prehire/integrations/mailbox/connect",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1441"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1448,
+    "route": "/dashboard/prehire/integrations/mailbox/${encodeURIComponent(mailboxId)}/labels",
+    "normalized_route": "/dashboard/prehire/integrations/mailbox/{param}/labels",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1448"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1452,
+    "route": "/dashboard/prehire/integrations/mailbox/${encodeURIComponent(mailboxId)}",
+    "normalized_route": "/dashboard/prehire/integrations/mailbox/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1452"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1459,
+    "route": "/dashboard/prehire/integrations/mailbox/${encodeURIComponent(mailboxId)}/check-now",
+    "normalized_route": "/dashboard/prehire/integrations/mailbox/{param}/check-now",
+    "method_hint": "PATCH",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1459"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1465,
+    "route": "/dashboard/prehire/integrations/mailbox/${encodeURIComponent(mailboxId)}",
+    "normalized_route": "/dashboard/prehire/integrations/mailbox/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1465"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1477,
+    "route": "/dashboard/posthire/action",
+    "normalized_route": "/dashboard/posthire/action",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1477"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1500,
+    "route": "/dashboard/posthire/employees",
+    "normalized_route": "/dashboard/posthire/employees",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1500"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1598,
+    "route": "/dashboard/posthire/employees/import",
+    "normalized_route": "/dashboard/posthire/employees/import",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1598"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1610,
+    "route": "/dashboard/posthire/employees/import-batches?limit=${limit}",
+    "normalized_route": "/dashboard/posthire/employees/import-batches",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1610"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1617,
+    "route": "/dashboard/posthire/employees/import-batches/${encodeURIComponent(batchId)}",
+    "normalized_route": "/dashboard/posthire/employees/import-batches/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1617"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1624,
+    "route": "/dashboard/posthire/employees/import-review?limit=${limit}",
+    "normalized_route": "/dashboard/posthire/employees/import-review",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1624"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1631,
+    "route": "/dashboard/posthire/employees/import-batches/${encodeURIComponent(batchId)}/rows/${encodeURIComponent(rowId)}/approve-name-change",
+    "normalized_route": "/dashboard/posthire/employees/import-batches/{param}/rows/{param}/approve-name-change",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1631"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1639,
+    "route": "/dashboard/posthire/employees/import-batches/${encodeURIComponent(batchId)}/rows/${encodeURIComponent(rowId)}/apply-approved-name-change",
+    "normalized_route": "/dashboard/posthire/employees/import-batches/{param}/rows/{param}/apply-approved-name-change",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1639"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1647,
+    "route": "/dashboard/posthire/employees/import-batches/${encodeURIComponent(batchId)}/exceptions.csv",
+    "normalized_route": "/dashboard/posthire/employees/import-batches/{param}/exceptions.csv",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1647"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1666,
+    "route": "/dashboard/posthire/employees/import-batches/${encodeURIComponent(batchId)}/rollback",
+    "normalized_route": "/dashboard/posthire/employees/import-batches/{param}/rollback",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1666"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1689,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}",
+    "normalized_route": "/dashboard/posthire/employees/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1689"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1723,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/status",
+    "normalized_route": "/dashboard/posthire/employees/{param}/status",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1723"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1765,
+    "route": "/dashboard/posthire/employee-status/approval-policy",
+    "normalized_route": "/dashboard/posthire/employee-status/approval-policy",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1765"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1771,
+    "route": "/dashboard/posthire/employee-status/pending${q}",
+    "normalized_route": "/dashboard/posthire/employee-status/pending{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1771"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1790,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/status/requests",
+    "normalized_route": "/dashboard/posthire/employees/{param}/status/requests",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1790"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1798,
+    "route": "/dashboard/posthire/employee-status/requests/${encodeURIComponent(requestId)}/cancel",
+    "normalized_route": "/dashboard/posthire/employee-status/requests/{param}/cancel",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1798"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1817,
+    "route": "/dashboard/posthire/employee-status/requests/${encodeURIComponent(requestId)}/decide",
+    "normalized_route": "/dashboard/posthire/employee-status/requests/{param}/decide",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1817"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1843,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/app-invite",
+    "normalized_route": "/dashboard/posthire/employees/{param}/app-invite",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1843"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1850,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}",
+    "normalized_route": "/dashboard/posthire/employees/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1850"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1863,
+    "route": "/dashboard/posthire/onboarding/${encodeURIComponent(employeeKey)}",
+    "normalized_route": "/dashboard/posthire/onboarding/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1863"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1896,
+    "route": "/dashboard/posthire/attendance/import/preview",
+    "normalized_route": "/dashboard/posthire/attendance/import/preview",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1896"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1904,
+    "route": "/dashboard/posthire/attendance/import/commit",
+    "normalized_route": "/dashboard/posthire/attendance/import/commit",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1904"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1908,
+    "route": "/dashboard/posthire/attendance/import/batches",
+    "normalized_route": "/dashboard/posthire/attendance/import/batches",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1908"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1912,
+    "route": "/dashboard/posthire/attendance/import/batches/${encodeURIComponent(batchId)}/reverse",
+    "normalized_route": "/dashboard/posthire/attendance/import/batches/{param}/reverse",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1912"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1916,
+    "route": "/dashboard/posthire/attendance/import/mappings",
+    "normalized_route": "/dashboard/posthire/attendance/import/mappings",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1916"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1921,
+    "route": "/dashboard/posthire/attendance/capture-ops",
+    "normalized_route": "/dashboard/posthire/attendance/capture-ops",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1921"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1925,
+    "route": "/dashboard/posthire/attendance/capture-ops/seed-synthetic",
+    "normalized_route": "/dashboard/posthire/attendance/capture-ops/seed-synthetic",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1925"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1937,
+    "route": "/dashboard/posthire/attendance/capture-ops/remediation/${encodeURIComponent(itemId)}/approve-mapping",
+    "normalized_route": "/dashboard/posthire/attendance/capture-ops/remediation/{param}/approve-mapping",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1937"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1949,
+    "route": "/dashboard/posthire/attendance/capture-ops/remediation/${encodeURIComponent(itemId)}/reject",
+    "normalized_route": "/dashboard/posthire/attendance/capture-ops/remediation/{param}/reject",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1949"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1969,
+    "route": "/dashboard/posthire/attendance/capture-ops/connectors/${encodeURIComponent(connectorId)}/health",
+    "normalized_route": "/dashboard/posthire/attendance/capture-ops/connectors/{param}/health",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1969"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1976,
+    "route": "/dashboard/posthire/attendance/import/mappings",
+    "normalized_route": "/dashboard/posthire/attendance/import/mappings",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1976"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1983,
+    "route": "/dashboard/posthire/attendance/import/map",
+    "normalized_route": "/dashboard/posthire/attendance/import/map",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1983"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 1995,
+    "route": "/dashboard/attendance/ops/exceptions${suffix}",
+    "normalized_route": "/dashboard/attendance/ops/exceptions{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:1995"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2004,
+    "route": "/dashboard/attendance/ops/exceptions/${encodeURIComponent(exceptionId)}/assign",
+    "normalized_route": "/dashboard/attendance/ops/exceptions/{param}/assign",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2004"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2016,
+    "route": "/dashboard/attendance/ops/exceptions/${encodeURIComponent(exceptionId)}/reopen",
+    "normalized_route": "/dashboard/attendance/ops/exceptions/{param}/reopen",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2016"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2033,
+    "route": "/dashboard/attendance/ops/corrections",
+    "normalized_route": "/dashboard/attendance/ops/corrections",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2033"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2045,
+    "route": "/dashboard/attendance/ops/cases/${encodeURIComponent(caseId)}/review",
+    "normalized_route": "/dashboard/attendance/ops/cases/{param}/review",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2045"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2057,
+    "route": "/dashboard/attendance/ops/cases/${encodeURIComponent(caseId)}/apply",
+    "normalized_route": "/dashboard/attendance/ops/cases/{param}/apply",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2057"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2067,
+    "route": "/dashboard/attendance/ops/disputes",
+    "normalized_route": "/dashboard/attendance/ops/disputes",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2067"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2079,
+    "route": "/dashboard/attendance/ops/disputes/${encodeURIComponent(disputeId)}/resolve",
+    "normalized_route": "/dashboard/attendance/ops/disputes/{param}/resolve",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2079"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2089,
+    "route": "/dashboard/attendance/ops/comments",
+    "normalized_route": "/dashboard/attendance/ops/comments",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2089"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2099,
+    "route": "/dashboard/posthire/attendance/export.csv?${params.toString()}",
+    "normalized_route": "/dashboard/posthire/attendance/export.csv",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2099"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2189,
+    "route": "/dashboard/posthire/shifts",
+    "normalized_route": "/dashboard/posthire/shifts",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2189"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2201,
+    "route": "/dashboard/posthire/shifts/${encodeURIComponent(shiftId)}/cancel",
+    "normalized_route": "/dashboard/posthire/shifts/{param}/cancel",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2201"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2222,
+    "route": "/dashboard/posthire/shifts/${encodeURIComponent(shiftId)}/reschedule",
+    "normalized_route": "/dashboard/posthire/shifts/{param}/reschedule",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2222"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2230,
+    "route": "/dashboard/posthire/shifts/${encodeURIComponent(shiftId)}/history",
+    "normalized_route": "/dashboard/posthire/shifts/{param}/history",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2230"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2241,
+    "route": "/dashboard/posthire/shifts/reconciliation/${encodeURIComponent(flagId)}/resolve",
+    "normalized_route": "/dashboard/posthire/shifts/reconciliation/{param}/resolve",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2241"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2251,
+    "route": "/dashboard/posthire/shifts/templates${qs}",
+    "normalized_route": "/dashboard/posthire/shifts/templates{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2251"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2272,
+    "route": "/dashboard/posthire/shifts/templates",
+    "normalized_route": "/dashboard/posthire/shifts/templates",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2272"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2280,
+    "route": "/dashboard/posthire/shifts/recurrences",
+    "normalized_route": "/dashboard/posthire/shifts/recurrences",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2280"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2289,
+    "route": "/dashboard/posthire/shifts/recurrences",
+    "normalized_route": "/dashboard/posthire/shifts/recurrences",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2289"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2306,
+    "route": "/dashboard/posthire/shifts/recurrences/${encodeURIComponent(recurrenceId)}/preview",
+    "normalized_route": "/dashboard/posthire/shifts/recurrences/{param}/preview",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2306"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2321,
+    "route": "/dashboard/posthire/shifts/recurrences/${encodeURIComponent(recurrenceId)}/materialize",
+    "normalized_route": "/dashboard/posthire/shifts/recurrences/{param}/materialize",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2321"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2330,
+    "route": "/dashboard/posthire/shifts/schedule-periods",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2330"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2349,
+    "route": "/dashboard/posthire/shifts/schedule-periods",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2349"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2361,
+    "route": "/dashboard/posthire/shifts/schedule-periods/${encodeURIComponent(periodId)}/generate-draft",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods/{param}/generate-draft",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2361"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2373,
+    "route": "/dashboard/posthire/shifts/schedule-versions/${encodeURIComponent(versionId)}/transition",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-versions/{param}/transition",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2373"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2381,
+    "route": "/dashboard/posthire/shifts/schedule-versions/${encodeURIComponent(versionId)}/review-diff",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-versions/{param}/review-diff",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2381"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2392,
+    "route": "/dashboard/posthire/shifts/schedule-versions/${encodeURIComponent(versionId)}/publish",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-versions/{param}/publish",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2392"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2400,
+    "route": "/dashboard/posthire/shifts/open-shifts",
+    "normalized_route": "/dashboard/posthire/shifts/open-shifts",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2400"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2407,
+    "route": "/dashboard/posthire/shifts/coverage-rules",
+    "normalized_route": "/dashboard/posthire/shifts/coverage-rules",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2407"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2425,
+    "route": "/dashboard/posthire/shifts/open-shifts",
+    "normalized_route": "/dashboard/posthire/shifts/open-shifts",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2425"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2446,
+    "route": "/dashboard/posthire/shifts/coverage-rules",
+    "normalized_route": "/dashboard/posthire/shifts/coverage-rules",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2446"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2454,
+    "route": "/dashboard/posthire/shifts/schedule-periods/${encodeURIComponent(periodId)}/new-draft",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods/{param}/new-draft",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2454"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2466,
+    "route": "/dashboard/posthire/shifts/schedule-periods/${encodeURIComponent(periodId)}/rollback",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods/{param}/rollback",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2466"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2474,
+    "route": "/dashboard/posthire/shifts/schedule-periods/${encodeURIComponent(periodId)}/versions",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods/{param}/versions",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2474"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2482,
+    "route": "/dashboard/posthire/shifts/rotations/patterns",
+    "normalized_route": "/dashboard/posthire/shifts/rotations/patterns",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2482"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2492,
+    "route": "/dashboard/posthire/shifts/rotations/patterns",
+    "normalized_route": "/dashboard/posthire/shifts/rotations/patterns",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2492"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2500,
+    "route": "/dashboard/posthire/shifts/rotations/assignments",
+    "normalized_route": "/dashboard/posthire/shifts/rotations/assignments",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2500"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2507,
+    "route": "/dashboard/posthire/shifts/rotations/assignments",
+    "normalized_route": "/dashboard/posthire/shifts/rotations/assignments",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2507"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2519,
+    "route": "/dashboard/posthire/shifts/rotations/assignments/${encodeURIComponent(assignmentId)}/preview",
+    "normalized_route": "/dashboard/posthire/shifts/rotations/assignments/{param}/preview",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2519"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2531,
+    "route": "/dashboard/posthire/shifts/schedule-periods/${encodeURIComponent(periodId)}/generate-from-rotation",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-periods/{param}/generate-from-rotation",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2531"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2539,
+    "route": "/dashboard/posthire/shifts/compliance-profiles",
+    "normalized_route": "/dashboard/posthire/shifts/compliance-profiles",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2539"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2546,
+    "route": "/dashboard/posthire/shifts/compliance-profiles",
+    "normalized_route": "/dashboard/posthire/shifts/compliance-profiles",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2546"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2561,
+    "route": "/dashboard/posthire/shifts/schedule-versions/${encodeURIComponent(versionId)}/pam-export",
+    "normalized_route": "/dashboard/posthire/shifts/schedule-versions/{param}/pam-export",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2561"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2569,
+    "route": "/dashboard/posthire/shifts/pam-exports",
+    "normalized_route": "/dashboard/posthire/shifts/pam-exports",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2569"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2588,
+    "route": "/dashboard/posthire/payroll/exports/${encodeURIComponent(exportId)}",
+    "normalized_route": "/dashboard/posthire/payroll/exports/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2588"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2593,
+    "route": "/dashboard/posthire/payroll/exports/${encodeURIComponent(exportId)}/download.csv",
+    "normalized_route": "/dashboard/posthire/payroll/exports/{param}/download.csv",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2593"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2619,
+    "route": "/dashboard/posthire/payroll/external",
+    "normalized_route": "/dashboard/posthire/payroll/external",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2619"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2628,
+    "route": "/dashboard/posthire/payroll/external/readiness?${params}",
+    "normalized_route": "/dashboard/posthire/payroll/external/readiness",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2628"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2635,
+    "route": "/dashboard/posthire/payroll/external/exports",
+    "normalized_route": "/dashboard/posthire/payroll/external/exports",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2635"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2643,
+    "route": "/dashboard/posthire/payroll/external/exports/${encodeURIComponent(exportRunId)}/download.csv",
+    "normalized_route": "/dashboard/posthire/payroll/external/exports/{param}/download.csv",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2643"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2673,
+    "route": "/dashboard/posthire/payroll/external/exports/${encodeURIComponent(exportRunId)}/import",
+    "normalized_route": "/dashboard/posthire/payroll/external/exports/{param}/import",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2673"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2684,
+    "route": "/dashboard/posthire/payroll/external/exports/${encodeURIComponent(exportRunId)}/reconcile",
+    "normalized_route": "/dashboard/posthire/payroll/external/exports/{param}/reconcile",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2684"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2692,
+    "route": "/dashboard/posthire/payroll/external/imports/${encodeURIComponent(importRunId)}",
+    "normalized_route": "/dashboard/posthire/payroll/external/imports/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2692"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2703,
+    "route": "/dashboard/posthire/payroll/external/exports/${encodeURIComponent(exportRunId)}/rollback",
+    "normalized_route": "/dashboard/posthire/payroll/external/exports/{param}/rollback",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2703"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2715,
+    "route": "/dashboard/posthire/payroll/external/quarantine/${encodeURIComponent(quarantineId)}/acknowledge",
+    "normalized_route": "/dashboard/posthire/payroll/external/quarantine/{param}/acknowledge",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2715"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2722,
+    "route": "/dashboard/posthire/payroll/payslips",
+    "normalized_route": "/dashboard/posthire/payroll/payslips",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2722"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2727,
+    "route": "/dashboard/posthire/payroll/payslips/${encodeURIComponent(payslipId)}",
+    "normalized_route": "/dashboard/posthire/payroll/payslips/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2727"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2736,
+    "route": "/dashboard/posthire/payroll/payslips/native",
+    "normalized_route": "/dashboard/posthire/payroll/payslips/native",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2736"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2746,
+    "route": "/dashboard/posthire/payroll/payslips/external",
+    "normalized_route": "/dashboard/posthire/payroll/payslips/external",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2746"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2754,
+    "route": "/dashboard/posthire/payroll/payslips/${encodeURIComponent(payslipId)}/replace",
+    "normalized_route": "/dashboard/posthire/payroll/payslips/{param}/replace",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2754"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2762,
+    "route": "/dashboard/posthire/payroll/payslips/${encodeURIComponent(payslipId)}/revoke",
+    "normalized_route": "/dashboard/posthire/payroll/payslips/{param}/revoke",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2762"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2769,
+    "route": "/dashboard/posthire/payroll/close-export",
+    "normalized_route": "/dashboard/posthire/payroll/close-export",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2769"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2776,
+    "route": "/dashboard/posthire/payroll/close-export/runs",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2776"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2788,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/submit",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/submit",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2788"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2800,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/approve",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/approve",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2800"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2812,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/close",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/close",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2812"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2820,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/journal",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/journal",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2820"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2832,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/bank-contract",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/bank-contract",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2832"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2844,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/reopen/initiate",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/reopen/initiate",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2844"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2856,
+    "route": "/dashboard/posthire/payroll/close-export/runs/${encodeURIComponent(closeRunId)}/reopen/confirm",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/runs/{param}/reopen/confirm",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2856"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2866,
+    "route": "/dashboard/posthire/payroll/close-export/finance-exports",
+    "normalized_route": "/dashboard/posthire/payroll/close-export/finance-exports",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2866"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2873,
+    "route": "/dashboard/posthire/payroll/statutory",
+    "normalized_route": "/dashboard/posthire/payroll/statutory",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2873"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2887,
+    "route": "/dashboard/posthire/payroll/statutory/pifss",
+    "normalized_route": "/dashboard/posthire/payroll/statutory/pifss",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2887"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2909,
+    "route": "/dashboard/posthire/payroll/statutory/eos",
+    "normalized_route": "/dashboard/posthire/payroll/statutory/eos",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2909"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2922,
+    "route": "/dashboard/posthire/payroll/statutory/${encodeURIComponent(kind)}/${encodeURIComponent(worksheetId)}/submit",
+    "normalized_route": "/dashboard/posthire/payroll/statutory/{param}/{param}/submit",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2922"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2935,
+    "route": "/dashboard/posthire/payroll/statutory/${encodeURIComponent(kind)}/${encodeURIComponent(worksheetId)}/approve",
+    "normalized_route": "/dashboard/posthire/payroll/statutory/{param}/{param}/approve",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2935"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2948,
+    "route": "/dashboard/posthire/payroll/statutory/${encodeURIComponent(kind)}/${encodeURIComponent(worksheetId)}/override/initiate",
+    "normalized_route": "/dashboard/posthire/payroll/statutory/{param}/{param}/override/initiate",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2948"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2961,
+    "route": "/dashboard/posthire/payroll/statutory/${encodeURIComponent(kind)}/${encodeURIComponent(worksheetId)}/override/confirm",
+    "normalized_route": "/dashboard/posthire/payroll/statutory/{param}/{param}/override/confirm",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2961"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2968,
+    "route": "/dashboard/posthire/analytics",
+    "normalized_route": "/dashboard/posthire/analytics",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2968"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2972,
+    "route": "/dashboard/posthire/action-inbox",
+    "normalized_route": "/dashboard/posthire/action-inbox",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2972"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 2989,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents",
+    "normalized_route": "/dashboard/posthire/employees/{param}/documents",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:2989"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3008,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents/compliance",
+    "normalized_route": "/dashboard/posthire/employees/{param}/documents/compliance",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3008"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3026,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents/${encodeURIComponent(documentType)}/review",
+    "normalized_route": "/dashboard/posthire/employees/{param}/documents/{param}/review",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3026"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3042,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents",
+    "normalized_route": "/dashboard/posthire/employees/{param}/documents",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3042"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3066,
+    "route": "/dashboard/posthire/documents/${encodeURIComponent(fileId)}?disposition=${disposition}",
+    "normalized_route": "/dashboard/posthire/documents/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3066"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3107,
+    "route": "/dashboard/hr-tasks?${search.toString()}",
+    "normalized_route": "/dashboard/hr-tasks",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3107"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3112,
+    "route": "/dashboard/hr-tasks/${encodeURIComponent(taskId)}/resolve",
+    "normalized_route": "/dashboard/hr-tasks/{param}/resolve",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3112"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3122,
+    "route": "/dashboard/outbound/needs-follow-up?${search.toString()}",
+    "normalized_route": "/dashboard/outbound/needs-follow-up",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3122"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3129,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/evaluation${suffix}",
+    "normalized_route": "/dashboard/prehire/applications/{param}/evaluation{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3129"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3246,
+    "route": "/dashboard/calendar/events?${search.toString()}",
+    "normalized_route": "/dashboard/calendar/events",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3246"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3258,
+    "route": "/dashboard/calendar/team-scopes",
+    "normalized_route": "/dashboard/calendar/team-scopes",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3258"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3263,
+    "route": "/dashboard/calendar/overview?${search.toString()}",
+    "normalized_route": "/dashboard/calendar/overview",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3263"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3274,
+    "route": "/dashboard/calendar/conflicts/preview",
+    "normalized_route": "/dashboard/calendar/conflicts/preview",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3274"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3279,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}",
+    "normalized_route": "/dashboard/calendar/events/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3279"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3286,
+    "route": "/dashboard/calendar/events",
+    "normalized_route": "/dashboard/calendar/events",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3286"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3294,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}",
+    "normalized_route": "/dashboard/calendar/events/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3294"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3306,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}/cancel",
+    "normalized_route": "/dashboard/calendar/events/{param}/cancel",
+    "method_hint": "PATCH",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3306"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3318,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}/rsvp",
+    "normalized_route": "/dashboard/calendar/events/{param}/rsvp",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3318"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3331,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}/guests/${encodeURIComponent(guestId)}/invite",
+    "normalized_route": "/dashboard/calendar/events/{param}/guests/{param}/invite",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3331"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3359,
+    "route": "/dashboard/calendar/reschedule-requests/${encodeURIComponent(requestId)}/resolve",
+    "normalized_route": "/dashboard/calendar/reschedule-requests/{param}/resolve",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3359"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3424,
+    "route": "/dashboard/calendar/sync/connections",
+    "normalized_route": "/dashboard/calendar/sync/connections",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3424"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3437,
+    "route": "/dashboard/platform/integrations",
+    "normalized_route": "/dashboard/platform/integrations",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3437"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3446,
+    "route": "/dashboard/platform/integrations/checklist?provider_key=${encodeURIComponent(providerKey)}&mode=${encodeURIComponent(mode)}",
+    "normalized_route": "/dashboard/platform/integrations/checklist",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3446"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3456,
+    "route": "/dashboard/platform/integrations/oauth/start",
+    "normalized_route": "/dashboard/platform/integrations/oauth/start",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3456"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3478,
+    "route": "/dashboard/platform/integrations/microsoft/enterprise",
+    "normalized_route": "/dashboard/platform/integrations/microsoft/enterprise",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3478"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3495,
+    "route": "/dashboard/platform/integrations/google/enterprise",
+    "normalized_route": "/dashboard/platform/integrations/google/enterprise",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3495"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3503,
+    "route": "/dashboard/platform/integrations/${encodeURIComponent(integrationId)}/health",
+    "normalized_route": "/dashboard/platform/integrations/{param}/health",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3503"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3511,
+    "route": "/dashboard/platform/integrations/${encodeURIComponent(integrationId)}/disconnect",
+    "normalized_route": "/dashboard/platform/integrations/{param}/disconnect",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3511"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3535,
+    "route": "/dashboard/platform/integrations/connect",
+    "normalized_route": "/dashboard/platform/integrations/connect",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3535"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3554,
+    "route": "/dashboard/calendar/sync/connections/google",
+    "normalized_route": "/dashboard/calendar/sync/connections/google",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3554"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3575,
+    "route": "/dashboard/calendar/sync/connections/microsoft",
+    "normalized_route": "/dashboard/calendar/sync/connections/microsoft",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3575"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3586,
+    "route": "/dashboard/calendar/sync/connections/legacy-operator",
+    "normalized_route": "/dashboard/calendar/sync/connections/legacy-operator",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3586"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3604,
+    "route": "/dashboard/calendar/sync/connections/${encodeURIComponent(connectionId)}",
+    "normalized_route": "/dashboard/calendar/sync/connections/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3604"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3612,
+    "route": "/dashboard/calendar/sync/connections/${encodeURIComponent(connectionId)}/disconnect",
+    "normalized_route": "/dashboard/calendar/sync/connections/{param}/disconnect",
+    "method_hint": "PATCH",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3612"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3620,
+    "route": "/dashboard/calendar/sync/connections/${encodeURIComponent(connectionId)}/reconnect",
+    "normalized_route": "/dashboard/calendar/sync/connections/{param}/reconnect",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3620"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3634,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}/sync",
+    "normalized_route": "/dashboard/calendar/events/{param}/sync",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3634"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3642,
+    "route": "/dashboard/calendar/events/${encodeURIComponent(eventId)}/sync/retry",
+    "normalized_route": "/dashboard/calendar/events/{param}/sync/retry",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3642"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3663,
+    "route": "/dashboard/posthire/employee-lifecycle/requests/${encodeURIComponent(requestId)}/decide",
+    "normalized_route": "/dashboard/posthire/employee-lifecycle/requests/{param}/decide",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3663"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3671,
+    "route": "/dashboard/posthire/employee-lifecycle/requests/${encodeURIComponent(requestId)}/cancel",
+    "normalized_route": "/dashboard/posthire/employee-lifecycle/requests/{param}/cancel",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3671"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3678,
+    "route": "/dashboard/posthire/employee-lifecycle/remediation",
+    "normalized_route": "/dashboard/posthire/employee-lifecycle/remediation",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3678"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3689,
+    "route": "/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/org-history",
+    "normalized_route": "/dashboard/posthire/employees/{param}/org-history",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3689"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3700,
+    "route": "/dashboard/posthire/employee-org/migration-batches?limit=${limit}",
+    "normalized_route": "/dashboard/posthire/employee-org/migration-batches",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3700"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3705,
+    "route": "/dashboard/posthire/employee-org/migration-batches/${encodeURIComponent(batchId)}/dry-run",
+    "normalized_route": "/dashboard/posthire/employee-org/migration-batches/{param}/dry-run",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3705"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3713,
+    "route": "/dashboard/posthire/employee-org/migration-batches/${encodeURIComponent(batchId)}/commit",
+    "normalized_route": "/dashboard/posthire/employee-org/migration-batches/{param}/commit",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3713"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3721,
+    "route": "/dashboard/posthire/employee-org/migration-batches/${encodeURIComponent(batchId)}/rollback",
+    "normalized_route": "/dashboard/posthire/employee-org/migration-batches/{param}/rollback",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3721"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3729,
+    "route": "/dashboard/posthire/employee-ess/policy",
+    "normalized_route": "/dashboard/posthire/employee-ess/policy",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3729"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3762,
+    "route": "/dashboard/posthire/employee-ess/requests/${encodeURIComponent(requestId)}/decide",
+    "normalized_route": "/dashboard/posthire/employee-ess/requests/{param}/decide",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3762"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3770,
+    "route": "/dashboard/posthire/employee-ess/requests/${encodeURIComponent(requestId)}/apply",
+    "normalized_route": "/dashboard/posthire/employee-ess/requests/{param}/apply",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3770"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/api.ts",
+    "line": 3777,
+    "route": "/dashboard/posthire/employee-ess/reconcile",
+    "normalized_route": "/dashboard/posthire/employee-ess/reconcile",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/api.ts:3777"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 49,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/offers",
+    "normalized_route": "/dashboard/prehire/applications/{param}/offers",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:49"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 60,
+    "route": "/dashboard/prehire/applications/${encodeURIComponent(appKey)}/offers",
+    "normalized_route": "/dashboard/prehire/applications/{param}/offers",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:60"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 72,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}",
+    "normalized_route": "/dashboard/prehire/offers/{param}",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:72"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 80,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}/submit-approval",
+    "normalized_route": "/dashboard/prehire/offers/{param}/submit-approval",
+    "method_hint": "PATCH",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:80"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 88,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}/approve",
+    "normalized_route": "/dashboard/prehire/offers/{param}/approve",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:88"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 96,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}/return",
+    "normalized_route": "/dashboard/prehire/offers/{param}/return",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:96"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 104,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}/send",
+    "normalized_route": "/dashboard/prehire/offers/{param}/send",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:104"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 112,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}/withdraw",
+    "normalized_route": "/dashboard/prehire/offers/{param}/withdraw",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:112"
+  },
+  {
+    "file": "apps/wathefni-dashboard/src/lib/offers-api.ts",
+    "line": 125,
+    "route": "/dashboard/prehire/offers/${encodeURIComponent(offerId)}/record-response",
+    "normalized_route": "/dashboard/prehire/offers/{param}/record-response",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-dashboard/src/lib/offers-api.ts:125"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/settings.tsx",
+    "line": 50,
+    "route": "/app/push/register",
+    "normalized_route": "/app/push/register",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/settings.tsx:50"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/settings.tsx",
+    "line": 54,
+    "route": "/app/push/unregister",
+    "normalized_route": "/app/push/unregister",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/settings.tsx:54"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/settings.tsx",
+    "line": 77,
+    "route": "/app/account/request-deletion",
+    "normalized_route": "/app/account/request-deletion",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/settings.tsx:77"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/attendance.tsx",
+    "line": 13,
+    "route": "/app/attendance",
+    "normalized_route": "/app/attendance",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/attendance.tsx:13"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/documents.tsx",
+    "line": 25,
+    "route": "/app/documents",
+    "normalized_route": "/app/documents",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/documents.tsx:25"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/documents.tsx",
+    "line": 68,
+    "route": "/app/documents/renew",
+    "normalized_route": "/app/documents/renew",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/documents.tsx:68"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/onboarding.tsx",
+    "line": 36,
+    "route": "/app/onboarding",
+    "normalized_route": "/app/onboarding",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/onboarding.tsx:36"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/onboarding.tsx",
+    "line": 74,
+    "route": "/app/onboarding/documents",
+    "normalized_route": "/app/onboarding/documents",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/onboarding.tsx:74"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/onboarding.tsx",
+    "line": 168,
+    "route": "/app/onboarding/items/${encodeURIComponent(itemId)}/versions",
+    "normalized_route": "/app/onboarding/items/{param}/versions",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/onboarding.tsx:168"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 136,
+    "route": "/app/auth/activate",
+    "normalized_route": "/app/auth/activate",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:136"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 156,
+    "route": "/app/auth/request-code",
+    "normalized_route": "/app/auth/request-code",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:156"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 163,
+    "route": "/app/push/unregister",
+    "normalized_route": "/app/push/unregister",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:163"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 168,
+    "route": "/app/auth/logout",
+    "normalized_route": "/app/auth/logout",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:168"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 366,
+    "route": "/app/auth/refresh",
+    "normalized_route": "/app/auth/refresh",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:366"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 372,
+    "route": "/app/me",
+    "normalized_route": "/app/me",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:372"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx",
+    "line": 378,
+    "route": "/app/me",
+    "normalized_route": "/app/me",
+    "method_hint": "POST",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx:378"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/push/PushLifecycle.tsx",
+    "line": 30,
+    "route": "/app/push/register",
+    "normalized_route": "/app/push/register",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/push/PushLifecycle.tsx:30"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/src/lib/documents.ts",
+    "line": 23,
+    "route": "/app/documents/${encodeURIComponent(fileId)}?disposition=attachment",
+    "normalized_route": "/app/documents/{param}",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/src/lib/documents.ts:23"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx",
+    "line": 30,
+    "route": "/app/shifts/today",
+    "normalized_route": "/app/shifts/today",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx:30"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx",
+    "line": 35,
+    "route": "/app/attendance",
+    "normalized_route": "/app/attendance",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx:35"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx",
+    "line": 40,
+    "route": "/app/leave",
+    "normalized_route": "/app/leave",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx:40"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx",
+    "line": 45,
+    "route": "/app/onboarding",
+    "normalized_route": "/app/onboarding",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx:45"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx",
+    "line": 50,
+    "route": "/app/notifications",
+    "normalized_route": "/app/notifications",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/index.tsx:50"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/shifts.tsx",
+    "line": 13,
+    "route": "/app/shifts/today",
+    "normalized_route": "/app/shifts/today",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/shifts.tsx:13"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/shifts.tsx",
+    "line": 14,
+    "route": "/app/shifts/upcoming",
+    "normalized_route": "/app/shifts/upcoming",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/shifts.tsx:14"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/notifications.tsx",
+    "line": 17,
+    "route": "/app/notifications",
+    "normalized_route": "/app/notifications",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/notifications.tsx:17"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/notifications.tsx",
+    "line": 27,
+    "route": "/app/notifications/${item.id}/read",
+    "normalized_route": "/app/notifications/{param}/read",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/notifications.tsx:27"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/leave.tsx",
+    "line": 21,
+    "route": "/app/leave",
+    "normalized_route": "/app/leave",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/leave.tsx:21"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/(tabs)/leave.tsx",
+    "line": 39,
+    "route": "/app/leave/${leaveId}/cancel",
+    "normalized_route": "/app/leave/{param}/cancel",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/(tabs)/leave.tsx:39"
+  },
+  {
+    "file": "apps/wathefni-employee-mobile/app/leave/request.tsx",
+    "line": 30,
+    "route": "/app/leave/request",
+    "normalized_route": "/app/leave/request",
+    "method_hint": "GET_OR_WRAPPER",
+    "exact_fix_location": "apps/wathefni-employee-mobile/app/leave/request.tsx:30"
+  }
+]

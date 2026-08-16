@@ -1,0 +1,69 @@
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] Android Bundled 2126ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (1251 modules)
+[expo-cli] iOS Bundled 3476ms ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/entry.js (1319 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] ../../../Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-b76ecf22857ed6f800e2d6e159547143.hbc (1.81 MB)
+[expo-cli] _expo/static/js/android/entry-b76ecf22857ed6f800e2d6e159547143.hbc.map (6.85 MB)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-8dd70f8c0fecbe106e361558a8a3ead3.hbc (1.81 MB)
+[expo-cli] _expo/static/js/ios/entry-8dd70f8c0fecbe106e361558a8a3ead3.hbc.map (6.84 MB)
+[expo-cli] 
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.76 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 7.6 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fd8d1-10b2-771b-a7b6-547b5d99ca79",
+    "createdAt": "2026-08-06T20:43:27.794Z",
+    "group": "b540423a-de1a-44c9-afa5-caa9504d2957",
+    "branch": "canary",
+    "message": "Onboarding: one canonical state + next action per surface",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd8d1-10b2-771b-a7b6-547b5d99ca79",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "87ddbaac29ac8083fe5c6d028e5986ee97006db1"
+  },
+  {
+    "id": "019fd8d1-10b2-745c-a768-3be2eddac34e",
+    "createdAt": "2026-08-06T20:43:27.794Z",
+    "group": "b540423a-de1a-44c9-afa5-caa9504d2957",
+    "branch": "canary",
+    "message": "Onboarding: one canonical state + next action per surface",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd8d1-10b2-745c-a768-3be2eddac34e",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "87ddbaac29ac8083fe5c6d028e5986ee97006db1"
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "manifest_version": "wathefni_battery_manifest_v1",
+  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+  "battery_name": "Wathefni General Ability & Workplace Judgment v1",
+  "company_code": "WATHEFNI",
+  "environment": "staging",
+  "status": "blocked_generation_quota",
+  "items": [],
+  "category_coverage": {
+    "numerical_reasoning": 0,
+    "verbal_reasoning": 0,
+    "logical_reasoning": 0,
+    "situational_judgment": 0,
+    "prioritization": 0
+  },
+  "difficulty_distribution": {},
+  "expected_duration_minutes": 40,
+  "deterministic_scoring_version": "assessment_product2_v1",
+  "rollback_predecessor": null,
+  "live_bank_inserted": false,
+  "approved_for_use": false,
+  "human_approval_complete": false,
+  "blockers": [
+    "approved_draft_inventory_empty",
+    "staging_model_insufficient_quota",
+    "no_items_generated",
+    "human_en_review_pending",
+    "separate_human_ar_review_pending",
+    "independent_human_answer_key_verification_pending"
+  ],
+  "manifest_sha256": "16bf9e707629f7630fb6e22102283b4e38cb39a92f17938456de9ebd0cec2c2d"
+}

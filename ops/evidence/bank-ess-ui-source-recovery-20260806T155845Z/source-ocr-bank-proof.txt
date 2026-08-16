@@ -1,0 +1,12 @@
+DocumentExtractionSummary: exists=True paths=['/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard/src/posthire/DocumentExtractionSummary.tsx', '/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard/src/posthire/DocumentExtractionSummary.test.tsx', '/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard/src/posthire/DocumentExtractionSummaryLoader.tsx']
+BankReviewPanel: exists=True paths=['/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard/src/posthire/employees360/BankReviewPanel.tsx']
+OnboardingCompletionStrip: exists=True paths=['/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard/src/posthire/employees360/OnboardingCompletionStrip.tsx']
+EssBankMaskPanel: exists=True paths=['/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard/src/posthire/employees360/ProfilePanels.tsx']
+PostHire contains 'DocumentExtractionSummary': True
+PostHire contains 'ComplianceFindings': False
+PostHire contains 'ComplianceRegister': False
+PostHire contains 'OnboardingOcr': False
+PostHire contains 'ocr': False
+BankReviewPanel mount: True
+OnboardingCompletionStrip mount: True
+document extraction still wired: True

@@ -1,0 +1,22 @@
+    hire-ready bridge — flags, ranks, wiring, freeze docs
+      PASS  bridge version
+      PASS  wave1 off by default
+      PASS  allowlist denies other
+      PASS  allowlist allows canary
+      PASS  truth writers dark without company allowlist
+      PASS  truth writers canary only
+      PASS  truth writers not global
+      PASS  rank hr > hire > offer
+      PASS  rank hire > offer
+      PASS  resolve employee_key from offer phone
+      PASS  hire_operations wires bridge
+      PASS  offer_service wires accept hook
+      PASS  token accept path wires bridge
+      PASS  preboarding convert route
+      PASS  cancel closes provisional
+      PASS  joining-date fan-out hook
+      PASS  surface freeze doc
+      PASS  rollback guidance present
+
+    18 passed, 0 failed
+HIRE_READY_BRIDGE_UNIT_FULL_PASS

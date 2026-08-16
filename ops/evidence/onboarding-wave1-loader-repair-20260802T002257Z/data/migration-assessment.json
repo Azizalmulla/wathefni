@@ -1,0 +1,1855 @@
+{
+  "generated_at": "20260802T002551Z",
+  "mode": "read_only",
+  "applied_changes": false,
+  "template_id": "default_kuwait",
+  "template_item_count": 36,
+  "four_reals": [
+    "WATHEFNI-96550252254",
+    "WATHEFNI-96566363363",
+    "WATHEFNI-96597727743",
+    "WATHEFNI-96599411617"
+  ],
+  "employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "live_item_count": 6,
+      "live_item_ids": [
+        "bank_details",
+        "civil_id",
+        "education_cert",
+        "medical",
+        "passport",
+        "personal_photo"
+      ],
+      "missing_from_live": [
+        {
+          "item_id": "access_card_issued",
+          "template": {
+            "item_id": "access_card_issued",
+            "label": "Access card / badge issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "account_access_created",
+          "template": {
+            "item_id": "account_access_created",
+            "label": "Email / account access created (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "app_invite_sent",
+          "template": {
+            "item_id": "app_invite_sent",
+            "label": "Employee app invite sent (if enabled)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "asset_handover",
+          "template": {
+            "item_id": "asset_handover",
+            "label": "Laptop / asset handover (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "attendance_device_id",
+          "template": {
+            "item_id": "attendance_device_id",
+            "label": "Attendance device ID assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "civil_id_expiry",
+          "template": {
+            "item_id": "civil_id_expiry",
+            "label": "Civil ID expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "code_of_conduct_ack",
+          "template": {
+            "item_id": "code_of_conduct_ack",
+            "label": "Code of conduct acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "company_policy_ack",
+          "template": {
+            "item_id": "company_policy_ack",
+            "label": "Company policy acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "department_assigned",
+          "template": {
+            "item_id": "department_assigned",
+            "label": "Department assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "emergency_contact",
+          "template": {
+            "item_id": "emergency_contact",
+            "label": "Emergency contact",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "employment_contract",
+          "template": {
+            "item_id": "employment_contract",
+            "label": "Signed employment contract",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "first_day_checklist",
+          "template": {
+            "item_id": "first_day_checklist",
+            "label": "First-day checklist completed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "job_title_confirmed",
+          "template": {
+            "item_id": "job_title_confirmed",
+            "label": "Job title confirmed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "medical_check",
+          "template": {
+            "item_id": "medical_check",
+            "label": "Medical check status (expats)",
+            "category": "compliance_gov",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "nda_signed",
+          "template": {
+            "item_id": "nda_signed",
+            "label": "NDA / confidentiality signed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "offer_letter",
+          "template": {
+            "item_id": "offer_letter",
+            "label": "Job offer / appointment letter",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "passport_expiry",
+          "template": {
+            "item_id": "passport_expiry",
+            "label": "Passport expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "payroll_status",
+          "template": {
+            "item_id": "payroll_status",
+            "label": "Payroll status",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "personal_details_form",
+          "template": {
+            "item_id": "personal_details_form",
+            "label": "Personal details form",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "probation_end",
+          "template": {
+            "item_id": "probation_end",
+            "label": "Probation period end date",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "reporting_manager_assigned",
+          "template": {
+            "item_id": "reporting_manager_assigned",
+            "label": "Reporting manager assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residence",
+          "template": {
+            "item_id": "residence",
+            "label": "Residence permit (Article 18 expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residency_expiry",
+          "template": {
+            "item_id": "residency_expiry",
+            "label": "Residency expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_allowances_confirmed",
+          "template": {
+            "item_id": "salary_allowances_confirmed",
+            "label": "Basic salary / allowances confirmed",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_transfer_details",
+          "template": {
+            "item_id": "salary_transfer_details",
+            "label": "Salary transfer details",
+            "category": "payroll_bank",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "shift_group_assigned",
+          "template": {
+            "item_id": "shift_group_assigned",
+            "label": "Shift group assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "training_completed",
+          "template": {
+            "item_id": "training_completed",
+            "label": "Training completed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "uniform_ppe_issued",
+          "template": {
+            "item_id": "uniform_ppe_issued",
+            "label": "Uniform / PPE issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "visa_article_type",
+          "template": {
+            "item_id": "visa_article_type",
+            "label": "Visa / residency type (e.g. Article 18)",
+            "category": "compliance_gov",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_location_assigned",
+          "template": {
+            "item_id": "work_location_assigned",
+            "label": "Work location / branch assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit",
+          "template": {
+            "item_id": "work_permit",
+            "label": "Work permit (expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit_expiry",
+          "template": {
+            "item_id": "work_permit_expiry",
+            "label": "Work permit expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        }
+      ],
+      "obsolete_vs_template": [
+        {
+          "item_id": "education_cert",
+          "reason": "optional legacy education upload; not in default_kuwait",
+          "live": {
+            "employee_key": "WATHEFNI-96550252254",
+            "name": "Talal Fadhli",
+            "company_code": "WATHEFNI",
+            "onboarding_status": "in_progress",
+            "item_id": "education_cert",
+            "label": "Educational certificates",
+            "required": false,
+            "status": "pending",
+            "owner": null,
+            "category": null,
+            "item_type": "document",
+            "document_type": null,
+            "reminder_count": 0
+          }
+        },
+        {
+          "item_id": "medical",
+          "reason": "legacy medical fitness; default_kuwait uses medical_check (hr task)",
+          "live": {
+            "employee_key": "WATHEFNI-96550252254",
+            "name": "Talal Fadhli",
+            "company_code": "WATHEFNI",
+            "onboarding_status": "in_progress",
+            "item_id": "medical",
+            "label": "Medical fitness certificate",
+            "required": false,
+            "status": "pending",
+            "owner": null,
+            "category": null,
+            "item_type": "document",
+            "document_type": "medical",
+            "reminder_count": 0
+          }
+        }
+      ],
+      "conflicts": [
+        {
+          "item_id": "bank_details",
+          "live_status": "pending",
+          "live_label": "Bank account (IBAN)",
+          "template_label": "Bank setup via Employee Self-Service (encrypted IBAN \u2014 not WhatsApp plaintext)",
+          "notes": [
+            "bank policy: keep row but collect via ESS encrypted workflow (no plaintext)"
+          ]
+        },
+        {
+          "item_id": "passport",
+          "live_status": "pending",
+          "live_label": "Passport (photo page)",
+          "template_label": "Passport copy (if applicable)",
+          "notes": [
+            "required live=True template=False",
+            "passport required on legacy; optional on default_kuwait"
+          ]
+        }
+      ],
+      "null_owner_or_category_count": 6
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "name": "Fouad Burhamad",
+      "live_item_count": 6,
+      "live_item_ids": [
+        "bank_details",
+        "civil_id",
+        "education_cert",
+        "medical",
+        "passport",
+        "personal_photo"
+      ],
+      "missing_from_live": [
+        {
+          "item_id": "access_card_issued",
+          "template": {
+            "item_id": "access_card_issued",
+            "label": "Access card / badge issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "account_access_created",
+          "template": {
+            "item_id": "account_access_created",
+            "label": "Email / account access created (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "app_invite_sent",
+          "template": {
+            "item_id": "app_invite_sent",
+            "label": "Employee app invite sent (if enabled)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "asset_handover",
+          "template": {
+            "item_id": "asset_handover",
+            "label": "Laptop / asset handover (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "attendance_device_id",
+          "template": {
+            "item_id": "attendance_device_id",
+            "label": "Attendance device ID assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "civil_id_expiry",
+          "template": {
+            "item_id": "civil_id_expiry",
+            "label": "Civil ID expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "code_of_conduct_ack",
+          "template": {
+            "item_id": "code_of_conduct_ack",
+            "label": "Code of conduct acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "company_policy_ack",
+          "template": {
+            "item_id": "company_policy_ack",
+            "label": "Company policy acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "department_assigned",
+          "template": {
+            "item_id": "department_assigned",
+            "label": "Department assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "emergency_contact",
+          "template": {
+            "item_id": "emergency_contact",
+            "label": "Emergency contact",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "employment_contract",
+          "template": {
+            "item_id": "employment_contract",
+            "label": "Signed employment contract",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "first_day_checklist",
+          "template": {
+            "item_id": "first_day_checklist",
+            "label": "First-day checklist completed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "job_title_confirmed",
+          "template": {
+            "item_id": "job_title_confirmed",
+            "label": "Job title confirmed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "medical_check",
+          "template": {
+            "item_id": "medical_check",
+            "label": "Medical check status (expats)",
+            "category": "compliance_gov",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "nda_signed",
+          "template": {
+            "item_id": "nda_signed",
+            "label": "NDA / confidentiality signed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "offer_letter",
+          "template": {
+            "item_id": "offer_letter",
+            "label": "Job offer / appointment letter",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "passport_expiry",
+          "template": {
+            "item_id": "passport_expiry",
+            "label": "Passport expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "payroll_status",
+          "template": {
+            "item_id": "payroll_status",
+            "label": "Payroll status",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "personal_details_form",
+          "template": {
+            "item_id": "personal_details_form",
+            "label": "Personal details form",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "probation_end",
+          "template": {
+            "item_id": "probation_end",
+            "label": "Probation period end date",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "reporting_manager_assigned",
+          "template": {
+            "item_id": "reporting_manager_assigned",
+            "label": "Reporting manager assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residence",
+          "template": {
+            "item_id": "residence",
+            "label": "Residence permit (Article 18 expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residency_expiry",
+          "template": {
+            "item_id": "residency_expiry",
+            "label": "Residency expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_allowances_confirmed",
+          "template": {
+            "item_id": "salary_allowances_confirmed",
+            "label": "Basic salary / allowances confirmed",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_transfer_details",
+          "template": {
+            "item_id": "salary_transfer_details",
+            "label": "Salary transfer details",
+            "category": "payroll_bank",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "shift_group_assigned",
+          "template": {
+            "item_id": "shift_group_assigned",
+            "label": "Shift group assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "training_completed",
+          "template": {
+            "item_id": "training_completed",
+            "label": "Training completed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "uniform_ppe_issued",
+          "template": {
+            "item_id": "uniform_ppe_issued",
+            "label": "Uniform / PPE issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "visa_article_type",
+          "template": {
+            "item_id": "visa_article_type",
+            "label": "Visa / residency type (e.g. Article 18)",
+            "category": "compliance_gov",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_location_assigned",
+          "template": {
+            "item_id": "work_location_assigned",
+            "label": "Work location / branch assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit",
+          "template": {
+            "item_id": "work_permit",
+            "label": "Work permit (expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit_expiry",
+          "template": {
+            "item_id": "work_permit_expiry",
+            "label": "Work permit expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        }
+      ],
+      "obsolete_vs_template": [
+        {
+          "item_id": "education_cert",
+          "reason": "optional legacy education upload; not in default_kuwait",
+          "live": {
+            "employee_key": "WATHEFNI-96566363363",
+            "name": "Fouad Burhamad",
+            "company_code": "WATHEFNI",
+            "onboarding_status": "in_progress",
+            "item_id": "education_cert",
+            "label": "Educational certificates",
+            "required": false,
+            "status": "pending",
+            "owner": null,
+            "category": null,
+            "item_type": "document",
+            "document_type": null,
+            "reminder_count": 0
+          }
+        },
+        {
+          "item_id": "medical",
+          "reason": "legacy medical fitness; default_kuwait uses medical_check (hr task)",
+          "live": {
+            "employee_key": "WATHEFNI-96566363363",
+            "name": "Fouad Burhamad",
+            "company_code": "WATHEFNI",
+            "onboarding_status": "in_progress",
+            "item_id": "medical",
+            "label": "Medical fitness certificate",
+            "required": false,
+            "status": "pending",
+            "owner": null,
+            "category": null,
+            "item_type": "document",
+            "document_type": "medical",
+            "reminder_count": 0
+          }
+        }
+      ],
+      "conflicts": [
+        {
+          "item_id": "bank_details",
+          "live_status": "pending",
+          "live_label": "Bank account (IBAN)",
+          "template_label": "Bank setup via Employee Self-Service (encrypted IBAN \u2014 not WhatsApp plaintext)",
+          "notes": [
+            "bank policy: keep row but collect via ESS encrypted workflow (no plaintext)"
+          ]
+        },
+        {
+          "item_id": "passport",
+          "live_status": "pending",
+          "live_label": "Passport (photo page)",
+          "template_label": "Passport copy (if applicable)",
+          "notes": [
+            "required live=True template=False",
+            "passport required on legacy; optional on default_kuwait"
+          ]
+        }
+      ],
+      "null_owner_or_category_count": 6
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "live_item_count": 6,
+      "live_item_ids": [
+        "bank_details",
+        "civil_id",
+        "education_cert",
+        "medical",
+        "passport",
+        "personal_photo"
+      ],
+      "missing_from_live": [
+        {
+          "item_id": "access_card_issued",
+          "template": {
+            "item_id": "access_card_issued",
+            "label": "Access card / badge issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "account_access_created",
+          "template": {
+            "item_id": "account_access_created",
+            "label": "Email / account access created (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "app_invite_sent",
+          "template": {
+            "item_id": "app_invite_sent",
+            "label": "Employee app invite sent (if enabled)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "asset_handover",
+          "template": {
+            "item_id": "asset_handover",
+            "label": "Laptop / asset handover (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "attendance_device_id",
+          "template": {
+            "item_id": "attendance_device_id",
+            "label": "Attendance device ID assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "civil_id_expiry",
+          "template": {
+            "item_id": "civil_id_expiry",
+            "label": "Civil ID expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "code_of_conduct_ack",
+          "template": {
+            "item_id": "code_of_conduct_ack",
+            "label": "Code of conduct acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "company_policy_ack",
+          "template": {
+            "item_id": "company_policy_ack",
+            "label": "Company policy acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "department_assigned",
+          "template": {
+            "item_id": "department_assigned",
+            "label": "Department assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "emergency_contact",
+          "template": {
+            "item_id": "emergency_contact",
+            "label": "Emergency contact",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "employment_contract",
+          "template": {
+            "item_id": "employment_contract",
+            "label": "Signed employment contract",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "first_day_checklist",
+          "template": {
+            "item_id": "first_day_checklist",
+            "label": "First-day checklist completed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "job_title_confirmed",
+          "template": {
+            "item_id": "job_title_confirmed",
+            "label": "Job title confirmed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "medical_check",
+          "template": {
+            "item_id": "medical_check",
+            "label": "Medical check status (expats)",
+            "category": "compliance_gov",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "nda_signed",
+          "template": {
+            "item_id": "nda_signed",
+            "label": "NDA / confidentiality signed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "offer_letter",
+          "template": {
+            "item_id": "offer_letter",
+            "label": "Job offer / appointment letter",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "passport_expiry",
+          "template": {
+            "item_id": "passport_expiry",
+            "label": "Passport expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "payroll_status",
+          "template": {
+            "item_id": "payroll_status",
+            "label": "Payroll status",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "personal_details_form",
+          "template": {
+            "item_id": "personal_details_form",
+            "label": "Personal details form",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "probation_end",
+          "template": {
+            "item_id": "probation_end",
+            "label": "Probation period end date",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "reporting_manager_assigned",
+          "template": {
+            "item_id": "reporting_manager_assigned",
+            "label": "Reporting manager assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residence",
+          "template": {
+            "item_id": "residence",
+            "label": "Residence permit (Article 18 expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residency_expiry",
+          "template": {
+            "item_id": "residency_expiry",
+            "label": "Residency expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_allowances_confirmed",
+          "template": {
+            "item_id": "salary_allowances_confirmed",
+            "label": "Basic salary / allowances confirmed",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_transfer_details",
+          "template": {
+            "item_id": "salary_transfer_details",
+            "label": "Salary transfer details",
+            "category": "payroll_bank",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "shift_group_assigned",
+          "template": {
+            "item_id": "shift_group_assigned",
+            "label": "Shift group assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "training_completed",
+          "template": {
+            "item_id": "training_completed",
+            "label": "Training completed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "uniform_ppe_issued",
+          "template": {
+            "item_id": "uniform_ppe_issued",
+            "label": "Uniform / PPE issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "visa_article_type",
+          "template": {
+            "item_id": "visa_article_type",
+            "label": "Visa / residency type (e.g. Article 18)",
+            "category": "compliance_gov",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_location_assigned",
+          "template": {
+            "item_id": "work_location_assigned",
+            "label": "Work location / branch assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit",
+          "template": {
+            "item_id": "work_permit",
+            "label": "Work permit (expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit_expiry",
+          "template": {
+            "item_id": "work_permit_expiry",
+            "label": "Work permit expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        }
+      ],
+      "obsolete_vs_template": [
+        {
+          "item_id": "education_cert",
+          "reason": "optional legacy education upload; not in default_kuwait",
+          "live": {
+            "employee_key": "WATHEFNI-96597727743",
+            "name": "mohammad alqattan",
+            "company_code": "WATHEFNI",
+            "onboarding_status": "in_progress",
+            "item_id": "education_cert",
+            "label": "Educational certificates",
+            "required": false,
+            "status": "pending",
+            "owner": null,
+            "category": null,
+            "item_type": "document",
+            "document_type": null,
+            "reminder_count": 0
+          }
+        },
+        {
+          "item_id": "medical",
+          "reason": "legacy medical fitness; default_kuwait uses medical_check (hr task)",
+          "live": {
+            "employee_key": "WATHEFNI-96597727743",
+            "name": "mohammad alqattan",
+            "company_code": "WATHEFNI",
+            "onboarding_status": "in_progress",
+            "item_id": "medical",
+            "label": "Medical fitness certificate",
+            "required": false,
+            "status": "pending",
+            "owner": null,
+            "category": null,
+            "item_type": "document",
+            "document_type": "medical",
+            "reminder_count": 0
+          }
+        }
+      ],
+      "conflicts": [
+        {
+          "item_id": "bank_details",
+          "live_status": "received",
+          "live_label": "Bank account (IBAN)",
+          "template_label": "Bank setup via Employee Self-Service (encrypted IBAN \u2014 not WhatsApp plaintext)",
+          "notes": [
+            "bank policy: keep row but collect via ESS encrypted workflow (no plaintext)"
+          ]
+        },
+        {
+          "item_id": "passport",
+          "live_status": "pending",
+          "live_label": "Passport (photo page)",
+          "template_label": "Passport copy (if applicable)",
+          "notes": [
+            "required live=True template=False",
+            "passport required on legacy; optional on default_kuwait"
+          ]
+        }
+      ],
+      "null_owner_or_category_count": 6
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "name": "",
+      "live_item_count": 0,
+      "live_item_ids": [],
+      "missing_from_live": [
+        {
+          "item_id": "access_card_issued",
+          "template": {
+            "item_id": "access_card_issued",
+            "label": "Access card / badge issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "account_access_created",
+          "template": {
+            "item_id": "account_access_created",
+            "label": "Email / account access created (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "app_invite_sent",
+          "template": {
+            "item_id": "app_invite_sent",
+            "label": "Employee app invite sent (if enabled)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "asset_handover",
+          "template": {
+            "item_id": "asset_handover",
+            "label": "Laptop / asset handover (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "attendance_device_id",
+          "template": {
+            "item_id": "attendance_device_id",
+            "label": "Attendance device ID assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "bank_details",
+          "template": {
+            "item_id": "bank_details",
+            "label": "Bank setup via Employee Self-Service (encrypted IBAN \u2014 not WhatsApp plaintext)",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "civil_id",
+          "template": {
+            "item_id": "civil_id",
+            "label": "Civil ID (front and back)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "civil_id_expiry",
+          "template": {
+            "item_id": "civil_id_expiry",
+            "label": "Civil ID expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "code_of_conduct_ack",
+          "template": {
+            "item_id": "code_of_conduct_ack",
+            "label": "Code of conduct acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "company_policy_ack",
+          "template": {
+            "item_id": "company_policy_ack",
+            "label": "Company policy acknowledged",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "department_assigned",
+          "template": {
+            "item_id": "department_assigned",
+            "label": "Department assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "emergency_contact",
+          "template": {
+            "item_id": "emergency_contact",
+            "label": "Emergency contact",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "employment_contract",
+          "template": {
+            "item_id": "employment_contract",
+            "label": "Signed employment contract",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "first_day_checklist",
+          "template": {
+            "item_id": "first_day_checklist",
+            "label": "First-day checklist completed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "job_title_confirmed",
+          "template": {
+            "item_id": "job_title_confirmed",
+            "label": "Job title confirmed",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "medical_check",
+          "template": {
+            "item_id": "medical_check",
+            "label": "Medical check status (expats)",
+            "category": "compliance_gov",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "nda_signed",
+          "template": {
+            "item_id": "nda_signed",
+            "label": "NDA / confidentiality signed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "ack",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "offer_letter",
+          "template": {
+            "item_id": "offer_letter",
+            "label": "Job offer / appointment letter",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "passport",
+          "template": {
+            "item_id": "passport",
+            "label": "Passport copy (if applicable)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "passport_expiry",
+          "template": {
+            "item_id": "passport_expiry",
+            "label": "Passport expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "payroll_status",
+          "template": {
+            "item_id": "payroll_status",
+            "label": "Payroll status",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "personal_details_form",
+          "template": {
+            "item_id": "personal_details_form",
+            "label": "Personal details form",
+            "category": "identity_legal",
+            "item_type": "text",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "personal_photo",
+          "template": {
+            "item_id": "personal_photo",
+            "label": "Personal photo",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": true,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "probation_end",
+          "template": {
+            "item_id": "probation_end",
+            "label": "Probation period end date",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "reporting_manager_assigned",
+          "template": {
+            "item_id": "reporting_manager_assigned",
+            "label": "Reporting manager assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residence",
+          "template": {
+            "item_id": "residence",
+            "label": "Residence permit (Article 18 expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "residency_expiry",
+          "template": {
+            "item_id": "residency_expiry",
+            "label": "Residency expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_allowances_confirmed",
+          "template": {
+            "item_id": "salary_allowances_confirmed",
+            "label": "Basic salary / allowances confirmed",
+            "category": "payroll_bank",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "salary_transfer_details",
+          "template": {
+            "item_id": "salary_transfer_details",
+            "label": "Salary transfer details",
+            "category": "payroll_bank",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "shift_group_assigned",
+          "template": {
+            "item_id": "shift_group_assigned",
+            "label": "Shift group assigned (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "training_completed",
+          "template": {
+            "item_id": "training_completed",
+            "label": "Training completed (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "uniform_ppe_issued",
+          "template": {
+            "item_id": "uniform_ppe_issued",
+            "label": "Uniform / PPE issued (if applicable)",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "visa_article_type",
+          "template": {
+            "item_id": "visa_article_type",
+            "label": "Visa / residency type (e.g. Article 18)",
+            "category": "compliance_gov",
+            "item_type": "text",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_location_assigned",
+          "template": {
+            "item_id": "work_location_assigned",
+            "label": "Work location / branch assigned",
+            "category": "company_readiness",
+            "item_type": "task",
+            "required": false,
+            "owner": "hr"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit",
+          "template": {
+            "item_id": "work_permit",
+            "label": "Work permit (expats)",
+            "category": "identity_legal",
+            "item_type": "document",
+            "required": false,
+            "owner": "employee"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        },
+        {
+          "item_id": "work_permit_expiry",
+          "template": {
+            "item_id": "work_permit_expiry",
+            "label": "Work permit expiry recorded",
+            "category": "compliance_gov",
+            "item_type": "date",
+            "required": false,
+            "owner": "system"
+          },
+          "note": "absent on live legacy checklist \u2014 would be inserted only by a future SEED/backfill (not Wave 1)"
+        }
+      ],
+      "obsolete_vs_template": [],
+      "conflicts": [],
+      "null_owner_or_category_count": 0
+    }
+  ],
+  "rollups": {
+    "any_missing": true,
+    "any_obsolete": true,
+    "any_conflicts": true,
+    "brian_partial_seed": true
+  },
+  "wave1_policy": {
+    "do_not_apply": true,
+    "seed_remains_off": true,
+    "hr_mutate_remains_off": true,
+    "bank_plaintext_frozen": true,
+    "apply_in": "Onboarding Wave 2 controlled backfill (after GO)"
+  },
+  "source": "live_db"
+}

@@ -1,0 +1,15 @@
+PASS route uses EmployeeProfileView
+PASS cream PageScreen + HrPushedNav
+PASS no OperationalDetailView on employee route
+PASS no manager_name anywhere client employee path
+PASS types drop manager_name
+PASS normalize drops manager_name
+PASS empty key → unavailable
+PASS 404 → not_found
+PASS status localized via composition
+PASS facts-only (no module cards)
+PASS People still opens profile
+PASS safe-back used
+PASS EN+AR keys
+PASS AR active is Arabic
+hr-employee-profile: GREEN

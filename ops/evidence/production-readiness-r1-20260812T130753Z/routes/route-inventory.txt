@@ -1,0 +1,179 @@
+== dashboard pages (Page union) ==
+694:  | 'talent_pool'
+695:  | 'active_application'
+696:  | 'hired'
+697:  | 'archived'
+698:  | 'restricted'
+704:  | 'overview'
+705:  | 'ai'
+706:  | 'jobs'
+707:  | 'requisitions'
+708:  | 'candidates'
+709:  | 'interviews'
+710:  | 'calendar'
+711:  | 'assessments'
+712:  | 'ranking'
+713:  | 'notifications'
+714:  | 'reports'
+715:  | 'employees'
+716:  | 'workforce'
+717:  | 'inbox'
+718:  | 'preboarding'
+719:  | 'onboarding'
+720:  | 'probation'
+721:  | 'attendance'
+722:  | 'leave'
+723:  | 'shifts'
+724:  | 'payroll'
+725:  | 'analytics'
+726:  | 'compliance'
+727:  | 'activity'
+728:  | 'settings'
+3245:  | 'pending'
+3246:  | 'delivered_whatsapp'
+3247:  | 'delivered_template'
+3248:  | 'sent_email_fallback'
+3249:  | 'needs_hr_action'
+3250:  | 'failed'
+3251:  | 'suppressed'
+3252:  | 'throttled'
+3253:  | 'dashboard_only'
+3366:  | 'draft'
+
+== employee app routes ==
+apps/wathefni-employee-mobile/app/(auth)/_layout.tsx
+apps/wathefni-employee-mobile/app/(auth)/activate.tsx
+apps/wathefni-employee-mobile/app/(tabs)/_layout.tsx
+apps/wathefni-employee-mobile/app/(tabs)/index.tsx
+apps/wathefni-employee-mobile/app/(tabs)/leave.tsx
+apps/wathefni-employee-mobile/app/(tabs)/payslips.tsx
+apps/wathefni-employee-mobile/app/(tabs)/profile.tsx
+apps/wathefni-employee-mobile/app/(tabs)/schedule.tsx
+apps/wathefni-employee-mobile/app/+not-found.tsx
+apps/wathefni-employee-mobile/app/_layout.tsx
+apps/wathefni-employee-mobile/app/bank.tsx
+apps/wathefni-employee-mobile/app/change-pin.tsx
+apps/wathefni-employee-mobile/app/documents.tsx
+apps/wathefni-employee-mobile/app/hr/(tabs)/_layout.tsx
+apps/wathefni-employee-mobile/app/hr/(tabs)/hiring.tsx
+apps/wathefni-employee-mobile/app/hr/(tabs)/inbox.tsx
+apps/wathefni-employee-mobile/app/hr/(tabs)/index.tsx
+apps/wathefni-employee-mobile/app/hr/(tabs)/more.tsx
+apps/wathefni-employee-mobile/app/hr/(tabs)/people.tsx
+apps/wathefni-employee-mobile/app/hr/_layout.tsx
+apps/wathefni-employee-mobile/app/hr/assistant.tsx
+apps/wathefni-employee-mobile/app/hr/attendance/[attendanceId].tsx
+apps/wathefni-employee-mobile/app/hr/attendance/index.tsx
+apps/wathefni-employee-mobile/app/hr/candidates/[appKey].tsx
+apps/wathefni-employee-mobile/app/hr/candidates/index.tsx
+apps/wathefni-employee-mobile/app/hr/change-pin.tsx
+apps/wathefni-employee-mobile/app/hr/delivery-alerts.tsx
+apps/wathefni-employee-mobile/app/hr/documents/[employeeKey]/[documentType].tsx
+apps/wathefni-employee-mobile/app/hr/documents/index.tsx
+apps/wathefni-employee-mobile/app/hr/employees/[employeeKey].tsx
+apps/wathefni-employee-mobile/app/hr/employees/index.tsx
+apps/wathefni-employee-mobile/app/hr/interviews/[interviewId].tsx
+apps/wathefni-employee-mobile/app/hr/interviews/index.tsx
+apps/wathefni-employee-mobile/app/hr/jobs/index.tsx
+apps/wathefni-employee-mobile/app/hr/leave/[id].tsx
+apps/wathefni-employee-mobile/app/hr/onboarding/[employeeKey].tsx
+apps/wathefni-employee-mobile/app/hr/onboarding/index.tsx
+apps/wathefni-employee-mobile/app/hr/preboarding/[assignmentId].tsx
+apps/wathefni-employee-mobile/app/hr/preboarding/index.tsx
+apps/wathefni-employee-mobile/app/hr/probation/[caseId].tsx
+apps/wathefni-employee-mobile/app/hr/probation/index.tsx
+apps/wathefni-employee-mobile/app/hr/requisitions/[requisitionId].tsx
+apps/wathefni-employee-mobile/app/hr/requisitions/index.tsx
+apps/wathefni-employee-mobile/app/hr/settings.tsx
+apps/wathefni-employee-mobile/app/hr/shift-swaps/[swapId].tsx
+apps/wathefni-employee-mobile/app/hr/shifts.tsx
+apps/wathefni-employee-mobile/app/hr/sign-in.tsx
+apps/wathefni-employee-mobile/app/hr/tasks/[taskId].tsx
+apps/wathefni-employee-mobile/app/hr/tasks/index.tsx
+apps/wathefni-employee-mobile/app/leave/history.tsx
+apps/wathefni-employee-mobile/app/leave/request.tsx
+apps/wathefni-employee-mobile/app/notifications.tsx
+apps/wathefni-employee-mobile/app/onboarding.tsx
+apps/wathefni-employee-mobile/app/preboarding.tsx
+apps/wathefni-employee-mobile/app/privacy-support.tsx
+apps/wathefni-employee-mobile/app/probation.tsx
+apps/wathefni-employee-mobile/app/schedule/history.tsx
+apps/wathefni-employee-mobile/app/settings.tsx
+
+== hr mobile routes ==
+apps/wathefni-hr-mobile/app/+html.tsx
+apps/wathefni-hr-mobile/app/+not-found.tsx
+apps/wathefni-hr-mobile/app/_layout.tsx
+apps/wathefni-hr-mobile/app/attendance/[attendanceId].tsx
+apps/wathefni-hr-mobile/app/attendance/index.tsx
+apps/wathefni-hr-mobile/app/candidates/[appKey].tsx
+apps/wathefni-hr-mobile/app/candidates/index.tsx
+apps/wathefni-hr-mobile/app/delivery-alerts.tsx
+apps/wathefni-hr-mobile/app/design-preview.tsx
+apps/wathefni-hr-mobile/app/documents/[employeeKey]/[documentType].tsx
+apps/wathefni-hr-mobile/app/documents/index.tsx
+apps/wathefni-hr-mobile/app/employees/[employeeKey].tsx
+apps/wathefni-hr-mobile/app/employees/index.tsx
+apps/wathefni-hr-mobile/app/index.tsx
+apps/wathefni-hr-mobile/app/interviews/[interviewId].tsx
+apps/wathefni-hr-mobile/app/interviews/index.tsx
+apps/wathefni-hr-mobile/app/leave/[id].tsx
+apps/wathefni-hr-mobile/app/onboarding/[employeeKey].tsx
+apps/wathefni-hr-mobile/app/onboarding/index.tsx
+apps/wathefni-hr-mobile/app/settings.tsx
+apps/wathefni-hr-mobile/app/shift-swaps/[swapId].tsx
+apps/wathefni-hr-mobile/app/shifts.tsx
+apps/wathefni-hr-mobile/app/sign-in.tsx
+apps/wathefni-hr-mobile/app/tasks.tsx
+
+== employee APP_ROUTES registry ==
+224:export const APP_ROUTES = {
+225-  '/(tabs)': { feature: 'core' },
+226-  '/(tabs)/index': { feature: 'core' },
+227-  '/notifications': { feature: 'core' },
+228-  '/(tabs)/profile': { feature: 'core' },
+229-  '/settings': { feature: 'core' },
+230-  '/privacy-support': { feature: 'core' },
+231-  '/change-pin': { feature: 'core' },
+232-  '/(tabs)/schedule': { feature: ['shifts', 'attendance'] },
+233-  '/schedule/history': { feature: 'attendance' },
+234-  '/(tabs)/leave': { feature: 'leave' },
+235-  '/leave/request': { feature: 'leave' },
+236-  '/leave/history': { feature: 'leave' },
+237-  '/documents': { feature: 'documents' },
+238-  '/onboarding': { feature: 'onboarding' },
+239-  '/preboarding': { feature: 'preboarding' },
+240-  '/probation': { feature: 'probation' },
+241-  '/payslips': { feature: 'payslips', params: ['payslip_id'] },
+242-  '/bank': { feature: 'bank' },
+243-} as const satisfies Record<string, RouteSpec>
+244-
+245:export type AppRoute = keyof typeof APP_ROUTES
+246-
+247-/**
+248- * Server/notification aliases for canonical routes. Kept explicit, never inferred.
+249- * `/shifts` and `/attendance` are the pre-Schedule paths that shift reminders and older
+250- * notifications still carry, so both land on the combined surface. `/(tabs)/notifications`
+251- * is the pre-bell Inbox path and is kept for the same reason.
+252- */
+253-const ROUTE_ALIASES: Record<string, AppRoute> = {
+254-  '/': '/(tabs)',
+255-  '/home': '/(tabs)',
+256-  '/inbox': '/notifications',
+257-  '/(tabs)/notifications': '/notifications',
+258-  '/profile': '/(tabs)/profile',
+259-  '/schedule': '/(tabs)/schedule',
+260-  '/shifts': '/(tabs)/schedule',
+261-  '/(tabs)/shifts': '/(tabs)/schedule',
+262-  '/attendance': '/(tabs)/schedule',
+263-  '/attendance/history': '/schedule/history',
+264-  '/leave': '/(tabs)/leave',
+265-}
+266-
+267-export type ResolvedRoute = {
+268-  route: AppRoute
+269-  params: Record<string, string>
+270-  /** Canonical href to hand to the router, with validated params re-encoded. */
+--
+289:  const route = (trimmed in APP_ROUTES ? (trimmed as AppRoute) : ROUTE_ALIASES[trimmed]) ?? null
+290-  if (!route) return null

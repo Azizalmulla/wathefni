@@ -1,0 +1,10 @@
+stamp=20260803T111959Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave2acb-prod-canary-20260803T111959Z
+payment_processing=disabled
+money_authority=external
+vendor_claimed=false
+authoritative_in_wathefni=false
+synthetic_only=true
+wave2b_started=false
+GATE=PROD_SYNTHETIC_PAYROLL_WAVE2AC_GO
+FREEZE_WAVE2AC=GO

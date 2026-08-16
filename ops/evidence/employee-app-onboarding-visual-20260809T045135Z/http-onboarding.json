@@ -1,0 +1,37 @@
+{
+  "lifecycle": "2a",
+  "completion": "waiting_on_employee",
+  "counts": {
+    "your_actions": 3,
+    "being_reviewed": 2,
+    "handled_by_others": 1,
+    "completed": 7
+  },
+  "your_actions": [
+    "civil_id",
+    "personal_photo",
+    "bank_details"
+  ],
+  "being_reviewed": [
+    "passport",
+    "offer_letter"
+  ],
+  "handled_by_others": [
+    "work_permit"
+  ],
+  "civil_status": "replacement_required",
+  "civil_reason": "Photo is too blurry \u2014 please resubmit a sharper Civil ID.",
+  "can_upload": true,
+  "onboarding_feature": {
+    "enabled": true,
+    "reason": null,
+    "dependency_mode": "all",
+    "module_keys": [
+      "onboarding"
+    ],
+    "actions": [
+      "view",
+      "upload_document"
+    ]
+  }
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wave D4 fixture</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --text: #2a241c;
+      --subtle: #6b6258;
+      --line: #e7dfd2;
+      --panel: #fffdf8;
+      --muted: #f6f0e6;
+      --warn: #c89445;
+      --ok: #2f6b4f;
+      --danger: #9b3b3b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif; background: linear-gradient(180deg, #f3ebe0, #fffdf8); color: var(--text); }
+    .page { padding: 24px; max-width: 980px; margin: 0 auto; }
+    .card { background: rgba(255,253,248,.92); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px; margin-bottom: 16px; box-shadow: 0 10px 40px rgba(28,25,21,.05); }
+    h1 { font-size: 22px; margin: 0 0 6px; }
+    h2 { font-size: 17px; margin: 0 0 6px; }
+    p { margin: 0 0 10px; color: var(--subtle); font-size: 13px; line-height: 1.5; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+    .badge { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 4px 10px; border: 1px solid; }
+    .badge.warn { background: #f8ebcf; color: #7a5420; border-color: #e2c48a; }
+    .badge.ok { background: #e4f1ea; color: var(--ok); border-color: #b9d8c7; }
+    .badge.danger { background: #f8e4e4; color: var(--danger); border-color: #e2b4b4; }
+    .badge.muted { background: var(--muted); color: var(--subtle); border-color: var(--line); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .btn { border: 0; border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 13px; background: var(--ink); color: #fff; }
+    .btn.sec { background: #efe6d6; color: var(--ink); }
+    .btn.ghost { background: transparent; color: var(--subtle); border: 1px solid var(--line); }
+    .item { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: var(--muted); margin-top: 10px; }
+    .seg { display: inline-flex; gap: 6px; }
+    .seg button.active { background: var(--ink); color: #fff; }
+    [dir="rtl"] body, body.rtl { direction: rtl; }
+    .mobile { max-width: 390px; }
+  </style>
+</head>
+<body>
+  <div class="page" id="root"></div>
+  <script>
+    const params = new URLSearchParams(location.search)
+    const locale = params.get('locale') || 'en'
+    const mode = params.get('mode') || 'desktop'
+    const isAr = locale === 'ar'
+    document.documentElement.lang = locale
+    if (isAr) document.body.classList.add('rtl')
+    const page = document.getElementById('root')
+    if (mode === 'mobile') page.classList.add('mobile')
+    const t = isAr ? {
+      settingsTitle: 'استقبال البريد والمستندات',
+      settingsDesc: 'أنشئ عنواناً عاماً أو اسماً مستعاراً لوظيفة، ثم حوّل بريد التوظيف إليه.',
+      general: 'عنوان عام',
+      jobAlias: 'اسم مستعار لوظيفة',
+      needsJob: 'تحتاج وظيفة',
+      roleBound: 'مربوطة بوظيفة',
+      identity: 'مراجعة الهوية',
+      quarantined: 'محجورة',
+      ready: 'جاهزة للمراجعة',
+      heldTitle: 'سير معلّقة بانتظار وظيفة',
+      heldDesc: 'عيّن وظيفة ثم أضف المرشح صراحةً ضمن المرشحين.',
+      admit: 'تعيين وإضافة',
+      address: 'wathefni-cv-demo@inbound.wathefni.ai',
+      candidate: 'سارة أحمد',
+      recovery: 'اطلب من المرشح إعادة إرسال PDF نظيف، أو دوّر العنوان عند الإساءة.',
+    } : {
+      settingsTitle: 'Email & document intake',
+      settingsDesc: 'Create a general address or a job-specific alias, then forward recruitment mail to it.',
+      general: 'General address',
+      jobAlias: 'Job-specific alias',
+      needsJob: 'Needs a job',
+      roleBound: 'Bound to a job',
+      identity: 'Identity review',
+      quarantined: 'Quarantined',
+      ready: 'Ready for review',
+      heldTitle: 'Held CVs waiting for a job',
+      heldDesc: 'Assign a job, then admit the candidate explicitly from Candidates.',
+      admit: 'Assign & admit',
+      address: 'wathefni-cv-demo@inbound.wathefni.ai',
+      candidate: 'Sara Held',
+      recovery: 'Ask the candidate to re-send a clean PDF/DOCX, or rotate the intake address if abused.',
+    }
+    page.innerHTML = `
+      <div class="card" data-testid="email-document-intake-card">
+        <h1>${t.settingsTitle}</h1>
+        <p>${t.settingsDesc}</p>
+        <div class="row">
+          <span class="badge ok">${isAr ? 'مفعّل' : 'Enabled'}</span>
+          <span class="badge warn">${t.needsJob}</span>
+          <span class="badge ok">${t.roleBound}</span>
+        </div>
+        <div class="item">
+          <code>${t.address}</code>
+          <div class="row" style="margin-top:8px">
+            <span class="badge warn">${t.needsJob}</span>
+            <button class="btn sec">${isAr ? 'نسخ' : 'Copy'}</button>
+            <button class="btn ghost">${isAr ? 'تدوير' : 'Rotate'}</button>
+          </div>
+        </div>
+        <div class="row seg" style="margin-top:14px">
+          <button class="btn active">${t.general}</button>
+          <button class="btn sec">${t.jobAlias}</button>
+        </div>
+      </div>
+      <div class="card" data-testid="held-intake-review">
+        <h2>${t.heldTitle}</h2>
+        <p>${t.heldDesc}</p>
+        <div class="row">
+          <span class="badge warn">${t.needsJob}</span>
+          <span class="badge warn">${t.identity}</span>
+          <span class="badge danger">${t.quarantined}</span>
+          <span class="badge ok">${t.ready}</span>
+        </div>
+        <p style="font-size:12px">${t.recovery}</p>
+        <div class="item">
+          <div class="row" style="justify-content:space-between">
+            <strong>${t.candidate}</strong>
+            <span class="badge warn">${t.needsJob}</span>
+          </div>
+          <div class="row">
+            <button class="btn">${t.admit}</button>
+            <button class="btn sec">${isAr ? 'معاينة' : 'Preview'}</button>
+          </div>
+        </div>
+      </div>
+    `
+  </script>
+</body>
+</html>

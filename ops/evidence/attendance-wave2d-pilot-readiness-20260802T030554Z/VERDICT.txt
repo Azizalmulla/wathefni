@@ -1,0 +1,19 @@
+Attendance Wave 2D — VERDICT
+Stamp: 20260802T030554Z
+
+Local qualify: PASS 53/0 (E360 + Onboarding freezes green)
+Staging qualify: PASS 52/0 (core proofs; freezes skipped for staging skew)
+Leak scans (local + staging evidence): PASS
+
+Secret-handling + leak gate: PASS
+Connector registry / wrong-tenant fail-closed: PASS
+Rotate / revoke / reconnect: PASS
+HR remediation + payroll exclusion + idempotency: PASS
+Health offline/lag/recovery: PASS
+Read-only compat (no ingest): PASS
+Wave 1 authority path for approved replay: PASS
+
+Real-device pilot (connect + ingest real punches): NO-GO
+Allowlisted pilot enablement: CONDITIONAL GO only after checklist + customer compat + separate pilot wave
+
+Frozen modules: unchanged (local freeze regressions green)

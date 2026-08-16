@@ -1,0 +1,192 @@
+BROKEN POST /dashboard/attendance/ops/cases/{case_id}/apply owner=400 hr_manager=400 viewer=400; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/attendance/ops/cases/{case_id}/review owner=400 hr_manager=400 viewer=400; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/attendance/ops/disputes/{dispute_id}/resolve owner=400 hr_manager=400 viewer=400; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/attendance/ops/exceptions/{exception_id}/assign owner=400 hr_manager=400 viewer=400; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/attendance/ops/exceptions/{exception_id}/reopen owner=400 hr_manager=400 viewer=400; raw/unclear errors for owner,hr_manager,viewer
+BROKEN PATCH /dashboard/calendar/events/{event_id} owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/calendar/events/{event_id}/cancel owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+PASS POST /dashboard/calendar/events/{event_id}/guests/{guest_id}/invite owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/calendar/events/{event_id}/rsvp owner=422 hr_manager=422 viewer=422
+PASS POST /dashboard/calendar/events/{event_id}/sync/retry owner=200 hr_manager=403 viewer=403
+PASS POST /dashboard/calendar/reschedule-requests/{request_id}/resolve owner=422 hr_manager=422 viewer=403
+PASS PATCH /dashboard/calendar/sync/connections/{connection_id} owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/calendar/sync/connections/{connection_id}/disconnect owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/calendar/sync/connections/{connection_id}/reconnect owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/hr-tasks/{task_id}/resolve owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/mobile/attendance/{attendance_id}/resolve owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/candidates/{app_key}/decision owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/documents/{employee_key}/{document_type}/review owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/interviews/{interview_id}/notes owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/leave/{leave_id}/decision owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/offers/{offer_id}/action owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/onboarding/{employee_key}/review owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/mobile/shift-swaps/{swap_id}/decision owner=401 hr_manager=401 viewer=401
+PASS DELETE /dashboard/org/managers/{scope_id} owner=404 hr_manager=404 viewer=404
+PASS POST /dashboard/platform/integrations/{integration_id}/disconnect owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/platform/integrations/{integration_id}/health owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/platform/integrations/{integration_id}/rotate owner=422 hr_manager=403 viewer=403
+BROKEN POST /dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/activate owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/health owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/revoke owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/attendance/capture-ops/connectors/{connector_id}/rotate owner=403 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/attendance/capture-ops/remediation/{item_id}/approve-mapping owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/attendance/capture-ops/remediation/{item_id}/reject owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+PASS POST /dashboard/posthire/attendance/capture-ops/remediation/{item_id}/replay owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/posthire/attendance/import/batches/{batch_id}/reverse owner=404 hr_manager=404 viewer=404
+BROKEN POST /dashboard/posthire/employee-ess/bank/{employee_key}/rotate owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/employee-ess/requests/{request_id}/apply owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/employee-ess/requests/{request_id}/decide owner=422 hr_manager=422 viewer=422; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/employee-ess/requests/{request_id}/submit owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/employee-ess/requests/{request_id}/withdraw owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/employee-lifecycle/downstream-actions/{action_id}/decide owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/employee-lifecycle/requests/{request_id}/cancel owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/posthire/employee-lifecycle/requests/{request_id}/decide owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/posthire/employee-org/migration-batches/{batch_id}/commit owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/posthire/employee-org/migration-batches/{batch_id}/dry-run owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/posthire/employee-org/migration-batches/{batch_id}/pause owner=409 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/posthire/employee-org/migration-batches/{batch_id}/rollback owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+PASS POST /dashboard/posthire/employee-status/requests/{request_id}/cancel owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/posthire/employee-status/requests/{request_id}/decide owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/posthire/employees/import-batches/{batch_id}/repair-side-effects owner=200 hr_manager=403 viewer=403
+BROKEN POST /dashboard/posthire/employees/import-batches/{batch_id}/rollback owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+PASS POST /dashboard/posthire/employees/import-batches/{batch_id}/rows/{row_id}/apply-approved-name-change owner=404 hr_manager=403 viewer=403
+BROKEN POST /dashboard/posthire/employees/import-batches/{batch_id}/rows/{row_id}/approve-name-change owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+PASS PATCH /dashboard/posthire/employees/{employee_key} owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/posthire/employees/{employee_key}/app-invite owner=422 hr_manager=422 viewer=422
+PASS POST /dashboard/posthire/employees/{employee_key}/documents owner=422 hr_manager=422 viewer=422
+PASS POST /dashboard/posthire/employees/{employee_key}/documents/{document_type}/review owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/posthire/employees/{employee_key}/lifecycle/downstream-actions owner=404 hr_manager=403 viewer=403
+BROKEN POST /dashboard/posthire/employees/{employee_key}/lifecycle/requests owner=500 hr_manager=500 viewer=500; server/network failure
+BROKEN POST /dashboard/posthire/employees/{employee_key}/status owner=500 hr_manager=500 viewer=500; server/network failure
+BROKEN POST /dashboard/posthire/employees/{employee_key}/status/requests owner=500 hr_manager=500 viewer=500; server/network failure
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/approve owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/bank-contract owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/close owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/journal owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/reopen/confirm owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/reopen/initiate owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/close-export/runs/{close_run_id}/submit owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+PASS POST /dashboard/posthire/payroll/external/exports/{export_run_id}/import owner=422 hr_manager=422 viewer=422
+BROKEN POST /dashboard/posthire/payroll/external/exports/{export_run_id}/reconcile owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/external/exports/{export_run_id}/rollback owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/posthire/payroll/external/quarantine/{quarantine_id}/acknowledge owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/payslips/{payslip_id}/replace owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/payslips/{payslip_id}/revoke owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/preview/{preview_run_id}/rollback owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/approve owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/override/confirm owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/override/initiate owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/payroll/statutory/{kind}/{worksheet_id}/submit owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/open-shifts/claims/{claim_id}/decide owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/open-shifts/{open_shift_id}/assign owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/open-shifts/{open_shift_id}/claim owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/reconciliation/{flag_id}/resolve owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN PATCH /dashboard/posthire/shifts/recurrences/{recurrence_id} owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/recurrences/{recurrence_id}/end owner=409 hr_manager=409 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/recurrences/{recurrence_id}/exceptions owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/recurrences/{recurrence_id}/materialize owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/recurrences/{recurrence_id}/pause owner=409 hr_manager=409 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/recurrences/{recurrence_id}/preview owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/recurrences/{recurrence_id}/resume owner=409 hr_manager=409 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/rotations/assignments/{assignment_id}/preview owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-periods/{period_id}/generate-draft owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-periods/{period_id}/generate-from-rotation owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-periods/{period_id}/new-draft owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-periods/{period_id}/rollback owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-versions/{version_id}/pam-export owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-versions/{version_id}/publish owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-versions/{version_id}/resolve-conflicts owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/schedule-versions/{version_id}/transition owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN PATCH /dashboard/posthire/shifts/templates/{template_id} owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/posthire/shifts/templates/{template_id}/archive owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+PASS POST /dashboard/posthire/shifts/{shift_id}/cancel owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/posthire/shifts/{shift_id}/reschedule owner=422 hr_manager=422 viewer=403
+BROKEN POST /dashboard/prehire/applications/{app_key}/assessment owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/classification/review owner=500 hr_manager=500 viewer=500; server/network failure
+BROKEN POST /dashboard/prehire/applications/{app_key}/classification/run owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer
+BROKEN POST /dashboard/prehire/applications/{app_key}/confirmations owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/evaluation owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/facts/review owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/hire owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/notes owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN PATCH /dashboard/prehire/applications/{app_key}/notes/{note_id} owner=422 hr_manager=422 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/notify owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/offers owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/owner owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+PASS POST /dashboard/prehire/applications/{app_key}/person-profile/add-to-job owner=422 hr_manager=422 viewer=403
+BROKEN POST /dashboard/prehire/applications/{app_key}/reject owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/shortlist owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/tags/{action} owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/tasks owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN PATCH /dashboard/prehire/applications/{app_key}/tasks/{task_id} owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/applications/{app_key}/video-interview owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+PASS POST /dashboard/prehire/assessments/authoring/drafts/{draft_id}/automated-review owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/drafts/{draft_id}/transition owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/adapt owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/rewrite owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/product2/drafts/{draft_id}/secondary-review owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/product2/model-registry/{registry_version_id}/activate owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/product2/translation-pairs/{translation_pair_id}/human-review owner=403 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/assessments/authoring/product2/translation-pairs/{translation_pair_id}/review owner=403 hr_manager=403 viewer=403
+BROKEN POST /dashboard/prehire/assessments/{attempt_id}/cancel owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/assessments/{attempt_id}/resend owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/assessments/{attempt_id}/review owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN DELETE /dashboard/prehire/candidates/saved-views/{view_id} owner=404 hr_manager=404 viewer=404; raw/unclear errors for owner,hr_manager,viewer
+BROKEN DELETE /dashboard/prehire/integrations/intake/{intake_id} owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/prehire/integrations/intake/{intake_id}/disable owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+BROKEN POST /dashboard/prehire/integrations/intake/{intake_id}/rotate owner=404 hr_manager=403 viewer=403; raw/unclear errors for owner
+PASS PATCH /dashboard/prehire/integrations/mailbox/{mailbox_id} owner=404 hr_manager=403 viewer=403
+PASS DELETE /dashboard/prehire/integrations/mailbox/{mailbox_id} owner=404 hr_manager=403 viewer=403
+PASS POST /dashboard/prehire/integrations/mailbox/{mailbox_id}/check-now owner=404 hr_manager=403 viewer=403
+BROKEN POST /dashboard/prehire/interviews/feedback/{submission_id}/reopen owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN PATCH /dashboard/prehire/interviews/{interview_id} owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/interviews/{interview_id}/actions/assign-interviewer owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/interviews/{interview_id}/actions/send-video-invitation owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/interviews/{interview_id}/feedback owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/interviews/{interview_id}/notes owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/interviews/{interview_id}/reschedule owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+BROKEN POST /dashboard/prehire/interviews/{interview_id}/transcripts/retry owner=404 hr_manager=404 viewer=403; raw/unclear errors for owner,hr_manager
+PASS PATCH /dashboard/prehire/offers/{offer_id} owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/prehire/offers/{offer_id}/approve owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/prehire/offers/{offer_id}/record-response owner=422 hr_manager=422 viewer=403
+PASS POST /dashboard/prehire/offers/{offer_id}/return owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/prehire/offers/{offer_id}/send owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/prehire/offers/{offer_id}/submit-approval owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/prehire/offers/{offer_id}/withdraw owner=422 hr_manager=422 viewer=403
+PASS PATCH /dashboard/prehire/positions/{position_code} owner=404 hr_manager=404 viewer=403
+PASS POST /dashboard/prehire/positions/{position_code}/ranking-evidence-policy owner=200 hr_manager=200 viewer=403
+PASS POST /dashboard/prehire/positions/{position_code}/status owner=422 hr_manager=422 viewer=422
+PASS PUT /dashboard/superadmin/setup/companies/{company_code}/channel-account owner=401 hr_manager=401 viewer=401
+PASS DELETE /dashboard/superadmin/setup/companies/{company_code}/channel-account owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/config/drafts owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/config/drafts/{document_id}/validate owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/config/publish owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/config/rollback owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/cutover/activate owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/cutover/parity/{boundary_key} owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/cutover/rollback/{boundary_key} owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/email/domains owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/email/domains/{domain_id}/refresh owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/email/force-wathefni owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/seed owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id} owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/email/mailboxes/{mailbox_id}/probe owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/impact-preview owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/imports owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/integrations owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/integrations/test owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/integrations/{provider_key}/pause owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/integrations/{provider_key}/reconnect owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/superadmin/setup/companies/{company_code}/lifecycle owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/superadmin/setup/companies/{company_code}/modules owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/modules/{module_key}/lifecycle owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/offboarding/preview owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/owner owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/superadmin/setup/companies/{company_code}/profile owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/readiness/run owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/superadmin/setup/companies/{company_code}/settings owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/companies/{company_code}/whatsapp-link owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/superadmin/setup/wizard/drafts/{draft_id} owner=401 hr_manager=401 viewer=401
+PASS POST /dashboard/superadmin/setup/wizard/drafts/{draft_id}/validate/{step} owner=401 hr_manager=401 viewer=401
+PASS PATCH /dashboard/team/users/{user_id} owner=422 hr_manager=403 viewer=403
+DASHBOARD_ROLE_API_AUDIT {"probes": 191, "status_counts": {"broken": 102, "pass": 89}, "server_failures": 4, "raw_error_candidates": 98}

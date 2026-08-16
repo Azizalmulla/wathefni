@@ -1,0 +1,93 @@
+    PRODUCTION READINESS R5H — engagement surface (staging DB)
+    tenant: R5H71CB15
+      PASS  sync catalog entitlement
+      PASS  second tenant enabled
+      PASS  engagement enableable
+      PASS  workspace ready
+      PASS  ER off
+      PASS  performance off
+      PASS  talent off
+      PASS  survey template
+      PASS  A version anonymous
+      PASS  A campaign draft
+      PASS  A launch freezes audience
+      PASS  A launch freezes version
+      PASS  A anonymous explicit
+      PASS  A submit E1
+      PASS  A no auto ER E1
+      PASS  A submit E2
+      PASS  A no auto ER E2
+      PASS  A submit E3
+      PASS  A no auto ER E3
+      PASS  A below threshold suppressed
+      PASS  A suppressed is not zero
+      PASS  A export obeys suppression
+      PASS  A threshold met
+      PASS  B breakdown ok
+      PASS  B ENG suppressed
+      PASS  B HR suppressed
+      PASS  B suppressed cells have no n
+      PASS  C participation listed
+      PASS  C admin cannot map answers
+      PASS  C no respondent answer map
+      PASS  D small team suppressed
+      PASS  D empty scope not company-wide
+      PASS  D empty scope company_wide false
+      PASS  D manager no raw answers
+      PASS  D other manager scope suppressed
+      PASS  E eNPS on explicit 0-10
+      PASS  E arbitrary question is not eNPS
+      PASS  F action plan created
+      PASS  F not ER
+      PASS  F not employment mutation
+      PASS  F no ER cases created
+      PASS  identified mode labeled
+      PASS  anonymous and identified distinct
+      PASS  employee workspace own surveys
+      PASS  employee detail no aggregates
+      PASS  employee isolation
+      PASS  assistant aggregates
+      PASS  assistant privacy forbidden
+      PASS  wave5 typed facts only
+      PASS  wave5 no free text
+      PASS  EN status label
+      PASS  AR status label
+      PASS  Engagement HTTP routes registered
+      PASS  Engagement employee HTTP routes registered
+      PASS  no HR Mobile Engagement namespace
+      PASS  unauthenticated workspace not public
+      PASS  unauthenticated employee not public
+      PASS  HR without Engagement permission 403
+      PASS  403 is not empty-surveys
+      PASS  manager admin workspace 403
+      PASS  manager aggregate route allowed
+      PASS  manager empty scope is not company-wide
+      PASS  manager empty scope suppressed or empty
+      PASS  HR workspace HTTP
+      PASS  HR lists campaigns
+      PASS  HR results HTTP
+      PASS  admin resolve anonymous denied
+      PASS  admin resolve fail-closed
+      PASS  export without engagement.export is 403
+      PASS  export with engagement.export
+      PASS  export has no respondent map
+      PASS  tenant isolation blocks foreign campaign
+      PASS  authorized employee workspace
+      PASS  employee no company analytics
+      PASS  employee no scores
+      PASS  employee isolation fail-closed
+      PASS  G launched version not rewritten
+      PASS  G history reconstructable
+      PASS  ER ON composition
+      PASS  ER ON created no ER cases
+      PASS  G disable ok
+      PASS  G history preserved flag
+      PASS  G historical campaigns retained
+      PASS  G new campaign blocked
+      PASS  G disabled workspace unavailable
+      PASS  G disabled counts are not fake zeros
+      PASS  G notifications suppressed when module off
+
+    87 passed, 0 failed
+R5H_ENGAGEMENT_SURFACE_DB_PASS
+STAGING_RC=0

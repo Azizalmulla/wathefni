@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "status": 200,
+  "json": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('ABDULAZIZALMULLA%40wathefni.onmicrosoft.com')/events(id,subject,isOnlineMeeting,onlineMeetingProvider,onlineMeeting,onlineMeetingUrl,attendees,start,end)/$entity",
+    "@odata.etag": "W/\"iRB78Onw7EaUm6TMsnqM7gAAAGKSvQ==\"",
+    "id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0ksAAA=",
+    "subject": "Wathefni Teams diag 20260730T233949Z",
+    "onlineMeetingUrl": null,
+    "isOnlineMeeting": false,
+    "onlineMeetingProvider": "unknown",
+    "start": {
+      "dateTime": "2026-07-31T01:39:51.0000000",
+      "timeZone": "UTC"
+    },
+    "end": {
+      "dateTime": "2026-07-31T02:09:51.0000000",
+      "timeZone": "UTC"
+    },
+    "attendees": [
+      {
+        "type": "required",
+        "status": {
+          "response": "none",
+          "time": "0001-01-01T00:00:00Z"
+        },
+        "emailAddress": {
+          "name": "ABDULAZIZ ALMULLA",
+          "address": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com"
+        }
+      }
+    ],
+    "onlineMeeting": null,
+    "calendar@odata.associationLink": "https://graph.microsoft.com/v1.0/users('ABDULAZIZALMULLA@wathefni.onmicrosoft.com')/calendars('AQMkADFhYjZlYjE2LTk5ADc2LTQyZTktOTQ3Yy1jMzA4YzA1M2QxM2EALgAAA31dd1i2eLxMmjxEp8b6h3sBAIkQe-Dp8OxGlJukzLJ6jO4AAAIBDQAAAA==')/$ref",
+    "calendar@odata.navigationLink": "https://graph.microsoft.com/v1.0/users('ABDULAZIZALMULLA@wathefni.onmicrosoft.com')/calendars('AQMkADFhYjZlYjE2LTk5ADc2LTQyZTktOTQ3Yy1jMzA4YzA1M2QxM2EALgAAA31dd1i2eLxMmjxEp8b6h3sBAIkQe-Dp8OxGlJukzLJ6jO4AAAIBDQAAAA==')"
+  }
+}

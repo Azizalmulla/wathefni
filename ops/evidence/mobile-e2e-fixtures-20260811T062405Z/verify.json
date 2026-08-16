@@ -1,0 +1,12 @@
+{
+  "approve": {
+    "ok": false,
+    "error": "mobile_login_failed",
+    "status": 401
+  },
+  "reject": {
+    "ok": false,
+    "error": "mobile_login_failed",
+    "status": 401
+  }
+}

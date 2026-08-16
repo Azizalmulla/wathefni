@@ -1,0 +1,14 @@
+PASS
+
+Employees 360 Wave 1C — hygiene + migration readiness (local/staging)
+Stamp: 20260801T195138Z
+Production mutated: NO
+Production deploy: NOT DONE (awaiting approval)
+
+Classifications:
+- WATHEFNI-96597727743 → null_should_be_active (active, high)
+- WATHEFNI-96550252254 → null_should_be_active (active, high)
+- WATHEFNI-P0-DUP-1 ×3 messages → synthetic_orphan_quarantine
+- Additional orphans after Wave 1: none
+
+Tests: unit 13/13 PASS; staging smoke 18/18 PASS

@@ -1,0 +1,10 @@
+ verified_bindings 
+-------------------
+                 0
+(1 row)
+
+ applications 
+--------------
+           18
+(1 row)
+

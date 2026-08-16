@@ -1,0 +1,4 @@
+COMBINED_GATE_VERDICT=PASS
+local=EMPLOYEE_APP_P1_RELEASE_GATE: PARTIAL (skips acknowledged by ALLOW_DB_SKIP=1)
+prod=EMPLOYEE_APP_P1_RELEASE_GATE: INCOMPLETE (run the skipped classes on their own host before claiming a canary)
+FUNCTIONAL_READY_FOR_PHYSICAL_VISUAL_QA=YES

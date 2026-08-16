@@ -1,0 +1,37 @@
+health_ok
+active
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SETUP_CONSOLE_ENABLED=true
+WATHEFNI_SETUP_CONSOLE_V2=on
+CAPTURE_INGEST_OFF_OK
+PASS  wave a version
+PASS  wathefni only constant
+PASS  honest states complete
+PASS  six stages
+PASS  refuses non-wathefni
+PASS  launch readiness page present
+PASS  UI overall status
+PASS  UI important blockers
+PASS  UI pause impact
+PASS  UI EN launch title
+PASS  UI AR launch title
+PASS  UI rtl
+PASS  UI mobile wrap
+PASS  app wires launch view
+PASS  no giant form in launch page
+PASS  route registered
+PASS  module imported in app
+PASS  db evaluate ok
+PASS  overall state present
+PASS  stages returned
+PASS  entitlements cannot bypass
+PASS  payroll money false
+PASS  attendance ingest false
+PASS  modules stage non-empty
+PASS  attendance honest ingest block
+FAIL  payroll controlled not money :: {'key': 'module:payroll', 'title_en': 'Payroll', 'title_ar': 'Payroll', 'state': 'setup_required', 'purchased': True, 'configured': False, 'blocked': False, 'live': False, 'summary_en': 'Payroll workspace is purchased but not opened for controlled use yet.', 'summary_ar': 'مساحة الرواتب مشتراة لكنها غير مفتوحة للاستخدام المنضبط بعد.', 'next_action_en': 'Open External payroll run after company basics and people are in place.', 'next_action_ar': 'افتح تشغيل الرواتب الخارجية بعد تجهيز الأساسيات والأشخاص.', 'deep_link': '/dashboard', 'evidence': {'gate': 'payroll_wave_off'}}
+PASS  blockers have next actions
+PASS  blockers have deep links
+db wathefni_staging
+
+27 passed, 1 failed

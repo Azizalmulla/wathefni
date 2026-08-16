@@ -1,0 +1,76 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5D — job architecture surface (unit)
+      PASS  JA customer enableable
+      PASS  JA customer visible
+      PASS  performance still enableable
+      PASS  talent still enableable
+      PASS  learning still hidden
+      PASS  comp planning still hidden
+      PASS  workforce planning still hidden
+      PASS  JA is not a catalog SKU
+      PASS  JA commercial sku false
+      PASS  JA domain_authority_ready
+      PASS  JA http_ready
+      PASS  JA hr_web_ready
+      PASS  JA employee surface not required
+      PASS  JA manager surface not required
+      PASS  JA mobile not required
+      PASS  fail-closed skips JA namespaces
+      PASS  fail-closed keeps Learning
+      PASS  not separate SKU
+      PASS  salary bands out
+      PASS  edges are not eligibility
+      PASS  no fuzzy AI
+      PASS  raw preserved
+      PASS  recruiting job is not JA profile
+      PASS  no employee shadow truth
+      PASS  talent optional
+      PASS  learning not required
+      PASS  comp planning not required
+      PASS  Setup remounts JA policies
+      PASS  Setup still remounts Talent
+      PASS  Setup still remounts Performance
+      PASS  Setup still omits Learning
+      PASS  Setup still omits Comp Planning
+      PASS  Setup still omits Workforce Planning
+      PASS  PostHire mounts JA workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace no career score formula
+      PASS  workspace names Recruiting Job boundary
+      PASS  workspace names requisition boundary
+      PASS  workspace edges not eligibility
+      PASS  no salary band authoring
+      PASS  Page includes job-architecture
+      PASS  nav.job-architecture registered
+      PASS  nav has no catalog module key
+      PASS  JA not a canonical posthire SKU
+      PASS  JA is a posthire nav page
+      PASS  app registers JA HTTP
+      PASS  JA read permission exists
+      PASS  JA manage permission exists
+      PASS  JA mapping permission exists
+      PASS  JA publish permission exists
+      PASS  no employee JA feature
+      PASS  HTTP mentions /dashboard/job-architecture
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /families
+      PASS  HTTP mentions /functions
+      PASS  HTTP mentions /profiles
+      PASS  HTTP mentions /grades
+      PASS  HTTP mentions /levels
+      PASS  HTTP mentions /career-edges
+      PASS  HTTP mentions /history
+      PASS  HTTP mentions /mappings
+      PASS  HTTP mentions /assignments
+      PASS  HTTP mentions /refs
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP does not register employee app JA
+      PASS  HTTP refuses hard delete
+      PASS  fail-closed no longer steals JA
+      PASS  Learning still fail-closed
+
+    70 passed, 0 failed
+R5D_JOB_ARCHITECTURE_SURFACE_UNIT_PASS

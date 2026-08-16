@@ -1,0 +1,3 @@
+/var/www/wathefni-dashboard/assets/dashboard-BnfWlcgh.js
+health=200
+dashboard=200

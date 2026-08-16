@@ -177,6 +177,52 @@ export function ShowMoreButton({ label, onPress }: { label: string; onPress: () 
 }
 
 /**
+ * Flat back control shared by pushed screens (history, settings, documents).
+ * No elevated pill — the page already has enough chrome.
+ */
+export function PageBackButton({ onPress, accessibilityLabel }: { onPress: () => void; accessibilityLabel: string }) {
+  const { isRTL } = useI18n()
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      hitSlop={8}
+      style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+    >
+      <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
+    </Pressable>
+  )
+}
+
+/**
+ * In-page empty / calm notice — surface, not a pastel hero.
+ * Full-screen Loading/Access may still use stronger chrome; list empties should not.
+ */
+export function QuietEmpty({
+  message,
+  icon,
+}: {
+  message: string
+  icon?: keyof typeof Ionicons.glyphMap
+}) {
+  const { isRTL } = useI18n()
+  const align = readingEdgeAlign(isRTL)
+  return (
+    <View style={styles.quietEmpty} accessibilityRole="summary">
+      {icon ? (
+        <View style={styles.quietIcon} accessible={false}>
+          <Ionicons name={icon} size={20} color={colors.subtle} />
+        </View>
+      ) : null}
+      <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.quietText, align]}>
+        {message}
+      </Text>
+    </View>
+  )
+}
+
+/**
  * Page a long list instead of laying all of it out at once.
  *
  * A ScrollView plus `.map()` over every payslip an employee has ever received
@@ -241,4 +287,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   showMoreText: { color: colors.accent, fontSize: font.small, fontWeight: '700' },
+  back: {
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quietEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  quietIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceMuted,
+  },
+  quietText: { flex: 1, color: colors.ink, fontSize: font.body, lineHeight: 22, fontWeight: '600' },
 })

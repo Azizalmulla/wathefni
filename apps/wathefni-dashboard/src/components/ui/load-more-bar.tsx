@@ -12,29 +12,36 @@ export function LoadMoreBar({
   loading,
   onLoadMore,
   noun = 'item',
+  showingLabel,
+  loadMoreLabel,
+  loadingLabel,
 }: {
   loaded: number
   total: number
   loading: boolean
   onLoadMore: () => void
   noun?: string
+  /** Pre-interpolated label; falls back to English "Showing X of Y nouns". */
+  showingLabel?: string
+  loadMoreLabel?: string
+  loadingLabel?: string
 }) {
   const hasMore = loaded < total
   if (!hasMore && total <= loaded) return null
+  const showing =
+    showingLabel
+    || `Showing ${loaded} of ${total} ${noun}${total === 1 ? '' : 's'}`
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line/45 px-4 py-3 text-[12.5px] text-subtle/85">
-      <span className="tabular-nums">
-        Showing {loaded} of {total} {noun}
-        {total === 1 ? '' : 's'}
-      </span>
+      <span className="tabular-nums">{showing}</span>
       {hasMore ? (
         <Button variant="secondary" size="sm" disabled={loading} onClick={onLoadMore}>
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+              <Loader2 className="h-4 w-4 animate-spin" /> {loadingLabel || 'Loading…'}
             </>
           ) : (
-            'Load more'
+            loadMoreLabel || 'Load more'
           )}
         </Button>
       ) : null}

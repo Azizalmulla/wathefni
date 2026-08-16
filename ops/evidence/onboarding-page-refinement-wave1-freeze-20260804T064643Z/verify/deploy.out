@@ -1,0 +1,10 @@
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-DavN6N29.js
+onboardingPrimaryAction False
+data-primary-action True
+Open checklist True
+View details True
+next_item_storage_status True
+file PostHire-DavN6N29.js
+APP_ENRICHMENT_FIELDS_OK
+BACKUP=/opt/wathefni/backups/production-pre-onboarding-page-refinement-wave1-freeze-20260804T064643Z

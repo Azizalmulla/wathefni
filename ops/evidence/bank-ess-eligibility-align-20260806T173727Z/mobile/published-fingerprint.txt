@@ -1,0 +1,7 @@
+syncLayoutLocale True
+typeof_guard True
+hasFeature_bank True
+open_bank True
+BankUnavailableView True
+hbc_ok True
+PUBLISHED_FINGERPRINT_PASS

@@ -1,0 +1,40 @@
+{
+  "ok": true,
+  "status": "done",
+  "result": {
+    "ok": true,
+    "task": {
+      "task_id": "3e293340-5735-4fd9-a695-8bdeab93eacf",
+      "status": "done",
+      "employee_key": "WATHEFNI-96550010002",
+      "source": "app_activation",
+      "task_type": "delivery_failed",
+      "metadata": {
+        "flow": "app_activation",
+        "template_key": "app_activation",
+        "attempt_reasons": [
+          "session:missing_candidate_conversation_id",
+          "template:template_disabled",
+          "email:postmark_http_422: You tried to send to recipient(s) that have been marked as inactive. Found inactive addresses: . Inactive recipients are ones that have generated a hard bounce, a spam complaint, or a manual suppressi"
+        ]
+      }
+    }
+  },
+  "task": {
+    "task_id": "3e293340-5735-4fd9-a695-8bdeab93eacf",
+    "task_type": "delivery_failed",
+    "source": "app_activation",
+    "title": "Couldn't reach employee: App activation code",
+    "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+    "employee": {
+      "employee_key": "WATHEFNI-96550010002",
+      "name": "Fahad Alenezi"
+    },
+    "status": "done",
+    "priority": "high",
+    "created_at": "2026-08-08T02:24:07.873791+00:00",
+    "updated_at": "2026-08-08T02:24:07.873791+00:00",
+    "allowed_actions": [],
+    "destination": "/tasks/3e293340-5735-4fd9-a695-8bdeab93eacf"
+  }
+}

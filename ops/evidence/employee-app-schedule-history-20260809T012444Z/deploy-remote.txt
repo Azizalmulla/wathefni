@@ -1,0 +1,5 @@
+active
+health=200
+port=8010
+route=/app/schedule/history
+backup=/opt/wathefni/backups/production-pre-employee-schedule-history-20260809T012444Z

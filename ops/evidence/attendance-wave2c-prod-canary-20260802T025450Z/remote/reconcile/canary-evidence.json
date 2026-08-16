@@ -1,0 +1,490 @@
+{
+  "summary": {
+    "pass": 54,
+    "fail": 0
+  },
+  "synthetic_ids": {
+    "tag": "312feae3",
+    "employee_key": "WATHEFNI-ATTW2C-312feae3",
+    "phone": "965524312fea",
+    "device_user_id": "9312",
+    "terminal_sn": "LAB-W2C-312FEA",
+    "connector_id": "w2c-lab-312feae3",
+    "shift_id": "5acbd482-ba82-4336-8092-45414fd6343a",
+    "oshift_id": "32004437-8a47-41ce-a97b-e58dafeb9065",
+    "projection_id": "8aad537f-ae64-4896-8b44-f7f114f95c8d",
+    "checkpoint": "biotime:2302",
+    "quarantine_id": "49f04e4f-3661-4902-bc8e-f23bdc5f6430",
+    "snapshot_id": "41ee89c4-9de8-4bca-ae01-4b9b68d658c3"
+  },
+  "results": [
+    {
+      "label": "production database",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "label": "authority on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "companies WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "store postgres",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "import off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96566363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96550252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96597727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96599411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "baseline 42 rows",
+      "ok": true,
+      "detail": {
+        "n": 42,
+        "demo": 42
+      }
+    },
+    {
+      "label": "synthetic allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lab fixture synthetic only",
+      "ok": true,
+      "detail": {
+        "emp_codes": [
+          "9312"
+        ],
+        "sn": "LAB-W2C-312FEA"
+      }
+    },
+    {
+      "label": "privacy reject images/templates",
+      "ok": true,
+      "detail": {
+        "error": "biometric_payload_forbidden",
+        "keys": [
+          "fingerprint_image",
+          "template"
+        ]
+      }
+    },
+    {
+      "label": "biotime pagination",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "label": "biotime pulled 4",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "label": "metadata card+face+biometric types",
+      "ok": true,
+      "detail": [
+        "biometric",
+        "card",
+        "face"
+      ]
+    },
+    {
+      "label": "no biometric payloads retained",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority ingest biotime",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 4,
+        "duplicates": 0,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "biotime:2101",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:2102",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:2201",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:2202",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "duplicate pull idempotent",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 4,
+        "duplicates": 4,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "biotime:2101",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:2102",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:2201",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "biotime:2202",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "normal projection 480",
+      "ok": true,
+      "detail": {
+        "worked": 480
+      }
+    },
+    {
+      "label": "overnight projection 480",
+      "ok": true,
+      "detail": {
+        "worked": 480
+      }
+    },
+    {
+      "label": "checkpoint resume",
+      "ok": true,
+      "detail": [
+        "biotime:2301",
+        "biotime:2302"
+      ]
+    },
+    {
+      "label": "agent poll enqueue",
+      "ok": true,
+      "detail": {
+        "enqueued": 6,
+        "pages": 1
+      }
+    },
+    {
+      "label": "agent offline queue",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "agent reconnect replay",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "delivered": 7,
+        "pending": 0,
+        "errors": []
+      }
+    },
+    {
+      "label": "credentials sealed durable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "restart outbox empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "checkpoint durable",
+      "ok": true,
+      "detail": "biotime:2302"
+    },
+    {
+      "label": "invalid credentials fail",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "credential rotation recovers",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "connector health model",
+      "ok": true,
+      "detail": {
+        "status": "ok",
+        "checkpoint": "biotime:2302",
+        "version": "attendance_capture_wave2b_v1"
+      }
+    },
+    {
+      "label": "health tracks errors",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "label": "unknown quarantined",
+      "ok": true,
+      "detail": "unknown_device_user"
+    },
+    {
+      "label": "mapped quarantine replay",
+      "ok": true,
+      "detail": {
+        "created": true,
+        "duplicate": false
+      }
+    },
+    {
+      "label": "csv same content same ids",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "csv duplicate across files",
+      "ok": true,
+      "detail": {
+        "r1": 2,
+        "r2_dup": 2
+      }
+    },
+    {
+      "label": "xlsx ingest",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 2,
+        "duplicates": 0,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "csv:db1107c7c8d82667f00a7e2bb8932753a336b7722e1d08fb1979cf9ca5f87a10:898da816253b17baec420fda6a648ae03723cc9f094a8d229a14cc153ad66eec",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "csv:db1107c7c8d82667f00a7e2bb8932753a336b7722e1d08fb1979cf9ca5f87a10:6a5f2fbd8e7d02573d8b396dce3db46e79cede3ce90d59f0befee6f1a54dbf6e",
+            "result": {
+              "ok": true,
+              "duplicate": false,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "sftp drop parse",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "interrupted import resume",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "csv day projection 480",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "day approved + snapshot",
+      "ok": true,
+      "detail": {
+        "payroll_eligible": true
+      }
+    },
+    {
+      "label": "payroll reconcile exact",
+      "ok": true,
+      "detail": {
+        "worked": 480,
+        "snapshot_id": "41ee89c4-9de8-4bca-ae01-4b9b68d658c3"
+      }
+    },
+    {
+      "label": "correction after snapshot",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "reimport idempotent after correction",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "accepted": 2,
+        "duplicates": 2,
+        "quarantined": 0,
+        "failed": 0,
+        "details": [
+          {
+            "source_event_id": "csv:e1f94373b089f7d1d89eac52193118d36daa7d4d6c1525ae72a8061e0c781131:d8de736cea2490d142fadd692e7d5fe53fc695e5a1e0b219e602994dff372ca9",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          },
+          {
+            "source_event_id": "csv:e1f94373b089f7d1d89eac52193118d36daa7d4d6c1525ae72a8061e0c781131:6c2666753ff2507dfd1335efe1045b12eb0f20825b0d266ad99c54a345ecae6b",
+            "result": {
+              "ok": true,
+              "duplicate": true,
+              "quarantined": null,
+              "error": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "reversal does not alter approved snapshot",
+      "ok": true,
+      "detail": {
+        "n": 1,
+        "worked": 480
+      }
+    },
+    {
+      "label": "cross-tenant isolation",
+      "ok": true,
+      "detail": {
+        "before": 3,
+        "after": 3,
+        "other": false
+      }
+    },
+    {
+      "label": "secrets absent from evidence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic punches cleaned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic projections cleaned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "demo rows untouched count",
+      "ok": true,
+      "detail": {
+        "n": 42,
+        "demo": 42
+      }
+    },
+    {
+      "label": "demo fingerprint unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "four reals still present",
+      "ok": true,
+      "detail": 4
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+    employees 360 wave1 containment — aliases, dups, canary, scope, concurrency
+      PASS  pure: WATHEFNI+staging canary allowed
+      PASS  pure: WATHEFNI+production canary denied by default
+      PASS  pure: production canary allowed only when explicitly listed
+      PASS  pure: empty company allowlist fails closed
+      PASS  pure: alias list bidirectional
+    SKIP DB cases: RuntimeEnvironmentError: database_environment_file_not_configured
+
+    5 passed, 0 failed (pure-only)

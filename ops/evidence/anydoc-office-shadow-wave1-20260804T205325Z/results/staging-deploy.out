@@ -1,0 +1,12 @@
+/opt/wathefni/backups/staging-pre-anydoc-office-shadow-20260804T205325Z
+Collecting firecrawl-anydoc==0.1.2
+  Downloading firecrawl_anydoc-0.1.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.0 kB)
+Downloading firecrawl_anydoc-0.1.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.6/3.6 MB 846.8 kB/s eta 0:00:00
+Installing collected packages: firecrawl-anydoc
+Successfully installed firecrawl-anydoc-0.1.2
+ANYDOC_PIN_OK 0.1.2
+staging_health_ok
+WATHEFNI_ANYDOC_OFFICE_SHADOW=staging_shadow
+PROD_FLAG_ABSENT_OK
+STAGING_SHADOW_DEPLOY_OK

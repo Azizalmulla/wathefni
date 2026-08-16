@@ -1,0 +1,15 @@
+PASS tabs layout exists
+PASS root hr index removed
+PASS stack hosts (tabs)
+PASS employee theme tab bar
+PASS home uses HOME_SECTION_TYPES
+PASS home has item cap
+PASS home is not module directory
+PASS inbox allowlist excludes delivery/hiring
+PASS inbox tab uses parity view
+PASS hiring separate sections
+PASS more uses launcher (no Hiring duplicates)
+PASS people tab is directory
+PASS i18n tab keys en+ar
+PASS no fake urgency invented in shell
+hr-shell-ia: GREEN

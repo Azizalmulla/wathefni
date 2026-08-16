@@ -1,0 +1,345 @@
+{
+  "stamp": "20260727T010235Z",
+  "ok": true,
+  "tag": "wa_manual_cutover_canary",
+  "passed": 29,
+  "failed": 0,
+  "results": [
+    {
+      "name": "health_200_pre",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "enforce_off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_authority_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "manual_authority_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "email_not_cut_over",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "email_path_authoritative",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage_b_untouched_marker",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cv_received_talent_pool_template",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production_db",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "name": "wa_pdf_accept",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_pdf_durable_file",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_provider_replay_idempotent",
+      "ok": true,
+      "detail": "4907b88f-5058-518a-adc8-5c8742f5e602"
+    },
+    {
+      "name": "wa_one_source_event",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "wa_image_ocr_plan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_docx_accept",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_malware_rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_empty_rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "restart_durable_not_temp_only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "manual_accept_held",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "manual_malware_rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hr_visible_non_actionable_tp",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "ck_indexed_non_actionable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_zero_job_applications",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "zero_unrelated_app_mutation",
+      "ok": true,
+      "detail": "20->20"
+    },
+    {
+      "name": "no_dup_cv_version",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "no_dup_tp_for_person",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "canary_commit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "health_200_post",
+      "ok": true,
+      "detail": "200"
+    }
+  ],
+  "cases": {
+    "wa_pdf": {
+      "ok": true,
+      "skipped": false,
+      "rejected": false,
+      "authoritative": true,
+      "cutover_version": "unified-inbound-cv-wa-manual-cutover-v1",
+      "confirmation_key": "cv_received_talent_pool",
+      "creates_job_application": false,
+      "requires_apply_code": false,
+      "durable_path": "/opt/wathefni/var/intake-durable/whatsapp_unsolicited/WATHEFNI/b2b7a57e-2eb6-462d-98db-5d64e224d21a.pdf",
+      "content_sha256": "0c7c1dc95b3e74e4947ebd7fd2e47ca5a0e28e6f503acfe4f8b77d422f4f7223",
+      "document_id": "b2b7a57e-2eb6-462d-98db-5d64e224d21a",
+      "scan": {
+        "state": "clean",
+        "reason_code": null,
+        "engine": "clamav",
+        "signature_version": "ClamAV 1.5.3/28073/Sun Jul 26 06:25:14 2026",
+        "scanned_at": "2026-07-27T01:02:36.016855+00:00",
+        "evidence": {
+          "raw": "stream: OK",
+          "bytes": 344,
+          "transport": "tcp",
+          "host": "127.0.0.1",
+          "port": 3310,
+          "unix_socket": null
+        }
+      },
+      "receipt": {
+        "ok": true,
+        "skipped": false,
+        "envelope_version": "unified-inbound-cv-envelope-v1",
+        "channel": "whatsapp",
+        "event_id": "4907b88f-5058-518a-adc8-5c8742f5e602",
+        "subject_id": "1e04c3c2-a852-51aa-be8f-ddbde93eb59d",
+        "item_ids": [
+          "739f7557-1b32-5323-82e7-2d2fff5d3f5c"
+        ],
+        "document_links": 1,
+        "hr_visible": true,
+        "actionable": false
+      },
+      "shared_processing": {
+        "ok": true,
+        "skipped": false,
+        "provider_plan": {
+          "local_first": true,
+          "mistral_ocr_eligible": false,
+          "gpt_vision_rescue_eligible": false,
+          "reason_codes": [
+            "accepted_local_poppler_or_text"
+          ]
+        },
+        "runs": [
+          {
+            "ok": true,
+            "skipped": false,
+            "run_id": "dd60ab60-902a-595a-9945-850b1cd8d3eb",
+            "status": "completed",
+            "idempotency_key": "document_acceptance:WATHEFNI:739f7557-1b32-5323-82e7-2d2fff5d3f5c:0c7c1dc95b3e74e4947ebd7fd2e47ca5a0e28e6f503acfe4f8b77d422f4f7223:unified-inbound-cv-processing-v1:document_acceptance:1"
+          },
+          {
+            "ok": true,
+            "skipped": false,
+            "run_id": "959782b8-c5e2-5d13-8e45-d68e14fdb24d",
+            "status": "completed",
+            "idempotency_key": "mime_content_validation:WATHEFNI:739f7557-1b32-5323-82e7-2d2fff5d3f5c:0c7c1dc95b3e74e4947ebd7fd2e47ca5a0e28e6f503acfe4f8b77d422f4f7223:unified-inbound-cv-processing-v1:mime_content_validation:1"
+          },
+          {
+            "ok": true,
+            "skipped": false,
+            "run_id": "727340cf-3cb0-50e6-adef-533621e265f4",
+            "status": "completed",
+            "idempotency_key": "local_extraction:WATHEFNI:739f7557-1b32-5323-82e7-2d2fff5d3f5c:0c7c1dc95b3e74e4947ebd7fd2e47ca5a0e28e6f503acfe4f8b77d422f4f7223:unified-inbound-cv-processing-v1:local_extraction:1"
+          }
+        ]
+      },
+      "wave4": {
+        "ok": true,
+        "skipped": false,
+        "wave": "unified-inbound-cv-wave4-v1",
+        "person": {
+          "ok": true,
+          "skipped": false,
+          "status": "linked",
+          "outcome": "new_person",
+          "person_id": "9a0561df-f5da-5852-8361-d0f15c197365",
+          "membership_id": "a9b182d5-a37e-5345-8e46-385240fc298c",
+          "merged": false,
+          "authority_version": "unified-inbound-cv-person-registry-v1"
+        },
+        "talent_pool": {
+          "ok": true,
+          "skipped": false,
+          "entry_id": "9f2c84a4-fd42-5225-88c3-7360e35166b6",
+          "actionable": false,
+          "status": "active",
+          "authority_version": "unified-talent-pool-authority-v1"
+        },
+        "cv_version": {
+          "ok": true,
+          "skipped": false,
+          "cv_version_id": "73144853-01c0-575e-b2e8-9a18f43b3d7f",
+          "reader_cutover": false
+        },
+        "creates_job_application": false
+      },
+      "talent_pool": {
+        "hr_visible": true,
+        "actionable": false,
+        "job_ranking_allowed": false,
+        "lifecycle_mutation_allowed": false,
+        "contact_allowed": false,
+        "held_state": "unsolicited_whatsapp_intake",
+        "requires_exact_job_confirmation": true,
+        "entry_id": "9f2c84a4-fd42-5225-88c3-7360e35166b6"
+      },
+      "cv_version_id": "73144853-01c0-575e-b2e8-9a18f43b3d7f",
+      "person_id": "9a0561df-f5da-5852-8361-d0f15c197365",
+      "subject_id": "1e04c3c2-a852-51aa-be8f-ddbde93eb59d",
+      "ck_index": {
+        "ok": true,
+        "job": {
+          "job_id": "e3d9f38f-626e-45e4-90d4-43f4504a4227",
+          "status": "pending",
+          "candidate_ref": "person:9a0561df-f5da-5852-8361-d0f15c197365"
+        },
+        "index_meta": {
+          "candidate_ref": "person:9a0561df-f5da-5852-8361-d0f15c197365",
+          "ref_kind": "person",
+          "searchable": true,
+          "actionable": false,
+          "provisional": false,
+          "job_ranking_allowed": false,
+          "version": "candidate-knowledge-person-subject-v1"
+        }
+      },
+      "accepted_at": "2026-07-27T01:02:36Z"
+    },
+    "wa_img": {
+      "ok": true,
+      "plan": {
+        "local_first": true,
+        "mistral_ocr_eligible": false,
+        "gpt_vision_rescue_eligible": false,
+        "reason_codes": [
+          "scanned_or_image_needs_ocr",
+          "mistral_ocr_disabled"
+        ]
+      },
+      "cv": "55e5c85e-da13-5c51-81a9-0ddf1747db22"
+    },
+    "manual": {
+      "ok": true,
+      "held": "needs_role",
+      "provenance": {
+        "batch_id": "wa_manual_cutover_canary-batch-20260727T010235Z",
+        "uploader_user_id": "owner-canary",
+        "source": "manual_upload",
+        "cutover_version": "unified-inbound-cv-wa-manual-cutover-v1"
+      },
+      "ck": {
+        "ok": true,
+        "job": {
+          "job_id": "d00581ca-09d9-4b9e-b419-e2acd11bfb65",
+          "status": "pending",
+          "candidate_ref": "subject:08252d27-5cc4-5174-b79a-6bceb1b02082"
+        },
+        "index_meta": {
+          "candidate_ref": "subject:08252d27-5cc4-5174-b79a-6bceb1b02082",
+          "ref_kind": "subject",
+          "searchable": true,
+          "actionable": false,
+          "provisional": true,
+          "job_ranking_allowed": false,
+          "version": "candidate-knowledge-person-subject-v1"
+        }
+      }
+    }
+  },
+  "before": {
+    "applications": 20,
+    "candidates": 23,
+    "applications_non_canary": 20
+  },
+  "assertions": {
+    "failed_names": [],
+    "enforce_enabled": false,
+    "email_cutover": false,
+    "stage_b_cutover": false
+  }
+}

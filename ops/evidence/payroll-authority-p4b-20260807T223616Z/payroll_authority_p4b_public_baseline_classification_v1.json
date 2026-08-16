@@ -1,0 +1,268 @@
+{
+  "pack_id": "KW_STATUTORY_PUBLIC_BASELINE_P4B_v1.0.0",
+  "created_at": "2026-08-08",
+  "country_code": "KW",
+  "authority_kind": "wathefni_public_baseline",
+  "activation_model": "OFFICIAL_CLEAR_only",
+  "money_authority": "preview_non_authoritative",
+  "mode_a_unlocked": false,
+  "synthetic_only": true,
+  "classifications": [
+    {
+      "rule_id": "pifss_basic_ee_er",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"employee_category": ["kuwaiti_national"], "sector": ["private", "oil"]},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Basic fund EE 5% / ER 10% on PIFSS basic insured salary ≤ KD 1500",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "primary_source_url": "https://www.pifss.gov.kw/sites/En/Pages/PensionSocialSecuritySector/FAQ.aspx",
+      "article_or_ref": "PIFSS FAQ contribution ratios (Basic)",
+      "notes": "Rates/caps OFFICIAL_CLEAR. Insurable wage mapping to Wathefni components is NOT activated — requires company/statutory classification of pifss wage base."
+    },
+    {
+      "rule_id": "pifss_supplementary_ee_er",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"employee_category": ["kuwaiti_national"], "sector": ["private", "oil"]},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Supplementary EE 5% / ER 10% on supplementary insured salary ≤ KD 1250",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "article_or_ref": "PIFSS FAQ contribution ratios (Supplementary)"
+    },
+    {
+      "rule_id": "pifss_pension_increase_ee_er",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"employee_category": ["kuwaiti_national"]},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Pension increase EE 2.5% / ER 1% on salary ≤ KD 2750",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "article_or_ref": "PIFSS FAQ contribution ratios (Pension increase)"
+    },
+    {
+      "rule_id": "pifss_unemployment_ee_er",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"employee_category": ["kuwaiti_national"], "sector": ["private", "oil"]},
+      "effective_from": "2013-05-01",
+      "proposed_rule": "Unemployment EE 0.5% / ER 0.5% on ≤ KD 2750 from 2013-05-01 private/oil",
+      "primary_source": "PIFSS official FAQ — Unemployment Insurance subjects from 05/01/2013; contribution table",
+      "article_or_ref": "PIFSS FAQ Unemployment Insurance + contribution ratios"
+    },
+    {
+      "rule_id": "pifss_remittance_timing",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"role": ["employer"]},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Contributions payable beginning of month following accrual; delay >10 days → 1%/month additional (remittance prep only)",
+      "primary_source": "PIFSS official FAQ — When are contributions paid?",
+      "article_or_ref": "PIFSS FAQ remittance timing",
+      "notes": "D-class remittance/reporting only — not payment processing."
+    },
+    {
+      "rule_id": "pifss_financial_remuneration",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "FAQ labels '(for 18 years of contribution)' — eligibility trigger ambiguous for universal payroll apply.",
+      "primary_source": "PIFSS official FAQ — Financial remuneration"
+    },
+    {
+      "rule_id": "pifss_wage_base_mapping",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "pifss_wage_base_classification_required",
+      "reason": "Official FAQ describes wage elements, but mapping Wathefni BASIC/allowances → PIFSS basic vs supplementary is company/statutory classification, not auto-assumed.",
+      "primary_source": "PIFSS FAQ insured salary Q&A"
+    },
+    {
+      "rule_id": "pifss_gcc_extension",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "Extension of Protection uses home-scheme rates — not Kuwaiti % table; no safe universal % encoding."
+    },
+    {
+      "rule_id": "pifss_expatriate_na",
+      "rule_family": "pifss",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "Negative applicability is widely accepted but not encoded as OFFICIAL_CLEAR without residual-scheme counsel confirmation."
+    },
+    {
+      "rule_id": "ot_ordinary_art66",
+      "rule_family": "ot_ordinary",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"sector": ["private"], "law": "Law No. 6/2010"},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "+25% over original remuneration for overtime; written order; ≤2h/day; ≤180h/year; ≤3 days/week or ≤90 days/year",
+      "primary_source": "Kuwait Law No. 6/2010 Article 66",
+      "article_or_ref": "Art. 66",
+      "formula": {"premium_percent": 25, "multiplier": 1.25, "pay_base": "original_remuneration"}
+    },
+    {
+      "rule_id": "ot_night_premium_50",
+      "rule_family": "ot_ordinary",
+      "classification": "UNSUPPORTED",
+      "activate": false,
+      "gate": "unsupported",
+      "reason": "Not found in Art. 66 EN text reviewed; vendor-only claims."
+    },
+    {
+      "rule_id": "rest_day_art67",
+      "rule_family": "rest_day_work",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"sector": ["private"], "law": "Law No. 6/2010"},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Weekly rest work: original remuneration + ≥50% + compensatory day off",
+      "primary_source": "Kuwait Law No. 6/2010 Article 67",
+      "article_or_ref": "Art. 67",
+      "formula": {"multiplier": 1.5, "compensatory_day_off": true}
+    },
+    {
+      "rule_id": "hourly_divisor_art67",
+      "rule_family": "ot_ordinary",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "Art.67 ¶2 divisor = actual working days excluding weekends; 26-day market practice is not a universal safe encoding."
+    },
+    {
+      "rule_id": "public_holiday_work_art68",
+      "rule_family": "public_holiday_work",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"sector": ["private"], "law": "Law No. 6/2010"},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Work on official holiday → double remuneration + additional day off",
+      "primary_source": "Kuwait Law No. 6/2010 Article 68",
+      "article_or_ref": "Art. 68",
+      "formula": {"multiplier": 2.0, "additional_day_off": true},
+      "notes": "Premium formula activated. Annual cabinet additions beyond Art.68 list remain gated."
+    },
+    {
+      "rule_id": "public_holiday_calendar_extras",
+      "rule_family": "public_holiday_work",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "Art.68 list is clear; Liberation Day and other annual declarations need company/year calendar policy."
+    },
+    {
+      "rule_id": "sick_leave_bands_art69",
+      "rule_family": "sick_leave_fractions",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"sector": ["private"], "law": "Law No. 6/2010"},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "15d@100% / 10d@75% / 10d@50% / 10d@25% / 30d unpaid (75d); medical report required",
+      "primary_source": "Kuwait Law No. 6/2010 Article 69",
+      "article_or_ref": "Art. 69",
+      "notes": "Bands activated. Year basis and pay-base (basic vs Art.55 remuneration) remain gated."
+    },
+    {
+      "rule_id": "sick_leave_year_basis",
+      "rule_family": "sick_leave_fractions",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "'During the year' — calendar vs employment year not settled by public text alone."
+    },
+    {
+      "rule_id": "sick_leave_pay_base",
+      "rule_family": "sick_leave_fractions",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "Art.69 'pay' vs Art.55 remuneration composition needs company remuneration definition for money base."
+    },
+    {
+      "rule_id": "eos_monthly_art51b",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"pay_frequency": ["monthly"], "sector": ["private"], "law": "Law No. 6/2010"},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "15 days rem/year first 5 years; 1 month/year thereafter; cap 1.5 years rem; pro-rata fractions",
+      "primary_source": "Kuwait Law No. 6/2010 Article 51(b)",
+      "article_or_ref": "Art. 51(b)"
+    },
+    {
+      "rule_id": "eos_daily_art51a",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"pay_frequency": ["daily", "weekly", "hourly", "piece"], "sector": ["private"]},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "10 days/year first 5; 15 days thereafter; cap 1 year rem",
+      "primary_source": "Kuwait Law No. 6/2010 Article 51(a)",
+      "article_or_ref": "Art. 51(a)"
+    },
+    {
+      "rule_id": "eos_full_entitlement_art52",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "effective_from": "2010-02-21",
+      "proposed_rule": "Full Art.51 benefit on employer terminate; fixed term unreenewe; Arts 48–50; female resign within 1y marriage",
+      "primary_source": "Kuwait Law No. 6/2010 Article 52",
+      "article_or_ref": "Art. 52"
+    },
+    {
+      "rule_id": "eos_resignation_indefinite_art53",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_CLEAR",
+      "activate": true,
+      "applies_to": {"contract_type": ["indefinite"], "termination": ["employee_resignation"]},
+      "effective_from": "2010-02-21",
+      "proposed_rule": "<3y none; 3–5y ½; 5–10y ⅔; ≥10y full",
+      "primary_source": "Kuwait Law No. 6/2010 Article 53",
+      "article_or_ref": "Art. 53"
+    },
+    {
+      "rule_id": "eos_remuneration_base",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "eos_remuneration_base_classification_required",
+      "reason": "Arts 55/62 define last remuneration conceptually; Wathefni must not silently use basic-only without classified remuneration input."
+    },
+    {
+      "rule_id": "eos_law17_2018_pifss_interaction",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "eos_pifss_interaction_review_required",
+      "reason": "Law 17/2018 interaction / retroactivity remains contested for operational universality."
+    },
+    {
+      "rule_id": "eos_fixed_term_resignation",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "review_required",
+      "reason": "Art.53 addresses indefinite-term resignation; fixed-term early exit not safely universalized."
+    },
+    {
+      "rule_id": "oil_special_regime",
+      "rule_family": "eos_indemnity",
+      "classification": "OFFICIAL_NEEDS_INTERPRETATION",
+      "activate": false,
+      "gate": "special_regime_review_required",
+      "reason": "Law 28/1969 petroleum labour interactions are special-regime layer."
+    }
+  ]
+}

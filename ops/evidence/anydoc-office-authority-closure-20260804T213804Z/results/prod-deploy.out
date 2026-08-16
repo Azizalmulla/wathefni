@@ -1,0 +1,5 @@
+/opt/wathefni/backups/production-pre-anydoc-office-authority-20260804T213804Z
+Requirement already satisfied: firecrawl-anydoc==0.1.2 in /opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages (0.1.2)
+prod_health_ok
+WATHEFNI_ANYDOC_OFFICE_AUTHORITY=production
+WATHEFNI_ANYDOC_OFFICE_SHADOW=production_shadow

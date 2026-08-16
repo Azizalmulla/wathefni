@@ -1,0 +1,38 @@
+---
+description: Freeze HR mobile Employee Profile quick facts after cream honesty lock; no E360 expansion
+globs: apps/wathefni-employee-mobile/src/hr/features/people/EmployeeProfileView.tsx,apps/wathefni-employee-mobile/src/hr/features/people/employeeComposition.ts,apps/wathefni-employee-mobile/app/hr/employees/[employeeKey].tsx,apps/wathefni-employee-mobile/scripts/verify-hr-employee-profile.py,apps/wathefni-employee-mobile/scripts/physical-hr-employee-profile-en-ar.py
+alwaysApply: false
+---
+
+# HR mobile Employee Profile — freeze
+
+HR mobile Employee quick profile (`/hr/employees/[employeeKey]`) is **accepted and frozen** after the cream + honesty lock (`20260810T180148Z`).
+Do **not** add Employees 360 sections, module hub cards, roster mutations, or invent `manager_name` without a real backend field.
+
+Canonical evidence: `ops/evidence/hr-employee-profile-cream-20260810T180148Z/`  
+Prior audit: `ops/evidence/hr-employee-profile-qual-20260810T175300Z/`  
+Debt: `ops/HR_MOBILE_EMPLOYEE_PROFILE_CONTRACT_DEBT.md`  
+Related: `.cursor/rules/employees360-freeze.mdc` (web E360 remains frozen separately)
+
+## Frozen product shape
+
+- Cream `PageScreen` + `HrPushedNav`; facts-only quick profile
+- Canonical facts only: name, employment status (localized), position, department, email, phone, start date
+- No `manager_name` unless API supplies a resolved manager name
+- Empty key → `unavailable`; 404 / missing → `not_found`; never blank ready
+- People row → profile; onboarding chip → onboarding (unchanged)
+- RBAC `employee_quick_profile` / `employees.read`; manager scope + tenant isolation; `useHrSafeBack` → People
+- No Attendance / Leave / Documents / Shifts / Payroll cards on this surface
+
+## Allowed without owner change-control
+
+- Bugfixes restoring freeze invariants / tenant isolation / RBAC
+- Docs / canary log / contract-debt notes
+- Adding resolved manager **only** when backend emits a real field and UI stays facts-only
+
+## Not allowed without an explicit owner wave
+
+- Porting Employees 360 sections or next-actions hub to mobile
+- Module dashboard cards / deep-link strip that turns profile into a second home
+- Roster edit, status dual-control, or other mutations from this surface
+- Reintroducing plum/`OperationalDetailView` chrome or silent false Manager row

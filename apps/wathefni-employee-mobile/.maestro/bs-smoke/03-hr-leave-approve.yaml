@@ -1,0 +1,37 @@
+# BrowserStack: Leave Approve → Confirm on real device.
+# Requires MAESTRO_LEAVE_ID (disposable requested leave) + HR credentials.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - browserstack
+  - hr
+  - leave
+  - mutation
+  - approve
+  - requires_credentials
+  - needs_fixtures
+---
+- runFlow:
+    when:
+      notVisible:
+        id: "e2e.tab.hr.home"
+    file: 01-hr-login.yaml
+- openLink: wathefni://hr/leave/${MAESTRO_LEAVE_ID}
+- extendedWaitUntil:
+    visible:
+      id: "e2e.hr.leave.approve"
+    timeout: 90000
+- tapOn:
+    id: "e2e.hr.leave.approve"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.confirm.sheet"
+    timeout: 30000
+- takeScreenshot: bs-leave-approve-confirm-sheet
+- tapOn:
+    id: "e2e.confirm.submit"
+- extendedWaitUntil:
+    notVisible:
+      id: "e2e.confirm.sheet"
+    timeout: 90000
+- takeScreenshot: bs-leave-approve-after-confirm

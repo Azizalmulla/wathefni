@@ -1,0 +1,24 @@
+WATHEFNI_ONBOARDING_DOC_VALIDATION_SOFT=on
+WATHEFNI_ONBOARDING_DOC_VALIDATION_HARD=off
+WATHEFNI_ONBOARDING_DOC_VALIDATION_COMPANIES=WATHEFNI
+WATHEFNI_ONBOARDING_DOC_VALIDATION_EMPLOYEE_ALLOWLIST=WATHEFNI-96599338566,WATHEFNI-96550252254
+PASS other employee denied
+PASS other company denied
+PASS civil_id wrong type blocks
+PASS reason wrong_media_item
+PASS has en correction
+PASS gpt_used false
+PASS identity mismatch blocks soft
+PASS reason identity_mismatch
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/smoke-test-onboarding-doc-validation-parity.py", line 283, in <module>
+    main()
+  File "/opt/wathefni/orchestrator/smoke-test-onboarding-doc-validation-parity.py", line 269, in main
+    test_uncertain_goes_to_hr_not_block()
+  File "/opt/wathefni/orchestrator/smoke-test-onboarding-doc-validation-parity.py", line 122, in test_uncertain_goes_to_hr_not_block
+    result = v.evaluate_employee_upload(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/onboarding_doc_validation_parity.py", line 422, in evaluate_employee_upload
+    "ok": bool(hybrid.get("ok") if "ok" in hybrid else True),
+                                   ^^^^^^^^^^^^^^
+TypeError: argument of type 'HybridEngineResult' is not iterable

@@ -1,0 +1,12 @@
+stamp=20260803T132904Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave3b-prod-canary-20260803T132904Z
+payment_processing=disabled
+payslips_as_money=false
+native_payslips_authoritative=false
+external_payslips_authority=external
+ai_calculations=false
+bank_files=false
+synthetic_only=true
+next_wave_started=false
+GATE=PROD_SYNTHETIC_PAYROLL_WAVE3_GO
+FREEZE_WAVE3=GO

@@ -1,0 +1,15 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "fda08e77-f7a1-464c-8596-00cc4e4c6461",
+  "androidUpdateId": "019fd966-e08d-7568-b50d-122cd236b059",
+  "iosUpdateId": "019fd966-e08d-719f-bd8f-54beead9ad55",
+  "message": "Auth Wave 2 Phase 3 smart auto-lock (Aziz/Talal canary)",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/fda08e77-f7a1-464c-8596-00cc4e4c6461",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1"
+  },
+  "priorGroupForRollback": "3d4d10ca-1852-473b-b912-a32de97d5245"
+}

@@ -1,0 +1,26 @@
+PASS  enabled WATHEFNI
+PASS  disabled OTHERCO
+PASS  flag off
+PASS  requires wave2
+PASS  hub terminated→left
+PASS  hub active→active
+PASS  hub notice→active
+PASS  hub suspended→active
+PASS  hub pending→pending_start
+PASS  pending_start is not active hub
+PASS  active hub is active
+PASS  state known pending_start
+PASS  state known active
+PASS  state known notice_period
+PASS  state known suspended
+PASS  state known terminated
+PASS  term type resignation
+PASS  term type dismissal
+PASS  term type end_of_contract
+PASS  term type mutual
+PASS  term type other
+PASS  hash stable order
+PASS  hash differs on change
+PASS  schema version
+
+24 passed, 0 failed

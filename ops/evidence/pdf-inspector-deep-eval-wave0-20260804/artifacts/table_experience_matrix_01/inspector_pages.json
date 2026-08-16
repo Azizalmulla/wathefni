@@ -1,0 +1,18 @@
+{
+  "pages_with_tables_1idx": [
+    1
+  ],
+  "pages_with_columns_1idx": [
+    1
+  ],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": true,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "# Experience Matrix — Table Heavy CV Annex\n\nCandidate: Table Annex Demo | email: table.annex@example.com\n\n|Year|Employer|Role|Domain|\n|---|---|---|---|\n|2024|Wathefni|Staff Engineer|HR Tech|\n|2022|Gulf Soft|Senior Engineer|Queues|\n|2020|ByteCo|Engineer|ETL|\n|2018|Startly|Junior Engineer|Web|\n",
+      "markdown_len": 293
+    }
+  ]
+}

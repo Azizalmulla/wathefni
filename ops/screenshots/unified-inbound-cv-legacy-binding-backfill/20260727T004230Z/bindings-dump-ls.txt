@@ -1,0 +1,1 @@
+-rw-r----- 1 postgres postgres 7191 Jul 27 00:42 /opt/wathefni/backups/production-pre-legacy-binding-backfill-20260727T004230Z/bindings.dump

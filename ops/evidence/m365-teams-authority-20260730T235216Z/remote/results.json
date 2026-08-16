@@ -1,0 +1,57 @@
+{
+  "stamp": "20260730T235217Z",
+  "proofs": {
+    "cert_token_mint": {
+      "ok": true
+    },
+    "teams_create_join_url": {
+      "ok": false,
+      "has_join_url": false,
+      "join_host": null,
+      "online_meeting_id": false,
+      "error": "graph_http_403",
+      "status": 403,
+      "detail": "{\"error\":{\"code\":\"forbidden\",\"message\":\"No application access policy found for this app 16f7135a-b7e8-4ac8-adfe-2d2b13de3131 on the user\",\"innerError\":{\"date\":\"2026-07-30T23:52:17\",\"request-id\":\"ff2e6ee0-a1d9-4d43-aecb-7"
+    },
+    "calendar_event_linked": {
+      "ok": false,
+      "has_event_id": false,
+      "has_web_link": false
+    },
+    "attendees_on_invite": {
+      "ok": false,
+      "attendee_count": 0
+    },
+    "timezone_consistency": {
+      "ok": false,
+      "timeZone": null,
+      "dateTime": null
+    },
+    "reschedule_same_event_no_duplicate": {
+      "ok": false,
+      "blocked_reason": "no_event_id"
+    },
+    "cancel": {
+      "ok": false,
+      "blocked_reason": "no_event_id"
+    },
+    "outside_aap_online_meeting_denied": {
+      "ok": true,
+      "status": 403,
+      "error": "graph_http_403",
+      "detail": "{\"error\":{\"code\":\"forbidden\",\"message\":\"No application access policy found for this app 16f7135a-b7e8-4ac8-adfe-2d2b13de3131 on the user\",\"innerError\":{\"date\":\"2026-07-30T23:52:17\""
+    },
+    "outside_au_calendar_still_denied": {
+      "ok": true,
+      "status": 403
+    },
+    "assistant_schedule_executor_wired": {
+      "ok": true
+    }
+  },
+  "summary": {
+    "passed": 4,
+    "failed": 6,
+    "verdict": "FAIL"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "item_id": "civil_id",
+  "status": "accepted",
+  "required": true,
+  "document_type": "civil_id",
+  "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg",
+  "storage_status": "stored",
+  "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "row_version": 3,
+  "lifecycle_meta": {
+    "phase": "accepted",
+    "source": "hr_approve",
+    "backfill_wave": "2a",
+    "backfilled_at": "2026-08-05T04:10:09.756363+00:00",
+    "backfilled_from": "received",
+    "lifecycle_status": "accepted",
+    "lifecycle_updated_at": "2026-08-05T04:11:01.093498+00:00"
+  }
+}

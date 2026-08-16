@@ -1,0 +1,11 @@
+{
+  "expo": "~54.0.0",
+  "rn": "0.81.5",
+  "react": "19.1.0",
+  "router": "~6.0.24",
+  "updates": "~29.0.19",
+  "notifications": "~0.32.17",
+  "reanimated": "~3.19.0",
+  "haptics": "~15.0.8",
+  "appVersion": "0.2.0"
+}

@@ -113,7 +113,14 @@ export function AttendanceImportDialog({
   }
 
   async function saveMapping() {
-    const name = window.prompt('Save this column mapping as (e.g. "ZKTeco main branch"):')?.trim()
+    const name = await confirm.withReason({
+      title: 'Save column mapping',
+      body: 'Name this mapping so you can reuse it on the next attendance import.',
+      confirmLabel: 'Save mapping',
+      reasonLabel: 'Mapping name',
+      reasonPlaceholder: 'e.g. ZKTeco main branch',
+      minReasonLength: 2,
+    })
     if (!name) return
     try {
       await saveAttendanceImportMapping(access, { name, mapping })

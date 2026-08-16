@@ -1,0 +1,149 @@
+{
+  "http_status": 200,
+  "body": {
+    "ok": true,
+    "item_id": "civil_id_dual_side_canary",
+    "file_id": "5a0aac14-8ff2-4666-84c8-9996b0b74741",
+    "storage_status": "stored",
+    "part": "front",
+    "attempt_id": "3bf63f7f-f485-4780-b86b-4ce5bbf1621e",
+    "parts": {
+      "schema": "civil_id_v1",
+      "front": {
+        "present": true,
+        "file_id": "5a0aac14-8ff2-4666-84c8-9996b0b74741",
+        "filename": "front.jpg",
+        "mime_type": "image/jpeg",
+        "file_sha256": "895eae026fbd7934c1b71ac5d850e84b7574263db9cf308595a4c26f6a3527ee",
+        "detected_side": "front",
+        "hr_warning": false,
+        "uploaded_at": "2026-08-06T02:08:31.833373+00:00"
+      },
+      "back": {
+        "present": false,
+        "file_id": null,
+        "filename": null,
+        "detected_side": null,
+        "hr_warning": false
+      },
+      "parts_complete": false,
+      "missing": [
+        "back"
+      ]
+    },
+    "parts_complete": false,
+    "status": "in_progress",
+    "pair_gate": {
+      "ok": false,
+      "reason": "parts_incomplete",
+      "hr_review_recommended": false,
+      "hr_warnings": []
+    },
+    "lifecycle_version": "2a",
+    "validation": {
+      "gate": "soft",
+      "decision": "allow",
+      "reason": null,
+      "hr_review_recommended": false,
+      "message": null,
+      "message_en": null,
+      "message_ar": null,
+      "gpt_used": false
+    }
+  }
+}
+{
+  "canary_status": "in_progress",
+  "review_status": "draft_parts",
+  "document_type_lane": "civil_id_dual_side_canary",
+  "front_present": true,
+  "back_present": false,
+  "ocr_expiry_serialized": "2028-06-01"
+}
+FIRST_FRONT_UPLOAD_SMOKE_PASS
+{
+  "status": "pending",
+  "group": "your_actions",
+  "actions": [
+    "preview",
+    "view_versions",
+    "upload_front",
+    "upload_back"
+  ]
+}
+READY_FOR_PHONE_RETEST
+{
+  "item_id": "civil_id",
+  "status": "accepted",
+  "required": true,
+  "document_type": "civil_id",
+  "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg",
+  "storage_status": "stored",
+  "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "row_version": 3,
+  "lifecycle_meta": {
+    "phase": "accepted",
+    "source": "hr_approve",
+    "backfill_wave": "2a",
+    "backfilled_at": "2026-08-05T04:10:09.756363+00:00",
+    "backfilled_from": "received",
+    "lifecycle_status": "accepted",
+    "lifecycle_updated_at": "2026-08-05T04:11:01.093498+00:00"
+  }
+}
+{
+  "civil_id": {
+    "status": "accepted",
+    "sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "sha_matches_expected": true
+  },
+  "dual_side_enabled": true,
+  "canary_item": {
+    "item_id": "civil_id_dual_side_canary",
+    "status": "pending",
+    "required": false,
+    "document_type": "civil_id_dual_side_canary",
+    "lifecycle_meta": {
+      "phase": "draft_parts",
+      "canary": true,
+      "purpose": "civil_id_dual_side_live_test",
+      "awaiting": "employee_parts",
+      "dual_side": true,
+      "created_at": "2026-08-06T01:54:12.575822+00:00",
+      "disposable": true,
+      "civil_id_parts": {
+        "back": {
+          "file_id": null,
+          "present": false,
+          "filename": null,
+          "hr_warning": false,
+          "detected_side": null
+        },
+        "front": {
+          "file_id": "5a0aac14-8ff2-4666-84c8-9996b0b74741",
+          "present": true,
+          "filename": "front.jpg",
+          "mime_type": "image/jpeg",
+          "hr_warning": false,
+          "file_sha256": "895eae026fbd7934c1b71ac5d850e84b7574263db9cf308595a4c26f6a3527ee",
+          "uploaded_at": "2026-08-06T02:08:31.833373+00:00",
+          "detected_side": "front"
+        },
+        "schema": "civil_id_v1",
+        "missing": [
+          "back"
+        ],
+        "parts_complete": false
+      },
+      "canary_reset_at": "2026-08-06T02:01:28.239757+00:00",
+      "lifecycle_status": "in_progress",
+      "last_submit_sha256": "895eae026fbd7934c1b71ac5d850e84b7574263db9cf308595a4c26f6a3527ee",
+      "explicitly_assigned": true,
+      "last_submit_file_id": "5a0aac14-8ff2-4666-84c8-9996b0b74741",
+      "lifecycle_updated_at": "2026-08-06T02:08:31.857482+00:00",
+      "do_not_approve_as_real": true,
+      "last_submit_version_id": "3bf63f7f-f485-4780-b86b-4ce5bbf1621e"
+    }
+  },
+  "canary_version": null
+}

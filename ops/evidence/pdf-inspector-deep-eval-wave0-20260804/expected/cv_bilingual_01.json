@@ -1,0 +1,27 @@
+{
+  "fixture_id": "cv_bilingual_01",
+  "category": "bilingual_cv",
+  "language": "ar_en",
+  "layout": "stacked_bilingual",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Abdullah Al-Rashid",
+    "عبدالله الراشد",
+    "abdullah.rashid@example.com",
+    "+96551234567",
+    "EXPERIENCE",
+    "الخبرة العملية"
+  ],
+  "expected_fields": {
+    "full_name": "Abdullah Al-Rashid",
+    "full_name_ar": "عبدالله الراشد",
+    "email": "abdullah.rashid@example.com",
+    "phone": "+96551234567",
+    "title": "Product Manager / مدير منتج"
+  },
+  "notes": "English block then Arabic block; both embedded as real text.",
+  "sha256": "426231f8d8cdcd7072acc7e485a4d1a273309bab518da047e0536d7fdc4994f5",
+  "bytes": 46251
+}

@@ -1,0 +1,17 @@
+OK P5.2 honesty
+OK encryption key available
+OK remediation scanned=0 resealed=0 reentry=0
+OK no insecure connector secrets remain
+OK missing key → create fails closed, nothing persisted
+OK invalid key → fails closed
+OK plainhex encrypt result rejected
+OK valid key → secret stored as fernet
+OK fernet-sealed connector sync works
+OK scheduler/sync rejects insecure secret without apply
+OK credential re-entry reseals with fernet
+OK API list redacts credentials
+OK P5.2 smoke PASS
+REMAINING_SECRETS 2
+alg fernet kv fp_35d21a8591d3 prefix gAAAAABqdi status active kind sftp id 03187821-9921-4642-ab20-97dee98f36c9
+alg fernet kv fp_35d21a8591d3 prefix gAAAAABqdi status active kind sftp id f0585b18-8d02-404a-a393-e7d367390ff1
+INSECURE_REMAINING 0

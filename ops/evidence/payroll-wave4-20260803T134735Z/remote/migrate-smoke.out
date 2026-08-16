@@ -1,0 +1,81 @@
+wave4 1.0.0
+connected_db wathefni_staging
+wave4_tables ['payroll_account_mappings', 'payroll_bank_export_drafts', 'payroll_close_dual_control', 'payroll_close_run_events', 'payroll_close_runs', 'payroll_finance_exports', 'payroll_journal_drafts', 'payroll_journal_lines']
+MIGRATE_OK payroll_close_export_wave4
+    payroll close export wave4
+      PASS  version
+      PASS  payment disabled
+      PASS  no posts payment
+      PASS  journal drafts
+      PASS  no erp journals
+      PASS  bank contract only
+      PASS  no bank files
+      PASS  no bank connection
+      PASS  no wps
+      PASS  no ashal
+      PASS  no pifss
+      PASS  no eos
+      PASS  no AI
+      PASS  native non-auth
+      PASS  external authority
+      PASS  immutable invariant
+      PASS  dual reopen invariant
+      PASS  sod invariant
+      PASS  ux en title
+      PASS  ux ar title
+      PASS  ux honesty
+      PASS  ux payment disabled
+      PASS  ux mobile
+      PASS  ux rtl
+connected_db wathefni_staging
+      PASS  draft
+      PASS  contract approve
+      PASS  period
+      PASS  preview ok
+      PASS  create close run
+      PASS  native authority
+      PASS  payment disabled on run
+      PASS  create idempotent
+      PASS  sod blocked before submit or bad status
+      PASS  submit review
+      PASS  self approve forbidden
+      PASS  sod approve+export blocked
+      PASS  approve ok
+      PASS  sod close+export blocked
+      PASS  self close forbidden
+      PASS  close ok
+      PASS  closed status
+      PASS  snapshot immutable
+      PASS  snapshot fingerprint
+      PASS  immutable probe
+      PASS  reclose blocked
+      PASS  invalid mapping fail closed
+      PASS  mapping BASIC
+      PASS  mapping TRANSPORT
+      PASS  mapping NET_PAYABLE
+      PASS  journal ok
+      PASS  journal balanced
+      PASS  journal no erp
+      PASS  journal idempotent
+      PASS  bank contract ok
+      PASS  bank no real format
+      PASS  bank no connection
+      PASS  bank no wps
+      PASS  bank idempotent
+      PASS  sod closer≠exporter
+      PASS  sod export+approve blocked
+      PASS  export recorded
+      PASS  recon unmatched
+      PASS  export idempotent
+      PASS  drift detected
+      PASS  bank export recorded
+      PASS  export self approve forbidden
+      PASS  export approved
+      PASS  recon matched
+      PASS  export history
+      PASS  reopen initiate
+      PASS  reopen same actor denied
+      PASS  reopen confirmed
+      PASS  reopened status
+      PASS  external export
+      PASS  external import

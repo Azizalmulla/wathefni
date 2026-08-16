@@ -1,0 +1,5 @@
+rollback_syntax_ok=true
+rollback_executable=true
+backup_has_app=true
+backup_has_dashboard=true
+NOTE=full rollback not executed post-GO to preserve Wave 7 UI

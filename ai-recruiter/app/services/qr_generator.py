@@ -12,8 +12,25 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# Replace with your actual AI Recruiter WhatsApp number
-WHATSAPP_NUMBER = "96599338566"
+
+def _apply_whatsapp_number(phone_number: str | None = None) -> str:
+    """Env-owned APPLY destination; fail closed when unconfigured."""
+    if phone_number:
+        number = "".join(ch for ch in str(phone_number).strip() if ch.isdigit())
+        if number:
+            return number
+    # Prefer process env so runtime systemd/env updates win over cached settings.
+    number = "".join(ch for ch in str(os.environ.get("WATHEFNI_APPLY_WHATSAPP_NUMBER") or "").strip() if ch.isdigit())
+    if not number:
+        number = "".join(ch for ch in str(os.environ.get("WATHEFNI_WHATSAPP_NUMBER") or "").strip() if ch.isdigit())
+    if not number:
+        try:
+            number = settings.apply_whatsapp_number()
+        except ValueError as exc:
+            raise ValueError(str(exc)) from exc
+    if not number:
+        raise ValueError("WATHEFNI_APPLY_WHATSAPP_NUMBER is not configured for this environment.")
+    return number
 
 
 def generate_qr_code(company_code: str, position_code: str, phone_number: str = None) -> str:
@@ -22,7 +39,7 @@ def generate_qr_code(company_code: str, position_code: str, phone_number: str = 
     
     Returns the file path of the saved QR code image.
     """
-    number = phone_number or WHATSAPP_NUMBER
+    number = _apply_whatsapp_number(phone_number)
     apply_code = f"APPLY-{company_code}-{position_code}"
     wa_url = f"https://wa.me/{number}?text={apply_code}"
 
@@ -48,7 +65,7 @@ def generate_qr_code(company_code: str, position_code: str, phone_number: str = 
 
 def get_qr_bytes(company_code: str, position_code: str, phone_number: str = None) -> bytes:
     """Generate QR code and return as bytes (for sending via WhatsApp)."""
-    number = phone_number or WHATSAPP_NUMBER
+    number = _apply_whatsapp_number(phone_number)
     apply_code = f"APPLY-{company_code}-{position_code}"
     wa_url = f"https://wa.me/{number}?text={apply_code}"
 

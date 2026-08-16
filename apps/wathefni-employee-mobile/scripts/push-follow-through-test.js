@@ -115,6 +115,10 @@ function main() {
   check('empty data yields null candidate', candidatePathFromPushData({}) === null)
   check('unknown flow yields null candidate', candidatePathFromPushData({ flow: 'calendar' }) === null)
   check('FLOW_DEFAULT_PATHS covers payroll and leave', Boolean(FLOW_DEFAULT_PATHS.payroll && FLOW_DEFAULT_PATHS.leave))
+  check(
+    'FLOW_DEFAULT_PATHS covers preboarding and probation',
+    FLOW_DEFAULT_PATHS.preboarding === '/preboarding' && FLOW_DEFAULT_PATHS.probation === '/probation',
+  )
 
   check(
     'entitled push follow-through opens the destination',

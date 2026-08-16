@@ -1,0 +1,326 @@
+=== REG DB smoke-test-wave1-lifecycle-full-db.py ===
+    wave1 lifecycle — full DB prove
+      PASS  truth-sync dry-run
+      PASS  truth-sync writers company canary
+      PASS  A1 create+submit
+      PASS  A1 SoD blocks creator
+      PASS  A1 approve
+      PASS  A1 open
+      PASS  A2 link job
+      PASS  A2 publish gate allows
+      PASS  A3 candidate application soft
+      PASS  A4 offer→pending_start
+      PASS  A4 preboard created
+      PASS  A4 hub pending_start
+      PASS  A5 assignment id
+      PASS  A5 ready
+      PASS  A6 hire tx ok
+      PASS  A6 activated
+      PASS  A6 same employment_id
+      PASS  A6 onboarding auto-start path
+      PASS  A6 onboarding started
+      PASS  A7 probation auto-plan
+      PASS  A7 case present
+      PASS  A7 30/60/90 seeded
+      PASS  A8 milestones completed
+      PASS  A8 under_review
+      PASS  A9 probation confirmed
+      PASS  A9 terminal confirmed
+      PASS  B manual without offers
+      PASS  B hire without offers
+      PASS  B probation available without offers
+      PASS  C hire without onboarding
+      PASS  C onboarding skipped cleanly
+      PASS  D gate not required when requisitions off
+      PASS  invariant pending_start not active early
+
+    33 passed, 0 failed
+WAVE1_LIFECYCLE_FULL_DB_PASS
+WAVE1_LIFECYCLE_FULL_PASS
+=== REG DB smoke-test-requisitions-wave1-db.py ===
+    requisitions wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  migration second apply idempotent
+      PASS  settings default disabled
+      PASS  gate setting default true
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  create draft
+      PASS  idempotent create replay
+      PASS  idempotent same id
+      PASS  submit pending_approval
+      PASS  SoD blocks self-approve
+      PASS  approve by other actor
+      PASS  status approved
+      PASS  publish gate required (both modules)
+      PASS  publish denied without link
+      PASS  link job to approved req
+      PASS  publish allowed after link
+      PASS  gate reports requisition_id
+      PASS  approved→open
+      PASS  M-02 gate off when requisitions disabled
+      PASS  M-02 publish allowed without req
+      PASS  cross-tenant create blocked
+      PASS  gate off when pre_hiring off
+      PASS  rollback guidance
+
+26 passed, 0 failed
+REQUISITIONS_WAVE1_DB_FULL_PASS
+=== REG DB smoke-test-requisitions-surfaces-db.py ===
+    requisitions surfaces — DB integration prove
+      PASS  create+submit via authority
+      PASS  queue ok
+      PASS  queue has attention
+      PASS  counts.attention
+      PASS  detail ok
+      PASS  detail events
+      PASS  explain
+      PASS  SoD blocks creator
+      PASS  approver succeeds
+      PASS  stale concurrency conflict
+      PASS  open succeeds
+      PASS  tenant isolation
+      PASS  module-off denied
+      PASS  works without pre_hiring
+
+    14 passed, 0 failed
+REQUISITIONS_SURFACES_DB_FULL_PASS
+=== REG DB smoke-test-preboarding-wave1-db.py ===
+    preboarding wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  settings default disabled
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  provisional pending_start created
+      PASS  provisional is_pending_start
+      PASS  resolve canonical employment
+      PASS  hub pending_start (non-active)
+      PASS  ESS not eligible for pending_start
+      PASS  employment_eligible false
+      PASS  create assignment
+      PASS  status not_started or in_progress
+      PASS  joining_date set
+      PASS  kuwait items seeded
+      PASS  civil_id required
+      PASS  bank_details required
+      PASS  idempotent create replay
+      PASS  cosmetic ready forbidden
+      PASS  start in_progress
+      PASS  ready rejected until required complete
+      PASS  manager scope denies other manager
+      PASS  recompute ok
+      PASS  readiness ready derived
+      PASS  assignment status ready
+      PASS  second assignment
+      PASS  item blocked
+      PASS  assignment blocked derived
+      PASS  cancel no_show
+      PASS  cancel reason audited
+      PASS  cancel event present
+      PASS  convert ready assignment
+      PASS  status converted
+      PASS  no duplicate employee row
+      PASS  handoff assignment create
+      PASS  handoff applied civil_id
+      PASS  civil_id done via handoff
+      PASS  offer auto-create off without offers module
+      PASS  offer auto-create skipped cleanly
+      PASS  cross-tenant blocked
+      PASS  module-off create denied
+      PASS  preboard_item tasks created or soft-zero
+      PASS  rollback guidance
+
+44 passed, 0 failed
+PREBOARDING_WAVE1_DB_FULL_PASS
+=== REG DB smoke-test-preboarding-surfaces-db.py ===
+    preboarding surfaces — DB queue/detail/employee/manager
+      PASS  create for surface
+      PASS  queue ok
+      PASS  queue has assignment
+      PASS  queue marks joining
+      PASS  manager sees assigned
+      PASS  other manager empty
+      PASS  detail ok
+      PASS  detail items
+      PASS  detail events
+      PASS  assistant explain
+      PASS  employee payload
+      PASS  employee only owns employee items
+      PASS  module-off queue denied
+
+13 passed, 0 failed
+PREBOARDING_SURFACES_DB_FULL_PASS
+=== REG DB smoke-test-hire-ready-bridge-db.py ===
+    hire-ready bridge — DB E2E prove
+      PASS  dry-run ok before writers
+      PASS  writers company canary only
+      PASS  j1 offer bridge ok
+      PASS  j1 employee_key
+      PASS  j1 provisional ok
+      PASS  j1 preboard created
+      PASS  j1 hub pending_start
+      PASS  j1 hub joining date
+      PASS  j2 provisional
+      PASS  j2 preboard without recruiting
+      PASS  j3 set joining ok
+      PASS  j3 one canonical date hub+preboard
+      PASS  j4 blocked≠ready
+      PASS  j4 cosmetic ready forbidden
+      PASS  j4/5 readiness derived ready
+      PASS  j5 convert ok
+      PASS  j5 same employment_id
+      PASS  j5 no duplicate employment
+      PASS  j6 onboarding auto-start attempted
+      PASS  j6 onboarding started
+      PASS  j7 convert without onboarding
+      PASS  j7 onboarding skipped cleanly
+      PASS  j8 dedupe ok
+      PASS  j8 stamped or preboard_done
+      PASS  j5b future stays pending_start
+      PASS  j5b convert still ok
+      PASS  j5b same employment
+      PASS  j9 cancel ok
+      PASS  j9 hub not active
+      PASS  j9 closed as left
+      PASS  pending_start ESS probe soft
+      PASS  cross-surface convert route
+      PASS  cross-surface web+mobile+app routes
+
+    33 passed, 0 failed
+HIRE_READY_BRIDGE_DB_FULL_PASS
+=== REG DB smoke-test-probation-wave1-db.py ===
+    probation wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  settings default disabled
+      PASS  gate off before enable
+      PASS  gate on after enable
+      PASS  other company disabled without enable
+      PASS  create case ok
+      PASS  case status active
+      PASS  seeded 3 milestones
+      PASS  milestone keys 30/60/90
+      PASS  idempotent replay
+      PASS  complete day_30
+      PASS  overdue marked
+      PASS  active→under_review
+      PASS  under_review→confirmed
+      PASS  confirmed terminal
+      PASS  extend ok
+      PASS  status extended
+      PASS  probation_end advanced
+      PASS  under_review→failed
+      PASS  decision reason required
+      PASS  tenant isolation get_case
+      PASS  runtime flag kill-switch
+
+    22 passed, 0 failed
+PROBATION_WAVE1_DB_FULL_PASS
+=== REG DB smoke-test-probation-surfaces-db.py ===
+    probation surfaces — DB integration prove
+      PASS  create via authority
+      PASS  queue ok
+      PASS  queue has case
+      PASS  detail ok
+      PASS  detail has milestones
+      PASS  detail has audit events
+      PASS  employee self ok
+      PASS  employee confidential stripped
+      PASS  manager scope allow
+      PASS  manager scope deny
+      PASS  stale milestone protection
+      PASS  concurrency conflict
+      PASS  decision reason required
+      PASS  terminal confirmed
+      PASS  tenant isolation
+      PASS  module-off queue denied
+      PASS  works without onboarding module
+      PASS  works without recruiting module
+      PASS  assistant explain deep link
+
+    19 passed, 0 failed
+PROBATION_SURFACES_DB_FULL_PASS
+=== REG DB smoke-test-workflow-approvals-phase-a-db.py ===
+    workflow_approvals phase A slice 1 — DB integration prove
+      PASS  migration tables present
+      PASS  migration second apply idempotent
+      PASS  company settings default disabled
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  policy create
+      PASS  policy update (new active)
+      PASS  active policy is v2 two-step
+      PASS  approval instance creation
+      PASS  self-approval SoD denial
+      PASS  stale row_version conflict
+      PASS  multi-step progression step1
+      PASS  idempotent decision replay
+      PASS  delegation out-of-scope grant created
+      PASS  out-of-scope delegation denial
+      PASS  expired delegation denial
+      PASS  revokable grant created
+      PASS  delegation revoke
+      PASS  revoked delegation denial
+      PASS  valid delegation grant
+      PASS  valid delegation decision
+      PASS  cross-tenant read denial
+      PASS  cross-tenant write denial
+      PASS  audit events emitted correctly
+      PASS  disabling feature blocks new authority writes
+      PASS  offer path does not import workflow_approvals
+      PASS  leave authority paths do not import workflow_approvals
+      PASS  legacy path runtime probe skipped (ModuleNotFoundError)
+      PASS  synthetic canary cleanup
+
+    31 passed, 0 failed
+    PHASE_A_SLICE1_DB_FULL_PASS
+=== REG DB smoke-test-workflow-task-sla-phase-a-db.py ===
+    workflow_task_sla phase A slice 2 — DB prove
+      PASS  migration idempotent
+      PASS  catalogue seeded
+      PASS  tasks default disabled
+      PASS  sla default disabled
+      PASS  tasks runtime gate
+      PASS  tasks allowlist gate
+      PASS  sla runtime gate
+      PASS  tasks gate open
+      PASS  sla gate open
+      PASS  task create
+      PASS  task idempotent replay
+      PASS  one open task per subject/action
+      PASS  subject required fail-closed
+      PASS  approval→task linkage preserved
+      PASS  task on hr_tasks SoT
+      PASS  subject_type from catalogue
+      PASS  task stale row_version
+      PASS  task resolve
+      PASS  resolve does not mutate subject
+      PASS  cross-tenant task read denial
+      PASS  unknown task_type denied
+      PASS  sla policy upsert
+      PASS  sla clock start
+      PASS  sla clock idempotent
+      PASS  sla reminder audit
+      PASS  sla breach
+      PASS  breach creates sla_breach hr_task
+      PASS  repeated breach evaluation idempotent
+      PASS  no duplicate sla_breach tasks
+      PASS  satisfy after breach deterministic
+      PASS  sla satisfy
+      PASS  sla cancel
+      PASS  SLA without tasks still breaches clock
+      PASS  cross-tenant clock read denial
+      PASS  disable tasks blocks create
+      PASS  disable sla blocks clock
+      PASS  audit events present
+      PASS  legacy hr_task type still insertable
+      PASS  synthetic cleanup
+
+    39 passed, 0 failed
+    PHASE_A_SLICE2_DB_FULL_PASS
+REG_DB_FAILS=0

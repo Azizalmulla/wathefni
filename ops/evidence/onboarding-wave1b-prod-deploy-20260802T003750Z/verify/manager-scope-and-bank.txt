@@ -1,0 +1,4 @@
+detail_has_manager_gate True
+list_uses_scope_where True
+bank_receipt (False, 'bank_via_ess_required')
+SEED False HR_MUTATE False

@@ -1,0 +1,164 @@
+    wave4 product acceptance — db
+      PASS  stamp
+      PASS  matrix size
+      PASS  setup get all
+      PASS  setup owns
+      PASS  wave5 catalog present
+      PASS  setup patch performance_goals
+      PASS  setup patch performance_reviews
+      PASS  setup patch performance_feedback
+      PASS  setup patch performance_calibration
+      PASS  setup patch talent_profile
+      PASS  setup patch talent_succession
+      PASS  setup rejects forced distribution
+      PASS  matrix goals_only/performance_goals
+      PASS  matrix goals_only/performance_reviews
+      PASS  matrix goals_only/performance_feedback
+      PASS  matrix goals_only/performance_calibration
+      PASS  matrix goals_only/talent_profile
+      PASS  matrix goals_only/talent_succession
+      PASS  goals only no reviews shell gate
+      PASS  matrix reviews_plus_goals/performance_goals
+      PASS  matrix reviews_plus_goals/performance_reviews
+      PASS  matrix reviews_plus_goals/performance_feedback
+      PASS  matrix reviews_plus_goals/performance_calibration
+      PASS  matrix reviews_plus_goals/talent_profile
+      PASS  matrix reviews_plus_goals/talent_succession
+      PASS  matrix reviews_without_formal_goals/performance_goals
+      PASS  matrix reviews_without_formal_goals/performance_reviews
+      PASS  matrix reviews_without_formal_goals/performance_feedback
+      PASS  matrix reviews_without_formal_goals/performance_calibration
+      PASS  matrix reviews_without_formal_goals/talent_profile
+      PASS  matrix reviews_without_formal_goals/talent_succession
+      PASS  matrix performance_full_talent_off/performance_goals
+      PASS  matrix performance_full_talent_off/performance_reviews
+      PASS  matrix performance_full_talent_off/performance_feedback
+      PASS  matrix performance_full_talent_off/performance_calibration
+      PASS  matrix performance_full_talent_off/talent_profile
+      PASS  matrix performance_full_talent_off/talent_succession
+      PASS  matrix talent_only_performance_off/performance_goals
+      PASS  matrix talent_only_performance_off/performance_reviews
+      PASS  matrix talent_only_performance_off/performance_feedback
+      PASS  matrix talent_only_performance_off/performance_calibration
+      PASS  matrix talent_only_performance_off/talent_profile
+      PASS  matrix talent_only_performance_off/talent_succession
+      PASS  talent usable without perf
+      PASS  matrix talent_plus_optional_performance_evidence/performance_goals
+      PASS  matrix talent_plus_optional_performance_evidence/performance_reviews
+      PASS  matrix talent_plus_optional_performance_evidence/performance_feedback
+      PASS  matrix talent_plus_optional_performance_evidence/performance_calibration
+      PASS  matrix talent_plus_optional_performance_evidence/talent_profile
+      PASS  matrix talent_plus_optional_performance_evidence/talent_succession
+      PASS  matrix talent_without_recruiting/performance_goals
+      PASS  matrix talent_without_recruiting/performance_reviews
+      PASS  matrix talent_without_recruiting/performance_feedback
+      PASS  matrix talent_without_recruiting/performance_calibration
+      PASS  matrix talent_without_recruiting/talent_profile
+      PASS  matrix talent_without_recruiting/talent_succession
+      PASS  matrix talent_without_learning/performance_goals
+      PASS  matrix talent_without_learning/performance_reviews
+      PASS  matrix talent_without_learning/performance_feedback
+      PASS  matrix talent_without_learning/performance_calibration
+      PASS  matrix talent_without_learning/talent_profile
+      PASS  matrix talent_without_learning/talent_succession
+      PASS  matrix succession_without_hipo/performance_goals
+      PASS  matrix succession_without_hipo/performance_reviews
+      PASS  matrix succession_without_hipo/performance_feedback
+      PASS  matrix succession_without_hipo/performance_calibration
+      PASS  matrix succession_without_hipo/talent_profile
+      PASS  matrix succession_without_hipo/talent_succession
+      PASS  matrix succession_without_nine_box/performance_goals
+      PASS  matrix succession_without_nine_box/performance_reviews
+      PASS  matrix succession_without_nine_box/performance_feedback
+      PASS  matrix succession_without_nine_box/performance_calibration
+      PASS  matrix succession_without_nine_box/talent_profile
+      PASS  matrix succession_without_nine_box/talent_succession
+      PASS  matrix hipo_without_nine_box/performance_goals
+      PASS  matrix hipo_without_nine_box/performance_reviews
+      PASS  matrix hipo_without_nine_box/performance_feedback
+      PASS  matrix hipo_without_nine_box/performance_calibration
+      PASS  matrix hipo_without_nine_box/talent_profile
+      PASS  matrix hipo_without_nine_box/talent_succession
+      PASS  matrix nine_box_without_succession/performance_goals
+      PASS  matrix nine_box_without_succession/performance_reviews
+      PASS  matrix nine_box_without_succession/performance_feedback
+      PASS  matrix nine_box_without_succession/performance_calibration
+      PASS  matrix nine_box_without_succession/talent_profile
+      PASS  matrix nine_box_without_succession/talent_succession
+      PASS  matrix full_performance_plus_talent/performance_goals
+      PASS  matrix full_performance_plus_talent/performance_reviews
+      PASS  matrix full_performance_plus_talent/performance_feedback
+      PASS  matrix full_performance_plus_talent/performance_calibration
+      PASS  matrix full_performance_plus_talent/talent_profile
+      PASS  matrix full_performance_plus_talent/talent_succession
+      PASS  matrix all_wave4_disabled/performance_goals
+      PASS  matrix all_wave4_disabled/performance_reviews
+      PASS  matrix all_wave4_disabled/performance_feedback
+      PASS  matrix all_wave4_disabled/performance_calibration
+      PASS  matrix all_wave4_disabled/talent_profile
+      PASS  matrix all_wave4_disabled/talent_succession
+      PASS  all disabled clean
+      PASS  enable goals
+      PASS  enable reviews
+      PASS  enable feedback
+      PASS  enable calibration
+      PASS  measure contract
+      PASS  create objective
+      PASS  two KRs
+      PASS  progress recorded
+      PASS  alignment link
+      PASS  cycle draft
+      PASS  cycle configured
+      PASS  cycle launched snapshot
+      PASS  self review
+      PASS  manager review
+      PASS  360 peer 9572
+      PASS  360 peer 9572
+      PASS  360 peer 9572
+      PASS  360 aggregate threshold
+      PASS  raw 360 protected
+      PASS  check-in
+      PASS  dev plan
+      PASS  dev action from review
+      PASS  calc policy
+      PASS  pre-calibration
+      PASS  deterministic replay
+      PASS  cal population freeze
+      PASS  calibration adjustment
+      PASS  pre-cal preserved
+      PASS  original layers intact
+      PASS  final locked performance
+      PASS  final vs pre separate
+      PASS  history survives setup edit
+      PASS  c3 development canonical after review
+      PASS  talent enable perf-off
+      PASS  succession enable 9box off
+      PASS  perf gates off during talent
+      PASS  canonical talent identity
+      PASS  employee aspiration
+      PASS  skill claim
+      PASS  skill verify
+      PASS  potential without performance
+      PASS  optional perf evidence
+      PASS  talent review lock
+      PASS  explicit hipo
+      PASS  9box projection optional
+      PASS  top-right ≠ hipo
+      PASS  succession nomination
+      PASS  target readiness
+      PASS  c3 development linked or soft
+      PASS  multiple successors
+      PASS  coverage facts path
+      PASS  wave5 coverage facts emitted
+      PASS  cross-tenant talent denied
+      PASS  potential hidden employee
+      PASS  hipo hidden employee
+      PASS  no forbidden columns
+      PASS  no duplicate succession development store
+      PASS  hipo history after disable
+      PASS  performance history after talent disable
+      PASS  all wave4 off after prove
+
+    159 passed, 0 failed
+WAVE4_PRODUCT_FULL_PASS
+STAGING_DB_RC=0

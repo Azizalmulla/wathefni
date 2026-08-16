@@ -1,0 +1,45 @@
+{
+  "completed_at": "2026-07-18T22:20:00+00:00",
+  "environment": "staging",
+  "approved_for_use": false,
+  "production_touched": false,
+  "participants_recruited": false,
+  "source_curated_manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "revised_manifest_sha256": "035a12a2e35c487d3588f2d3be8952cd3350f30f2b030cdf3d863c5490e39c62",
+  "item7_revise": {
+    "en_revision_id": "58b443fb-dfa0-47b8-a947-4721f2be3ae7",
+    "ar_revision_id": "5b9ac5f5-2f98-4cda-af2a-79f21719ca6d",
+    "translation_pair_id": "0c2370bd-7370-4674-b133-c3dd58c7cac4",
+    "answer_key": "C",
+    "change": "Exclusive-dependency prioritization rewrite; less generically virtuous keyed option; stronger tempting distractors (false delegation, incomplete HR submit)."
+  },
+  "monitoring": {
+    "8": "difficulty_monitoring (content unchanged)",
+    "22": "ceiling_effect_monitoring (content unchanged)"
+  },
+  "other_23_items_unchanged": true,
+  "battery_v2": {
+    "en": {
+      "battery_key": "b1_gawj_v1_en_pilot_v2",
+      "assessment_version_id": "8b079f30-6c58-4753-81a7-1945d4c6424b",
+      "content_sha256": "d21f6178ba56b071c468bc58ea3101359eef302d16fa5057289a2b167d7ab2ea"
+    },
+    "ar": {
+      "battery_key": "b1_gawj_v1_ar_pilot_v2",
+      "assessment_version_id": "90d6ebd8-bbdb-4de2-82a3-e5c6efe764e6",
+      "content_sha256": "ec136b1c4c61b97f54056b282418ba17c2024d2c47de57b231786d2ccd4113bd"
+    },
+    "active_for_recruiting": false
+  },
+  "safari_fix": {
+    "all_contract_checks_passed": true,
+    "html_sha256": "ebc49418533c597c31851d0952150d920bc043f75287eaa115c7f333083ede60",
+    "deployed_to": "wathefni-orchestrator-staging"
+  },
+  "artifacts": [
+    "BATTERY_MANIFEST_V2.json",
+    "ITEM7_REVISE_PROOF.json",
+    "SAFARI_FIX_PROOF.json",
+    "VALIDATION_STUDY_PROTOCOL.md"
+  ]
+}

@@ -1,0 +1,102 @@
+# Employee App Visual Refinement Phase C+D — source stamp
+generated: 2026-08-08T10:23:15Z
+git head: cf26d59512a22a7634eb4edd28b4425ec1624405
+branch:   authority-cutover
+
+## iOS bundle export (runtime import proof)
+PASS  expo export --platform ios: 1368 modules bundled, 0 errors
+      entry-7c54254d316dda7a1c8613af5fef6d4c.hbc (3.23 MB)
+
+## files changed in this phase
+   M apps/wathefni-employee-mobile/.gitignore
+   M apps/wathefni-employee-mobile/app.json
+   M apps/wathefni-employee-mobile/app/(auth)/activate.tsx
+   M apps/wathefni-employee-mobile/app/(tabs)/_layout.tsx
+   M apps/wathefni-employee-mobile/app/(tabs)/index.tsx
+   M apps/wathefni-employee-mobile/app/(tabs)/leave.tsx
+   M apps/wathefni-employee-mobile/app/(tabs)/profile.tsx
+   D apps/wathefni-employee-mobile/app/(tabs)/shifts.tsx
+   M apps/wathefni-employee-mobile/app/_layout.tsx
+   D apps/wathefni-employee-mobile/app/attendance.tsx
+   M apps/wathefni-employee-mobile/app/documents.tsx
+   M apps/wathefni-employee-mobile/app/leave/request.tsx
+  RM apps/wathefni-employee-mobile/app/(tabs)/notifications.tsx -> apps/wathefni-employee-mobile/app/notifications.tsx
+   M apps/wathefni-employee-mobile/app/onboarding.tsx
+   M apps/wathefni-employee-mobile/app/settings.tsx
+   M apps/wathefni-employee-mobile/docs/CAPABILITIES.md
+   M apps/wathefni-employee-mobile/eas.json
+   M apps/wathefni-employee-mobile/package-lock.json
+   M apps/wathefni-employee-mobile/package.json
+   M apps/wathefni-employee-mobile/scripts/verify-capability-foundation.py
+   M apps/wathefni-employee-mobile/src/api/client.ts
+   M apps/wathefni-employee-mobile/src/api/errors.ts
+   M apps/wathefni-employee-mobile/src/api/types.ts
+   M apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx
+   M apps/wathefni-employee-mobile/src/capabilities.ts
+   M apps/wathefni-employee-mobile/src/components/AccessStates.tsx
+   M apps/wathefni-employee-mobile/src/components/AppErrorBoundary.tsx
+   M apps/wathefni-employee-mobile/src/components/States.tsx
+   M apps/wathefni-employee-mobile/src/components/premium.tsx
+   M apps/wathefni-employee-mobile/src/components/ui.tsx
+   M apps/wathefni-employee-mobile/src/features/activation/ActivationView.tsx
+   M apps/wathefni-employee-mobile/src/features/home/HomeView.tsx
+   M apps/wathefni-employee-mobile/src/features/onboarding/OnboardingView.tsx
+   M apps/wathefni-employee-mobile/src/features/remaining/RemainingViews.tsx
+   M apps/wathefni-employee-mobile/src/i18n/ar.json
+   M apps/wathefni-employee-mobile/src/i18n/en.json
+   M apps/wathefni-employee-mobile/src/i18n/index.tsx
+   M apps/wathefni-employee-mobile/src/lib/documents.ts
+   M apps/wathefni-employee-mobile/src/lib/format.ts
+   M apps/wathefni-employee-mobile/src/lib/hooks.ts
+   M apps/wathefni-employee-mobile/src/lib/uploadDocument.ts
+   M apps/wathefni-employee-mobile/src/push/PushLifecycle.tsx
+   M apps/wathefni-employee-mobile/src/theme.ts
+   M apps/wathefni-employee-mobile/tsconfig.json
+  ?? apps/wathefni-employee-mobile/.easignore
+  ?? apps/wathefni-employee-mobile/app/(auth)/_layout.tsx
+  ?? apps/wathefni-employee-mobile/app/(tabs)/payslips.tsx
+  ?? apps/wathefni-employee-mobile/app/(tabs)/schedule.tsx
+  ?? apps/wathefni-employee-mobile/app/bank.tsx
+  ?? apps/wathefni-employee-mobile/app/change-pin.tsx
+  ?? apps/wathefni-employee-mobile/assets/
+  ?? apps/wathefni-employee-mobile/docs/NATIVE_DOCUMENT_SCANNER_PREP.md
+  ?? apps/wathefni-employee-mobile/modules/
+  ?? apps/wathefni-employee-mobile/ops/
+  ?? apps/wathefni-employee-mobile/scripts/a11y-i18n-static-scan.py
+  ?? apps/wathefni-employee-mobile/scripts/composition-shapes-test.js
+  ?? apps/wathefni-employee-mobile/scripts/density-hierarchy-test.js
+  ?? apps/wathefni-employee-mobile/scripts/documents-hierarchy-test.js
+  ?? apps/wathefni-employee-mobile/scripts/feature-unavailable-copy-test.js
+  ?? apps/wathefni-employee-mobile/scripts/pin-crypto-selftest.js
+  ?? apps/wathefni-employee-mobile/scripts/push-follow-through-test.js
+  ?? apps/wathefni-employee-mobile/scripts/session-refresh-static-proof.py
+  ?? apps/wathefni-employee-mobile/scripts/verify-color-system.py
+  ?? apps/wathefni-employee-mobile/scripts/verify-density-hierarchy.py
+  ?? apps/wathefni-employee-mobile/src/auth/authFailure.ts
+  ?? apps/wathefni-employee-mobile/src/auth/autoLockDiagnostics.ts
+  ?? apps/wathefni-employee-mobile/src/auth/autoLockPolicy.ts
+  ?? apps/wathefni-employee-mobile/src/auth/autoLockStorage.ts
+  ?? apps/wathefni-employee-mobile/src/auth/biometricAuth.ts
+  ?? apps/wathefni-employee-mobile/src/auth/biometricPolicy.ts
+  ?? apps/wathefni-employee-mobile/src/auth/biometricStorage.ts
+  ?? apps/wathefni-employee-mobile/src/auth/deviceLock.ts
+  ?? apps/wathefni-employee-mobile/src/auth/deviceSecurityNotice.ts
+  ?? apps/wathefni-employee-mobile/src/auth/pinCrypto.ts
+  ?? apps/wathefni-employee-mobile/src/auth/pinPolicy.ts
+  ?? apps/wathefni-employee-mobile/src/auth/pinStorage.ts
+  ?? apps/wathefni-employee-mobile/src/auth/sessionResume.ts
+  ?? apps/wathefni-employee-mobile/src/components/layout.tsx
+  ?? apps/wathefni-employee-mobile/src/components/lists.tsx
+  ?? apps/wathefni-employee-mobile/src/composition/
+  ?? apps/wathefni-employee-mobile/src/features/bank/
+  ?? apps/wathefni-employee-mobile/src/features/documents/
+  ?? apps/wathefni-employee-mobile/src/features/onboarding/lifecycleProjection.ts
+  ?? apps/wathefni-employee-mobile/src/features/pin/
+  ?? apps/wathefni-employee-mobile/src/features/profile/
+  ?? apps/wathefni-employee-mobile/src/features/schedule/
+  ?? apps/wathefni-employee-mobile/src/lib/documentScanner.ts
+  ?? apps/wathefni-employee-mobile/src/lib/employeeSoftRefresh.ts
+  ?? apps/wathefni-employee-mobile/src/lib/featureUnavailableCopy.ts
+  ?? apps/wathefni-employee-mobile/src/lib/moduleState.ts
+  ?? apps/wathefni-employee-mobile/src/lib/refresh.tsx
+  ?? apps/wathefni-employee-mobile/src/push/resolvePushDestination.ts

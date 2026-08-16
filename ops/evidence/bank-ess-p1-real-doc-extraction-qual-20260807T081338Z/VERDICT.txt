@@ -1,0 +1,8 @@
+PASS
+stamp=20260807T081338Z
+fixture=1786090542147.pdf
+bank=Gulf Bank
+iban_masked=KW35…9548
+confidence=0.98
+p2_started=no
+auth_wave2_phase6_started=no

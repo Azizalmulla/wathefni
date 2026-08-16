@@ -1,0 +1,12 @@
+{
+  "A_normal_full_period": {
+    "ok": true,
+    "gross_residual": 0.0,
+    "net_residual": 0.0,
+    "line_residuals": [],
+    "unexplained_residual": 0.0
+  },
+  "oracle_pack": {
+    "residual_count": 0
+  }
+}

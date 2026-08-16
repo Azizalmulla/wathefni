@@ -1,0 +1,14 @@
+stamp=20260802T011738Z
+time_utc=2026-08-02T01:20:41Z
+active
+=== SHAs before ===
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  /opt/wathefni/orchestrator/app.py
+a87e5bfb44f5a896c25f9efc4d2d0e28addf5bcfcf85d97ee5519a8cb4417016  /opt/wathefni/orchestrator/action_registry.py
+ls: cannot access '/opt/wathefni/orchestrator/onboarding_wave2.py': No such file or directory
+onboarding_wave2.py absent (expected pre-wave2b)
+=== flags before (process) ===
+WATHEFNI_DOC_UPLOAD=on
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_ONBOARDING_SEED=off

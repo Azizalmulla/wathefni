@@ -1,0 +1,59 @@
+{
+  "blocker_count": 0,
+  "gates": [
+    {
+      "metric": "retrieval_needle_recall_1k",
+      "observed": true,
+      "status": "PASS",
+      "threshold": "needle_found == true"
+    },
+    {
+      "metric": "retrieval_needle_recall_10k",
+      "observed": true,
+      "status": "PASS",
+      "threshold": "needle_found == true"
+    },
+    {
+      "metric": "search_p95_ms_10k",
+      "observed": 182.66,
+      "status": "PASS",
+      "threshold": "<= 2000ms local mock"
+    },
+    {
+      "metric": "full_50k_executed",
+      "observed": false,
+      "status": "ACCEPTED_LIMITATION",
+      "threshold": "execute if capacity permits"
+    },
+    {
+      "metric": "voyage_real_provider",
+      "observed": "not_available",
+      "status": "ACCEPTED_LIMITATION",
+      "threshold": "credentials + explicit enable"
+    },
+    {
+      "metric": "cross_tenant_leak",
+      "observed": 0,
+      "status": "PASS",
+      "threshold": "0"
+    },
+    {
+      "metric": "forbidden_mutations",
+      "observed": 0,
+      "status": "PASS",
+      "threshold": "0"
+    },
+    {
+      "metric": "ranking_unexplained_deltas",
+      "observed": 0,
+      "status": "PASS",
+      "threshold": "0"
+    },
+    {
+      "metric": "audit_fail_closed",
+      "observed": true,
+      "status": "PASS",
+      "threshold": "deny evidence on audit write failure"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+OK Hiring home cream PageScreen
+GAP Candidates/Interviews lists legacy Screen/WorkspaceHeader
+GAP browse Jobs/Ranking/Assessments → /hr/candidates
+GAP candidates API has no position param
+GAP normalize drops ranking honesty flags
+GAP Hiring upcoming EN hardcodes
+GAP Assistant interviews uses app_key as interviewId
+GAP Candidate schedule_interview → list only
+GAP Interview notes direct POST no expected token in mobile request model
+GAP Interview detail notes mutation no expected token
+GAP notes error folds into full detail state
+OK safe-back parents Hiring for lists

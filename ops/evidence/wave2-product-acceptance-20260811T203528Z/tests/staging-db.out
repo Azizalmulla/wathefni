@@ -1,0 +1,98 @@
+    wave2 product acceptance — db
+      PASS  released payslip visibility helper
+      PASS  unreleased not visible
+      PASS  released visible
+      PASS  payment ack ≠ paid
+      PASS  settlement finalized ≠ paid
+      PASS  settlement ≠ clearance
+      PASS  assistant read-only (mutations off)
+      PASS  assistant read-only under spine wave
+      PASS  EN/AR settlement labels
+      PASS  EN/AR payment labels
+      PASS  rollout canary allowlist
+      PASS  rollout gate structured
+      PASS  rollback global off
+      PASS  rollback guidance present
+      PASS  setup get_all wave2 ok
+      PASS  setup has attendance policy
+      PASS  setup has settlement policy
+      PASS  setup EN/AR labels
+      PASS  setup patch attendance
+      PASS  setup attendance persisted
+      PASS  setup patch leave
+      PASS  setup patch payroll independence defaults
+      PASS  setup payroll manual_inputs_ok
+      PASS  setup payment_processing default off
+      PASS  setup ack≠paid contract
+      PASS  setup settlement honesty
+      PASS  matrix[attendance_alone] attendance gate
+      PASS  matrix[attendance_alone] leave runtime path
+      PASS  matrix[attendance_alone] shifts gate
+      PASS  matrix[attendance_alone] payroll gate
+      PASS  matrix[attendance_alone] payment gate
+      PASS  matrix[attendance_alone] settlement gate
+      PASS  matrix[attendance_alone] tenant isolation
+      PASS  matrix[leave_alone] attendance gate
+      PASS  matrix[leave_alone] leave runtime path
+      PASS  matrix[leave_alone] shifts gate
+      PASS  matrix[leave_alone] payroll gate
+      PASS  matrix[leave_alone] payment gate
+      PASS  matrix[leave_alone] settlement gate
+      PASS  matrix[leave_alone] tenant isolation
+      PASS  matrix[shifts_alone] attendance gate
+      PASS  matrix[shifts_alone] leave runtime path
+      PASS  matrix[shifts_alone] shifts gate
+      PASS  matrix[shifts_alone] payroll gate
+      PASS  matrix[shifts_alone] payment gate
+      PASS  matrix[shifts_alone] settlement gate
+      PASS  matrix[shifts_alone] tenant isolation
+      PASS  matrix[payroll_alone_manual] attendance gate
+      PASS  matrix[payroll_alone_manual] leave runtime path
+      PASS  matrix[payroll_alone_manual] shifts gate
+      PASS  matrix[payroll_alone_manual] payroll gate
+      PASS  matrix[payroll_alone_manual] payment gate
+      PASS  matrix[payroll_alone_manual] settlement gate
+      PASS  matrix[payroll_alone_manual] tenant isolation
+      PASS  matrix[payroll_alone_manual] payroll independent (no att/leave required)
+      PASS  matrix[attendance_payroll] attendance gate
+      PASS  matrix[attendance_payroll] leave runtime path
+      PASS  matrix[attendance_payroll] shifts gate
+      PASS  matrix[attendance_payroll] payroll gate
+      PASS  matrix[attendance_payroll] payment gate
+      PASS  matrix[attendance_payroll] settlement gate
+      PASS  matrix[attendance_payroll] tenant isolation
+      PASS  matrix[leave_payroll] attendance gate
+      PASS  matrix[leave_payroll] leave runtime path
+      PASS  matrix[leave_payroll] shifts gate
+      PASS  matrix[leave_payroll] payroll gate
+      PASS  matrix[leave_payroll] payment gate
+      PASS  matrix[leave_payroll] settlement gate
+      PASS  matrix[leave_payroll] tenant isolation
+      PASS  matrix[ot_payroll_optional] attendance gate
+      PASS  matrix[ot_payroll_optional] leave runtime path
+      PASS  matrix[ot_payroll_optional] shifts gate
+      PASS  matrix[ot_payroll_optional] payroll gate
+      PASS  matrix[ot_payroll_optional] payment gate
+      PASS  matrix[ot_payroll_optional] settlement gate
+      PASS  matrix[ot_payroll_optional] tenant isolation
+      PASS  matrix[shifts_attendance] attendance gate
+      PASS  matrix[shifts_attendance] leave runtime path
+      PASS  matrix[shifts_attendance] shifts gate
+      PASS  matrix[shifts_attendance] payroll gate
+      PASS  matrix[shifts_attendance] payment gate
+      PASS  matrix[shifts_attendance] settlement gate
+      PASS  matrix[shifts_attendance] tenant isolation
+      PASS  matrix[full_workforce_truth] attendance gate
+      PASS  matrix[full_workforce_truth] leave runtime path
+      PASS  matrix[full_workforce_truth] shifts gate
+      PASS  matrix[full_workforce_truth] payroll gate
+      PASS  matrix[full_workforce_truth] payment gate
+      PASS  matrix[full_workforce_truth] settlement gate
+      PASS  matrix[full_workforce_truth] tenant isolation
+      PASS  matrix[all_disabled] attendance gate
+      PASS  matrix[all_disabled] leave runtime path
+      PASS  matrix[all_disabled] shifts gate
+      PASS  matrix[all_disabled] payroll gate
+      PASS  matrix[all_disabled] payment gate
+      PASS  matrix[all_disabled] settlement gate
+      PASS  matrix[all_disabled] tenant isolation

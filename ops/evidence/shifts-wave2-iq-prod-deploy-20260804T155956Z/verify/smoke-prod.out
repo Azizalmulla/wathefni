@@ -1,0 +1,47 @@
+PASS posthire_bundle_present — PostHire-DWa5FLLn.js
+PASS iq_wave2_marker
+PASS updating_overlay
+PASS updating_copy
+PASS surfaces_preserved
+PASS board_preserved
+PASS filters_preserved
+PASS mutation_concurrency
+PASS swap_actions
+PASS confirm_continue
+PASS wave1_primary
+PASS leave_still_present
+PASS iq_shell_still
+SHIFTS_WAVE2_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+SHIFTS_WAVE2_IQ_SMOKE_OK
+PASS posthire_bundle_present — PostHire-DWa5FLLn.js
+PASS surfaces_marker
+PASS schedule_default_marker
+PASS attention_strip
+PASS primary_schedule
+PASS board_marker
+PASS operations_collapsed
+PASS no_inner_h1_pattern
+PASS governed_filters
+PASS composer_org_governed
+PASS empty_cta
+PASS mutation_concurrency
+PASS mutation_swaps
+PASS arabic_surface
+PASS leave_still_present
+PASS attendance_still_present
+SHIFT_STATUS_COUNTS [{"status": "scheduled", "c": 81}, {"status": "cancelled", "c": 73}]
+PASS shifts_table_readable — statuses=2
+SHIFTS_WAVE1_SMOKE_OK
+PASS confirm_marker
+PASS shell_busy_marker
+PASS activity_refreshing
+PASS working_copy
+PASS no_always_refreshing_banner_only
+PASS activity_timeline
+PASS settings_ia
+PASS alerts_preserved
+IQ_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+INTERACTION_QUALITY_WAVE1_SMOKE_OK
+SMOKE_OK

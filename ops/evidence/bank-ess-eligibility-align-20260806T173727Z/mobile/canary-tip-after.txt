@@ -1,0 +1,34 @@
+
+Branch:
+Name  canary
+ID    019fd252-ff83-7881-82d0-47a97c1add86
+
+Recent update groups:
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Bank ESS eligibility align me/onboarding/bank 20260806T181405Z (runtime 0.1.0)" (20 seconds ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  388e8cf5-1d6b-4140-9c84-bfff55504928
+
+———
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Fix Bank ESS OTA syncLayoutLocale clean 20260806T172002Z (runtime 0.1.0)" (51 minutes ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  85f648c9-73a0-4b14-9d8e-838913496a4d
+
+———
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Fix Bank ESS OTA crash syncLayoutLocale 20260806T172002Z (runtime 0.1.0)" (52 minutes ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  f65e46d0-50ae-41c6-b4ce-d75233f87168

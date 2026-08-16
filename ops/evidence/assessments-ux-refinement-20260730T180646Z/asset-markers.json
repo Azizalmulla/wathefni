@@ -1,0 +1,38 @@
+{
+  "chunk": "AssessmentsPage-BTvtfzjP.js",
+  "en": [
+    "Ready to send",
+    "Sent pending",
+    "In progress",
+    "Resend needed",
+    "Delivery failed",
+    "Completed",
+    "Needs review",
+    "Expired",
+    "Cancelled",
+    "Mark reviewed",
+    "View report"
+  ],
+  "ar": [
+    "جاهز للإرسال",
+    "مُرسل بانتظار البدء",
+    "قيد التنفيذ",
+    "يحتاج إعادة إرسال",
+    "فشل التسليم",
+    "مكتمل",
+    "يحتاج مراجعة",
+    "منتهي",
+    "ملغى",
+    "تسجيل المراجعة",
+    "عرض التقرير"
+  ],
+  "profiler": [
+    "assessments_tab",
+    "assessments_cohort",
+    "assessments_pagination",
+    "assessments_open_report",
+    "assessments_open_workspace",
+    "assessments_row_action",
+    "profiler_commit"
+  ]
+}

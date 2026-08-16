@@ -1,0 +1,24 @@
+    probation surfaces — DB integration prove
+      PASS  create via authority
+      PASS  queue ok
+      PASS  queue has case
+      PASS  detail ok
+      PASS  detail has milestones
+      PASS  detail has audit events
+      PASS  employee self ok
+      PASS  employee confidential stripped
+      PASS  manager scope allow
+      PASS  manager scope deny
+      PASS  stale milestone protection
+      PASS  concurrency conflict
+      PASS  decision reason required
+      PASS  terminal confirmed
+      PASS  tenant isolation
+      PASS  module-off queue denied
+      PASS  works without onboarding module
+      PASS  works without recruiting module
+      PASS  assistant explain deep link
+
+    19 passed, 0 failed
+PROBATION_SURFACES_DB_FULL_PASS
+STAGING_DB_RC=0

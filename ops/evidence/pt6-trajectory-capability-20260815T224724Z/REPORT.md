@@ -1,0 +1,12 @@
+# pt6 qualification
+- Stamp: 20260815T224724Z
+- Dashboard: YES
+- Mobile: YES
+- Unit: YES
+- Predecessor: YES
+- Wave contracts: YES
+- Staging DB: YES
+- Live: YES
+- Deploy: YES
+- Comprehensive predecessors: YES
+- Verdict: **PT6_TRAJECTORY_CAPABILITY_INTELLIGENCE_FULL_PASS**

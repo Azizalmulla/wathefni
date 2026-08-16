@@ -1,0 +1,76 @@
+    PRODUCTION READINESS R3 — data-safety unit contracts
+
+    P0-6 — fixture tooling fails closed
+      PASS  seed script with no environment refuses
+      PASS  seed script pointed at production-shaped target refuses
+      PASS  missing company refuses rather than defaulting
+      PASS  WATHEFNI is not an inferred fixture tenant
+      PASS  explicit staging synthetic tenant is accepted
+      PASS  explicit canary fixtures stay opt-in on non-production
+      PASS  missing non-production ack refuses
+      PASS  wildcard tenant deletion is refused
+      PASS  destructive matrix cannot target the canary tenant
+      PASS  scoped company_modules delete names company_code
+      PASS  scoped company_modules delete carries only named tenants
+      PASS  unscoped DELETE FROM company_modules is detected
+      PASS  scoped DELETE FROM company_modules is not flagged unscoped
+      PASS  Aziz qualification identity cannot be mutated by fixtures
+      PASS  production maintenance without the named ack refuses
+      PASS  named production maintenance with the deliberate ack is accepted
+      PASS  mutating ops tooling accepts explicit staging synthetic tenant
+      PASS  mutating ops tooling pointed at production refuses
+      PASS  mutating ops tooling does not treat WATHEFNI as an inferred tenant
+
+    implicit WATHEFNI company authority
+      PASS  missing company code fails closed
+      PASS  empty company code fails closed
+      PASS  explicit legitimate tenant still resolves
+      PASS  explicit canary tenant still resolves when named
+      PASS  missing company does not resolve to WATHEFNI
+      PASS  WATHEFNI is classified as canary identity, not a default
+      PASS  or-WATHEFNI snippets classify as implicit fallback
+
+    synthetic connector / fixture entry points
+      PASS  synthetic connectors are off by default
+      PASS  creating a canary connector without the isolated capability refuses
+      PASS  non-synthetic connector kinds are unaffected
+      PASS  isolated synthetic tenant can use the test capability
+      PASS  WATHEFNI still cannot, even with the flag
+      PASS  an explicit allowlist is required to use WATHEFNI as a test tenant
+
+    live process refusals
+      PASS  seed script with no environment refuses
+      PASS  seed script pointed at production-shaped target refuses (process)
+      PASS  production mobile build cannot bake demo flags
+      PASS  development preview can still enable demo flags
+
+    R3 — source-level regressions that must not come back
+      PASS  employee-mobile app.config.js fails the build when a production release bakes demo flags
+      PASS  employee-mobile production EAS profile stamps a production-release marker
+      PASS  app.py no longer uses company_code or WATHEFNI as tenant authority
+      PASS  app.py no longer uses WATHEFNI_DEFAULT_COMPANY as a routing fallback
+      PASS  app.py requires company context through require_company_code
+      PASS  ops-seed-payslip-visual-fixture.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-payslip-visual-fixture.py activates the fixture guard before importing app
+      PASS  ops-seed-docs-visual-fixture.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-docs-visual-fixture.py activates the fixture guard before importing app
+      PASS  ops-seed-schedule-visual-fixture.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-schedule-visual-fixture.py activates the fixture guard before importing app
+      PASS  ops-seed-onboarding-visual-fixture.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-onboarding-visual-fixture.py activates the fixture guard before importing app
+      PASS  ops-seed-inbox-visual-fixture.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-inbox-visual-fixture.py activates the fixture guard before importing app
+      PASS  ops-seed-bank-visual-fixture.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-bank-visual-fixture.py activates the fixture guard before importing app
+      PASS  ops-seed-wave1-visual-canary.py no longer defaults WATHEFNI_ENV to production
+      PASS  ops-seed-wave1-visual-canary.py activates the fixture guard before importing app
+      PASS  kuwait production matrix no longer defaults to the production database
+      PASS  kuwait production matrix uses the data-safety guard
+      PASS  no live script setdefault WATHEFNI_ENV to production
+      PASS  production-named canary scripts are hard-blocked against production
+      PASS  app.py has no remaining or-WATHEFNI tenant fallbacks
+      PASS  demo production guard is present in mobile source
+
+    R3_DATA_SAFETY_UNIT_PASS
+    61 passed, 0 failed
+

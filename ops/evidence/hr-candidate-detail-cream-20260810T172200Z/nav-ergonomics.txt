@@ -1,0 +1,58 @@
+PASS decideHrSafeBack + hrCanonicalParent exported
+PASS useHrSafeBack uses performHrSafeBack
+PASS HrPushedNav uses PageBackButton
+PASS PageBackButton RTL arrow
+PASS canonical parents encoded for leave/candidates/hiring/more/settings/pin
+PASS parent /hr/leave/abc → /hr
+PASS parent /hr/candidates/x → /hr/candidates
+PASS parent /hr/candidates → /hr/hiring
+PASS parent /hr/interviews/y → /hr/interviews
+PASS parent /hr/interviews → /hr/hiring
+PASS parent /hr/tasks/z → /hr/tasks
+PASS parent /hr/tasks → /hr/more
+PASS parent /hr/settings → /hr/more
+PASS parent /hr/change-pin → /hr/settings
+PASS parent /hr/delivery-alerts → /hr/more
+PASS parent /hr/assistant → /hr/more
+PASS parent /hr/employees/e1 → /hr/people
+PASS parent /hr/shift-swaps/s1 → /hr/shifts
+PASS push history → back
+PASS cold deep link → replace parent
+PASS module list cold → More
+PASS nested detail cold → list
+PASS change-pin cold → settings
+PASS signedOut mounts auth-only stack
+PASS signedOut stack only registers sign-in
+PASS signedOut disables gestures
+PASS signedIn stack still has modules
+PASS no bare router.back() under HR app/features
+PASS leave detail onBack
+PASS candidate detail onBack
+PASS settings safe back
+PASS change-pin safe back
+PASS LeaveApprovalView accepts onBack
+PASS CandidateReviewView accepts onBack
+PASS OperationalList/Detail accept onBack
+PASS HrPushedNav on features/tasks/HRTasksQueueView.tsx
+PASS HrPushedNav on features/tasks/HRTaskDetailView.tsx
+PASS HrPushedNav on features/onboarding/HROnboardingQueueView.tsx
+PASS HrPushedNav on features/documents/HRDocumentReviewsQueueView.tsx
+PASS HrPushedNav on features/attendance/HRAttendanceQueueView.tsx
+PASS HrPushedNav on features/shifts/HRShiftsHomeView.tsx
+PASS HrPushedNav on features/delivery-alerts/HRDeliveryAlertsMonitorView.tsx
+PASS HrPushedNav on features/assistant/HRAssistantView.tsx
+PASS People tab can omit Back
+PASS Employees stack passes showBack
+PASS Candidates/Interviews lists use onBack
+PASS tab (tabs)/index.tsx is not a pushed chrome file
+PASS tab (tabs)/inbox.tsx is not a pushed chrome file
+PASS tab (tabs)/hiring.tsx is not a pushed chrome file
+PASS tab (tabs)/more.tsx is not a pushed chrome file
+PASS tab (tabs)/people.tsx is not a pushed chrome file
+PASS Home tab root no HrPushedNav
+PASS Hiring tab root no HrPushedNav
+PASS More tab root no HrPushedNav
+PASS More→Employee uses replace
+PASS HR common.back EN+AR
+
+hr-navigation-ergonomics: GREEN

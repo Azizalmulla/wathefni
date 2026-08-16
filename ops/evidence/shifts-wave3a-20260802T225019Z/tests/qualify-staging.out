@@ -1,0 +1,70 @@
+staging dashboard updated: /opt/wathefni/staging/dashboard-dist
+health_ok
+active
+PYBIN=/opt/wathefni/orchestrator/.venv/bin/python
+PASS  version 3.0.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+40 passed, 0 failed
+SHW3A tag=D4FA3D10 key=WATHEFNI-SHW2B-W3A-D4FA3D10 evid=/opt/wathefni/staging-evidence/shifts-wave3a-20260802T225019Z/tests
+PASS  connected_db_is_staging
+PASS  db_name_wathefni_staging
+PASS  wave3_module_enabled
+PASS  honesty_payroll_false
+PASS  honesty_no_templates
+FATAL module 'shifts_schedule_integrity_wave2' has no attribute 'is_wave2_synthetic_employee'
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-shifts-wave3a-live-staging.py", line 344, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-shifts-wave3a-live-staging.py", line 179, in main
+    created = app.create_shift_assignment(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 19378, in create_shift_assignment
+    return create_shift_assignment_for_employee(work_items[0][0], employee=work_items[0][1], company_code=company, created_by_phone=created_by_phone)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 19103, in create_shift_assignment_for_employee
+    synth = _shifts_subject_is_synthetic(employee)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 122, in _shifts_subject_is_synthetic
+    or _shifts_w2.is_wave2_synthetic_employee(employee_key=employee_key or (employee or {}).get("employee_key"), phone=phone or (employee or {}).get("phone"))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'shifts_schedule_integrity_wave2' has no attribute 'is_wave2_synthetic_employee'

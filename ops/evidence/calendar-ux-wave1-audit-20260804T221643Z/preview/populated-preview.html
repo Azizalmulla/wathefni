@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar Wave 1 — populated preview (review only)</title>
+  <style>
+    :root {
+      --ink: #2f2c27;
+      --muted: #6b6560;
+      --line: #e8dfd0;
+      --surface: #f7f3eb;
+      --interview: #b9cde8;
+      --video: #c9d8ec;
+      --followup: #f3d85f;
+      --meeting: #e9e4d9;
+      --start: #d4c4a8;
+      --onboard: #e8d4a8;
+      --leave: #e4ded2;
+      --compliance: #f3d85f;
+      --payroll: #d9d2c6;
+      --training: #e9e4d9;
+      --cancelled: #ddd7cc;
+      --tentative: #efbdd7;
+      --preview-stripe: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        rgba(47, 44, 39, 0.08) 4px,
+        rgba(47, 44, 39, 0.08) 8px
+      );
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      background: linear-gradient(160deg, #f4efe6 0%, #ebe4d8 55%, #e4ddd0 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    body[dir="rtl"] { font-family: "Geeza Pro", "Traditional Arabic", "Iowan Old Style", Georgia, serif; }
+    .banner {
+      background: #3b3212;
+      color: #f7f3eb;
+      padding: 10px 20px;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+    .banner strong { color: #f3d85f; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      justify-content: space-between;
+      padding: 20px 24px 8px;
+    }
+    h1 { margin: 0; font-size: 28px; font-weight: 600; }
+    .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    button, select {
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.active { background: var(--ink); color: #fffdf8; border-color: var(--ink); }
+    .shell {
+      margin: 12px 24px 32px;
+      background: rgba(255, 253, 248, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 8px 14px;
+      padding: 12px 16px; border-bottom: 1px solid var(--line);
+      font-size: 12px; color: var(--muted);
+    }
+    .swatch {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .swatch i {
+      width: 12px; height: 12px; border-radius: 3px; display: inline-block;
+    }
+    .month, .week, .day { display: none; }
+    .month.show, .week.show, .day.show { display: block; }
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      min-height: 520px;
+    }
+    .dow {
+      padding: 10px; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--muted); border-bottom: 1px solid var(--line);
+    }
+    .cell {
+      min-height: 110px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      padding: 8px; vertical-align: top;
+    }
+    .cell.empty { background: rgba(0,0,0,0.015); }
+    .cell .n { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .chip {
+      display: block; width: 100%; text-align: start;
+      border: 0; border-radius: 8px; padding: 4px 6px; margin-bottom: 4px;
+      font-size: 11px; line-height: 1.25; cursor: pointer;
+      position: relative; overflow: hidden;
+    }
+    .chip.preview-only::after {
+      content: ""; position: absolute; inset: 0; background: var(--preview-stripe); pointer-events: none;
+    }
+    .chip .tag {
+      display: inline-block; font-size: 9px; text-transform: uppercase;
+      letter-spacing: 0.06em; opacity: 0.75; margin-inline-end: 4px;
+    }
+    .week-grid {
+      display: grid;
+      grid-template-columns: 56px repeat(7, 1fr);
+      min-height: 560px;
+    }
+    .hour {
+      border-bottom: 1px solid var(--line); height: 40px;
+      font-size: 10px; color: var(--muted); padding: 4px;
+    }
+    .day-col {
+      position: relative; border-inline-start: 1px solid var(--line);
+      min-height: 560px; background:
+        repeating-linear-gradient(to bottom, transparent 0, transparent 39px, var(--line) 39px, var(--line) 40px);
+    }
+    .day-col .head {
+      position: sticky; top: 0; background: #fffdf8; z-index: 2;
+      padding: 8px; font-size: 12px; border-bottom: 1px solid var(--line); text-align: center;
+    }
+    .abs-chip {
+      position: absolute; left: 4px; right: 4px; border-radius: 8px;
+      padding: 6px 8px; font-size: 11px; overflow: hidden; z-index: 1;
+    }
+    .day-view { padding: 16px; min-height: 480px; position: relative; }
+    .day-view .abs-chip { left: 64px; right: 16px; }
+    .drawer {
+      position: fixed; inset-inline-end: 0; top: 0; bottom: 0; width: min(380px, 92vw);
+      background: #fffdf8; border-inline-start: 1px solid var(--line);
+      box-shadow: none; padding: 20px; transform: translateX(110%);
+      transition: transform 180ms ease; z-index: 20;
+    }
+    body[dir="rtl"] .drawer { transform: translateX(-110%); }
+    .drawer.open { transform: translateX(0); }
+    .drawer h2 { margin: 0 0 8px; font-size: 20px; }
+    .meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .pill {
+      display: inline-block; border-radius: 999px; padding: 3px 10px;
+      font-size: 11px; margin-inline-end: 6px; margin-bottom: 6px;
+      background: var(--meeting);
+    }
+    .pill.warn { background: #3b3212; color: #f3d85f; }
+    .scrim {
+      position: fixed; inset: 0; background: rgba(47,44,39,0.12); display: none; z-index: 15;
+    }
+    .scrim.open { display: block; }
+    .mobile { max-width: 390px; margin-inline: auto; }
+    @media (max-width: 720px) {
+      header, .shell { margin-inline: 10px; }
+      header { padding-inline: 10px; }
+      .month-grid { font-size: 11px; }
+      .cell { min-height: 84px; padding: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="banner" data-testid="preview-banner">
+    <strong>REVIEW ONLY</strong> — deterministic synthetic populated preview.
+    Post-hiring chips are striped and labeled Preview. Not production data. Not deployed.
+  </div>
+  <header>
+    <div>
+      <h1 id="brand">Wathefni Calendar</h1>
+      <div class="sub" id="subtitle">Wave 1 populated preview · week of 2–8 Aug 2026</div>
+    </div>
+    <div class="controls">
+      <button type="button" data-view="month" class="active">Month</button>
+      <button type="button" data-view="week">Week</button>
+      <button type="button" data-view="day">Day</button>
+      <select id="locale">
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+      </select>
+      <select id="viewport">
+        <option value="desktop">Desktop</option>
+        <option value="mobile">Mobile</option>
+      </select>
+    </div>
+  </header>
+  <div id="frame" class="shell">
+    <div class="legend" id="legend"></div>
+    <div class="month show" id="month"></div>
+    <div class="week" id="week"></div>
+    <div class="day" id="day"></div>
+  </div>
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true"></aside>
+  <script>
+    const COLORS = {
+      interview: 'var(--interview)',
+      video_interview: 'var(--video)',
+      candidate_followup: 'var(--followup)',
+      meeting: 'var(--meeting)',
+      employee_start: 'var(--start)',
+      onboarding_deadline: 'var(--onboard)',
+      approved_leave: 'var(--leave)',
+      compliance_expiry: 'var(--compliance)',
+      payroll_cutoff: 'var(--payroll)',
+      training_company: 'var(--training)',
+    };
+    const LABELS = {
+      en: {
+        interview: 'Interview', video_interview: 'Video interview', candidate_followup: 'Candidate follow-up',
+        meeting: 'Meeting', employee_start: 'Employee start', onboarding_deadline: 'Onboarding deadline',
+        approved_leave: 'Approved leave', compliance_expiry: 'Compliance expiry', payroll_cutoff: 'Payroll cutoff',
+        training_company: 'Training / company', preview: 'Preview', cancelled: 'Cancelled', tentative: 'Tentative',
+        confirmed: 'Confirmed', live: 'Connected', drawerNote: 'Specialist module keeps mutation authority.',
+      },
+      ar: {
+        interview: 'مقابلة', video_interview: 'مقابلة مرئية', candidate_followup: 'متابعة مرشح',
+        meeting: 'اجتماع', employee_start: 'بدء موظف', onboarding_deadline: 'موعد إنهاء التعيين',
+        approved_leave: 'إجازة معتمدة', compliance_expiry: 'انتهاء امتثال', payroll_cutoff: 'قطع الرواتب',
+        training_company: 'تدريب / شركة', preview: 'معاينة', cancelled: 'ملغى', tentative: 'مبدئي',
+        confirmed: 'مؤكد', live: 'متصل', drawerNote: 'الوحدة المختصة تحتفظ بسلطة التعديل.',
+      },
+    };
+    let events = [];
+    let locale = 'en';
+    let view = 'month';
+    let selectedDay = 3; // Aug 3 dense day
+
+    function catColor(ev) {
+      if (ev.status === 'cancelled') return 'var(--cancelled)';
+      if (ev.status === 'tentative' && ev.category !== 'interview') return 'var(--tentative)';
+      return COLORS[ev.category] || 'var(--meeting)';
+    }
+
+    function openDrawer(ev) {
+      const L = LABELS[locale];
+      const drawer = document.getElementById('drawer');
+      drawer.innerHTML = `
+        <p class="meta">${L[ev.category] || ev.category}</p>
+        <h2>${ev.title}</h2>
+        <div>
+          <span class="pill">${L[ev.status] || ev.status}</span>
+          <span class="pill">${ev.preview_only ? L.preview : L.live}</span>
+          ${ev.preview_only ? '<span class="pill warn">POST-HIRE PREVIEW</span>' : ''}
+        </div>
+        <p class="meta">${ev.start_at.replace('T',' ').slice(0,16)} → ${ev.end_at.replace('T',' ').slice(11,16)}</p>
+        <p class="meta">Owner: ${ev.module_owner}</p>
+        <p class="meta">${L.drawerNote}</p>
+        ${ev.note ? `<p class="meta">${ev.note}</p>` : ''}
+      `;
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.getElementById('scrim').classList.add('open');
+    }
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('scrim').classList.remove('open');
+    }
+    document.getElementById('scrim').onclick = closeDrawer;
+
+    function chipHtml(ev) {
+      const L = LABELS[locale];
+      const cls = ev.preview_only ? 'chip preview-only' : 'chip';
+      return `<button type="button" class="${cls}" style="background:${catColor(ev)}" data-id="${ev.event_id}">
+        <span class="tag">${ev.preview_only ? L.preview : ''}</span>${ev.title}
+      </button>`;
+    }
+
+    function renderLegend() {
+      const L = LABELS[locale];
+      const items = Object.keys(COLORS).map((k) =>
+        `<span class="swatch"><i style="background:${COLORS[k]}"></i>${L[k]}</span>`
+      ).join('');
+      document.getElementById('legend').innerHTML = items +
+        `<span class="swatch"><i style="background:var(--cancelled)"></i>${L.cancelled}</span>` +
+        `<span class="swatch"><i style="background:var(--preview-stripe),#fff"></i>${L.preview}</span>`;
+    }
+
+    function dayEvents(day) {
+      return events.filter((e) => {
+        const s = new Date(e.start_at);
+        const en = new Date(e.end_at);
+        const d0 = new Date(Date.UTC(2026, 7, day, 0, 0));
+        const d1 = new Date(Date.UTC(2026, 7, day, 23, 59));
+        // compare local Kuwait dates via ISO date prefix
+        const startDay = Number(e.start_at.slice(8, 10));
+        const endDay = Number(e.end_at.slice(8, 10));
+        return day >= startDay && day <= endDay;
+      });
+    }
+
+    function renderMonth() {
+      const dow = locale === 'ar'
+        ? ['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']
+        : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      // Aug 2026 starts Saturday — pad 6 empties before day 1? Aug 1 = Saturday.
+      // Week of interest starts Sun Aug 2. Show Aug calendar: Sat=1.
+      let html = dow.map((d) => `<div class="dow">${d}</div>`).join('');
+      // leading empty cells: Aug 1 is Saturday index 6
+      for (let i = 0; i < 6; i++) html += `<div class="cell empty"></div>`;
+      for (let day = 1; day <= 31; day++) {
+        const list = dayEvents(day);
+        const dense = list.length >= 3 ? ' data-dense="1"' : '';
+        html += `<div class="cell"${dense} data-day="${day}"><div class="n">${day}</div>${list.map(chipHtml).join('')}</div>`;
+      }
+      document.getElementById('month').innerHTML = `<div class="month-grid">${html}</div>`;
+      document.querySelectorAll('.chip').forEach((btn) => {
+        btn.onclick = () => openDrawer(events.find((e) => e.event_id === btn.dataset.id));
+      });
+    }
+
+    function placeAbs(container, day) {
+      const list = dayEvents(day).filter((e) => !e.all_day);
+      list.forEach((ev, idx) => {
+        const startH = Number(ev.start_at.slice(11, 13)) + Number(ev.start_at.slice(14, 16)) / 60;
+        const endH = Number(ev.end_at.slice(11, 13)) + Number(ev.end_at.slice(14, 16)) / 60;
+        const top = (startH - 7) * 40 + 36;
+        const height = Math.max(28, (endH - startH) * 40);
+        const lane = idx % 2;
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'abs-chip' + (ev.preview_only ? ' preview-only' : '');
+        el.style.background = catColor(ev);
+        el.style.top = top + 'px';
+        el.style.height = height + 'px';
+        if (list.length > 1) {
+          el.style.left = lane === 0 ? '4px' : '52%';
+          el.style.right = lane === 0 ? '52%' : '4px';
+        }
+        el.textContent = ev.title;
+        el.onclick = () => openDrawer(ev);
+        container.appendChild(el);
+      });
+      dayEvents(day).filter((e) => e.all_day).forEach((ev) => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'abs-chip' + (ev.preview_only ? ' preview-only' : '');
+        el.style.background = catColor(ev);
+        el.style.top = '36px';
+        el.style.height = '24px';
+        el.textContent = ev.title;
+        el.onclick = () => openDrawer(ev);
+        container.appendChild(el);
+      });
+    }
+
+    function renderWeek() {
+      const hours = Array.from({ length: 14 }, (_, i) => i + 7);
+      let html = `<div class="week-grid"><div></div>`;
+      for (let day = 2; day <= 8; day++) {
+        html += `<div class="day-col" data-day="${day}"><div class="head">${day} Aug</div></div>`;
+      }
+      html += `</div>`;
+      // rebuild with hour gutter
+      html = `<div class="week-grid"><div>${hours.map((h) => `<div class="hour">${String(h).padStart(2,'0')}:00</div>`).join('')}</div>`;
+      for (let day = 2; day <= 8; day++) {
+        html += `<div class="day-col" id="wday-${day}"><div class="head">${day}</div></div>`;
+      }
+      html += `</div>`;
+      document.getElementById('week').innerHTML = html;
+      for (let day = 2; day <= 8; day++) placeAbs(document.getElementById('wday-' + day), day);
+    }
+
+    function renderDay() {
+      const hours = Array.from({ length: 14 }, (_, i) => i + 7);
+      document.getElementById('day').innerHTML =
+        `<div class="day-view" id="day-canvas">${hours.map((h) => `<div class="hour">${String(h).padStart(2,'0')}:00</div>`).join('')}</div>`;
+      placeAbs(document.getElementById('day-canvas'), selectedDay);
+    }
+
+    function setView(v) {
+      view = v;
+      document.querySelectorAll('[data-view]').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
+      document.getElementById('month').classList.toggle('show', v === 'month');
+      document.getElementById('week').classList.toggle('show', v === 'week');
+      document.getElementById('day').classList.toggle('show', v === 'day');
+    }
+
+    function applyLocale() {
+      document.body.dir = locale === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = locale;
+      document.getElementById('brand').textContent = locale === 'ar' ? 'تقويم وظفني' : 'Wathefni Calendar';
+      document.getElementById('subtitle').textContent = locale === 'ar'
+        ? 'معاينة موجة 1 · أسبوع ٢–٨ أغسطس ٢٠٢٦'
+        : 'Wave 1 populated preview · week of 2–8 Aug 2026';
+      renderLegend();
+      renderMonth();
+      renderWeek();
+      renderDay();
+      setView(view);
+    }
+
+    document.querySelectorAll('[data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
+    document.getElementById('locale').onchange = (e) => { locale = e.target.value; applyLocale(); };
+    document.getElementById('viewport').onchange = (e) => {
+      document.getElementById('frame').classList.toggle('mobile', e.target.value === 'mobile');
+    };
+
+    const PREVIEW_DATA = {"contract": "calendar_ux_wave1_populated_preview", "review_only": true, "not_deployed": true, "anchor_week_start": "2026-08-02", "timezone": "Asia/Kuwait", "events": [{"event_id": "syn-interview-1", "title": "Interview · Sara · Product Designer", "category": "interview", "status": "confirmed", "source": "live", "module_owner": "interviews", "start_at": "2026-08-03T10:00:00+03:00", "end_at": "2026-08-03T11:00:00+03:00", "preview_only": false}, {"event_id": "syn-interview-2", "title": "Interview · Omar · Ops Lead", "category": "interview", "status": "tentative", "source": "live", "module_owner": "interviews", "start_at": "2026-08-04T14:00:00+03:00", "end_at": "2026-08-04T15:00:00+03:00", "preview_only": false}, {"event_id": "syn-video-1", "title": "Video interview (async) · Lina", "category": "video_interview", "status": "confirmed", "source": "preview", "module_owner": "interviews", "start_at": "2026-08-05T09:00:00+03:00", "end_at": "2026-08-05T09:45:00+03:00", "preview_only": true, "note": "Live product skips async_video; shown only for Wave 1 review."}, {"event_id": "syn-followup-1", "title": "Candidate follow-up · Sara", "category": "candidate_followup", "status": "confirmed", "source": "preview", "module_owner": "candidates", "start_at": "2026-08-06T11:30:00+03:00", "end_at": "2026-08-06T12:00:00+03:00", "preview_only": true}, {"event_id": "syn-start-1", "title": "Employee start · Khaled", "category": "employee_start", "status": "confirmed", "source": "preview", "module_owner": "employees360", "start_at": "2026-08-03T00:00:00+03:00", "end_at": "2026-08-03T23:59:00+03:00", "all_day": true, "preview_only": true}, {"event_id": "syn-onboard-1", "title": "Onboarding deadline · docs due", "category": "onboarding_deadline", "status": "confirmed", "source": "preview", "module_owner": "onboarding", "start_at": "2026-08-07T17:00:00+03:00", "end_at": "2026-08-07T17:30:00+03:00", "preview_only": true}, {"event_id": "syn-leave-1", "title": "Approved leave · Nour", "category": "approved_leave", "status": "confirmed", "source": "preview", "module_owner": "leave", "start_at": "2026-08-05T00:00:00+03:00", "end_at": "2026-08-06T23:59:00+03:00", "all_day": true, "preview_only": true}, {"event_id": "syn-compliance-1", "title": "Compliance expiry · Civil ID", "category": "compliance_expiry", "status": "confirmed", "source": "preview", "module_owner": "compliance", "start_at": "2026-08-08T09:00:00+03:00", "end_at": "2026-08-08T09:30:00+03:00", "preview_only": true}, {"event_id": "syn-payroll-1", "title": "Payroll cutoff", "category": "payroll_cutoff", "status": "confirmed", "source": "preview", "module_owner": "payroll", "start_at": "2026-08-04T16:00:00+03:00", "end_at": "2026-08-04T16:30:00+03:00", "preview_only": true}, {"event_id": "syn-training-1", "title": "Company training · Safety", "category": "training_company", "status": "confirmed", "source": "preview", "module_owner": "calendar_manual", "start_at": "2026-08-06T13:00:00+03:00", "end_at": "2026-08-06T15:00:00+03:00", "preview_only": true}, {"event_id": "syn-meeting-1", "title": "Hiring sync", "category": "meeting", "status": "confirmed", "source": "live", "module_owner": "calendar", "start_at": "2026-08-03T10:30:00+03:00", "end_at": "2026-08-03T11:30:00+03:00", "preview_only": false, "note": "Overlaps interview to exercise lane layout."}, {"event_id": "syn-cancelled-1", "title": "Interview · cancelled slot", "category": "interview", "status": "cancelled", "source": "live", "module_owner": "interviews", "start_at": "2026-08-07T11:00:00+03:00", "end_at": "2026-08-07T12:00:00+03:00", "preview_only": false}], "proposed_category_colors": {"interview": {"token": "wf-accent-follow", "hex_today": "#b9cde8", "note": "Live CalendarShell interview blue"}, "video_interview": {"token": "wf-accent-follow-soft", "hex_proposed": "#c9d8ec", "preview_only": true}, "candidate_followup": {"token": "wf-accent-review", "hex_proposed": "#f3d85f"}, "meeting": {"token": "wf-frame", "hex_today": "#e9e4d9"}, "employee_start": {"token": "wf-accent-priority", "hex_proposed": "#d4c4a8", "preview_only": true}, "onboarding_deadline": {"token": "wf-accent-assess", "hex_proposed": "#e8d4a8", "preview_only": true}, "approved_leave": {"token": "stone", "hex_today_ooo": "#e4ded2", "preview_only": true}, "compliance_expiry": {"token": "wf-accent-review", "hex_proposed": "#f3d85f", "preview_only": true}, "payroll_cutoff": {"token": "ink-soft", "hex_proposed": "#d9d2c6", "preview_only": true}, "training_company": {"token": "wf-frame", "hex_proposed": "#e9e4d9", "preview_only": true}}, "status_overlays_separate": {"cancelled": "#ddd7cc", "tentative": "#efbdd7", "confirmed": "none — category fill wins", "completed": "none — category fill wins"}};
+    events = PREVIEW_DATA.events;
+    applyLocale();
+    if (location.hash === '#drawer') {
+      openDrawer(events.find((e) => e.event_id === 'syn-interview-1'));
+    }
+  </script>
+</body>
+</html>

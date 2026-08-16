@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BACKUP_DIR="${1:-$(cd "$(dirname "$0")" && pwd)}"
+ORCH=/opt/wathefni/orchestrator
+test -d "$BACKUP_DIR/modules"
+/opt/wathefni/backups/production-pre-migration-wave1br-20260804T023703Z

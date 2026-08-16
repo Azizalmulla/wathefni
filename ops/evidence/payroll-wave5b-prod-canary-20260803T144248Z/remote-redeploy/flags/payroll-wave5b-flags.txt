@@ -1,0 +1,9 @@
+PAYROLL_WAVE5 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW5', 'PYW5-SYNTH|', 'PYW4', 'PYW4-SYNTH|', 'PYW3', 'PYW3-SYNTH|', 'PYW2B', 'PYW2B-SYNTH|', 'PYW2A', 'PYW2ACB', 'PYW1', 'PYW1-SYNTH|', 'W2BB', 'W3B', 'W4B', 'W4', 'W5B', 'W5')
+prefixes ('965541', '965540', '965539')
+honesty {'payment_processing': 'disabled', 'posts_payment': False, 'remittance': False, 'statutory_filing': False, 'pifss_worksheets': True, 'pifss_remittance': False, 'eos_worksheets': True, 'eos_auto_payable': False, 'automatic_legal_compliance_claim': False, 'bank_files': False, 'wps': False, 'ashal': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'ai_calculations': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK

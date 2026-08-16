@@ -1,0 +1,7 @@
+env staging
+wave2a_version 1.0.0
+expected_db wathefni_staging
+honesty {'payment_processing': 'disabled', 'money_authority': 'external', 'adapter_kind': 'synthetic_csv_sftp', 'vendor_claimed': False}
+connected_db wathefni_staging
+adapter_tables ['payroll_adapter_events', 'payroll_adapter_export_runs', 'payroll_adapter_import_lines', 'payroll_adapter_import_runs', 'payroll_adapter_quarantine', 'payroll_adapter_reconciliations']
+MIGRATE_OK payroll_external_adapter_wave2a

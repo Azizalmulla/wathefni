@@ -1,0 +1,82 @@
+=== SHAs ===
+17c8927dc3449b305a74c7eb8abaa05bd0461c14d498459b97ba02e8d71f6e25  /opt/wathefni/orchestrator/employee_lifecycle_wave3.py
+bc95081cf016bb68acf4e7afc7d43cafd07c1e8cd621968be708e48e3ee6151e  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+b3548984055180b12f1197234708c22c0a545a58b3b1e87cc624f841ea92b6f7  /opt/wathefni/orchestrator/lifecycle-effective-worker.py
+c3f9f1483ff916eabc7392f48e58f62debf27527851b9a1efa5152f13c66dc31  /opt/wathefni/orchestrator/app.py
+ls: cannot access '/opt/wathefni/orchestrator/employee_policy_packs_wave3h.py': No such file or directory
+packs_absent
+=== SCHEMA_VERSION ===
+45:SCHEMA_VERSION = "employees360-wave3d-public-law-policy-v1"
+293:        (SCHEMA_VERSION,),
+=== FLAGS ===
+WATHEFNI_EMPLOYEE_AUTHORITY_V2=on
+WATHEFNI_EMPLOYEE_AUTHORITY_V2_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_ENV=production
+WATHEFNI_LIFECYCLE_COUNSEL_GATE=on
+=== TIMER ===
+enabled
+active
+Sat 2026-08-01 22:08:01 UTC      35s Sat 2026-08-01 22:03:01 UTC       4min 24s ago wathefni-offer-lifecycle.timer                       wathefni-offer-lifecycle.service
+Sat 2026-08-01 22:08:27 UTC  1min 1s Sat 2026-08-01 22:03:27 UTC       3min 58s ago wathefni-offer-lifecycle-staging.timer               wathefni-offer-lifecycle-staging.service
+Sat 2026-08-01 23:00:05 UTC    52min Sat 2026-08-01 22:00:26 UTC           6min ago wathefni-lifecycle-effective.timer                   wathefni-lifecycle-effective.service
+Sat 2026-08-01 23:01:21 UTC    53min Sat 2026-08-01 22:00:09 UTC           7min ago wathefni-lifecycle-effective-staging.timer           wathefni-lifecycle-effective-staging.service
+=== DROPINS ===
+20-assessment-authoring-off.conf
+assistant-hr-reads.conf
+assistant-remediation.conf
+candidate-knowledge.conf
+canonical-lifecycle.conf
+channel-presets.conf
+civil-id.conf
+cv-extraction-v2.conf
+cv-mistral-ocr.conf
+dashboard-auth.conf
+doc-upload.conf
+durable-email-ingress.conf
+employee-authority-v2.conf
+employee-lifecycle-v3-synthetic.conf
+employee-next-actions.conf
+environment.conf
+feature-flags.conf
+google-oauth.conf
+jobs-apply-whatsapp.conf
+leave-balances.conf
+m365-mail.conf
+m365-oauth.conf
+mailbox-secret.conf
+offer-token.conf
+outbound-layer.conf
+outbound-layer.conf.bak.20260609T175724Z
+public-links.conf
+ranking-retrieval.conf
+retrieval-models.conf
+runtime-env.conf
+runtime-environment-identity.conf
+sender-acknowledgment-off.conf
+setup-console-v2.conf
+setup-operator-credentials.conf
+strict-whatsapp-perms.conf
+talent-pool-auto-email-classification.conf
+talent-pool-classification.conf
+tool-agent-terra.conf
+toolcall-responses.conf
+toolcall.conf
+unified-candidates.conf
+unified-inbound-cv.conf
+waveD-phase2-inbound-allowlist.conf
+waveD-phase3-enterprise.conf
+waveD-phase5-mailbox-connectors.conf
+[Service]
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+Environment=WATHEFNI_LIFECYCLE_COUNSEL_GATE=on
+=== HEALTH ===
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}

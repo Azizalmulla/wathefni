@@ -1,0 +1,80 @@
+{
+  "verdict": "PASS_WITH_PENDING_PHYSICAL",
+  "sdk_before": {
+    "expo": "~51.0.0",
+    "rn": "0.74.5",
+    "react": "18.2.0",
+    "router": "~3.5.18"
+  },
+  "sdk_after": {
+    "expo": "~54.0.0",
+    "rn": "0.81.5",
+    "react": "19.1.0",
+    "router": "~6.0.24",
+    "updates": "~29.0.19",
+    "notifications": "~0.32.17",
+    "reanimated": "~3.19.0",
+    "haptics": "~15.0.8",
+    "appVersion": "0.2.0"
+  },
+  "app_version": {
+    "before": "0.1.0",
+    "after": "0.2.0",
+    "runtimeVersion_policy": "appVersion"
+  },
+  "newArchEnabled": false,
+  "reanimated": "~3.19.0 (pinned for legacy arch)",
+  "ios_build": {
+    "id": "83f5955b-f9c7-45a7-a4c9-d09f696a2dcf",
+    "link": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/83f5955b-f9c7-45a7-a4c9-d09f696a2dcf",
+    "ipa": "https://expo.dev/artifacts/eas/n32aCuim_3lCkkA9mWT4omjJUqOH2IwhvVt02lOj2Nw.ipa",
+    "sdkVersion": "54.0.0",
+    "runtimeVersion": "0.2.0",
+    "buildNumber": "22",
+    "resolvedImage": "macos-sequoia-15.6-xcode-26.2"
+  },
+  "icon_composer_bundled": true,
+  "icon_evidence": [
+    "WathefniAppIcon60x60@2x.png",
+    "WathefniAppIcon76x76@2x~ipad.png",
+    "Assets.car"
+  ],
+  "push_sound_bundled": true,
+  "push_sound_sha256_match": true,
+  "regression": {
+    "tsc": "PASS",
+    "expo_export": "PASS",
+    "gates_pass": [
+      "semantic-feedback",
+      "push-sound",
+      "capability",
+      "color",
+      "auth-wave2",
+      "density",
+      "session-refresh",
+      "a11y-i18n",
+      "composition",
+      "documents",
+      "push-followthrough",
+      "feature-unavailable",
+      "leave-history",
+      "attendance-history",
+      "pin-crypto"
+    ],
+    "gates_fail_preexisting_dirty_tree": [
+      "rtl (ScheduleView/ScheduleWeekStrip row-reverse \u2014 not introduced by SDK upgrade)"
+    ],
+    "expo_doctor": "1 advisory (app.config.js dynamic \u2014 pre-existing pattern)"
+  },
+  "physical_icon": {
+    "status": "PENDING",
+    "reason": "No iPhone connected to this machine (devicectl: No devices found)"
+  },
+  "rollback": {
+    "restore_package_json_lock": "ops/evidence/.../before/",
+    "app_version": "0.1.0",
+    "runtime": "0.1.0 binaries still on canary channel for old installs",
+    "eas_image": "remove ios.image pin / use prior Xcode 15.4 default",
+    "note": "Do not OTA 0.2.0 JS to 0.1.0 native; runtimeVersion isolates"
+  }
+}

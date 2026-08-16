@@ -1,0 +1,410 @@
+{
+  "ok": true,
+  "items": [
+    {
+      "task_id": "3e293340-5735-4fd9-a695-8bdeab93eacf",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96550010002",
+        "name": "Fahad Alenezi"
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-08T02:24:07.873791+00:00",
+      "updated_at": "2026-08-08T02:24:07.873791+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/3e293340-5735-4fd9-a695-8bdeab93eacf"
+    },
+    {
+      "task_id": "38682e0e-8d02-47ae-b96e-72171276773b",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554281535",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:30:30.033827+00:00",
+      "updated_at": "2026-08-07T10:30:30.033827+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/38682e0e-8d02-47ae-b96e-72171276773b"
+    },
+    {
+      "task_id": "7525ade3-7f7a-4475-a86a-d2a91b5d514c",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554682194",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:30:26.581737+00:00",
+      "updated_at": "2026-08-07T10:30:26.581737+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/7525ade3-7f7a-4475-a86a-d2a91b5d514c"
+    },
+    {
+      "task_id": "846343a5-24f1-4ed9-b1c0-ccef61db0009",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554682193",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:30:26.147414+00:00",
+      "updated_at": "2026-08-07T10:30:26.147414+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/846343a5-24f1-4ed9-b1c0-ccef61db0009"
+    },
+    {
+      "task_id": "1f2263f2-7f9c-4be1-9b16-3be9533b6fc0",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554682192",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:30:25.983912+00:00",
+      "updated_at": "2026-08-07T10:30:25.983912+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/1f2263f2-7f9c-4be1-9b16-3be9533b6fc0"
+    },
+    {
+      "task_id": "5746fa2c-fa3d-4120-9608-ca9481989e05",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554682191",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:30:25.735393+00:00",
+      "updated_at": "2026-08-07T10:30:25.735393+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/5746fa2c-fa3d-4120-9608-ca9481989e05"
+    },
+    {
+      "task_id": "482b3cbc-8ad0-4486-bcc2-3b97737e8e2c",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96556036171",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:30:22.983751+00:00",
+      "updated_at": "2026-08-07T10:30:22.983751+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/482b3cbc-8ad0-4486-bcc2-3b97737e8e2c"
+    },
+    {
+      "task_id": "d64ce4a8-58fb-48f4-bd60-19413a027e2c",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554496527",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:17:32.312255+00:00",
+      "updated_at": "2026-08-07T10:17:32.312255+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/d64ce4a8-58fb-48f4-bd60-19413a027e2c"
+    },
+    {
+      "task_id": "44653f59-e476-49b4-b7dc-30195f5c8b67",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554435004",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:17:29.382280+00:00",
+      "updated_at": "2026-08-07T10:17:29.382280+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/44653f59-e476-49b4-b7dc-30195f5c8b67"
+    },
+    {
+      "task_id": "b40ca01c-7dea-403b-abde-7eabd2663aa0",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554435003",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:17:29.242456+00:00",
+      "updated_at": "2026-08-07T10:17:29.242456+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/b40ca01c-7dea-403b-abde-7eabd2663aa0"
+    },
+    {
+      "task_id": "62bd13d1-d987-40ba-a681-ebfcd298b892",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554435002",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:17:29.151965+00:00",
+      "updated_at": "2026-08-07T10:17:29.151965+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/62bd13d1-d987-40ba-a681-ebfcd298b892"
+    },
+    {
+      "task_id": "28587f7b-f609-4d5e-80b6-0ea7812f241d",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554435001",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:17:29.045474+00:00",
+      "updated_at": "2026-08-07T10:17:29.045474+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/28587f7b-f609-4d5e-80b6-0ea7812f241d"
+    },
+    {
+      "task_id": "76e4e9af-dc36-4561-955c-bb78c9d8e4fc",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96556474981",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:17:16.282893+00:00",
+      "updated_at": "2026-08-07T10:17:16.282893+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/76e4e9af-dc36-4561-955c-bb78c9d8e4fc"
+    },
+    {
+      "task_id": "fbfd3e2c-6af0-46fb-94e2-c4cf11fe1d1d",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96556791051",
+        "name": "P4 Cutover d6a01400"
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T10:16:14.902526+00:00",
+      "updated_at": "2026-08-07T10:16:14.902526+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/fbfd3e2c-6af0-46fb-94e2-c4cf11fe1d1d"
+    },
+    {
+      "task_id": "e0bde8af-3eef-4d0b-9b62-e7c27788ff1e",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554790019",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T09:58:37.506751+00:00",
+      "updated_at": "2026-08-07T09:58:37.506751+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/e0bde8af-3eef-4d0b-9b62-e7c27788ff1e"
+    },
+    {
+      "task_id": "58c2d8f5-7112-459f-a421-55da06aaf5fa",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554466724",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T09:58:34.565576+00:00",
+      "updated_at": "2026-08-07T09:58:34.565576+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/58c2d8f5-7112-459f-a421-55da06aaf5fa"
+    },
+    {
+      "task_id": "1729e1ae-27ec-4f19-a961-3fee7944190d",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554466723",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T09:58:34.424143+00:00",
+      "updated_at": "2026-08-07T09:58:34.424143+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/1729e1ae-27ec-4f19-a961-3fee7944190d"
+    },
+    {
+      "task_id": "599155d4-d67f-48e0-8deb-1109f43cee64",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554466722",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T09:58:34.328392+00:00",
+      "updated_at": "2026-08-07T09:58:34.328392+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/599155d4-d67f-48e0-8deb-1109f43cee64"
+    },
+    {
+      "task_id": "50d97ca5-eb3c-45a8-afe3-738cc09cdce7",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554466721",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T09:58:34.236068+00:00",
+      "updated_at": "2026-08-07T09:58:34.236068+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/50d97ca5-eb3c-45a8-afe3-738cc09cdce7"
+    },
+    {
+      "task_id": "7245ba9d-a573-44f6-8801-6d27823aa0d7",
+      "task_type": "delivery_failed",
+      "source": "app_activation",
+      "title": "Couldn't reach employee: App activation code",
+      "detail": "Wathefni could not reach this employee through the currently enabled channels. Follow up directly, then mark this done.",
+      "employee": {
+        "employee_key": "WATHEFNI-96554903584",
+        "name": null
+      },
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-08-07T09:57:25.677148+00:00",
+      "updated_at": "2026-08-07T09:57:25.677148+00:00",
+      "allowed_actions": [
+        "read",
+        "resolve"
+      ],
+      "destination": "/tasks/7245ba9d-a573-44f6-8801-6d27823aa0d7"
+    }
+  ],
+  "open_count": 46,
+  "total": 46,
+  "offset": 0,
+  "limit": 20,
+  "status": "open"
+}

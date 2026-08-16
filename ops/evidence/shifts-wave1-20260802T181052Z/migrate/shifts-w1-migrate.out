@@ -1,0 +1,7 @@
+env staging
+schema_version 1.0.0
+expected_db wathefni_staging
+connected_db wathefni_staging
+shift_assignment_wave1_cols ['break_minutes', 'ends_next_day', 'idempotency_key', 'row_version', 'site_key']
+orphan_table shift_orphan_quarantine
+SHIFTS_W1_MIGRATE_OK

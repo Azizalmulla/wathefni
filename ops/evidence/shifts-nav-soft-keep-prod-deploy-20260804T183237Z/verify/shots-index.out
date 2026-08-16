@@ -1,0 +1,15 @@
+total 1264
+drwxr-xr-x 2 root root   4096 Aug  4 18:33 .
+drwxr-xr-x 4 root root   4096 Aug  4 18:32 ..
+-rw-r--r-- 1 root root 144716 Aug  4 18:33 01-start-populated.png
+-rw-r--r-- 1 root root 138169 Aug  4 18:33 02-refresh-soft-keep.png
+-rw-r--r-- 1 root root 137841 Aug  4 18:33 03-pending-after-burst.png
+-rw-r--r-- 1 root root  98977 Aug  4 18:33 04-settled.png
+-rw-r--r-- 1 root root 106530 Aug  4 18:33 05-pending-prev-burst.png
+-rw-r--r-- 1 root root 105350 Aug  4 18:33 05b-pending-prev-single.png
+-rw-r--r-- 1 root root 116044 Aug  4 18:33 06-end.png
+-rw-r--r-- 1 root root 106524 Aug  4 18:33 07-seq-1.png
+-rw-r--r-- 1 root root  99925 Aug  4 18:33 08-seq-2.png
+-rw-r--r-- 1 root root  99608 Aug  4 18:33 09-seq-3.png
+-rw-r--r-- 1 root root 100353 Aug  4 18:33 10-seq-settled.png
+-rw-r--r-- 1 root root   3076 Aug  4 18:33 nav-race-report.json

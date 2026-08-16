@@ -53,4 +53,14 @@ describe('capability-driven navigation', () => {
     expect(destinationAvailable(meFixture('multi-workspace'), '/candidates/c-1')).toBe(true)
     expect(destinationAvailable(meFixture('multi-workspace'), '/unknown-admin')).toBe(false)
   })
+
+  it('admits leave queue and nested operational destinations', () => {
+    const hr = meFixture('hr-only')
+    expect(routeAvailable(hr, 'leave')).toBe(true)
+    expect(destinationAvailable(hr, '/leave')).toBe(true)
+    expect(destinationAvailable(hr, '/leave/lv-1')).toBe(true)
+    expect(destinationAvailable(hr, '/attendance/att-1')).toBe(true)
+    expect(destinationAvailable(hr, '/documents/emp-1/passport')).toBe(true)
+    expect(destinationAvailable(meFixture('recruiter-only'), '/leave')).toBe(false)
+  })
 })

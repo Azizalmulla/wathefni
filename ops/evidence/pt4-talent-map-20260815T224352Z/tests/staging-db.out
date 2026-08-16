@@ -1,0 +1,14 @@
+    pt4 talent map — db journeys
+      PASS  enable
+      PASS  map ok
+      PASS  second lens ok
+      PASS  placement exists
+      PASS  missing perf is unknown
+      PASS  not stuffed in middle
+      PASS  same canonical potential
+      PASS  same designated hipo
+      PASS  why present
+
+    9 passed, 0 failed
+PT4_DYNAMIC_TALENT_MAP_DB_PASS
+STAGING_RC=0

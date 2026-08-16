@@ -1,0 +1,31 @@
+    talent succession c6 — prove
+      PASS  c6 module
+      PASS  charter stamp
+      PASS  c5 authoritative
+      PASS  not perf cal
+      PASS  hipo explicit
+      PASS  no auto hipo
+      PASS  9box projection
+      PASS  9box optional
+      PASS  succ w/o 9box
+      PASS  hipo w/o 9box
+      PASS  succ w/o hipo
+      PASS  target readiness
+      PASS  no master score
+      PASS  assistant out
+      PASS  EN designated
+      PASS  AR ready_now
+      PASS  rollback
+      PASS  no ai hipo
+      PASS  no employee.box
+      PASS  9box projects
+      PASS  9box not SoT
+      PASS  top-right ≠ hipo
+      PASS  9box unavailable if axis missing
+      PASS  global off
+      PASS  empty allowlist admits after R5C
+      PASS  canary ok
+      PASS  tenant iso
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    27 passed, 0 failed (unit-only)

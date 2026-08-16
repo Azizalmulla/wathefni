@@ -1,0 +1,46 @@
+{
+  "wave": "local_hybrid_pdf_engine_wave0",
+  "decision": "pin_current_python_binding_no_silent_upgrade",
+  "inspected_at": "2026-08-04T01:50:00+00:00",
+  "pinned": {
+    "integration": "Python PyO3 binding (pdf_inspector.process_pdf / extract_pages_markdown)",
+    "package": "pdf-inspector",
+    "version": "0.2.6",
+    "requirement": "pdf-inspector==0.2.6",
+    "pypi_wheel_macos_arm64_sha256": "d2b2aaa95b242da38630bbd0644ffe9a929466f9c4e6406d6f1957b59b413d08",
+    "pypi_sdist_sha256": "5bb387f39bf7a93b02b49188b670b9798f8ccc7e58f68eee5883a512aa05ceb2",
+    "local_extension_sha256": "696e3bde5c1114fea03f9edd4c4276b27df4104eebdc7f034761b457ab27f53e",
+    "ocr_model": "mistral-ocr-4-0",
+    "mistral_sdk": "mistralai==2.6.0"
+  },
+  "upstream_observed": {
+    "pypi_latest": "0.2.6",
+    "github_tags_latest": "v0.7.0 (20f24d1f8d4a) — version numbering diverges from PyPI",
+    "crates_io_search": "pdf-inspector 0.1.7 on main Cargo.toml / crates search",
+    "npm_latest": "@firecrawl/pdf-inspector 1.12.0 (separate semver line)",
+    "firecrawl_hosted_api": "NOT USED"
+  },
+  "integration_options_ranked": [
+    {
+      "option": "current_python_binding_0.2.6",
+      "rank": 1,
+      "rationale": "Already qualified in Waves 0–2, present on production venv for shadow, matches Wathefni Python orchestrator, page Markdown API available, no Node/Rust service ops."
+    },
+    {
+      "option": "node_binding_npm",
+      "rank": 2,
+      "rationale": "Would require Node sidecar; npm 1.12.0 semver does not map cleanly to PyPI 0.2.6; higher integration risk."
+    },
+    {
+      "option": "rust_cli_or_service",
+      "rank": 3,
+      "rationale": "Extra process boundary; GitHub tags ahead of PyPI without clear commit↔wheel pin for 0.2.6."
+    },
+    {
+      "option": "direct_rust_library",
+      "rank": 4,
+      "rationale": "Forces Rust toolchain into Wathefni runtime; not needed for Wave 0."
+    }
+  ],
+  "production_upgrade": "FORBIDDEN in this wave — do not silently upgrade beyond pinned 0.2.6"
+}

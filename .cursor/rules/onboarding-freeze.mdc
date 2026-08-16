@@ -1,0 +1,44 @@
+---
+description: Freeze Onboarding controlled WATHEFNI rollout; block unsafe post-hire onboarding changes
+globs: wathefni-orchestrator/onboarding*.py,wathefni-orchestrator/app.py,wathefni-orchestrator/action_registry.py,wathefni-orchestrator/canary-prod-onboarding*.py,wathefni-orchestrator/migrate-prod-onboarding*.py,apps/wathefni-dashboard/src/posthire/**,ops/ONBOARDING*.md,ops/evidence/onboarding-*/**
+alwaysApply: false
+---
+
+# Onboarding freeze
+
+Onboarding is **production-qualified for controlled WATHEFNI operation** and **frozen** for feature/redesign work. See `ops/ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- HR production use: **GO**
+- Manager production use: **scoped GO**
+- Talal employee-app onboarding: **GO** (`WATHEFNI-96550252254` only)
+- Broad employee-app rollout: **disabled**
+- General automatic SEED: **disabled** (`WATHEFNI_ONBOARDING_SEED=off`)
+- Template authority: **`default_kuwait@2.0.0`**
+- Bank collection: **ESS-owned** (no plaintext)
+- Historical checklist / migrations: **auditable** (`retired_legacy` retained)
+
+## Hard bans for future post-hiring PRs
+
+1. **Do not reintroduce recruiter logic into onboarding loaders** — `load_onboarding_items` must keep joining `employees` and must not use `candidates.read`.
+2. **Do not bypass tenant or manager scope** — keep company filters, `_employee_scope_where`, and `context_manager_allows_employee` / `manager_scope_allows_employee`.
+3. **Do not collect plaintext bank details** — keep `onboarding_plaintext_bank_forbidden`, ESS authority on `bank_details`, and masked reads.
+4. **Do not change pinned template history silently** — no rewrite of pinned `2.0.0` rows; obsolete items stay `retired_legacy` unless an audited migration wave says otherwise.
+5. **Do not weaken optimistic concurrency or audit** — keep `expected_row_version` / `stale_item_version` and `onboarding_audit_events` on mutations.
+6. **Do not enable broad SEED or employee-app access** without an explicit owner-approved rollout wave.
+7. **Do not change frozen Employees 360 or pre-hiring / Wave D** to unblock Onboarding work.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- Running `smoke-test-onboarding-freeze-regression.py`
+- Soft-kill / restore of `zz-onboarding-wave4-hr-mutate.conf` under the runbook
+
+## Not allowed without owner change-control
+
+- Turning `WATHEFNI_ONBOARDING_SEED=on` globally
+- Emptying `WATHEFNI_ONBOARDING_HR_MUTATE_COMPANIES` while HR_MUTATE is on (opens all tenants)
+- Broadening `WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST`
+- Onboarding UX redesign or new onboarding product features

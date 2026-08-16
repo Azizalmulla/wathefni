@@ -1,0 +1,17 @@
+{
+  "iso_apps": [],
+  "iso_companies": [
+    {
+      "company_code": "MIGW1BRAVO",
+      "c": 1
+    }
+  ],
+  "migration_batches": [
+    {
+      "company_code": "MIGW1BRAVO",
+      "status": "rolled_back",
+      "c": 1
+    }
+  ],
+  "tagged_migration_jobs": []
+}

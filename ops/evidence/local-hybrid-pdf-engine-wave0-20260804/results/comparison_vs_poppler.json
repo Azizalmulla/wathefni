@@ -1,0 +1,38 @@
+{
+  "corpus": {
+    "n": 560,
+    "gates": {
+      "zero_false_ocr_skips": true,
+      "broken_encoding_all_ocr": true,
+      "arabic_wave0_preserved_local": true,
+      "scanned_mixed_routing": true,
+      "envelope_contract_document_envelope_at_1": true
+    },
+    "false_skip_docs": 0,
+    "hybrid_ocr_pages": 147,
+    "poppler_ocr_pages": 149,
+    "ocr_set_agreement_pct": 99.29,
+    "quality_forced_ocr_pages": 21,
+    "projected_cost_usd_if_all_ocr_executed": 0.588,
+    "overhead_p95_ms": 2.0
+  },
+  "real_ocr_proof": {
+    "docs": 12,
+    "model": "mistral-ocr-4-0",
+    "hybrid_billable_pages": 12,
+    "hybrid_cost_usd": 0.048,
+    "poppler_compare_billable_pages": 11,
+    "poppler_compare_cost_usd": 0.044,
+    "field_marker_parity_docs": 12,
+    "field_marker_parity_pct": 100.0,
+    "within_cap": true
+  },
+  "vs_poppler_summary": {
+    "false_skips_hybrid": 0,
+    "unnecessary_ocr_vs_poppler_docs": "broken_encoding forces OCR even when Poppler accepts (wave0 fixture) \u2014 intentional",
+    "arabic_wave0": "hybrid preserves native; Poppler over-OCR via too_few_words",
+    "layout": "native Markdown retains tables/columns metadata from inspector; scanned pages OCR markdown",
+    "latency": "inspector path p95~2ms offline; real OCR dominated by Mistral (~seconds/doc batch)",
+    "cost": "corpus projected hybrid 147 pages ($0.588) vs poppler 149 ($0.596); real proof hybrid $0.048 / 12 pages"
+  }
+}

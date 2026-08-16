@@ -1,0 +1,138 @@
+{
+  "helpers": [
+    "DashboardChatNewSessionRequest",
+    "DashboardLoginRequest",
+    "assert_legacy_dashboard_auth_safe_at_startup",
+    "create_dashboard_session",
+    "dashboard_access_payload",
+    "dashboard_access_payload_for_user",
+    "dashboard_auth_login",
+    "dashboard_auth_logout",
+    "dashboard_auth_me",
+    "dashboard_auth_response",
+    "dashboard_chat_session_allowed",
+    "dashboard_chat_session_scope",
+    "dashboard_chat_session_title",
+    "dashboard_configured_token",
+    "dashboard_prehire_chat_new_session",
+    "dashboard_prehire_chat_session_detail",
+    "dashboard_prehire_chat_sessions",
+    "dashboard_token_hash",
+    "dashboard_user_by_session",
+    "legacy_dashboard_token_auth_enabled",
+    "revoke_dashboard_recovery_sessions",
+    "upsert_dashboard_chat_session"
+  ],
+  "users": [
+    {
+      "user_id": "201d0b3b-6a6f-483f-914a-7a2356fd0a2e",
+      "email": "fslalmulla@gmail.com",
+      "role": "viewer",
+      "status": "active"
+    },
+    {
+      "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+      "email": "azizalmulla16@gmail.com",
+      "role": "owner",
+      "status": "active"
+    },
+    {
+      "user_id": "90b78a42-9eb2-43b6-9eeb-c9c134a964b6",
+      "email": "h.almulla@almulla-media.com",
+      "role": "viewer",
+      "status": "active"
+    },
+    {
+      "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+      "email": "f.burhama@disruptv.tech",
+      "role": "owner",
+      "status": "active"
+    }
+  ],
+  "multi": [
+    {
+      "phone": "96598900677",
+      "n": 3,
+      "keys": [
+        "96598900677-WATHEFNI-FINANCE",
+        "96598900677-WATHEFNI-HR",
+        "96598900677-WATHEFNI-ACCOUNTING"
+      ],
+      "statuses": [
+        "screening",
+        "shortlisted",
+        "review_pending"
+      ]
+    },
+    {
+      "phone": "96597485758",
+      "n": 2,
+      "keys": [
+        "96597485758-WATHEFNI-HR",
+        "96597485758-WATHEFNI-ACCOUNTING_EXCEL"
+      ],
+      "statuses": [
+        "shortlisted",
+        "screening_complete"
+      ]
+    },
+    {
+      "phone": "96597727743",
+      "n": 2,
+      "keys": [
+        "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+        "96597727743-WATHEFNI-MARKETING_SPECIALIST"
+      ],
+      "statuses": [
+        "awaiting_cv",
+        "hired"
+      ]
+    }
+  ],
+  "general": [
+    {
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "position_code": "",
+      "name": "Noor Tahat"
+    },
+    {
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "position_code": "",
+      "name": "yasser al dossary"
+    }
+  ],
+  "live": [
+    {
+      "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "screening_complete",
+      "position_code": "ACCOUNTING_EXCEL",
+      "name": ""
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-HR",
+      "status": "shortlisted",
+      "position_code": "HR",
+      "name": ""
+    },
+    {
+      "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+      "status": "screening",
+      "position_code": "ACCOUNTING",
+      "name": ""
+    },
+    {
+      "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+      "status": "awaiting_cv",
+      "position_code": "ACCOUNTING",
+      "name": ""
+    },
+    {
+      "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "position_code": "ACCOUNTING_EXCEL",
+      "name": ""
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+[08:37:45] Bank ESS P2 production workflow qualification
+[08:37:45]   [PASS] contract_version_p2 :: "bank_ess_v1_p2_production_workflow"
+[08:37:45]   [PASS] p1_mime_sniff_frozen
+[08:37:45]   [PASS] wrong_document_type_flag :: {"status": "extracted", "confidence": 0.7, "field_confidence": {}, "proposed": {"bank_name": "X"}, "warnings": ["wrong_document_type"], "unreadable_reason": null, "needs_manual_fallback": false, "uncertain": false, "missing_iban": true, "wrong_document_type": true, "authoritative
+[08:37:45]   [PASS] p1_hr_masking_frozen :: {"iban": "**************************9548", "bank_name": "Gulf Bank"}
+[08:37:48]   [PASS] seed_request :: {"code": 200}
+[08:37:48]   [PASS] seed_effective :: {"fp": "5425959aa0fc0391"}
+[08:37:53]   [PASS] upload_extract_rich :: {"bank": "Gulf Bank", "iban": "KW35\u20269548", "status": "extracted", "confidence": 0.98, "authoritative": false}
+[08:37:53]   [PASS] extract_non_authoritative
+[08:37:53]   [PASS] kw_iban_valid :: {"iban": "KW35\u20269548"}
+[08:37:53]   [PASS] confirm_correct_submit :: {"code": 200, "state": "pending_hr", "request_id": "0d7f4d70-998c-4b33-b8d5-e83344389e1b"}
+[08:37:53]   [PASS] duplicate_submit_blocked :: {"code": 409, "error": "bank_request_already_active"}
+[08:37:54]   [PASS] idempotent_resubmit :: {"code": 200, "idempotent": true}
+[08:37:54]   [PASS] invalid_kw_iban_rejected :: {"code": 422, "error": "bank_account_invalid"}
+[08:37:54]   [PASS] resubmit_with_evidence :: {"code": 200, "request_id": "f2394225-db72-428d-b3a7-69dbc52c9d6f"}
+[08:37:54]   [PASS] effective_unchanged_until_apply :: {"seed": "5425959aa0fc0391", "mid": "5425959aa0fc0391"}
+[08:37:54]   [PASS] submit_did_not_write_verified :: {"count": 0}
+[08:37:54]   [PASS] evidence_private
+[08:37:54]   [FAIL] hr_current_vs_proposed_vs_extracted :: {"changed": ["account_holder", "account_number", "bank_name", "branch", "iban", "swift"], "extract_status": null, "extract_iban": null}
+[08:37:54]   [FAIL] hr_extraction_masked :: {"leaked": false, "extract_iban": null}
+[08:37:54]   [PASS] hr_verify_not_effective :: {"state": "pending_payroll", "fp": "5425959aa0fc0391"}
+[08:37:54]   [PASS] apply_writes_effective :: {"code": 200, "fp": "0f349ce848ab5e4b", "expected": "0f349ce848ab5e4b"}
+[08:37:54]   [PASS] aziz_effective_unchanged :: {"before": "0f349ce848ab5e4b", "after": "0f349ce848ab5e4b"}
+[08:37:54]   [PASS] ar_next_step :: {"msg": "\u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0627\u0644\u0628\u0646\u0643\u064a\u0629 \u0645\u0648\u062b\u0651\u0642\u0629. \u0623\u0631\u0633\u0644 \u062a\u063a\u064a\u064a\u0631\u064b\u0627 \u0625\u0630\u0627 \u0627\u062e\u062a\u0644\u0641 \u0634\u064a\u0621."}
+[08:37:54] summary {'unit': '4/4', 'live': '17/19', 'verdict': 'FAIL', 'errors': []} → /opt/wathefni/production-evidence/bank-ess-p2/20260807T083709Z/qual/p2-20260807T083745Z.json

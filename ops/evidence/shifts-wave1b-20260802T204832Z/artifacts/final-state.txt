@@ -1,0 +1,30 @@
+=== SHAs ===
+4b55894a7a9249bb5a86276095fd44f49d2c8c2a1ac15ff942a3202375702ee1  /opt/wathefni/orchestrator/app.py
+82262f2e0e7b6e9dc04c7a6e3305d50eef4816659a6b931bb40742d8160f0da7  /opt/wathefni/orchestrator/shifts_authority_wave1.py
+=== FLAGS ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SHIFTS_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_KEY_MARKERS=SHW1B,SHW1B-SYNTH|
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965529
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1
+=== residual synth ===
+{
+  "residual_assignments": 0,
+  "residual_employees": 0,
+  "orphans": [
+    {
+      "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+      "status": "cancelled"
+    },
+    {
+      "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+      "status": "cancelled"
+    },
+    {
+      "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+      "status": "cancelled"
+    }
+  ],
+  "quarantine_active": 3
+}

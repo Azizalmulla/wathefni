@@ -1,0 +1,17 @@
+OK contract 1.1.4 apply-once honesty
+OK preview: 1 safe update + 1 name conflict
+OK confirm safe rows; conflict person unchanged; batch partial
+OK approve keeps original batch; Approved card ready to apply
+OK re-upload does not inherit approval onto new batch
+OK apply updates once; audit stamps; queue clears for original batch
+OK history retains approval, application, actor/time, before/after
+OK employee migration foundation P3 apply-flow smoke
+OK preview retry 1: one active identity card
+OK preview retry 2: one active identity card
+OK preview retry 3: one active identity card
+OK history/ledger retains repeated conflict rows
+OK approve moves to Approved (still in queue until apply)
+OK approve preserves older ledger conflict rows
+OK apply clears active queue for that identity
+OK history/batch detail retains review rows
+OK employee migration foundation P3 review queue smoke

@@ -1,0 +1,18 @@
+ROW	PASS	Attendance correction prepare→confirm	att=bd743aa2-bc85-4d66-b21f-60a27e7ff0c6; in_exceptions=False; prepare=needs_confirmation; confirm=completed; refresh_ok=True
+ROW	FAIL	Shift swap approve/reject confirm	relation "shift_swaps" does not exist
+LINE 2:                 SELECT * FROM shift_swaps
+                                      ^
+
+ROW	BLOCKED	Onboarding Accept/Waive confirm	no being_reviewed/hr_actionable fixtures; list_total=0; hr_mutate=True
+ROW	BLOCKED	Onboarding file preview	no onboarding checklist fixture with preview_path
+ROW	BLOCKED	Document Mark reviewed confirm	no needs_review documents in live queue
+ROW	BLOCKED	Document file preview/download	no document fixture with preview/download path
+ROW	PASS	HR Task Mark done confirm	task=3e293340-5735-4fd9-a695-8bdeab93eacf; status=done
+ROW	PASS	Candidate CV open	path=/dashboard/mobile/candidates/96597485758-WATHEFNI-HR/cv/preview; available=True; size_bytes_meta=37143; fetched=0; http=401
+ROW	BLOCKED	Face ID enable/unlock + cancel→PIN fallback	no iOS simulator/USB device on build host; cannot exercise biometric UI
+ROW	BLOCKED	auto-lock/background lock	no device; static local-lock verify previously GREEN — physical pending owner device
+ROW	BLOCKED	Forgot PIN → operator email/password recovery	no device; recovery is operator email/password (not OTP) per freeze — UI not exercised
+ROW	BLOCKED	safe-back and state refresh after each flow	API refresh after attendance/swap/task exercised where fixtures existed; UI safe-back needs device
+ROW	BLOCKED	EN/AR on confirmation/auth/file states	static matrix GREEN; physical locale toggle needs device
+TAG hr-cfa-20260810T182638Z
+WROTE /tmp/hr-cfa-out

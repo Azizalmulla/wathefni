@@ -1,0 +1,16 @@
+PASS posthire_bundle_present — PostHire-C4LKK5jr.js
+PASS iq_wave2_marker
+PASS updating_overlay
+PASS updating_copy
+PASS surfaces_preserved
+PASS board_preserved
+PASS filters_preserved
+PASS mutation_concurrency
+PASS swap_actions
+PASS confirm_continue
+PASS wave1_primary
+PASS leave_still_present
+PASS iq_shell_still
+SHIFTS_WAVE2_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+SHIFTS_WAVE2_IQ_SMOKE_OK

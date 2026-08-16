@@ -1,0 +1,14 @@
+DIR_COUNT 112 sample 5
+DIR_ROW {"key": "WATHEFNI-96599411617", "name": "Brian Saleh", "destination": "/employees/WATHEFNI-96599411617", "keys": ["allowed_actions", "destination", "employee", "employee_key", "started_on"]}
+DIR_ROW {"key": "WATHEFNI-96550010005", "name": "Dana Alajmi", "destination": "/employees/WATHEFNI-96550010005", "keys": ["allowed_actions", "destination", "employee", "employee_key", "started_on"]}
+DIR_ROW {"key": "WATHEFNI-96550010002", "name": "Fahad Alenezi", "destination": "/employees/WATHEFNI-96550010002", "keys": ["allowed_actions", "destination", "employee", "employee_key", "started_on"]}
+SAMPLE_KEY WATHEFNI-96599411617
+PROFILE_TOP_KEYS ['employee', 'ok']
+PROFILE_EMP_KEYS ['allowed_actions', 'email', 'employee', 'employee_key', 'phone', 'started_on']
+HAS_MANAGER False None
+PROFILE_FACTS {"name": "Brian Saleh", "position": "", "department": "", "status": "active", "email": "briansaleh92@gmail.com", "phone": "96599411617", "started_on": "2026-08-01", "allowed_actions": ["read"]}
+FULL_PROFILE_KEYS ['available_modules', 'company_code', 'doc_upload_enabled', 'employee', 'hr_mutate_enabled', 'next_actions', 'next_actions_enabled', 'next_actions_summary', 'sections']
+FULL_CARD_MANAGERish {'name': 'Brian Saleh', 'phone': '96599411617', 'email': 'briansaleh92@gmail.com', 'start_date': '2026-08-01'}
+E360_SECTIONS ['attendance', 'compliance', 'documents', 'leave', 'onboarding', 'payroll', 'shifts']
+MISSING_EMP 404 {"error": "employee_not_found", "message": "We couldn't find that employee."}
+SPINE_OK True

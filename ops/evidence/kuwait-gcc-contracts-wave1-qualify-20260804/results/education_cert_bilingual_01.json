@@ -1,0 +1,1034 @@
+{
+  "label": {
+    "id": "education_cert_bilingual_01",
+    "document_type": "education_cert",
+    "lang": "bilingual",
+    "variant": "scan",
+    "country_code": "KW",
+    "employee_or_holder_ar": "يوسف سالم الشمري",
+    "employee_or_holder_en": "YOUSEF SALEM ALSHAMMARI",
+    "issuing_authority": "Kuwait University",
+    "qualification_or_category": "Bachelor of Business",
+    "document_number": "EDU-2019-8899",
+    "issue_date": "2019-06-20",
+    "expiry_date": null,
+    "employer_or_sponsor": null,
+    "path": "ops/evidence/kuwait-gcc-contracts-wave1-corpus-20260804/images/education_cert_bilingual_01.png",
+    "absolute_path": "/opt/wathefni/staging/ops/evidence/kuwait-gcc-contracts-wave1-corpus-20260804/images/education_cert_bilingual_01.png",
+    "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+    "synthetic": true,
+    "anonymized": true,
+    "created_at": "2026-08-04T03:57:58.998060+00:00"
+  },
+  "extract": {
+    "document_type": "education_cert",
+    "document_number": "EDU-2019-8899",
+    "issued_date": "2019-06-20",
+    "expiry_date": null,
+    "full_name": "YOUSEF SALEM ALSHAMMARI",
+    "nationality": null,
+    "date_of_birth": null,
+    "confidence": 0.98,
+    "extraction_status": "extracted",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "country_code": "KW",
+    "issuing_authority": "Kuwait University",
+    "jurisdiction": "kuwait_private_sector",
+    "employer_or_sponsor": null,
+    "renewal_required": null,
+    "fields": {
+      "document_type": {
+        "value": "education_cert",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "country_code": {
+        "value": "KW",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "jurisdiction": {
+        "value": "kuwait_private_sector",
+        "confidence": 0.4,
+        "provenance": {
+          "source": "jurisdiction_profile",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issuing_authority": {
+        "value": "Kuwait University",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_number": {
+        "value": "EDU-2019-8899",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employee_or_holder_ar": {
+        "value": "يوسف سالم الشمري",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employee_or_holder_en": {
+        "value": "YOUSEF SALEM ALSHAMMARI",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employer_or_sponsor": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "occupation_or_profession": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "permit_or_residency_category": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "qualification_or_category": {
+        "value": "Bachelor of Business",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_status": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issue_date": {
+        "value": "2019-06-20",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "expiry_date": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "renewal_required": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name": {
+        "value": "YOUSEF SALEM ALSHAMMARI",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employee_or_holder": {
+        "value": "YOUSEF SALEM ALSHAMMARI",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      }
+    },
+    "validation": {
+      "ok": true,
+      "issues": [],
+      "has_issue_date": true,
+      "has_expiry_date": false
+    },
+    "envelope": {
+      "contract": "document_envelope@1",
+      "foundation_id": "wathefni_document_processing_foundation_wave1",
+      "foundation_version": "1.0.0",
+      "company_code": "WATHEFNI",
+      "subject_type": "employee_compliance",
+      "subject_key": "education_cert_bilingual_01",
+      "file_id": null,
+      "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+      "source_channel": "qualify_shared",
+      "migration_batch_id": null,
+      "document_class": "compliance",
+      "file_type": "png",
+      "authority_label": "needs_hr_confirmation",
+      "route_policy": {
+        "reading_route": null,
+        "structuring": null,
+        "ocr_policy": null,
+        "gpt_auto_ocr_fallback": false
+      },
+      "processing": {
+        "status": "extracted",
+        "extractor": "kuwait_gcc_mistral_document_ai",
+        "contract": "kuwait-gcc-document-intelligence-v1",
+        "expected_type": "education_cert",
+        "gpt_auto_fallback": false,
+        "cv_v2_forbidden": true,
+        "country_code": "KW",
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": false
+        },
+        "confidence": 0.98
+      },
+      "text_ref": null,
+      "structured_ref": null,
+      "retention_class": "compliance_document",
+      "error": null,
+      "created_at": "2026-08-04T04:01:39.490556+00:00",
+      "cloud_portability": {
+        "domain_contract_cloud_agnostic": true,
+        "aws_specific_deps": false,
+        "gcp_specific_deps": false,
+        "worker_shape": "container_ready_async"
+      }
+    },
+    "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+    "channel": "qualify_shared",
+    "duplicate_keys": {
+      "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+      "identifier_key": "WATHEFNI:education_cert:edu-2019-8899"
+    },
+    "cost_usd": 0.004,
+    "latency_ms": 2420,
+    "issued_date_parsed": "2019-06-20",
+    "expiry_date_parsed": null
+  },
+  "verify": {
+    "matches_expected_item": true,
+    "detected_item": "education_cert",
+    "confidence": 0.98,
+    "reason": "extracted",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "channel": "qualify_shared",
+    "extraction_status": "extracted",
+    "fields": {
+      "document_type": {
+        "value": "education_cert",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "country_code": {
+        "value": "KW",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "jurisdiction": {
+        "value": "kuwait_private_sector",
+        "confidence": 0.4,
+        "provenance": {
+          "source": "jurisdiction_profile",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issuing_authority": {
+        "value": "Kuwait University",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_number": {
+        "value": "EDU-2019-8899",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employee_or_holder_ar": {
+        "value": "يوسف سالم الشمري",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employee_or_holder_en": {
+        "value": "YOUSEF SALEM ALSHAMMARI",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employer_or_sponsor": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "occupation_or_profession": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "permit_or_residency_category": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "qualification_or_category": {
+        "value": "Bachelor of Business",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_status": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issue_date": {
+        "value": "2019-06-20",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "expiry_date": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "renewal_required": {
+        "value": null,
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name": {
+        "value": "YOUSEF SALEM ALSHAMMARI",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employee_or_holder": {
+        "value": "YOUSEF SALEM ALSHAMMARI",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "kuwait_gcc_mistral_document_ai",
+          "contract": "kuwait-gcc-document-intelligence-v1",
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      }
+    }
+  },
+  "classify": {
+    "detected_item": "education_cert",
+    "confidence": 0.97,
+    "reason": "Document is an education certificate issued by Kuwait University with bilingual details.",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "side": "single",
+    "extraction_status": "extracted",
+    "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+    "identity_result": {
+      "ok": true,
+      "extraction_status": "extracted",
+      "authoritative": false,
+      "hr_confirmation_required": true,
+      "confidence": 0.97,
+      "detected_item": "education_cert",
+      "matches_expected_item": null,
+      "reason": "Document is an education certificate issued by Kuwait University with bilingual details.",
+      "side": "single",
+      "fields": {
+        "document_type": {
+          "value": null,
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "side": {
+          "value": "single",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_relationship": {
+          "value": "standalone",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_ar": {
+          "value": "يوسف سالم الشمري",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_en": {
+          "value": "YOUSEF SALEM ALSHAMMARI",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_number": {
+          "value": "EDU-2019-8899",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "nationality": {
+          "value": null,
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "date_of_birth": {
+          "value": null,
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issue_date": {
+          "value": "2019-06-20",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "expiry_date": {
+          "value": null,
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "employer_or_sponsor": {
+          "value": null,
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name": {
+          "value": "YOUSEF SALEM ALSHAMMARI",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issued_date": {
+          "value": "2019-06-20",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        }
+      },
+      "validation": {
+        "ok": true,
+        "issues": [],
+        "has_issue_date": true,
+        "has_expiry_date": false,
+        "has_dob": false
+      },
+      "envelope": {
+        "contract": "document_envelope@1",
+        "foundation_id": "wathefni_document_processing_foundation_wave1",
+        "foundation_version": "1.0.0",
+        "company_code": "WATHEFNI",
+        "subject_type": "employee_identity",
+        "subject_key": "education_cert_bilingual_01",
+        "file_id": null,
+        "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+        "source_channel": "identity_wave2_classify",
+        "migration_batch_id": null,
+        "document_class": "identity",
+        "file_type": "png",
+        "authority_label": "needs_hr_confirmation",
+        "route_policy": {
+          "reading_route": "shared_envelope_intake",
+          "structuring": "identity_processor_current_gpt_vision",
+          "ocr_policy": "do_not_use_cv_v2",
+          "gpt_auto_ocr_fallback": false
+        },
+        "processing": {
+          "status": "extracted",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "expected_item": null,
+          "detected_item": "education_cert",
+          "gpt_auto_fallback": false,
+          "cv_v2_forbidden": true,
+          "validation": {
+            "ok": true,
+            "issues": [],
+            "has_issue_date": true,
+            "has_expiry_date": false,
+            "has_dob": false
+          },
+          "confidence": 0.97
+        },
+        "text_ref": null,
+        "structured_ref": null,
+        "retention_class": "identity_document",
+        "error": null,
+        "created_at": "2026-08-04T04:01:47.041482+00:00",
+        "cloud_portability": {
+          "domain_contract_cloud_agnostic": true,
+          "aws_specific_deps": false,
+          "gcp_specific_deps": false,
+          "worker_shape": "container_ready_async"
+        }
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "latency_ms": 2537
+        }
+      ],
+      "engine": {
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "latency_ms": 2537,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "error": null
+      },
+      "cost_usd": 0.004,
+      "latency_ms": 2537,
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+      "gpt_used": false,
+      "company_code": "WATHEFNI",
+      "duplicate_keys": {
+        "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+        "identifier_key": "education_cert:edu-2019-8899"
+      },
+      "legacy_compat": {
+        "document_type": null,
+        "document_number": "EDU-2019-8899",
+        "issued_date": "2019-06-20",
+        "expiry_date": null,
+        "nationality": null,
+        "full_name": "YOUSEF SALEM ALSHAMMARI",
+        "full_name_ar": "يوسف سالم الشمري",
+        "full_name_en": "YOUSEF SALEM ALSHAMMARI",
+        "date_of_birth": null,
+        "employer_or_sponsor": null,
+        "side": "single",
+        "confidence": 0.97,
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "issued_date_parsed": "2019-06-20",
+        "expiry_date_parsed": null,
+        "date_of_birth_parsed": null,
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "gpt_used": false,
+        "fields": {
+          "document_type": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "يوسف سالم الشمري",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "YOUSEF SALEM ALSHAMMARI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "EDU-2019-8899",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2019-06-20",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "YOUSEF SALEM ALSHAMMARI",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2019-06-20",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "envelope": {
+          "contract": "document_envelope@1",
+          "foundation_id": "wathefni_document_processing_foundation_wave1",
+          "foundation_version": "1.0.0",
+          "company_code": "WATHEFNI",
+          "subject_type": "employee_identity",
+          "subject_key": "education_cert_bilingual_01",
+          "file_id": null,
+          "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+          "source_channel": "identity_wave2_classify",
+          "migration_batch_id": null,
+          "document_class": "identity",
+          "file_type": "png",
+          "authority_label": "needs_hr_confirmation",
+          "route_policy": {
+            "reading_route": "shared_envelope_intake",
+            "structuring": "identity_processor_current_gpt_vision",
+            "ocr_policy": "do_not_use_cv_v2",
+            "gpt_auto_ocr_fallback": false
+          },
+          "processing": {
+            "status": "extracted",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "expected_item": null,
+            "detected_item": "education_cert",
+            "gpt_auto_fallback": false,
+            "cv_v2_forbidden": true,
+            "validation": {
+              "ok": true,
+              "issues": [],
+              "has_issue_date": true,
+              "has_expiry_date": false,
+              "has_dob": false
+            },
+            "confidence": 0.97
+          },
+          "text_ref": null,
+          "structured_ref": null,
+          "retention_class": "identity_document",
+          "error": null,
+          "created_at": "2026-08-04T04:01:47.041482+00:00",
+          "cloud_portability": {
+            "domain_contract_cloud_agnostic": true,
+            "aws_specific_deps": false,
+            "gcp_specific_deps": false,
+            "worker_shape": "container_ready_async"
+          }
+        },
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": false,
+          "has_dob": false
+        }
+      }
+    },
+    "delegated_to": "identity_document_extraction",
+    "channel": "qualify_shared"
+  },
+  "score": {
+    "id": "education_cert_bilingual_01",
+    "class": "education_cert",
+    "extract_status": "extracted",
+    "provider": "mistral",
+    "gpt_used": true,
+    "authoritative": true,
+    "hr_confirmation_required": true,
+    "country_code": "KW",
+    "issuing_authority": "Kuwait University",
+    "validation": {
+      "ok": true,
+      "issues": [],
+      "has_issue_date": true,
+      "has_expiry_date": false
+    },
+    "duplicate_keys": {
+      "content_sha256": "c37398478d8c35ab5e0a2e2d0ac7b3102c7d67f8fa72e05082ece85606c63a26",
+      "identifier_key": "WATHEFNI:education_cert:edu-2019-8899"
+    },
+    "per_field": {
+      "document_number": "match",
+      "employee_or_holder_en": "match",
+      "issue_date": "match",
+      "qualification_or_category": "match"
+    },
+    "field_match_rate": 1.0,
+    "arabic_ok": true,
+    "verify_match": true,
+    "classify_detected": "education_cert",
+    "cost_usd": 0.004,
+    "latency_ms": 2420,
+    "delegated_to": null
+  }
+}

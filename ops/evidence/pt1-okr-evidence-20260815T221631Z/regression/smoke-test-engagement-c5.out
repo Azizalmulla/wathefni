@@ -1,0 +1,37 @@
+    engagement c5 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  recognition out
+      PASS  works without er
+      PASS  works without perf/talent
+      PASS  works without learning
+      PASS  works without payroll
+      PASS  min 5 default
+      PASS  threshold upward only
+      PASS  no respondent map
+      PASS  participation separated
+      PASS  fail closed below
+      PASS  complementary suppression
+      PASS  enps explicit only
+      PASS  action plan distinct
+      PASS  no auto er
+      PASS  no second analytics
+      PASS  assistant mutations out
+      PASS  setup wave6 engagement
+      PASS  setup honesty
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  recognition absent
+      PASS  gate off
+      PASS  empty allowlist admits after R5H
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema campaigns
+      PASS  anonymous null employee check
+      PASS  no recognition ddl
+      PASS  min responses check
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    33 passed, 0 failed (unit-only)

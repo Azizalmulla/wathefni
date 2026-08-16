@@ -1,0 +1,13 @@
+{
+  "import_lines": 2,
+  "reconciliations": 1,
+  "events_import": 3,
+  "imports": 2,
+  "recon_export": 0,
+  "events_export": 2,
+  "quarantine_by_export": 2,
+  "exports": 1,
+  "quarantine": 0,
+  "contracts": 1,
+  "periods": 1
+}

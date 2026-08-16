@@ -1,0 +1,7 @@
+# Payroll Wave 1 staging qualify
+stamp=20260803T042310Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave1-20260803T042310Z
+payment_processing=disabled
+money_authority=false
+production_deploy=false
+GATE=STAGING_PAYROLL_WAVE1_FOUNDATION_GO

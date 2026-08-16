@@ -1,0 +1,50 @@
+{
+  "proof_addresses": [
+    {
+      "intake_id": "078e9694-b845-4548-a906-473109f08c59",
+      "local_part": "wathefni-cv-5e50be",
+      "status": "disabled",
+      "label": "wave_d3_prod_proof general"
+    },
+    {
+      "intake_id": "685c33ce-942f-4ada-bdf8-f85c22623ceb",
+      "local_part": "wathefni-cv-555bd8",
+      "status": "disabled",
+      "label": "wave_d3_prod_proof general"
+    },
+    {
+      "intake_id": "071c7d72-ea32-43f5-8d87-54f7f73b6123",
+      "local_part": "wathefni-cv-726bfe",
+      "status": "disabled",
+      "label": "wave_d3_prod_proof general"
+    },
+    {
+      "intake_id": "f26751dc-b4bb-401d-94d9-cd4a08d3d78d",
+      "local_part": "wathefni-cv-1917d7",
+      "status": "disabled",
+      "label": "wave_d3_prod_proof general"
+    },
+    {
+      "intake_id": "a862b4fc-68e6-4648-bab5-49832fc244e2",
+      "local_part": "wathefni-cv-a9ee64",
+      "status": "disabled",
+      "label": "wave_d3_prod_proof general"
+    },
+    {
+      "intake_id": "bc8b2fbf-06ee-4fae-9042-d5eb8c5f42d1",
+      "local_part": "wathefni-cv-bf5c1d",
+      "status": "disabled",
+      "label": "wave_d3_prod_proof general"
+    }
+  ],
+  "all_disabled": true,
+  "active_proof_addresses": 0,
+  "wathefni_active_intake_total": 1,
+  "inbound_enterprise": {},
+  "kill_switch_off": true,
+  "admin_override_absent": true,
+  "inbound_enterprise_restored": {
+    "plan": "internal",
+    "kill_switch": false
+  }
+}

@@ -1,0 +1,5 @@
+schema_version 1.1.0
+connected_db wathefni
+shift_assignment_wave1_cols ['break_minutes', 'ends_next_day', 'idempotency_key', 'row_version', 'site_key']
+settings {'synthetic_only': True, 'block_notice_period': False}
+SHIFTS_W1B_PROD_MIGRATE_OK

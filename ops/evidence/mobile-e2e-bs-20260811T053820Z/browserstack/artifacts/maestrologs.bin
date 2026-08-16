@@ -1,0 +1,227 @@
+05:39:02.173 [ INFO] MAESTRO.logSystemInfo: ---- System Info ----
+05:39:02.174 [ INFO] MAESTRO.logSystemInfo: Maestro Version: 1.39.10
+05:39:02.175 [ INFO] MAESTRO.logSystemInfo: CI: Undefined
+05:39:02.175 [ INFO] MAESTRO.logSystemInfo: OS Name: Mac OS X
+05:39:02.175 [ INFO] MAESTRO.logSystemInfo: OS Version: 14.1.2
+05:39:02.175 [ INFO] MAESTRO.logSystemInfo: Architecture: aarch64
+05:39:02.175 [ INFO] MAESTRO.logSystemInfo: Java Version: 16
+05:39:02.259 [ INFO] MAESTRO.logSystemInfo: Xcode Version: 15.4
+05:39:02.260 [ INFO] MAESTRO.logSystemInfo: Flutter Version: Undefined
+05:39:02.263 [ INFO] MAESTRO.logSystemInfo: Flutter Channel: Undefined
+05:39:02.263 [ INFO] MAESTRO.logSystemInfo: ---------------------
+05:39:02.858 [DEBUG] io.micrometer.common.util.internal.logging.InternalLoggerFactory.newDefaultFactory: Using SLF4J as the default logging framework
+05:39:03.781 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device 00008120-000404D91A38A01E using port 11103
+05:39:04.848 [TRACE] ios.xctest.XCTestRealIOSDevice.open: Opening a connection
+05:39:04.896 [ INFO] maestro.Maestro.invoke: Getting device info
+05:39:05.055 [ INFO] maestro.Maestro.invoke: Got device info: DeviceInfo(platform=IOS, widthPixels=1179, heightPixels=2556, widthGrid=393, heightGrid=852)
+05:39:05.134 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Define variables RUNNING
+05:39:05.139 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Define variables COMPLETED
+05:39:05.139 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration RUNNING
+05:39:05.139 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration COMPLETED
+05:39:05.140 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Launch app "ai.wathefni.employee" RUNNING
+05:39:05.140 [ INFO] maestro.Maestro.launchApp: Launching app ai.wathefni.employee
+05:39:07.054 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Launch app "ai.wathefni.employee" COMPLETED
+05:39:07.054 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Choose how to continue" is visible RUNNING
+05:39:07.169 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:07.810 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:07.814 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Choose how to continue" is visible COMPLETED
+05:39:07.814 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Continue as employee" is visible RUNNING
+05:39:08.000 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:08.596 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:08.599 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Continue as employee" is visible COMPLETED
+05:39:08.599 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Continue as HR" is visible RUNNING
+05:39:08.728 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:09.319 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:09.324 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Continue as HR" is visible COMPLETED
+05:39:09.324 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Take screenshot bs-mode-chooser RUNNING
+05:39:09.324 [ INFO] maestro.orchestra.Orchestra.takeScreenshotCommand: /usr/local/.browserstack/app-automate-tmp/00008120-000404D91A38A01E/logs/maestro_debug_bs-smoke/00-launch-unsigned_bs-smoke/00-launch-unsigned_1
+05:39:09.324 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot to a file: /usr/local/.browserstack/app-automate-tmp/00008120-000404D91A38A01E/logs/maestro_debug_bs-smoke/00-launch-unsigned_bs-smoke/00-launch-unsigned_1/bs-mode-chooser.png
+05:39:09.327 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+05:39:09.511 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Take screenshot bs-mode-chooser COMPLETED
+05:39:09.513 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on "Continue as employee" RUNNING
+05:39:09.656 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:10.250 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:10.256 [ INFO] maestro.Maestro.tap-BUbHBYE: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Continue as employee, title=, value=, text=, hintText=, resource-id=, bounds=[24,260][369,311], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=24, y=260, width=345, height=51))
+05:39:10.257 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+05:39:10.466 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+05:39:10.466 [ INFO] ios.IOSDevice.invoke: screen static = true
+05:39:10.466 [ INFO] maestro.Maestro.tap-BUbHBYE: Refreshed element
+05:39:10.468 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Tapping at (196, 285) using screenshot based logic for wait
+05:39:10.902 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+05:39:11.108 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+05:39:11.108 [ INFO] ios.IOSDevice.invoke: screen static = true
+05:39:11.108 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Something has changed in the UI judging by view hierarchy. Proceed.
+05:39:11.108 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on "Continue as employee" COMPLETED
+05:39:11.108 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Phone" is visible RUNNING
+05:39:11.203 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:11.791 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:11.957 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:12.633 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:12.795 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:13.455 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:13.736 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:14.289 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:14.450 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:15.021 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:15.175 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:15.752 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:15.905 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:16.464 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:16.618 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:17.194 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:17.354 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:17.938 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:18.082 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:18.753 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:18.904 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:19.477 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:19.634 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:20.197 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:20.354 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:20.926 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:21.188 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:21.766 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:21.924 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:22.378 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:22.648 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:23.199 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:23.371 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:23.944 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:24.097 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:24.669 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:24.818 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:25.507 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:25.656 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:26.221 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:26.383 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:26.943 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:27.105 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:27.575 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:27.825 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:28.397 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:28.559 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:29.230 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:29.403 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:29.969 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:30.132 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:30.690 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:30.857 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:31.447 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:31.689 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:32.262 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:32.416 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:32.974 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:33.138 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:33.694 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:33.852 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:34.431 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:34.585 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:35.047 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:35.220 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:35.796 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:35.947 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:36.492 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:36.671 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:37.238 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:37.387 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:38.065 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:38.222 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:38.794 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:38.943 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:39.507 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:39.679 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:40.237 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:40.396 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:41.051 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:41.207 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:41.790 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:41.938 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:42.512 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:42.674 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:43.243 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:43.400 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:43.966 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:44.131 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:44.690 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:44.855 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:45.431 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:45.582 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:46.055 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:46.200 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:46.774 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:46.924 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:47.507 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:47.668 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:48.219 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:48.382 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:48.938 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:49.100 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:49.684 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:49.831 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:50.391 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:50.657 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:51.227 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:51.379 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:51.944 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:52.108 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:52.684 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:52.836 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:53.297 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:53.458 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:54.041 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:54.196 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:54.754 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:54.937 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:55.494 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:55.658 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:56.227 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:56.386 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:57.063 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:57.230 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:57.798 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:57.957 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:58.439 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:58.587 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:59.255 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:39:59.413 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:39:59.977 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:00.142 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:00.702 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:00.857 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:01.541 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:01.699 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:02.267 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:02.418 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:02.974 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:03.137 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:03.713 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:03.864 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:04.445 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:04.598 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:05.163 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:05.320 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:05.876 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:06.033 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:06.722 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:07.022 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:07.549 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:07.711 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:08.278 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:08.437 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:08.994 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:09.164 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:09.736 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:09.890 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:10.453 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:10.620 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:11.180 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:11.352 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:11.925 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:12.076 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+05:40:12.644 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+05:40:12.645 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Phone" is visible FAILED
+05:40:12.647 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+05:40:12.647 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+05:40:13.535 [ INFO] xcuitest.installer.LocalRealDeviceXCTestInstaller.close: [Start] Cleaning up the ui test runner files
+05:40:13.535 [ INFO] xcuitest.installer.LocalRealDeviceXCTestInstaller.close: [Done] Cleaning up the ui test runner files
+05:40:13.536 [ INFO] ios.devicectl.DevicectlIOSDevice.close: Nothing to be done

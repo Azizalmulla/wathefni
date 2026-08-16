@@ -1,0 +1,122 @@
+{
+  "stamp": "20260727T001041Z",
+  "passed": 23,
+  "failed": 0,
+  "results": [
+    {
+      "name": "health_200",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "staging_env",
+      "ok": true,
+      "detail": "staging"
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "staging_db_connect",
+      "ok": true,
+      "detail": "wathefni_staging"
+    },
+    {
+      "name": "person_registry_link",
+      "ok": true,
+      "detail": "linked"
+    },
+    {
+      "name": "identity_review_no_merge",
+      "ok": true,
+      "detail": "identity_review"
+    },
+    {
+      "name": "talent_pool_entry",
+      "ok": true,
+      "detail": "38904ada-db5c-568e-bc8b-8a0fc34e6e7f"
+    },
+    {
+      "name": "owned_cv_version",
+      "ok": true,
+      "detail": "870b6357-02c3-54a1-9983-c430ea0bab78"
+    },
+    {
+      "name": "cv_version_idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "job_binding",
+      "ok": true,
+      "detail": "70626910-8692-4fdc-9a3f-b09e1bddeb08"
+    },
+    {
+      "name": "shadow_deny",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "verified_allow",
+      "ok": true,
+      "detail": "allow"
+    },
+    {
+      "name": "enforce_deny_lab",
+      "ok": true,
+      "detail": "enforce_deny"
+    },
+    {
+      "name": "ck_person_ref",
+      "ok": true,
+      "detail": "person:e435fb8f-7ba2-5e4f-9eb5-324b253355e5"
+    },
+    {
+      "name": "ck_subject_ref",
+      "ok": true,
+      "detail": "subject:1d9059b1-6d91-4b1c-83ae-b7eae29df84f"
+    },
+    {
+      "name": "ck_non_actionable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "zero_downstream_mutation",
+      "ok": true,
+      "detail": "candidates 97->97; apps 86->86"
+    },
+    {
+      "name": "rollback_flag_off_skips",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cross_tenant_isolation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "gate_kill_switch_off",
+      "ok": true,
+      "detail": "off"
+    },
+    {
+      "name": "scale_idempotent_cv",
+      "ok": true,
+      "detail": "n=25 unique=1"
+    },
+    {
+      "name": "production_dual_write_untouched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "staging_commit",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

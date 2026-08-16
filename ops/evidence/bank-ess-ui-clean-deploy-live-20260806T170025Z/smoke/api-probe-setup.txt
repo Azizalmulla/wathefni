@@ -1,0 +1,2 @@
+health 200
+candidates ['ops-smoke-civil-id-dual-side-front-upload.py', 'ops-smoke-kuwait-docs-qual-matrix.py', 'ops-smoke-bank-ess-onboarding-qual-matrix.py', 'ops-smoke-civil-id-dual-side-full-sequence.py']

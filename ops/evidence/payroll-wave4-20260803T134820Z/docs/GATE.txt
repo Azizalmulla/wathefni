@@ -1,0 +1,19 @@
+# Payroll Wave 4 staging qualify
+stamp=20260803T134820Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave4-20260803T134820Z
+payment_processing=disabled
+bank_files=false
+bank_connection=false
+wps=false
+ashal=false
+journals=false
+journal_drafts=true
+bank_export_contract=true
+pifss=false
+eos=false
+ai_calculations=false
+native_results_authoritative=false
+external_payroll_authority=external
+production_deploy=false
+prod_synthetic_gate=NO-GO (staging-only wave; requires Wave 4-B prod synthetic path)
+GATE=STAGING_PAYROLL_WAVE4_CLOSE_EXPORT_GO

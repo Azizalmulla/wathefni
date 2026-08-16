@@ -1,0 +1,15 @@
+    exit close c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  rollback
+      PASS  EN closed
+      PASS  AR ready
+      PASS  assistant out
+      PASS  sole left authority
+      PASS  finalized ≠ paid
+      PASS  real term dark
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  real canary blocked

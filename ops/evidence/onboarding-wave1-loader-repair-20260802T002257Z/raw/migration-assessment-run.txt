@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "source": "snapshot:/Users/azizalmulla/Desktop/claw/ops/evidence/onboarding-wave0-prod-truth-20260801T235617Z/data/item-breakdown.txt",
+  "out_dir": "/Users/azizalmulla/Desktop/claw/ops/evidence/onboarding-wave1-loader-repair-20260802T002257Z/data",
+  "rollups": {
+    "any_missing": true,
+    "any_obsolete": true,
+    "any_conflicts": true,
+    "brian_partial_seed": true
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "locale": "en",
+    "suffix": "collapsed",
+    "openBefore": false,
+    "open": false,
+    "openDefaultWasCollapsed": true,
+    "summaryText": "Assessment configurationNeeds attention·22 questions·21 evidence indicators·Last refreshed Jul 31, 2026, 10:31 PMAdmin details",
+    "detailsVisible": true,
+    "expand": false,
+    "dir": "ltr",
+    "hasOldLabel": false,
+    "hasNewLabel": true,
+    "hasProduct2": true
+  },
+  {
+    "locale": "en",
+    "suffix": "expanded",
+    "openBefore": false,
+    "open": true,
+    "openDefaultWasCollapsed": true,
+    "summaryText": "Assessment configurationNeeds attention·22 questions·21 evidence indicators·Last refreshed Jul 31, 2026, 10:31 PMAdmin details",
+    "detailsVisible": true,
+    "expand": true,
+    "dir": "ltr",
+    "hasOldLabel": false,
+    "hasNewLabel": true,
+    "hasProduct2": true
+  },
+  {
+    "locale": "ar",
+    "suffix": "collapsed",
+    "openBefore": false,
+    "open": false,
+    "openDefaultWasCollapsed": true,
+    "summaryText": "إعداد التقييميحتاج انتباه·22 أسئلة·21 مؤشر دليل·آخر تحديث 31‏/07‏/2026، 10:31 مالتفاصيل للإداريين",
+    "detailsVisible": true,
+    "expand": false,
+    "dir": "rtl",
+    "hasOldLabel": false,
+    "hasNewLabel": true,
+    "hasProduct2": true
+  },
+  {
+    "locale": "ar",
+    "suffix": "expanded",
+    "openBefore": false,
+    "open": true,
+    "openDefaultWasCollapsed": true,
+    "summaryText": "إعداد التقييميحتاج انتباه·22 أسئلة·21 مؤشر دليل·آخر تحديث 31‏/07‏/2026، 10:31 مالتفاصيل للإداريين",
+    "detailsVisible": true,
+    "expand": true,
+    "dir": "rtl",
+    "hasOldLabel": false,
+    "hasNewLabel": true,
+    "hasProduct2": true
+  }
+]

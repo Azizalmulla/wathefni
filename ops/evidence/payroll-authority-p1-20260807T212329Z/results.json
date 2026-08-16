@@ -1,0 +1,322 @@
+{
+  "verdict": "PASS",
+  "pass": 57,
+  "fail": 0,
+  "stamp": "20260807T212329Z",
+  "evidence": "/opt/wathefni/ops/evidence/payroll-authority-p1-20260807T212329Z",
+  "schema": {
+    "table": "payroll_authority_snapshots",
+    "lines": "payroll_authority_snapshot_lines",
+    "events": "payroll_authority_snapshot_events",
+    "catalog": "payroll_component_catalog",
+    "money_authority": [
+      "wathefni",
+      "external"
+    ],
+    "status": [
+      "sealed",
+      "replaced",
+      "revoked"
+    ]
+  },
+  "authority_transitions": {
+    "mode_b": "import \u2192 seal_from_external_import \u2192 sealed(money_authority=external) \u2192 payslip/PDF",
+    "mode_a_p1": "native_preview \u2192 seal_from_native_preview \u2192 REFUSED (mode_a_wathefni_seal_not_unlocked)",
+    "correction": "sealed \u2192 replace_authority_snapshot \u2192 prior=replaced + new sealed",
+    "period_close": "Wave 4 close_run \u2260 money seal"
+  },
+  "results": [
+    {
+      "name": "p1 version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a seal locked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode b seal unlocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview remains preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period close not money seal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no statutory formulas",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "immutable invariant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period close helper false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf requires sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf accepts sealed id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "component catalog seeded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "import",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "seal external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "money_authority external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source_mode mode_b",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "currency KWD",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "status sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled on snap",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "has source fingerprint",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "has content fingerprint",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "has component lines",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "seal idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "same snap id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mutate refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fingerprint unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip from sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip linked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official eligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official pdf from sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a seal refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payslip preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native money preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native not official eligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native pdf refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close draft ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "one current sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close does not create snap",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "import2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale overwrite refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new sealed id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new status sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior replaced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history retains prior",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "only one current sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior not deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "peer has no sealed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "audit events present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "schema columns",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "p2_blockers": [
+    "Input assembly (attendance + leave) not wired into sealed Mode A path",
+    "Mode A authoritative-finalize path not unlocked",
+    "SYNTHETIC_ONLY remains",
+    "Statutory formulas remain counsel-gated",
+    "payment_processing disabled; no payment_date"
+  ]
+}

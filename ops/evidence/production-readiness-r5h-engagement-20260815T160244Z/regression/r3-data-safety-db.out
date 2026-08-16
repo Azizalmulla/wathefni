@@ -1,0 +1,37 @@
+    PRODUCTION READINESS R3 — live data-safety paths
+    tenants: R3CLEANC5A9C4 / R3SYNTHC5A9C4 / R3OTHERC5A9C4
+
+    missing company fails closed
+      PASS  require_company_code(None) fails closed
+      PASS  missing company does not resolve to WATHEFNI
+      PASS  module lookup without a company fails closed
+      PASS  explicit legitimate tenant still resolves
+      PASS  explicit canary name still resolves when named
+
+    clean company bootstrap
+      PASS  clean bootstrap has no employees rows
+      PASS  clean bootstrap has no employee_messages rows
+      PASS  clean bootstrap has no employee_documents rows
+      PASS  clean bootstrap has no leave_policies rows
+      PASS  clean bootstrap has no leave_balances rows
+      PASS  clean bootstrap has no leave_requests rows
+      PASS  clean bootstrap has no company_modules rows
+
+    fixture identity cannot leak into a clean tenant
+      PASS  clean tenant did not inherit the fixture employee
+      PASS  fixture employee stayed in the synthetic tenant
+
+    destructive matrix stays scoped
+      PASS  destructive matrix deleted only the named synthetic tenant modules
+      PASS  destructive matrix left the other tenant's modules intact
+
+    synthetic connectors
+      PASS  a normal tenant cannot create a canary connector
+
+    seed script with explicit staging synthetic tenant
+      PASS  seed guard accepts explicit staging synthetic tenant
+
+    R3_DATA_SAFETY_FULL_PASS
+    18 passed, 0 failed
+
+STAGING_RC=0

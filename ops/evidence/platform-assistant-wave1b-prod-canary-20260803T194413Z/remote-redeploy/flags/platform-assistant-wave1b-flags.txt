@@ -1,0 +1,13 @@
+WAVE1 1
+COMPANIES WATHEFNI
+KILL 0
+MUTATIONS 0
+CAPTURE_INGEST off
+enabled True
+company True
+company_external False
+mutations_allowed False
+kill_engaged False
+honesty {'wathefni_only': True, 'hr_dashboard_only': True, 'mutates_records': False, 'payroll_money': False, 'attendance_ingest': False, 'whatsapp_widening': False, 'default_posthire_entry': 'action_inbox'}
+PAW1B_MARKER=PAW1B
+flags_ok_wave1b=true

@@ -1,0 +1,15 @@
+## PROD process
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_ONBOARDING_SEED=off
+## STAGING process
+WATHEFNI_EMPLOYEE_APP=off
+WATHEFNI_ONBOARDING_HR_MUTATE=off
+WATHEFNI_ONBOARDING_SEED=off
+## SHAs
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  /opt/wathefni/orchestrator/app.py
+a73ee60b369a4a5b8a764cf3736e67b8a7a57608eba6de695852d6bcbf77a99a  /opt/wathefni/staging/orchestrator/app.py
+## health
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_log
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"staging","database_environment":"staging","database_environment_marker":"65aede205f95","database_logical_n

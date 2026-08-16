@@ -1,0 +1,29 @@
+    PRODUCTION READINESS R4 — notification suppression (staging DB)
+    tenants: R4ON268546 / R4OFF268546
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-r4-truth-in-ui-db.py", line 207, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-r4-truth-in-ui-db.py", line 156, in main
+    enabled = app.deliver_employee_notification(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 19440, in deliver_employee_notification
+    result = deliver_to_employee(
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/outbound_delivery.py", line 1100, in deliver_to_employee
+    outcome = _attempt_ladder(
+              ^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/outbound_delivery.py", line 600, in _attempt_ladder
+    r = OctopusProvider.send_session(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/outbound_delivery.py", line 442, in send_session
+    return legacy.send_octopus_whatsapp(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 31679, in send_octopus_whatsapp
+    record_outbound_delivery_event(
+  File "/opt/wathefni/staging/orchestrator/app.py", line 32235, in record_outbound_delivery_event
+    company = _resolve_outbound_delivery_company_code(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/app.py", line 32202, in _resolve_outbound_delivery_company_code
+    raise ValueError("company_code_required")
+ValueError: company_code_required

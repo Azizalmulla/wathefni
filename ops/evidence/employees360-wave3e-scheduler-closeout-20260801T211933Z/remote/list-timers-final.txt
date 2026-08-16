@@ -1,0 +1,5 @@
+NEXT                         LEFT LAST                           PASSED UNIT                                       ACTIVATES
+Sat 2026-08-01 22:00:18 UTC 36min Sat 2026-08-01 21:00:25 UTC 23min ago wathefni-lifecycle-effective-staging.timer wathefni-lifecycle-effective-staging.service
+Sat 2026-08-01 22:01:02 UTC 36min Sat 2026-08-01 21:23:31 UTC   44s ago wathefni-lifecycle-effective.timer         wathefni-lifecycle-effective.service
+
+2 timers listed.

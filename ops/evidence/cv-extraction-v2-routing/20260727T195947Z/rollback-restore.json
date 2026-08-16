@@ -1,0 +1,6 @@
+{
+  "rollback_health": "200",
+  "restore_health": "200",
+  "v2_enabled_after_restore": true,
+  "publish_after_restore": true
+}

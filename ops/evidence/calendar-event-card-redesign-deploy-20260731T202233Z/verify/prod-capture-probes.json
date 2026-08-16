@@ -1,0 +1,92 @@
+{
+  "verdict": "PASS",
+  "probes": {
+    "desktop": {
+      "cards": [
+        {
+          "id": "calendar-timed-event-short-check-in",
+          "density": "short",
+          "lane": "1/1",
+          "text": "Candidate check-in08:00 AM – 08:30 AM",
+          "height": 28
+        },
+        {
+          "id": "calendar-timed-event-medium-review",
+          "density": "medium",
+          "lane": "1/1",
+          "text": "Hiring review09:00 AM – 10:30 AMDeadline· Tentative",
+          "height": 72
+        },
+        {
+          "id": "calendar-timed-event-long-teams",
+          "density": "long",
+          "lane": "1/1",
+          "text": "Interview · Sara · Product Designer11:00 AM – 02:00 PMInterview· ConfirmedTeamsSARJoin",
+          "height": 144
+        },
+        {
+          "id": "calendar-timed-event-overlap-interview",
+          "density": "long",
+          "lane": "1/3",
+          "text": "Interview · Omar · Finance Lead09:00 AM – 12:00 PM",
+          "height": 144
+        },
+        {
+          "id": "calendar-timed-event-c3c3d8e7-dc0c-4fbd-9d57-8c91d1cc053b",
+          "density": "long",
+          "lane": "2/3",
+          "text": "online meeting with aziz09:00 AM – 10:00 AM (+1d)",
+          "height": 576
+        },
+        {
+          "id": "calendar-timed-event-overlap-screen",
+          "density": "medium",
+          "lane": "3/3",
+          "text": "Portfolio review09:30 AM – 11:00 AM",
+          "height": 72
+        }
+      ],
+      "hasShort": true,
+      "hasMedium": true,
+      "hasLong": true,
+      "hasOverlap": true,
+      "crossDay": {
+        "present": true,
+        "text": "online meeting with aziz09:00 AM – 10:00 AM (+1d)",
+        "showsPlus1d": true,
+        "density": "long",
+        "height": 576
+      },
+      "join": {
+        "openedMeeting": true,
+        "url": "https://teams.microsoft.com/l/meetup-join/calendar-visual-proof"
+      },
+      "drawerOpened": true,
+      "scopeMine": true,
+      "scopeCompany": true,
+      "scopeSwitcherPresent": true
+    },
+    "rtl": {
+      "dir": "rtl",
+      "myCalendar": "تقويمي",
+      "hasArabicJoin": true,
+      "crossDayShowsPlusDay": true
+    },
+    "mobile": {
+      "dayMode": true,
+      "hasTeams": true,
+      "hasJoin": true
+    },
+    "empty": {
+      "noTimedCards": true
+    },
+    "overview": {
+      "title": "My calendar",
+      "hasScopeToggle": false,
+      "overviewScopes": [
+        "mine"
+      ],
+      "onlyMine": true
+    }
+  }
+}

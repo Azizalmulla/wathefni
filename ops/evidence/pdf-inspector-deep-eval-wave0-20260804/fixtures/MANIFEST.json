@@ -1,0 +1,228 @@
+{
+  "created_at": "2026-08-03T22:14:29.142752+00:00",
+  "count": 24,
+  "fixtures": [
+    {
+      "fixture_id": "cv_en_digital_01",
+      "category": "english_digital_cv",
+      "path": "fixtures/cv_en_digital_01.pdf",
+      "language": "en",
+      "layout": "single_column",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_en_digital_02",
+      "category": "english_digital_cv",
+      "path": "fixtures/cv_en_digital_02.pdf",
+      "language": "en",
+      "layout": "single_column",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_en_digital_03",
+      "category": "english_digital_cv",
+      "path": "fixtures/cv_en_digital_03.pdf",
+      "language": "en",
+      "layout": "single_column",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_ar_digital_01",
+      "category": "arabic_digital_cv",
+      "path": "fixtures/cv_ar_digital_01.pdf",
+      "language": "ar",
+      "layout": "single_column_rtl",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_ar_digital_02",
+      "category": "arabic_digital_cv",
+      "path": "fixtures/cv_ar_digital_02.pdf",
+      "language": "ar",
+      "layout": "single_column_rtl",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_ar_digital_03",
+      "category": "arabic_digital_cv",
+      "path": "fixtures/cv_ar_digital_03.pdf",
+      "language": "ar",
+      "layout": "single_column_rtl",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_bilingual_01",
+      "category": "bilingual_cv",
+      "path": "fixtures/cv_bilingual_01.pdf",
+      "language": "ar_en",
+      "layout": "stacked_bilingual",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_bilingual_02",
+      "category": "bilingual_cv",
+      "path": "fixtures/cv_bilingual_02.pdf",
+      "language": "ar_en",
+      "layout": "stacked_bilingual",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_multicolumn_01",
+      "category": "multicolumn_cv",
+      "path": "fixtures/cv_multicolumn_01.pdf",
+      "language": "en",
+      "layout": "two_column",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_multicolumn_02",
+      "category": "multicolumn_cv",
+      "path": "fixtures/cv_multicolumn_02.pdf",
+      "language": "en",
+      "layout": "two_column",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_scanned_en_01",
+      "category": "scanned_image_only_cv",
+      "path": "fixtures/cv_scanned_en_01.pdf",
+      "language": "en",
+      "layout": "single_column",
+      "pdf_nature": "scanned_image_only",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_scanned_ar_01",
+      "category": "scanned_image_only_cv",
+      "path": "fixtures/cv_scanned_ar_01.pdf",
+      "language": "ar",
+      "layout": "single_column",
+      "pdf_nature": "scanned_image_only",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_scanned_en_02",
+      "category": "scanned_image_only_cv",
+      "path": "fixtures/cv_scanned_en_02.pdf",
+      "language": "en",
+      "layout": "single_column",
+      "pdf_nature": "scanned_image_only",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_mixed_01",
+      "category": "mixed_digital_scanned",
+      "path": "fixtures/cv_mixed_01.pdf",
+      "language": "en",
+      "layout": "mixed_pages",
+      "pdf_nature": "mixed",
+      "pages": 2
+    },
+    {
+      "fixture_id": "cv_mixed_02",
+      "category": "mixed_digital_scanned",
+      "path": "fixtures/cv_mixed_02.pdf",
+      "language": "en",
+      "layout": "mixed_pages",
+      "pdf_nature": "mixed",
+      "pages": 2
+    },
+    {
+      "fixture_id": "cv_tounicode_proper_01",
+      "category": "cid_tounicode",
+      "path": "fixtures/cv_tounicode_proper_01.pdf",
+      "language": "ar_en",
+      "layout": "single_column",
+      "pdf_nature": "digital_text_tounicode",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_broken_encoding_01",
+      "category": "broken_encoding",
+      "path": "fixtures/cv_broken_encoding_01.pdf",
+      "language": "en_broken",
+      "layout": "single_column",
+      "pdf_nature": "digital_broken_encoding",
+      "pages": 1
+    },
+    {
+      "fixture_id": "contract_employment_en_01",
+      "category": "contract",
+      "path": "fixtures/contract_employment_en_01.pdf",
+      "language": "en",
+      "layout": "legal_prose",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "contract_kuwait_labor_law_real_01",
+      "category": "contract",
+      "path": "fixtures/contract_kuwait_labor_law_real_01.pdf",
+      "language": "ar",
+      "layout": "official_legal",
+      "pdf_nature": "digital_text_real_world",
+      "pages": 3
+    },
+    {
+      "fixture_id": "identity_civil_id_digital_01",
+      "category": "identity_document",
+      "path": "fixtures/identity_civil_id_digital_01.pdf",
+      "language": "ar_en",
+      "layout": "id_card",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "identity_passport_scanned_01",
+      "category": "identity_document",
+      "path": "fixtures/identity_passport_scanned_01.pdf",
+      "language": "en",
+      "layout": "passport_biodata",
+      "pdf_nature": "scanned_image_only",
+      "pages": 1
+    },
+    {
+      "fixture_id": "table_compensation_01",
+      "category": "table_heavy",
+      "path": "fixtures/table_compensation_01.pdf",
+      "language": "en",
+      "layout": "table",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "table_experience_matrix_01",
+      "category": "table_heavy",
+      "path": "fixtures/table_experience_matrix_01.pdf",
+      "language": "en",
+      "layout": "table",
+      "pdf_nature": "digital_text",
+      "pages": 1
+    },
+    {
+      "fixture_id": "cv_en_digital_multipage_01",
+      "category": "english_digital_cv",
+      "path": "fixtures/cv_en_digital_multipage_01.pdf",
+      "language": "en",
+      "layout": "single_column_multipage",
+      "pdf_nature": "digital_text",
+      "pages": 2
+    }
+  ],
+  "policy": {
+    "no_txt_cvs": true,
+    "no_trivial_placeholders": true,
+    "structurally_valid_pdfs_only": true,
+    "paid_ocr": false
+  }
+}

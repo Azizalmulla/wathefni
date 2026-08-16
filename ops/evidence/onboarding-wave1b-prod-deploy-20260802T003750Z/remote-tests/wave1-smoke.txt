@@ -1,0 +1,42 @@
+=== Onboarding Wave 1 — read authority smoke ===
+PASS  load_onboarding_items exists
+PASS  employee_onboarding_items wraps load
+PASS  loader has no candidates.read
+PASS  loader joins employees
+PASS  loader does not call dashboard_effective_permissions
+PASS  plaintext bank forbidden helper
+PASS  bank_details forbidden
+PASS  iban text forbidden
+PASS  normal doc allowed
+PASS  receipt rejects bank_details
+PASS  SEED defaults off
+PASS  HR_MUTATE defaults off
+PASS  SEED off when 'off'
+PASS  HR_MUTATE off when 'off'
+PASS  reminder candidates require company_code
+PASS  reminder scan is tenant_safe marker
+PASS  empty company reminder candidates empty
+PASS  empty company still-onboarding empty
+PASS  counts required_total=3
+PASS  counts received=1
+PASS  counts pending excludes waived
+PASS  template bank label mentions ESS/encrypted
+PASS  template bank item_type is task (not plaintext text)
+PASS  summary returns items
+PASS  summary bank_collection ess
+PASS  summary counts match items
+PASS  next item skips bank_details
+PASS  mask redacts bank value
+--- DB behavioural ---
+PASS  DB load returns checklist rows
+PASS  DB load types are onboarding items
+PASS  wrong company returns empty
+PASS  summary counts == SQL list counts
+PASS  summary items length == loaded
+PASS  reminder company scope excludes other tenant
+PASS  reminder includes company employee
+PASS  reminder without company empty
+PASS  detail helper uses company-scoped find
+PASS  detail uses context_manager_allows_employee
+
+RESULT  pass=38 fail=0

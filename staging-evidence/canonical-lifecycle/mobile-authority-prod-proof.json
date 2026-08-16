@@ -1,0 +1,209 @@
+{
+  "pass": 36,
+  "fail": 0,
+  "proof": {
+    "checks": [
+      {
+        "label": "EN stage label present",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "AR ready_for_review label contract",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR manager real production login",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "me backend_current",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "me advertises shortlist",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "cancel/reschedule feature_disabled on mobile",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR detail advertises shortlist+reject",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR detail omits schedule_interview",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR detail omits hire from ready_for_review",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR shortlist prepare succeeds (not permission_denied)",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "shortlist prepare code not permission_denied",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR shortlist executes",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR reject prepare succeeds",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "HR reject executes",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "hire from valid shortlisted stage prepares",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "hire prepare not permission_denied",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "recruiter production login",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "recruiter hire absent",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "recruiter hire denied",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "stale decision returns stale_decision",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "stale distinct from permission_denied",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview detail readable",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview notes write advertised",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview cancel absent",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview reschedule absent",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview notes save succeeds",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "tenant isolation hides other company candidate",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "no synthetic employee left from abandoned hire",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "WATHEFNI applications unchanged",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "WATHEFNI interviews unchanged",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "WATHEFNI employees unchanged",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "WATHEFNI outbound unchanged",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "WATHEFNI decision audits unchanged",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "synthetic companies removed",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "synthetic applications removed",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "synthetic interviews removed",
+        "ok": true,
+        "detail": null
+      }
+    ],
+    "proof": {
+      "wathefni_before": {
+        "applications": 17,
+        "interviews": 4,
+        "employees": 4,
+        "outbound": 5,
+        "decision_audits": 0
+      },
+      "wathefni_after": {
+        "applications": 17,
+        "interviews": 4,
+        "employees": 4,
+        "outbound": 5,
+        "decision_audits": 0
+      }
+    },
+    "cleanup": {
+      "companies_left": 0,
+      "apps_left": 0,
+      "interviews_left": 0
+    }
+  }
+}

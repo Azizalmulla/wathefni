@@ -1,0 +1,13 @@
+
+Omar Nasser
+omar.nasser@example.com | +96550001122
+LEFT COLUMN — Experience
+Senior Engineer 2020-2026
+Built intake queues and OCR gates.
+Owned PostgreSQL schemas.
+Mentored 4 engineers.
+RIGHT COLUMN — Education
+BSc Computer Engineering
+Kuwait University 2019
+Certifications
+AWS SAA, PMP

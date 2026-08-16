@@ -1,0 +1,40 @@
+=== waveD-phase2-inbound-allowlist.conf ===
+[Service]
+Environment=WATHEFNI_INBOUND_ALLOWED_COMPANIES=WATHEFNI
+# Mailbox sync must remain off for Phase 2
+Environment=WATHEFNI_MAILBOX_SYNC=off
+=== waveD-phase3-enterprise.conf ===
+# Wave D Phase 3 — enterprise hardening pins (safe defaults)
+# External tenants remain allowlist-gated. Mailbox sync stays off.
+# Postmark env: expected=production; PIN allows current webhooks without
+# custom header while staging markers still fail closed.
+[Service]
+Environment=WATHEFNI_INBOUND_ALLOWED_COMPANIES=WATHEFNI
+Environment=WATHEFNI_MAILBOX_SYNC=off
+Environment=WATHEFNI_INBOUND_DEFAULT_PLAN=enterprise
+Environment=WATHEFNI_POSTMARK_INBOUND_ENV=production
+Environment=WATHEFNI_POSTMARK_INBOUND_ENV_PIN=production
+Environment=WATHEFNI_INTAKE_RETENTION_EXECUTE=off
+Environment=WATHEFNI_INTAKE_TENANT_CONCURRENCY=8
+=== waveD-phase5-mailbox-connectors.conf ===
+[Service]
+# Wave D Phase 5 — premium mailbox connectors dark by default.
+# Forwarding remains the core product. External tenants stay allowlist-gated.
+Environment=WATHEFNI_MAILBOX_SYNC=off
+# Dedicated Microsoft mail-read OAuth app (NOT calendar SP, NOT Mail.Send SP).
+# Leave unset until tenant-flagged premium enablement; do not reuse:
+#   WATHEFNI_M365_MAIL_* (outbound Mail.Send)
+#   calendar/platform Microsoft app
+# Expected when enabled: WATHEFNI_M365_MAILBOX_CLIENT_ID / CLIENT_SECRET / REDIRECT_URI
+=== durable-email-ingress.conf ===
+[Service]
+EnvironmentFile=-/root/.openclaw/secrets/wathefni-intake.env
+Environment=WATHEFNI_INBOUND_EMAIL=on
+Environment=WATHEFNI_SENDER_ACKNOWLEDGMENT=off
+Environment=WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION=on
+Environment=WATHEFNI_TALENT_POOL_CLASSIFICATION_WORKERS=off
+Environment=WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_TENANTS=WATHEFNI
+Environment=WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_STARTED_AT=2026-07-26T16:15:58Z
+Environment=WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_RECIPIENT=92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com
+Environment=WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_MAX_ATTEMPTS=3
+Environment=WATHEFNI_INTAKE_TENANT_CONCURRENCY=1

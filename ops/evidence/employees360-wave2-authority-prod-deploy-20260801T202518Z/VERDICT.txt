@@ -1,0 +1,13 @@
+PASS
+
+Employees 360 Wave 2 production deploy (WATHEFNI only)
+Stamp: 20260801T202518Z
+Evidence: ops/evidence/employees360-wave2-authority-prod-deploy-20260801T202518Z/
+
+Schema: employees360-wave2-authority-v1
+Journal: 54c41793-e6c0-4125-ac0e-52057716b07b
+Backfill: 4/4 deterministic approved-map IDs
+Counts: persons=4 employments=4 assignments=4
+Prove 35/35; rollback drill PASS; restore-new PASS
+Health: 200
+Wave 3: not started

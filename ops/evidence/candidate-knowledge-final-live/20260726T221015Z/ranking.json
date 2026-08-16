@@ -1,0 +1,41 @@
+{
+  "shadow": {
+    "status": "PASS",
+    "class": "expected_authority_difference",
+    "denial": "held_or_job_ranking_ineligible",
+    "unexplained": []
+  },
+  "reader": {
+    "held_probe": {
+      "active": true,
+      "eligible": false,
+      "denial_reason": "held_or_job_ranking_ineligible",
+      "evidence_versions": {
+        "canonical_cv_version_id": "c36c0291-ceec-4697-91d8-02e4c108d5b5",
+        "facts_id": "7ad7eefe-0e8f-4e6b-8fd9-0b8f324776b5",
+        "knowledge_version": "candidate-knowledge-phase3-v1"
+      },
+      "prior_eligibility_bucket": "eligible"
+    },
+    "enabled": true,
+    "status": "PASS",
+    "held_remain_denied": true,
+    "unexplained_material_deltas": 0,
+    "scores_and_evidence_versions_ok": true,
+    "rollback_proven": true,
+    "health_enable": {
+      "http_code": 200,
+      "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+    },
+    "health_rollback_off": {
+      "http_code": 200,
+      "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+    },
+    "health_restore_on": {
+      "http_code": 200,
+      "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+    }
+  },
+  "status": "PASS",
+  "live_reader_decision": "ON"
+}

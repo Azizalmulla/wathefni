@@ -1,0 +1,19 @@
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=WATHEFNI_ENV=production
+Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
+Environment=WATHEFNI_EXPECTED_DATABASE_PORT=5432
+Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni
+Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-production-isolation-v1
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python /opt/wathefni/orchestrator/durable-email-ingress-worker.py --limit 1
+JOB_TYPES = frozenset(
+    {
+        "intake_validation",
+        "file_safety_scan",
+        "cv_identity_resolution",
+        "accepted_intake_preparation",
+        # Wave D6A: non-accepted identity still materializes a Held application
+        # (or fails loudly) so durable completion is never silent.
+        "held_intake_materialization",
+        "cv_extraction",
+        "profile_structuring",

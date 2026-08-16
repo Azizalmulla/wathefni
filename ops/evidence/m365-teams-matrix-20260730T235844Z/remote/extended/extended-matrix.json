@@ -1,0 +1,42 @@
+{
+  "stamp": "20260730T235917Z",
+  "create_ok": true,
+  "join_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MWNhZjE4MTEtNzY1NS00N2E1LTgzNTAtZTQ5YzVkZWIzN2E2%40thread.v2/0?co",
+  "join_url_ok": true,
+  "event_id": true,
+  "online_meeting_id": true,
+  "linked": true,
+  "attendee_count": 2,
+  "attendee_addresses": [
+    "ABDULAZIZALMULLA@wathefni.onmicrosoft.com",
+    "candidate-evidence@wathefni.onmicrosoft.com"
+  ],
+  "timezone": "UTC",
+  "start": "2026-07-31T01:59:17.0000000",
+  "invitation_contains_join": true,
+  "invitation_body_has_teams_text": true,
+  "invitation_email_note": "Graph calendar create with attendees issues Outlook invitations; mailbox Sent Items not readable under calendar RBACfA / OM-only app roles",
+  "reschedule_ok": true,
+  "same_event_id": true,
+  "same_online_meeting_id_kept": true,
+  "cancel_ok": true,
+  "cancel_status": 204,
+  "get_after_cancel_status": 404,
+  "audit": {
+    "create_event_id": true,
+    "create_om_id": true,
+    "web_link": true,
+    "reschedule_same_ids": true,
+    "cancel_removed_event": true
+  },
+  "assistant": {
+    "executor": "_schedule_interview_executor",
+    "microsoft_teams_in_source": true,
+    "uses_interview_service": true,
+    "microsoft_env_configured": true,
+    "live_helper_join_url": true
+  },
+  "organizer_allowed": true,
+  "outside_policy_denied": true,
+  "outside_policy_status": 403
+}

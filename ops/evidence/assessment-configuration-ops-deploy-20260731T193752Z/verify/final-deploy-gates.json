@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "chunk": "dashboard-C2UeV2r7.js",
+  "artifact_sha256": "eb634c49d58658b242e62984567505875be3cdc913c87360344ce6419a218196",
+  "collapsed": true,
+  "expanded": true,
+  "rtl": true,
+  "tabs_ok": true,
+  "tests_ok": true,
+  "rollback_ok": true
+}

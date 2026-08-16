@@ -1,0 +1,52 @@
+{
+  "stamp": "20260801T181251Z",
+  "verdict": "COMPLETE",
+  "critical_product_blockers": [],
+  "medium_product_blockers": [],
+  "open_low_hygiene": [
+    "ops_alert_pack_thin_for_multi_tenant",
+    "m365_mailbox_app_unset",
+    "d6ga_dead_letter_preserved",
+    "retention_execute_off"
+  ],
+  "closed_stale_findings": [
+    {
+      "id": "P3_assessments_orphan_queue_500",
+      "status": "STALE_CLOSED",
+      "live_behavior": "GET /dashboard/prehire/assessments/queue → 410 Gone assessment_queue_route_removed (never 500)",
+      "live_cohort_path": "GET /dashboard/prehire/applications?overview_cohort=assessment_ready_to_send → 200",
+      "caller_audit": 0,
+      "reprobe": "verify/p3-orphan-route-reprobe-20260801T182124Z.json",
+      "tombstone_deploy": "assessments-queue-tombstone-waveA-deploy-20260801T033029Z"
+    }
+  ],
+  "deferred_operational": [
+    "external_forwarding_canary_enablement",
+    "mailbox_connector_ga",
+    "broader_multi_tenant_ga",
+    "retention_execute_enablement",
+    "multi_tenant_ops_dashboard"
+  ],
+  "ga_posture_live": {
+    "wathefni_forwarding": "GO",
+    "external_tenants": "disabled",
+    "external_canary": "prepared_not_started",
+    "broader_ga": "NO-GO",
+    "mailbox_sync": "off",
+    "connectors": "dark"
+  },
+  "production_baseline_shas": {
+    "app.py": "27c7e2f0d8fe110b2683a0173b29122c5293411a64a71fcb865cdab8d079e790",
+    "inbound_cv_authority.py": "8cf1759371a2a3d4f1f42125e1ba960ae34db23f6c173f657aa1532cd95a4fab",
+    "durable_email_ingress.py": "5807b200bd1f22e3e4d6512be485b73595b1e4b5c89915e14dc2d0177fa59a16"
+  },
+  "flags": {
+    "WATHEFNI_INBOUND_EMAIL": "on",
+    "WATHEFNI_INBOUND_ALLOWED_COMPANIES": "WATHEFNI",
+    "WATHEFNI_MAILBOX_SYNC": "off",
+    "WATHEFNI_INTAKE_RETENTION_EXECUTE": "off"
+  },
+  "permission_begin_post_hiring": true,
+  "permission_enable_external_or_canary": false,
+  "permission_enable_mailbox_sync": false
+}

@@ -1,0 +1,202 @@
+[
+  {
+    "name": "normal day approved + payroll eligible",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overnight projection present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "multi-session day has 2+ sessions",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "paid and unpaid breaks present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "missing check-in exception",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "missing check-out exception",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "late minutes > 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "early leave minutes > 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "absence status",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dispute base correction requested",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dispute base approved (single \u2014 lateness)",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dispute base applied (approve\u2260apply)",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employee dispute raised",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "locked metadata on projection",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payroll lock denies correction",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "click exception opened",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "click exception assigned",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "correction requested",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "case status requested (not applied)",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "reject without apply",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "absence exception for dual",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dual correction requested",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "first approval dual_pending",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "not applied after first approve",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "same approver blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "second approval ready to apply",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "approve and apply remain separate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "apply after dual approval",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dispute resolved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "reopen after evidence",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "stale row_version fail-closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "out-of-scope manager denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "manager self-correction denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "daily board seed rows >= 8",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "has approved row",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "has incomplete rows",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "has absent row",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "has locked row",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "exclusion reasons sample non-empty",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "API/UI totals exact match",
+    "ok": true,
+    "detail": null
+  }
+]

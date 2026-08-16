@@ -1,0 +1,14 @@
+{
+  "has_no_job_assigned": true,
+  "has_cvs_need_attention": true,
+  "has_review_identity": true,
+  "has_expertise_col": true,
+  "has_received_col": true,
+  "has_manual_upload": true,
+  "absent_open_intake_ops_cta": true,
+  "has_with_a_job_pill": true,
+  "ok": true,
+  "js": [
+    "dashboard-Cj-bOz7F.js"
+  ]
+}

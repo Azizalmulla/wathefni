@@ -1,0 +1,80 @@
+    PRODUCTION READINESS R5I — compensation planning surface (staging DB)
+    tenant: R5I46D7F6
+      PASS  comp planning enableable
+      PASS  JA hard blocks enable
+      PASS  enable JA+Comp A
+      PASS  enable JA+Comp B
+      PASS  A workspace ready
+      PASS  A performance off
+      PASS  A talent off
+      PASS  A payroll off
+      PASS  A workforce planning off
+      PASS  A JA grade
+      PASS  A band belongs to Comp not JA
+      PASS  A non-KWD rejected
+      PASS  A create cycle
+      PASS  A freeze eligible population
+      PASS  A eligible ≠ increase
+      PASS  A eligible n
+      PASS  A snapshot frozen JA+band
+      PASS  A budget
+      PASS  A over-budget hard block
+      PASS  A recommendation
+      PASS  A budget math converges
+      PASS  A empty manager is zero rows
+      PASS  A scoped manager sees report
+      PASS  A scoped manager not company-wide
+      PASS  B calibrate
+      PASS  B original remains
+      PASS  B calibrated distinct
+      PASS  C SOD same actor blocked
+      PASS  C approve
+      PASS  C finalize
+      PASS  C decision not applied
+      PASS  C salary/payroll not mutated
+      PASS  F payroll OFF blocks wathefni_payroll
+      PASS  D explicit package
+      PASS  D not applied
+      PASS  D handoff idempotent
+      PASS  D handoff ≠ execution
+      PASS  D payroll ON uses explicit handoff
+      PASS  D payroll handoff not paid
+      PASS  E second cycle
+      PASS  E launch with advisory context
+      PASS  E HiPo ≠ automatic raise
+      PASS  E guided context allowed without auto formula
+      PASS  G later band v2
+      PASS  G snapshot base immutable
+      PASS  G snapshot band version immutable
+      PASS  G history reconstructable
+      PASS  Compensation Planning HTTP routes registered
+      PASS  no Employee App Compensation namespace
+      PASS  no HR Mobile Compensation namespace
+      PASS  unauthenticated workspace not public
+      PASS  HR without Compensation permission 403
+      PASS  403 is not empty-cycles
+      PASS  manager admin workspace 403
+      PASS  manager worksheet route allowed
+      PASS  manager empty scope is not company-wide
+      PASS  manager empty scope is zero rows
+      PASS  HR workspace HTTP
+      PASS  HR lists cycles
+      PASS  HR worksheet HTTP
+      PASS  export without comp_planning.export is 403
+      PASS  export with comp_planning.export
+      PASS  export has no hidden rows
+      PASS  recommend-only cannot approve
+      PASS  non-KWD create is 422
+      PASS  non-KWD names no FX
+      PASS  tenant isolation blocks foreign cycle
+      PASS  G disable ok
+      PASS  G disable hides workspace
+      PASS  G historical cycle preserved
+      PASS  G history still reconstructable after disable
+      PASS  JA off → Comp unavailable
+      PASS  JA off does not guess worksheet
+      PASS  assistant mutation forbidden
+
+    74 passed, 0 failed
+R5I_COMPENSATION_PLANNING_SURFACE_DB_PASS
+STAGING_RC=0

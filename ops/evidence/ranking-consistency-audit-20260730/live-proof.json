@@ -1,0 +1,189 @@
+{
+  "company": "WATHEFNI",
+  "checks": {
+    "default_assessment_mode": "unused",
+    "cv_default_required": true,
+    "assessment_lateral_wired_into_pool": false,
+    "reviewable_used_in_pool": false,
+    "pool_excludes_archived": false,
+    "pool_excludes_hired_rejected_withdrawn": true,
+    "ui_uses_total_matching_not_eligible": true,
+    "RankingResponse_omits_eligible_count": true,
+    "top_n_dashboard": 10,
+    "no_visibility_sql_in_pool": true
+  },
+  "jobs": [
+    {
+      "position": "FULLSTACK_DEVELOPER",
+      "pool_total_run": 2,
+      "pool_total_live": 2,
+      "pool_eq_live": true,
+      "eligible_count": 0,
+      "not_met_count": 0,
+      "unknown_count": 2,
+      "header_matching_ne_eligible": true,
+      "jobs_active_pipeline": 1,
+      "matching_ne_active_pipeline": true,
+      "item_buckets": {
+        "insufficient_information": 2
+      },
+      "pool_statuses": {
+        "screening_complete": 1,
+        "awaiting_cv": 1
+      },
+      "multi_application_people": 0,
+      "counters_sum": 2,
+      "counters_sum_lt_pool": false,
+      "not_applicable_uncounted": false,
+      "shown_if_top10": 2
+    },
+    {
+      "position": "HR",
+      "pool_total_run": 2,
+      "pool_total_live": 2,
+      "pool_eq_live": true,
+      "eligible_count": 0,
+      "not_met_count": 0,
+      "unknown_count": 0,
+      "header_matching_ne_eligible": true,
+      "jobs_active_pipeline": 2,
+      "matching_ne_active_pipeline": false,
+      "item_buckets": {
+        "not_applicable": 2
+      },
+      "pool_statuses": {
+        "shortlisted": 2
+      },
+      "multi_application_people": 0,
+      "counters_sum": 0,
+      "counters_sum_lt_pool": true,
+      "not_applicable_uncounted": true,
+      "shown_if_top10": 2
+    },
+    {
+      "position": "ACCOUNTING",
+      "pool_total_run": 1,
+      "pool_total_live": 1,
+      "pool_eq_live": true,
+      "eligible_count": 0,
+      "not_met_count": 0,
+      "unknown_count": 0,
+      "header_matching_ne_eligible": true,
+      "jobs_active_pipeline": 1,
+      "matching_ne_active_pipeline": false,
+      "item_buckets": {
+        "not_applicable": 1
+      },
+      "pool_statuses": {
+        "review_pending": 1
+      },
+      "multi_application_people": 0,
+      "counters_sum": 0,
+      "counters_sum_lt_pool": true,
+      "not_applicable_uncounted": true,
+      "shown_if_top10": 1
+    },
+    {
+      "position": "ACCOUNTING_EXCEL",
+      "pool_total_run": 1,
+      "pool_total_live": 1,
+      "pool_eq_live": true,
+      "eligible_count": 0,
+      "not_met_count": 0,
+      "unknown_count": 0,
+      "header_matching_ne_eligible": true,
+      "jobs_active_pipeline": 1,
+      "matching_ne_active_pipeline": false,
+      "item_buckets": {
+        "not_applicable": 1
+      },
+      "pool_statuses": {
+        "screening_complete": 1
+      },
+      "multi_application_people": 0,
+      "counters_sum": 0,
+      "counters_sum_lt_pool": true,
+      "not_applicable_uncounted": true,
+      "shown_if_top10": 1
+    },
+    {
+      "position": "FINANCE",
+      "pool_total_run": 1,
+      "pool_total_live": 1,
+      "pool_eq_live": true,
+      "eligible_count": 0,
+      "not_met_count": 0,
+      "unknown_count": 1,
+      "header_matching_ne_eligible": true,
+      "jobs_active_pipeline": 1,
+      "matching_ne_active_pipeline": false,
+      "item_buckets": {
+        "insufficient_information": 1
+      },
+      "pool_statuses": {
+        "screening": 1
+      },
+      "multi_application_people": 0,
+      "counters_sum": 1,
+      "counters_sum_lt_pool": false,
+      "not_applicable_uncounted": false,
+      "shown_if_top10": 1
+    },
+    {
+      "position": "SOCIAL_MEDIA_MANAGER",
+      "pool_total_run": 1,
+      "pool_total_live": 1,
+      "pool_eq_live": true,
+      "eligible_count": 0,
+      "not_met_count": 0,
+      "unknown_count": 0,
+      "header_matching_ne_eligible": true,
+      "jobs_active_pipeline": 1,
+      "matching_ne_active_pipeline": false,
+      "item_buckets": {
+        "not_applicable": 1
+      },
+      "pool_statuses": {
+        "shortlisted": 1
+      },
+      "multi_application_people": 0,
+      "counters_sum": 0,
+      "counters_sum_lt_pool": true,
+      "not_applicable_uncounted": true,
+      "shown_if_top10": 1
+    }
+  ],
+  "verdict": "FAIL",
+  "policy_related_tables": [
+    "job_ranking_criteria",
+    "job_ranking_criteria_sets"
+  ],
+  "divergences": [
+    "FULLSTACK_DEVELOPER: matching=2 vs eligible=0",
+    "FULLSTACK_DEVELOPER: ranking_pool=2 vs jobs_active_pipeline=1",
+    "HR: matching=2 vs eligible=0",
+    "HR: eligible+not_met+unknown=0 < pool=2 (not_applicable uncounted=True)",
+    "ACCOUNTING: matching=1 vs eligible=0",
+    "ACCOUNTING: eligible+not_met+unknown=0 < pool=1 (not_applicable uncounted=True)",
+    "ACCOUNTING_EXCEL: matching=1 vs eligible=0",
+    "ACCOUNTING_EXCEL: eligible+not_met+unknown=0 < pool=1 (not_applicable uncounted=True)",
+    "FINANCE: matching=1 vs eligible=0",
+    "SOCIAL_MEDIA_MANAGER: matching=1 vs eligible=0",
+    "SOCIAL_MEDIA_MANAGER: eligible+not_met+unknown=0 < pool=1 (not_applicable uncounted=True)"
+  ],
+  "verdict_reasons": [
+    "Header copy uses total_matching (=pool_total), never eligible_count",
+    "eligible_count unused in RankingPage / RankingResponse types",
+    "Leaderboard is top-N of sorted full pool, not eligible-filtered list",
+    "Pool = production non-terminal apps (no CV gate, archived not excluded); Jobs active_pipeline = CV + exclude archived",
+    "No assignment/visibility SQL on Ranking pool",
+    "CV-first assessment default unused PASS; assessment_pool_lateral_sql unwired",
+    "not_applicable bucket omitted from eligible/not_met/unknown counters"
+  ],
+  "edge_cases_live": {
+    "archived_in_any_positive_pool": false,
+    "hired_rejected_withdrawn_in_pool": false,
+    "multi_application_any": false,
+    "all_current_runs_eligible_zero": true
+  }
+}

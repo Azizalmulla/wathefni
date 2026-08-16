@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "production_dark_execution_go": true,
+  "production_dark_started": false,
+  "production_deploy": false,
+  "production_canary": false,
+  "live_tools": false,
+  "ranking_cutover": false,
+  "external_tenants": false,
+  "worker_backfill": "PASS",
+  "voyage_bench": "PASS",
+  "blockers": []
+}

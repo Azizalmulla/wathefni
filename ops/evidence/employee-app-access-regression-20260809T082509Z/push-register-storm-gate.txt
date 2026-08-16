@@ -1,0 +1,7 @@
+[PASS] requestRef avoids unstable request dep
+[PASS] registration effect does not depend on request
+[PASS] single-flight / lastRegisteredToken present
+[PASS] token listener never re-asks permission
+[PASS] askedPermission gates OS prompt once
+[PASS] soft access codes do not blockApp on api phase
+GREEN push-register-storm gate

@@ -1,0 +1,6 @@
+/opt/wathefni/orchestrator/app.py:22207:                "error": "identity_binding_not_authorized",
+/opt/wathefni/orchestrator/app.py:23688:                    if not _inbound_cv_authority.held_review_extraction_authorized(
+/opt/wathefni/orchestrator/app.py:58052:                    if _inbound_cv_authority.held_review_extraction_authorized(
+/opt/wathefni/orchestrator/app.py:58077:                    "identity_binding_not_authorized"
+/opt/wathefni/orchestrator/app.py:58122:                    "status": "extraction_soft_failed",
+/opt/wathefni/orchestrator/inbound_cv_authority.py:1074:def held_review_extraction_authorized(

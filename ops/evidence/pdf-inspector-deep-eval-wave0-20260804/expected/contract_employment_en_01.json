@@ -1,0 +1,23 @@
+{
+  "fixture_id": "contract_employment_en_01",
+  "category": "contract",
+  "language": "en",
+  "layout": "legal_prose",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "EMPLOYMENT CONTRACT",
+    "Samir Haddad",
+    "Civil ID",
+    "Kuwait Labor Law"
+  ],
+  "expected_fields": {
+    "employee_name": "Samir Haddad",
+    "civil_id": "289010101234",
+    "salary_kwd": "1250"
+  },
+  "notes": "Generated employment contract with structured clauses.",
+  "sha256": "5aee000df04128732bd70babcc84bdb14b5d7afb0779f5a239f5778fe2f23514",
+  "bytes": 32446
+}

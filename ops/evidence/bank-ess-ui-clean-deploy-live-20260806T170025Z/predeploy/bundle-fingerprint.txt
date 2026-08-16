@@ -1,0 +1,12 @@
+Extraction & validation summary: True
+never overwrite: True
+data-document-extraction-summary: True
+data-compliance-findings: True
+data-compliance-register: True
+data-compliance-summary: True
+Bank details: True
+masked by default: True
+Currently verified: True
+data-completion-state: True
+Awaiting your review: True
+FINGERPRINT PASS

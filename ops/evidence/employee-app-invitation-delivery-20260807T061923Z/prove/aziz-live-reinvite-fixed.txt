@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "delivered": true,
+  "delivery_status": "delivered",
+  "channel": "email",
+  "error": null,
+  "code_in_result": false,
+  "after_status": "delivered",
+  "after_channel": "email",
+  "outbound_status": null
+}
+PASS aziz_live_reinvite_after_outbound_fix

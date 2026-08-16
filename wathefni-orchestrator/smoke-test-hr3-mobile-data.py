@@ -61,6 +61,19 @@ class FakeApp:
     def item_display_label(item: dict[str, Any]) -> str:
         return str(item.get("label") or item.get("document_type") or item.get("item_id") or "Item")
 
+    @staticmethod
+    def attendance_exception_kind(row: dict[str, Any] | None) -> str | None:
+        status = str((row or {}).get("status") or "").lower()
+        if status == "late":
+            return "lateness"
+        if status in {"absent", "absence"}:
+            return "absence"
+        return status or None
+
+    @staticmethod
+    def attendance_row_is_exception(row: dict[str, Any] | None) -> bool:
+        return FakeApp.attendance_exception_kind(row) is not None
+
 
 class CapabilityApp:
     HTTPException = ContractHTTPException
@@ -68,16 +81,24 @@ class CapabilityApp:
 
     @staticmethod
     def company_has_module(_company: str, module: str) -> bool:
-        return module in {"onboarding", "compliance", "attendance", "shifts", "pre_hiring"}
+        return module in {"onboarding", "compliance", "attendance", "shifts", "pre_hiring", "interviews"}
 
     @staticmethod
     def onboarding_hr_mutate_enabled() -> bool:
+        return True
+
+    @staticmethod
+    def onboarding_hr_mutate_enabled_for_company(_company: str) -> bool:
         return True
 
 
 class CapabilityAppOnboardingReadOnly(CapabilityApp):
     @staticmethod
     def onboarding_hr_mutate_enabled() -> bool:
+        return False
+
+    @staticmethod
+    def onboarding_hr_mutate_enabled_for_company(_company: str) -> bool:
         return False
 
 
@@ -141,7 +162,10 @@ def main() -> int:
     }
     for label, route in routes.items():
         check(route in source, f"{label} route is registered")
-    check("/dashboard/mobile/tasks/{task_id}/resolve" not in source, "HR-task resolve remains unexposed")
+    check("/dashboard/mobile/tasks/{task_id}/resolve" in source, "HR-task resolve is exposed for Mark done")
+    check("/dashboard/mobile/tasks/{task_id}" in source, "HR-task detail route is registered")
+    check("mobile_hr_task_resolve" in source, "scoped mobile resolve helper exists")
+    check("_load_hr_task" in source, "mobile task load enforces manager scope")
 
     check("/app/" not in source, "HR-3 adapters expose no Employee App route")
     check("ai-recruiter" not in source, "HR-3 adapters expose no legacy recruiter route")

@@ -1,0 +1,37 @@
+    workflow_approvals phase A slice 1 — DB integration prove
+      PASS  migration tables present
+      PASS  migration second apply idempotent
+      PASS  company settings default disabled
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  policy create
+      PASS  policy update (new active)
+      PASS  active policy is v2 two-step
+      PASS  approval instance creation
+      PASS  self-approval SoD denial
+      PASS  stale row_version conflict
+      PASS  multi-step progression step1
+      PASS  idempotent decision replay
+      PASS  delegation out-of-scope grant created
+      PASS  out-of-scope delegation denial
+      PASS  expired delegation denial
+      PASS  revokable grant created
+      PASS  delegation revoke
+      PASS  revoked delegation denial
+      PASS  valid delegation grant
+      PASS  valid delegation decision
+      PASS  cross-tenant read denial
+      PASS  cross-tenant write denial
+      PASS  audit events emitted correctly
+      PASS  disabling feature blocks new authority writes
+      PASS  offer path does not import workflow_approvals
+      PASS  leave authority paths do not import workflow_approvals
+      PASS  leave dual-control API still present
+      PASS  offer.approve permission untouched
+      PASS  synthetic canary cleanup
+
+    32 passed, 0 failed
+    PHASE_A_SLICE1_DB_FULL_PASS
+STAGING_DB_RC=0

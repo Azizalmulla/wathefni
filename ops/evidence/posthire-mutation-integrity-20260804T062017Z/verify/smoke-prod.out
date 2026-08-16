@@ -1,0 +1,4 @@
+availability_approve_registered False # gap documented if False — unknown_action on UI
+harness_mapping OK
+posthire-mutation-integrity smoke passed
+add_employee_path=dedicated_REST (bypasses assistant kill by design)

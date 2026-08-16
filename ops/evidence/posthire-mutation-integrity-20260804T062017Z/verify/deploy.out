@@ -1,0 +1,22 @@
+=== deploying ===
+Environment=WATHEFNI_ASSISTANT_MUTATIONS=0
+Environment=WATHEFNI_ASSISTANT_MUTATIONS=0
+Environment=WATHEFNI_ASSISTANT_MUTATIONS=0
+Environment=WATHEFNI_ASSISTANT_MUTATIONS=0
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+availability_approve_registered False # gap documented if False — unknown_action on UI
+harness_mapping OK
+posthire-mutation-integrity smoke passed
+add_employee_path=dedicated_REST (bypasses assistant kill by design)
+{
+  "mutations_allowed": false,
+  "whatsapp_status": "mutations_disabled",
+  "whatsapp_msg_snip": "Mutations are disabled for this assistant session. I can summarize, explain, inv",
+  "dashboard_status": "permission_denied",
+  "dashboard_is_mutations_disabled": false
+}
+LIVE_CHANNEL_PROBE_OK
+dashboard_hits ['Action cancelled — nothing changed.', 'mutations_disabled']
+DASHBOARD_OK
+BACKUP=/opt/wathefni/backups/production-pre-posthire-mutation-integrity-20260804T062017Z
+DEPLOY_OK

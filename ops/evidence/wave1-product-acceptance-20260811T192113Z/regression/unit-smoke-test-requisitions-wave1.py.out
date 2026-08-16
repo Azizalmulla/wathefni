@@ -1,0 +1,25 @@
+    requisitions wave1 — SM + flags + publish-gate wiring
+      PASS  schema version pinned
+      PASS  sql pack exists
+      PASS  draft→pending_approval
+      PASS  pending_approval→approved
+      PASS  pending_approval→rejected
+      PASS  rejected→draft
+      PASS  approved→open
+      PASS  open→filled
+      PASS  open→cancelled
+      PASS  approved not→filled
+      PASS  filled terminal
+      PASS  cancelled terminal
+      PASS  runtime flag default off
+      PASS  runtime flag on
+      PASS  allowlist normalizes
+      PASS  empty allowlist = nobody
+      PASS  rollback guidance present
+      PASS  prehire_jobs calls assert_job_publish_allowed
+      PASS  publish/reopen/resume path gated
+      PASS  app.ensure_schema wires ensure_requisitions_schema
+      PASS  no Requisitions UI page claimed
+
+21 passed, 0 failed
+REQUISITIONS_WAVE1_UNIT_PASS

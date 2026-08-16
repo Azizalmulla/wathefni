@@ -1,0 +1,35 @@
+SEED_NOTES {"prefix": "ATTW4UI620656", "capture_ops": {"status": 200, "ok": true}, "capture_seed": {"status": 200, "ok": true}, "ops_list": {"status": 200, "ok": true, "count": 1, "case_count": 0, "has_cases_key": true}, "attendance_sample": {"status": 200, "rows": 0}}
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-overview-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/attendance-ops-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4-ux-20260802T121338Z/screenshots/connector-health-ar-mobile.png
+{
+  "prefix": "ATTW4UI620656",
+  "company": "WATHEFNI",
+  "shots": [
+    "attendance-ops-ar-desktop.png",
+    "attendance-ops-ar-mobile.png",
+    "attendance-ops-en-desktop.png",
+    "attendance-ops-en-mobile.png",
+    "attendance-overview-ar-desktop.png",
+    "attendance-overview-ar-mobile.png",
+    "attendance-overview-en-desktop.png",
+    "attendance-overview-en-mobile.png",
+    "connector-health-ar-desktop.png",
+    "connector-health-ar-mobile.png",
+    "connector-health-en-desktop.png",
+    "connector-health-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false,
+  "jargon_scan_note": "UI copy audited in source; screenshots are visual evidence",
+  "ingest_enabled": false
+}

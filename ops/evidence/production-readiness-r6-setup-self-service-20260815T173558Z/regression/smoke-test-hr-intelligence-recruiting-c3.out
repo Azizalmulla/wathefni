@@ -1,0 +1,21 @@
+    hr intelligence recruiting c3 — prove
+      PASS  c3 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  uses c1 evaluator
+      PASS  no second math engine
+      PASS  ttf distinct tth
+      PASS  no universal source score
+      PASS  unknown stays unknown
+      PASS  canonical hire bridge
+      PASS  EN open
+      PASS  AR filled
+      PASS  source unknown en
+      PASS  source referral
+      PASS  c3 global off
+      PASS  empty allowlist admits after R6
+      PASS  canary ok
+      PASS  tenant iso
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    17 passed, 0 failed (unit-only)

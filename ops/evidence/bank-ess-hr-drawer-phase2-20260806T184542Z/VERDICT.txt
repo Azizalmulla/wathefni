@@ -1,0 +1,6 @@
+deployed
+
+HR onboarding drawer: BankReviewPanel wired + ownership groups + compact rows.
+Backend bank checklist sync/reconcile PASS for Aziz pending_hr.
+Mobile submittedAt {{date}} OTA published.
+Auth Wave 2 not started.

@@ -1,0 +1,19 @@
+    hr intelligence time pay c4 — prove
+      PASS  c4 module
+      PASS  c4 contract
+      PASS  c4 stamp
+      PASS  commercial analytics
+      PASS  c3 import regression
+      PASS  uses c1 evaluator
+      PASS  projection not SoT
+      PASS  no fx
+      PASS  EN status
+      PASS  AR status
+      PASS  all semantic keys
+      PASS  c4 global off
+      PASS  empty allowlist admits after R6
+      PASS  canary gate
+      PASS  tenant runtime isolation
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    15 passed, 0 failed (unit-only)

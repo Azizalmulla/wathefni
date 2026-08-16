@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "error": "schema_not_migrated:fail_closed_probe:missing=wave1br_missing_relation_probe_zzz",
+  "missing": [
+    "wave1br_missing_relation_probe_zzz"
+  ]
+}
+FAIL_CLOSED_OK

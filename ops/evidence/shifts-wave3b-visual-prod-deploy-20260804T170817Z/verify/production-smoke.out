@@ -1,0 +1,27 @@
+PASS posthire_bundle_present — PostHire-C4LKK5jr.js
+PASS wave3b_marker
+PASS roster_board
+PASS roster_rows
+PASS identity_once_component
+PASS overlap_layout
+PASS overnight_continuation
+PASS mobile_day_strip
+PASS fixed_end_sheet
+PASS history_soft_keep
+PASS client_filter_chrome
+PASS iq_wave2_marker
+PASS updating_non_reflow
+PASS filters_preserved
+PASS surfaces_preserved
+PASS composer_org
+PASS edit_org
+PASS mutation_concurrency
+PASS swap_actions
+PASS shared_priority_token
+PASS shared_review_token
+PASS no_legacy_scheduled_hex
+PASS no_legacy_conflict_hex
+PASS confirm_shell_present
+SHIFTS_WAVE3B_DB {"db": "wathefni", "bundle": "PostHire-C4LKK5jr.js"}
+PASS db_readable — wathefni
+SHIFTS_WAVE3B_VISUAL_SMOKE_OK

@@ -1,0 +1,111 @@
+{
+  "seed_enabled": false,
+  "hr_mutate_enabled": false,
+  "bank_receipt": [
+    false,
+    "bank_via_ess_required"
+  ],
+  "bank_forbidden_helper": true,
+  "reminder_no_company": true,
+  "employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "item_count": 6,
+      "helper_eq_summary_ids": true,
+      "counts_match_sql": true,
+      "pending": 4,
+      "received": 0,
+      "required_total": 4,
+      "wrong_tenant_empty": true,
+      "recompute_match": true,
+      "bank_values_redacted": true
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "name": "Fouad Burhamad",
+      "item_count": 6,
+      "helper_eq_summary_ids": true,
+      "counts_match_sql": true,
+      "pending": 4,
+      "received": 0,
+      "required_total": 4,
+      "wrong_tenant_empty": true,
+      "recompute_match": true,
+      "bank_values_redacted": true
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "item_count": 6,
+      "helper_eq_summary_ids": true,
+      "counts_match_sql": true,
+      "pending": 2,
+      "received": 2,
+      "required_total": 4,
+      "wrong_tenant_empty": true,
+      "recompute_match": true,
+      "bank_values_redacted": true
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "name": "Brian Saleh",
+      "item_count": 1,
+      "helper_eq_summary_ids": true,
+      "counts_match_sql": true,
+      "pending": 1,
+      "received": 0,
+      "required_total": 1,
+      "wrong_tenant_empty": true,
+      "recompute_match": true,
+      "bank_values_redacted": true
+    }
+  ],
+  "gates": {
+    "no_candidates_read_in_loader": true,
+    "all_four_present": true,
+    "all_reconcile": true
+  },
+  "item_fingerprint_after": [
+    "WATHEFNI-96550252254|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96550252254|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96550252254|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96550252254|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96550252254|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96550252254|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96566363363|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96566363363|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96566363363|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96566363363|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96566363363|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96566363363|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96597727743|bank_details|True|received|bad78241880ae6d5ae7d9512cb8bb321",
+    "WATHEFNI-96597727743|civil_id|True|received|fd1de835a88e1a642bc3fc17125e19e8",
+    "WATHEFNI-96597727743|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96597727743|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96597727743|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96597727743|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e",
+    "WATHEFNI-96599411617|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e"
+  ],
+  "checklist_unchanged": true,
+  "tenant_reminder_gate": {
+    "ok": true,
+    "reminder_foreign_count": 0,
+    "still_onboarding_no_company": true
+  },
+  "waived_probe": {
+    "ok": true,
+    "summary": {
+      "pending_count": 1,
+      "received_count": 1,
+      "required_total": 3
+    },
+    "sql": {
+      "pending_count": 1,
+      "received_count": 1,
+      "required_total": 2
+    }
+  },
+  "cleanup_probe_deleted": true,
+  "ok": true
+}

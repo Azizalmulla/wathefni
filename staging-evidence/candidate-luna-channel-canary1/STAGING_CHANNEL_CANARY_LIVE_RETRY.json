@@ -1,0 +1,96 @@
+{
+  "marker": "luna_channel_canary_v1",
+  "started_at": "2026-07-19T21:26:02+00:00",
+  "retry_reason": "user_confirmed_hi_conversation_live",
+  "conversation_id": "1611",
+  "authorization": {
+    "recipient_name": "Aziz Almulla",
+    "recipient_phone_redacted": "965****8566",
+    "recipient_phone_sha256": "492c7b867e94619fab58426d4c938b86f06983f8c4d6ded0fd29bb16e854c437"
+  },
+  "live_probe": {
+    "success": true,
+    "provider_message_id": null
+  },
+  "delivery": {
+    "ok": true,
+    "provider_message_id": null,
+    "provider_message_id_redacted": null,
+    "attempt_id": "df06de06-5882-47de-b535-fa3b82a3bc53",
+    "app_key": "luna-canary-689d455a47",
+    "battery_key": "wathefni_ability_v1",
+    "expires_at": "2026-07-21T21:26:00.753277+00:00",
+    "assessment_link_redacted": "http://127.0.0.1:8011/assessment/df06de06-5882-47de-b535-fa3b82a3bc53?token=***",
+    "mode": "send_assessment",
+    "binding_ok": true
+  },
+  "secure_link": {
+    "http_status": 200,
+    "html_ok": true,
+    "attempt_id_in_page": false,
+    "company": "WATHEFNI",
+    "battery_key": "wathefni_ability_v1",
+    "expires_at": "2026-07-21T21:26:00.753277+00:00"
+  },
+  "dedupe": {
+    "provider_message_id": "luna_channel_canary_v1.wamid.fb17a0ead93445519c5e0d3102fab117",
+    "ledger_row_count": 1,
+    "ledger_rows_redacted": [
+      {
+        "provider_message_id": "luna_channel_canary_v1.wamid.fb17a0ead93445519c5e0d3102fab117",
+        "status": "completed",
+        "sender_phone": "965****8566",
+        "conversation_id": "1611"
+      }
+    ],
+    "replay_duplicate": true,
+    "first_intent": "candidate_application_status",
+    "replay_intent": "candidate_application_status"
+  },
+  "mutation_guards": {
+    "stage_before": "screening_complete",
+    "stage_after": "screening_complete",
+    "stage_unchanged": true
+  },
+  "cleanup": {
+    "tokens_revoked": 1,
+    "assessment_responses": 0,
+    "assessment_scores": 0,
+    "assessment_reports": 0,
+    "assessment_events": 4,
+    "assessment_invitations": 2,
+    "assessment_tokens": 1,
+    "attempts": 1,
+    "bindings": 1,
+    "applications": 1,
+    "inbound": 1
+  },
+  "cleanup_zero": true,
+  "after_counters": {
+    "applications": 0,
+    "attempts": 0,
+    "inbound": 0
+  },
+  "pass": true,
+  "remaining_blocker": null,
+  "production_recommendation": "GO \u2014 promoted to production on operator request (2026-07-19).",
+  "ended_at": "2026-07-19T21:26:02+00:00",
+  "provider_message_id": "wamid.HBgLOTY1OTkzMzg1NjYVAgARGBJFNDhBMTc3NDcxMkZENURCODAA",
+  "provider_message_id_source": "outbound_delivery_events.payload.send_result.json.data.response.messages[0].id",
+  "connectivity_probe_provider_message_id": "wamid.HBgLOTY1OTkzMzg1NjYVAgARGBIxOEEyQUQyMzU3MzI0MjY5N0EA",
+  "checks": {
+    "live_send_ok": true,
+    "delivery_status_sent": true,
+    "provider_message_id_present": true,
+    "secure_link_http_200": true,
+    "inbound_dedupe_replay_ok": true,
+    "stage_unchanged": true,
+    "synthetic_cleanup_ok": true
+  },
+  "pass_reason": "live assessment invite delivered with real WhatsApp wamid; prior false fail was canary extractor missing nested data.response.messages[].id",
+  "authorized_recipient": {
+    "name": "Aziz Almulla",
+    "phone_redacted": "965****8566"
+  },
+  "note": "Conversation validated by user hi; staging link seeded to 1611; OpenClaw temporarily pointed at staging orch 8011 for canary then restored."
+}

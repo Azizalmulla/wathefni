@@ -1,0 +1,7 @@
+OK schema
+OK preview create/update/review/name-alone
+OK commit updates applied
+OK skip when unchanged
+OK concurrency-safe undo
+OK honesty invariants
+OK employee migration foundation P3 local smoke

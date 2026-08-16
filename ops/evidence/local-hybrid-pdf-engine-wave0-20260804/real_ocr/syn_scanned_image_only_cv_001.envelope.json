@@ -1,0 +1,92 @@
+{
+  "contract": "document_envelope@1",
+  "company_code": "WATHEFNI",
+  "subject_type": "other",
+  "subject_key": "syn_scanned_image_only_cv_001",
+  "file_id": null,
+  "content_sha256": "15052c55d362c868730b45c53f1f3614e259cdec586263865884f55a974f7ef1",
+  "source_channel": "real_ocr_proof_wave0",
+  "migration_batch_id": null,
+  "document_class": "cv",
+  "authority_label": "machine_extracted",
+  "filename": "syn_scanned_image_only_cv_001.pdf",
+  "processing": {
+    "route": "local_hybrid_pdf_engine",
+    "engine_id": "local_hybrid_pdf_engine_wave0",
+    "engine_version": "0.1.0",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "inspector_version": "0.2.6",
+    "inspector_extension_sha256": "f1613e52d611e9d7fc0382327120c0afe06d5af9910b9dfd0606b50f27f53a1d",
+    "request_id": null,
+    "pages_local": [],
+    "pages_ocr": [
+      1
+    ],
+    "pages_failed": [],
+    "page_methods": [
+      {
+        "page": 1,
+        "method": "ocr",
+        "reason": "inspector_needs_ocr",
+        "inspector_needs_ocr": true,
+        "quality_forced_ocr": false,
+        "error": null,
+        "text_sha256": "1b4b3eed7358747326474f232d65baab5ed0c00a3d381658bcd9027009cb8cd7",
+        "char_count": 176
+      }
+    ],
+    "quality_ok": true,
+    "confidence": null,
+    "estimated_cost_usd": 0.004,
+    "projected_cost_usd_if_ocr_executed": 0.004,
+    "billable_pages": 1,
+    "simulated_ocr": false,
+    "cache_hit": false,
+    "wall_ms": 709,
+    "limits": {
+      "max_pages": 15,
+      "max_bytes": 20971520,
+      "timeout_s": 180.0,
+      "max_retries": 2,
+      "max_projected_cost_usd": 0.12,
+      "allow_paid_ocr": true,
+      "cache_dir": "/opt/wathefni/evidence/local-hybrid-pdf-engine-wave0-20260804/cache/real"
+    },
+    "inspector": {
+      "pages_needing_ocr_raw": [
+        1
+      ],
+      "pages_with_tables": [],
+      "pages_with_columns": [],
+      "is_complex": false,
+      "ocr_reasons_by_page": []
+    },
+    "ocr": {
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "simulated": false,
+      "pages_requested_1idx": [
+        1
+      ],
+      "pages_requested_0idx": [
+        0
+      ],
+      "projected_cost_usd": 0.004,
+      "retries": 0,
+      "error": null,
+      "request_id": null,
+      "latency_ms": 708,
+      "billable_pages": 1,
+      "estimated_cost_usd": 0.004
+    },
+    "job_id": null,
+    "shadow": null
+  },
+  "text_ref": "inline:merged_markdown",
+  "structured_ref": null,
+  "retention_class": "ephemeral_synthetic",
+  "merged_markdown": "# Huda AlRashid\n\nSoftware Engineer\n\nEmail: huda.alrashid.4687@synthetic-eval.example\n\nPhone: +96551594875\n\nSkills: Kubernetes, Arabic NLP, SQL, React\n\nScanned synthetic CV page",
+  "error": null,
+  "created_at": "2026-08-03T22:54:09.520658+00:00"
+}

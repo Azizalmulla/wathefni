@@ -1,16 +1,17 @@
 import { useCallback, useRef, useState } from 'react'
 import { Alert } from 'react-native'
-import { useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/auth/AuthProvider'
 import { useI18n } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
+import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
 import { ApiError } from '@/api/client'
 import { approvedErrorMessage } from '@/api/errors'
 import { openPrivateFile } from '@/lib/documents'
 import { pickDocument, pickImageFromLibrary, UploadPickError } from '@/lib/uploadDocument'
-import { successHaptic } from '@/native/haptics'
+import { errorFeedback, successFeedback, warningFeedback } from '@/native/haptics'
+import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
 import {
   BankErrorView,
   BankLoadingView,
@@ -31,14 +32,14 @@ import type { BankEvidenceRow, BankMutationResponse, BankStatusResponse } from '
 export default function BankScreen() {
   const { t, locale } = useI18n()
   const { request, uploadFile, downloadFile, hasFeature } = useAuth()
-  const router = useRouter()
+  const onBack = useEmployeeSafeBack()
   const queryClient = useQueryClient()
   const bankEnabled = hasFeature('bank')
 
   const query = useAppQuery<BankStatusResponse>(
     ['bank', locale],
     `/app/bank?locale=${encodeURIComponent(locale)}`,
-    { staleTime: 0, enabled: bankEnabled },
+    { staleTime: HIGH_CHURN_STALE_MS, enabled: bankEnabled },
   )
 
   const [form, setForm] = useState<BankFormValues>({})
@@ -57,6 +58,13 @@ export default function BankScreen() {
   // becomes two. Cleared only after the server accepts the submission.
   const idempotencyKey = useRef<string | null>(null)
   const busy = useRef(false)
+  /** Latest evidence open wins — a newer tap supersedes an in-flight open. */
+  const openGeneration = useRef(0)
+
+  const softRefreshBank = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['bank'] })
+    void queryClient.invalidateQueries({ queryKey: ['onboarding'] })
+  }, [queryClient])
 
   const applyResult = useCallback(
     (result: BankMutationResponse | { bank?: BankStatusResponse }) => {
@@ -119,7 +127,7 @@ export default function BankScreen() {
           },
         })
         idempotencyKey.current = null
-        successHaptic()
+        successFeedback()
         applyResult(result)
         // Sensitive values never linger in component state after they are sealed.
         setForm({})
@@ -162,9 +170,10 @@ export default function BankScreen() {
         `/app/bank/requests/${encodeURIComponent(requestId)}/submit`,
         { method: 'POST' },
       )
-      successHaptic()
+      successFeedback()
       applyResult(result)
     } catch (error) {
+      errorFeedback()
       Alert.alert(t('common.error'), approvedErrorMessage(error, t))
     } finally {
       busy.current = false
@@ -175,6 +184,7 @@ export default function BankScreen() {
   const onWithdraw = useCallback(() => {
     const requestId = query.data?.submission?.request_id
     if (!requestId || busy.current) return
+    warningFeedback()
     Alert.alert(t('bank.withdrawConfirmTitle'), t('bank.withdrawConfirmMessage'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -191,6 +201,7 @@ export default function BankScreen() {
               )
               applyResult(result)
             } catch (error) {
+              errorFeedback()
               Alert.alert(t('common.error'), approvedErrorMessage(error, t))
             } finally {
               busy.current = false
@@ -213,7 +224,7 @@ export default function BankScreen() {
       if (requestId) parameters.request_id = requestId
       const transfer = uploadFile('/app/bank/evidence', picked, parameters)
       const uploaded = (await transfer.promise) as import('@/api/types').BankEvidenceUploadResponse
-      successHaptic()
+      successFeedback()
       const evidenceId = String(uploaded?.evidence_id || '')
       if (evidenceId) {
         setPendingEvidenceIds((prev) => (prev.includes(evidenceId) ? prev : [...prev, evidenceId]))
@@ -230,12 +241,14 @@ export default function BankScreen() {
       setFieldErrors({})
       setFormError(null)
       setExtractionNote(extractionNoteFromUpload(uploaded, t))
-      await query.refetch()
+      // Soft refresh — never block the form open on a full bank refetch.
+      softRefreshBank()
     } catch (error) {
       if (error instanceof UploadPickError) {
         Alert.alert(t('onboarding.permissionTitle'), t('onboarding.permissionMessage'))
         return
       }
+      errorFeedback()
       Alert.alert(t('common.error'), approvedErrorMessage(error, t))
       // Fail open: still let the employee enter details manually.
       setFormOpen(true)
@@ -243,11 +256,11 @@ export default function BankScreen() {
     } finally {
       setUploading(false)
     }
-  }, [form, query, t, uploadFile, uploading])
+  }, [form, query.data?.submission?.request_id, softRefreshBank, t, uploadFile, uploading])
 
   const onOpenEvidence = useCallback(
     async (evidence: BankEvidenceRow) => {
-      if (openingEvidenceId) return
+      const generation = ++openGeneration.current
       setOpeningEvidenceId(evidence.evidence_id)
       try {
         const handle = await openPrivateFile(
@@ -256,14 +269,19 @@ export default function BankScreen() {
           evidence.evidence_id,
           downloadFile,
         )
+        if (generation !== openGeneration.current) return
         await handle.completed
       } catch (error) {
+        if (generation !== openGeneration.current) return
+        errorFeedback()
         Alert.alert(t('common.error'), approvedErrorMessage(error, t))
       } finally {
-        setOpeningEvidenceId(null)
+        if (generation === openGeneration.current) {
+          setOpeningEvidenceId(null)
+        }
       }
     },
-    [downloadFile, openingEvidenceId, t],
+    [downloadFile, t],
   )
 
   const onRefresh = useCallback(async () => {
@@ -276,18 +294,18 @@ export default function BankScreen() {
   }, [query])
 
   if (!bankEnabled) {
-    return <BankUnavailableView onBack={() => router.back()} />
+    return <BankUnavailableView onBack={onBack} />
   }
 
-  if (query.isLoading && !query.data) return <BankLoadingView />
+  if (query.isLoading && !query.data) return <BankLoadingView onBack={onBack} />
   if (!query.data) {
     // Controlled rollout and company opt-out are explicit states, not errors:
     // show why the screen is unavailable instead of a retry loop.
     const code = String((query.error as { code?: string } | null)?.code || '')
     if (code === 'bank_ess_disabled' || code === 'bank_ess_not_allowlisted' || code === 'ess_v5_disabled') {
-      return <BankUnavailableView onBack={() => router.back()} />
+      return <BankUnavailableView onBack={onBack} />
     }
-    return <BankErrorView onRetry={() => void query.refetch()} />
+    return <BankErrorView onRetry={() => void query.refetch()} onBack={onBack} />
   }
 
   return (
@@ -330,7 +348,7 @@ export default function BankScreen() {
       openingEvidenceId={openingEvidenceId}
       refreshing={refreshing}
       onRefresh={() => void onRefresh()}
-      onBack={() => router.back()}
+      onBack={onBack}
       fieldErrors={fieldErrors}
       formError={formError}
       extractionNote={extractionNote}

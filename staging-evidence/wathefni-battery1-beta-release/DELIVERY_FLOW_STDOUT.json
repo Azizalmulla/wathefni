@@ -1,0 +1,132 @@
+{
+  "marker": "battery1_beta_prod_proof",
+  "started_at": "2026-07-18T22:54:18+00:00",
+  "environment": {
+    "application_environment": "production",
+    "database_environment": "production",
+    "database_environment_marker": "2646585bbedb",
+    "database_logical_name": "b1f1a54885f2",
+    "database_host": "aaf075b7b4bf",
+    "match": true
+  },
+  "delivery_mode": "dry_run",
+  "authoring_env": "false",
+  "authoring_off": true,
+  "real_external_message": false,
+  "recruiting_stage_mutated": false,
+  "offer_hire_action": false,
+  "ai_scoring": false,
+  "before_counts": {
+    "wathefni_attempts": 4,
+    "external_attempts": 0,
+    "external_batteries": 0,
+    "ability_items": 22,
+    "beta_en_items": 25
+  },
+  "hr_view": {
+    "assessments_module_ok": true,
+    "available_batteries": [
+      {
+        "battery_key": "wathefni_gawj_v1_ar_beta",
+        "company_code": "WATHEFNI",
+        "name": "Wathefni General Ability & Workplace Judgment \u2014 Beta",
+        "version": "beta_v1",
+        "is_active": false,
+        "locale": "ar",
+        "approved_for_use_status": "approved_for_use_beta",
+        "scores_are_supporting_evidence_only": true,
+        "selectable_for_hr_send": true,
+        "assessment_version_id": "43330814-2987-411b-a120-6cb661d91393",
+        "content_sha256": "d9a267f3a40a0bfe53d5e8dfc04a4e12540b911e0b80c4bb40af49b53f5cb095"
+      },
+      {
+        "battery_key": "wathefni_gawj_v1_en_beta",
+        "company_code": "WATHEFNI",
+        "name": "Wathefni General Ability & Workplace Judgment \u2014 Beta",
+        "version": "beta_v1",
+        "is_active": false,
+        "locale": "en",
+        "approved_for_use_status": "approved_for_use_beta",
+        "scores_are_supporting_evidence_only": true,
+        "selectable_for_hr_send": true,
+        "assessment_version_id": "469a1067-2d36-4824-9e5e-d4cfbbad06b4",
+        "content_sha256": "caf19b2eaaf177f27bb50fdc351ad9691886d42778eea8e348d71c6c232ca976"
+      },
+      {
+        "battery_key": "wathefni_ability_v1",
+        "company_code": "GLOBAL",
+        "name": "Wathefni Ability Assessment",
+        "version": "v1",
+        "is_active": true,
+        "locale": null,
+        "approved_for_use_status": "active",
+        "scores_are_supporting_evidence_only": false,
+        "selectable_for_hr_send": true,
+        "assessment_version_id": null,
+        "content_sha256": null
+      }
+    ],
+    "beta_label": "Wathefni General Ability & Workplace Judgment \u2014 Beta",
+    "item_count_en": 25,
+    "item_count_ar": 25,
+    "item7_revision": "58b443fb-dfa0-47b8-a947-4721f2be3ae7",
+    "item7_answer_key": "C",
+    "monitoring_flags": {
+      "7": "revised_after_internal_pilot",
+      "8": "difficulty_monitoring",
+      "22": "ceiling_effect_monitoring"
+    },
+    "can_inspect_en_ar": true,
+    "answer_keys_visible_with_manage": true
+  },
+  "safari": {
+    "progress_version_uses_state": true,
+    "legacy_data_attempt_gone": true,
+    "replaceChildren": true,
+    "svh": true,
+    "html_sha256": "ebc49418533c597c31851d0952150d920bc043f75287eaa115c7f333083ede60"
+  },
+  "delivery_flow": {
+    "hr_selected_battery": "wathefni_gawj_v1_en_beta",
+    "locale": "en",
+    "expires_days": 7,
+    "delivery_status": "intentionally_skipped",
+    "assessment_version_id": "469a1067-2d36-4824-9e5e-d4cfbbad06b4",
+    "secure_link_issued": true,
+    "candidate_completed": true,
+    "score_percent": "96.0",
+    "scoring_authority": "deterministic_frozen_wathefni_content",
+    "ai_scoring": false
+  },
+  "hr_report": {
+    "attempt_status": "completed",
+    "battery_key": "wathefni_gawj_v1_en_beta",
+    "assessment_version_id": "469a1067-2d36-4824-9e5e-d4cfbbad06b4",
+    "score_percent": "96.0",
+    "report_payload_ok": true,
+    "report_html_bytes": 3302,
+    "report_mentions_battery": true
+  },
+  "cleanup": {
+    "attempts": 1,
+    "responses": 25,
+    "tokens": 1,
+    "invitations": 2,
+    "events": 32,
+    "applications": 1,
+    "candidates": 1,
+    "scores": 1,
+    "reports": 1
+  },
+  "after_counts": {
+    "wathefni_attempts": 4,
+    "external_attempts": 0,
+    "external_batteries": 0,
+    "ability_items": 22,
+    "beta_en_items": 25,
+    "proof_attempts_remaining": 0,
+    "proof_apps_remaining": 0
+  },
+  "completed_at": "2026-07-18T22:54:19+00:00",
+  "ok": true
+}

@@ -1,0 +1,10 @@
+test_empty_extraction_blocks_publication (test_cv_extraction_v2.CvExtractionV2Tests.test_empty_extraction_blocks_publication) ... ok
+test_project_profile_facts_v2_keeps_sections (test_cv_extraction_v2.CvExtractionV2Tests.test_project_profile_facts_v2_keeps_sections) ... ok
+test_schema_has_required_sections (test_cv_extraction_v2.CvExtractionV2Tests.test_schema_has_required_sections) ... ok
+test_validate_moves_contaminated_skills_to_unmodeled (test_cv_extraction_v2.CvExtractionV2Tests.test_validate_moves_contaminated_skills_to_unmodeled) ... ok
+test_validate_recovers_languages_from_text (test_cv_extraction_v2.CvExtractionV2Tests.test_validate_recovers_languages_from_text) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK

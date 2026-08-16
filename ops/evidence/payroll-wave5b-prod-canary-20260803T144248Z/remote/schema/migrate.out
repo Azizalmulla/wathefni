@@ -1,0 +1,12 @@
+wave5_version 1.0.0
+wave4_version 1.0.0
+wave3_version 1.0.0
+wave2b_version 1.0.0
+wave2a_version 1.0.0
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'posts_payment': False, 'remittance': False, 'statutory_filing': False, 'pifss_worksheets': True, 'pifss_remittance': False, 'eos_worksheets': True, 'eos_auto_payable': False, 'automatic_legal_compliance_claim': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'ai_calculations': False, 'synthetic_only': True}
+connected_db wathefni
+wave5_tables ['payroll_eos_worksheets', 'payroll_pifss_worksheets', 'payroll_statutory_dual_control', 'payroll_statutory_rule_tables', 'payroll_statutory_worksheet_events']
+wave1_2a_2b_3_4_tables_ok
+MIGRATE_OK payroll_pifss_eos_wave5_prod
+ACK_PRODUCTION_PAYROLL_W5B=YES

@@ -1,0 +1,565 @@
+
+===== smoke-test-whatsapp-identity.py =====
+      PASS  flag defaults OFF when unset
+      PASS  flag parses truthy/falsy values correctly
+      PASS  read-only permission classification correct
+      PASS  flag OFF preserves legacy empty-perms behaviour (no regression on deploy)
+      PASS  flag ON: unlinked/empty identity reads but cannot mutate
+      PASS  flag ON: every mutating tool fails closed for empty perms; reads still allowed
+      PASS  flag ON: linked owner (real permission set) is unaffected
+      PASS  flag ON: partial-permission role enforced by its own permission set
+      PASS  _visible_tools hides mutating gated tools from unlinked identity (owner unaffected)
+      PASS  execution-time denial uses a clear, HR-facing access message (no raw tokens)
+      PASS  employee self-service routes through the non-HR handler, not the hardened orchestrator gate
+
+    11 passed, 0 failed
+
+    WHATSAPP IDENTITY HARDENING: ALL CHECKS PASSED
+
+===== smoke-test-cv-docx.py =====
+    cv docx — local-first structure, selective image OCR, cache
+      PASS  EN method local — docx-local-v2
+      PASS  EN quality ok
+      PASS  EN no OCR calls
+      PASS  EN header text
+      PASS  EN footer text
+      PASS  EN table cell
+      PASS  EN textbox
+      PASS  EN hyperlink href
+      PASS  EN provenance blocks
+      PASS  AR extracted
+      PASS  AR rtl flag present
+      PASS  AR no OCR
+      PASS  mixed bilingual flag
+      PASS  mixed no OCR for ordinary text
+      PASS  logo skipped — skip_logo
+      PASS  large image text candidate — text_candidate
+      PASS  OCR called once for text image — 1
+      PASS  logo not OCR'd
+      PASS  OCR text merged
+      PASS  OCR call count metadata
+      PASS  cache hit on second pass
+      PASS  cache avoids OCR
+      PASS  human preserve still available
+      PASS  corrupted needs_review
+      PASS  corrupted not quality_ok
+    summary: 25 passed, 0 failed
+
+===== smoke-test-cv-extraction-ocr.py =====
+    cv extraction — mistral-ocr-4-0 routing, arabic, cache, provenance
+      PASS  model pin is mistral-ocr-4-0
+      PASS  sdk pin is mistralai==2.6.0
+      PASS  never uses mistral-ocr-latest constant
+      PASS  arabic-indic digits normalize
+      PASS  persian digits normalize
+      PASS  email inside RTL marks
+      PASS  kuwait phone from arabic digits
+      PASS  url extracted
+      PASS  arabic headings detected
+      PASS  arabic month date parsed
+      PASS  arabic-only digital text accepted locally — accepted_local
+      PASS  empty fails quality
+      PASS  short fails quality
+      PASS  good bilingual passes quality
+      PASS  human_verified email preserved
+      PASS  non-protected field can update
+      PASS  cache key stable
+      PASS  cache key changes with model
+      PASS  mistral OCR default off
+      PASS  OCR only failed page indexes — [[1]]
+      PASS  mixed PDF keeps local page text
+      PASS  metadata has real stage/tier/provider/models
+      PASS  billable pages recorded
+      PASS  OCR skipped when flag off
+      PASS  cost estimate $4/1000 pages
+      PASS  meta has stage
+      PASS  meta has tier
+      PASS  meta has provider
+      PASS  meta has actual_request_model
+      PASS  meta has provider_response_model
+      PASS  no gpt-5.4-vision label
+    summary: 31 passed, 0 failed
+
+===== smoke-test-tiered-intake.py =====
+tiered intake smoke tests passed
+
+===== smoke-test-document-upload.py =====
+document upload harness — company DOCUPLOADTESTCO (env: /root/.openclaw/secrets/postgres.staging.env)
+  PASS  flag defaults OFF
+  PASS  upload denied while flag OFF (403)
+  PASS  compliance payload gate OFF when flag OFF
+  PASS  employee 360 gate OFF when flag OFF
+  PASS  flag flips ON
+  PASS  compliance payload gate ON when flag ON
+  PASS  employee 360 gate ON when flag ON
+  PASS  unsupported extension rejected (400)
+  PASS  empty file rejected (400)
+  PASS  oversize file rejected (400)
+  PASS  out-of-scope manager cannot upload (404)
+  PASS  unknown employee 404
+  PASS  item starts pending
+  PASS  upload returns ok
+  PASS  upload returns a file_id
+  PASS  item now received
+  PASS  document index resolves the item to the new file
+  PASS  hub lists exactly one document
+  PASS  uploaded file is marked available
+  PASS  uploaded file resolves tenant-scoped
+  PASS  uploaded file is downloadable from disk
+  PASS  compliance payload lists the uploaded civil_id with a file_id
+  PASS  employee 360 documents section includes the uploaded file
+  PASS  replace returns ok + file_id
+  PASS  index points at the replacement
+
+25 passed, 0 failed
+
+DOCUMENT UPLOAD: ALL CHECKS PASSED
+
+===== smoke-test-bulk-cv-import.py =====
+bulk CV import smoke tests passed
+
+===== smoke-test-canonical-recruiting-lifecycle.py =====
+    canonical recruiting lifecycle — matrix + binding + task + labels
+      PASS  exactly eight application stages
+      PASS  offer is not a canonical stage
+      PASS  communication states are four values
+      PASS  legacy map cv_received -> cv_processing
+      PASS  legacy map screening -> cv_processing
+      PASS  legacy map screening_complete -> ready_for_review
+      PASS  legacy map review_pending -> ready_for_review
+      PASS  legacy map offered -> shortlisted
+      PASS  legacy map offer_sent -> shortlisted
+      PASS  legacy map scheduled -> interview
+      PASS  legacy map needs_role -> None
+      PASS  legacy map import_review -> None
+      PASS  allows shortlisted -> hired
+      PASS  allows awaiting_cv -> cv_processing
+      PASS  allows cv_processing -> ready_for_review
+      PASS  allows shortlisted -> interview
+      PASS  allows ready_for_review -> interview
+      PASS  allows interview -> hired
+      PASS  allows ready_for_review -> rejected
+      PASS  allows ready_for_review -> shortlisted
+      PASS  allows shortlisted -> rejected
+      PASS  allows interview -> rejected
+      PASS  allows interview -> shortlisted
+      PASS  blocks awaiting_cv -> hired
+      PASS  blocks cv_processing -> hired
+      PASS  blocks ready_for_review -> hired
+      PASS  blocks hired -> shortlisted
+      PASS  blocks rejected -> shortlisted
+      PASS  blocks awaiting_cv -> interview
+      PASS  shortlist requires human confirmation
+      PASS  reject requires human confirmation
+      PASS  hire requires human confirmation
+      PASS  schedule requires human confirmation
+      PASS  cv success does not require confirmation
+      PASS  reject permission is candidate.decide
+      PASS  hire permission is candidate.decide
+      PASS  shortlist permission is candidate.manage
+      PASS  AI cannot shortlist without confirmation
+      PASS  reject without confirmation fails closed
+      PASS  label ready_for_review
+      PASS  label screening_complete
+      PASS  label review_pending
+      PASS  label cv_processing
+      PASS  label cv_received
+      PASS  label shortlisted
+      PASS  label interview
+      PASS  label hired
+      PASS  label rejected
+      PASS  label withdrawn
+      PASS  comm delivered_whatsapp -> sent
+      PASS  comm sent_email_fallback -> sent
+      PASS  comm needs_hr_action -> failed
+      PASS  comm suppressed -> intentionally_skipped
+      PASS  comm dashboard_only -> intentionally_skipped
+      PASS  comm pending -> pending
+      PASS  comm throttled -> pending
+      PASS  ready_for_review actions include shortlist+reject+schedule
+      PASS  ready_for_review cannot hire directly
+      PASS  shortlisted can hire/reject/schedule
+      PASS  terminal hired has no actions
+      PASS  tool reject uses candidate.decide
+      PASS  tool hire uses candidate.decide
+      PASS  tool shortlist uses candidate.manage
+      PASS  flag enabled
+      PASS  lifecycle schema ensure
+      PASS  WhatsApp ambiguity fails closed
+      PASS  conversation bind ok
+      PASS  bound conversation resolves to app A
+      PASS  shortlist transition ok
+      PASS  shortlist to_stage
+      PASS  shortlist idempotent replay
+      PASS  stale expected_from_stage fails closed
+      PASS  hire from ready_for_review blocked
+      PASS  HR task created
+      PASS  HR task idempotent for same cv_version
+      PASS  new CV version creates distinct ready task
+      PASS  tenant mismatch fails closed
+
+    result: 77 passed, 0 failed
+
+===== smoke-test-communication-router.py =====
+communication router smoke tests passed
+
+===== smoke-test-delivery-mode.py =====
+delivery mode dry_run smoke test passed (no real email/WhatsApp sent)
+
+===== smoke-test-delivery-reliability.py =====
+delivery reliability harness — company DELIVERYRELIABILITYCO (env: /root/.openclaw/secrets/postgres.staging.env)
+  PASS  humanize: mentions WhatsApp + email, not codes
+  PASS  humanize: suggested action mentions adding email
+  PASS  humanize: no raw reason codes leak
+  PASS  flow label humanizes shift
+  PASS  flow label humanizes leave_decision
+  PASS  readiness: templates not configured
+  PASS  readiness: email fallback available
+  PASS  readiness: 2 employees total
+  PASS  readiness: 1 with email, 1 missing
+  PASS  readiness: summary says templates not configured yet
+  PASS  closed session + templates off + email -> sent via email
+  PASS  email fallback reports channel email
+  PASS  email fallback reports ok
+  PASS  no email + templates off -> failed (no fake success)
+  PASS  informational failure raises NO HR task
+  PASS  needs-follow-up includes target_email field
+  PASS  needs-follow-up has the failed no-email message
+  PASS  needs-follow-up exposes no raw/encrypted body
+  PASS  scan attempts both seeded shifts
+  PASS  scan stamps reminder_sent_at on the email shift
+  PASS  scan stamps reminder_sent_at on the FAILED no-email shift
+  PASS  failed shift reminder does NOT re-fire on the next scan
+  PASS  scan delivered the email shift via email (email passed through)
+  PASS  scan recorded the no-email shift as failed
+  PASS  failed onboarding reminder stamps last_reminded_at (throttled)
+  PASS  throttled onboarding reminder is excluded within cooldown
+
+26 passed, 0 failed
+
+DELIVERY RELIABILITY HARNESS: ALL CHECKS PASSED
+
+===== smoke-test-outbound-delivery.py =====
+outbound delivery harness — company OUTBOUNDTESTCO (env: /root/.openclaw/secrets/postgres.staging.env)
+  PASS  layer flag OFF by default
+  PASS  flow gate OFF when layer off
+  PASS  layer flag ON
+  PASS  named flow enabled
+  PASS  other flow still gated
+  PASS  flows=all enables any flow
+  PASS  templates flag OFF by default
+  PASS  email fallback ON by default
+  PASS  session success -> delivered_whatsapp
+  PASS  session success -> channel whatsapp_session
+  PASS  closed session -> template delivers
+  PASS  template -> channel whatsapp_template
+  PASS  closed session + no template -> email fallback
+  PASS  email fallback -> channel email
+  PASS  critical + all channels fail -> needs_hr_action
+  PASS  needs_hr_action creates an HR task
+  PASS  HR task row exists, open & high priority
+  PASS  HR task records no message body (HR-safe)
+  PASS  standard + all fail (non-retryable) -> failed
+  PASS  standard failure raises NO HR task
+  PASS  transient + no fallback -> pending (retryable)
+  PASS  pending schedules a next attempt
+  PASS  sweep processes due pending messages
+  PASS  sweep delivers the recovered message
+  PASS  recovered message attempts incremented
+  PASS  repeated dedupe_key returns same message
+  PASS  repeated dedupe_key marks deduped
+  PASS  dedupe creates exactly one row
+  PASS  metadata_only stores no raw body
+  PASS  metadata_only stores a generic label preview
+  PASS  metadata_only stores no ciphertext
+  PASS  preview sensitivity keeps a readable preview
+  PASS  encrypted degrades safely when no keyring
+  PASS  real template send: disabled when flag off
+  PASS  real template send: unmapped key falls through
+  PASS  template mapping resolves approved name
+  PASS  real template send: approved mapping + dry_run = ok
+  PASS  real email send (dry_run) reports ok
+  PASS  real email send rejects empty recipient
+  PASS  layer writes consolidated audit events
+  PASS  all messages stay in our company
+  PASS  hr task list includes the delivery-failure task
+  PASS  hr task open count >= 1
+  PASS  needs-follow-up includes needs_hr_action message
+  PASS  needs-follow-up includes failed message
+  PASS  needs-follow-up keeps metadata-only body generic
+  PASS  needs-follow-up exposes no raw/encrypted body field
+  PASS  manager scope sees tasks for its managed employee
+  PASS  manager scope hides tasks for non-managed employees
+  PASS  manager scope filters needs-follow-up too
+  PASS  resolve_hr_task succeeds
+  PASS  resolved task drops out of the open list
+  PASS  resolve is company-scoped (other company cannot touch)
+
+53 passed, 0 failed
+
+OUTBOUND DELIVERY HARNESS: ALL CHECKS PASSED
+
+===== smoke-test-whatsapp-suppression.py =====
+whatsapp suppression harness — companies WASUPPRESSIONCO/WASUPPRESSIONCO2 (env: /root/.openclaw/secrets/postgres.staging.env)
+  PASS  detect opt-out: 'STOP'
+  PASS  detect opt-out: 'stop'
+  PASS  detect opt-out: '  Stop '
+  PASS  detect opt-out: 'unsubscribe'
+  PASS  detect opt-out: 'cancel messages'
+  PASS  detect opt-out: 'إلغاء الاشتراك'
+  PASS  detect opt-out: 'الغاء الاشتراك'
+  PASS  detect opt-out: 'إيقاف'
+  PASS  detect opt-out: 'توقف'
+  PASS  NOT opt-out: 'لا'
+  PASS  NOT opt-out: 'no'
+  PASS  NOT opt-out: 'no thanks'
+  PASS  NOT opt-out: 'hello'
+  PASS  NOT opt-out: ''
+  PASS  NOT opt-out: 'what about my shift'
+  PASS  NOT opt-out: 'stop the shift please'
+  PASS  inbound STOP from employee returns a confirmation
+  PASS  inbound STOP records a suppression
+  PASS  suppression scope defaults to whatsapp
+  PASS  inbound STOP from non-employee phone is ignored
+  PASS  inbound non-opt-out text does not suppress
+  PASS  suppressed (whatsapp) + email -> sent via email
+  PASS  suppressed: WhatsApp session provider NOT called
+  PASS  suppressed: WhatsApp template provider NOT called
+  PASS  suppressed: email provider WAS called
+  PASS  suppressed: reasons show opt-out for session + template
+  PASS  scope=all -> STATUS_SUPPRESSED (terminal)
+  PASS  scope=all: critical flow raises NO HR task
+  PASS  scope=all: email provider NOT called
+  PASS  scope=all: reasons include email opt-out
+  PASS  non-suppressed: session + template attempted, email lands
+  PASS  suppressed message appears in needs-follow-up
+  PASS  humanize: opt-out wording is calm (opted out)
+  PASS  humanize: opt-out leaks no raw codes
+  PASS  no cross-tenant leak: company 2 cannot see company 1's suppressed message
+  PASS  unsuppress clears suppression state
+  PASS  after unsuppress: WhatsApp session delivers again
+  PASS  template map: company-specific override wins for its company
+  PASS  template map: global default used for other company
+  PASS  template map: global default used when no company given
+  PASS  WATHEFNI_OUTBOUND_TEMPLATES stays off
+  PASS  catalog includes shift_rescheduled
+  PASS  company_name is injectable in onboarding welcome body
+
+43 passed, 0 failed
+
+WHATSAPP SUPPRESSION HARNESS: ALL CHECKS PASSED
+
+===== smoke-test-prehire-registry-parity.py =====
+    pre-hire registry migration — flag + parity + harness + behaviour
+      PASS  flag unset -> all actions disabled (legacy path)
+      PASS  flag 'off' -> disabled
+      PASS  flag 'all' -> every action enabled
+      PASS  flag '1' -> enabled
+      PASS  comma list enables only the named actions
+      PASS  comma list leaves unnamed actions disabled
+      PASS  shortlist_candidate is registered
+      PASS  shortlist_candidate module is a Pre-Hiring registry module
+      PASS  shortlist_candidate resolves through the harness module check
+      PASS  hire_candidate is registered
+      PASS  hire_candidate module is a Pre-Hiring registry module
+      PASS  hire_candidate resolves through the harness module check
+      PASS  notify_candidate is registered
+      PASS  notify_candidate module is a Pre-Hiring registry module
+      PASS  notify_candidate resolves through the harness module check
+      PASS  send_assessment is registered
+      PASS  send_assessment module is a Pre-Hiring registry module
+      PASS  send_assessment resolves through the harness module check
+      PASS  send_video_interview is registered
+      PASS  send_video_interview module is a Pre-Hiring registry module
+      PASS  send_video_interview resolves through the harness module check
+      PASS  PREHIRE_DASHBOARD_REGISTRY_MODULES is the three Pre-Hiring modules
+      PASS  hire uses the dedicated employee-creating executor
+      PASS  hire keeps posthire in result_keys
+      PASS  shortlist still uses the status-only executor
+      PASS  shortlist_candidate maps to candidate.manage
+      PASS  hire_candidate maps to candidate.decide
+      PASS  notify_candidate maps to candidate.manage
+      PASS  send_assessment maps to assessment.manage
+      PASS  send_video_interview maps to interview.manage
+      PASS  viewer cannot manage candidates
+      PASS  viewer cannot decide (hire)
+      PASS  whitelist keeps app_key
+      PASS  whitelist drops company_code
+      PASS  whitelist drops actor_role
+      PASS  whitelist drops stray
+      PASS  hire executor marks application hired
+      PASS  hire executor runs transition_hire (creates employee)
+      PASS  hire succeeds only when both steps succeed
+      PASS  hire result carries the posthire outcome for audit
+      PASS  hire fails when transition_hire fails (no silent half-hire)
+      PASS  hire skips transition_hire if the status update fails
+      PASS  hire reports failure if the status update fails
+      PASS  completed action returns ok
+      PASS  response returns the refreshed application for the UI
+      PASS  orchestrator never receives the client company
+      PASS  company comes from the session scope
+      PASS  audited as an APPLICATION action (not employee)
+      PASS  audit records the registry source
+      PASS  audit company is the session company
+      PASS  auto-confirm re-invokes the orchestrator exactly once
+      PASS  auto-confirmed action completes (no modal returned)
+      PASS  permission_denied maps to a 403 with HR-safe copy
+      PASS  an action outside the Pre-Hiring modules is rejected with 404
+      PASS  delivery is in dry-run for this test
+      PASS  send returns a simulated dry-run result (no real send)
+      PASS  real shortlist via registry completes
+      PASS  real shortlist returns the refreshed application
+      PASS  real shortlist writes an audit row
+      PASS  application is now shortlisted in the DB
+      PASS  repeated submit is idempotent / safe
+
+    61 passed, 0 failed
+    PRE-HIRE REGISTRY PARITY: ALL CHECKS PASSED
+
+===== smoke-test-browser-assessment.py =====
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-browser-assessment.py", line 119, in <module>
+    main()
+  File "/opt/wathefni/staging/orchestrator/smoke-test-browser-assessment.py", line 101, in main
+    assert_true(state["attempt"]["status"] == "in_progress", "opening browser assessment should start attempt")
+                ~~~~~^^^^^^^^^^^
+KeyError: 'attempt'
+
+===== smoke-test-assessments-cleanup1.py =====
+{"checks": {"failed": [], "passed": ["duplicate answer is idempotent", "duplicate answer does not advance", "concurrent duplicate inserts one response", "concurrent duplicate advances once", "wrong tenant cannot answer attempt", "WhatsApp returns browser link", "WhatsApp cannot advance answers", "HR cancel terminalizes attempt", "cancelled link rejected", "durable attempt expiry enforced", "expired status persisted", "resend revokes prior token", "resend new token is active", "dry-run delivery is intentionally skipped", "last answer completes from frozen version", "answer after completion rejected", "score and report immutable", "score and report pinned to same version", "completion does not rewrite screening facet", "assessment completion creates no offer", "assessment completion cannot hire", "exact attempt report opens", "incomplete assessment earns zero ranking points", "completed assessment without percent earns zero", "ready_for_review included in assessment queue", "queue and action count are identical", "authoring automated review passes deterministic checks", "human-gated authoring lifecycle reaches approved", "approved draft is not published to live bank"]}, "failed": 0, "passed": 29, "production_touched": false, "real_delivery_sent": false, "suite": "assessments_cleanup1", "synthetic_cleanup": {"applications": 0, "attempts": 0, "companies": 0, "drafts": 0, "modules": 0}}
+
+===== smoke-test-interview-workflow.py =====
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-interview-workflow.py", line 15, in <module>
+    import app
+  File "/opt/wathefni/staging/orchestrator/app.py", line 38, in <module>
+    import psycopg2.pool
+ModuleNotFoundError: No module named 'psycopg2.pool'; 'psycopg2' is not a package
+
+===== smoke-test-offer-lifecycle.py =====
+Offer-1 authority + schema contract
+  ok: employment_offers module catalogued
+  ok: employment_offers depends on pre_hiring
+  ok: owner can create
+  ok: owner can approve
+  ok: cannot approve from draft
+  ok: can send approved
+  ok: cannot send draft
+  ok: can edit draft
+  ok: cannot edit sent
+  ok: recruiter cannot approve
+  ok: hiring manager can approve
+  ok: hiring manager cannot send
+  ok: hire_override is grant-only
+  ok: hire_override permission mapped
+  ok: AI mutation rejected
+  ok: human and candidate actors allowed
+  ok: mobile advertise approve/return
+  ok: mobile V1 excludes edit/send
+  ok: mobile record/withdraw on sent
+  ok: generated PDF header
+  ok: terms fingerprint sha256
+  ok: draft -> pending_approval
+  ok: pending -> approved
+  ok: approved -> sent
+  ok: sent -> accepted
+  ok: accepted is terminal
+  ok: app defines offer permissions
+  ok: app defines offer grant-only set
+  ok: hire_override referenced in app
+  ok: grant-only stripped from role defaults
+  ok: offer routes registered
+  ok: hire executor gated
+  ok: hire override request model present
+  ok: schema ensure wired
+  ok: schema creates employment_offers
+  ok: schema creates employment_offer_versions
+  ok: schema creates employment_offer_events
+  ok: schema creates employment_offer_tokens
+  ok: schema creates employment_offer_deliveries
+  ok: schema creates employment_offer_hire_override_audits
+  ok: open offer uniqueness index
+  ok: deploy ships offer_lifecycle.py
+  ok: deploy ships offer_service.py
+  ok: deploy ships offer_routes.py
+  ok: create_draft service
+  ok: send_offer service
+  ok: token respond service
+  ok: hire gate service
+Offer-1 smoke passed
+
+===== smoke-test-offer-hire-override.py =====
+Offer hire-override audit hardening
+  ok: UUID actor override allowed
+  ok: UUID actor audit_id returned
+  ok: UUID actor creates exactly one audit
+  ok: UUID actor subject preserved
+  ok: UUID actor_user_id stored
+  ok: no_accepted_offer recorded true
+  ok: previous stage recorded
+  ok: next stage recorded
+  ok: confirmation reference recorded
+  ok: reason recorded
+  ok: non-UUID actor override allowed
+  ok: non-UUID subject preserved
+  ok: non-UUID leaves actor_user_id null when not provided
+  ok: actor type human preserved
+  ok: missing reason rejected
+  ok: missing permission rejected
+  ok: missing confirmation rejected
+  ok: AI override rejected
+  ok: audit insert failure fail-closed
+  ok: stale application state rejected
+  ok: invalid application stage rejected
+  ok: tenant mismatch rejected
+  ok: retry/idempotency creates exactly one audit
+  ok: retry returns same audit_id
+  ok: retry marked idempotent_replay
+  ok: accepted-offer path does not use override
+  ok: accepted-offer path returns offer_id
+  ok: accepted-offer path writes no override audit
+  ok: schema creates hire_override audit table
+Offer hire-override audit hardening passed
+
+===== smoke-test-tenant-isolation-harness.py =====
+tenant isolation harness — companies TENANTISOTESTA / TENANTISOTESTB (env: /root/.openclaw/secrets/postgres.staging.env)
+  PASS  company_employees(TENANTISOTESTA) returns only TENANTISOTESTA
+  PASS  list_attendance(TENANTISOTESTA) excludes TENANTISOTESTB
+  PASS  list_leave_requests(TENANTISOTESTA) excludes TENANTISOTESTB
+  PASS  list_shifts(TENANTISOTESTA) excludes TENANTISOTESTB
+  PASS  list_timesheets(TENANTISOTESTA) excludes TENANTISOTESTB
+  PASS  company_employees(TENANTISOTESTB) returns only TENANTISOTESTB
+  PASS  list_attendance(TENANTISOTESTB) excludes TENANTISOTESTA
+  PASS  list_leave_requests(TENANTISOTESTB) excludes TENANTISOTESTA
+  PASS  list_shifts(TENANTISOTESTB) excludes TENANTISOTESTA
+  PASS  list_timesheets(TENANTISOTESTB) excludes TENANTISOTESTA
+  PASS  find_employee_by_phone under TENANTISOTESTA resolves TENANTISOTESTA's employee
+  PASS  find_employee_by_name under TENANTISOTESTA resolves TENANTISOTESTA's employee
+  PASS  latest_employee under TENANTISOTESTA stays within TENANTISOTESTA
+  PASS  resolve_employee_for_direct_action(phone) under TENANTISOTESTA resolves TENANTISOTESTA
+  PASS  find_employee_by_phone under TENANTISOTESTB resolves TENANTISOTESTB's employee
+  PASS  find_employee_by_name under TENANTISOTESTB resolves TENANTISOTESTB's employee
+  PASS  latest_employee under TENANTISOTESTB stays within TENANTISOTESTB
+  PASS  resolve_employee_for_direct_action(phone) under TENANTISOTESTB resolves TENANTISOTESTB
+  PASS  no active company is set for fail-closed checks
+  PASS  find_employee_by_name fails closed without company scope
+  PASS  find_employee_by_phone fails closed without company scope
+  PASS  latest_employee fails closed without company scope
+  PASS  employee_company_code_for_phone resolves a company-unique phone to its company
+  PASS  employee_company_code_for_phone resolves a shared phone to a real owning company
+
+24 passed, 0 failed
+
+TENANT ISOLATION HARNESS: ALL CHECKS PASSED
+
+===== smoke-test-context-guardrails.py =====
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-context-guardrails.py", line 1433, in <module>
+    main()
+  File "/opt/wathefni/staging/orchestrator/smoke-test-context-guardrails.py", line 311, in main
+    assert_true(classified_focus["intent"] == "answer_candidate_focus", "candidate name alone must route to candidate focus")
+  File "/opt/wathefni/staging/orchestrator/smoke-test-context-guardrails.py", line 12, in assert_true
+    raise AssertionError(message)
+AssertionError: candidate name alone must route to candidate focus
+
+SMOKE_FILES_PASSED=17 SMOKE_FILES_FAILED=3 TOTAL=20

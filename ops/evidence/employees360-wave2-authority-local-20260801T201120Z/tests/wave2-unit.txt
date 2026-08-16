@@ -1,0 +1,21 @@
+PASS  map person WATHEFNI-96550252254
+PASS  map employment WATHEFNI-96550252254
+PASS  map assignment WATHEFNI-96550252254
+PASS  seed stable WATHEFNI-96550252254
+PASS  map person WATHEFNI-96566363363
+PASS  map employment WATHEFNI-96566363363
+PASS  map assignment WATHEFNI-96566363363
+PASS  seed stable WATHEFNI-96566363363
+PASS  map person WATHEFNI-96597727743
+PASS  map employment WATHEFNI-96597727743
+PASS  map assignment WATHEFNI-96597727743
+PASS  seed stable WATHEFNI-96597727743
+PASS  map person WATHEFNI-96599411617
+PASS  map employment WATHEFNI-96599411617
+PASS  map assignment WATHEFNI-96599411617
+PASS  seed stable WATHEFNI-96599411617
+PASS  seed mismatch fail-closed
+PASS  non-map deterministic
+PASS  tenant isolation in person seed
+
+19 passed, 0 failed

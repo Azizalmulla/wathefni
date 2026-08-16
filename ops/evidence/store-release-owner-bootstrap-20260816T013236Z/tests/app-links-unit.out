@@ -1,0 +1,16 @@
+    APP LINKS — unit
+      PASS  employee leave HTTPS destination exists
+      PASS  HR people HTTPS destination exists
+      PASS  unknown slug fails closed
+      PASS  leave slug resolves to /leave
+      PASS  custom scheme preserved in fallback HTML
+      PASS  AASA has applinks key
+      PASS  AASA details empty until team id is provisioned
+      PASS  assetlinks empty until cert fingerprints are provisioned
+      PASS  AASA includes appID when configured
+      PASS  iOS associatedDomains lists api.wathefni.ai
+      PASS  Android intentFilters host api.wathefni.ai
+      PASS  orchestrator mounts app_links router
+
+    APP_LINKS_UNIT_PASS
+    12 passed, 0 failed

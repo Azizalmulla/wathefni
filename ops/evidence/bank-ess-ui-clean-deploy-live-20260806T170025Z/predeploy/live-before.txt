@@ -1,0 +1,11 @@
+total 32
+drwxr-xr-x 3  501 staff 4096 Aug  6 03:52 .
+drwxr-xr-x 6 root root  4096 Jul 28 19:47 ..
+drwxr-xr-x 2  501 staff 4096 Aug  6 03:52 assets
+-rw-r--r-- 1  501 staff 9522 Aug  6 03:52 favicon.svg
+-rw-r--r-- 1  501 staff 2105 Aug  6 03:52 index.html
+-rw-r--r-- 1  501 staff 1548 Aug  6 03:52 setup-console.html
+/var/www/wathefni-dashboard
+/var/www/wathefni-dashboard/assets/PostHire-6LCFY5pA.js
+406b9dca3d05926dcaf0c3390c960e72c42d58bf5883b3d8f47b209be935dab1  /var/www/wathefni-dashboard/assets/PostHire-6LCFY5pA.js
+health:200

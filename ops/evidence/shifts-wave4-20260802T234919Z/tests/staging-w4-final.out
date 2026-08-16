@@ -1,0 +1,59 @@
+=== W4 ===
+PASS  version 4.0.0
+PASS  wave4 enabled
+PASS  company WATHEFNI
+PASS  honesty templates true
+PASS  honesty recurring true
+PASS  honesty rotations false
+PASS  honesty publishing false
+PASS  honesty payroll false
+PASS  honesty leave false
+PASS  honesty attendance false
+PASS  honesty draft_publish false
+PASS  w3 honesty still templates false
+PASS  shw4 synthetic
+PASS  real phone not synth
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  same-day template
+PASS  overnight template
+PASS  split afternoon template
+PASS  fixed weekly recurrence
+PASS  six-on/one-off recurrence
+PASS  alternating day/night recurrence
+PASS  team-targeted recurrence
+PASS  split schedule second recurrence
+PASS  preview ok
+PASS  preview has newly_generated
+PASS  effective window present
+PASS  materialize weekly ok
+PASS  materialize created rows
+PASS  duplicate materialize idempotent
+PASS  unchanged after rematerialize
+PASS  test lock acquired
+PASS  concurrent materialize lock held
+PASS  alternating materialize ok
+PASS  overnight generated rows
+PASS  split PM materialize ok
+PASS  team materialize attempted
+PASS  six-on materialize ok
+PASS  one-off exception skip
+PASS  pause recurrence
+PASS  paused preview empty
+PASS  resume recurrence
+PASS  no historical generated for weekly (skip today)
+PASS  cancelled held on rematerialize
+PASS  cancelled does not return
+PASS  manual override detached class
+PASS  template edit ok
+PASS  template planning_version bumped
+PASS  end recurrence
+PASS  cleanup residual_total
+PASS  create_template present
+PASS  preview_recurrence present
+PASS  materialize_recurrence present
+PASS  app imports wave4
+
+54 passed, 0 failed
+W4_RC=0
+STAGING_W4_DONE

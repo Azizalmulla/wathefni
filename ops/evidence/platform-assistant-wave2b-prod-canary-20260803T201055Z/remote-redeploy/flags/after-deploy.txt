@@ -1,0 +1,14 @@
+=== SHAs after ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+eb92691a45690eead8b7bb519fdace95b2ad3c9ce0cb4f07d329cac2fd8d3af7  /opt/wathefni/orchestrator/action_registry.py
+2144878c3bd1c5f75b1ee5cc560883937cc9239997810072eb9345a0be46dafe  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+031b41c3f7a6803154b9e58122250bfc1f3888a824194c1446c0ecbdec0e845e  /opt/wathefni/orchestrator/platform_assistant_spine_wave1.py
+7093874b7815d843749a59a714dc2f3bfbb7bf8432dacefcfd345f21bdaba33c  /opt/wathefni/orchestrator/platform_assistant_wave2_safe_ops_reads.py
+=== flags after ===
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2_COMPANIES=WATHEFNI

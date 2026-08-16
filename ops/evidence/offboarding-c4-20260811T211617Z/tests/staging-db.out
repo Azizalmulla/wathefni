@@ -1,0 +1,69 @@
+    offboarding + clearance c4 — prove
+      PASS  c4 module
+      PASS  charter stamp
+      PASS  commercial key offboarding
+      PASS  clearance is subworkflow
+      PASS  rollback guidance
+      PASS  EN ready_to_close
+      PASS  AR blocked
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  identity not required
+      PASS  AM not required
+      PASS  real termination dark
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  real canary blocked in C4
+      PASS  exit intent ready
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  exit intent → one offboarding case
+      PASS  required/optional items materialized
+      PASS  case in_progress or blocked/ready
+      PASS  duplicate handoff does not create duplicate case
+      PASS  handover item present
+      PASS  it depends on assets
+      PASS  dependency blocking
+      PASS  manager/dept scoped completion RBAC
+      PASS  handover flow
+      PASS  asset clearance reference
+      PASS  assets completed
+      PASS  dependency unblocking
+      PASS  reject path
+      PASS  blocked case after required reject
+      PASS  blocked cannot become ready_to_close
+      PASS  blocked case cannot complete
+      PASS  return path
+      PASS  department scoped completion
+      PASS  unauthorized waiver denied
+      PASS  authorized waiver + reason
+      PASS  manual IT confirmation without identity adapter
+      PASS  manual confirm ≠ access_revoked
+      PASS  IT item completed
+      PASS  optional identity adapter request
+      PASS  revoke requested ≠ revoked
+      PASS  case access_revoked still false after request
+      PASS  identity adapter ack semantics
+      PASS  stale/concurrent protection
+      PASS  HR completion
+      PASS  all required items satisfied → ready_to_close
+      PASS  required clearance satisfied
+      PASS  offboarding completed
+      PASS  no false settlement/paid
+      PASS  no false exit interview
+      PASS  employment not left on C4 complete
+      PASS  employment truth still active
+      PASS  independent of payroll settle module
+      PASS  EN/AR contracts
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  history intact after rollback
+      PASS  clearance history intact
+      PASS  real termination gate remains OFF
+
+    63 passed, 0 failed
+OFFBOARDING_UNIT_PASS
+OFFBOARDING_FULL_PASS
+STAGING_RC=0

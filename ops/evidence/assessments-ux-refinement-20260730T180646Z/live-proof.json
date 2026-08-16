@@ -1,0 +1,16 @@
+{
+  "assessments_chunk": "AssessmentsPage-BTvtfzjP.js",
+  "dashboard_chunk": "dashboard-kWY_asLi.js",
+  "no_metric_grid": true,
+  "has_ready_to_send": true,
+  "has_sent_pending": true,
+  "has_ar_cancelled": true,
+  "has_ar_ready": true,
+  "no_window_prompt": true,
+  "has_with_reason": true,
+  "has_profiler_marks": true,
+  "summary_version_field": true,
+  "health": "200",
+  "cancelled_allows_resend": true,
+  "verdict": "PASS"
+}

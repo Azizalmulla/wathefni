@@ -1,0 +1,71 @@
+{
+  "reconcile": {
+    "request_id": "18a34456-b07f-4fe7-b96d-ca17e04b78a4",
+    "state": "pending_hr"
+  },
+  "bank_item_db": {
+    "status": "processing",
+    "rejection_reason": null
+  },
+  "bank_projection": [
+    {
+      "item_id": "bank_details",
+      "label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+      "item_type": "task",
+      "required": true,
+      "document_type": null,
+      "status": "processing",
+      "value": null,
+      "storage_provider": null,
+      "storage_status": null,
+      "storage_url": null,
+      "drive_url": null,
+      "reminder_count": 0,
+      "last_reminded_at": null,
+      "escalated_at": null,
+      "updated_at": "2026-08-06T18:48:08.997051+00:00",
+      "category": "payroll_bank",
+      "owner": "employee",
+      "sort_order": 9,
+      "row_version": 3,
+      "due_date": "2026-07-25",
+      "depends_on": [],
+      "collection_mode": "ess_encrypted",
+      "authority": "ess",
+      "template_version": "2.0.0",
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-96599338566",
+      "rejection_reason": null,
+      "completed_at": null,
+      "lifecycle_meta": {
+        "phase": "bank_ess_pending_review",
+        "source": "bank_ess_sync",
+        "authority": "ess",
+        "ess_phase": "pending_review",
+        "lifecycle_status": "processing",
+        "lifecycle_updated_at": "2026-08-06T18:48:09.015228+00:00"
+      },
+      "bank_collection": "ess_encrypted",
+      "owner_group": "payroll",
+      "legacy_status": "processing",
+      "responsible_party": "hr",
+      "file_id": null,
+      "replacement_required": false,
+      "waiting_on": "hr",
+      "bank_ess_eligible": false,
+      "actions": [
+        "review_bank"
+      ],
+      "group": "being_reviewed"
+    }
+  ],
+  "being_reviewed_ids": [
+    "bank_details",
+    "offer_letter"
+  ],
+  "your_actions_ids": [],
+  "completion_state": "waiting_on_hr",
+  "bank_actions": [
+    "review_bank"
+  ]
+}

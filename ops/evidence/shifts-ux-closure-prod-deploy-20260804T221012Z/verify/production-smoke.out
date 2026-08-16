@@ -1,0 +1,7 @@
+Show advanced organization
+data-shifts-org-advanced
+240px
+2
+health=200
+-rwxr-xr-x 1 root root 384 Aug  4 22:10 /opt/wathefni/backups/production-pre-shifts-ux-closure-20260804T221012Z/ROLLBACK.sh
+SHIFTS_UX_CLOSURE_DEPLOY_OK bundle=PostHire-5m8ecUXs.js

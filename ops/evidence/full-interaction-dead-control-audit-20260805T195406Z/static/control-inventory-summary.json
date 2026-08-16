@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-08-05T22:18:26.191Z",
+  "controls": 1101,
+  "dashboard": 1035,
+  "employee_mobile": 66,
+  "dead_candidates": 0,
+  "dead_by_app": {
+    "dashboard": 0,
+    "employee_mobile": 0
+  }
+}

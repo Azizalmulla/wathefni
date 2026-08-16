@@ -1,0 +1,12 @@
+{
+  "flag": "likely_bad_test_data",
+  "action": "do_not_delete_in_this_deploy",
+  "event_id": "c3c3d8e7-dc0c-4fbd-9d57-8c91d1cc053b",
+  "title": "online meeting with aziz",
+  "status": "cancelled",
+  "timezone": "Asia/Kuwait",
+  "start_at": "2026-08-01T06:00:00+00:00",
+  "end_at": "2026-08-02T07:00:00+00:00",
+  "duration_minutes": 1500,
+  "note": "Cross-day cancelled meeting spanning 25 hours. Visual deploy preserved the stored interval and labels it (+1d)/(+يوم). Recommend separate cleanup review."
+}

@@ -1,0 +1,187 @@
+[
+  {
+    "name": "wave1 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave1 company",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic_only on",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payment_processing disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "money_authority false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no g2n",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "art70=6",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sod pair warns",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "operator has approve",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "operator lacks export",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "db is wathefni",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "smoke rows exist (2)",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "smoke quarantined",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "smoke not hard-deleted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "real employee contract refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode native",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode external",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode parallel_shadow",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "settings payment disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "contract draft",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "creator self-approve denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "contract approve",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overlap denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "contract replace",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "offer seeds draft only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "period open",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "period lock",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "period close",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "period reopen",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "source mix forbidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "input export stub",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "result import bans posts_payment",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "smoke still quarantined mid-run",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "cleanup residual zero",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "smoke still present after cleanup",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "smoke still quarantined after cleanup",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "final payment disabled",
+    "ok": true,
+    "detail": null
+  }
+]

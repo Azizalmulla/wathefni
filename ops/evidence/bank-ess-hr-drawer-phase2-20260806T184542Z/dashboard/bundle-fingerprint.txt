@@ -1,0 +1,6 @@
+Needs HR action True
+Bank details True
+onboarding-bank-review-slot True
+View details True
+Review bank True
+Waiting on employee True

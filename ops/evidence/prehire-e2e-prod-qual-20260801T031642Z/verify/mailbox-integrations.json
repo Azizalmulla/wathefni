@@ -1,0 +1,15 @@
+{
+    "company_code": "WATHEFNI",
+    "feature": {
+        "enabled": false,
+        "encryption_ready": true,
+        "gmail_oauth_ready": true,
+        "providers": [
+            {
+                "key": "gmail",
+                "label": "Gmail / Google Workspace"
+            }
+        ]
+    },
+    "connections": []
+}

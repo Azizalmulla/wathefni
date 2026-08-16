@@ -1,0 +1,121 @@
+{
+  "search_matrix": {
+    "query_lexical": "Esraa Aziz HRCI Ambassador",
+    "lexical": {
+      "mode": "lexical_only",
+      "total": 1,
+      "status": "PASS"
+    },
+    "hybrid": {
+      "mode": "hybrid",
+      "total": 1,
+      "status": "PASS"
+    },
+    "semantic_probe": {
+      "query": "professional experience skills qualifications",
+      "mode": "hybrid",
+      "total": 2,
+      "status": "PASS",
+      "note": "hybrid preferred; lexical_only acceptable only if disclosed and non-empty"
+    }
+  },
+  "canary": [
+    {
+      "id": "C1_exact_cv",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "version_id": "44cfbc94-9220-4d11-8af7-fd7823376079"
+    },
+    {
+      "id": "C1_owner_get",
+      "status": "PASS",
+      "text_omitted": true
+    },
+    {
+      "id": "C1_owner_search",
+      "status": "PASS",
+      "total": 1,
+      "mode": "hybrid"
+    },
+    {
+      "id": "owner_allowlist_denies_normal_user",
+      "status": "PASS"
+    },
+    {
+      "id": "C2_mariam_surname",
+      "status": "PASS",
+      "code": "candidate_ambiguous"
+    },
+    {
+      "id": "C3_held",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "ranking_eligible": false,
+      "denial": "held_or_job_ranking_ineligible"
+    },
+    {
+      "id": "C4_long_chunk",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "n": 8468
+    },
+    {
+      "id": "C5_gap",
+      "status": "PASS",
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "canonical_cv": "not_recorded"
+    },
+    {
+      "id": "C6_identity_no_false_bind",
+      "status": "PASS",
+      "note": "covered_by_C2"
+    },
+    {
+      "id": "C7_compare",
+      "status": "PASS"
+    },
+    {
+      "id": "C8_ranking_shadow",
+      "status": "PASS",
+      "class": "expected_authority_difference",
+      "denial": "held_or_job_ranking_ineligible",
+      "unexplained": [],
+      "live_ranking_reader": "off"
+    },
+    {
+      "id": "C10_audit_fail_closed",
+      "status": "PASS"
+    },
+    {
+      "id": "tenant_isolation",
+      "status": "PASS",
+      "other_company_chunks_in_db": 0
+    },
+    {
+      "id": "zero_mutation_guards",
+      "status": "PASS"
+    },
+    {
+      "id": "registry_no_live_tools",
+      "status": "PASS",
+      "tools_flag": "off"
+    },
+    {
+      "id": "ranking_reader_off",
+      "status": "PASS"
+    },
+    {
+      "id": "pii_email_absent_in_current_chunks",
+      "status": "PASS",
+      "hits": 0
+    }
+  ],
+  "voyage_runtime": {
+    "document_calls": 0,
+    "query_calls": 2,
+    "provider": "voyage",
+    "model": "voyage-4-large"
+  },
+  "audit_events_session": 7,
+  "vector_chunks": 10
+}

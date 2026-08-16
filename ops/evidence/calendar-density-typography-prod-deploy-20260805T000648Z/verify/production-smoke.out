@@ -1,0 +1,4 @@
+health_ok
+SERVED=assets/dashboard-C6t_zS8E.js
+PROD_VARIANT_SMOKE {'bundle': 'CalendarShell-BG7-AiTh.js', 'category_rail': True, 'variants': True, 'selected': True, 'all_day': True, 'overlap_more': True, 'overlap_menu': True, 'portal': True, 'token_surface': True, 'no_legacy_outline': True, 'no_transparent_event_border': True}
+PROD_VARIANT_SMOKE_OK

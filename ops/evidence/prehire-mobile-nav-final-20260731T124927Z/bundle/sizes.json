@@ -1,0 +1,89 @@
+{
+  "local": {
+    "AssessmentsPage": 55589,
+    "InterviewsPage": 31730,
+    "CandidatesPage": 13200,
+    "dashboard": 221411,
+    "ReportsPage": 11416,
+    "JobsPage": 36879,
+    "AdminAIPage": 15983,
+    "CalendarShell": 29679,
+    "RankingPage": 9249
+  },
+  "prod": {
+    "dashboard": 213425,
+    "CalendarShell": 29592,
+    "AdminAIPage": 16008,
+    "ReportsPage": 10682,
+    "RankingPage": 9310,
+    "AssessmentsPage": 55548,
+    "InterviewsPage": 31740,
+    "JobsPage": 37079,
+    "CandidatesPage": 12300
+  },
+  "rows": [
+    {
+      "chunk": "dashboard",
+      "local": 221411,
+      "prod": 213425,
+      "delta": 7986,
+      "delta_pct": 3.7418296825582757
+    },
+    {
+      "chunk": "JobsPage",
+      "local": 36879,
+      "prod": 37079,
+      "delta": -200,
+      "delta_pct": -0.5393888724075623
+    },
+    {
+      "chunk": "CandidatesPage",
+      "local": 13200,
+      "prod": 12300,
+      "delta": 900,
+      "delta_pct": 7.317073170731707
+    },
+    {
+      "chunk": "InterviewsPage",
+      "local": 31730,
+      "prod": 31740,
+      "delta": -10,
+      "delta_pct": -0.0315059861373661
+    },
+    {
+      "chunk": "CalendarShell",
+      "local": 29679,
+      "prod": 29592,
+      "delta": 87,
+      "delta_pct": 0.2939983779399838
+    },
+    {
+      "chunk": "AssessmentsPage",
+      "local": 55589,
+      "prod": 55548,
+      "delta": 41,
+      "delta_pct": 0.07381003816519047
+    },
+    {
+      "chunk": "RankingPage",
+      "local": 9249,
+      "prod": 9310,
+      "delta": -61,
+      "delta_pct": -0.6552094522019334
+    },
+    {
+      "chunk": "ReportsPage",
+      "local": 11416,
+      "prod": 10682,
+      "delta": 734,
+      "delta_pct": 6.871372402171878
+    },
+    {
+      "chunk": "AdminAIPage",
+      "local": 15983,
+      "prod": 16008,
+      "delta": -25,
+      "delta_pct": -0.1561719140429785
+    }
+  ]
+}

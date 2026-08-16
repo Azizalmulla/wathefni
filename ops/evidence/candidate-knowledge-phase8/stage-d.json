@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "model": "voyage-4-large",
+  "query_model": "voyage-4-large",
+  "dimensions": 1024,
+  "input_types": [
+    "document",
+    "query"
+  ],
+  "document_calls": 5,
+  "query_calls": 3,
+  "doc_latency_ms": {
+    "p50": 380.79435750842094,
+    "p95": 593.2091204449534
+  },
+  "query_latency_ms": {
+    "p50": 214.17723409831524,
+    "p95": 246.910416521132
+  },
+  "estimated_tokens": 660,
+  "estimated_cost_usd": 7.9e-05,
+  "recall": {
+    "en": {
+      "query": "finance valuation experience in the Gulf",
+      "expect": "en-1",
+      "hit": true,
+      "bar": 0.85
+    },
+    "ar": {
+      "query": "\u062e\u0628\u0631\u0629 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0648\u0642\u0627\u0646\u0648\u0646 \u0627\u0644\u0639\u0645\u0644",
+      "expect": "ar-1",
+      "hit": true,
+      "bar": 0.8
+    },
+    "bi": {
+      "query": "bilingual HR payroll Kuwait",
+      "expect": "bi-1",
+      "hit": true,
+      "bar": 0.8
+    }
+  },
+  "provider_failure_disclosed": true,
+  "pii_sent": false,
+  "semantic_flag_enabled_after_pass": true,
+  "gates": [
+    {
+      "id": "en_recall",
+      "status": "PASS"
+    },
+    {
+      "id": "ar_recall",
+      "status": "PASS"
+    },
+    {
+      "id": "bi_recall",
+      "status": "PASS"
+    },
+    {
+      "id": "failure_disclosure",
+      "status": "PASS"
+    },
+    {
+      "id": "pii_leak",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "pass": 29,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "disable_semantics_standard_no_delete",
+      "detail": {
+        "stop_new_activity": true,
+        "hide_navigation_and_surfaces": true,
+        "block_module_apis": true,
+        "preserve_historical_records": true,
+        "preserve_audit_history": true,
+        "delete_data": false,
+        "silent_cancel_or_mutate_existing": false
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "disable_semantics_only_employee_app_exception",
+      "detail": [
+        "employee_app"
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "employee_app_disable_preserves_history",
+      "detail": [
+        "revoke_active_employee_app_sessions",
+        "supersede_open_invites"
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "ops_deep_link_payroll",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-modules",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-profile",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-channels",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-owner",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-app-access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/dashboard?page=",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_ownership_key:company_identity",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_ownership_key:module_entitlements",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_ownership_key:employee_app_enabled",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_ownership_key:employee_app_access_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_ownership_key:payroll_company_setup",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_ownership_key:channel_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:id=\"classic-profile\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:id=\"classic-modules\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:id=\"classic-channels\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:id=\"classic-owner\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:EmployeeAppAccessPolicyCard",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:OwnershipDeepLinksCard",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "setup_ui:PayrollSetupPlaceholderCard",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:/dashboard/superadmin/setup/companies/{company_c",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:/dashboard/superadmin/setup/ownership",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:company_app_access_owned_by_setup_console",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:allow_module_toggle=False",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:module_enable_owned_by_setup_console",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_api_skipped_no_token",
+      "detail": {
+        "hint": "Set WATHEFNI_SETUP_TOKEN + WATHEFNI_SETUP_PHONE for live checks"
+      }
+    }
+  ]
+}

@@ -220,6 +220,11 @@ def main() -> None:
     tool_index = {t["function"]["name"]: t for t in tools}
     assert_true(action_registry.spec_for("send_assessment").module == "assessments", "send_assessment must be gated by the assessments module")
     assert_true(action_registry.spec_for("send_video_interview").module == "video_interviews", "send_video_interview must be gated by the video_interviews module")
+    assert_true(action_registry.spec_for("schedule_interview").module == "interviews", "schedule_interview must be gated by the interviews module")
+    assert_true(action_registry.spec_for("reschedule_interview").module == "interviews", "reschedule_interview must be gated by the interviews module")
+    assert_true(action_registry.spec_for("cancel_interview").module == "interviews", "cancel_interview must be gated by the interviews module")
+    assert_true(action_registry.spec_for("send_interview_invite").module == "interviews", "send_interview_invite must be gated by the interviews module")
+    assert_true(action_registry.spec_for("get_interview_invite_status").module == "interviews", "get_interview_invite_status must be gated by the interviews module")
 
     entitlement_scope = {
         "company_id": "WATHEFNI",
@@ -231,6 +236,36 @@ def main() -> None:
         "role_scope": "hr_manager",
         "permissions": ["prehire.read", "candidate.manage", "assessment.manage", "interview.manage"],
     }
+
+    # Live interview tools must hide when interviews is OFF even if video_interviews is ON.
+    original_modules_visibility = set(FakeLegacy.ENABLED_MODULES)
+    try:
+        FakeLegacy.ENABLED_MODULES = {"pre_hiring", "video_interviews", "assessments"}
+        visible_no_live = {
+            str((t.get("function") or {}).get("name") or "")
+            for t in tool_call_orchestrator._visible_tools(tools, entitlement_scope)
+        }
+        assert_true("schedule_interview" not in visible_no_live, "live interview tools must hide when interviews module is OFF")
+        assert_true("send_video_interview" in visible_no_live, "video interview tool remains when video_interviews is ON")
+        FakeLegacy.ENABLED_MODULES = {"pre_hiring", "interviews", "assessments"}
+        visible_live = {
+            str((t.get("function") or {}).get("name") or "")
+            for t in tool_call_orchestrator._visible_tools(tools, entitlement_scope)
+        }
+        assert_true("schedule_interview" in visible_live, "live interview tools must appear when interviews module is ON")
+        FakeLegacy.ENABLED_MODULES = {"pre_hiring", "assessments"}
+        blocked_live_off = tool_call_orchestrator._execute_tool(
+            "schedule_interview",
+            {"candidate_app_key": FakeLegacy.APP["app_key"]},
+            FakeRequest(),
+            {},
+            {},
+            entitlement_scope,
+        )
+        assert_true(blocked_live_off["status"] == "module_disabled", "interviews disabled must block schedule_interview")
+    finally:
+        FakeLegacy.ENABLED_MODULES = original_modules_visibility
+
     original_modules = set(FakeLegacy.ENABLED_MODULES)
     try:
         FakeLegacy.ENABLED_MODULES = {"pre_hiring", "video_interviews"}
@@ -492,20 +527,18 @@ def main() -> None:
     assert_true(not tool_call_orchestrator._is_fresh_session_opener("is Faisal good for Instagram marketing?"), "operational candidate turns must not reset the active session")
 
     for language_phrase in (
-        "Language policy is based on the user's CURRENT message only",
-        "reply only in Latin characters",
-        "Do NOT switch into Arabic script",
-        "Do not infer reply language from WhatsApp profile name",
+        "Language policy follows the CURRENT user message only",
+        "Latin vs Arabic script",
     ):
         assert_true(language_phrase in toolcall_source, f"tool-call prompt must enforce strict current-message language policy: {language_phrase!r}")
 
     for required_phrase in (
-        "Wathefni HR",
-        "answer directly with no tool call",
+        "grounded HR operating copilot",
+        "capability_authority",
         "state_summary",
         "SENSITIVE",
         "Never invent",
-        "WhatsApp-short",
+        "execute_candidate_workflow",
     ):
         assert_true(required_phrase in toolcall_source, f"toolcall system prompt must include the rule: {required_phrase!r}")
 

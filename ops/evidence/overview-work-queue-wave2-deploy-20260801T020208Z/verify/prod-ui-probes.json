@@ -1,0 +1,54 @@
+{
+  "verdict": "PASS",
+  "checks": {
+    "no_toplevel_view_all_in_work_en": true,
+    "no_toplevel_view_all_in_work_ar": true,
+    "roles_view_all_still_exists_en": true,
+    "scope_mine_api": true,
+    "scope_company_api": true,
+    "follow_up_card_opens_cohort": true,
+    "people_unit_visible_en": true,
+    "apps_separate_visible_en": true,
+    "follow_up_2_4_clear": true,
+    "footer_people_en": true,
+    "ar_rtl": true,
+    "row_cta_navigates": true
+  },
+  "en": {
+    "locale": "en",
+    "viewAllInWorkCount": 0,
+    "rolesViewAllCount": 1,
+    "apiMine": true,
+    "apiCompany": true,
+    "followUpClear": true,
+    "followUpNav": "https://api.wathefni.ai/dashboard/?page=candidates&follow_up=needed&overview_cohort=follow_up_needed&cohort_key=follow_up_needed",
+    "rowCtaOpened": {
+      "before": "overview",
+      "after": "candidates",
+      "label": "Follow up with candidate"
+    },
+    "bodyHasPeople": true,
+    "bodyHasApps": true,
+    "footerPeople": true,
+    "followUpCard": "FOLLOW UP 2 people · 4 applications"
+  },
+  "ar": {
+    "locale": "ar",
+    "viewAllInWorkCount": 0,
+    "rolesViewAllCount": 1,
+    "apiMine": true,
+    "apiCompany": true,
+    "followUpClear": true,
+    "followUpNav": "https://api.wathefni.ai/dashboard/?page=candidates&follow_up=needed&overview_cohort=follow_up_needed&cohort_key=follow_up_needed",
+    "bodyHasPeople": true,
+    "bodyHasApps": true,
+    "footerPeople": true,
+    "followUpCard": "متابعة المرشحين 2 أشخاص · 4 طلبات",
+    "rtl": {
+      "htmlDir": null,
+      "bodyDir": null,
+      "hasRtlNode": true,
+      "rtlNodeTag": "MAIN"
+    }
+  }
+}

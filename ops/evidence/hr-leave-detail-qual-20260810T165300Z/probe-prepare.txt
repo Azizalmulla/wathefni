@@ -1,0 +1,30 @@
+BALANCES_ENABLED True
+LEAVE_ROWS 8
+ROW {"leave_id": "033e8a56-480c-4188-ad68-93d73003fc01", "employee_key": "WATHEFNI-96566363363", "leave_type": "annual", "status": "requested", "start_date": "2026-08-16", "end_date": "2026-08-18", "reason": "Family trip", "decision_note": "", "requested_at": "2026-08-09 09:00:24.912428+00", "updated_at": "2026-08-09 09:00:24.912428+00"}
+ROW {"leave_id": "6ad2133d-ca56-4919-99c1-0864d328292b", "employee_key": "WATHEFNI-96597727743", "leave_type": "sick", "status": "requested", "start_date": "2026-08-12", "end_date": "2026-08-12", "reason": "Medical appointment", "decision_note": "", "requested_at": "2026-08-09 09:00:24.912428+00", "updated_at": "2026-08-09 09:00:24.912428+00"}
+ROW {"leave_id": "4f5a877d-105e-4f33-a5ab-eda01c96a609", "employee_key": "WATHEFNI-96599338566", "leave_type": "sick", "status": "cancelled", "start_date": "2026-08-12", "end_date": "2026-08-12", "reason": "Synthetic QA sick request", "decision_note": "", "requested_at": "2026-08-05 03:12:22.446893+00", "updated_at": "2026-08-05 04:02:33.131151+00"}
+ROW {"leave_id": "be0f772d-655c-4ee9-ad88-b4a65c3da329", "employee_key": "WATHEFNI-96599338566", "leave_type": "annual", "status": "approved", "start_date": "2026-07-26", "end_date": "2026-07-26", "reason": "Synthetic QA approved leave", "decision_note": "", "requested_at": "2026-08-05 03:12:22.446893+00", "updated_at": "2026-08-05 03:12:22.446893+00"}
+ROW {"leave_id": "65d6ddb8-f11d-45cf-b63c-f14040c21bcc", "employee_key": "WATHEFNI-SHW2-d3ffcf98", "leave_type": "annual", "status": "approved", "start_date": "2026-09-06", "end_date": "2026-09-06", "reason": "shw2-recon-leave", "decision_note": "", "requested_at": "2026-08-03 03:38:25.407985+00", "updated_at": "2026-08-03 03:38:25.407985+00"}
+ROW {"leave_id": "c7699147-bf39-406b-8beb-7076cc4a74fa", "employee_key": "WATHEFNI-SHW2B-d3ffcf98", "leave_type": "annual", "status": "cancelled", "start_date": "2026-08-28", "end_date": "2026-08-28", "reason": "shw2-swap-leave", "decision_note": "", "requested_at": "2026-08-03 03:38:24.887862+00", "updated_at": "2026-08-03 03:38:24.887862+00"}
+ROW {"leave_id": "3b38885a-c9a6-44f3-9c5c-ea1ba0e15a80", "employee_key": "WATHEFNI-SHW1-d8ee5588", "leave_type": "annual", "status": "approved", "start_date": "2026-08-21", "end_date": "2026-08-21", "reason": "shw1", "decision_note": "", "requested_at": "2026-08-02 23:05:35.269702+00", "updated_at": "2026-08-02 23:05:35.269702+00"}
+ROW {"leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4", "employee_key": "WATHEFNI-96566363363", "leave_type": "sick", "status": "approved", "start_date": "2026-05-11", "end_date": "2026-05-11", "reason": "Fouad needs sick leave tomorrow", "decision_note": "yes", "requested_at": "2026-05-10 21:47:06.790517+00", "updated_at": "2026-05-10 21:48:14.881505+00"}
+USER {"user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f", "company_code": "WATHEFNI", "email": "azizalmulla16@gmail.com", "name": "Aziz Almulla", "phone": "96599338566", "role": "owner", "status": "active"}
+ACTOR {"company_code": "WATHEFNI", "actor_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f", "actor_role": "owner", "hr_phone": "96599338566"}
+DETAIL_KEYS ['allowed_actions', 'balance', 'decision_note', 'destination', 'duration_days', 'employee', 'end_date', 'leave_id', 'leave_type', 'reason', 'requested_at', 'shift_conflict_count', 'start_date', 'status', 'updated_at']
+DETAIL_SUMMARY {"leave_id": "033e8a56-480c-4188-ad68-93d73003fc01", "status": "requested", "leave_type": "annual", "start_date": "2026-08-16", "end_date": "2026-08-18", "duration_days": 3.0, "reason": "Family trip", "shift_conflict_count": 1, "allowed_actions": ["read", "approve", "reject"], "employee": {"employee_key": "WATHEFNI-96566363363", "name": "Fouad Burhamad", "position_title": "IT Maintenance", "department": null, "employment_status": "active"}, "balance_type": "list", "balance_len": 1, "balance_sample": {"leave_type": "annual", "entitlement_days": 30.0, "accrued_to_date": 17.5, "consumed": 0.0, "current_balance": 17.5, "can_take_from": null, "enforced": false, "legal_reviewed": false, "balances_enforced": false, "observe_only": true, "reserved": 0.0, "available": 17.5}}
+Traceback (most recent call last):
+  File "/tmp/probe_leave_mobile.py", line 202, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/tmp/probe_leave_mobile.py", line 115, in main
+    prepared = omd.prepare_mobile_confirmation(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/operator_mobile_data.py", line 2043, in prepare_mobile_confirmation
+    cur.execute(
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type uuid: "hr-leave-qual-probe"
+LINE 6: ...   VALUES ('88b17ca9-aff4-4721-a553-c1b5514ef95f','hr-leave-...
+                                                             ^
+

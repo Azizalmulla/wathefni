@@ -1,0 +1,13 @@
+activated_ok replaced= True
+me_before_ok True
+sessions_revoked 1
+historical {'status': 'revoked', 'revoked_reason': 'hr_revoked'}
+me_after_status 401
+me_after_error app_access_revoked
+me_after_message Your app access was reset. Sign in again with a new activation code.
+refresh_after_status 401
+refresh_dead_ok
+reinvite_activate_ok True replaced False
+PHONE=99338566
+ACTIVATION_CODE=382699
+LIVE_REVOKE_REINVITE_OK

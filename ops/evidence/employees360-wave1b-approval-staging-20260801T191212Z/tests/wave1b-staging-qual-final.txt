@@ -1,0 +1,40 @@
+    employees360 wave1b staging qualification
+      PASS  runtime env is staging-like (not production)
+      PASS  production canary denied by default policy
+      PASS  dashboard API has approval policy client
+      PASS  dashboard API has status request client
+      PASS  dashboard API has decide client
+      PASS  dashboard UI no longer hardcodes canary-only path
+      PASS  dashboard UI uses approval policy
+      PASS  roster create canonicalizes local phone
+      PASS  alias lookup local
+      PASS  alias lookup 965
+      PASS  duplicate prevention on alias
+      PASS  import helper alias-aware
+      PASS  recruiting hire uses canonical phone
+      PASS  PATCH concurrency conflict
+      PASS  PATCH concurrency success
+      PASS  out-of-scope manager PATCH denied
+      PASS  separate eligible approver available or creatable
+      PASS  policy reports canary allowed on staging
+      PASS  policy lists eligible approvers excluding self
+      PASS  policy has at least one eligible approver
+      PASS  status approval request created
+      PASS  status approval cancelled
+      PASS  cancel leaves employee unchanged
+      PASS  status approval rejected
+      PASS  reject leaves employee unchanged
+      PASS  stale request blocked at create
+      PASS  replay same hash is idempotent
+      PASS  replay different hash conflicts
+      PASS  self as designated approver forbidden
+      PASS  status approval approved+committed
+      PASS  approve applies left status
+      PASS  canary rejected in production env
+      PASS  direct separate_approval commit rejected
+      PASS  integrity includes employee_messages
+      PASS  integrity includes file_registry
+      PASS  orphan document fail-closed marker
+      PASS  status approval module present
+
+    37 passed, 0 failed

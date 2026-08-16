@@ -1,0 +1,55 @@
+=== W3 UX ===
+PASS  version 3.1.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  SHW3B synthetic key
+PASS  965531 synthetic phone
+PASS  real phone not wave3 synth
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+43 passed, 0 failed
+=== W1 ===
+      FAIL  split afternoon ok :: shifts_real_mutation_not_allowlisted
+      PASS  split overlap detected
+      FAIL  overnight 22-06 create :: shifts_real_mutation_not_allowlisted
+      FAIL  overnight ends_next_day true
+      PASS  overnight vs next-morning overlap
+      PASS  Attendance overnight interval matches Shifts
+      FAIL  approved-leave conflict requires handling :: shifts_real_mutation_not_allowlisted
+      FAIL  leave conflict ack allows create :: shifts_real_mutation_not_allowlisted

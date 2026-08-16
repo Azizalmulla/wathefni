@@ -1,0 +1,4 @@
+WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS=absence,early_leave
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_OUTBOUND_FLOWS=leave_decision,onboarding,compliance,shift
+Mon 2026-08-03 02:30:03 UTC      11h Sun 2026-08-02 02:30:09 UTC            12h ago wathefni-leave-accrual.timer                         wathefni-leave-accrual.service

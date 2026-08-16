@@ -1,0 +1,36 @@
+{
+  "verdict": "PASS",
+  "stamp": "20260808T013422Z",
+  "root_cause": "Caddy served /dashboard/assets from /var/www/wathefni-dashboard while /setup-console HTML came from /opt/wathefni/dashboard-dist; hashed setupConsole entry JS returned public 404 → empty #root white screen",
+  "pre_fix": {
+    "html": 200,
+    "entry_asset": "/dashboard/assets/setupConsole-Xtk-tD4a.js",
+    "entry_asset_http": 404
+  },
+  "fixes": [
+    "Caddy single root → /opt/wathefni/dashboard-dist",
+    "Synced rebuilt dist to orch dist + www",
+    "Boot shell + script error + timeout recovery",
+    "SetupConsoleErrorBoundary",
+    "Null-safe Classic workspace",
+    "setup-console-boot overflow scroll override"
+  ],
+  "post_proof": {
+    "html": 200,
+    "boot_shell_present": true,
+    "entry_asset": "/dashboard/assets/setupConsole-Bj0igwhi.js",
+    "entry_asset_http": 200,
+    "asset_fail_count": 0,
+    "caddy_root": "/opt/wathefni/dashboard-dist",
+    "uvicorn_setup_console": 200
+  },
+  "not_started": [
+    "Employee App P1",
+    "Auth Wave 2 Phase 6",
+    "Broad Setup Console redesign",
+    "Payroll Authority reopen"
+  ],
+  "docs": [
+    "ops/SETUP_CONSOLE_RECOVERY_AND_ARCHITECTURE_AUDIT.md"
+  ]
+}

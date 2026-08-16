@@ -1,0 +1,25 @@
+ verified_bindings 
+-------------------
+                11
+(1 row)
+
+                  app_key                  |    position_code     | legacy 
+-------------------------------------------+----------------------+--------
+ 96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER | SOCIAL_MEDIA_MANAGER | true
+ 96566363363-WATHEFNI-IT_MAINTENANCE       | IT_MAINTENANCE       | true
+ 96597485758-WATHEFNI-ACCOUNTING_EXCEL     | ACCOUNTING_EXCEL     | true
+ 96597485758-WATHEFNI-HR                   | HR                   | true
+ 96597727743-WATHEFNI-FULLSTACK_DEVELOPER  | FULLSTACK_DEVELOPER  | true
+ 96597727743-WATHEFNI-MARKETING_SPECIALIST | MARKETING_SPECIALIST | true
+ 96598900677-WATHEFNI-ACCOUNTING           | ACCOUNTING           | true
+ 96598900677-WATHEFNI-FINANCE              | FINANCE              | true
+ 96598900677-WATHEFNI-HR                   | HR                   | true
+ 96599338566-WATHEFNI-FULLSTACK_DEVELOPER  | FULLSTACK_DEVELOPER  | true
+ 96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER | SOCIAL_MEDIA_MANAGER | true
+(11 rows)
+
+ applications 
+--------------
+           18
+(1 row)
+

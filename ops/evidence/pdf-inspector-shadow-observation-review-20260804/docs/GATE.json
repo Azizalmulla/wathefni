@@ -1,0 +1,11 @@
+{
+  "wave": "pdf_inspector_production_shadow_observation_review",
+  "mode": "read_only",
+  "live_eligible_cv_pdfs": 0,
+  "production_shadow_armed": true,
+  "confirms_wave0": true,
+  "broken_encoding_gates": "partial_signal_only",
+  "guarded_advisor_canary": "NO-GO",
+  "routing_influence": "FORBIDDEN",
+  "min_threshold_real_cv_pdfs": 200
+}

@@ -60,8 +60,8 @@ export function meFixture(operator: OperatorFixture): MobileMe {
     account_state: 'active',
     company_state: 'active',
     workspaces: {
-      hr: { enabled: hr, features: hr ? operatorHRFeatures : {} },
-      recruiting: { enabled: recruiting, features: recruiting ? recruitingFeatures : {} },
+      hr: { enabled: hr, features: hr ? structuredClone(operatorHRFeatures) : {} },
+      recruiting: { enabled: recruiting, features: recruiting ? structuredClone(recruitingFeatures) : {} },
       owner: { enabled: false, features: {}, reason: 'feature_disabled' },
     },
     scope: {

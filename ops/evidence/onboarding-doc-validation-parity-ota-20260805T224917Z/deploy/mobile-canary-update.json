@@ -1,0 +1,22 @@
+{
+  "name": "canary",
+  "id": "019fd252-ff83-7881-82d0-47a97c1add86",
+  "currentPage": [
+    {
+      "branch": "canary",
+      "message": "\"Document Validation Parity mobile UX 20260805T224917Z\" (16 seconds ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "b6bccf66-d7a2-4b95-b5dd-73543f9faa86",
+      "platforms": "android, ios"
+    },
+    {
+      "branch": "canary",
+      "message": "\"Interaction authority fixes 20260805T220256Z\" (39 minutes ago by abdulazizalmulla)",
+      "runtimeVersion": "0.1.0",
+      "isRollBackToEmbedded": false,
+      "group": "34a288bc-36c6-40fb-80e3-a38fe5449320",
+      "platforms": "android, ios"
+    }
+  ]
+}

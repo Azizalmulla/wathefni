@@ -1,0 +1,464 @@
+{
+  "purpose": "Approved small subset for future staging intake testing only",
+  "production_forbidden": true,
+  "create_candidate_records": false,
+  "owner_approval_required_before_staging_intake": true,
+  "count": 26,
+  "documents": [
+    {
+      "doc_id": "wave0_cv_en_digital_01",
+      "filename": "wave0_cv_en_digital_01.pdf",
+      "rel_path": "corpus/wave0_cv_en_digital_01.pdf",
+      "sha256": "b0ca976fd5c05de6b4167a482486840826332148566c5eb8055268166cf86fc3",
+      "pages": 1,
+      "category": "english_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_en_digital_02",
+      "filename": "wave0_cv_en_digital_02.pdf",
+      "rel_path": "corpus/wave0_cv_en_digital_02.pdf",
+      "sha256": "a9aaeadd843e0d09a6667e3d8f1dfad77c2e2b2dee372343bdc405190abfab52",
+      "pages": 1,
+      "category": "english_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_en_digital_03",
+      "filename": "wave0_cv_en_digital_03.pdf",
+      "rel_path": "corpus/wave0_cv_en_digital_03.pdf",
+      "sha256": "2ab0a11179b98ec9e85c511c78c591393c88b3da58df15d37d1a985bd628bcb7",
+      "pages": 1,
+      "category": "english_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_en_digital_multipage_01",
+      "filename": "wave0_cv_en_digital_multipage_01.pdf",
+      "rel_path": "corpus/wave0_cv_en_digital_multipage_01.pdf",
+      "sha256": "52b424cb6bcebf525c09065f0aea9132a4a8082dac8b1d1fa1bd733d1b8902b7",
+      "pages": 2,
+      "category": "english_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_ar_digital_01",
+      "filename": "wave0_cv_ar_digital_01.pdf",
+      "rel_path": "corpus/wave0_cv_ar_digital_01.pdf",
+      "sha256": "79dc3f6977f6ae782622eea404f312de6b26f14c120c899c1f3a1224e7a80b6c",
+      "pages": 1,
+      "category": "arabic_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted_or_poppler_ocr",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": false,
+      "eval_high_risk": true,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_ar_digital_02",
+      "filename": "wave0_cv_ar_digital_02.pdf",
+      "rel_path": "corpus/wave0_cv_ar_digital_02.pdf",
+      "sha256": "4e69799218352305beab9962c736b766b6857f091727ba5c54fda6399752bdaa",
+      "pages": 1,
+      "category": "arabic_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted_or_poppler_ocr",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": false,
+      "eval_high_risk": true,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_ar_digital_03",
+      "filename": "wave0_cv_ar_digital_03.pdf",
+      "rel_path": "corpus/wave0_cv_ar_digital_03.pdf",
+      "sha256": "3aa809d79501ddcbea7fbfa84a78be9aab83ad0f2f1ed5ba5c3c660f9d81b2a8",
+      "pages": 1,
+      "category": "arabic_digital_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted_or_poppler_ocr",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": false,
+      "eval_high_risk": true,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_arabic_digital_cv_000",
+      "filename": "syn_arabic_digital_cv_000.pdf",
+      "rel_path": "corpus/syn_arabic_digital_cv_000.pdf",
+      "sha256": "e42b01bfd627901db01ce4dcd0df4a611ff33161eb65e36bb0e4c4a162ad8d4d",
+      "pages": 1,
+      "category": "arabic_digital_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "digital_accepted_or_poppler_ocr",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_bilingual_01",
+      "filename": "wave0_cv_bilingual_01.pdf",
+      "rel_path": "corpus/wave0_cv_bilingual_01.pdf",
+      "sha256": "426231f8d8cdcd7072acc7e485a4d1a273309bab518da047e0536d7fdc4994f5",
+      "pages": 1,
+      "category": "bilingual_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_bilingual_02",
+      "filename": "wave0_cv_bilingual_02.pdf",
+      "rel_path": "corpus/wave0_cv_bilingual_02.pdf",
+      "sha256": "8f749173728e88914e3474039e8d839415aac4e501418e623878242047f9c8f5",
+      "pages": 1,
+      "category": "bilingual_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_multicolumn_01",
+      "filename": "wave0_cv_multicolumn_01.pdf",
+      "rel_path": "corpus/wave0_cv_multicolumn_01.pdf",
+      "sha256": "d8659d41472940b1cd3dd4265eb942f5a29df529cb312f9659a55d97fdd1f9c5",
+      "pages": 1,
+      "category": "multicolumn_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_multicolumn_02",
+      "filename": "wave0_cv_multicolumn_02.pdf",
+      "rel_path": "corpus/wave0_cv_multicolumn_02.pdf",
+      "sha256": "3d634308c999b0f78b2cb66a5908e712392cd9a1aba989cee5798f763fce7e08",
+      "pages": 1,
+      "category": "multicolumn_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_design_heavy_cv_000",
+      "filename": "syn_design_heavy_cv_000.pdf",
+      "rel_path": "corpus/syn_design_heavy_cv_000.pdf",
+      "sha256": "cd70312b30ba4a3bc8ef8b32ae22acf0cfd40f564a1c3a2e3ac6e59ebf6256a9",
+      "pages": 1,
+      "category": "design_heavy_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_design_heavy_cv_001",
+      "filename": "syn_design_heavy_cv_001.pdf",
+      "rel_path": "corpus/syn_design_heavy_cv_001.pdf",
+      "sha256": "3541105dbb77aea1fcedc85ab95e80ba4d7265ababbc25fc80e978f5a8c7da85",
+      "pages": 1,
+      "category": "design_heavy_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "wave0_cv_scanned_ar_01",
+      "filename": "wave0_cv_scanned_ar_01.pdf",
+      "rel_path": "corpus/wave0_cv_scanned_ar_01.pdf",
+      "sha256": "8dc5cec5d1314a378c5c2256fb277b010f70a3d1556438b05de98f87e2c3f5b1",
+      "pages": 1,
+      "category": "scanned_image_only_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "needs_ocr_all",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": [
+        1
+      ]
+    },
+    {
+      "doc_id": "wave0_cv_scanned_en_01",
+      "filename": "wave0_cv_scanned_en_01.pdf",
+      "rel_path": "corpus/wave0_cv_scanned_en_01.pdf",
+      "sha256": "681c09d8c991aa149cbbf3d618aee635d56f98142fb6abfab7c2cd75fb3900d7",
+      "pages": 1,
+      "category": "scanned_image_only_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "needs_ocr_all",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": [
+        1
+      ]
+    },
+    {
+      "doc_id": "wave0_cv_scanned_en_02",
+      "filename": "wave0_cv_scanned_en_02.pdf",
+      "rel_path": "corpus/wave0_cv_scanned_en_02.pdf",
+      "sha256": "aa1f2ac04c47c83513378aed37940fe9f46b3774407596157953b84747921a18",
+      "pages": 1,
+      "category": "scanned_image_only_cv",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "needs_ocr_all",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": [
+        1
+      ]
+    },
+    {
+      "doc_id": "wave0_cv_mixed_01",
+      "filename": "wave0_cv_mixed_01.pdf",
+      "rel_path": "corpus/wave0_cv_mixed_01.pdf",
+      "sha256": "dcfd69012db6244c90942577c30f2f1f6a43993a932b080940cf9688b56de923",
+      "pages": 2,
+      "category": "mixed_digital_scanned",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "needs_ocr_partial",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        2
+      ],
+      "eval_inspector_ocr": [
+        2
+      ]
+    },
+    {
+      "doc_id": "wave0_cv_mixed_02",
+      "filename": "wave0_cv_mixed_02.pdf",
+      "rel_path": "corpus/wave0_cv_mixed_02.pdf",
+      "sha256": "91b544e6bc06e504986b3205c03ddbf067efe5611f21c86483d1d17c416f8363",
+      "pages": 2,
+      "category": "mixed_digital_scanned",
+      "source_id": "wave0_synthetic",
+      "expected_ocr_policy": "needs_ocr_partial",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        2
+      ],
+      "eval_inspector_ocr": [
+        2
+      ]
+    },
+    {
+      "doc_id": "syn_table_heavy_cv_000",
+      "filename": "syn_table_heavy_cv_000.pdf",
+      "rel_path": "corpus/syn_table_heavy_cv_000.pdf",
+      "sha256": "d0bfc5ecf50a43808320435a724b9e2695a5d2ce5d9b73801f7b1293ac7a349e",
+      "pages": 1,
+      "category": "table_heavy_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_table_heavy_cv_001",
+      "filename": "syn_table_heavy_cv_001.pdf",
+      "rel_path": "corpus/syn_table_heavy_cv_001.pdf",
+      "sha256": "36ba9eddeefa6d0557c68b22687705b7bb26fad0a65582eb11a162ca3ec5505a",
+      "pages": 1,
+      "category": "table_heavy_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "digital_accepted",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_broken_encoding_000",
+      "filename": "syn_broken_encoding_000.pdf",
+      "rel_path": "corpus/syn_broken_encoding_000.pdf",
+      "sha256": "3dc8e6ccb6594ef9df9cdd1f4ecae35a3be921dda8d19b1b961814b8e077cd58",
+      "pages": 1,
+      "category": "broken_encoding",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "encoding_stress",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": false,
+      "eval_high_risk": true,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_broken_encoding_001",
+      "filename": "syn_broken_encoding_001.pdf",
+      "rel_path": "corpus/syn_broken_encoding_001.pdf",
+      "sha256": "93ae45c1bfff7496f3f05bb081a68ac85fb9e67e573f341b4862c5d4e10a1790",
+      "pages": 1,
+      "category": "broken_encoding",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "encoding_stress",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": false,
+      "eval_high_risk": true,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_cid_tounicode_missing_font_000",
+      "filename": "syn_cid_tounicode_missing_font_000.pdf",
+      "rel_path": "corpus/syn_cid_tounicode_missing_font_000.pdf",
+      "sha256": "94b9deaf141aa8255eb73c19576f9239936bcfd273b325cd77a64b30b9e72830",
+      "pages": 1,
+      "category": "cid_tounicode_missing_font",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "encoding_or_symbol_stress",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [],
+      "eval_inspector_ocr": []
+    },
+    {
+      "doc_id": "syn_rotated_scan_cv_000",
+      "filename": "syn_rotated_scan_cv_000.pdf",
+      "rel_path": "corpus/syn_rotated_scan_cv_000.pdf",
+      "sha256": "4290a6c462eda7e0d62cabe451dd06a3202dc44bfaecd855dd6b31d17d9ab364",
+      "pages": 1,
+      "category": "rotated_scan_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "needs_ocr_all",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": [
+        1
+      ]
+    },
+    {
+      "doc_id": "syn_lowres_compressed_scan_cv_000",
+      "filename": "syn_lowres_compressed_scan_cv_000.pdf",
+      "rel_path": "corpus/syn_lowres_compressed_scan_cv_000.pdf",
+      "sha256": "32f5a794a5175b8286ac74a86980d4893937d07a51dfdc54d965bf9c02be6c02",
+      "pages": 1,
+      "category": "lowres_compressed_scan_cv",
+      "source_id": "synthetic_wave2_generated",
+      "expected_ocr_policy": "needs_ocr_all",
+      "contains_real_pii": false,
+      "synthetic": true,
+      "eval_agreement": true,
+      "eval_high_risk": false,
+      "eval_poppler_ocr": [
+        1
+      ],
+      "eval_inspector_ocr": [
+        1
+      ]
+    }
+  ],
+  "notes": "Do not insert the full Wave 2 corpus into staging/production. This subset is synthetic-only and sized for smoke/intake harnesses."
+}

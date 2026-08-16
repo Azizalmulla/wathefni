@@ -1,0 +1,23 @@
+{
+  "fixture_id": "cv_broken_encoding_01",
+  "category": "broken_encoding",
+  "language": "en_broken",
+  "layout": "single_column",
+  "pdf_nature": "digital_broken_encoding",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [
+    1
+  ],
+  "expected_text_needles": [
+    "broken.encoding@example.com",
+    "+96556667788",
+    "EXPERIENCE"
+  ],
+  "expected_fields": {
+    "email": "broken.encoding@example.com",
+    "phone": "+96556667788"
+  },
+  "notes": "Deliberate mojibake/garbled text; encoding-issue / OCR-fallback stress case.",
+  "sha256": "7c33f16f35f0eec47d1c14268d099a265d29d7a1fbccfc912cf6b692a4fd6a01",
+  "bytes": 1752
+}

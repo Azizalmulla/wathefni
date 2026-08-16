@@ -1,0 +1,40 @@
+{
+  "tag": "57b4df9d",
+  "phones": {
+    "a": "965525157490",
+    "b": "965525257490"
+  },
+  "cleanup_keys": [
+    "WATHEFNI-965525157490",
+    "WATHEFNI-965525257490"
+  ],
+  "employee_keys": {
+    "a": "WATHEFNI-965525157490",
+    "b": "WATHEFNI-965525257490"
+  },
+  "leave_annual": "8cc39f10-75a8-4fa1-9020-955922dbad03",
+  "leave_sick": "556ddd53-909f-4f25-a47c-6441bc514c0c",
+  "leave_vacation": "3e81b655-279f-497c-86c1-64b35950913b",
+  "shift_id": "01ecf1f8-a306-487d-a59e-6ada5898404e",
+  "timesheet_id": "ebb8e45f-e846-4e87-8d9b-d5522701bd9b",
+  "attendance_ids": [
+    "bb60d9f7-14cb-45dc-a7de-dc042bb7e169"
+  ],
+  "leave_stale": "01de2f83-5fbc-4ebd-be89-dc6bab8743d0",
+  "leave_lifecycle": "7bcc2a1a-5158-4302-bd0a-d5a88d677e23",
+  "leave_legacy_ledger": "9fac0719-3dcf-470e-980a-606eedd7ffc7",
+  "cleanup": {
+    "leave_events": 8,
+    "leave_ledger": 2,
+    "leave_requests": 6,
+    "leave_balances": 2,
+    "attendance_events": 2,
+    "attendance_records": 2,
+    "attendance_day_projections": 3,
+    "shift_assignments": 1,
+    "payroll_timesheet_events": 2,
+    "payroll_timesheets": 1,
+    "employees": 2
+  },
+  "four_real_balances_fp": "21bb5fb2ed227123d9010ef5603004c0"
+}

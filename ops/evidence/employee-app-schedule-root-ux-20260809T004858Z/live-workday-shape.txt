@@ -1,0 +1,5 @@
+PASS Aziz WATHEFNI-96599338566: today=0 upcoming=0 recent=5 window_days=30 summary={'present': 3, 'late': 1, 'absent': 1} preview_upcoming_hidden=0 preview_recent_hidden=0
+  authority shifts=ready attendance=ready upcoming=ready
+PASS Talal WATHEFNI-96550252254: today=0 upcoming=0 recent=0 window_days=30 summary={'present': 0, 'late': 0, 'absent': 0} preview_upcoming_hidden=0 preview_recent_hidden=0
+  authority shifts=ready attendance=ready upcoming=ready
+LIVE_WORKDAY_SHAPE_OK

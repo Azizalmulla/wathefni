@@ -1,0 +1,16 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [
+    1
+  ],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": true,
+      "markdown": "",
+      "markdown_len": 0
+    }
+  ]
+}

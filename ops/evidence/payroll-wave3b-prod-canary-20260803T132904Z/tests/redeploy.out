@@ -1,0 +1,101 @@
+stamp=20260803T132904Z-redeploy
+time_utc=2026-08-03T13:30:13Z
+active
+=== SHAs before ===
+f8c2b134088f647bd44483df7e013400425fefbdbcb122aae2e46cc3b611f1fc  /opt/wathefni/orchestrator/app.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  /opt/wathefni/orchestrator/payroll_authority_wave1.py
+4540e93c8a01c3b95642f35ab0483498198b0f085f9789a4e73f5914bdc67773  /opt/wathefni/orchestrator/payroll_external_adapter_wave2a.py
+2470298b86bd6a282cfe87c03ffbf11f41f1e53fd82c75854e754d0f79fbc62e  /opt/wathefni/orchestrator/payroll_native_preview_wave2b.py
+ls: cannot access '/opt/wathefni/orchestrator/payroll_payslip_wave3.py': No such file or directory
+payroll_payslip_wave3.py absent
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PAYROLL_WAVE1=1
+WATHEFNI_PAYROLL_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS=PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_PHONE_PREFIXES=965539
+WATHEFNI_PAYROLL_WAVE2A=1
+WATHEFNI_PAYROLL_WAVE2A_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_KEY_MARKERS=PYW2ACB,PYW2ACB-SYNTH|,PYW2AB,PYW2AB-SYNTH|,PYW2A,PYW2A-SYNTH|,PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_PHONE_PREFIXES=965540,965539
+WATHEFNI_PAYROLL_WAVE2B=1
+WATHEFNI_PAYROLL_WAVE2B_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_KEY_MARKERS=PYW2B,PYW2B-SYNTH|,PYW1,PYW1-SYNTH|,W2BB
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_PHONE_PREFIXES=965541,965539
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+{
+  "db": "wathefni",
+  "payroll_payslip_documents": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_preview_runs": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_adapter_import_runs": {
+    "present": true,
+    "count": 0
+  }
+}
+[13:30:16] backing up modules + dropins + dashboard posthire
+2470298b86bd6a282cfe87c03ffbf11f41f1e53fd82c75854e754d0f79fbc62e  modules/payroll_native_preview_wave2b.py
+4540e93c8a01c3b95642f35ab0483498198b0f085f9789a4e73f5914bdc67773  modules/payroll_external_adapter_wave2a.py
+f8c2b134088f647bd44483df7e013400425fefbdbcb122aae2e46cc3b611f1fc  modules/app.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  modules/payroll_authority_wave1.py
+[13:30:16] deploying wave3 modules + app routes + dashboard UI
+[13:30:16] writing synthetic-only Wave 3 drop-in (Wave 1/2A/2B drop-ins untouched)
+[13:30:16] migrate schema (ACK)
+wave3_version 1.0.0
+wave2b_version 1.0.0
+wave2a_version 1.0.0
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'payslips_as_money': False, 'native_payslips_authoritative': False, 'external_payslips_authority': 'external', 'ai_calculations': False, 'synthetic_only': True}
+connected_db wathefni
+payslip_tables ['payroll_payslip_documents', 'payroll_payslip_events', 'payroll_payslip_lines']
+wave1_2a_2b_tables_ok
+MIGRATE_OK payroll_payslip_wave3_prod
+ACK_PRODUCTION_PAYROLL_W3B=YES
+health_ok
+active
+=== SHAs after ===
+dad1653d287a42533e826b83bc37c6053568eb737df54a69bbade8154b4a1418  /opt/wathefni/orchestrator/payroll_payslip_wave3.py
+37dd6393958131176ab93a70616a6ef992ce30a65ab3f5339270bc0fb8a5a4e1  /opt/wathefni/orchestrator/app.py
+2470298b86bd6a282cfe87c03ffbf11f41f1e53fd82c75854e754d0f79fbc62e  /opt/wathefni/orchestrator/payroll_native_preview_wave2b.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  /opt/wathefni/orchestrator/payroll_authority_wave1.py
+4540e93c8a01c3b95642f35ab0483498198b0f085f9789a4e73f5914bdc67773  /opt/wathefni/orchestrator/payroll_external_adapter_wave2a.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PAYROLL_WAVE1=1
+WATHEFNI_PAYROLL_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS=PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_PHONE_PREFIXES=965539
+WATHEFNI_PAYROLL_WAVE2A=1
+WATHEFNI_PAYROLL_WAVE2A_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_KEY_MARKERS=PYW2ACB,PYW2ACB-SYNTH|,PYW2AB,PYW2AB-SYNTH|,PYW2A,PYW2A-SYNTH|,PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_PHONE_PREFIXES=965540,965539
+WATHEFNI_PAYROLL_WAVE2B=1
+WATHEFNI_PAYROLL_WAVE2B_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_KEY_MARKERS=PYW2B,PYW2B-SYNTH|,PYW1,PYW1-SYNTH|,W2BB
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_PHONE_PREFIXES=965541,965539
+WATHEFNI_PAYROLL_WAVE3=1
+WATHEFNI_PAYROLL_WAVE3_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_KEY_MARKERS=PYW3,PYW3-SYNTH|,PYW2B,PYW2B-SYNTH|,PYW2A,PYW2ACB,PYW1,PYW1-SYNTH|,W2BB,W3B
+WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_PHONE_PREFIXES=965541,965540,965539
+PAYROLL_WAVE3 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW3', 'PYW3-SYNTH|', 'PYW2B', 'PYW2B-SYNTH|', 'PYW2A', 'PYW2ACB', 'PYW1', 'PYW1-SYNTH|', 'W2BB', 'W3B')
+prefixes ('965541', '965540', '965539')
+honesty {'payment_processing': 'disabled', 'payslips_as_money': False, 'native_payslips_authoritative': False, 'external_payslips_authority': 'external', 'ai_calculations': False, 'bank_files': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK
+DEPLOY_OK stamp=20260803T132904Z-redeploy backup=/opt/wathefni/backups/production-pre-payroll-wave3b-20260803T132904Z-redeploy evid=/opt/wathefni/production-evidence/payroll-wave3b-prod-canary/20260803T132904Z-redeploy

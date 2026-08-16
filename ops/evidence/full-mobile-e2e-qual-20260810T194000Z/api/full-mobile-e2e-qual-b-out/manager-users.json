@@ -1,0 +1,44 @@
+[
+  {
+    "user_id": "a17accee-0adb-4bc2-9276-aff489914c3e",
+    "company_code": "WATHEFNI",
+    "email": "interaction-audit-root-20260805T195406Z@wathefni.invalid",
+    "name": "Interaction Audit HR Manager",
+    "phone": null,
+    "role": "hr_manager",
+    "status": "disabled",
+    "password_hash": null,
+    "last_active_at": "2026-08-05 21:40:08.907393+00:00",
+    "invited_by_user_id": null,
+    "invited_at": null,
+    "accepted_at": "2026-08-05 19:54:54.242778+00:00",
+    "disabled_at": "2026-08-05 21:43:37.661891+00:00",
+    "metadata": {
+      "interaction_audit_cleanup": "20260805T195406Z",
+      "temporary_interaction_audit": "20260805T195406Z"
+    },
+    "created_at": "2026-08-05 19:54:54.242778+00:00",
+    "updated_at": "2026-08-05 21:40:08.907393+00:00"
+  },
+  {
+    "user_id": "a629acda-3b67-4a87-aaf8-0105dc86d930",
+    "company_code": "WATHEFNI",
+    "email": "interaction-late-hr_manager-20260805t220256z@audit.wathefni.local",
+    "name": "Interaction Late hr_manager",
+    "phone": null,
+    "role": "hr_manager",
+    "status": "disabled",
+    "password_hash": null,
+    "last_active_at": "2026-08-05 22:05:57.167407+00:00",
+    "invited_by_user_id": null,
+    "invited_at": null,
+    "accepted_at": "2026-08-05 22:05:41.015138+00:00",
+    "disabled_at": "2026-08-05 22:13:46.431125+00:00",
+    "metadata": {
+      "temporary_audit": "20260805T220256Z",
+      "cleanup_completed": "20260805T220256Z"
+    },
+    "created_at": "2026-08-05 22:05:41.015138+00:00",
+    "updated_at": "2026-08-05 22:13:46.431125+00:00"
+  }
+]

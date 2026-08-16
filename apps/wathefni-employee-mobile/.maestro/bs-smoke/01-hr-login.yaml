@@ -1,0 +1,47 @@
+# BrowserStack: HR work-email sign-in → PIN setup/unlock → Home.
+# Requires setEnvVariables: MAESTRO_HR_COMPANY, MAESTRO_HR_EMAIL, MAESTRO_HR_PASSWORD, MAESTRO_PIN
+# Uses simple ASCII email (e2ehr@test.internal) — prior wathefni.internal was corrupted by iOS keyboard to wathefnit.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - browserstack
+  - hr
+  - auth
+  - requires_credentials
+---
+- runFlow:
+    file: _ota-to-unsigned.yaml
+- tapOn:
+    id: "e2e.auth.method.workEmail"
+- assertVisible:
+    id: "e2e.auth.hr.company"
+- tapOn:
+    id: "e2e.auth.hr.company"
+- eraseText
+- inputText: ${MAESTRO_HR_COMPANY}
+- tapOn:
+    id: "e2e.auth.hr.email"
+- eraseText
+- inputText: ${MAESTRO_HR_EMAIL_LOCAL}
+- inputText: "@"
+- inputText: ${MAESTRO_HR_EMAIL_DOMAIN}
+- tapOn:
+    id: "e2e.auth.hr.password"
+- eraseText
+- inputText: ${MAESTRO_HR_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "e2e.auth.hr.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.pin.root"
+    timeout: 120000
+- runFlow:
+    file: _hr-pin-setup.yaml
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 90000
+- assertVisible:
+    id: "e2e.tab.hr.home"
+- takeScreenshot: bs-hr-home

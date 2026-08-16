@@ -1,0 +1,7 @@
+Connect canary source True
+Sync history True
+Run sync True
+Pause True
+Disconnect True
+Will apply True
+Onboarding · True

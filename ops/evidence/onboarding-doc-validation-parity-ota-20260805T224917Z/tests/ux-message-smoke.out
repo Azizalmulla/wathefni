@@ -1,0 +1,4 @@
+OK code document_validation_wrong_media_item en_calm True ar_calm True
+OK code document_validation_unreadable en_calm True ar_calm True
+OK code document_validation_needs_review en_calm False ar_calm None
+SMOKE PASS

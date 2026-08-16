@@ -1,0 +1,19 @@
+{
+  "expected_chunk": "dashboard-C2UeV2r7.js",
+  "chunk_present": true,
+  "index_refs_chunk": true,
+  "artifact_sha256": "eb634c49d58658b242e62984567505875be3cdc913c87360344ce6419a218196",
+  "has_configuration": true,
+  "has_summary_testid": true,
+  "has_details_testid": true,
+  "role_gate_recruiter_hm_excluded": true,
+  "has_product2": true,
+  "no_old_label": true,
+  "css_hide_rule": true,
+  "health_after": "200",
+  "dashboard_after": "200",
+  "send_tab_present": true,
+  "attempts_present": true,
+  "reports_present": true,
+  "all_pass": true
+}

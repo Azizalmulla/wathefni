@@ -1,0 +1,29 @@
+=== E360 ===
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+=== ONBOARDING ===
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+=== ATTENDANCE ===
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+=== LEAVE ===
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+=== SHIFTS ===
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+96 passed, 0 failed
+=== COMPLIANCE ===
+PASS  frozen module doc intact ANALYTICS_WAVE1_ATTENTION_FREEZE.md
+
+36 passed, 0 failed
+=== ACTION_INBOX ===
+PASS  frozen module doc intact COMPLIANCE_WAVE1_FINDINGS_FREEZE.md
+
+47 passed, 0 failed
+SIBLING_FREEZES_DONE

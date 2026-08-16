@@ -1,0 +1,216 @@
+{
+  "company": "WATHEFNI",
+  "verdict": "PASS",
+  "fail_keys": [],
+  "checks": {
+    "active_applications_equals_pipeline": true,
+    "active_applications_value": 7,
+    "active_pipeline_truth": 7,
+    "interview_debt_equals_4": true,
+    "interview_debt_value": 4,
+    "assessment_pending_excludes_completed": true,
+    "assessment_pending_value": 2,
+    "no_needs_role_in_stage": true,
+    "stage_labels": [
+      "New",
+      "Ready for review",
+      "Shortlisted",
+      "Hired"
+    ],
+    "assessment_labels_human": true,
+    "interview_labels_human": true,
+    "owner_export_parity": true,
+    "manager_export_parity": true,
+    "recruiter_export_parity": true,
+    "owner_roles_not_open_only": true,
+    "interviews_export_visible_count": true,
+    "metric_version": true,
+    "held_still_exist_outside_reviewable": 5
+  },
+  "owner": {
+    "role": "owner",
+    "apply_assignment_scope": false,
+    "overview": {
+      "open_roles": 9,
+      "active_applications": 7,
+      "ready_for_review": 2,
+      "interview_scheduling_debt": 4,
+      "assessment_pending": 2,
+      "followups_current": 2,
+      "units": {
+        "open_roles": "role",
+        "active_applications": "application",
+        "ready_for_review": "people",
+        "interview_scheduling_debt": "application",
+        "assessment_pending": "people",
+        "followups_current": "people"
+      }
+    },
+    "stage_labels": [
+      "New",
+      "Ready for review",
+      "Shortlisted",
+      "Hired"
+    ],
+    "assessment_labels": [
+      "Expired",
+      "Completed",
+      "Sent pending"
+    ],
+    "interview_labels": [
+      "Cancelled",
+      "Completed"
+    ],
+    "export_displayed": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 4,
+      "followup_delivery_history": 9
+    },
+    "export_actual": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 4,
+      "followup_delivery_history": 9
+    },
+    "export_parity": {
+      "candidates": true,
+      "roles": true,
+      "assessments": true,
+      "interviews": true,
+      "followups": true,
+      "followup_delivery_history": true
+    },
+    "metric_version": "reports-contract-v2",
+    "partial": false,
+    "ok": true
+  },
+  "manager": {
+    "role": "hr_manager",
+    "apply_assignment_scope": false,
+    "overview": {
+      "open_roles": 9,
+      "active_applications": 7,
+      "ready_for_review": 2,
+      "interview_scheduling_debt": 4,
+      "assessment_pending": 2,
+      "followups_current": 2,
+      "units": {
+        "open_roles": "role",
+        "active_applications": "application",
+        "ready_for_review": "people",
+        "interview_scheduling_debt": "application",
+        "assessment_pending": "people",
+        "followups_current": "people"
+      }
+    },
+    "stage_labels": [
+      "New",
+      "Ready for review",
+      "Shortlisted",
+      "Hired"
+    ],
+    "assessment_labels": [
+      "Expired",
+      "Completed",
+      "Sent pending"
+    ],
+    "interview_labels": [
+      "Cancelled",
+      "Completed"
+    ],
+    "export_displayed": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 4,
+      "followup_delivery_history": 9
+    },
+    "export_actual": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 4,
+      "followup_delivery_history": 9
+    },
+    "export_parity": {
+      "candidates": true,
+      "roles": true,
+      "assessments": true,
+      "interviews": true,
+      "followups": true,
+      "followup_delivery_history": true
+    },
+    "metric_version": "reports-contract-v2",
+    "partial": false,
+    "ok": true
+  },
+  "recruiter": {
+    "role": "recruiter",
+    "apply_assignment_scope": false,
+    "overview": {
+      "open_roles": 9,
+      "active_applications": 7,
+      "ready_for_review": 2,
+      "interview_scheduling_debt": 4,
+      "assessment_pending": 2,
+      "followups_current": 2,
+      "units": {
+        "open_roles": "role",
+        "active_applications": "application",
+        "ready_for_review": "people",
+        "interview_scheduling_debt": "application",
+        "assessment_pending": "people",
+        "followups_current": "people"
+      }
+    },
+    "stage_labels": [
+      "New",
+      "Ready for review",
+      "Shortlisted",
+      "Hired"
+    ],
+    "assessment_labels": [
+      "Expired",
+      "Completed",
+      "Sent pending"
+    ],
+    "interview_labels": [
+      "Cancelled",
+      "Completed"
+    ],
+    "export_displayed": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 4,
+      "followup_delivery_history": 9
+    },
+    "export_actual": {
+      "candidates": 10,
+      "roles": 12,
+      "assessments": 5,
+      "interviews": 4,
+      "followups": 4,
+      "followup_delivery_history": 9
+    },
+    "export_parity": {
+      "candidates": true,
+      "roles": true,
+      "assessments": true,
+      "interviews": true,
+      "followups": true,
+      "followup_delivery_history": true
+    },
+    "metric_version": "reports-contract-v2",
+    "partial": false,
+    "ok": true
+  }
+}

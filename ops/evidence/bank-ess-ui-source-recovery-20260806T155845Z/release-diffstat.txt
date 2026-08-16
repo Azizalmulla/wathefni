@@ -1,0 +1,20 @@
+ apps/wathefni-dashboard/src/posthire/PostHire.tsx  |  14 +-
+ .../posthire/employees360/BankReviewPanel.test.tsx | 196 +++++
+ .../src/posthire/employees360/BankReviewPanel.tsx  | 465 +++++++++++
+ .../OnboardingCompletionStrip.test.tsx             |  80 ++
+ .../employees360/OnboardingCompletionStrip.tsx     |  57 ++
+ .../src/posthire/employees360/bankReview.ts        |  62 ++
+ .../posthire/employees360/onboardingCompletion.ts  |  43 +
+ apps/wathefni-employee-mobile/app/_layout.tsx      |  37 +-
+ apps/wathefni-employee-mobile/app/bank.tsx         | 271 +++++++
+ apps/wathefni-employee-mobile/app/onboarding.tsx   | 196 ++++-
+ .../scripts/verify-capability-foundation.py        |  70 ++
+ apps/wathefni-employee-mobile/src/api/errors.ts    |  59 ++
+ apps/wathefni-employee-mobile/src/api/types.ts     | 202 +++++
+ .../src/features/bank/BankView.tsx                 | 514 ++++++++++++
+ .../src/features/onboarding/OnboardingView.tsx     | 867 ++++++++++++++++-----
+ .../src/features/onboarding/lifecycleProjection.ts | 221 ++++++
+ apps/wathefni-employee-mobile/src/i18n/ar.json     | 168 +++-
+ apps/wathefni-employee-mobile/src/i18n/en.json     | 168 +++-
+ apps/wathefni-employee-mobile/src/lib/documents.ts |  30 +-
+ 19 files changed, 3461 insertions(+), 259 deletions(-)

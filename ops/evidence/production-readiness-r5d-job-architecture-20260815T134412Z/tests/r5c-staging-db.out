@@ -1,0 +1,69 @@
+    PRODUCTION READINESS R5C — talent surface (staging DB)
+    tenant: R5C4629D3
+      PASS  sync catalog entitlement
+      PASS  no master score
+      PASS  JA not required
+      PASS  learning not required
+      PASS  profile created
+      PASS  profile has no score
+      PASS  explicit evidence
+      PASS  potential framework
+      PASS  potential explicit
+      PASS  talent review created
+      PASS  review prepared
+      PASS  history intact
+      PASS  perf consume enabled
+      PASS  perf evidence linked
+      PASS  high performer did not auto HiPo
+      PASS  potential still explicit
+      PASS  critical role
+      PASS  succession plan
+      PASS  successor 1
+      PASS  successor 2 different readiness
+      PASS  multi successor slate
+      PASS  no universal readiness
+      PASS  nine-box config
+      PASS  nine-box derived
+      PASS  nine-box does not imply HiPo
+      PASS  HiPo explicit
+      PASS  top right not HiPo
+      PASS  potential preserved after 9-box
+      PASS  employee aspiration
+      PASS  employee workspace ok
+      PASS  employee potential hidden
+      PASS  employee hipo hidden
+      PASS  employee no hipo key
+      PASS  employee no potential key
+      PASS  employee potential API hidden
+      PASS  recruiting off talent works
+      PASS  no silent candidate
+      PASS  interest not application
+      PASS  recruiting on explicit handoff
+      PASS  handoff does not write pool
+      PASS  HR workspace summary
+      PASS  manager empty scope fail-closed
+      PASS  talent catalog enableable
+      PASS  JA enableable after R5D
+      PASS  Talent still does not require JA
+      PASS  talent HTTP routes registered
+      PASS  unauthenticated dashboard not public
+      PASS  unauthenticated employee not public
+      PASS  HR workspace HTTP
+      PASS  alias /dashboard/talent works
+      PASS  HR lists profiles
+      PASS  tenant isolation 404
+      PASS  manager empty scope fail-closed
+      PASS  manager HiPo without sensitive forbidden
+      PASS  manager succession without perm forbidden
+      PASS  HR without manage denied write
+      PASS  employee sees own workspace
+      PASS  employee cannot see potential
+      PASS  employee cannot see hipo
+      PASS  employee cannot see succession
+      PASS  employee IDOR stays self or empty
+      PASS  history preserved after disable
+      PASS  new work blocked when disabled
+
+    63 passed, 0 failed
+R5C_TALENT_SURFACE_DB_PASS
+STAGING_RC=0

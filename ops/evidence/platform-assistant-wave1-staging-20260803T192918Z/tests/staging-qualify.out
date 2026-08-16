@@ -1,0 +1,98 @@
+health_ok
+active
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+CAPTURE_INGEST_OFF_OK
+WAVE1_FLAG_OK
+MUTATIONS_OFF_OK
+PASS  wave1 version
+PASS  wathefni only
+PASS  wave1 enabled
+PASS  company ok
+PASS  external company denied
+PASS  mutations default off
+PASS  master kill default off
+PASS  honesty no money
+PASS  honesty no ingest
+PASS  honesty no mutations
+PASS  honesty no legal auth
+PASS  default posthire inbox
+PASS  hr dashboard only
+PASS  contract action_inbox
+PASS  contract employees_360
+PASS  contract setup_console
+PASS  contracts read-only
+PASS  contracts no mutations
+PASS  grounding has freshness
+PASS  grounding has authority
+PASS  grounding has citations
+PASS  fallback en missing
+PASS  fallback ar missing
+PASS  fallback en stale
+PASS  fallback ar stale
+PASS  fallback en partial
+PASS  fallback ar partial
+PASS  fallback en unavailable
+PASS  fallback ar unavailable
+PASS  fallback en blocked
+PASS  fallback ar blocked
+PASS  fallback en unsupported
+PASS  fallback ar unsupported
+PASS  master kill on
+PASS  master kill reply
+PASS  master kill off
+PASS  mutation denial status
+PASS  tool summarize_action_inbox
+PASS  tool summarize_employee_360
+PASS  tool get_launch_readiness_summary
+PASS  mutation tools hidden
+PASS  whatsapp no spine tools
+PASS  external no spine tools
+PASS  catalog action inbox
+PASS  catalog e360
+PASS  catalog setup
+PASS  empty chips en inbox
+PASS  empty chips ar
+PASS  inbox tool returns grounding
+PASS  inbox freshness
+PASS  inbox authority label
+PASS  inbox no mutate
+PASS  tenant isolation on tool
+PASS  permission denial
+PASS  audit event persisted
+PASS  setup readiness tool
+PASS  setup readiness citations
+PASS  mutations explicit on
+PASS  mutations explicit off
+
+59 passed, 0 failed
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+PASS  E360 freeze doc present
+PASS  Onboarding freeze doc present
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+96 passed, 0 failed
+STAGING_SPINE_EVAL_OK {"inbox_authority": "partial", "inbox_confidence": "partial", "ready_overall": "live_controlled", "mutations_allowed": false}
+STAGING_PLATFORM_ASSISTANT_WAVE1_OK

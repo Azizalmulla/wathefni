@@ -55,7 +55,7 @@ function loadTs(relPath) {
 
 const { balanceForLeaveType, balancesAreInformational } = loadTs('src/features/leave/leaveBalance.ts')
 const { telHref, displayPhone } = loadTs('src/lib/contact.ts')
-const { daysUntil, kuwaitToday, formatDateTime } = loadTs('src/lib/format.ts')
+const { daysUntil, kuwaitToday, kuwaitDayPart, formatDateTime } = loadTs('src/lib/format.ts')
 
 console.log('    employee app phase E — high-value additions (balance, duration, contact, expiry)')
 
@@ -186,6 +186,12 @@ check('today is a Kuwait date, not the device date', () => {
   // 22:00 UTC is already the next day in Kuwait (UTC+3).
   assert.equal(kuwaitToday(new Date('2026-08-08T22:00:00Z')), '2026-08-09')
   assert.equal(kuwaitToday(new Date('2026-08-08T10:00:00Z')), '2026-08-08')
+
+  assert.equal(kuwaitDayPart(new Date('2026-08-08T05:00:00Z')), 'morning') // 08:00 KW
+  assert.equal(kuwaitDayPart(new Date('2026-08-08T10:00:00Z')), 'afternoon') // 13:00 KW
+  assert.equal(kuwaitDayPart(new Date('2026-08-08T15:00:00Z')), 'evening') // 18:00 KW
+  assert.equal(kuwaitDayPart(new Date('2026-08-08T20:59:00Z')), 'evening') // 23:59 KW
+  assert.equal(kuwaitDayPart(new Date('2026-08-08T21:00:00Z')), 'morning') // 00:00 KW next day
 })
 
 check('expiry day count does not drift across the Kuwait day boundary', () => {

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "019fd849-26c1-740a-bc32-6e4a2283d429",
+    "createdAt": "2026-08-06T18:15:00.545Z",
+    "group": "388e8cf5-1d6b-4140-9c84-bfff55504928",
+    "branch": "canary",
+    "message": "Bank ESS eligibility align me/onboarding/bank 20260806T181405Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd849-26c1-740a-bc32-6e4a2283d429",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "f1573abd7705ad3907d0bab9e185dd18524777b3"
+  },
+  {
+    "id": "019fd849-26c1-72ec-94b8-500e667e3bc0",
+    "createdAt": "2026-08-06T18:15:00.545Z",
+    "group": "388e8cf5-1d6b-4140-9c84-bfff55504928",
+    "branch": "canary",
+    "message": "Bank ESS eligibility align me/onboarding/bank 20260806T181405Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd849-26c1-72ec-94b8-500e667e3bc0",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "f1573abd7705ad3907d0bab9e185dd18524777b3"
+  }
+]

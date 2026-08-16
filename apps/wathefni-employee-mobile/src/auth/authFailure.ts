@@ -108,8 +108,10 @@ export function classifyAuthFailure(
       accessState: soft,
       wipeLocalSession: false,
       reason: `${error.code}:${effectivePhase}`,
-      // Incidental API network blips must not hijack the whole app shell.
-      blockApp: !(effectivePhase === 'api' && soft === 'offline'),
+      // Soft gates may block boot/refresh_me/unlock. Incidental API calls
+      // (push register, badge poll, etc.) must never hijack the shell —
+      // a false 403 during a storm previously projected "App access unavailable".
+      blockApp: effectivePhase !== 'api',
     }
   }
 

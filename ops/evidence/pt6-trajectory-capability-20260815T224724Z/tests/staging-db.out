@@ -1,0 +1,12 @@
+    pt6 trajectory — db journeys
+      PASS  no policy → no label
+      PASS  publish policy
+      PASS  insufficient history → no label
+      PASS  holder dep changes analytic coverage
+      PASS  employment not mutated
+      PASS  baseline coverage unchanged after dep
+      PASS  employee still active
+
+    7 passed, 0 failed
+PT6_TRAJECTORY_CAPABILITY_INTELLIGENCE_DB_PASS
+STAGING_RC=0

@@ -1,0 +1,91 @@
+{
+  "passed": 4,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "prod-en-desktop-settings-intake",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "ok": true,
+      "signals": {
+        "htmlLang": "en",
+        "hasIntakeEn": true,
+        "hasIntakeAr": false,
+        "hasCreateEn": true,
+        "hasCreateAr": false,
+        "hasSetupSteps": true,
+        "noIntakeOps": true,
+        "rtl": false,
+        "snippet": "Email & document intake\n\nForward your company recruitment email to a Wathefni address. Inbox sync is not used in this phase.\n\nEnabled\nLast received: 1 Aug 2026, 08:00 · 8 / 7d\n92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com\nPostmark default test\nNo role alias — held as needs role until HR assi"
+      }
+    },
+    {
+      "name": "prod-ar-desktop-settings-intake",
+      "locale": "ar",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "ok": true,
+      "signals": {
+        "htmlLang": "ar",
+        "hasIntakeEn": false,
+        "hasIntakeAr": true,
+        "hasCreateEn": false,
+        "hasCreateAr": true,
+        "hasSetupSteps": true,
+        "noIntakeOps": true,
+        "rtl": true,
+        "snippet": "استقبال البريد والمستندات\n\nحوّل بريد التوظيف في شركتك إلى عنوان وظفني. لا تتم مزامنة صندوق الوارد في هذه المرحلة.\n\nمفعّل\nآخر استلام: 1 Aug 2026, 08:00 · 8 / 7d\n92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com\nPostmark default test\nبدون وظيفة محددة — تُحفظ كـ «تحتاج دوراً» حتى يعيّنها ا"
+      }
+    },
+    {
+      "name": "prod-en-mobile-settings-intake",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "ok": true,
+      "signals": {
+        "htmlLang": "en",
+        "hasIntakeEn": true,
+        "hasIntakeAr": false,
+        "hasCreateEn": true,
+        "hasCreateAr": false,
+        "hasSetupSteps": true,
+        "noIntakeOps": true,
+        "rtl": false,
+        "snippet": "Email & document intake\n\nForward your company recruitment email to a Wathefni address. Inbox sync is not used in this phase.\n\nEnabled\nLast received: 1 Aug 2026, 08:00 · 8 / 7d\n92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com\nPostmark default test\nNo role alias — held as needs role until HR assi"
+      }
+    },
+    {
+      "name": "prod-ar-mobile-settings-intake",
+      "locale": "ar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "ok": true,
+      "signals": {
+        "htmlLang": "ar",
+        "hasIntakeEn": false,
+        "hasIntakeAr": true,
+        "hasCreateEn": false,
+        "hasCreateAr": true,
+        "hasSetupSteps": true,
+        "noIntakeOps": true,
+        "rtl": true,
+        "snippet": "استقبال البريد والمستندات\n\nحوّل بريد التوظيف في شركتك إلى عنوان وظفني. لا تتم مزامنة صندوق الوارد في هذه المرحلة.\n\nمفعّل\nآخر استلام: 1 Aug 2026, 08:00 · 8 / 7d\n92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com\nPostmark default test\nبدون وظيفة محددة — تُحفظ كـ «تحتاج دوراً» حتى يعيّنها ا"
+      }
+    }
+  ],
+  "chunk_ar_copy": {
+    "hasIntakeAr": true,
+    "hasCreateAr": true,
+    "hasStepsMarker": true
+  }
+}

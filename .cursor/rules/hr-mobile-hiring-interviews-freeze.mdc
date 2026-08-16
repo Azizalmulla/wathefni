@@ -1,0 +1,39 @@
+---
+description: Freeze HR mobile Hiring home + Candidates list + Interviews after cream honesty lock; no workflow expansion
+globs: apps/wathefni-employee-mobile/src/hr/features/hiring/**,apps/wathefni-employee-mobile/src/hr/features/recruiting/CandidatesQueueView.tsx,apps/wathefni-employee-mobile/src/hr/features/recruiting/InterviewsQueueView.tsx,apps/wathefni-employee-mobile/src/hr/features/recruiting/InterviewDetailView.tsx,apps/wathefni-employee-mobile/src/hr/features/recruiting/JobsPositionsView.tsx,apps/wathefni-employee-mobile/src/hr/features/recruiting/CreamQueueScreen.tsx,apps/wathefni-employee-mobile/app/hr/jobs/**,apps/wathefni-employee-mobile/app/hr/candidates/index.tsx,apps/wathefni-employee-mobile/app/hr/interviews/**,apps/wathefni-employee-mobile/scripts/verify-hr-hiring-*.py,apps/wathefni-employee-mobile/scripts/physical-hr-hiring-interviews-en-ar.py,wathefni-orchestrator/operator_mobile_data.py
+alwaysApply: false
+---
+
+# HR mobile Hiring + Candidates list + Interviews — freeze
+
+Hiring home, Candidates list (position-scoped), Jobs/positions picker, and Interviews list/detail are **accepted and frozen** after the cream + honesty lock (`20260810T174850Z`).
+Do **not** invent Assessments mobile workflow, unscoped candidate pipelines, or interview schedule/reschedule mutations while auditing adjacent surfaces.
+
+Canonical evidence: `ops/evidence/hr-hiring-interviews-cream-20260810T174850Z/`  
+Prior audit: `ops/evidence/hr-hiring-interviews-qual-20260810T173000Z/`  
+Debt: `ops/HR_MOBILE_HIRING_INTERVIEWS_CONTRACT_DEBT.md`
+
+## Frozen product shape
+
+- Hiring cream home: positions-backed summary; localized priority/upcoming; browse Jobs → `/hr/jobs`; Ranking/Candidates browse → Jobs first; **Assessments omitted**
+- Priorities: follow-up/ready/assessment → `/jobs`; role → `/candidates?position={code}`
+- Candidates list: cream `PageScreen` + `HrPushedNav`; requires position; calm `requires_position` / `ranking_unavailable` — never fake empty ranked success
+- Jobs list: `GET /dashboard/mobile/positions` → opens scoped Candidates
+- Interviews list/detail: cream; notes POST with `expected_updated_at` + `expected_version`; stale/error inline; invalidate interview + interviews + hiring + priorities
+- Assistant: interviews use `interview_id` only (never `app_key`); ranking/jobs → Jobs or scoped Candidates; assessments stay web-only
+- Candidate `schedule_interview` → interviews **list** (honest; no fake detail)
+- Preserve RBAC, module gates, tenant isolation, safe-back, existing backend workflows
+
+## Allowed without owner change-control
+
+- Bugfixes restoring freeze invariants / tenant isolation / RBAC / concurrency tokens
+- Docs / canary log / contract-debt notes
+- Shared Assistant deep-link safety that does not expand recruiting workflow
+
+## Not allowed without an explicit owner wave
+
+- Inventing Assessments mobile queue or company-wide unscoped candidate list
+- Schedule / reschedule / cancel interview mutations on mobile
+- SOD conversion for interview notes (direct POST + tokens remains intentional)
+- Remapping Jobs → Candidates long-term or reintroducing Assessments browse remap
+- Reintroducing plum/`@hr/theme` Operational list chrome on these surfaces

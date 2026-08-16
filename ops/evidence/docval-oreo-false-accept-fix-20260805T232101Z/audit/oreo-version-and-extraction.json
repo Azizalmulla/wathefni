@@ -1,0 +1,764 @@
+{
+  "queries": {
+    "document_storage_operations": [
+      {
+        "probe": "content_sha256",
+        "rows": [
+          {
+            "operation_id": "cda82def-6ff5-447b-9531-63096f669e1f",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-96599338566",
+            "item_id": "civil_id_canary_test",
+            "provider": "local",
+            "provider_scope": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees",
+            "trace_key": "cda82def6ff5447b953163096f669e1f",
+            "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "external_file_id": null,
+            "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "status": "canonical_committed",
+            "failure_reason": null,
+            "attempt_count": 0,
+            "next_attempt_at": null,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "metadata": {
+              "upload_name": null,
+              "storage_status": "stored",
+              "planned_provider": "local",
+              "primary_provider": null,
+              "fallback_provider": "local",
+              "planned_local_root": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees",
+              "planned_drive_folder_id": "18xxK1nsF8aohpwvd2XJDRJ1TzHqtI2vL"
+            },
+            "stored_at": "2026-08-05 23:15:32.508568+00:00",
+            "canonical_committed_at": "2026-08-05 23:15:32.517741+00:00",
+            "compensated_at": null,
+            "created_at": "2026-08-05 23:15:32.492026+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00"
+          }
+        ]
+      },
+      {
+        "probe": "employee_item",
+        "rows": [
+          {
+            "operation_id": "cda82def-6ff5-447b-9531-63096f669e1f",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-96599338566",
+            "item_id": "civil_id_canary_test",
+            "provider": "local",
+            "provider_scope": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees",
+            "trace_key": "cda82def6ff5447b953163096f669e1f",
+            "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "external_file_id": null,
+            "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "status": "canonical_committed",
+            "failure_reason": null,
+            "attempt_count": 0,
+            "next_attempt_at": null,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "metadata": {
+              "upload_name": null,
+              "storage_status": "stored",
+              "planned_provider": "local",
+              "primary_provider": null,
+              "fallback_provider": "local",
+              "planned_local_root": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees",
+              "planned_drive_folder_id": "18xxK1nsF8aohpwvd2XJDRJ1TzHqtI2vL"
+            },
+            "stored_at": "2026-08-05 23:15:32.508568+00:00",
+            "canonical_committed_at": "2026-08-05 23:15:32.517741+00:00",
+            "compensated_at": null,
+            "created_at": "2026-08-05 23:15:32.492026+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00"
+          }
+        ]
+      }
+    ],
+    "employee_documents": [
+      {
+        "probe": "content_sha256",
+        "rows": [
+          {
+            "document_id": "3561676d-cb0a-400e-a15a-92b9f3d39fcd",
+            "employee_key": "WATHEFNI-96599338566",
+            "phone": "96599338566",
+            "company_code": "WATHEFNI",
+            "item_id": "civil_id_canary_test",
+            "document_type": "civil_id_canary_test",
+            "filename": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "local_path": "/tmp/app-doc-upload-59vqkl_5/F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "drive_file_id": null,
+            "drive_url": null,
+            "expiry_date": null,
+            "status": "received",
+            "metadata": {
+              "label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+              "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+              "item_id": "civil_id_canary_test",
+              "storage": {
+                "ok": true,
+                "metadata": {
+                  "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                  "company_code": "WATHEFNI"
+                },
+                "provider": "local",
+                "drive_url": null,
+                "mime_type": "image/jpeg",
+                "stored_at": "2026-08-05T23:15:32Z",
+                "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                "drive_file_id": null,
+                "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+                "storage_status": "stored",
+                "external_file_id": null,
+                "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg"
+              },
+              "extraction": {
+                "gpt_used": false,
+                "confidence": 0.0,
+                "verification": {
+                  "reason": "needs_review",
+                  "channel": "whatsapp_onboarding",
+                  "gpt_used": false,
+                  "provider": "mistral",
+                  "confidence": 0.0,
+                  "delegated_to": "identity_document_extraction",
+                  "authoritative": false,
+                  "detected_item": "unknown",
+                  "document_type": "civil_id",
+                  "extraction_status": "needs_review",
+                  "matches_expected_item": false,
+                  "canonical_document_type": "civil_id",
+                  "hr_confirmation_required": true
+                },
+                "authoritative": false,
+                "doc_validation": {
+                  "gate": "soft",
+                  "route": {
+                    "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                    "extension": ".jpg",
+                    "file_type": "jpg",
+                    "file_types": [
+                      "jpg",
+                      "jpeg",
+                      "png",
+                      "pdf",
+                      "tif",
+                      "tiff",
+                      "webp"
+                    ],
+                    "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                    "structuring": "identity_document_extraction_mistral",
+                    "reading_route": "shared_envelope_intake",
+                    "document_class": "identity",
+                    "fallback_reading": "needs_review",
+                    "gpt_auto_ocr_fallback": false,
+                    "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                    "gpt_fallback_forbidden": true
+                  },
+                  "reason": "needs_review",
+                  "decision": "allow_uncertain",
+                  "gpt_used": false,
+                  "hr_review_recommended": true
+                },
+                "extraction_error": "shared_extract_unavailable",
+                "extraction_status": "needs_review",
+                "hr_confirmation_required": true
+              },
+              "received_at": "2026-08-05T23:15:32Z"
+            },
+            "raw_json": {
+              "label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+              "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+              "item_id": "civil_id_canary_test",
+              "storage": {
+                "ok": true,
+                "metadata": {
+                  "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                  "company_code": "WATHEFNI"
+                },
+                "provider": "local",
+                "drive_url": null,
+                "mime_type": "image/jpeg",
+                "stored_at": "2026-08-05T23:15:32Z",
+                "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                "drive_file_id": null,
+                "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+                "storage_status": "stored",
+                "external_file_id": null,
+                "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg"
+              },
+              "extraction": {
+                "gpt_used": false,
+                "confidence": 0.0,
+                "verification": {
+                  "reason": "needs_review",
+                  "channel": "whatsapp_onboarding",
+                  "gpt_used": false,
+                  "provider": "mistral",
+                  "confidence": 0.0,
+                  "delegated_to": "identity_document_extraction",
+                  "authoritative": false,
+                  "detected_item": "unknown",
+                  "document_type": "civil_id",
+                  "extraction_status": "needs_review",
+                  "matches_expected_item": false,
+                  "canonical_document_type": "civil_id",
+                  "hr_confirmation_required": true
+                },
+                "authoritative": false,
+                "doc_validation": {
+                  "gate": "soft",
+                  "route": {
+                    "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                    "extension": ".jpg",
+                    "file_type": "jpg",
+                    "file_types": [
+                      "jpg",
+                      "jpeg",
+                      "png",
+                      "pdf",
+                      "tif",
+                      "tiff",
+                      "webp"
+                    ],
+                    "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                    "structuring": "identity_document_extraction_mistral",
+                    "reading_route": "shared_envelope_intake",
+                    "document_class": "identity",
+                    "fallback_reading": "needs_review",
+                    "gpt_auto_ocr_fallback": false,
+                    "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                    "gpt_fallback_forbidden": true
+                  },
+                  "reason": "needs_review",
+                  "decision": "allow_uncertain",
+                  "gpt_used": false,
+                  "hr_review_recommended": true
+                },
+                "extraction_error": "shared_extract_unavailable",
+                "extraction_status": "needs_review",
+                "hr_confirmation_required": true
+              },
+              "received_at": "2026-08-05T23:15:32Z"
+            },
+            "received_at": "2026-08-05",
+            "created_at": "2026-08-05 23:15:32.517741+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_provider": "local",
+            "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "external_file_id": null,
+            "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "mime_type": "image/jpeg",
+            "stored_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_status": "stored",
+            "storage_error": null,
+            "document_number": null,
+            "issued_at": null,
+            "extracted_at": "2026-08-05 23:15:32.517741+00:00",
+            "extraction_status": "needs_review",
+            "extraction_error": "shared_extract_unavailable",
+            "extraction_confidence": "0.0"
+          }
+        ]
+      },
+      {
+        "probe": "employee_item",
+        "rows": [
+          {
+            "document_id": "3561676d-cb0a-400e-a15a-92b9f3d39fcd",
+            "employee_key": "WATHEFNI-96599338566",
+            "phone": "96599338566",
+            "company_code": "WATHEFNI",
+            "item_id": "civil_id_canary_test",
+            "document_type": "civil_id_canary_test",
+            "filename": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "local_path": "/tmp/app-doc-upload-59vqkl_5/F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "drive_file_id": null,
+            "drive_url": null,
+            "expiry_date": null,
+            "status": "received",
+            "metadata": {
+              "label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+              "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+              "item_id": "civil_id_canary_test",
+              "storage": {
+                "ok": true,
+                "metadata": {
+                  "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                  "company_code": "WATHEFNI"
+                },
+                "provider": "local",
+                "drive_url": null,
+                "mime_type": "image/jpeg",
+                "stored_at": "2026-08-05T23:15:32Z",
+                "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                "drive_file_id": null,
+                "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+                "storage_status": "stored",
+                "external_file_id": null,
+                "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg"
+              },
+              "extraction": {
+                "gpt_used": false,
+                "confidence": 0.0,
+                "verification": {
+                  "reason": "needs_review",
+                  "channel": "whatsapp_onboarding",
+                  "gpt_used": false,
+                  "provider": "mistral",
+                  "confidence": 0.0,
+                  "delegated_to": "identity_document_extraction",
+                  "authoritative": false,
+                  "detected_item": "unknown",
+                  "document_type": "civil_id",
+                  "extraction_status": "needs_review",
+                  "matches_expected_item": false,
+                  "canonical_document_type": "civil_id",
+                  "hr_confirmation_required": true
+                },
+                "authoritative": false,
+                "doc_validation": {
+                  "gate": "soft",
+                  "route": {
+                    "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                    "extension": ".jpg",
+                    "file_type": "jpg",
+                    "file_types": [
+                      "jpg",
+                      "jpeg",
+                      "png",
+                      "pdf",
+                      "tif",
+                      "tiff",
+                      "webp"
+                    ],
+                    "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                    "structuring": "identity_document_extraction_mistral",
+                    "reading_route": "shared_envelope_intake",
+                    "document_class": "identity",
+                    "fallback_reading": "needs_review",
+                    "gpt_auto_ocr_fallback": false,
+                    "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                    "gpt_fallback_forbidden": true
+                  },
+                  "reason": "needs_review",
+                  "decision": "allow_uncertain",
+                  "gpt_used": false,
+                  "hr_review_recommended": true
+                },
+                "extraction_error": "shared_extract_unavailable",
+                "extraction_status": "needs_review",
+                "hr_confirmation_required": true
+              },
+              "received_at": "2026-08-05T23:15:32Z"
+            },
+            "raw_json": {
+              "label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+              "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+              "item_id": "civil_id_canary_test",
+              "storage": {
+                "ok": true,
+                "metadata": {
+                  "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                  "company_code": "WATHEFNI"
+                },
+                "provider": "local",
+                "drive_url": null,
+                "mime_type": "image/jpeg",
+                "stored_at": "2026-08-05T23:15:32Z",
+                "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+                "drive_file_id": null,
+                "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+                "storage_status": "stored",
+                "external_file_id": null,
+                "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg"
+              },
+              "extraction": {
+                "gpt_used": false,
+                "confidence": 0.0,
+                "verification": {
+                  "reason": "needs_review",
+                  "channel": "whatsapp_onboarding",
+                  "gpt_used": false,
+                  "provider": "mistral",
+                  "confidence": 0.0,
+                  "delegated_to": "identity_document_extraction",
+                  "authoritative": false,
+                  "detected_item": "unknown",
+                  "document_type": "civil_id",
+                  "extraction_status": "needs_review",
+                  "matches_expected_item": false,
+                  "canonical_document_type": "civil_id",
+                  "hr_confirmation_required": true
+                },
+                "authoritative": false,
+                "doc_validation": {
+                  "gate": "soft",
+                  "route": {
+                    "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+                    "extension": ".jpg",
+                    "file_type": "jpg",
+                    "file_types": [
+                      "jpg",
+                      "jpeg",
+                      "png",
+                      "pdf",
+                      "tif",
+                      "tiff",
+                      "webp"
+                    ],
+                    "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+                    "structuring": "identity_document_extraction_mistral",
+                    "reading_route": "shared_envelope_intake",
+                    "document_class": "identity",
+                    "fallback_reading": "needs_review",
+                    "gpt_auto_ocr_fallback": false,
+                    "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+                    "gpt_fallback_forbidden": true
+                  },
+                  "reason": "needs_review",
+                  "decision": "allow_uncertain",
+                  "gpt_used": false,
+                  "hr_review_recommended": true
+                },
+                "extraction_error": "shared_extract_unavailable",
+                "extraction_status": "needs_review",
+                "hr_confirmation_required": true
+              },
+              "received_at": "2026-08-05T23:15:32Z"
+            },
+            "received_at": "2026-08-05",
+            "created_at": "2026-08-05 23:15:32.517741+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_provider": "local",
+            "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "external_file_id": null,
+            "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "mime_type": "image/jpeg",
+            "stored_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_status": "stored",
+            "storage_error": null,
+            "document_number": null,
+            "issued_at": null,
+            "extracted_at": "2026-08-05 23:15:32.517741+00:00",
+            "extraction_status": "needs_review",
+            "extraction_error": "shared_extract_unavailable",
+            "extraction_confidence": "0.0"
+          }
+        ]
+      }
+    ],
+    "governed_document_events": [
+      {
+        "probe": "version_id",
+        "rows": [
+          {
+            "event_id": "8a193687-ceef-498a-90f5-af19112e7062",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-96599338566",
+            "document_type": "civil_id_canary_test",
+            "version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a",
+            "actor_user_id": "96599338566",
+            "actor_kind": "employee",
+            "action": "uploaded",
+            "reason": null,
+            "old_state": {
+              "current_version_id": null
+            },
+            "new_state": {
+              "is_current": true,
+              "legitimacy": "file_received_pending_hr_review",
+              "version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a",
+              "review_status": "pending_hr_review"
+            },
+            "created_at": "2026-08-05 23:15:32.517741+00:00"
+          }
+        ]
+      }
+    ],
+    "governed_document_versions": [
+      {
+        "probe": "version_id",
+        "rows": [
+          {
+            "version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-96599338566",
+            "document_type": "civil_id_canary_test",
+            "version_no": 1,
+            "file_id": "a9bdb930-fb30-42f4-abaf-f2e441e09219",
+            "file_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "filename": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "mime_type": "image/jpeg",
+            "review_status": "pending_hr_review",
+            "is_current": true,
+            "issue_date": null,
+            "expiry_date": null,
+            "document_number": null,
+            "ocr_proposal": {
+              "name": null,
+              "issue_date": null,
+              "expiry_date": null,
+              "authoritative": false,
+              "document_number": null,
+              "extraction_status": "needs_review"
+            },
+            "confirmed_metadata": {},
+            "rejection_reason": null,
+            "uploaded_by": "96599338566",
+            "upload_source": "employee_or_hr_upload",
+            "hr_reviewer_user_id": null,
+            "reviewed_at": null,
+            "created_at": "2026-08-05 23:15:32.517741+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00"
+          }
+        ]
+      },
+      {
+        "probe": "file_id",
+        "rows": [
+          {
+            "version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-96599338566",
+            "document_type": "civil_id_canary_test",
+            "version_no": 1,
+            "file_id": "a9bdb930-fb30-42f4-abaf-f2e441e09219",
+            "file_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "filename": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "mime_type": "image/jpeg",
+            "review_status": "pending_hr_review",
+            "is_current": true,
+            "issue_date": null,
+            "expiry_date": null,
+            "document_number": null,
+            "ocr_proposal": {
+              "name": null,
+              "issue_date": null,
+              "expiry_date": null,
+              "authoritative": false,
+              "document_number": null,
+              "extraction_status": "needs_review"
+            },
+            "confirmed_metadata": {},
+            "rejection_reason": null,
+            "uploaded_by": "96599338566",
+            "upload_source": "employee_or_hr_upload",
+            "hr_reviewer_user_id": null,
+            "reviewed_at": null,
+            "created_at": "2026-08-05 23:15:32.517741+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00"
+          }
+        ]
+      }
+    ],
+    "onboarding_items": [
+      {
+        "probe": "content_sha256",
+        "rows": [
+          {
+            "employee_key": "WATHEFNI-96599338566",
+            "item_id": "civil_id_canary_test",
+            "label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+            "item_type": "document",
+            "required": false,
+            "document_type": "civil_id_canary_test",
+            "status": "processing",
+            "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "drive_file_id": null,
+            "drive_url": null,
+            "expiry_date": null,
+            "raw_json": {
+              "canary": true,
+              "source": "civil_id_canary_test",
+              "seeded_by": "ops_aziz_docval_canary_item"
+            },
+            "created_at": "2026-08-05 23:07:47.786324+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_provider": "local",
+            "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "external_file_id": null,
+            "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "mime_type": "image/jpeg",
+            "stored_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_status": "stored",
+            "storage_error": null,
+            "reminder_count": 0,
+            "last_reminded_at": null,
+            "escalated_at": null,
+            "category": "identity_legal",
+            "owner": "employee",
+            "sort_order": 9999,
+            "row_version": 2,
+            "due_date": null,
+            "depends_on": [],
+            "collection_mode": "document",
+            "authority": "onboarding",
+            "template_version": "2.0.0-canary",
+            "rejection_reason": null,
+            "completed_at": null,
+            "lifecycle_meta": {
+              "phase": "processing",
+              "canary": true,
+              "purpose": "document_validation_parity_live_test",
+              "awaiting": "hr_review",
+              "created_at": "2026-08-05T23:07:47.792236+00:00",
+              "disposable": true,
+              "doc_validation": {
+                "gate": "soft",
+                "reason": "needs_review",
+                "decision": "allow_uncertain",
+                "gpt_used": false,
+                "hr_review_recommended": true
+              },
+              "canary_reset_at": "2026-08-05T23:13:23.096521+00:00",
+              "lifecycle_status": "processing",
+              "last_submit_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+              "explicitly_assigned": true,
+              "last_submit_file_id": "a9bdb930-fb30-42f4-abaf-f2e441e09219",
+              "lifecycle_updated_at": "2026-08-05T23:15:32.558495+00:00",
+              "do_not_approve_as_real": true,
+              "last_submit_version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a"
+            }
+          }
+        ]
+      },
+      {
+        "probe": "employee_item",
+        "rows": [
+          {
+            "employee_key": "WATHEFNI-96599338566",
+            "item_id": "civil_id_canary_test",
+            "label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+            "item_type": "document",
+            "required": false,
+            "document_type": "civil_id_canary_test",
+            "status": "processing",
+            "value": "F7CB3770-DD6B-4EFB-995F-A8D83633A7C5.jpg",
+            "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "drive_file_id": null,
+            "drive_url": null,
+            "expiry_date": null,
+            "raw_json": {
+              "canary": true,
+              "source": "civil_id_canary_test",
+              "seeded_by": "ops_aziz_docval_canary_item"
+            },
+            "created_at": "2026-08-05 23:07:47.786324+00:00",
+            "updated_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_provider": "local",
+            "storage_object_key": "data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "external_file_id": null,
+            "storage_url": "local://data/companies/WATHEFNI/employees/96599338566/documents/civil_id_canary_test/civil_id_canary_test-67221e9686f3-cda82def6ff5447b953163096f669e1f.jpg",
+            "content_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+            "mime_type": "image/jpeg",
+            "stored_at": "2026-08-05 23:15:32.517741+00:00",
+            "storage_status": "stored",
+            "storage_error": null,
+            "reminder_count": 0,
+            "last_reminded_at": null,
+            "escalated_at": null,
+            "category": "identity_legal",
+            "owner": "employee",
+            "sort_order": 9999,
+            "row_version": 2,
+            "due_date": null,
+            "depends_on": [],
+            "collection_mode": "document",
+            "authority": "onboarding",
+            "template_version": "2.0.0-canary",
+            "rejection_reason": null,
+            "completed_at": null,
+            "lifecycle_meta": {
+              "phase": "processing",
+              "canary": true,
+              "purpose": "document_validation_parity_live_test",
+              "awaiting": "hr_review",
+              "created_at": "2026-08-05T23:07:47.792236+00:00",
+              "disposable": true,
+              "doc_validation": {
+                "gate": "soft",
+                "reason": "needs_review",
+                "decision": "allow_uncertain",
+                "gpt_used": false,
+                "hr_review_recommended": true
+              },
+              "canary_reset_at": "2026-08-05T23:13:23.096521+00:00",
+              "lifecycle_status": "processing",
+              "last_submit_sha256": "67221e9686f312c7ca1fdb2d2e28072f7d219ae484ca8bb6198ad3c5c4ef360f",
+              "explicitly_assigned": true,
+              "last_submit_file_id": "a9bdb930-fb30-42f4-abaf-f2e441e09219",
+              "lifecycle_updated_at": "2026-08-05T23:15:32.558495+00:00",
+              "do_not_approve_as_real": true,
+              "last_submit_version_id": "81d08408-31ac-499b-a1d6-99f1b77a3a4a"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "candidate_tables": [
+    "application_cv_extraction_v2",
+    "application_cv_facts_migration_audit",
+    "assessment_ai_model_registry_versions",
+    "assessment_blueprint_versions",
+    "assessment_content_versions",
+    "assessment_prompt_versions",
+    "attendance_capture_audit_events",
+    "attendance_ops_audit_events",
+    "calendar_event_audit",
+    "calendar_sync_audit",
+    "candidate_cv_text_versions",
+    "candidate_documents",
+    "canonical_cv_evidence_migration_audit",
+    "company_policy_audit",
+    "company_policy_documents",
+    "compliance_documents",
+    "cv_extraction_cache",
+    "cv_extraction_finalizations",
+    "cv_extraction_leases",
+    "cv_extraction_runs",
+    "cv_versions",
+    "document_privacy_jobs",
+    "document_storage_operations",
+    "document_type_compat_map",
+    "employee_document_email_intake",
+    "employee_document_metadata",
+    "employee_documents",
+    "employee_ess_audit_journal",
+    "employee_ess_document_versions",
+    "employee_onboarding_assignments",
+    "employment_offer_hire_override_audits",
+    "employment_offer_versions",
+    "governed_document_events",
+    "governed_document_versions",
+    "inbound_cv_identity_extractions",
+    "intake_documents",
+    "intake_item_documents",
+    "interview_feedback_definition_versions",
+    "leave_attachment_audit",
+    "leave_holiday_audit",
+    "leave_holiday_year_versions",
+    "onboarding_audit_events",
+    "onboarding_items",
+    "onboarding_migration_batches",
+    "onboarding_migration_item_snapshots",
+    "payroll_payslip_documents",
+    "platform_company_integration_audit",
+    "report_export_audits",
+    "semantic_documents",
+    "shift_assignment_versions",
+    "shift_schedule_versions",
+    "tc_audit_events",
+    "tc_config_documents",
+    "tc_decision_audit",
+    "tc_onboarding_wizard_drafts",
+    "tc_tenant_config_versions"
+  ]
+}

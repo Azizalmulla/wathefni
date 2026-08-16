@@ -1,0 +1,1004 @@
+#!/usr/bin/env python3
+"""Onboarding Wave 2A — shared document/checklist lifecycle foundation.
+
+Single authority for employee-app and HR web transitions. Feature-flagged;
+does not implement bank ESS, OCR classify/verify parity, or template overlays.
+
+Canonical employee-facing states (stored on onboarding_items.status when flag on):
+  pending → in_progress → submitted → processing → accepted
+  submitted|processing → rejected → replacement_required → submitted
+  * → waived | blocked
+
+Legacy `received` is never employee-facing when the flag is on: mapped/backfilled
+to `processing` (awaiting HR). Weak-confidence historical uploads are not auto-rejected.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from datetime import datetime, timezone
+from typing import Any
+
+_ON = frozenset({"1", "true", "yes", "on", "enabled"})
+
+# Canonical states (employee + HR shared contract).
+STATE_PENDING = "pending"
+STATE_IN_PROGRESS = "in_progress"
+STATE_SUBMITTED = "submitted"
+STATE_PROCESSING = "processing"
+STATE_ACCEPTED = "accepted"
+STATE_REJECTED = "rejected"
+STATE_REPLACEMENT_REQUIRED = "replacement_required"
+STATE_WAIVED = "waived"
+STATE_BLOCKED = "blocked"
+
+CANONICAL_STATES = frozenset(
+    {
+        STATE_PENDING,
+        STATE_IN_PROGRESS,
+        STATE_SUBMITTED,
+        STATE_PROCESSING,
+        STATE_ACCEPTED,
+        STATE_REJECTED,
+        STATE_REPLACEMENT_REQUIRED,
+        STATE_WAIVED,
+        STATE_BLOCKED,
+    }
+)
+
+# Legacy / alternate spellings → canonical (read path + backfill).
+LEGACY_STATUS_MAP: dict[str, str] = {
+    "pending": STATE_PENDING,
+    "missing": STATE_PENDING,
+    "requested": STATE_PENDING,
+    "in_progress": STATE_IN_PROGRESS,
+    "submitted": STATE_SUBMITTED,
+    "processing": STATE_PROCESSING,
+    # Ambiguous historical receipt → awaiting HR review (not final).
+    "received": STATE_PROCESSING,
+    "needs_review": STATE_PROCESSING,
+    "accepted": STATE_ACCEPTED,
+    "complete": STATE_ACCEPTED,
+    "completed": STATE_ACCEPTED,
+    "verified": STATE_ACCEPTED,
+    "approved": STATE_ACCEPTED,
+    "reviewed": STATE_ACCEPTED,
+    "rejected": STATE_REJECTED,
+    "replacement_required": STATE_REPLACEMENT_REQUIRED,
+    "reupload_required": STATE_REPLACEMENT_REQUIRED,
+    "waived": STATE_WAIVED,
+    "cancelled_onboarding": STATE_WAIVED,
+    "blocked": STATE_BLOCKED,
+    "abandoned_employment_ended": STATE_BLOCKED,
+    "retired_legacy": STATE_WAIVED,
+}
+
+# Who may initiate each transition (service owner).
+TRANSITION_OWNERS: dict[tuple[str, str], str] = {
+    (STATE_PENDING, STATE_IN_PROGRESS): "employee_app|hr|system",
+    (STATE_PENDING, STATE_SUBMITTED): "employee_app",
+    (STATE_IN_PROGRESS, STATE_SUBMITTED): "employee_app",
+    (STATE_SUBMITTED, STATE_PROCESSING): "document_pipeline",
+    (STATE_PROCESSING, STATE_ACCEPTED): "hr_review",
+    (STATE_SUBMITTED, STATE_ACCEPTED): "hr_review",
+    (STATE_PROCESSING, STATE_REJECTED): "hr_review",
+    (STATE_SUBMITTED, STATE_REJECTED): "hr_review",
+    (STATE_REJECTED, STATE_REPLACEMENT_REQUIRED): "hr_review",
+    (STATE_PROCESSING, STATE_REPLACEMENT_REQUIRED): "hr_review",
+    (STATE_REPLACEMENT_REQUIRED, STATE_SUBMITTED): "employee_app",
+    (STATE_ACCEPTED, STATE_REPLACEMENT_REQUIRED): "hr_review",  # rare re-open
+    (STATE_PENDING, STATE_WAIVED): "hr_review",
+    (STATE_IN_PROGRESS, STATE_WAIVED): "hr_review",
+    (STATE_PROCESSING, STATE_WAIVED): "hr_review",
+    (STATE_REPLACEMENT_REQUIRED, STATE_WAIVED): "hr_review",
+    (STATE_PENDING, STATE_BLOCKED): "system|hr_review",
+    (STATE_IN_PROGRESS, STATE_BLOCKED): "system|hr_review",
+}
+
+COMPLETE_STATES = frozenset({STATE_ACCEPTED, STATE_WAIVED})
+EMPLOYEE_ACTION_STATES = frozenset(
+    {STATE_PENDING, STATE_IN_PROGRESS, STATE_REPLACEMENT_REQUIRED, STATE_REJECTED}
+)
+REVIEW_STATES = frozenset({STATE_SUBMITTED, STATE_PROCESSING})
+
+DOCUMENT_COLLECTION_MODES = frozenset({"document", "file", "media"})
+
+
+def lifecycle_enabled(*, company_code: str | None = None, employee_key: str | None = None) -> bool:
+    if (os.environ.get("WATHEFNI_ONBOARDING_LIFECYCLE_V2A") or "").strip().lower() not in _ON:
+        return False
+    companies = {
+        c.strip().upper()
+        for c in (os.environ.get("WATHEFNI_ONBOARDING_LIFECYCLE_V2A_COMPANIES") or "WATHEFNI").split(",")
+        if c.strip()
+    }
+    if company_code and str(company_code).upper() not in companies:
+        return False
+    allow = {
+        k.strip()
+        for k in (os.environ.get("WATHEFNI_ONBOARDING_LIFECYCLE_V2A_EMPLOYEE_ALLOWLIST") or "").split(",")
+        if k.strip()
+    }
+    if allow and employee_key and str(employee_key).strip() not in allow:
+        return False
+    return True
+
+
+def ensure_lifecycle_schema(cur: Any) -> None:
+    cur.execute(
+        """
+        ALTER TABLE onboarding_items
+          ADD COLUMN IF NOT EXISTS rejection_reason text,
+          ADD COLUMN IF NOT EXISTS completed_at timestamptz,
+          ADD COLUMN IF NOT EXISTS lifecycle_meta jsonb NOT NULL DEFAULT '{}'::jsonb
+        """
+    )
+
+
+def normalize_status(raw: str | None) -> str:
+    key = str(raw or "").strip().lower()
+    if not key:
+        return STATE_PENDING
+    if key in CANONICAL_STATES:
+        return key
+    return LEGACY_STATUS_MAP.get(key, STATE_PENDING)
+
+
+def is_lifecycle_complete(status: str | None) -> bool:
+    return normalize_status(status) in COMPLETE_STATES
+
+
+def responsible_party(item: dict[str, Any]) -> str:
+    """Who the item is waiting on right now."""
+    status = normalize_status(item.get("status"))
+    authority = str(item.get("authority") or "").lower()
+    owner = str(item.get("owner") or "").lower()
+    category = str(item.get("category") or "").lower()
+    item_id = str(item.get("item_id") or "").lower()
+    collection = str(item.get("collection_mode") or item.get("item_type") or "").lower()
+
+    if status in COMPLETE_STATES:
+        return "none"
+    if status == STATE_BLOCKED:
+        return "system"
+    if status in REVIEW_STATES:
+        return "hr"
+    if status in {STATE_REPLACEMENT_REQUIRED, STATE_REJECTED}:
+        return "employee"
+    if authority == "ess" or collection == "ess_encrypted" or item_id == "bank_details":
+        return "employee"  # Wave 2B will surface bank UI; still employee-owned
+    if authority == "compliance_mirror" or category == "compliance_gov":
+        return "compliance"
+    if category == "payroll_bank" or item_id in {
+        "salary_transfer_details",
+        "salary_allowances_confirmed",
+        "payroll_status",
+    }:
+        return "payroll" if status not in EMPLOYEE_ACTION_STATES else "payroll"
+    if owner in {"hr", "system"} and collection not in DOCUMENT_COLLECTION_MODES | {"ack", "text", "date"}:
+        return "hr" if owner == "hr" else "system"
+    if owner == "employee" or collection in DOCUMENT_COLLECTION_MODES | {"ack", "text", "date", "ess_encrypted"}:
+        return "employee"
+    if owner == "hr":
+        return "hr"
+    if owner == "system":
+        return "system"
+    return "hr"
+
+
+def _is_document_item(item: dict[str, Any]) -> bool:
+    mode = str(item.get("collection_mode") or "").lower()
+    itype = str(item.get("item_type") or "").lower()
+    return bool(item.get("document_type")) or mode in DOCUMENT_COLLECTION_MODES or itype == "document"
+
+
+def _item_evidence(item: dict[str, Any]) -> bool:
+    return bool(item.get("file_id") or item.get("current_file_id") or item.get("value"))
+
+
+def _explicitly_assigned(item: dict[str, Any]) -> bool:
+    meta = item.get("lifecycle_meta") if isinstance(item.get("lifecycle_meta"), dict) else {}
+    return bool(meta.get("explicitly_assigned") or meta.get("applicable"))
+
+
+def _lifecycle_active(status: str) -> bool:
+    return status in REVIEW_STATES | COMPLETE_STATES | {
+        STATE_REPLACEMENT_REQUIRED,
+        STATE_REJECTED,
+        STATE_SUBMITTED,
+        STATE_IN_PROGRESS,
+    }
+
+
+def _employee_visible(item: dict[str, Any]) -> bool:
+    """Surface employee checklist rows; hide dormant optional and empty HR rails.
+
+    Optional items appear only when applicable/explicitly assigned, already
+    submitted, under review, needing replacement, or holding file evidence.
+    Bank stays visible (informational Wave 2A). Required employee items stay visible.
+    """
+    owner = str(item.get("owner") or "").lower()
+    authority = str(item.get("authority") or "").lower()
+    mode = str(item.get("collection_mode") or "").lower()
+    item_id = str(item.get("item_id") or "").lower()
+    if authority == "compliance_mirror":
+        return False
+    if item_id == "bank_details" or mode == "ess_encrypted":
+        return True  # visible but Wave 2A actions empty for bank submit
+
+    status = normalize_status(item.get("status"))
+    has_evidence = _item_evidence(item)
+    explicitly_assigned = _explicitly_assigned(item)
+    active = _lifecycle_active(status)
+
+    # Optional / non-required: hide dormant pending with no evidence and no assignment.
+    if item.get("required") is False:
+        if active or has_evidence or explicitly_assigned:
+            if owner == "employee":
+                return True
+            if _is_document_item(item):
+                return True
+        return False
+
+    if owner == "employee":
+        return True
+    # HR-owned document with real evidence or active review/completion
+    if _is_document_item(item) and (active or has_evidence):
+        return True
+    return False
+
+
+def _hr_main_visible(item: dict[str, Any]) -> bool:
+    """HR web main checklist: required, assigned, active, or active non-employee rails."""
+    authority = str(item.get("authority") or "").lower()
+    mode = str(item.get("collection_mode") or "").lower()
+    item_id = str(item.get("item_id") or "").lower()
+    owner = str(item.get("owner") or "").lower()
+    if authority == "compliance_mirror":
+        return False
+    if item_id == "bank_details" or mode == "ess_encrypted":
+        return True
+
+    status = normalize_status(item.get("status"))
+    has_evidence = _item_evidence(item)
+    explicitly_assigned = _explicitly_assigned(item)
+    active = _lifecycle_active(status)
+
+    if item.get("required") is True:
+        return True
+    if active or has_evidence or explicitly_assigned:
+        return True
+    # Active HR/IT/payroll rails: non-employee pending work that is still required was
+    # already covered. Optional pending non-employee rows stay dormant.
+    if owner in {"hr", "system"} and status in {STATE_PENDING, STATE_IN_PROGRESS} and item.get("required") is True:
+        return True
+    return False
+
+
+def _hr_available_task(item: dict[str, Any]) -> bool:
+    """Dormant optional template rows for the collapsed Available tasks area."""
+    if _hr_main_visible(item):
+        return False
+    authority = str(item.get("authority") or "").lower()
+    if authority == "compliance_mirror":
+        return False
+    status = normalize_status(item.get("status"))
+    if item.get("required") is False and status in {STATE_PENDING, STATE_IN_PROGRESS}:
+        return True
+    return False
+
+
+def actions_for_hr_item(
+    item: dict[str, Any],
+    *,
+    can_mutate: bool,
+    can_upload: bool,
+    lifecycle_on: bool,
+) -> list[str]:
+    """HR web actions. Mark complete maps to accepted when lifecycle is on."""
+    status = normalize_status(item.get("status")) if lifecycle_on else str(item.get("status") or "pending").lower()
+    mode = str(item.get("collection_mode") or "").lower()
+    item_id = str(item.get("item_id") or "").lower()
+    actions: list[str] = []
+    if item.get("file_id") or item.get("current_file_id"):
+        actions.append("preview")
+        actions.append("view_versions")
+    if mode == "ess_encrypted" or item_id == "bank_details":
+        if can_mutate and status not in COMPLETE_STATES:
+            actions.append("waive")
+        return actions
+    if can_upload and _is_document_item(item) and status in {
+        STATE_PENDING,
+        STATE_IN_PROGRESS,
+        STATE_REPLACEMENT_REQUIRED,
+        STATE_REJECTED,
+        "pending",
+    }:
+        actions.append("upload")
+    if can_mutate and status not in COMPLETE_STATES:
+        if status not in {STATE_WAIVED, "waived"}:
+            actions.append("mark_complete")
+            actions.append("waive")
+    return actions
+
+
+def actions_for_item(
+    item: dict[str, Any],
+    *,
+    can_upload: bool,
+    lifecycle_on: bool,
+) -> list[str]:
+    if not lifecycle_on:
+        # Legacy: document upload only when pending-ish
+        if can_upload and _is_document_item(item) and not is_lifecycle_complete(item.get("status")):
+            st = str(item.get("status") or "").lower()
+            if st in {"received", "complete", "completed", "verified", "approved", "reviewed"}:
+                return ["preview"] if item.get("file_id") else []
+            return ["upload"]
+        return []
+
+    status = normalize_status(item.get("status"))
+    mode = str(item.get("collection_mode") or "").lower()
+    item_id = str(item.get("item_id") or "").lower()
+    actions: list[str] = []
+    if item.get("file_id") or item.get("current_file_id"):
+        actions.append("preview")
+        actions.append("view_versions")
+    if mode == "ess_encrypted" or item_id == "bank_details":
+        # Wave 2B — no submit yet
+        return actions
+    if not _is_document_item(item):
+        return actions
+    if not can_upload:
+        return actions
+    if status in {STATE_PENDING, STATE_IN_PROGRESS}:
+        actions.append("upload")
+    if status == STATE_REPLACEMENT_REQUIRED:
+        actions.append("replace")
+        actions.append("resubmit")
+    if status == STATE_REJECTED:
+        actions.append("resubmit")
+    # Do not allow replace while processing/accepted (approved evidence protected)
+    return actions
+
+
+def group_key_for_item(item: dict[str, Any]) -> str:
+    status = normalize_status(item.get("status"))
+    party = responsible_party(item)
+    if status in COMPLETE_STATES:
+        return "completed"
+    if status in REVIEW_STATES:
+        return "being_reviewed"
+    if party in {"hr", "payroll", "compliance", "system"} and status in EMPLOYEE_ACTION_STATES:
+        # Employee-owned but waiting on someone else is rare; still "your_actions" if they must act
+        pass
+    if party == "employee" and status in EMPLOYEE_ACTION_STATES | {STATE_PENDING, STATE_IN_PROGRESS}:
+        return "your_actions"
+    if party in {"hr", "payroll", "compliance", "system"}:
+        return "handled_by_others"
+    if status in EMPLOYEE_ACTION_STATES:
+        return "your_actions"
+    return "handled_by_others"
+
+
+def decorate_item(
+    item: dict[str, Any],
+    *,
+    file_id: str | None = None,
+    version: dict[str, Any] | None = None,
+    can_upload: bool = False,
+    lifecycle_on: bool = True,
+) -> dict[str, Any]:
+    row = dict(item)
+    raw_status = row.get("status")
+    status = normalize_status(raw_status) if lifecycle_on else str(raw_status or "pending")
+    row["status"] = status
+    row["legacy_status"] = raw_status
+    row["authority"] = row.get("authority") or "onboarding"
+    row["collection_mode"] = row.get("collection_mode") or row.get("item_type") or "document"
+    row["owner"] = row.get("owner") or "employee"
+    row["responsible_party"] = responsible_party(row) if lifecycle_on else (
+        "employee" if str(row.get("owner") or "") == "employee" else "hr"
+    )
+    row["file_id"] = file_id or row.get("file_id")
+    if version:
+        row["current_version_id"] = str(version.get("version_id") or "") or None
+        row["current_version_no"] = version.get("version_no")
+        row["review_status"] = version.get("review_status")
+        row["version_filename"] = version.get("filename")
+        row["version_mime_type"] = version.get("mime_type")
+        if version.get("rejection_reason") and not row.get("rejection_reason"):
+            row["rejection_reason"] = version.get("rejection_reason")
+        if version.get("file_id") and not row.get("file_id"):
+            row["file_id"] = str(version.get("file_id"))
+    row["replacement_required"] = status == STATE_REPLACEMENT_REQUIRED
+    row["waiting_on"] = row["responsible_party"]
+    row["completed_at"] = row.get("completed_at")
+    row["actions"] = actions_for_item(row, can_upload=can_upload, lifecycle_on=lifecycle_on)
+    row["group"] = group_key_for_item(row) if lifecycle_on else (
+        "completed" if str(raw_status or "").lower() in {"received", "complete", "completed", "verified"} else "your_actions"
+    )
+    return row
+
+
+def load_latest_versions_by_type(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+) -> dict[str, dict[str, Any]]:
+    """Latest governed version per document_type (prefer pending review, else highest version_no)."""
+    cur.execute(
+        """
+        SELECT DISTINCT ON (document_type)
+          version_id, document_type, version_no, file_id, filename, mime_type,
+          review_status, is_current, rejection_reason, created_at, reviewed_at,
+          parts_schema, parts_complete
+        FROM governed_document_versions
+        WHERE company_code=%s AND employee_key=%s
+        ORDER BY document_type,
+          CASE review_status
+            WHEN 'draft_parts' THEN 0
+            WHEN 'pending_hr_review' THEN 1
+            WHEN 'rejected_reupload' THEN 2
+            WHEN 'hr_reviewed' THEN 3
+            ELSE 4
+          END,
+          version_no DESC
+        """,
+        (str(company_code).upper(), employee_key),
+    )
+    out: dict[str, dict[str, Any]] = {}
+    for r in cur.fetchall() or []:
+        row = dict(r)
+        out[str(row.get("document_type") or "")] = row
+    return out
+
+
+def _apply_dual_side_decoration(
+    row: dict[str, Any],
+    *,
+    version: dict[str, Any] | None,
+    company_code: str,
+    employee_key: str,
+    can_upload: bool,
+    lifecycle_on: bool,
+) -> dict[str, Any]:
+    try:
+        import onboarding_civil_id_dual_side as dual
+
+        item_id = str(row.get("item_id") or "")
+        if not dual.dual_side_applies(
+            company_code=company_code, employee_key=employee_key, item_id=item_id
+        ):
+            return row
+        parts = None
+        if isinstance(version, dict) and version.get("parts") is not None:
+            parts = version.get("parts")
+        elif isinstance(version, dict) and version.get("version_id"):
+            # Parts may be attached by caller; otherwise leave empty slots.
+            parts = version.get("parts") or {}
+        return dual.decorate_dual_side_item(
+            row,
+            version=version,
+            parts=parts if isinstance(parts, dict) else {},
+            can_upload=can_upload,
+            lifecycle_on=lifecycle_on,
+        )
+    except Exception:
+        return row
+
+
+def build_employee_projection(
+    items: list[dict[str, Any]],
+    *,
+    company_code: str,
+    employee_key: str,
+    file_index: dict[str, str],
+    versions_by_type: dict[str, dict[str, Any]],
+    can_upload: bool,
+    lifecycle_on: bool,
+    previously_completed: bool = False,
+) -> dict[str, Any]:
+    decorated: list[dict[str, Any]] = []
+    for item in items:
+        item_id = str(item.get("item_id") or "")
+        doc_type = str(item.get("document_type") or item_id)
+        fid = file_index.get(item_id) or file_index.get(doc_type)
+        version = versions_by_type.get(doc_type) or versions_by_type.get(item_id)
+        # Prefer canonical compliance type keys used in governed versions
+        if not version and doc_type:
+            for k, v in versions_by_type.items():
+                if k == doc_type or k.replace("-", "_") == doc_type:
+                    version = v
+                    break
+        row = decorate_item(
+            item,
+            file_id=fid,
+            version=version,
+            can_upload=can_upload,
+            lifecycle_on=lifecycle_on,
+        )
+        row = _apply_dual_side_decoration(
+            row,
+            version=version,
+            company_code=company_code,
+            employee_key=employee_key,
+            can_upload=can_upload,
+            lifecycle_on=lifecycle_on,
+        )
+        if lifecycle_on and not _employee_visible(row):
+            continue
+        decorated.append(row)
+
+    groups = {
+        "your_actions": [],
+        "being_reviewed": [],
+        "handled_by_others": [],
+        "completed": [],
+    }
+    for row in decorated:
+        groups.setdefault(row.get("group") or "handled_by_others", []).append(row)
+
+    required = [i for i in decorated if i.get("required") is True]
+    accepted = [i for i in required if is_lifecycle_complete(i.get("status"))]
+    open_required = [i for i in required if not is_lifecycle_complete(i.get("status"))]
+
+    return {
+        "lifecycle_version": "2a" if lifecycle_on else "legacy",
+        "items": decorated,
+        "groups": groups,
+        "your_actions": groups["your_actions"],
+        "being_reviewed": groups["being_reviewed"],
+        "handled_by_others": groups["handled_by_others"],
+        "completed": groups["completed"],
+        # Legacy keys kept for older clients during canary.
+        "pending": [i for i in open_required if i.get("group") == "your_actions"],
+        "received": groups["completed"] + groups["being_reviewed"],
+        "required_total": len(required),
+        "received_count": len(accepted),
+        "pending_count": len(open_required),
+        "accepted_count": len(accepted),
+        # Canonical completion computed over the FULL item set (not the
+        # employee-visible subset) so employee app and HR web cannot disagree.
+        "completion": completion_block(
+            items, locale="en", previously_completed=previously_completed
+        ),
+    }
+
+
+def completion_block(
+    items: list[dict[str, Any]],
+    *,
+    locale: str = "en",
+    previously_completed: bool = False,
+    assignment_status: str | None = None,
+) -> dict[str, Any]:
+    """Canonical completion snapshot for any projection. Single source of truth.
+
+    `previously_completed` must come from the persisted snapshot; without it a
+    surface cannot distinguish `reopened` from `waiting_on_*` and would disagree
+    with the HR completion endpoint.
+    """
+    try:
+        import onboarding_completion_contract as _completion
+
+        rows = [dict(i) for i in items or []]
+        by_id = {str(r.get("item_id") or ""): r for r in rows}
+        for row in rows:
+            raw = row.get("depends_on") or []
+            if isinstance(raw, str):
+                try:
+                    raw = json.loads(raw)
+                except Exception:
+                    raw = []
+            row["blocked_by"] = [
+                str(d)
+                for d in (raw or [])
+                if not _completion.item_is_satisfied((by_id.get(str(d)) or {}).get("status"))
+            ]
+            row.setdefault("responsible_party", responsible_party(row))
+        snapshot = _completion.compute_completion(
+            rows,
+            previously_completed=bool(previously_completed),
+            assignment_status=assignment_status,
+        )
+        snapshot["next_action"] = _completion.next_action(snapshot, locale=locale)
+        return snapshot
+    except Exception:
+        return {"state": "in_progress", "computed": False}
+
+
+def build_hr_web_projection(
+    items: list[dict[str, Any]],
+    *,
+    company_code: str,
+    employee_key: str,
+    file_index: dict[str, str],
+    versions_by_type: dict[str, dict[str, Any]],
+    can_mutate: bool,
+    can_upload: bool,
+    lifecycle_on: bool,
+    owner_group_fn: Any | None = None,
+    previously_completed: bool = False,
+) -> dict[str, Any]:
+    """HR dashboard projection: main checklist + collapsed available_tasks.
+
+    Main shows required, explicitly assigned, active/reviewed/completed, bank,
+    and active non-dormant rails. Dormant optional template rows go to available_tasks.
+    """
+    main: list[dict[str, Any]] = []
+    available: list[dict[str, Any]] = []
+    for item in items:
+        item_id = str(item.get("item_id") or "")
+        doc_type = str(item.get("document_type") or item_id)
+        fid = file_index.get(item_id) or file_index.get(doc_type)
+        version = versions_by_type.get(doc_type) or versions_by_type.get(item_id)
+        if not version and doc_type:
+            for k, v in versions_by_type.items():
+                if k == doc_type or k.replace("-", "_") == doc_type:
+                    version = v
+                    break
+        row = decorate_item(
+            item,
+            file_id=fid,
+            version=version,
+            can_upload=can_upload,
+            lifecycle_on=lifecycle_on,
+        )
+        row = _apply_dual_side_decoration(
+            row,
+            version=version,
+            company_code=company_code,
+            employee_key=employee_key,
+            can_upload=can_upload,
+            lifecycle_on=lifecycle_on,
+        )
+        if callable(owner_group_fn):
+            try:
+                row["owner_group"] = owner_group_fn(row)
+            except Exception:
+                row["owner_group"] = row.get("owner_group") or row.get("responsible_party") or "hr"
+        else:
+            row["owner_group"] = row.get("owner_group") or row.get("responsible_party") or "hr"
+        row["actions"] = actions_for_hr_item(
+            row, can_mutate=can_mutate, can_upload=can_upload, lifecycle_on=lifecycle_on
+        )
+        # Preserve dual-side preview actions for HR after HR action rewrite.
+        if isinstance(row.get("civil_id_parts"), dict):
+            parts = row["civil_id_parts"]
+            hr_actions = list(row.get("actions") or [])
+            if parts.get("front", {}).get("present") or parts.get("front", {}).get("file_id"):
+                if "preview_front" not in hr_actions:
+                    hr_actions.append("preview_front")
+            if parts.get("back", {}).get("present") or parts.get("back", {}).get("file_id"):
+                if "preview_back" not in hr_actions:
+                    hr_actions.append("preview_back")
+            row["actions"] = hr_actions
+        if not lifecycle_on:
+            main.append(row)
+            continue
+        if _hr_main_visible(row):
+            main.append(row)
+        elif _hr_available_task(row):
+            available.append(row)
+
+    groups = {
+        "your_actions": [],
+        "being_reviewed": [],
+        "handled_by_others": [],
+        "completed": [],
+    }
+    for row in main:
+        groups.setdefault(row.get("group") or "handled_by_others", []).append(row)
+
+    required = [i for i in main if i.get("required") is True]
+    accepted = [i for i in required if is_lifecycle_complete(i.get("status"))]
+    open_required = [i for i in required if not is_lifecycle_complete(i.get("status"))]
+
+    return {
+        "lifecycle_version": "2a" if lifecycle_on else "legacy",
+        "projection": "hr_web",
+        "items": main,
+        "available_tasks": available,
+        "groups": groups,
+        "your_actions": groups["your_actions"],
+        "being_reviewed": groups["being_reviewed"],
+        "handled_by_others": groups["handled_by_others"],
+        "completed": groups["completed"],
+        "pending": [i for i in open_required if i.get("group") in {"your_actions", "handled_by_others"}],
+        "received": groups["completed"] + groups["being_reviewed"],
+        "required_total": len(required),
+        "received_count": len(accepted),
+        "pending_count": len(open_required),
+        "accepted_count": len(accepted),
+        "available_tasks_count": len(available),
+        # Same canonical snapshot as the employee projection: full item set.
+        "completion": completion_block(
+            items, locale="en", previously_completed=previously_completed
+        ),
+    }
+
+
+def set_item_lifecycle(
+    cur: Any,
+    *,
+    employee_key: str,
+    item_id: str,
+    new_status: str,
+    rejection_reason: str | None = None,
+    clear_rejection: bool = False,
+    completed_at: datetime | None = None,
+    meta_patch: dict[str, Any] | None = None,
+) -> None:
+    from psycopg2.extras import Json
+
+    status = normalize_status(new_status)
+    # jsonb must be JSON-serializable (OCR/parts often carry date/datetime).
+    meta = json.loads(json.dumps(dict(meta_patch or {}), default=str))
+    meta["lifecycle_updated_at"] = datetime.now(timezone.utc).isoformat()
+    meta["lifecycle_status"] = status
+    if rejection_reason:
+        meta["rejection_reason"] = rejection_reason
+
+    completed = completed_at
+    if status in COMPLETE_STATES and completed is None:
+        completed = datetime.now(timezone.utc)
+    if status not in COMPLETE_STATES:
+        completed = None
+
+    if clear_rejection:
+        cur.execute(
+            """
+            UPDATE onboarding_items
+            SET status=%s,
+                rejection_reason=NULL,
+                completed_at=%s,
+                lifecycle_meta = COALESCE(lifecycle_meta, '{}'::jsonb) || %s::jsonb,
+                updated_at=now()
+            WHERE employee_key=%s AND item_id=%s
+            """,
+            (status, completed, Json(meta), employee_key, item_id),
+        )
+    elif rejection_reason is not None:
+        cur.execute(
+            """
+            UPDATE onboarding_items
+            SET status=%s,
+                rejection_reason=%s,
+                completed_at=%s,
+                lifecycle_meta = COALESCE(lifecycle_meta, '{}'::jsonb) || %s::jsonb,
+                updated_at=now()
+            WHERE employee_key=%s AND item_id=%s
+            """,
+            (status, rejection_reason, completed, Json(meta), employee_key, item_id),
+        )
+    else:
+        cur.execute(
+            """
+            UPDATE onboarding_items
+            SET status=%s,
+                completed_at=%s,
+                lifecycle_meta = COALESCE(lifecycle_meta, '{}'::jsonb) || %s::jsonb,
+                updated_at=now()
+            WHERE employee_key=%s AND item_id=%s
+            """,
+            (status, completed, Json(meta), employee_key, item_id),
+        )
+
+
+def apply_employee_document_submit(
+    cur: Any,
+    *,
+    employee_key: str,
+    item_id: str,
+    file_id: str | None,
+    version_id: str | None,
+    content_sha256: str | None,
+    validation_meta: dict[str, Any] | None = None,
+) -> str:
+    """Employee upload → submitted then processing (sync pipeline). Returns final status."""
+    meta_extra = dict(validation_meta or {})
+    set_item_lifecycle(
+        cur,
+        employee_key=employee_key,
+        item_id=item_id,
+        new_status=STATE_SUBMITTED,
+        clear_rejection=True,
+        meta_patch={
+            "last_submit_file_id": file_id,
+            "last_submit_version_id": version_id,
+            "last_submit_sha256": content_sha256,
+            "phase": "submitted",
+            **meta_extra,
+        },
+    )
+    set_item_lifecycle(
+        cur,
+        employee_key=employee_key,
+        item_id=item_id,
+        new_status=STATE_PROCESSING,
+        clear_rejection=True,
+        meta_patch={
+            "last_submit_file_id": file_id,
+            "last_submit_version_id": version_id,
+            "last_submit_sha256": content_sha256,
+            "phase": "processing",
+            "awaiting": "hr_review",
+            **meta_extra,
+        },
+    )
+    sync_completion_contract(cur, employee_key=employee_key, actor="employee_submit")
+    return STATE_PROCESSING
+
+
+def sync_completion_contract(cur: Any, *, employee_key: str, actor: str | None = None) -> None:
+    """Recompute canonical employee-level completion after any item transition.
+
+    Without this, employees.onboarding_status could stay `completed` after a
+    rejection (stale completion across surfaces).
+    """
+    try:
+        import onboarding_completion_contract as _completion
+
+        _completion.recompute(cur, employee_key=employee_key, actor=actor)
+    except Exception:
+        pass
+
+
+def apply_hr_approve_to_checklist(
+    cur: Any,
+    *,
+    employee_key: str,
+    document_type: str,
+) -> list[str]:
+    """Map HR approve of a document type onto matching onboarding item(s)."""
+    cur.execute(
+        """
+        SELECT item_id FROM onboarding_items
+        WHERE employee_key=%s AND (item_id=%s OR document_type=%s)
+        """,
+        (employee_key, document_type, document_type),
+    )
+    ids = [str(r["item_id"]) for r in (cur.fetchall() or [])]
+    for iid in ids:
+        set_item_lifecycle(
+            cur,
+            employee_key=employee_key,
+            item_id=iid,
+            new_status=STATE_ACCEPTED,
+            clear_rejection=True,
+            meta_patch={"phase": "accepted", "source": "hr_approve"},
+        )
+    sync_completion_contract(cur, employee_key=employee_key, actor="hr_approve")
+    return ids
+
+
+def apply_hr_reject_to_checklist(
+    cur: Any,
+    *,
+    employee_key: str,
+    document_type: str,
+    reason: str,
+) -> list[str]:
+    cur.execute(
+        """
+        SELECT item_id FROM onboarding_items
+        WHERE employee_key=%s AND (item_id=%s OR document_type=%s)
+        """,
+        (employee_key, document_type, document_type),
+    )
+    ids = [str(r["item_id"]) for r in (cur.fetchall() or [])]
+    for iid in ids:
+        # rejected → replacement_required (mandatory reason)
+        set_item_lifecycle(
+            cur,
+            employee_key=employee_key,
+            item_id=iid,
+            new_status=STATE_REJECTED,
+            rejection_reason=reason,
+            meta_patch={"phase": "rejected", "source": "hr_reject"},
+        )
+        set_item_lifecycle(
+            cur,
+            employee_key=employee_key,
+            item_id=iid,
+            new_status=STATE_REPLACEMENT_REQUIRED,
+            rejection_reason=reason,
+            meta_patch={"phase": "replacement_required", "source": "hr_reject"},
+        )
+    sync_completion_contract(cur, employee_key=employee_key, actor="hr_reject")
+    return ids
+
+
+def backfill_received_to_processing(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_keys: list[str] | None = None,
+) -> int:
+    """Deterministic canary backfill: received → processing. Never auto-reject."""
+    ensure_lifecycle_schema(cur)
+    if employee_keys:
+        cur.execute(
+            """
+            UPDATE onboarding_items oi
+            SET status='processing',
+                lifecycle_meta = COALESCE(oi.lifecycle_meta, '{}'::jsonb)
+                  || jsonb_build_object(
+                       'backfilled_from', 'received',
+                       'backfill_wave', '2a',
+                       'backfilled_at', now()
+                     ),
+                updated_at=now()
+            FROM employees e
+            WHERE oi.employee_key = e.employee_key
+              AND e.company_code=%s
+              AND oi.employee_key = ANY(%s)
+              AND lower(oi.status)='received'
+            """,
+            (str(company_code).upper(), list(employee_keys)),
+        )
+    else:
+        cur.execute(
+            """
+            UPDATE onboarding_items oi
+            SET status='processing',
+                lifecycle_meta = COALESCE(oi.lifecycle_meta, '{}'::jsonb)
+                  || jsonb_build_object(
+                       'backfilled_from', 'received',
+                       'backfill_wave', '2a',
+                       'backfilled_at', now()
+                     ),
+                updated_at=now()
+            FROM employees e
+            WHERE oi.employee_key = e.employee_key
+              AND e.company_code=%s
+              AND lower(oi.status)='received'
+            """,
+            (str(company_code).upper(),),
+        )
+    return int(cur.rowcount or 0)
+
+
+def find_idempotent_pending_version(
+    cur: Any,
+    *,
+    company_code: str,
+    employee_key: str,
+    document_type: str,
+    content_sha256: str | None,
+) -> dict[str, Any] | None:
+    """Replay guard for the *same submission attempt*.
+
+    Matches only a version that is still `pending_hr_review` with the same SHA.
+    Rejected / approved / superseded versions are intentionally excluded so a
+    permitted `replacement_required` resubmission with the same file bytes still
+    creates a new append-only governed version (never deletes prior evidence).
+    """
+    if not content_sha256:
+        return None
+    cur.execute(
+        """
+        SELECT * FROM governed_document_versions
+        WHERE company_code=%s AND employee_key=%s AND document_type=%s
+          AND file_sha256=%s
+          AND review_status='pending_hr_review'
+        ORDER BY version_no DESC
+        LIMIT 1
+        """,
+        (str(company_code).upper(), employee_key, document_type, content_sha256),
+    )
+    row = cur.fetchone()
+    return dict(row) if row else None
+
+
+def upload_allowed_for_status(status: str | None) -> bool:
+    """Statuses where a new employee submission may begin (not a replay)."""
+    return normalize_status(status) in {
+        STATE_PENDING,
+        STATE_IN_PROGRESS,
+        STATE_REPLACEMENT_REQUIRED,
+        STATE_REJECTED,
+    }

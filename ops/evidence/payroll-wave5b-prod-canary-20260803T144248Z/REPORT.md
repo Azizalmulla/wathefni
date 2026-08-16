@@ -1,0 +1,155 @@
+# Payroll Wave 5-B — production synthetic qualification
+
+**Stamp:** `20260803T144248Z`  
+**Evidence:** `ops/evidence/payroll-wave5b-prod-canary-20260803T144248Z/`  
+**Scope:** Non-authoritative PIFSS + EOS review worksheets  
+**Mode:** production WATHEFNI · **SYNTHETIC_ONLY** · markers **PYW5/PYW1/W5B** · phones **965541***  
+
+---
+
+## Verdicts
+
+| Scope | Verdict |
+|---|---|
+| Production synthetic Wave 5 PIFSS/EOS worksheets | **GO** |
+| Freeze Wave 5 | **GO** |
+| Wave 1 + 2A + 2B + 3 + 4 freezes retained | **YES** |
+| Remittance / filing / bank / WPS / AS’HAL / payments / auto-compliance | **NO-GO** |
+| Final end-to-end payroll qualification | **NO-GO / not started** |
+
+---
+
+## Migration / ACK
+
+```
+wave5_version 1.0.0
+wave4_version 1.0.0
+wave3_version 1.0.0
+wave2b_version 1.0.0
+wave2a_version 1.0.0
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'posts_payment': False, 'remittance': False, 'statutory_filing': False, 'pifss_worksheets': True, 'pifss_remittance': False, 'eos_worksheets': True, 'eos_auto_payable': False, 'automatic_legal_compliance_claim': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'ai_calculations': False, 'synthetic_only': True}
+connected_db wathefni
+wave5_tables ['payroll_eos_worksheets', 'payroll_pifss_worksheets', 'payroll_statutory_dual_control', 'payroll_statutory_rule_tables', 'payroll_statutory_worksheet_events']
+wave1_2a_2b_3_4_tables_ok
+MIGRATE_OK payroll_pifss_eos_wave5_prod
+ACK_PRODUCTION_PAYROLL_W5B=YES
+```
+
+ACK flags:
+```
+PAYROLL_WAVE5 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW5', 'PYW5-SYNTH|', 'PYW4', 'PYW4-SYNTH|', 'PYW3', 'PYW3-SYNTH|', 'PYW2B', 'PYW2B-SYNTH|', 'PYW2A', 'PYW2ACB', 'PYW1', 'PYW1-SYNTH|', 'W2BB', 'W3B', 'W4B', 'W4', 'W5B', 'W5')
+prefixes ('965541', '965540', '965539')
+honesty {'payment_processing': 'disabled', 'posts_payment': False, 'remittance': False, 'statutory_filing': False, 'pifss_worksheets': True, 'pifss_remittance': False, 'eos_worksheets': True, 'eos_auto_payable': False, 'automatic_legal_compliance_claim': False, 'bank_files': False, 'wps': False, 'ashal': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'ai_calculations': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK
+```
+
+---
+
+## Production flags (after deploy)
+
+```
+=== SHAs after ===
+4a64752c66a8e08663c55e8424444d982ed9f12a731526353d1e48f270c01c43  /opt/wathefni/orchestrator/payroll_pifss_eos_wave5.py
+d2c896d50a32f7d5933c23322e40e7076a86d506134dfa66598ea0af20418d15  /opt/wathefni/orchestrator/app.py
+69cb36ccf0ebc40dd61032b6b05fbd557a040564e5b42752e96b4bba76dcde13  /opt/wathefni/orchestrator/payroll_close_export_wave4.py
+dad1653d287a42533e826b83bc37c6053568eb737df54a69bbade8154b4a1418  /opt/wathefni/orchestrator/payroll_payslip_wave3.py
+2470298b86bd6a282cfe87c03ffbf11f41f1e53fd82c75854e754d0f79fbc62e  /opt/wathefni/orchestrator/payroll_native_preview_wave2b.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  /opt/wathefni/orchestrator/payroll_authority_wave1.py
+4540e93c8a01c3b95642f35ab0483498198b0f085f9789a4e73f5914bdc67773  /opt/wathefni/orchestrator/payroll_external_adapter_wave2a.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PAYROLL_WAVE1=1
+WATHEFNI_PAYROLL_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS=PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_PHONE_PREFIXES=965539
+WATHEFNI_PAYROLL_WAVE2A=1
+WATHEFNI_PAYROLL_WAVE2A_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_KEY_MARKERS=PYW2ACB,PYW2ACB-SYNTH|,PYW2AB,PYW2AB-SYNTH|,PYW2A,PYW2A-SYNTH|,PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_PHONE_PREFIXES=965540,965539
+WATHEFNI_PAYROLL_WAVE2B=1
+WATHEFNI_PAYROLL_WAVE2B_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_KEY_MARKERS=PYW2B,PYW2B-SYNTH|,PYW1,PYW1-SYNTH|,W2BB
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE2B_SYNTHETIC_PHONE_PREFIXES=965541,965539
+WATHEFNI_PAYROLL_WAVE3=1
+WATHEFNI_PAYROLL_WAVE3_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_KEY_MARKERS=PYW3,PYW3-SYNTH|,PYW2B,PYW2B-SYNTH|,PYW2A,PYW2ACB,PYW1,PYW1-SYNTH|,W2BB,W3B
+WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_PHONE_PREFIXES=965541,965540,965539
+WATHEFNI_PAYROLL_WAVE4=1
+WATHEFNI_PAYROLL_WAVE4_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE4_SYNTHETIC_KEY_MARKERS=PYW4,PYW4-SYNTH|,PYW3,PYW3-SYNTH|,PYW2B,PYW2B-SYNTH|,PYW2A,PYW2ACB,PYW1,PYW1-SYNTH|,W2BB,W3B,W4B,W4
+WATHEFNI_PAYROLL_WAVE4_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE4_SYNTHETIC_PHONE_PREFIXES=965541,965540,965539
+WATHEFNI_PAYROLL_WAVE5=1
+WATHEFNI_PAYROLL_WAVE5_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE5_SYNTHETIC_KEY_MARKERS=PYW5,PYW5-SYNTH|,PYW4,PYW4-SYNTH|,PYW3,PYW3-SYNTH|,PYW2B,PYW2B-SYNTH|,PYW2A,PYW2ACB,PYW1,PYW1-SYNTH|,W2BB,W3B,W4B,W4,W5B,W5
+WATHEFNI_PAYROLL_WAVE5_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE5_SYNTHETIC_PHONE_PREFIXES=965541,965540,965539
+```
+
+Required:
+- `WATHEFNI_PAYROLL_WAVE5=1`
+- `WATHEFNI_PAYROLL_WAVE5_SYNTHETIC_ONLY=1`
+- worksheets only · no remittance/filing · EOS never auto-payable
+- native non-authoritative · external authority retained
+- `payment_processing=disabled`
+- Wave 1 + 2A + 2B + 3 + 4 flags remain enabled
+
+---
+
+## Backup / rollback
+
+- Backup: `/opt/wathefni/backups/production-pre-payroll-wave5b-20260803T144248Z`
+- Rollback executed + verified: **YES**
+- Wave 1–4 posture retained; Wave 5 drop-in cleared
+- Redeploy + second canary completed
+
+---
+
+## Synthetic canary counts
+
+| Pass | Passed | Failed | Residual |
+|---|---:|---:|---:|
+| Before rollback | 81 | 0 | |
+| After redeploy | 81 | 0 | 0 |
+
+Proofs: category separation, counsel-required/unsupported blocking, effective-dated rule versioning, dual-approval override + evidence, recalculation, immutable approved history, residual cleanup.
+
+---
+
+## EN/AR + mobile
+
+| Check | Result |
+|---|---|
+| Local UX smoke | PASS |
+| Prod UX smoke | PASS |
+
+---
+
+## Sibling freezes
+
+| Suite | Result |
+|---|---|
+| Employees 360 (local) | 57/0 |
+| Onboarding (local) | 54/0 |
+| Attendance (local) | 26/0 |
+| Leave (local) | 35/0 |
+| Shifts (local) | 96/0 |
+| Production freezes + Wave 1–5 honesty | PASS |
+
+---
+
+## Blockers
+
+- None for Wave 5 freeze scope.
+
+Remittance, filing, bank/WPS/AS’HAL, payments, auto-compliance claims, and final end-to-end payroll qualification remain **NO-GO**.

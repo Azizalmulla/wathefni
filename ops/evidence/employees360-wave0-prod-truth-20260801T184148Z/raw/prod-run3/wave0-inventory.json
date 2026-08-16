@@ -1,0 +1,1348 @@
+{
+  "stamp_utc": "2026-08-01T18:46:13Z",
+  "mode": "read_only",
+  "mutated": false,
+  "database_name_hint": null,
+  "flags": {
+    "WATHEFNI_DOC_UPLOAD": "on",
+    "WATHEFNI_ONBOARDING_SEED": "off",
+    "WATHEFNI_EMPLOYEE_APP": "off",
+    "WATHEFNI_EMPLOYEE_NEXT_ACTIONS": "on",
+    "WATHEFNI_LEAVE_BALANCES": "on",
+    "WATHEFNI_INBOUND_EMAIL": "on",
+    "WATHEFNI_MAILBOX_SYNC": "off",
+    "WATHEFNI_ENV": "production",
+    "WATHEFNI_EXPECTED_DATABASE_NAME": "wathefni",
+    "WATHEFNI_DATABASE_ENVIRONMENT_MARKER": "wathefni-production-isolation-v1",
+    "WATHEFNI_ORG_HIERARCHY": null,
+    "WATHEFNI_ONBOARDING_HR_MUTATE": null,
+    "WATHEFNI_ENVIRONMENT": null
+  },
+  "backup_readiness": {
+    "paths_checked": [
+      {
+        "path": "/opt/wathefni/backups",
+        "exists": true
+      },
+      {
+        "path": "/opt/wathefni/backups/weekly",
+        "exists": true
+      },
+      {
+        "path": "/opt/wathefni/production-evidence",
+        "exists": true
+      }
+    ],
+    "recent_backups": [
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveD-phase6b-cv-extraction-20260801T174712Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T17:49:45.735265+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveD-phase6a-held-20260801T165754Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T16:59:06.489306+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveD-phase5-mailbox-20260801T155854Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T16:00:12.915231+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveD-phase4-alias-admit-20260801T152150Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T15:23:11.565444+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveD-phase3-enterprise-20260801T132649Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T13:28:06.584335+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveD-phase2-inbound-20260801T045628Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T04:59:01.101372+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-waveC-entitlement-20260801T042210Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T04:23:18.013977+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-assessments-queue-tombstone-20260801T033029Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:31:32.617566+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-workspace-smoothness-20260801T030232Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:03:25.638867+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-candidates-filter-ux-wave4-20260801T023636Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T02:37:07.095446+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/offsite",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T02:30:45.162377+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/daily",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T02:30:45.160377+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-candidates-url-wave3-20260801T021935Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T02:20:20.725638+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-overview-work-queue-wave2-20260801T020208Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T02:03:20.543621+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/production-pre-follow-up-tenant-strict-wave1-20260801T015103Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T01:53:01.060429+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/weekly/20260726T023109Z",
+        "is_dir": true,
+        "mtime_utc": "2026-07-26T02:31:15.647857+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/weekly/20260726T005132Z",
+        "is_dir": true,
+        "mtime_utc": "2026-07-26T00:51:37.543243+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/weekly/20260719T023127Z",
+        "is_dir": true,
+        "mtime_utc": "2026-07-19T02:31:33.656364+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/backups/weekly/20260712T023420Z",
+        "is_dir": true,
+        "mtime_utc": "2026-07-12T02:34:26.166469+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase6-final-requal",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T17:59:45.106736+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase6b-cv-extraction",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T17:49:45.458266+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase6a-held",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T16:59:06.466306+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase6-ga",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T16:10:19.584321+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase5-mailbox",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T16:00:12.227234+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase4-alias-admit",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T15:23:00.671508+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase3-enterprise",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T13:27:06.233681+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveD-phase2-inbound",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T04:58:54.596410+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/waveC-entitlement",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T04:22:13.252354+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/hybrid-email-m365-waveB-20260801T033857Z-rerun",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:41:56.564612+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/hybrid-email-m365-waveB-20260801T033857Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:40:59.299971+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/m365-teams-waveB-20260801T033857Z",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:40:32.952137+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/assessments-queue-tombstone",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:31:32.429567+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/workspace-smoothness",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T03:03:04.160985+00:00",
+        "size_bytes": null
+      },
+      {
+        "path": "/opt/wathefni/production-evidence/candidates-filter-ux-wave4",
+        "is_dir": true,
+        "mtime_utc": "2026-08-01T02:36:38.128597+00:00",
+        "size_bytes": null
+      }
+    ],
+    "weekly_present": true,
+    "weekly_ls": "total 16\ndrwx------ 2 root root 4096 Jul 26 02:31 20260726T023109Z\ndrwx------ 2 root root 4096 Jul 26 00:51 20260726T005132Z\ndrwx------ 2 root root 4096 Jul 19 02:31 20260719T023127Z\ndrwx------ 2 root root 4096 Jul 12 02:34 20260712T023420Z\n"
+  },
+  "database": {
+    "database": "wathefni",
+    "db_user": "wathefni_app",
+    "server_addr": "127.0.0.1/32",
+    "is_replica": false,
+    "db_now": "2026-08-01 18:46:13.993159+00:00",
+    "readonly_session": true
+  },
+  "schema": {
+    "employees": {
+      "columns": [
+        {
+          "column_name": "employee_key",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "column_name": "phone",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "column_name": "company_code",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "column_name": "app_key",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "name",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "email",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "position_title",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "hire_date",
+          "data_type": "date",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "start_date",
+          "data_type": "date",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "onboarding_status",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": "'not_started'::text"
+        },
+        {
+          "column_name": "documents_pending",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": "0"
+        },
+        {
+          "column_name": "documents_complete",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": "0"
+        },
+        {
+          "column_name": "compliance_status",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": "'pending'::text"
+        },
+        {
+          "column_name": "profile",
+          "data_type": "jsonb",
+          "is_nullable": "NO",
+          "column_default": "'{}'::jsonb"
+        },
+        {
+          "column_name": "raw_json",
+          "data_type": "jsonb",
+          "is_nullable": "NO",
+          "column_default": "'{}'::jsonb"
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()"
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()"
+        },
+        {
+          "column_name": "employment_status",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "column_name": "device_user_id",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        }
+      ],
+      "constraints": [
+        {
+          "constraint_name": "2200_16795_10_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_11_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_12_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_13_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_14_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_15_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_16_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_17_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_1_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_2_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "2200_16795_3_not_null",
+          "constraint_type": "CHECK",
+          "columns": null
+        },
+        {
+          "constraint_name": "employees_app_key_fkey",
+          "constraint_type": "FOREIGN KEY",
+          "columns": "app_key"
+        },
+        {
+          "constraint_name": "employees_pkey",
+          "constraint_type": "PRIMARY KEY",
+          "columns": "employee_key"
+        }
+      ],
+      "indexes": [
+        {
+          "indexname": "employees_company_app_key_uq",
+          "indexdef": "CREATE UNIQUE INDEX employees_company_app_key_uq ON public.employees USING btree (company_code, app_key) WHERE ((app_key IS NOT NULL) AND (app_key <> ''::text))"
+        },
+        {
+          "indexname": "employees_pkey",
+          "indexdef": "CREATE UNIQUE INDEX employees_pkey ON public.employees USING btree (employee_key)"
+        },
+        {
+          "indexname": "idx_employees_company",
+          "indexdef": "CREATE INDEX idx_employees_company ON public.employees USING btree (company_code)"
+        },
+        {
+          "indexname": "idx_employees_device_user_id",
+          "indexdef": "CREATE UNIQUE INDEX idx_employees_device_user_id ON public.employees USING btree (company_code, device_user_id) WHERE ((device_user_id IS NOT NULL) AND (device_user_id <> ''::text))"
+        },
+        {
+          "indexname": "idx_employees_onboarding",
+          "indexdef": "CREATE INDEX idx_employees_onboarding ON public.employees USING btree (onboarding_status)"
+        },
+        {
+          "indexname": "idx_employees_phone",
+          "indexdef": "CREATE INDEX idx_employees_phone ON public.employees USING btree (phone)"
+        }
+      ],
+      "unique_indexes": [
+        {
+          "index_name": "employees_pkey",
+          "indexdef": "CREATE UNIQUE INDEX employees_pkey ON public.employees USING btree (employee_key)"
+        },
+        {
+          "index_name": "idx_employees_device_user_id",
+          "indexdef": "CREATE UNIQUE INDEX idx_employees_device_user_id ON public.employees USING btree (company_code, device_user_id) WHERE ((device_user_id IS NOT NULL) AND (device_user_id <> ''::text))"
+        },
+        {
+          "index_name": "employees_company_app_key_uq",
+          "indexdef": "CREATE UNIQUE INDEX employees_company_app_key_uq ON public.employees USING btree (company_code, app_key) WHERE ((app_key IS NOT NULL) AND (app_key <> ''::text))"
+        }
+      ],
+      "has_unique_company_phone": false,
+      "row_count": 4
+    },
+    "related": {
+      "employee_status_changes": {
+        "exists": true,
+        "row_count": 2,
+        "columns": [
+          "change_id",
+          "company_code",
+          "employee_key",
+          "idempotency_key",
+          "request_hash",
+          "previous_status",
+          "requested_status",
+          "previous_updated_at",
+          "resulting_updated_at",
+          "requester_user_id",
+          "approver_user_id",
+          "reason",
+          "approval_reference",
+          "approval_mode",
+          "changed_fields",
+          "action_result_id",
+          "operation_status",
+          "verification_status",
+          "verification_error",
+          "created_at",
+          "committed_at",
+          "verified_at"
+        ]
+      },
+      "employee_org_assignments": {
+        "exists": true,
+        "row_count": 0,
+        "columns": [
+          "assignment_id",
+          "company_code",
+          "employee_key",
+          "branch_key",
+          "team_key",
+          "role",
+          "is_primary",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "manager_scopes": {
+        "exists": true,
+        "row_count": 0,
+        "columns": [
+          "scope_id",
+          "company_code",
+          "manager_phone",
+          "scope_type",
+          "branch_key",
+          "team_key",
+          "role",
+          "permissions",
+          "is_active",
+          "metadata",
+          "created_at",
+          "updated_at",
+          "dashboard_user_id"
+        ]
+      },
+      "company_branches": {
+        "exists": true,
+        "row_count": 0,
+        "columns": [
+          "branch_key",
+          "company_code",
+          "branch_name",
+          "aliases",
+          "metadata",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "company_teams": {
+        "exists": true,
+        "row_count": 0,
+        "columns": [
+          "team_key",
+          "company_code",
+          "team_name",
+          "branch_key",
+          "aliases",
+          "metadata",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "dashboard_user_permission_grants": {
+        "exists": true,
+        "row_count": 9,
+        "columns": [
+          "grant_id",
+          "company_code",
+          "user_id",
+          "permission",
+          "status",
+          "review_reference",
+          "granted_by_user_id",
+          "granted_reason",
+          "granted_at",
+          "revoked_by_user_id",
+          "revoked_reason",
+          "revoked_at",
+          "updated_at"
+        ]
+      },
+      "dashboard_users": {
+        "exists": true,
+        "row_count": 4,
+        "columns": [
+          "user_id",
+          "company_code",
+          "email",
+          "name",
+          "phone",
+          "role",
+          "status",
+          "password_hash",
+          "last_active_at",
+          "invited_by_user_id",
+          "invited_at",
+          "accepted_at",
+          "disabled_at",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "company_modules": {
+        "exists": true,
+        "row_count": 13,
+        "columns": [
+          "company_code",
+          "module_key",
+          "enabled",
+          "source",
+          "settings",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "file_registry": {
+        "exists": true,
+        "row_count": 82,
+        "columns": [
+          "file_id",
+          "company_code",
+          "owner_phone",
+          "subject_type",
+          "subject_key",
+          "file_kind",
+          "document_type",
+          "original_filename",
+          "source_path",
+          "local_path",
+          "storage_provider",
+          "storage_object_key",
+          "external_file_id",
+          "storage_url",
+          "content_sha256",
+          "mime_type",
+          "size_bytes",
+          "storage_status",
+          "storage_error",
+          "metadata",
+          "raw_json",
+          "stored_at",
+          "created_at",
+          "updated_at",
+          "person_id",
+          "membership_id"
+        ]
+      },
+      "onboarding_items": {
+        "exists": true,
+        "row_count": 19,
+        "columns": [
+          "employee_key",
+          "item_id",
+          "label",
+          "item_type",
+          "required",
+          "document_type",
+          "status",
+          "value",
+          "local_path",
+          "drive_file_id",
+          "drive_url",
+          "expiry_date",
+          "raw_json",
+          "created_at",
+          "updated_at",
+          "storage_provider",
+          "storage_object_key",
+          "external_file_id",
+          "storage_url",
+          "content_sha256",
+          "mime_type",
+          "stored_at",
+          "storage_status",
+          "storage_error",
+          "reminder_count",
+          "last_reminded_at",
+          "escalated_at",
+          "category",
+          "owner",
+          "sort_order"
+        ]
+      },
+      "compliance_documents": {
+        "exists": true,
+        "row_count": 18,
+        "columns": [
+          "employee_key",
+          "document_type",
+          "label",
+          "status",
+          "expiry_date",
+          "days_until_expiry",
+          "last_reminded",
+          "reminder_count",
+          "authority",
+          "notes",
+          "raw_json",
+          "updated_at",
+          "document_number",
+          "issued_date",
+          "extracted_at",
+          "extraction_status",
+          "extraction_error",
+          "extraction_confidence",
+          "last_checked_at",
+          "last_alerted_at",
+          "warning_days",
+          "renewal_status",
+          "severity",
+          "company_code"
+        ]
+      },
+      "employee_identity": {
+        "exists": true,
+        "row_count": 9,
+        "columns": [
+          "employee_key",
+          "company_code",
+          "identity_profile",
+          "employee_category",
+          "nationality_country_code",
+          "civil_id_encrypted",
+          "civil_id_last4",
+          "passport_number_encrypted",
+          "passport_last4",
+          "residence_number_encrypted",
+          "residence_last4",
+          "work_permit_number_encrypted",
+          "work_permit_last4",
+          "civil_id_confirmed",
+          "passport_confirmed",
+          "residence_confirmed",
+          "work_permit_confirmed",
+          "ocr_pending",
+          "requiredness_policy",
+          "updated_at",
+          "created_at"
+        ]
+      },
+      "hire_operations": {
+        "exists": true,
+        "row_count": 0,
+        "columns": [
+          "operation_id",
+          "company_code",
+          "app_key",
+          "employee_key",
+          "status",
+          "idempotency_key",
+          "confirmation_id",
+          "actor_user_id",
+          "actor_phone",
+          "channel",
+          "expected_from_stage",
+          "expected_version",
+          "structured_reason",
+          "result",
+          "last_error",
+          "created_at",
+          "updated_at",
+          "completed_at"
+        ]
+      }
+    }
+  },
+  "tenants": {
+    "companies": [
+      {
+        "company_code": "C1A1EFB783A",
+        "name": "C1A1EFB783A",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A337C46B4",
+        "name": "C1A337C46B4",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A3B936DBA",
+        "name": "C1A3B936DBA",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A3DDA247D",
+        "name": "C1A3DDA247D",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A46872D9F",
+        "name": "C1A46872D9F",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A70FF5760",
+        "name": "C1A70FF5760",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A76618D15",
+        "name": "C1A76618D15",
+        "status": "active"
+      },
+      {
+        "company_code": "C1A83D33836",
+        "name": "C1A83D33836",
+        "status": "active"
+      },
+      {
+        "company_code": "C1ACC5AB281",
+        "name": "C1ACC5AB281",
+        "status": "active"
+      },
+      {
+        "company_code": "C1AEAC285A8",
+        "name": "C1AEAC285A8",
+        "status": "active"
+      },
+      {
+        "company_code": "C1AF1FF352C",
+        "name": "C1AF1FF352C",
+        "status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "name": "Wathefni",
+        "status": "active"
+      }
+    ],
+    "modules": [
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "analytics",
+        "enabled": true,
+        "source": "agent_enable_analytics_mvp"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "assessments",
+        "enabled": true,
+        "source": "dashboard_assessment_mvp"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "attendance",
+        "enabled": true,
+        "source": "attendance_mvp_deploy"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "calendar",
+        "enabled": true,
+        "source": "c6_qualification"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "compliance",
+        "enabled": true,
+        "source": "company_config"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "employment_offers",
+        "enabled": true,
+        "source": "production_controlled_enablement"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "interviews",
+        "enabled": true,
+        "source": "migration:interviews-module-carveout-v1"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "leave",
+        "enabled": true,
+        "source": ""
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "onboarding",
+        "enabled": true,
+        "source": "company_config"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "payroll",
+        "enabled": true,
+        "source": "payroll_policy_mvp"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "pre_hiring",
+        "enabled": true,
+        "source": "company_config"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "shifts",
+        "enabled": true,
+        "source": "company_config"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "video_interviews",
+        "enabled": true,
+        "source": "operator_fix_2026-07-05"
+      }
+    ],
+    "people_modules_enabled": [
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "attendance",
+        "enabled": true,
+        "source": "attendance_mvp_deploy"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "compliance",
+        "enabled": true,
+        "source": "company_config"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "leave",
+        "enabled": true,
+        "source": ""
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "onboarding",
+        "enabled": true,
+        "source": "company_config"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "payroll",
+        "enabled": true,
+        "source": "payroll_policy_mvp"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "module_key": "shifts",
+        "enabled": true,
+        "source": "company_config"
+      }
+    ]
+  },
+  "employee_inventory": {
+    "total": 4,
+    "by_company": {
+      "WATHEFNI": 4
+    },
+    "status_distribution": {
+      "WATHEFNI": {
+        "<null_or_blank>": 2,
+        "active": 2
+      },
+      "_all": {
+        "<null_or_blank>": 2,
+        "active": 2
+      }
+    },
+    "invalid_or_unknown_statuses": {
+      "<null_or_blank>": 2
+    },
+    "phone_format_counts": {
+      "kw_965": 4
+    },
+    "keys_using_local_8_suffix": {
+      "count": 0,
+      "samples": []
+    },
+    "keys_suffix_ne_stored_phone": {
+      "count": 0,
+      "samples": []
+    }
+  },
+  "duplicates": {
+    "exact_phone": {
+      "count_groups": 0,
+      "groups": []
+    },
+    "local_vs_965_or_canonical_collision": {
+      "count_groups": 0,
+      "groups": [],
+      "local_vs_965_count": 0
+    },
+    "repeated_email": {
+      "count_groups": 0,
+      "groups": []
+    },
+    "summary": {
+      "tenants_with_any_duplicate_signal": [],
+      "employees_in_local_vs_965_groups": 0
+    }
+  },
+  "rehire_left_linkage": {
+    "left_employees_with_app_key": {
+      "count": 0,
+      "samples": []
+    },
+    "hire_operations_pointing_at_left_employees": {
+      "count": 0,
+      "samples": []
+    }
+  },
+  "orphans": {
+    "tables": {
+      "attendance_records": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "leave_requests": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "shift_assignments": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "payroll_timesheets": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_availability_requests": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "compliance_documents": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "onboarding_items": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": null,
+        "samples": [],
+        "classification": "clean"
+      },
+      "file_registry": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_sessions": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_push_tokens": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_app_invites": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_status_changes": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_org_assignments": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_messages": {
+        "present": true,
+        "orphans": 3,
+        "cross_tenant_key_collisions": 0,
+        "samples": [
+          {
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-P0-DUP-1"
+          }
+        ],
+        "classification": "orphan_employee_key"
+      },
+      "employee_notification_reads": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_availability_events": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "employee_documents": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "manager_scope_members": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      },
+      "hire_operations": {
+        "present": true,
+        "orphans": 0,
+        "cross_tenant_key_collisions": 0,
+        "samples": [],
+        "classification": "clean"
+      }
+    },
+    "total_orphan_rows": 3,
+    "tables_with_orphans": [
+      "employee_messages"
+    ],
+    "not_in_app_INTEGRITY_CHILD_TABLES": [
+      "employee_app_invites",
+      "employee_availability_events",
+      "employee_documents",
+      "employee_messages",
+      "employee_notification_reads",
+      "employee_org_assignments",
+      "employee_push_tokens",
+      "employee_sessions",
+      "employee_status_changes",
+      "file_registry",
+      "hire_operations",
+      "manager_scope_members",
+      "onboarding_items"
+    ]
+  },
+  "permissions": {
+    "employee_grants_active": [
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "201d0b3b-6a6f-483f-914a-7a2356fd0a2e",
+        "permission": "employees.manage",
+        "status": "active",
+        "role": "viewer",
+        "email_redacted": "f***@gmail.com",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+        "permission": "employees.manage",
+        "status": "active",
+        "role": "owner",
+        "email_redacted": "a***@gmail.com",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "90b78a42-9eb2-43b6-9eeb-c9c134a964b6",
+        "permission": "employees.manage",
+        "status": "active",
+        "role": "viewer",
+        "email_redacted": "h***@almulla-media.com",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+        "permission": "employees.manage",
+        "status": "active",
+        "role": "owner",
+        "email_redacted": "f***@disruptv.tech",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "201d0b3b-6a6f-483f-914a-7a2356fd0a2e",
+        "permission": "employees.read",
+        "status": "active",
+        "role": "viewer",
+        "email_redacted": "f***@gmail.com",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+        "permission": "employees.read",
+        "status": "active",
+        "role": "owner",
+        "email_redacted": "a***@gmail.com",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "90b78a42-9eb2-43b6-9eeb-c9c134a964b6",
+        "permission": "employees.read",
+        "status": "active",
+        "role": "viewer",
+        "email_redacted": "h***@almulla-media.com",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+        "permission": "employees.read",
+        "status": "active",
+        "role": "owner",
+        "email_redacted": "f***@disruptv.tech",
+        "user_status": "active"
+      },
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+        "permission": "employees.status.approve",
+        "status": "active",
+        "role": "owner",
+        "email_redacted": "f***@disruptv.tech",
+        "user_status": "active"
+      }
+    ],
+    "counts": {
+      "employees_read": 4,
+      "employees_manage": 4,
+      "employees_status_approve": 1,
+      "dual_manage_and_approve": 1
+    },
+    "dual_manage_and_approve_users": [
+      {
+        "company_code": "WATHEFNI",
+        "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+        "email_redacted": "f***@disruptv.tech",
+        "role": "owner",
+        "classification": "holds_employees_manage_and_status_approve",
+        "canary_self_approval_risk": true
+      }
+    ],
+    "nav_api_mismatch_candidates": [],
+    "people_enabled_companies": [
+      "WATHEFNI"
+    ]
+  },
+  "manager_scopes": {
+    "scope_rows": 0,
+    "active_scopes": 0,
+    "manager_scope_members": 0,
+    "by_type": {},
+    "employee_org_assignments": 0,
+    "scoped_managers_with_employees_manage": [],
+    "out_of_scope_mutation_risk_count": 0,
+    "samples_active_scopes": []
+  },
+  "self_approved_internal_canary": {
+    "table_present": true,
+    "rows": [],
+    "total_matching_sampled": 1,
+    "by_company": {
+      "WATHEFNI": 1
+    },
+    "outside_wathefni": {},
+    "samples": [
+      {
+        "company_code": "WATHEFNI",
+        "employee_key": "WATHEFNI-96566363363",
+        "approval_mode": "self_approved_internal_canary",
+        "requester_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+        "approver_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+        "previous_status": "active",
+        "requested_status": "active",
+        "verification_status": "verified",
+        "created_at": "2026-07-12 15:46:31.901606+00:00",
+        "outside_wathefni": false
+      }
+    ],
+    "total_count": 1,
+    "outside_wathefni_count": 0,
+    "status_action_results_by_company": [
+      {
+        "company_code": "WATHEFNI",
+        "n": 2
+      }
+    ]
+  },
+  "immediate_risk": {
+    "signals": [
+      {
+        "severity": "P0",
+        "signal": "self_approved_internal_canary_used_on_WATHEFNI",
+        "count": 1,
+        "active_customer_data_at_risk": false,
+        "note": "Internal-only usage observed; server still does not tenant-restrict the mode"
+      },
+      {
+        "severity": "P1",
+        "signal": "orphan_employee_linked_rows",
+        "count": 3,
+        "tables": [
+          "employee_messages"
+        ],
+        "active_customer_data_at_risk": true
+      }
+    ],
+    "any_active_customer_data_at_immediate_risk": true
+  }
+}

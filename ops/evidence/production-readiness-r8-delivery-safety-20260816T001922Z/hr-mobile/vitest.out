@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /Users/azizalmulla/Desktop/claw/apps/wathefni-hr-mobile
+
+
+ Test Files  11 passed (11)
+      Tests  45 passed (45)
+   Start at  03:19:27
+   Duration  232ms (transform 508ms, setup 0ms, import 697ms, tests 53ms, environment 1ms)
+

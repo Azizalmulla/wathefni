@@ -1,0 +1,1 @@
+LOCAL_BUNDLE_SMOKE_OK {'bundle': 'CalendarShell-DWbjBZuG.js', 'composition': True, 'controls': True, 'detail_accent': True, 'detail_close': True, 'calendar_event': True, 'escape': True, 'cascade': True, 'wide_grid': True, 'nowrap': True, 'no_inert_overlay': True, 'compact_drawer': True}

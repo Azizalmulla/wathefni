@@ -35,23 +35,59 @@ def main() -> int:
     # Catalog invariants are dependency-free and run everywhere.
     keys = [module.key for module in catalog.MODULE_CATALOG]
     check("catalog module keys are unique", len(keys) == len(set(keys)))
-    check("catalog contains exactly the 12 canonical product modules", set(keys) == {
-        "pre_hiring", "assessments", "video_interviews", "employment_offers", "onboarding",
+    check("catalog contains exactly the 20 canonical product modules", set(keys) == {
+        "pre_hiring", "assessments", "interviews", "calendar", "video_interviews", "employment_offers",
+        "requisitions", "preboarding", "onboarding", "probation",
         "compliance", "attendance", "shifts", "leave", "payroll",
         "analytics", "employee_app",
+        "performance", "talent", "learning",
     })
+    check("requisitions has no HARD module dependency", catalog.MODULE_BY_KEY["requisitions"].depends_on == ())
+    check("preboarding has no HARD module dependency", catalog.MODULE_BY_KEY["preboarding"].depends_on == ())
+    check("probation has no HARD module dependency", catalog.MODULE_BY_KEY["probation"].depends_on == ())
+    check("requisitions alias maps", catalog.normalize_module_key("headcount_request") == "requisitions")
+    check("preboard alias maps", catalog.normalize_module_key("pre_boarding") == "preboarding")
+    check("calendar module is opt-in pre_hire hr suite", (
+        catalog.MODULE_BY_KEY["calendar"].suite == "pre_hire"
+        and catalog.MODULE_BY_KEY["calendar"].audience == "hr"
+        and catalog.MODULE_BY_KEY["calendar"].order == 28
+        and catalog.MODULE_BY_KEY["calendar"].depends_on == ()
+    ))
+    check("calendar is not legacy-implied from pre_hiring", (
+        "calendar" not in catalog.apply_legacy_module_implications({"pre_hiring"})
+    ))
+    check("live interviews is independent of video_interviews", (
+        catalog.MODULE_BY_KEY["interviews"].depends_on == ("pre_hiring",)
+        and catalog.MODULE_BY_KEY["video_interviews"].depends_on == ("pre_hiring",)
+        and "video_interviews" not in catalog.MODULE_BY_KEY["interviews"].depends_on
+        and "interviews" not in catalog.MODULE_BY_KEY["video_interviews"].depends_on
+    ))
+    check("setup save protects currently-enabled interviews", catalog.protect_setup_module_selection(
+        ["pre_hiring", "assessments", "video_interviews"],
+        currently_enabled=["pre_hiring", "interviews", "video_interviews"],
+    ) == ["assessments", "interviews", "pre_hiring", "video_interviews"])
+    check("apply_legacy_module_implications grants interviews from pre_hiring seed", (
+        catalog.apply_legacy_module_implications({"pre_hiring"}) == {"pre_hiring", "interviews"}
+    ))
     check("employee_app is a post-hire employee module", (
         catalog.MODULE_BY_KEY["employee_app"].suite == "post_hire"
         and catalog.MODULE_BY_KEY["employee_app"].audience == "employee"
     ))
     check("employee_app retains the platform master flag", catalog.MODULE_BY_KEY["employee_app"].master_flag == "WATHEFNI_EMPLOYEE_APP")
-    check("people modules preserve the former six-module semantics", set(catalog.POSTHIRE_PEOPLE_MODULES) == {
-        "onboarding", "compliance", "attendance", "shifts", "leave", "payroll",
+    check("people modules include Wave 1 hire-ready surfaces", set(catalog.POSTHIRE_PEOPLE_MODULES) == {
+        "preboarding", "onboarding", "probation", "compliance", "attendance", "shifts", "leave", "payroll",
     })
-    check("post-hire dashboard modules include analytics and compliance", set(catalog.POSTHIRE_MODULES) == {
-        "onboarding", "compliance", "attendance", "shifts", "leave", "payroll", "analytics",
+    check("post-hire dashboard modules include Wave 1 + analytics", set(catalog.POSTHIRE_MODULES) == {
+        "preboarding", "onboarding", "probation", "compliance", "attendance", "shifts", "leave", "payroll", "analytics",
     })
-    check("tool-call gated modules derive from post-hire catalog metadata", catalog.TOOLCALL_GATED_MODULES == frozenset(catalog.POSTHIRE_MODULES))
+    check(
+        "tool-call gated includes Wave 1 + post-hire operational modules",
+        {"requisitions", "preboarding", "probation"}.issubset(catalog.TOOLCALL_GATED_MODULES)
+        and set(catalog.POSTHIRE_MODULES).issubset(catalog.TOOLCALL_GATED_MODULES)
+        and {"assessments", "interviews", "video_interviews", "calendar", "employment_offers"}.issubset(
+            catalog.TOOLCALL_GATED_MODULES
+        ),
+    )
     check("Setup Console catalog includes employee_app", "employee_app" in catalog.SETUP_CONSOLE_MODULES)
     check("legacy post_hiring alias remains backward compatible", catalog.normalize_module_key("post-hiring") == "onboarding")
     check("assessments hard-depends on pre_hiring only", catalog.MODULE_BY_KEY["assessments"].depends_on == ("pre_hiring",))
@@ -74,17 +110,18 @@ def main() -> int:
         and catalog.expand_module_dependencies(["payroll"]) == ["payroll"]
     ))
     check("payroll has no employee-app surface in V1", catalog.MODULE_BY_KEY["payroll"].app_surface_key is None)
-    check("bundles include the six approved suites", {bundle.id for bundle in catalog.MODULE_BUNDLES} == {
+    check("bundles include hire-ready suite", {bundle.id for bundle in catalog.MODULE_BUNDLES} == {
         "pre_hiring_suite",
         "hiring_assessment_suite",
         "core_hr_suite",
+        "hire_ready_suite",
         "workforce_operations",
         "compliance_onboarding",
         "employee_self_service",
     })
     check("hiring assessment bundle expands with pre_hiring", catalog.expand_module_dependencies(
         catalog.BUNDLE_BY_ID["hiring_assessment_suite"].modules
-    ) == ["assessments", "pre_hiring", "video_interviews"])
+    ) == ["assessments", "interviews", "pre_hiring", "video_interviews"])
     check("app surfaces require employee_app selection", catalog.app_surfaces_for_modules(["attendance", "leave"]) == [])
     surfaces = catalog.app_surfaces_for_modules(["employee_app", "attendance", "payroll"])
     check("app surface preview derives from selected modules and excludes payroll", (

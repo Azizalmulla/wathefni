@@ -1,0 +1,5 @@
+total 3572
+drwxr-xr-x   2 root root    4096 Aug  6 20:32 .
+drwx------ 512 root root   40960 Aug  6 20:32 ..
+-rw-r--r--   1 root root 3566403 Aug  6 20:32 app.py
+-rw-r--r--   1 root root   37878 Aug  6 20:32 onboarding_completion_contract.py

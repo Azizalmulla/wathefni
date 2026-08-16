@@ -1,0 +1,81 @@
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: ERROR:    Exception in ASGI application
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: Traceback (most recent call last):
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     result = await app(  # type: ignore[func-returns-value]
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     return await self.app(scope, receive, send)
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     await super().__call__(scope, receive, send)
+--
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     raise PoolError("connection pool exhausted")
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: ERROR:    Exception in ASGI application
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: Traceback (most recent call last):
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     result = await app(  # type: ignore[func-returns-value]
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     return await self.app(scope, receive, send)
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     await super().__call__(scope, receive, send)
+--
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     raise PoolError("connection pool exhausted")
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: ERROR:    Exception in ASGI application
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: Traceback (most recent call last):
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     result = await app(  # type: ignore[func-returns-value]
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     return await self.app(scope, receive, send)
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     await super().__call__(scope, receive, send)
+--
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     raise PoolError("connection pool exhausted")
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: ERROR:    Exception in ASGI application
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: Traceback (most recent call last):
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     result = await app(  # type: ignore[func-returns-value]
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     return await self.app(scope, receive, send)
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     await super().__call__(scope, receive, send)
+--
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     raise PoolError("connection pool exhausted")
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: ERROR:    Exception in ASGI application
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: Traceback (most recent call last):
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     result = await app(  # type: ignore[func-returns-value]
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     return await self.app(scope, receive, send)
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     await super().__call__(scope, receive, send)
+--
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     raise PoolError("connection pool exhausted")
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: psycopg2.pool.PoolError: connection pool exhausted
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: INFO:     188.70.19.146:0 - "POST /app/push/register HTTP/1.1" 500 Internal Server Error
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: ERROR:    Exception in ASGI application
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]: Traceback (most recent call last):
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     result = await app(  # type: ignore[func-returns-value]
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:     return await self.app(scope, receive, send)
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aug 09 08:33:45 srv1419988 uvicorn[2880314]:   File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+177

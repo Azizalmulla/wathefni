@@ -1,0 +1,102 @@
+payroll FINAL production synthetic E2E canary
+tag 57f48d88 employee WATHEFNI-PYW1-PYWF-FINAL-57f48d88
+[PASS] w1 honesty payment disabled
+[PASS] w2a honesty external
+[PASS] w2b honesty non-auth
+[PASS] w3 honesty not money
+[PASS] w4 honesty drafts only
+[PASS] w5 honesty worksheets only
+[PASS] w1 enabled
+[PASS] w2a enabled
+[PASS] w2b enabled
+[PASS] w3 enabled
+[PASS] w4 enabled
+[PASS] w5 enabled
+[PASS] native non-auth
+[PASS] external authority
+[PASS] no ai
+[PASS] no bank/wps/ashal
+[PASS] ux statutory tab
+[PASS] ux close tab
+[PASS] ux payslip tab
+[PASS] ux payrollStatutoryUx.ts ar
+[PASS] ux payrollStatutoryUx.ts disabled
+[PASS] ux payrollCloseExportUx.ts ar
+[PASS] ux payrollCloseExportUx.ts disabled
+[PASS] ux payrollPayslipUx.ts ar
+[PASS] ux payrollPayslipUx.ts disabled
+[PASS] period year >= 2035
+connected_db wathefni
+[PASS] production db
+[PASS] settings payment disabled
+[PASS] mode set native
+[PASS] mode set external
+[PASS] mode set parallel_shadow
+[PASS] preview blocked in external
+[PASS] contract draft
+[PASS] contract self-approve forbidden
+[PASS] contract approve
+[PASS] concurrency stale denied or already approved
+[PASS] period
+[PASS] period lock
+[PASS] period close
+[PASS] period reopen
+[PASS] preview ok (native)
+[PASS] preview idempotent
+[PASS] unsupported fail-closed
+[PASS] preview ok (shadow)
+[PASS] native payslip
+[PASS] native payslip non-auth
+[PASS] payslips not money
+[PASS] payslip idempotent
+[PASS] payslip EN download
+[PASS] payslip AR download
+[PASS] close create
+[PASS] close native authority
+[PASS] close payment disabled
+[PASS] close create idempotent
+[PASS] close submit
+[PASS] self approve forbidden
+[PASS] sod approve+export blocked
+[PASS] close approve
+[PASS] self close forbidden
+[PASS] close ok
+[PASS] closed status
+[PASS] snapshot immutable
+[PASS] snapshot fingerprint
+[PASS] immutable probe
+[PASS] mapping BASIC
+[PASS] mapping TRANSPORT
+[PASS] mapping NET_PAYABLE
+[PASS] journal draft
+[PASS] journal balanced
+[PASS] bank contract only
+[PASS] no real bank files
+[PASS] finance export
+[PASS] fingerprint drift detected
+[PASS] finance export approve
+[PASS] reopen initiate
+[PASS] reopen same actor deny
+[PASS] reopen confirm
+[PASS] external export
+[PASS] external import
+[PASS] import idempotent
+[PASS] fingerprint drift blocked
+[PASS] fingerprint drift quarantined
+[PASS] malformed quarantined
+[PASS] quarantine list non-empty
+[PASS] reconcile ok
+[PASS] external payslip
+[PASS] external payslip authority
+[PASS] external close create
+[PASS] external close authority
+[PASS] nonsynthetic refused
+[PASS] expat unsupported
+[PASS] kuwaiti counsel_required
+[PASS] kuwaiti status counsel_required
+[PASS] eos art blocked
+[PASS] restore prior mode
+[PASS] residual zero
+
+96 passed, 0 failed
+QUALIFICATION_JSON /opt/wathefni/production-evidence/payroll-final-prod-synthetic/20260803T150857Z/canary/after-redeploy/qualification.json

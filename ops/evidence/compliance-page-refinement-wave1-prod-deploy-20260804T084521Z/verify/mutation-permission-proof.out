@@ -1,0 +1,14 @@
+PASS compliance.manage gate
+PASS review POST endpoint
+PASS correct_metadata action
+PASS compliance_send_reminder
+PASS HR reviewed honesty
+PASS reject reason modal
+PASS dates modal
+PASS Employees D1 prompt preserved
+PASS Employees D2 prompt preserved
+PASS no expiry prompt leftover
+PASS no issue prompt leftover
+MUTATION_PERMISSION_PROOF_OK
+LIVE_BUNDLE PostHire-CTpKApnh.js
+API_CHUNK api-sYOc6kIY.js

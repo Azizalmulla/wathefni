@@ -1,0 +1,54 @@
+    leave enforcement c2 — prove
+      PASS  enforcement module
+      PASS  rollback guidance
+      PASS  EN/AR leave type canonicalize annual
+      PASS  EN/AR leave type canonicalize unpaid
+      PASS  EN/AR unpaid catalogue present
+      PASS  global enforcement off
+      PASS  empty allowlist denies
+      PASS  allowlisted still needs pack attestation
+      PASS  enable blocked without attestation
+      PASS  policy pack attested
+      PASS  attested but not enabled yet
+      PASS  enforcement enabled for canary
+      PASS  enforcement gate open
+      PASS  other company denied
+      PASS  sufficient annual reserve
+      PASS  insufficient annual rejected
+      PASS  direct reserve fail-closed under enforcement
+      PASS  unpaid skips balance
+      PASS  override requires reason
+      PASS  authorized override reserves
+      PASS  balance adjustment posted
+      PASS  balance top-up after override
+      PASS  cancel path reserved
+      PASS  cancel releases reservation
+      PASS  cancel restores available
+      PASS  consume from reservation
+      PASS  approved cancel reverses consumption
+      PASS  N-step policy bound
+      PASS  N-step instance started
+      PASS  self-approval denial
+      PASS  stale concurrent conflict
+      PASS  step1 approved
+      PASS  step2 completes N-step
+      PASS  delegation grant created
+      PASS  delegated subject instance
+      PASS  delegated approver succeeds
+      PASS  expired window rejected at create or marked
+      PASS  revocable grant created
+      PASS  delegation revoked
+      PASS  out-of-scope grant created
+      PASS  out-of-scope delegation denied
+      PASS  single-step fallback when WA off
+      PASS  enforcement-off observe path
+      PASS  tenant isolation on enforcement
+      PASS  manager/self decision helper still enforces
+      PASS  leave independent of attendance
+      PASS  leave independent of payroll
+      PASS  honesty flags enforced when on
+
+    48 passed, 0 failed
+LEAVE_ENFORCEMENT_UNIT_PASS
+LEAVE_ENFORCEMENT_FULL_PASS
+STAGING_RC=0

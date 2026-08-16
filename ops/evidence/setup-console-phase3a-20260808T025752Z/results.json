@@ -1,0 +1,214 @@
+{
+  "pass": 33,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "weekend_days_normalize",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "working_days_from_weekend",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:working_calendar_missing",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:statutory_employee_inputs_incomplete",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:upsert_variance_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:confirm_authoritative",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:allowlist_add",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:revoke_employee_allowlist",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:payroll_employee_statutory_inputs",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:seed_kuwait_fixed_holidays",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:history_rewritten",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:wathefni_owned_rate_rejected",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-phase=\"3a\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-payroll-setup-calendar",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-payroll-setup-statutory-inputs",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-payroll-setup-variance",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-payroll-setup-allowlist",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:confirmAuthoritative",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Never type PIFSS",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_internal_jargon",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_get_phase3a",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_calendar_persist",
+      "detail": [
+        {
+          "action": "upsert_finalize_policy",
+          "enterprise_sod_strict": false
+        },
+        {
+          "action": "update_setup_extras",
+          "setup_extras": {
+            "payroll_frequency": "monthly",
+            "cutoff_day": 25,
+            "period_end_rule": "calendar_month",
+            "working_calendar_note": "",
+            "weekend_days": [
+              "fri",
+              "sat"
+            ],
+            "working_days": [
+              "sun",
+              "mon",
+              "tue",
+              "wed",
+              "thu"
+            ],
+            "calendar_configured": true,
+            "holiday_calendar_source": "company_public_holidays",
+            "use_wathefni_public_holiday_pack": true
+          }
+        },
+        {
+          "action": "apply_working_calendar",
+          "weekend_days": [
+            "fri",
+            "sat"
+          ]
+        }
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "live_calendar_clears_readiness_blocker",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_statutory_gap_counts",
+      "detail": {
+        "incomplete": 0,
+        "missing_category": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_variance_upsert",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_preview_entitlement",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_allowlisted_transition",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_authoritative_requires_confirm",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_allowlist_search",
+      "detail": {
+        "n": 5
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_allowlist_add",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_mode_b_switch_soft",
+      "detail": {
+        "status": 400,
+        "error": null
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_restore_attempted",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_tenant_404",
+      "detail": null
+    }
+  ]
+}

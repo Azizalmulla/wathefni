@@ -1,0 +1,568 @@
+onboarding queue bank reconcile failed company=WATHEFNI
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 35185, in onboarding_queue_enrichment
+    _bank_sync.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96599411617
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96550010005
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96550010002
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96588721142
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96566363363
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96550010010
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96550010003
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96550010001
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554011492
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554497342
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554855202
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554011493
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554497343
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554855203
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96555720031
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554011494
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554497344
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96554855204
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96557057331
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96557057342
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96557057353
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96558968661
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96558740881
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96558968662
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96558740882
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96558968664
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-96558968663
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-REALBLOCK-0F290BF7
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-02a6de2d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-1db8844d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-329c9917
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-3aa6fe67
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-5b6fc7bd
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-9f20bf37
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-b5521366
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-cb1963ca
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-ce3cea2e
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-d76dbdb7
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-d8ee5588
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-02a6de2d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-1db8844d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-329c9917
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-3aa6fe67
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-5b6fc7bd
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-9f20bf37
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-b5521366
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-cb1963ca
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-ce3cea2e
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1-TERM-d76dbdb7
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-02a6de2d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-1db8844d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-329c9917
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-3aa6fe67
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-5b6fc7bd
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-9f20bf37
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-b5521366
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-cb1963ca
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-ce3cea2e
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-d76dbdb7
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW1B-d8ee5588
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-11f4acfb
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-2ab7e260
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-424360f9
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-60f54384
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-73701d78
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-7dc6607b
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-962589e3
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-cbf93a4d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-d3be72f0
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-d3ffcf98
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-f08b1406
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-f148c3be
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2-ffa0a12e
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-11f4acfb
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-2ab7e260
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-424360f9
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-60f54384
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-73701d78
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-7dc6607b
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-962589e3
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-cbf93a4d
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-d3be72f0
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-d3ffcf98
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-f08b1406
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-f148c3be
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2B-ffa0a12e
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2C-11f4acfb
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2C-2ab7e260
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2C-424360f9
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+hr onboarding bank reconcile failed employee=WATHEFNI-SHW2C-60f54384
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/app.py", line 74991, in dashboard_posthire_onboarding_detail
+    _bank.reconcile_onboarding_bank_item(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_bank_ess' has no attribute 'reconcile_onboarding_bank_item'. Did you mean: 'sync_onboarding_bank_item'?
+ACTOR {"company_code": "WATHEFNI", "actor_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f", "actor_role": "owner", "hr_phone": "96599338566"}
+PERMS_HAS_LEAVE True True False
+BALANCES_ENABLED True
+OPEN_COUNT 2 items 2
+OPEN_ITEM {"leave_id": "6ad2133d-ca56-4919-99c1-0864d328292b", "employee": "mohammad alqattan", "type": "sick", "dates": ["2026-08-12", "2026-08-12"], "days": null, "conflicts": 1, "actions": ["read", "approve", "reject"], "has_balance": false}
+OPEN_ITEM {"leave_id": "033e8a56-480c-4188-ad68-93d73003fc01", "employee": "Fouad Burhamad", "type": "annual", "dates": ["2026-08-16", "2026-08-18"], "days": null, "conflicts": 1, "actions": ["read", "approve", "reject"], "has_balance": false}
+FOUAD_DETAIL {"leave_id": "033e8a56-480c-4188-ad68-93d73003fc01", "status": "requested", "leave_type": "annual", "employee": {"employee_key": "WATHEFNI-96566363363", "name": "Fouad Burhamad", "position_title": "IT Maintenance", "department": null, "employment_status": "active"}, "start_date": "2026-08-16", "end_date": "2026-08-18", "duration_days": 3.0, "reason": "Family trip", "shift_conflict_count": 1, "allowed_actions": ["read", "approve", "reject"], "balance_sample": {"leave_type": "annual", "current_balance": 17.5, "available": 17.5, "reserved": 0.0, "observe_only": true, "enforced": false}, "balance_len": 1}
+CONFLICT_DB_COUNT 1 PAYLOAD 1 MATCH True
+CREATED_LEAVE dcb1aa40-b2fb-4f56-a406-079eea29e6d2
+DETAIL {"leave_id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2", "status": "requested", "leave_type": "annual", "employee": {"employee_key": "WATHEFNI-96550252254", "name": "Talal Fadhli", "position_title": "Social Media Manager", "department": null, "employment_status": "active"}, "start_date": "2026-08-20", "end_date": "2026-08-20", "duration_days": 1.0, "reason": "HR mobile leave detail qualification (disposable)", "shift_conflict_count": 0, "allowed_actions": ["read", "approve", "reject"], "balance_sample": {"leave_type": "annual", "current_balance": 17.5, "available": 17.5, "reserved": 0.0, "observe_only": true, "enforced": false}, "balance_len": 1}
+BALANCE_ROWS [{"leave_type": "annual", "entitlement_days": 30.0, "accrued_to_date": 17.5, "consumed": 0.0, "current_balance": 17.5, "can_take_from": null, "enforced": false, "legal_reviewed": false, "balances_enforced": false, "observe_only": true, "reserved": 0.0, "available": 17.5}]
+REJECT_REASON_REQUIRED {'error': 'rejection_reason_required'}
+PREPARE_REJECT {"ok": false, "status": "needs_confirmation", "confirmation": {"confirmation_id": "db8f74f4-358c-4037-9955-bace68bb6b49", "confirmation_hash": "2d5a7afc04919041a3d417d198b097990d5219344437b2103f2a996e30f21922", "action": "reject_leave_request", "target": {"type": "leave_request", "id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2"}, "summary": "Talal Fadhli · annual", "consequence": "Reject Talal Fadhli's leave and notify the employee.", "current_state": "requested", "expires_at": "2026-08-10T17:10:46.643315+00:00", "status": "pending", "backend_confirmation": {"args": {"leave_id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2", "decision_note": "Qualification reject reason"}, "text": "Reject that employee's leave for Thursday, 20 August 2026?", "action_hash": "9aa4642339ec75d310eb6725ccc3dbf08b8d743c6582ebd13820b67e6966377f", "action_type": "reject_leave_request"}, "idempotent_replay": false}, "result": null}
+PREPARE_APPROVE {"ok": false, "status": "needs_confirmation", "confirmation": {"confirmation_id": "0fa1cbfe-dfbc-4cfb-831d-491112f16b65", "confirmation_hash": "321b6faa69e6a55a700022e275994c2626d4e2576a14f4d7693dfcb93dac9fd3", "action": "approve_leave_request", "target": {"type": "leave_request", "id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2"}, "summary": "Talal Fadhli · annual", "consequence": "Approve Talal Fadhli's leave and notify the employee.", "current_state": "requested", "expires_at": "2026-08-10T17:10:46.790190+00:00", "status": "pending", "backend_confirmation": {"args": {"leave_id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2"}, "text": "Approve that employee's leave for Thursday, 20 August 2026?", "action_hash": "934c5942b6a06e9ec71388ded915b018a0acd8c22c021aaee0d6610013c4a372", "action_type": "approve_leave_request"}, "idempotent_replay": false}, "result": null}
+CONFIRM_APPROVE {"ok": true, "status": "completed", "confirmation": {"confirmation_id": "0fa1cbfe-dfbc-4cfb-831d-491112f16b65", "confirmation_hash": "321b6faa69e6a55a700022e275994c2626d4e2576a14f4d7693dfcb93dac9fd3", "action": "approve_leave_request", "target": {"type": "leave_request", "id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2"}, "summary": "Talal Fadhli · annual", "consequence": "Approve Talal Fadhli's leave and notify the employee.", "current_state": "requested", "expires_at": "2026-08-10T17:10:46.790190+00:00", "status": "completed", "backend_confirmation": {"args": {"leave_id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2"}, "text": "Approve that employee's leave for Thursday, 20 August 2026?", "action_hash": "934c5942b6a06e9ec71388ded915b018a0acd8c22c021aaee0d6610013c4a372", "action_type": "approve_leave_request"}, "idempotent_replay": false}, "result": {"ok": true, "status": "completed", "message": "Approved Employee's leave for Thursday, 20 August 2026.", "confirmation": null, "result": {"ok": true, "leave": {"leave_id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2", "company_code": "WATHEFNI", "employee_key": "WATHEFNI-96550252254", "employee_phone": null, "employee_name": null, "start_date": "2026-0
+AFTER_DETAIL {"leave_id": "dcb1aa40-b2fb-4f56-a406-079eea29e6d2", "status": "approved", "leave_type": "annual", "employee": {"employee_key": "WATHEFNI-96550252254", "name": "Talal Fadhli", "position_title": "Social Media Manager", "department": null, "employment_status": "active"}, "start_date": "2026-08-20", "end_date": "2026-08-20", "duration_days": 1.0, "reason": "HR mobile leave detail qualification (disposable)", "shift_conflict_count": 0, "allowed_actions": [], "balance_sample": {"leave_type": "annual", "current_balance": 17.5, "available": 17.5, "reserved": 0.0, "observe_only": true, "enforced": false}, "balance_len": 1}
+STALE_REPLAY_UNEXPECTED_OK
+PRIORITY_LEAVE_DESTINATIONS ['/leave/6ad2133d-ca56-4919-99c1-0864d328292b', '/leave/033e8a56-480c-4188-ad68-93d73003fc01']
+DISPOSABLE_STILL_IN_PRIORITIES False
+HIST_APPROVED {"leave_id": "be0f772d-655c-4ee9-ad88-b4a65c3da329", "status": "approved", "leave_type": "annual", "employee": {"employee_key": "WATHEFNI-96599338566", "name": "W5C-SYNTH|Aziz Mobile QA", "position_title": "Mobile QA Tester", "department": "Internal QA", "employment_status": "active"}, "start_date": "2026-07-26", "end_date": "2026-07-26", "duration_days": 1.0, "reason": "Synthetic QA approved leave", "shift_conflict_count": 0, "allowed_actions": [], "balance_sample": null, "balance_len": 0}
+SAFE_BACK_PARENT /hr for leave detail (hrCanonicalParent)
+VERDICT_BACKEND_PATH PASS

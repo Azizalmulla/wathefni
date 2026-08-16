@@ -1,0 +1,95 @@
+{
+  "tenants": [
+    {
+      "company_code": "WATHEFNI",
+      "employee_count": 4,
+      "manager_count": 4,
+      "approver_count": 1,
+      "managers": [
+        {
+          "user_id": "201d0b3b-6a6f-483f-914a-7a2356fd0a2e",
+          "email": "fslalmulla@gmail.com",
+          "role": "viewer",
+          "name": "Faisal Almulla"
+        },
+        {
+          "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+          "email": "f.burhama@disruptv.tech",
+          "role": "owner",
+          "name": "Fouad"
+        },
+        {
+          "user_id": "90b78a42-9eb2-43b6-9eeb-c9c134a964b6",
+          "email": "h.almulla@almulla-media.com",
+          "role": "viewer",
+          "name": "hamad almulla"
+        },
+        {
+          "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+          "email": "azizalmulla16@gmail.com",
+          "role": "owner",
+          "name": "Aziz Almulla"
+        }
+      ],
+      "approvers": [
+        {
+          "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+          "email": "f.burhama@disruptv.tech",
+          "role": "owner",
+          "name": "Fouad"
+        }
+      ],
+      "status_capable": true,
+      "has_eligible_separate_approver": false,
+      "reason": "missing_separate_approver"
+    }
+  ],
+  "gate": "FAIL",
+  "canary_env_allowlist_includes_production": false,
+  "canary_env_override": "",
+  "tenants_needing_separate_approver": [
+    {
+      "company_code": "WATHEFNI",
+      "employee_count": 4,
+      "manager_count": 4,
+      "approver_count": 1,
+      "managers": [
+        {
+          "user_id": "201d0b3b-6a6f-483f-914a-7a2356fd0a2e",
+          "email": "fslalmulla@gmail.com",
+          "role": "viewer",
+          "name": "Faisal Almulla"
+        },
+        {
+          "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+          "email": "f.burhama@disruptv.tech",
+          "role": "owner",
+          "name": "Fouad"
+        },
+        {
+          "user_id": "90b78a42-9eb2-43b6-9eeb-c9c134a964b6",
+          "email": "h.almulla@almulla-media.com",
+          "role": "viewer",
+          "name": "hamad almulla"
+        },
+        {
+          "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+          "email": "azizalmulla16@gmail.com",
+          "role": "owner",
+          "name": "Aziz Almulla"
+        }
+      ],
+      "approvers": [
+        {
+          "user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+          "email": "f.burhama@disruptv.tech",
+          "role": "owner",
+          "name": "Fouad"
+        }
+      ],
+      "status_capable": true,
+      "has_eligible_separate_approver": false,
+      "reason": "missing_separate_approver"
+    }
+  ]
+}

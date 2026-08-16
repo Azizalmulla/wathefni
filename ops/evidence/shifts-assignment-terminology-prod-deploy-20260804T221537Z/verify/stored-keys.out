@@ -1,0 +1,5 @@
+2322:                        <option value="general">{c.assignmentGeneral}</option>
+2323:                        <option value="guest">{c.assignmentGuest}</option>
+2324:                        <option value="operations">{c.assignmentOperations}</option>
+2325:                        <option value="night">{c.assignmentNight}</option>
+2326:                        <option value="event">{c.assignmentEvent}</option>

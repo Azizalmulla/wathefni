@@ -1,0 +1,9 @@
+PASS Employee Stack does not register hr screen
+PASS ModeRedirect sync hard-deny /hr for employee
+PASS AuthGate redirects employee away from /hr
+PASS No async hrWorkspaceEnabled employee/hr bounce
+PASS no /ranking destination emit
+PASS no soft-dead emit /candidates?follow_up=
+PASS no soft-dead emit /candidates?review_status=
+PASS no soft-dead emit /candidates?assessment_status=
+FAIL prehire priorities use /candidates

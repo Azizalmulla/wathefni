@@ -1,0 +1,103 @@
+{
+  "phase": "after",
+  "shots": [
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-candidates-desktop.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-candidates-tablet.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-candidates-filters-open.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-general-email.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-whatsapp.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-job-applicant.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-multi-person.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-uncertain-dup.png",
+    "/opt/wathefni/production-evidence/candidates-list-simp/20260727T135119Z/after/after/after-candidates-ar-rtl.png"
+  ],
+  "assertions": {
+    "headers": [
+      "CANDIDATE",
+      "EXPERTISE",
+      "JOB",
+      "STAGE",
+      "RECEIVED"
+    ],
+    "page_snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCC\nCLSQ WhatsApp Candidate\n\tNot identified\tCLSQ Finance Manager\tReady for review\tWhatsApp \u00b7 Today\n\nCP\nCLSQ Multi Person\n\tNot identified\tCLSQ Sales Lead +1\tInterview\tManual upload \u00b7 Today\n\nCA\nCLSQ Job Applicant\n\tNot identified\tCLSQ Finance Manager\tReady for review\tJob application \u00b7 Today\n\nCE\nCLSQ General Email\n\tNot identified\tNo job assigned\tNew\tEmail \u00b7 Today\n\nCU\nCLSQ Same Name Uncertain\nReview identity\n\tNot identified\tCLSQ Sales Lead\tShortlisted\tManual upload \u00b7 Today\n\nCU\nCLSQ Same Name Uncertain\nReview identity\n\tNot identified\tCLSQ Finance Manager\tReady for review\tManual upload \u00b7 Today\nShowing 1-7 of 7 \u00b7 6 people on this page\nPrevious\nNext",
+    "five_columns": true,
+    "no_forbidden_headers": true,
+    "has_stage_not_status": true,
+    "absent::Talent Pool": true,
+    "absent::Advisory": true,
+    "absent::Career area": true,
+    "absent::Likely role": true,
+    "absent::Not linked": true,
+    "absent::needs_role": true,
+    "absent::Open Intake Operations": true,
+    "absent::bulk_import": true,
+    "absent::Source not recorded": true,
+    "absent::Recruiting email": true,
+    "filters_button_visible": true,
+    "classification_hidden_by_default": true,
+    "classification_visible_in_filters": true,
+    "row::general-email": {
+      "ok": true,
+      "expect": [
+        "CLSQ General Email",
+        "No job assigned"
+      ],
+      "snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCE\nCLSQ General Email\n\tNot identified\tNo job assigned\tNew\tEmail \u00b7 Today\nShowing 1-1 of 1 \u00b7 1 people on this page\nPrevious\nNext"
+    },
+    "row::whatsapp": {
+      "ok": true,
+      "expect": [
+        "CLSQ WhatsApp Candidate",
+        "WhatsApp"
+      ],
+      "snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCC\nCLSQ WhatsApp Candidate\n\tNot identified\tCLSQ Finance Manager\tReady for review\tWhatsApp \u00b7 Today\nShowing 1-1 of 1 \u00b7 1 people on this page\nPrevious\nNext"
+    },
+    "row::job-applicant": {
+      "ok": true,
+      "expect": [
+        "CLSQ Job Applicant",
+        "CLSQ Finance Manager",
+        "Ready for review"
+      ],
+      "snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCA\nCLSQ Job Applicant\n\tNot identified\tCLSQ Finance Manager\tReady for review\tJob application \u00b7 Today\nShowing 1-1 of 1 \u00b7 1 people on this page\nPrevious\nNext"
+    },
+    "row::multi-person": {
+      "ok": true,
+      "expect": [
+        "CLSQ Multi Person",
+        "+1"
+      ],
+      "snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCP\nCLSQ Multi Person\n\tNot identified\tCLSQ Sales Lead +1\tInterview\tManual upload \u00b7 Today\nShowing 1-2 of 2 \u00b7 1 people on this page\nPrevious\nNext"
+    },
+    "row::uncertain-dup": {
+      "ok": true,
+      "expect": [
+        "CLSQ Same Name Uncertain",
+        "Review identity"
+      ],
+      "snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nCU\nCLSQ Same Name Uncertain\nReview identity\n\tNot identified\tCLSQ Sales Lead\tShortlisted\tManual upload \u00b7 Today\n\nCU\nCLSQ Same Name Uncertain\nReview identity\n\tNot identified\tCLSQ Finance Manager\tReady for review\tManual upload \u00b7 Today\nShowing 1-2 of 2 \u00b7 2 people on this page\nPrevious\nNext"
+    },
+    "rtl_dir": true,
+    "ar_headers": [
+      "\u0627\u0644\u0645\u0631\u0634\u062d",
+      "\u0627\u0644\u062e\u0628\u0631\u0629",
+      "\u0627\u0644\u0648\u0638\u064a\u0641\u0629",
+      "\u0627\u0644\u0645\u0631\u062d\u0644\u0629",
+      "\u0627\u0644\u0627\u0633\u062a\u0644\u0627\u0645"
+    ]
+  },
+  "fixtures": {
+    "prefix": "CLSQ1FCF25",
+    "keys": {
+      "job_app": "CLSQ1FCF25-JOB",
+      "multi_a": "CLSQ1FCF25-MULTI-A",
+      "multi_b": "CLSQ1FCF25-MULTI-B",
+      "wa": "CLSQ1FCF25-WA",
+      "general_email": "CLSQ1FCF25-GEN-EMAIL",
+      "dup1": "CLSQ1FCF25-DUP1",
+      "dup2": "CLSQ1FCF25-DUP2"
+    },
+    "email_shared": "clsq.shared.clsq1fcf25@example.invalid"
+  },
+  "ok": true
+}

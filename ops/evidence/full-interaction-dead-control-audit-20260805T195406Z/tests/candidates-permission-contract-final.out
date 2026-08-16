@@ -1,0 +1,19 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/components/candidates/HeldIntakeReviewCard.test.tsx src/pages/CandidatesWave3Contract.test.tsx src/pages/CandidatesWave4Contract.test.tsx
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  3 passed (3)
+      Tests  15 passed (15)
+   Start at  00:26:53
+   Duration  1.50s (transform 465ms, setup 495ms, import 691ms, tests 664ms, environment 2.21s)
+

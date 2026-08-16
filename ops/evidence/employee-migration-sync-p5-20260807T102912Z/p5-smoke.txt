@@ -1,0 +1,16 @@
+OK P5 honesty
+OK connector catalog
+OK connected 8e1bb796-5310-4e6e-958a-300defc80b6d
+OK connector auth failure
+OK pause/resume
+OK initial full sync
+OK incremental sync without duplicates
+OK source update classified totals={'create': 0, 'update': 1, 'skip': 0, 'review': 0, 'conflict': 0, 'invalid': 0, 'warnings': 0, 'deactivate': 0}
+OK conflict → Needs review
+OK higher-authority payroll protected
+OK sync-run history n=4
+OK retry-safe re-sync
+OK lifecycle signals captured only
+OK disconnect
+OK employee migration sync P5 connected systems
+P5_EXIT=0

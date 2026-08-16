@@ -1,0 +1,17 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "68f5d59c-c243-4f50-8361-6f49d7a7c5db",
+  "androidUpdateId": "019fda25-3ec3-78fb-9675-9fa82a68d16f",
+  "iosUpdateId": "019fda25-3ec3-7c2e-8fbf-aace550307af",
+  "message": "Auth Wave 2 Phase 3B: Face ID on proven auto-lock overlay (PIN fallback)",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/68f5d59c-c243-4f50-8361-6f49d7a7c5db",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC": "1"
+  },
+  "priorPinOnlyGroup": "f6364b3b-5b9f-4ec9-8c97-3ec22f560a89",
+  "disableAutolockGroup": "3c51b707-15c4-4793-8cf5-f933a62f236f"
+}

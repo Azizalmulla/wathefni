@@ -3,13 +3,14 @@ WhatsApp webhook handler.
 Receives incoming messages from WhatsApp Cloud API and routes them.
 """
 from fastapi import APIRouter, Request, Depends, Query
+import httpx
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.config import get_settings
 from app.services.routing import identify_sender, parse_apply_code
 from app.services.whatsapp import parse_webhook_message, send_text_message
-from app.services.hr_engine import handle_hr_query
+from app.services.employee_onboarding import handle_employee_onboarding_message
 from app.services.screening import (
     get_screening_questions,
     generate_screening_response,
@@ -24,6 +25,10 @@ from app.models.conversation import Conversation
 
 router = APIRouter()
 settings = get_settings()
+HR_ORCHESTRATOR_SAFE_FALLBACK_REPLY = (
+    "I need the Wathefni HR orchestrator to answer HR operations safely. "
+    "Please try again in a moment."
+)
 
 # In-memory session state for active screening conversations
 # In production, move this to Redis or database
@@ -63,11 +68,21 @@ async def handle_webhook(request: Request, db: Session = Depends(get_db)):
     sender = identify_sender(sender_phone, db)
 
     if sender["type"] == "hr":
-        # HR manager — route to HR query engine
-        response = handle_hr_query(text, str(sender["company_id"]), db)
+        response = await _handle_hr_orchestrator_turn(sender_phone, text, message)
         await send_text_message(sender_phone, response)
         _log_message(db, sender_phone, "outbound", "text", response)
         return {"status": "hr_response_sent"}
+
+    elif sender["type"] == "employee":
+        result = handle_employee_onboarding_message(
+            db,
+            employee=sender["user"],
+            text=text,
+            msg_type=msg_type,
+            message=message,
+        )
+        await send_text_message(sender_phone, result["reply"])
+        return {"status": "employee_response_sent", "updated": result["updated"]}
 
     elif sender["type"] == "candidate":
         # Existing candidate — check if they're in a screening session
@@ -302,3 +317,33 @@ def _parse_salary(text: str | None) -> float | None:
     if numbers:
         return float(numbers[0])
     return None
+
+
+async def _handle_hr_orchestrator_turn(sender_phone: str, text: str, message: dict) -> str:
+    """Forward HR-admin turns to the Wathefni LangGraph orchestrator."""
+    payload = {
+        "account_id": "meta-whatsapp",
+        "conversation_id": sender_phone,
+        "sender_phone": sender_phone,
+        "sender_role": "hr_admin",
+        "raw_text": text,
+        "media": None,
+        "metadata": {
+            "source": "ai_recruiter_meta_webhook",
+            "provider_payload": message,
+        },
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            result = (
+                await client.post(
+                    settings.wathefni_hr_orchestrator_url,
+                    json=payload,
+                    headers={"X-Internal-Token": settings.wathefni_internal_token},
+                )
+            ).json()
+    except Exception:
+        return HR_ORCHESTRATOR_SAFE_FALLBACK_REPLY
+    if isinstance(result, dict) and result.get("authoritative") and result.get("reply_text"):
+        return str(result["reply_text"])
+    return HR_ORCHESTRATOR_SAFE_FALLBACK_REPLY

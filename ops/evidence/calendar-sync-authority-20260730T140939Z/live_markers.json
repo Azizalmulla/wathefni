@@ -1,0 +1,16 @@
+{
+  "no_External_sync": true,
+  "has_Platform_Integrations": true,
+  "has_Synced": true,
+  "no_comes_later": true,
+  "legacy_operator_present": true,
+  "CalendarShell": [
+    "CalendarShell-2449y5UN.js"
+  ],
+  "SettingsPage": [
+    "SettingsPage-Cj1Jh3Wk.js"
+  ],
+  "dashboard": [
+    "dashboard-B-yUXbUt.js"
+  ]
+}

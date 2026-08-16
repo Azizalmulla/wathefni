@@ -1,0 +1,8 @@
+{"employee_action": "created", "employee_key": "WATHEFNI-96599338566", "phone": "96599338566", "name": "W5C-SYNTH|Aziz Mobile QA"}
+{"onboarding_start": {"ok": false, "error": "start_onboarding() got an unexpected keyword argument 'company_code'"}}
+{"allowlist_updated": "/etc/systemd/system/wathefni-orchestrator.service.d/zz-employee-final-controlled-rollout.conf", "value": "WATHEFNI-96550252254,WATHEFNI-96599338566"}
+{"allowlist_updated": "/etc/systemd/system/wathefni-orchestrator.service.d/zzzzzzzzzzzzz-shifts-wave6c-controlled.conf", "value": "WATHEFNI-96550252254,WATHEFNI-96599338566"}
+{"orchestrator_healthy": true}
+{"allowlist_assert": "ok", "keys": ["WATHEFNI-96550252254", "WATHEFNI-96599338566"]}
+AZIZ_MOBILE_QA_CANARY_READY
+{"ok": true, "phone_digits": "96599338566", "phone_display": "+96599338566", "activation_code": "848625", "invite_id": "4ae6f066-64ff-4b1c-8e9f-22a81daf7cd0", "expires_at": "2026-08-06 03:12:27.667755+00:00", "employee_key": "WATHEFNI-96599338566", "company_code": "WATHEFNI", "name": "W5C-SYNTH|Aziz Mobile QA", "talal_preserved": {"employee_key": "WATHEFNI-96550252254", "name": "Talal Fadhli", "phone": "96550252254"}, "seed_counts": {"shifts_qa": 3, "onboarding_items": 0}, "api_smoke": {"me": 200, "onboarding": 200, "leave": 200, "shifts_today": 200, "attendance": 200, "notifications": 200, "documents": 200, "profile": 200}, "allowlist": "WATHEFNI-96550252254,WATHEFNI-96599338566", "authority": {"payroll_money": false, "hiring_admin": false, "manager": false, "employee_ess_only": true}}

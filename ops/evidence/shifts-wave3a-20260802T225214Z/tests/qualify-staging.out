@@ -1,0 +1,84 @@
+health_ok
+PASS  version 3.0.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+40 passed, 0 failed
+SHW3A tag=46989F88 key=WATHEFNI-SHW2B-W3A-46989F88 evid=/opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/tests
+PASS  connected_db_is_staging
+PASS  db_name_wathefni_staging
+PASS  wave3_module_enabled
+PASS  honesty_payroll_false
+PASS  honesty_no_templates
+PASS  create_shift_ok
+PASS  create_has_shift_id
+PASS  overnight_create_ok
+PASS  overnight_ends_next_day
+PASS  list_wave3_enabled
+PASS  list_honesty_embedded
+PASS  list_contains_created
+PASS  ui_state_present
+PASS  history_versions
+PASS  history_has_current
+PASS  stale_rejected
+PASS  reschedule_ok
+PASS  cancel_ok
+PASS  overnight_cancel_ok
+PASS  dashboard_dist_calendar_aligned
+PASS  residual_zero
+
+21 passed, 0 failed
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+/opt/wathefni/orchestrator/.venv/bin/python: can't open file '/opt/wathefni/staging/orchestrator/smoke-test-attendance-freeze-regression.py': [Errno 2] No such file or directory
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+SEED {"prefix": "SHW3AUI2E2672", "day": "2026-08-04", "create": {"status": 405, "ok": false, "body": {"detail": "Method Not Allowed"}}, "list": {"status": 200, "wave3": {"enabled": true, "version": "3.0.0", "actor_hr_allowlisted": false, "actor_manager_allowlisted": false, "real_mutation_gate": false, "can_mutate_real": true, "permission_matrix": {"hr_allowlisted": {"create": true, "reschedule": true, "soft_cancel": true, "swap_decide": true, "availability_decide": true, "reconciliation_resolve": tru
+SHOT /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots/shifts-wave3a-desktop-board.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots/shifts-wave3a-desktop-composer.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots/shifts-wave3a-mobile-rtl.png
+SHOTS_DIR /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots
+shot_rc=0
+STAGING_SHIFTS_W3A_OK

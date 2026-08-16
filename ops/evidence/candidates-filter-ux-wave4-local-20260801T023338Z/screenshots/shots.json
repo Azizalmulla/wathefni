@@ -1,0 +1,55 @@
+{
+  "ok": true,
+  "shots": [
+    {
+      "name": "en-desktop-chips",
+      "file": "/Users/azizalmulla/Desktop/claw/ops/evidence/candidates-filter-ux-wave4-local-20260801T023338Z/screenshots/en-desktop-chips.png",
+      "url": "http://127.0.0.1:5199/dashboard/filter-ux-harness.html?locale=en",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "locale": "en"
+    },
+    {
+      "name": "en-desktop-drawer",
+      "file": "/Users/azizalmulla/Desktop/claw/ops/evidence/candidates-filter-ux-wave4-local-20260801T023338Z/screenshots/en-desktop-drawer.png",
+      "url": "http://127.0.0.1:5199/dashboard/filter-ux-harness.html?locale=en&open=1",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "locale": "en"
+    },
+    {
+      "name": "en-mobile-sheet",
+      "file": "/Users/azizalmulla/Desktop/claw/ops/evidence/candidates-filter-ux-wave4-local-20260801T023338Z/screenshots/en-mobile-sheet.png",
+      "url": "http://127.0.0.1:5199/dashboard/filter-ux-harness.html?locale=en&open=1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "locale": "en"
+    },
+    {
+      "name": "ar-desktop-chips-rtl",
+      "file": "/Users/azizalmulla/Desktop/claw/ops/evidence/candidates-filter-ux-wave4-local-20260801T023338Z/screenshots/ar-desktop-chips-rtl.png",
+      "url": "http://127.0.0.1:5199/dashboard/filter-ux-harness.html?locale=ar",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "locale": "ar"
+    },
+    {
+      "name": "ar-mobile-sheet-rtl",
+      "file": "/Users/azizalmulla/Desktop/claw/ops/evidence/candidates-filter-ux-wave4-local-20260801T023338Z/screenshots/ar-mobile-sheet-rtl.png",
+      "url": "http://127.0.0.1:5199/dashboard/filter-ux-harness.html?locale=ar&open=1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "locale": "ar"
+    }
+  ]
+}

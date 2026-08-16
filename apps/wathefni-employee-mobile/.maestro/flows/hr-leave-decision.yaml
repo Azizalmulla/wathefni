@@ -1,0 +1,14 @@
+# Placeholder: HR leave approve/reject UI path.
+# Not part of smoke. Will FAIL until HR session + leave fixtures exist — do not treat as PASS.
+appId: ai.wathefni.employee
+tags:
+  - full
+  - hr
+  - leave
+  - mutation
+  - requires_session
+  - needs_fixtures
+---
+- assertVisible:
+    id: "e2e.tab.hr.home"
+# TODO: Inbox/Leave detail → Approve/Reject → Confirm → API/DB reconcile

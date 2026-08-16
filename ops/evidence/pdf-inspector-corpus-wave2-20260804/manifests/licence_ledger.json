@@ -1,0 +1,90 @@
+[
+  {
+    "source_id": "synthetic_wave2_generated",
+    "dataset_name": "Wathefni Wave 2 Synthetic CV PDF Corpus",
+    "source": "Generated offline in-repo via wave2-cv-pdf-corpus-build.py",
+    "licence_or_terms": "Internal evaluation artifact; synthetic content owned/generated for Wathefni eval",
+    "contains_real_personal_information": false,
+    "commercial_or_internal_evaluation_permitted": true,
+    "attribution_or_redistribution": "Do not publish as real CVs; fake @synthetic-eval.example contacts",
+    "included": true,
+    "exclusion_reason": null
+  },
+  {
+    "source_id": "wave0_synthetic",
+    "dataset_name": "pdf-inspector Deep Eval Wave 0 fixtures",
+    "source": "ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures",
+    "licence_or_terms": "Synthetic fixtures generated for Wave 0; internal eval reuse",
+    "contains_real_personal_information": false,
+    "commercial_or_internal_evaluation_permitted": true,
+    "attribution_or_redistribution": "Internal reuse OK",
+    "included": true,
+    "exclusion_reason": null
+  },
+  {
+    "source_id": "kuwait_moj_public_law",
+    "dataset_name": "Kuwait Labor Law No. 6 of 2010 (MOJ public PDF excerpt)",
+    "source": "Kuwait Ministry of Justice public legal publication (local evidence copy)",
+    "licence_or_terms": "Public government legal text; used as non-CV layout edge case only",
+    "contains_real_personal_information": false,
+    "commercial_or_internal_evaluation_permitted": true,
+    "attribution_or_redistribution": "Attribute Kuwait MOJ; redistribute only as public law text",
+    "included": true,
+    "exclusion_reason": null
+  },
+  {
+    "source_id": "doclaynet",
+    "dataset_name": "DocLayNet",
+    "source": "https://github.com/DS4SD/DocLayNet",
+    "licence_or_terms": "CDLA-Permissive-1.0 — Use and Publish permitted with agreement notice on redistribution",
+    "contains_real_personal_information": "Possible in source business documents; not profiled here",
+    "commercial_or_internal_evaluation_permitted": true,
+    "attribution_or_redistribution": "Provide CDLA-Permissive-1.0 text/link if publishing data",
+    "included": false,
+    "exclusion_reason": "Approved licence, but full PDF extra is multi-GB; not ingested this wave. Layout edge cases synthesized instead."
+  },
+  {
+    "source_id": "publaynet",
+    "dataset_name": "PubLayNet",
+    "source": "https://github.com/ibm-aur-nlp/publaynet (PMC OA commercial-use subset)",
+    "licence_or_terms": "CDLA-Permissive-1.0 / PMC OA commercial-use collection provenance",
+    "contains_real_personal_information": false,
+    "commercial_or_internal_evaluation_permitted": true,
+    "attribution_or_redistribution": "Scientific article pages; provide CDLA notice if redistributing",
+    "included": false,
+    "exclusion_reason": "Approved for non-CV layout use, but large download deferred; not required to hit 500 with synthetic CV coverage."
+  },
+  {
+    "source_id": "eramatch_synthetic",
+    "dataset_name": "EraMatch CV Parsing Benchmark v3.0",
+    "source": "https://www.kaggle.com/datasets/anasahmad25/cv-parsing-eramatch",
+    "licence_or_terms": "Stated CC0 / synthetic LLM+template CVs",
+    "contains_real_personal_information": false,
+    "commercial_or_internal_evaluation_permitted": true,
+    "attribution_or_redistribution": "CC0; attribution optional",
+    "included": false,
+    "exclusion_reason": "Licence appears OK (synthetic+CC0) but Kaggle download not used this wave; equivalent synthetic PDFs generated locally to avoid third-party retention."
+  },
+  {
+    "source_id": "opensporks_livecareer",
+    "dataset_name": "opensporks/resumes (Hugging Face)",
+    "source": "https://huggingface.co/datasets/opensporks/resumes",
+    "licence_or_terms": "Labeled CC0-1.0, but provenance is scraped LiveCareer resume examples",
+    "contains_real_personal_information": true,
+    "commercial_or_internal_evaluation_permitted": false,
+    "attribution_or_redistribution": "Excluded — scraped personal/example CVs; privacy risk despite CC0 copyright label",
+    "included": false,
+    "exclusion_reason": "Lawful internal use not established for scraped personal CV examples; user policy forbids identifiable CVs without explicit permitted use."
+  },
+  {
+    "source_id": "linkedin_google_personal_sites",
+    "dataset_name": "LinkedIn / Google / personal website CVs",
+    "source": "n/a",
+    "licence_or_terms": "Not licensed for scraping",
+    "contains_real_personal_information": true,
+    "commercial_or_internal_evaluation_permitted": false,
+    "attribution_or_redistribution": "Forbidden",
+    "included": false,
+    "exclusion_reason": "Explicitly out of scope per Wave 2 instructions."
+  }
+]

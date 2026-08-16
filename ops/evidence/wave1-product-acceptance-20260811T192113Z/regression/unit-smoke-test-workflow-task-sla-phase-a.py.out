@@ -1,0 +1,26 @@
+    workflow_task_sla phase A slice 2 — ontology + SLA unit
+      PASS  schema version
+      PASS  sql pack exists
+      PASS  canonical type requisition_approval
+      PASS  canonical type preboard_item
+      PASS  canonical type preboard_readiness
+      PASS  canonical type probation_milestone
+      PASS  canonical type probation_decision
+      PASS  canonical type sla_breach
+      PASS  unknown type rejected
+      PASS  clock running→breached
+      PASS  clock breached terminal
+      PASS  clock running→satisfied
+      PASS  clock breached→satisfied allowed
+      PASS  clock breached→cancelled allowed
+      PASS  naive due_at coerced to UTC
+      PASS  invariants documented in rollback guidance
+      PASS  tasks flag default off
+      PASS  sla flag default off
+      PASS  tasks allowlist
+      PASS  sla allowlist
+      PASS  rollback modularity note
+      PASS  rollback retains tables
+      PASS  modularity: SLA independent of tasks for clocks
+
+    23 passed, 0 failed

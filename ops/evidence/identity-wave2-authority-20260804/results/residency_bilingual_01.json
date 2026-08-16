@@ -1,0 +1,1052 @@
+{
+  "id": "residency_bilingual_01",
+  "document_type": "residency",
+  "side": "single",
+  "classify": {
+    "detected_item": "residency",
+    "confidence": 0.95,
+    "reason": "extracted",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "side": "single",
+    "extraction_status": "extracted",
+    "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+    "identity_result": {
+      "ok": true,
+      "extraction_status": "extracted",
+      "authoritative": false,
+      "hr_confirmation_required": true,
+      "confidence": 0.95,
+      "detected_item": "residency",
+      "matches_expected_item": null,
+      "reason": "extracted",
+      "side": "single",
+      "fields": {
+        "document_type": {
+          "value": "residency",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "side": {
+          "value": "single",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_relationship": {
+          "value": "standalone",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_ar": {
+          "value": "راجيش كومار شارما",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_en": {
+          "value": "RAJESH KUMAR SHARMA",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_number": {
+          "value": "RES-778899",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "nationality": {
+          "value": "Indian",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "date_of_birth": {
+          "value": "1988-02-25",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issue_date": {
+          "value": "2024-01-01",
+          "confidence": 0.94,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "expiry_date": {
+          "value": "2026-12-31",
+          "confidence": 0.93,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "employer_or_sponsor": {
+          "value": "WATHEFNI TRADING CO",
+          "confidence": 0.92,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name": {
+          "value": "RAJESH KUMAR SHARMA",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issued_date": {
+          "value": "2024-01-01",
+          "confidence": 0.94,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        }
+      },
+      "validation": {
+        "ok": true,
+        "issues": [],
+        "has_issue_date": true,
+        "has_expiry_date": true,
+        "has_dob": true
+      },
+      "envelope": {
+        "contract": "document_envelope@1",
+        "foundation_id": "wathefni_document_processing_foundation_wave1",
+        "foundation_version": "1.0.0",
+        "company_code": "WATHEFNI",
+        "subject_type": "employee_identity",
+        "subject_key": "residency_bilingual_01",
+        "file_id": null,
+        "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+        "source_channel": "identity_wave2_classify",
+        "migration_batch_id": null,
+        "document_class": "identity",
+        "file_type": "png",
+        "authority_label": "needs_hr_confirmation",
+        "route_policy": {
+          "reading_route": "shared_envelope_intake",
+          "structuring": "identity_processor_current_gpt_vision",
+          "ocr_policy": "do_not_use_cv_v2",
+          "gpt_auto_ocr_fallback": false
+        },
+        "processing": {
+          "status": "extracted",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "expected_item": null,
+          "detected_item": "residency",
+          "gpt_auto_fallback": false,
+          "cv_v2_forbidden": true,
+          "validation": {
+            "ok": true,
+            "issues": [],
+            "has_issue_date": true,
+            "has_expiry_date": true,
+            "has_dob": true
+          },
+          "confidence": 0.95
+        },
+        "text_ref": null,
+        "structured_ref": null,
+        "retention_class": "identity_document",
+        "error": null,
+        "created_at": "2026-08-04T03:29:25.042229+00:00",
+        "cloud_portability": {
+          "domain_contract_cloud_agnostic": true,
+          "aws_specific_deps": false,
+          "gcp_specific_deps": false,
+          "worker_shape": "container_ready_async"
+        }
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "latency_ms": 3042
+        }
+      ],
+      "engine": {
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "latency_ms": 3042,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "error": null
+      },
+      "cost_usd": 0.004,
+      "latency_ms": 3042,
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+      "gpt_used": false,
+      "company_code": "WATHEFNI",
+      "duplicate_keys": {
+        "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+        "identifier_key": "residency:res-778899"
+      },
+      "legacy_compat": {
+        "document_type": "residency",
+        "document_number": "RES-778899",
+        "issued_date": "2024-01-01",
+        "expiry_date": "2026-12-31",
+        "nationality": "Indian",
+        "full_name": "RAJESH KUMAR SHARMA",
+        "full_name_ar": "راجيش كومار شارما",
+        "full_name_en": "RAJESH KUMAR SHARMA",
+        "date_of_birth": "1988-02-25",
+        "employer_or_sponsor": "WATHEFNI TRADING CO",
+        "side": "single",
+        "confidence": 0.95,
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "issued_date_parsed": "2024-01-01",
+        "expiry_date_parsed": "2026-12-31",
+        "date_of_birth_parsed": "1988-02-25",
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "gpt_used": false,
+        "fields": {
+          "document_type": {
+            "value": "residency",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "راجيش كومار شارما",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "RAJESH KUMAR SHARMA",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "RES-778899",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Indian",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1988-02-25",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2024-01-01",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2026-12-31",
+            "confidence": 0.93,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": "WATHEFNI TRADING CO",
+            "confidence": 0.92,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "RAJESH KUMAR SHARMA",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2024-01-01",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "envelope": {
+          "contract": "document_envelope@1",
+          "foundation_id": "wathefni_document_processing_foundation_wave1",
+          "foundation_version": "1.0.0",
+          "company_code": "WATHEFNI",
+          "subject_type": "employee_identity",
+          "subject_key": "residency_bilingual_01",
+          "file_id": null,
+          "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+          "source_channel": "identity_wave2_classify",
+          "migration_batch_id": null,
+          "document_class": "identity",
+          "file_type": "png",
+          "authority_label": "needs_hr_confirmation",
+          "route_policy": {
+            "reading_route": "shared_envelope_intake",
+            "structuring": "identity_processor_current_gpt_vision",
+            "ocr_policy": "do_not_use_cv_v2",
+            "gpt_auto_ocr_fallback": false
+          },
+          "processing": {
+            "status": "extracted",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "expected_item": null,
+            "detected_item": "residency",
+            "gpt_auto_fallback": false,
+            "cv_v2_forbidden": true,
+            "validation": {
+              "ok": true,
+              "issues": [],
+              "has_issue_date": true,
+              "has_expiry_date": true,
+              "has_dob": true
+            },
+            "confidence": 0.95
+          },
+          "text_ref": null,
+          "structured_ref": null,
+          "retention_class": "identity_document",
+          "error": null,
+          "created_at": "2026-08-04T03:29:25.042229+00:00",
+          "cloud_portability": {
+            "domain_contract_cloud_agnostic": true,
+            "aws_specific_deps": false,
+            "gcp_specific_deps": false,
+            "worker_shape": "container_ready_async"
+          }
+        },
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        }
+      }
+    }
+  },
+  "verify": {
+    "matches_expected_item": true,
+    "detected_item": "residency",
+    "confidence": 0.96,
+    "reason": "Document matches expected residency format with all required fields extracted.",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "side": "single",
+    "extraction_status": "extracted",
+    "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+    "identity_result": {
+      "ok": true,
+      "extraction_status": "extracted",
+      "authoritative": false,
+      "hr_confirmation_required": true,
+      "confidence": 0.96,
+      "detected_item": "residency",
+      "matches_expected_item": true,
+      "reason": "Document matches expected residency format with all required fields extracted.",
+      "side": "single",
+      "fields": {
+        "document_type": {
+          "value": "residency",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "side": {
+          "value": "single",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_relationship": {
+          "value": "standalone",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_ar": {
+          "value": "راجيش كومار شارما",
+          "confidence": 0.98,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name_en": {
+          "value": "RAJESH KUMAR SHARMA",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "document_number": {
+          "value": "RES-778899",
+          "confidence": 0.97,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "nationality": {
+          "value": "Indian",
+          "confidence": 0.95,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "date_of_birth": {
+          "value": "1988-02-25",
+          "confidence": 0.96,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issue_date": {
+          "value": "2024-01-01",
+          "confidence": 0.94,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "expiry_date": {
+          "value": "2026-12-31",
+          "confidence": 0.93,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "employer_or_sponsor": {
+          "value": "WATHEFNI TRADING CO",
+          "confidence": 0.92,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "full_name": {
+          "value": "RAJESH KUMAR SHARMA",
+          "confidence": 0.99,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        },
+        "issued_date": {
+          "value": "2024-01-01",
+          "confidence": 0.94,
+          "provenance": {
+            "source": "mistral_document_ai",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "page": null,
+            "authoritative": false,
+            "hr_confirmed": false
+          }
+        }
+      },
+      "validation": {
+        "ok": true,
+        "issues": [],
+        "has_issue_date": true,
+        "has_expiry_date": true,
+        "has_dob": true
+      },
+      "envelope": {
+        "contract": "document_envelope@1",
+        "foundation_id": "wathefni_document_processing_foundation_wave1",
+        "foundation_version": "1.0.0",
+        "company_code": "WATHEFNI",
+        "subject_type": "employee_identity",
+        "subject_key": "residency_bilingual_01",
+        "file_id": null,
+        "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+        "source_channel": "identity_wave2_verify",
+        "migration_batch_id": null,
+        "document_class": "identity",
+        "file_type": "png",
+        "authority_label": "needs_hr_confirmation",
+        "route_policy": {
+          "reading_route": "shared_envelope_intake",
+          "structuring": "identity_processor_current_gpt_vision",
+          "ocr_policy": "do_not_use_cv_v2",
+          "gpt_auto_ocr_fallback": false
+        },
+        "processing": {
+          "status": "extracted",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "expected_item": "residency",
+          "detected_item": "residency",
+          "gpt_auto_fallback": false,
+          "cv_v2_forbidden": true,
+          "validation": {
+            "ok": true,
+            "issues": [],
+            "has_issue_date": true,
+            "has_expiry_date": true,
+            "has_dob": true
+          },
+          "confidence": 0.96
+        },
+        "text_ref": null,
+        "structured_ref": null,
+        "retention_class": "identity_document",
+        "error": null,
+        "created_at": "2026-08-04T03:29:27.708839+00:00",
+        "cloud_portability": {
+          "domain_contract_cloud_agnostic": true,
+          "aws_specific_deps": false,
+          "gcp_specific_deps": false,
+          "worker_shape": "container_ready_async"
+        }
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "latency_ms": 2665
+        }
+      ],
+      "engine": {
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "latency_ms": 2665,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "error": null
+      },
+      "cost_usd": 0.004,
+      "latency_ms": 2665,
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+      "gpt_used": false,
+      "company_code": "WATHEFNI",
+      "duplicate_keys": {
+        "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+        "identifier_key": "residency:res-778899"
+      },
+      "legacy_compat": {
+        "document_type": "residency",
+        "document_number": "RES-778899",
+        "issued_date": "2024-01-01",
+        "expiry_date": "2026-12-31",
+        "nationality": "Indian",
+        "full_name": "RAJESH KUMAR SHARMA",
+        "full_name_ar": "راجيش كومار شارما",
+        "full_name_en": "RAJESH KUMAR SHARMA",
+        "date_of_birth": "1988-02-25",
+        "employer_or_sponsor": "WATHEFNI TRADING CO",
+        "side": "single",
+        "confidence": 0.96,
+        "extraction_status": "extracted",
+        "extraction_error": null,
+        "issued_date_parsed": "2024-01-01",
+        "expiry_date_parsed": "2026-12-31",
+        "date_of_birth_parsed": "1988-02-25",
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "gpt_used": false,
+        "fields": {
+          "document_type": {
+            "value": "residency",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "side": {
+            "value": "single",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_relationship": {
+            "value": "standalone",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_ar": {
+            "value": "راجيش كومار شارما",
+            "confidence": 0.98,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name_en": {
+            "value": "RAJESH KUMAR SHARMA",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": "RES-778899",
+            "confidence": 0.97,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "nationality": {
+            "value": "Indian",
+            "confidence": 0.95,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "date_of_birth": {
+            "value": "1988-02-25",
+            "confidence": 0.96,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": "2024-01-01",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": "2026-12-31",
+            "confidence": 0.93,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": "WATHEFNI TRADING CO",
+            "confidence": 0.92,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": "RAJESH KUMAR SHARMA",
+            "confidence": 0.99,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issued_date": {
+            "value": "2024-01-01",
+            "confidence": 0.94,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "identity_mistral_document_ai",
+              "contract": "identity-document-extraction-v1",
+              "page": null,
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "envelope": {
+          "contract": "document_envelope@1",
+          "foundation_id": "wathefni_document_processing_foundation_wave1",
+          "foundation_version": "1.0.0",
+          "company_code": "WATHEFNI",
+          "subject_type": "employee_identity",
+          "subject_key": "residency_bilingual_01",
+          "file_id": null,
+          "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+          "source_channel": "identity_wave2_verify",
+          "migration_batch_id": null,
+          "document_class": "identity",
+          "file_type": "png",
+          "authority_label": "needs_hr_confirmation",
+          "route_policy": {
+            "reading_route": "shared_envelope_intake",
+            "structuring": "identity_processor_current_gpt_vision",
+            "ocr_policy": "do_not_use_cv_v2",
+            "gpt_auto_ocr_fallback": false
+          },
+          "processing": {
+            "status": "extracted",
+            "extractor": "identity_mistral_document_ai",
+            "contract": "identity-document-extraction-v1",
+            "expected_item": "residency",
+            "detected_item": "residency",
+            "gpt_auto_fallback": false,
+            "cv_v2_forbidden": true,
+            "validation": {
+              "ok": true,
+              "issues": [],
+              "has_issue_date": true,
+              "has_expiry_date": true,
+              "has_dob": true
+            },
+            "confidence": 0.96
+          },
+          "text_ref": null,
+          "structured_ref": null,
+          "retention_class": "identity_document",
+          "error": null,
+          "created_at": "2026-08-04T03:29:27.708839+00:00",
+          "cloud_portability": {
+            "domain_contract_cloud_agnostic": true,
+            "aws_specific_deps": false,
+            "gcp_specific_deps": false,
+            "worker_shape": "container_ready_async"
+          }
+        },
+        "validation": {
+          "ok": true,
+          "issues": [],
+          "has_issue_date": true,
+          "has_expiry_date": true,
+          "has_dob": true
+        }
+      }
+    }
+  },
+  "extract": {
+    "extraction_status": "extracted",
+    "document_type": "residency",
+    "document_number": "RES-778899",
+    "full_name": "RAJESH KUMAR SHARMA",
+    "full_name_ar": "راجيش كومار شارما",
+    "full_name_en": "RAJESH KUMAR SHARMA",
+    "issued_date": "2024-01-01",
+    "expiry_date": "2026-12-31",
+    "nationality": "Indian",
+    "date_of_birth": "1988-02-25",
+    "confidence": 0.95,
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "gpt_used": false,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "side": "single",
+    "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+    "extraction_error": null
+  },
+  "auth_false": true,
+  "gpt_free": true,
+  "validation": {
+    "ok": true,
+    "issues": [],
+    "has_issue_date": true,
+    "has_expiry_date": true,
+    "has_dob": true
+  },
+  "duplicate_keys": {
+    "content_sha256": "c2db3c88b5deff933914746f3f2d9e241d39d64576a884ac8eda1de5b79c3182",
+    "identifier_key": "residency:res-778899"
+  },
+  "duplicate_of": null,
+  "hr_correction_example": {
+    "document_number": "RES-778899",
+    "authoritative": true,
+    "hr_confirmed": true,
+    "corrected_from": "RES-778899"
+  },
+  "verify_match": true,
+  "classify_ok": true,
+  "extract_ok": true
+}

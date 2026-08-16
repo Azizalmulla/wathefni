@@ -1,0 +1,38 @@
+canary {"status": "pending", "lifecycle_meta": {"canary": true, "purpose": "civil_id_dual_side_live_test", "dual_side": true, "disposable": true, "explicitly_assigned": true, "reset_clean_for_phone": true, "do_not_approve_as_real": true}}
+{
+  "status": "pending",
+  "group": "your_actions",
+  "actions": [
+    "preview",
+    "view_versions",
+    "upload_front",
+    "upload_back"
+  ],
+  "parts": {
+    "schema": "civil_id_v1",
+    "front": {
+      "present": false,
+      "file_id": null,
+      "filename": null,
+      "detected_side": null,
+      "hr_warning": false
+    },
+    "back": {
+      "present": false,
+      "file_id": null,
+      "filename": null,
+      "detected_side": null,
+      "hr_warning": false
+    },
+    "parts_complete": false,
+    "missing": [
+      "front",
+      "back"
+    ],
+    "version_id": null,
+    "review_status": null,
+    "attempt_open": false
+  },
+  "civil_ok": true
+}
+READY_FOR_PHONE_RETEST

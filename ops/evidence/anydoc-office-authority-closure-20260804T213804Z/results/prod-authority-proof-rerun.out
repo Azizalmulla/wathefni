@@ -1,0 +1,16 @@
+WATHEFNI_ANYDOC_OFFICE_AUTHORITY=production
+WATHEFNI_ANYDOC_OFFICE_SHADOW=production_shadow
+{
+  "mode": "production",
+  "docx_selected_engine": "anydoc",
+  "docx_promoted": true,
+  "docx_method": "anydoc_docx",
+  "csv_structured_unchanged": true,
+  "csv_role": "markdown_normalization_only",
+  "xlsx_openpyxl_rows": 3,
+  "pdf_denied": true,
+  "pinned_version": "0.1.2",
+  "rollback": "/opt/wathefni/backups/production-pre-anydoc-office-authority-20260804T213804Z/ROLLBACK.sh"
+}
+PROD_AUTHORITY_PROOF_OK
+PROD_AUTHORITY_PROOF_RERUN_OK

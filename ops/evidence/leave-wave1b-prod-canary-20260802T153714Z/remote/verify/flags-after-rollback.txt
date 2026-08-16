@@ -1,0 +1,3 @@
+=== flags after rollback ===
+LEAVE_AUTHORITY unset
+/opt/wathefni/orchestrator/leave_authority_wave1.py

@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "out": "/opt/wathefni/production-evidence/unified-inbound-cv-legacy-binding-backfill/20260727T004230Z",
+  "assertions": {
+    "allowlist_all_allow": true,
+    "smoke_all_shadow_deny": true,
+    "held_all_shadow_deny": true,
+    "bugs": 0,
+    "unexplained": 0,
+    "zero_app_mutation": true,
+    "zero_candidate_mutation": true,
+    "job_bindings_created": 11,
+    "cv_bindings_created": 0
+  }
+}

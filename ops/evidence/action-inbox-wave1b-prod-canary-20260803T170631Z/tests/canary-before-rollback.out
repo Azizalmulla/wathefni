@@ -1,0 +1,43 @@
+[PASS] wave1 enabled
+[PASS] synthetic_only enforced
+[PASS] company allowlisted
+[PASS] read_only
+[PASS] composes_only
+[PASS] no mutations
+[PASS] no AI
+[PASS] hiring reports separate
+[PASS] alerts own notifications
+[PASS] no compliance wave2
+[PASS] no analytics wave2
+[PASS] no payroll money
+[PASS] no attendance ingest
+[PASS] no shifts manager expand
+[PASS] analytics freeze no compliance metrics
+[PASS] compliance freeze no legal claims
+[PASS] cross-source item count
+[PASS] e360 compliance deduped
+[PASS] high severity first
+[PASS] all three streams present
+[PASS] owner label EN
+[PASS] owner label AR
+[PASS] deadline present
+[PASS] deadline label EN
+[PASS] escalation label EN
+[PASS] escalation label AR
+[PASS] evidence label EN
+[PASS] authority label EN
+[PASS] authority label AR
+[PASS] deep link compliance
+[PASS] what AR present
+[PASS] never gov verified
+[PASS] analytics deep link leave
+[PASS] e360 deep link onboarding
+[PASS] clears on resolve
+[PASS] dedupe in clear proof
+[PASS] after clear remaining 1
+[PASS] as_of present
+[PASS] timezone Kuwait
+[PASS] freshness stale_after
+[PASS] definitions EN/AR
+[PASS] honesty mutates false
+[PASS] production db

@@ -1,0 +1,36 @@
+=== W3 UX ===
+PASS  bulk readiness note
+
+43 passed, 0 failed
+W3_RC=0
+=== W1 ===
+      PASS  tenant isolation company mismatch
+
+    90 passed, 0 failed
+W1_RC=0
+=== W2 ===
+      PASS  wave2 module no payroll money calc
+
+    82 passed, 0 failed
+W2_RC=0
+=== E360 ===
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+E360_RC=0
+=== ONB ===
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+ONB_RC=0
+=== ATT ===
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+ATT_RC=0
+=== LEAVE ===
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+LEAVE_RC=0
+PRIOR_WAVES_DONE

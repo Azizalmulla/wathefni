@@ -1,0 +1,1274 @@
+{
+  "stamp": "20260809T042111Z",
+  "tag": "bank-visual-fixture",
+  "scenarios": {
+    "noura": {
+      "employee_key": "WATHEFNI-96550010001",
+      "role": "applied_plus_pending_hr",
+      "applied": {
+        "ok": true,
+        "request_id": "a462b4f7-0f39-4393-a3d4-7356c10d2f7d",
+        "submit": {
+          "http": 200,
+          "state": "pending_hr",
+          "body": {
+            "ok": true,
+            "idempotent": false,
+            "replaced": false,
+            "bank": {
+              "contract_version": "bank_ess_v1_p2_production_workflow",
+              "employee_key": "WATHEFNI-96550010001",
+              "has_verified_bank": false,
+              "has_payroll_effective_bank": false,
+              "verified": null,
+              "payroll_effective": null,
+              "submission": {
+                "request_id": "a462b4f7-0f39-4393-a3d4-7356c10d2f7d",
+                "state": "pending_hr",
+                "submission_state": "pending_hr",
+                "concurrency_version": 1,
+                "submitted_at": "2026-08-09T04:21:19.275557+00:00",
+                "updated_at": "2026-08-09T04:21:19.275557+00:00",
+                "proposed": {
+                  "display": {
+                    "iban": "**************************0101",
+                    "bank_name": "Visual Fixture Bank",
+                    "iban_last4": "0101",
+                    "iban_masked": true,
+                    "account_holder": "Visual Fixture Noura Applied \u00b7 bank-visual-fixture"
+                  },
+                  "fingerprint": "5425959aa0fc0391",
+                  "fields_proposed": [
+                    "account_holder",
+                    "bank_name",
+                    "iban"
+                  ],
+                  "sealed": true,
+                  "masked": true,
+                  "iban": "**************************0101",
+                  "iban__masked": true,
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "account_holder": "Visual Fixture Noura Applied \u00b7 bank-visual-fixture"
+                },
+                "rejection_reason": null,
+                "can_withdraw": true,
+                "can_resubmit": false,
+                "evidence": []
+              },
+              "submission_state": "pending_hr",
+              "change_under_review": true,
+              "next_step": {
+                "owner": "hr",
+                "message": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_en": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+              },
+              "can_submit_new": false,
+              "masking": {
+                "masked_by_default": true,
+                "reveal_requires_permission": "employees.ess.unmask",
+                "reveal_is_audited": true
+              },
+              "validation_scheme": "kw_iban"
+            }
+          }
+        },
+        "apply": {
+          "final_state": "approved",
+          "steps": [
+            {
+              "decide_hr": 200,
+              "state": "pending_payroll"
+            },
+            {
+              "decide_payroll": 200
+            },
+            {
+              "apply": 200,
+              "body": {
+                "ok": true,
+                "request": {
+                  "request_id": "a462b4f7-0f39-4393-a3d4-7356c10d2f7d",
+                  "company_code": "WATHEFNI",
+                  "employee_key": "WATHEFNI-96550010001",
+                  "employment_id": "5f1037e5-e321-5bb6-a355-63621c96a983",
+                  "request_type": "bank_detail_change",
+                  "state": "applied",
+                  "requester_kind": "employee",
+                  "requester_user_id": null,
+                  "requester_employee_key": "WATHEFNI-96550010001",
+                  "proposed_values": {
+                    "sealed": true,
+                    "display": {
+                      "iban": "**************************0101",
+                      "bank_name": "Visual Fixture Bank",
+                      "iban_last4": "0101",
+                      "iban_masked": true,
+                      "account_holder": "Visual Fixture Noura Applied \u00b7 bank-visual-fixture"
+                    },
+                    "validation": {
+                      "ok": true,
+                      "scheme": "kw_iban",
+                      "enforced": true,
+                      "problems": []
+                    },
+                    "fingerprint": "5425959aa0fc0391",
+                    "__sealed_bank": {
+                      "alg": "fernet",
+                      "key_id": "8d180c0cfb7f3a69",
+                      "schema": "ess_bank_v1",
+                      "ciphertext": "gAAAAABqeAA_0KpKzGxFoICE7aP9YNA8Y4TVjlwfxWqGnh1U4sKqdoH3kz0jIfRjPCUMwwsFBOgY_BdvKBqcw58e-sSPU9scqOAC8lJrz8Xj_r1WN3bh8HPuzApn9aV9VCqK0KQt5uq44Arqu_BqlRtYYr4wwqBpr_q6NQYxV8cdE5DHtpx5zYX-4PmT-njPyEki_PzANZTAAfmpv8VwO32-x9kqGCY2BjalAipzCcEFYpXiSLFLKFdsMMrJ3hDf4t5EzmzNjPFE2UQvpCXFyjk0BJid3vXCVA==",
+                      "plaintext_forbidden": true
+                    },
+                    "fields_proposed": [
+                      "account_holder",
+                      "bank_name",
+                      "iban"
+                    ],
+                    "contract_version": "bank_ess_v1_p2_production_workflow",
+                    "plaintext_forbidden": true
+                  },
+                  "old_value_snapshot": {
+                    "hub": {
+                      "name": "Noura Almutairi",
+                      "email": "noura.almutairi@example.com",
+                      "phone": "96550010001",
+                      "updated_at": "2026-08-08 05:34:22.806642+00:00"
+                    },
+                    "employment": {
+                      "end_date": null,
+                      "start_date": "2024-01-15",
+                      "eligibility": "active",
+                      "suspended_on": null,
+                      "access_policy": {
+                        "view": "full_masked",
+                        "eligibility": "active",
+                        "ess_mutations": true,
+                        "session_allowed": true,
+                        "allowed_request_types": [
+                          "assignment_correction",
+                          "bank_detail_change",
+                          "document_change",
+                          "emergency_contact_change",
+                          "employment_letter",
+                          "manager_change",
+                          "personal_detail_change",
+                          "service_certificate",
+                          "transfer"
+                        ]
+                      },
+                      "employment_id": "5f1037e5-e321-5bb6-a355-63621c96a983",
+                      "lifecycle_state": "active",
+                      "worker_category": null,
+                      "employment_status": "active",
+                      "jurisdiction_code": null,
+                      "policy_pack_status": null
+                    },
+                    "captured_at": "2026-08-09T04:21:19.257514+00:00",
+                    "bank_version": 2,
+                    "employee_key": "WATHEFNI-96550010001",
+                    "bank_fingerprint": "5425959aa0fc0391"
+                  },
+                  "approval_route": [
+                    "hr",
+                    "payroll"
+                  ],
+                  "approval_cursor": 2,
+                  "comments": [
+                    {
+                      "at": "2026-08-09T04:21:19.432710+00:00",
+                      "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                      "text": "bank-visual-fixture apply 20260809T042111Z",
+                      "action": "approve"
+                    },
+                    {
+                      "at": "2026-08-09T04:21:19.505536+00:00",
+                      "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                      "text": "bank-visual-fixture apply 20260809T042111Z \u00b7 payroll",
+                      "action": "approve"
+                    }
+                  ],
+                  "evidence": {},
+                  "concurrency_version": 4,
+                  "expected_hub_updated_at": "2026-08-08T05:34:22.806642+00:00",
+                  "expected_assignment_version": null,
+                  "idempotency_key": "bank-visual-fixture-cf69fd8122",
+                  "request_hash": "626a6c8ed10b53218ff8e6f62a8c1ff5f4fc56644f0a0e7f30e2eb19524c80c1",
+                  "designated_approver_user_id": null,
+                  "applied_authority_ref": {
+                    "key_id": "8d180c0cfb7f3a69",
+                    "overlay": "employee_ess_bank_profiles",
+                    "request_id": "a462b4f7-0f39-4393-a3d4-7356c10d2f7d",
+                    "request_type": "bank_detail_change",
+                    "bank_fingerprint": "5425959aa0fc0391",
+                    "payroll_effective": {
+                      "idempotent": false,
+                      "effective_id": 55,
+                      "payroll_lock": {
+                        "locked": false,
+                        "period_end": "2041-07-31",
+                        "period_status": "open"
+                      },
+                      "effective_from": "2026-08-09",
+                      "deferred_for_payroll_lock": false
+                    },
+                    "bank_profile_version": 3,
+                    "onboarding_bank_item": "accepted"
+                  },
+                  "applied_at": "2026-08-09T04:21:19.569645+00:00",
+                  "applied_by_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                  "fail_reason": null,
+                  "created_at": "2026-08-09T04:21:19.275557+00:00",
+                  "updated_at": "2026-08-09T04:21:19.569645+00:00",
+                  "expected_personal_version": 0,
+                  "expected_bank_version": 2
+                },
+                "authority_ref": {
+                  "request_id": "a462b4f7-0f39-4393-a3d4-7356c10d2f7d",
+                  "request_type": "bank_detail_change",
+                  "bank_profile_version": 3,
+                  "bank_fingerprint": "5425959aa0fc0391",
+                  "key_id": "8d180c0cfb7f3a69",
+                  "overlay": "employee_ess_bank_profiles",
+                  "payroll_effective": {
+                    "idempotent": false,
+                    "effective_id": 55,
+                    "effective_from": "2026-08-09",
+                    "deferred_for_payroll_lock": false,
+                    "payroll_lock": {
+                      "locked": false,
+                      "period_status": "open",
+                      "period_end": "2041-07-31"
+                    }
+                  },
+                  "onboarding_bank_item": "accepted"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "pending_hr": {
+        "request_id": "51d2803e-eca5-405f-8d32-371de60e4060",
+        "submit": {
+          "http": 200,
+          "state": "pending_hr",
+          "body": {
+            "ok": true,
+            "idempotent": false,
+            "replaced": false,
+            "bank": {
+              "contract_version": "bank_ess_v1_p2_production_workflow",
+              "employee_key": "WATHEFNI-96550010001",
+              "has_verified_bank": true,
+              "has_payroll_effective_bank": true,
+              "verified": {
+                "display": {
+                  "iban": "**************************0101",
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "iban_masked": true,
+                  "account_holder": "Visual Fixture Noura Applied \u00b7 bank-visual-fixture"
+                },
+                "fingerprint": "5425959aa0fc0391",
+                "verified_at": "2026-08-09T04:21:19.421123+00:00",
+                "verified_by_stage": "hr"
+              },
+              "payroll_effective": {
+                "display": {
+                  "iban": "**************************0101",
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "iban_masked": true,
+                  "account_holder": "Visual Fixture Noura Applied \u00b7 bank-visual-fixture"
+                },
+                "fingerprint": "5425959aa0fc0391",
+                "effective_from": "2026-08-09",
+                "bank_profile_version": 3
+              },
+              "submission": {
+                "request_id": "51d2803e-eca5-405f-8d32-371de60e4060",
+                "state": "pending_hr",
+                "submission_state": "pending_hr",
+                "concurrency_version": 1,
+                "submitted_at": "2026-08-09T04:21:19.740499+00:00",
+                "updated_at": "2026-08-09T04:21:19.740499+00:00",
+                "proposed": {
+                  "display": {
+                    "iban": "**************************0101",
+                    "bank_name": "Visual Fixture Bank",
+                    "iban_last4": "0101",
+                    "iban_masked": true,
+                    "account_holder": "Visual Fixture Noura Pending HR \u00b7 bank-visual-fixture"
+                  },
+                  "fingerprint": "f7201f9b127f155a",
+                  "fields_proposed": [
+                    "account_holder",
+                    "bank_name",
+                    "iban"
+                  ],
+                  "sealed": true,
+                  "masked": true,
+                  "iban": "**************************0101",
+                  "iban__masked": true,
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "account_holder": "Visual Fixture Noura Pending HR \u00b7 bank-visual-fixture"
+                },
+                "rejection_reason": null,
+                "can_withdraw": true,
+                "can_resubmit": false,
+                "evidence": []
+              },
+              "submission_state": "pending_hr",
+              "change_under_review": true,
+              "next_step": {
+                "owner": "hr",
+                "message": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_en": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+              },
+              "can_submit_new": false,
+              "masking": {
+                "masked_by_default": true,
+                "reveal_requires_permission": "employees.ess.unmask",
+                "reveal_is_audited": true
+              },
+              "validation_scheme": "kw_iban"
+            }
+          }
+        }
+      }
+    },
+    "7001": {
+      "employee_key": "WATHEFNI-9655497001",
+      "role": "pending_payroll",
+      "applied": {
+        "ok": true,
+        "request_id": "f2a4f6be-b9be-4746-893b-00e635c44deb",
+        "submit": {
+          "http": 200,
+          "state": "pending_hr",
+          "body": {
+            "ok": true,
+            "idempotent": false,
+            "replaced": false,
+            "bank": {
+              "contract_version": "bank_ess_v1_p2_production_workflow",
+              "employee_key": "WATHEFNI-9655497001",
+              "has_verified_bank": false,
+              "has_payroll_effective_bank": false,
+              "verified": null,
+              "payroll_effective": null,
+              "submission": {
+                "request_id": "f2a4f6be-b9be-4746-893b-00e635c44deb",
+                "state": "pending_hr",
+                "submission_state": "pending_hr",
+                "concurrency_version": 1,
+                "submitted_at": "2026-08-09T04:21:19.986435+00:00",
+                "updated_at": "2026-08-09T04:21:19.986435+00:00",
+                "proposed": {
+                  "display": {
+                    "iban": "**************************0202",
+                    "bank_name": "Visual Fixture Bank",
+                    "iban_last4": "0202",
+                    "iban_masked": true,
+                    "account_holder": "Visual Fixture 7001 Applied \u00b7 bank-visual-fixture"
+                  },
+                  "fingerprint": "65671d325a31d4f8",
+                  "fields_proposed": [
+                    "account_holder",
+                    "bank_name",
+                    "iban"
+                  ],
+                  "sealed": true,
+                  "masked": true,
+                  "iban": "**************************0202",
+                  "iban__masked": true,
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0202",
+                  "account_holder": "Visual Fixture 7001 Applied \u00b7 bank-visual-fixture"
+                },
+                "rejection_reason": null,
+                "can_withdraw": true,
+                "can_resubmit": false,
+                "evidence": []
+              },
+              "submission_state": "pending_hr",
+              "change_under_review": true,
+              "next_step": {
+                "owner": "hr",
+                "message": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_en": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+              },
+              "can_submit_new": false,
+              "masking": {
+                "masked_by_default": true,
+                "reveal_requires_permission": "employees.ess.unmask",
+                "reveal_is_audited": true
+              },
+              "validation_scheme": "kw_iban"
+            }
+          }
+        },
+        "apply": {
+          "final_state": "approved",
+          "steps": [
+            {
+              "decide_hr": 200,
+              "state": "pending_payroll"
+            },
+            {
+              "decide_payroll": 200
+            },
+            {
+              "apply": 200,
+              "body": {
+                "ok": true,
+                "request": {
+                  "request_id": "f2a4f6be-b9be-4746-893b-00e635c44deb",
+                  "company_code": "WATHEFNI",
+                  "employee_key": "WATHEFNI-9655497001",
+                  "employment_id": null,
+                  "request_type": "bank_detail_change",
+                  "state": "applied",
+                  "requester_kind": "employee",
+                  "requester_user_id": null,
+                  "requester_employee_key": "WATHEFNI-9655497001",
+                  "proposed_values": {
+                    "sealed": true,
+                    "display": {
+                      "iban": "**************************0202",
+                      "bank_name": "Visual Fixture Bank",
+                      "iban_last4": "0202",
+                      "iban_masked": true,
+                      "account_holder": "Visual Fixture 7001 Applied \u00b7 bank-visual-fixture"
+                    },
+                    "validation": {
+                      "ok": true,
+                      "scheme": "kw_iban",
+                      "enforced": true,
+                      "problems": []
+                    },
+                    "fingerprint": "65671d325a31d4f8",
+                    "__sealed_bank": {
+                      "alg": "fernet",
+                      "key_id": "8d180c0cfb7f3a69",
+                      "schema": "ess_bank_v1",
+                      "ciphertext": "gAAAAABqeAA_xaCNLFib4hlqbKWr58s78mgb66AFbaEmE6GYQMpgqFDSyhJoo_Vc5eZGFWDb6ma8BqxLoUAOHrOuPs8OqkWBq903fkjddj-zuMIRBlP7L9QuGKRzefZ2heSyRBZHWfHnB4hcelPbHKDHNmJjpDhtb3GP3dNwDaXsQ3mjM1n48kOFvtwv8nP-o7yU_4kAHZv7aPi1UVIegTPrbC32t-VQy5QBBo_SblkZnBvwKiM2IMyh53CDjHwdr7G7Ps4D_X9Zd0Hod7nznreHYH0KX3KDHQ==",
+                      "plaintext_forbidden": true
+                    },
+                    "fields_proposed": [
+                      "account_holder",
+                      "bank_name",
+                      "iban"
+                    ],
+                    "contract_version": "bank_ess_v1_p2_production_workflow",
+                    "plaintext_forbidden": true
+                  },
+                  "old_value_snapshot": {
+                    "hub": {
+                      "name": "W5C-SYNTH| Bank Visual 7001",
+                      "email": null,
+                      "phone": "9655497001",
+                      "updated_at": "2026-08-09 04:21:18.906124+00:00"
+                    },
+                    "employment": {
+                      "end_date": null,
+                      "start_date": null,
+                      "eligibility": "active",
+                      "access_policy": {
+                        "view": "full_masked",
+                        "eligibility": "active",
+                        "ess_mutations": true,
+                        "session_allowed": true,
+                        "allowed_request_types": [
+                          "assignment_correction",
+                          "bank_detail_change",
+                          "document_change",
+                          "emergency_contact_change",
+                          "employment_letter",
+                          "manager_change",
+                          "personal_detail_change",
+                          "service_certificate",
+                          "transfer"
+                        ]
+                      },
+                      "employment_id": null,
+                      "lifecycle_state": null,
+                      "worker_category": null,
+                      "employment_status": null,
+                      "jurisdiction_code": null,
+                      "policy_pack_status": null
+                    },
+                    "captured_at": "2026-08-09T04:21:19.967480+00:00",
+                    "employee_key": "WATHEFNI-9655497001"
+                  },
+                  "approval_route": [
+                    "hr",
+                    "payroll"
+                  ],
+                  "approval_cursor": 2,
+                  "comments": [
+                    {
+                      "at": "2026-08-09T04:21:20.192503+00:00",
+                      "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                      "text": "bank-visual-fixture apply 20260809T042111Z",
+                      "action": "approve"
+                    },
+                    {
+                      "at": "2026-08-09T04:21:20.287009+00:00",
+                      "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                      "text": "bank-visual-fixture apply 20260809T042111Z \u00b7 payroll",
+                      "action": "approve"
+                    }
+                  ],
+                  "evidence": {},
+                  "concurrency_version": 4,
+                  "expected_hub_updated_at": "2026-08-09T04:21:18.906124+00:00",
+                  "expected_assignment_version": null,
+                  "idempotency_key": "bank-visual-fixture-d6423dd5ef",
+                  "request_hash": "8d2d3cbb5c53d7c7b46006d381de3a68725fb773bb19dea0405de90c86013d76",
+                  "designated_approver_user_id": null,
+                  "applied_authority_ref": {
+                    "key_id": "8d180c0cfb7f3a69",
+                    "overlay": "employee_ess_bank_profiles",
+                    "request_id": "f2a4f6be-b9be-4746-893b-00e635c44deb",
+                    "request_type": "bank_detail_change",
+                    "bank_fingerprint": "65671d325a31d4f8",
+                    "payroll_effective": {
+                      "idempotent": false,
+                      "effective_id": 56,
+                      "payroll_lock": {
+                        "locked": false,
+                        "period_end": "2041-07-31",
+                        "period_status": "open"
+                      },
+                      "effective_from": "2026-08-09",
+                      "deferred_for_payroll_lock": false
+                    },
+                    "bank_profile_version": 1,
+                    "onboarding_bank_item": "accepted"
+                  },
+                  "applied_at": "2026-08-09T04:21:20.350482+00:00",
+                  "applied_by_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                  "fail_reason": null,
+                  "created_at": "2026-08-09T04:21:19.986435+00:00",
+                  "updated_at": "2026-08-09T04:21:20.350482+00:00",
+                  "expected_personal_version": 0,
+                  "expected_bank_version": 0
+                },
+                "authority_ref": {
+                  "request_id": "f2a4f6be-b9be-4746-893b-00e635c44deb",
+                  "request_type": "bank_detail_change",
+                  "bank_profile_version": 1,
+                  "bank_fingerprint": "65671d325a31d4f8",
+                  "key_id": "8d180c0cfb7f3a69",
+                  "overlay": "employee_ess_bank_profiles",
+                  "payroll_effective": {
+                    "idempotent": false,
+                    "effective_id": 56,
+                    "effective_from": "2026-08-09",
+                    "deferred_for_payroll_lock": false,
+                    "payroll_lock": {
+                      "locked": false,
+                      "period_status": "open",
+                      "period_end": "2041-07-31"
+                    }
+                  },
+                  "onboarding_bank_item": "accepted"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "pending_payroll": {
+        "request_id": "1f1bf624-4c69-44b6-aecd-00ca65ec558f",
+        "submit": {
+          "http": 200,
+          "state": "pending_hr",
+          "body": {
+            "ok": true,
+            "idempotent": false,
+            "replaced": false,
+            "bank": {
+              "contract_version": "bank_ess_v1_p2_production_workflow",
+              "employee_key": "WATHEFNI-9655497001",
+              "has_verified_bank": true,
+              "has_payroll_effective_bank": true,
+              "verified": {
+                "display": {
+                  "iban": "**************************0202",
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0202",
+                  "iban_masked": true,
+                  "account_holder": "Visual Fixture 7001 Applied \u00b7 bank-visual-fixture"
+                },
+                "fingerprint": "65671d325a31d4f8",
+                "verified_at": "2026-08-09T04:21:20.180322+00:00",
+                "verified_by_stage": "hr"
+              },
+              "payroll_effective": {
+                "display": {
+                  "iban": "**************************0202",
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0202",
+                  "iban_masked": true,
+                  "account_holder": "Visual Fixture 7001 Applied \u00b7 bank-visual-fixture"
+                },
+                "fingerprint": "65671d325a31d4f8",
+                "effective_from": "2026-08-09",
+                "bank_profile_version": 1
+              },
+              "submission": {
+                "request_id": "1f1bf624-4c69-44b6-aecd-00ca65ec558f",
+                "state": "pending_hr",
+                "submission_state": "pending_hr",
+                "concurrency_version": 1,
+                "submitted_at": "2026-08-09T04:21:20.507541+00:00",
+                "updated_at": "2026-08-09T04:21:20.507541+00:00",
+                "proposed": {
+                  "display": {
+                    "iban": "**************************0101",
+                    "bank_name": "Visual Fixture Bank",
+                    "iban_last4": "0101",
+                    "iban_masked": true,
+                    "account_holder": "Visual Fixture 7001 Payroll \u00b7 bank-visual-fixture"
+                  },
+                  "fingerprint": "d003f4ce7af1f7f1",
+                  "fields_proposed": [
+                    "account_holder",
+                    "bank_name",
+                    "iban"
+                  ],
+                  "sealed": true,
+                  "masked": true,
+                  "iban": "**************************0101",
+                  "iban__masked": true,
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "account_holder": "Visual Fixture 7001 Payroll \u00b7 bank-visual-fixture"
+                },
+                "rejection_reason": null,
+                "can_withdraw": true,
+                "can_resubmit": false,
+                "evidence": []
+              },
+              "submission_state": "pending_hr",
+              "change_under_review": true,
+              "next_step": {
+                "owner": "hr",
+                "message": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_en": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+              },
+              "can_submit_new": false,
+              "masking": {
+                "masked_by_default": true,
+                "reveal_requires_permission": "employees.ess.unmask",
+                "reveal_is_audited": true
+              },
+              "validation_scheme": "kw_iban"
+            }
+          }
+        },
+        "hr_approve": {
+          "http": 200,
+          "body": {
+            "ok": true,
+            "request": {
+              "request_id": "1f1bf624-4c69-44b6-aecd-00ca65ec558f",
+              "company_code": "WATHEFNI",
+              "employee_key": "WATHEFNI-9655497001",
+              "employment_id": null,
+              "request_type": "bank_detail_change",
+              "state": "pending_payroll",
+              "requester_kind": "employee",
+              "requester_user_id": null,
+              "requester_employee_key": "WATHEFNI-9655497001",
+              "proposed_values": {
+                "sealed": true,
+                "display": {
+                  "iban": "**************************0101",
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "iban_masked": true,
+                  "account_holder": "Visual Fixture 7001 Payroll \u00b7 bank-visual-fixture"
+                },
+                "validation": {
+                  "ok": true,
+                  "scheme": "kw_iban",
+                  "enforced": true,
+                  "problems": []
+                },
+                "fingerprint": "d003f4ce7af1f7f1",
+                "__sealed_bank": {
+                  "alg": "fernet",
+                  "key_id": "8d180c0cfb7f3a69",
+                  "schema": "ess_bank_v1",
+                  "ciphertext": "gAAAAABqeABAzJH9v0IaUuKq6D3Ke6VLF7CaL6RVAcaNh6yd5h70PuQDTjg89zJpW1PT619Ns27RurzgHhQ4HzynTvFI06dSXQrFhMKj9x5bkkL54g0K5sqQ3D699sZ6EBq1zCaZEXgjU9kvMtjKl7HUpUUkB3RJYUkLgMSsBJLY5LAM_-z0rOMVM8WpULUOCnYUsJGXkufYB05loClyvmQe-GbuXYm5YSiD97Bg77JFTkYeoB5RoOQMtutghmsnNEp5O218ZgqNdi9XEnH-V1IWo9nufJ72mQ==",
+                  "plaintext_forbidden": true
+                },
+                "fields_proposed": [
+                  "account_holder",
+                  "bank_name",
+                  "iban"
+                ],
+                "contract_version": "bank_ess_v1_p2_production_workflow",
+                "plaintext_forbidden": true
+              },
+              "old_value_snapshot": {
+                "hub": {
+                  "name": "W5C-SYNTH| Bank Visual 7001",
+                  "email": null,
+                  "phone": "9655497001",
+                  "updated_at": "2026-08-09 04:21:18.906124+00:00"
+                },
+                "employment": {
+                  "end_date": null,
+                  "start_date": null,
+                  "eligibility": "active",
+                  "access_policy": {
+                    "view": "full_masked",
+                    "eligibility": "active",
+                    "ess_mutations": true,
+                    "session_allowed": true,
+                    "allowed_request_types": [
+                      "assignment_correction",
+                      "bank_detail_change",
+                      "document_change",
+                      "emergency_contact_change",
+                      "employment_letter",
+                      "manager_change",
+                      "personal_detail_change",
+                      "service_certificate",
+                      "transfer"
+                    ]
+                  },
+                  "employment_id": null,
+                  "lifecycle_state": null,
+                  "worker_category": null,
+                  "employment_status": null,
+                  "jurisdiction_code": null,
+                  "policy_pack_status": null
+                },
+                "captured_at": "2026-08-09T04:21:20.491450+00:00",
+                "bank_version": 1,
+                "employee_key": "WATHEFNI-9655497001",
+                "bank_fingerprint": "65671d325a31d4f8"
+              },
+              "approval_route": [
+                "hr",
+                "payroll"
+              ],
+              "approval_cursor": 1,
+              "comments": [
+                {
+                  "at": "2026-08-09T04:21:20.665505+00:00",
+                  "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                  "text": "bank-visual-fixture hr\u2192payroll 20260809T042111Z",
+                  "action": "approve"
+                }
+              ],
+              "evidence": {},
+              "concurrency_version": 2,
+              "expected_hub_updated_at": "2026-08-09T04:21:18.906124+00:00",
+              "expected_assignment_version": null,
+              "idempotency_key": "bank-visual-fixture-a69e964fe7",
+              "request_hash": "677f73ea28edeaa20ceb09fb5b5e5436309b5110c62724a4802705af88909c21",
+              "designated_approver_user_id": null,
+              "applied_authority_ref": null,
+              "applied_at": null,
+              "applied_by_user_id": null,
+              "fail_reason": null,
+              "created_at": "2026-08-09T04:21:20.507541+00:00",
+              "updated_at": "2026-08-09T04:21:20.655575+00:00",
+              "expected_personal_version": 0,
+              "expected_bank_version": 1
+            },
+            "applied": false
+          }
+        }
+      }
+    },
+    "7002": {
+      "employee_key": "WATHEFNI-9655497002",
+      "role": "needs_correction",
+      "request_id": "c1991a85-9c2a-44b8-8363-ca8873e4c8bf",
+      "submit": {
+        "http": 200,
+        "state": "pending_hr",
+        "body": {
+          "ok": true,
+          "idempotent": false,
+          "replaced": false,
+          "bank": {
+            "contract_version": "bank_ess_v1_p2_production_workflow",
+            "employee_key": "WATHEFNI-9655497002",
+            "has_verified_bank": false,
+            "has_payroll_effective_bank": false,
+            "verified": null,
+            "payroll_effective": null,
+            "submission": {
+              "request_id": "c1991a85-9c2a-44b8-8363-ca8873e4c8bf",
+              "state": "pending_hr",
+              "submission_state": "pending_hr",
+              "concurrency_version": 1,
+              "submitted_at": "2026-08-09T04:21:20.745543+00:00",
+              "updated_at": "2026-08-09T04:21:20.745543+00:00",
+              "proposed": {
+                "display": {
+                  "iban": "**************************2233",
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "2233",
+                  "iban_masked": true,
+                  "account_holder": "Visual Fixture 7002 Correction \u00b7 bank-visual-fixture"
+                },
+                "fingerprint": "133d763440eb239b",
+                "fields_proposed": [
+                  "account_holder",
+                  "bank_name",
+                  "iban"
+                ],
+                "sealed": true,
+                "masked": true,
+                "iban": "**************************2233",
+                "iban__masked": true,
+                "bank_name": "Visual Fixture Bank",
+                "iban_last4": "2233",
+                "account_holder": "Visual Fixture 7002 Correction \u00b7 bank-visual-fixture"
+              },
+              "rejection_reason": null,
+              "can_withdraw": true,
+              "can_resubmit": false,
+              "evidence": []
+            },
+            "submission_state": "pending_hr",
+            "change_under_review": true,
+            "next_step": {
+              "owner": "hr",
+              "message": "HR is reviewing your submission. Nothing else is needed from you.",
+              "message_en": "HR is reviewing your submission. Nothing else is needed from you.",
+              "message_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+            },
+            "can_submit_new": false,
+            "masking": {
+              "masked_by_default": true,
+              "reveal_requires_permission": "employees.ess.unmask",
+              "reveal_is_audited": true
+            },
+            "validation_scheme": "kw_iban"
+          }
+        }
+      },
+      "return": {
+        "http": 200,
+        "body": {
+          "ok": true,
+          "request": {
+            "request_id": "c1991a85-9c2a-44b8-8363-ca8873e4c8bf",
+            "company_code": "WATHEFNI",
+            "employee_key": "WATHEFNI-9655497002",
+            "employment_id": null,
+            "request_type": "bank_detail_change",
+            "state": "needs_information",
+            "requester_kind": "employee",
+            "requester_user_id": null,
+            "requester_employee_key": "WATHEFNI-9655497002",
+            "proposed_values": {
+              "sealed": true,
+              "display": {
+                "iban": "**************************2233",
+                "bank_name": "Visual Fixture Bank",
+                "iban_last4": "2233",
+                "iban_masked": true,
+                "account_holder": "Visual Fixture 7002 Correction \u00b7 bank-visual-fixture"
+              },
+              "validation": {
+                "ok": true,
+                "scheme": "kw_iban",
+                "enforced": true,
+                "problems": []
+              },
+              "fingerprint": "133d763440eb239b",
+              "__sealed_bank": {
+                "alg": "fernet",
+                "key_id": "8d180c0cfb7f3a69",
+                "schema": "ess_bank_v1",
+                "ciphertext": "gAAAAABqeABAlQjXnjBwzWO93Am6i5kKAPcU67RVWnnn0ErYycJKoe_8ALMhaS8g6aEXbT6VeDmRBuCccZIZ3hiCW5Z85nvPQdMNHn6nVKjMbUZySivKQj-QsOm_V0vNrO9q3MTKhhZFonTu3HVqlZc9yCrbnAGXPvwysurYsqfqOtm31cg8DxKUbmdyOv7In_2iZoiZ92gqSbJLEKCXW8IFzYtLGH7wKx2peRwC9IHhYUNo0d0UELDJZsrTrzlXsv8XN7sqWATL47UYKt5m1AyreIF1rTh5fQ==",
+                "plaintext_forbidden": true
+              },
+              "fields_proposed": [
+                "account_holder",
+                "bank_name",
+                "iban"
+              ],
+              "contract_version": "bank_ess_v1_p2_production_workflow",
+              "plaintext_forbidden": true
+            },
+            "old_value_snapshot": {
+              "hub": {
+                "name": "W5C-SYNTH| Bank Visual 7002",
+                "email": null,
+                "phone": "9655497002",
+                "updated_at": "2026-08-09 04:21:18.910386+00:00"
+              },
+              "employment": {
+                "end_date": null,
+                "start_date": null,
+                "eligibility": "active",
+                "access_policy": {
+                  "view": "full_masked",
+                  "eligibility": "active",
+                  "ess_mutations": true,
+                  "session_allowed": true,
+                  "allowed_request_types": [
+                    "assignment_correction",
+                    "bank_detail_change",
+                    "document_change",
+                    "emergency_contact_change",
+                    "employment_letter",
+                    "manager_change",
+                    "personal_detail_change",
+                    "service_certificate",
+                    "transfer"
+                  ]
+                },
+                "employment_id": null,
+                "lifecycle_state": null,
+                "worker_category": null,
+                "employment_status": null,
+                "jurisdiction_code": null,
+                "policy_pack_status": null
+              },
+              "captured_at": "2026-08-09T04:21:20.729173+00:00",
+              "employee_key": "WATHEFNI-9655497002"
+            },
+            "approval_route": [
+              "hr",
+              "payroll"
+            ],
+            "approval_cursor": 0,
+            "comments": [
+              {
+                "at": "2026-08-09T04:21:20.879596+00:00",
+                "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                "text": "bank-visual-fixture: please re-check the IBAN on your certificate and resubmit.",
+                "action": "return_for_information"
+              }
+            ],
+            "evidence": {},
+            "concurrency_version": 2,
+            "expected_hub_updated_at": "2026-08-09T04:21:18.910386+00:00",
+            "expected_assignment_version": null,
+            "idempotency_key": "bank-visual-fixture-5bfd2fcb70",
+            "request_hash": "4739c9a845f2bfeef03a77184b59a44fa3ec2385e199a5479f1182d93a816995",
+            "designated_approver_user_id": null,
+            "applied_authority_ref": null,
+            "applied_at": null,
+            "applied_by_user_id": null,
+            "fail_reason": null,
+            "created_at": "2026-08-09T04:21:20.745543+00:00",
+            "updated_at": "2026-08-09T04:21:20.865466+00:00",
+            "expected_personal_version": 0,
+            "expected_bank_version": 0
+          },
+          "applied": false
+        }
+      }
+    },
+    "7003": {
+      "employee_key": "WATHEFNI-9655497003",
+      "role": "applied_clean",
+      "applied": {
+        "ok": true,
+        "request_id": "1455d2cf-caa8-43c4-a683-c7f72d6220cc",
+        "submit": {
+          "http": 200,
+          "state": "pending_hr",
+          "body": {
+            "ok": true,
+            "idempotent": false,
+            "replaced": false,
+            "bank": {
+              "contract_version": "bank_ess_v1_p2_production_workflow",
+              "employee_key": "WATHEFNI-9655497003",
+              "has_verified_bank": false,
+              "has_payroll_effective_bank": false,
+              "verified": null,
+              "payroll_effective": null,
+              "submission": {
+                "request_id": "1455d2cf-caa8-43c4-a683-c7f72d6220cc",
+                "state": "pending_hr",
+                "submission_state": "pending_hr",
+                "concurrency_version": 1,
+                "submitted_at": "2026-08-09T04:21:20.976595+00:00",
+                "updated_at": "2026-08-09T04:21:20.976595+00:00",
+                "proposed": {
+                  "display": {
+                    "iban": "**************************0101",
+                    "bank_name": "Visual Fixture Bank",
+                    "iban_last4": "0101",
+                    "iban_masked": true,
+                    "account_holder": "Visual Fixture 7003 Applied \u00b7 bank-visual-fixture"
+                  },
+                  "fingerprint": "969dedbeeb3b767f",
+                  "fields_proposed": [
+                    "account_holder",
+                    "bank_name",
+                    "iban"
+                  ],
+                  "sealed": true,
+                  "masked": true,
+                  "iban": "**************************0101",
+                  "iban__masked": true,
+                  "bank_name": "Visual Fixture Bank",
+                  "iban_last4": "0101",
+                  "account_holder": "Visual Fixture 7003 Applied \u00b7 bank-visual-fixture"
+                },
+                "rejection_reason": null,
+                "can_withdraw": true,
+                "can_resubmit": false,
+                "evidence": []
+              },
+              "submission_state": "pending_hr",
+              "change_under_review": true,
+              "next_step": {
+                "owner": "hr",
+                "message": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_en": "HR is reviewing your submission. Nothing else is needed from you.",
+                "message_ar": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+              },
+              "can_submit_new": false,
+              "masking": {
+                "masked_by_default": true,
+                "reveal_requires_permission": "employees.ess.unmask",
+                "reveal_is_audited": true
+              },
+              "validation_scheme": "kw_iban"
+            }
+          }
+        },
+        "apply": {
+          "final_state": "approved",
+          "steps": [
+            {
+              "decide_hr": 200,
+              "state": "pending_payroll"
+            },
+            {
+              "decide_payroll": 200
+            },
+            {
+              "apply": 200,
+              "body": {
+                "ok": true,
+                "request": {
+                  "request_id": "1455d2cf-caa8-43c4-a683-c7f72d6220cc",
+                  "company_code": "WATHEFNI",
+                  "employee_key": "WATHEFNI-9655497003",
+                  "employment_id": null,
+                  "request_type": "bank_detail_change",
+                  "state": "applied",
+                  "requester_kind": "employee",
+                  "requester_user_id": null,
+                  "requester_employee_key": "WATHEFNI-9655497003",
+                  "proposed_values": {
+                    "sealed": true,
+                    "display": {
+                      "iban": "**************************0101",
+                      "bank_name": "Visual Fixture Bank",
+                      "iban_last4": "0101",
+                      "iban_masked": true,
+                      "account_holder": "Visual Fixture 7003 Applied \u00b7 bank-visual-fixture"
+                    },
+                    "validation": {
+                      "ok": true,
+                      "scheme": "kw_iban",
+                      "enforced": true,
+                      "problems": []
+                    },
+                    "fingerprint": "969dedbeeb3b767f",
+                    "__sealed_bank": {
+                      "alg": "fernet",
+                      "key_id": "8d180c0cfb7f3a69",
+                      "schema": "ess_bank_v1",
+                      "ciphertext": "gAAAAABqeABAfKPtpgtL42Sqp3E4HzSAC54VDahr4tdpyz9w9JaGwV_HPn29wcFjG_2wAstLfonX0YMMYyuYIVlQenWrYYhiXNdWyBUOlDD3BCObU5SA21-HOd6j5xciFkPgN0rj8xqNzRLccAr6o_b8f9gGdMLs9BBwO9dQJh3lNzfOwccAvAHeMa43s7DE2KnncT7DiFsTzN8EZ2NZf2zOSOr8HJl4lKSHoeK6Nsj3ybAqGT5rc31TY4E1iqvzmcSWi3gdbpSC4Y4hQ-5G540Cod0VjJLvtg==",
+                      "plaintext_forbidden": true
+                    },
+                    "fields_proposed": [
+                      "account_holder",
+                      "bank_name",
+                      "iban"
+                    ],
+                    "contract_version": "bank_ess_v1_p2_production_workflow",
+                    "plaintext_forbidden": true
+                  },
+                  "old_value_snapshot": {
+                    "hub": {
+                      "name": "W5C-SYNTH| Bank Visual 7003",
+                      "email": null,
+                      "phone": "9655497003",
+                      "updated_at": "2026-08-09 04:21:18.911661+00:00"
+                    },
+                    "employment": {
+                      "end_date": null,
+                      "start_date": null,
+                      "eligibility": "active",
+                      "access_policy": {
+                        "view": "full_masked",
+                        "eligibility": "active",
+                        "ess_mutations": true,
+                        "session_allowed": true,
+                        "allowed_request_types": [
+                          "assignment_correction",
+                          "bank_detail_change",
+                          "document_change",
+                          "emergency_contact_change",
+                          "employment_letter",
+                          "manager_change",
+                          "personal_detail_change",
+                          "service_certificate",
+                          "transfer"
+                        ]
+                      },
+                      "employment_id": null,
+                      "lifecycle_state": null,
+                      "worker_category": null,
+                      "employment_status": null,
+                      "jurisdiction_code": null,
+                      "policy_pack_status": null
+                    },
+                    "captured_at": "2026-08-09T04:21:20.965635+00:00",
+                    "employee_key": "WATHEFNI-9655497003"
+                  },
+                  "approval_route": [
+                    "hr",
+                    "payroll"
+                  ],
+                  "approval_cursor": 2,
+                  "comments": [
+                    {
+                      "at": "2026-08-09T04:21:21.139693+00:00",
+                      "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                      "text": "bank-visual-fixture apply 20260809T042111Z",
+                      "action": "approve"
+                    },
+                    {
+                      "at": "2026-08-09T04:21:21.233202+00:00",
+                      "by": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                      "text": "bank-visual-fixture apply 20260809T042111Z \u00b7 payroll",
+                      "action": "approve"
+                    }
+                  ],
+                  "evidence": {},
+                  "concurrency_version": 4,
+                  "expected_hub_updated_at": "2026-08-09T04:21:18.911661+00:00",
+                  "expected_assignment_version": null,
+                  "idempotency_key": "bank-visual-fixture-1cbee9ccfe",
+                  "request_hash": "6f67c8d0fe3b650769e52b3e3d2152f10424c910071f768f779ff22ddda7d4c7",
+                  "designated_approver_user_id": null,
+                  "applied_authority_ref": {
+                    "key_id": "8d180c0cfb7f3a69",
+                    "overlay": "employee_ess_bank_profiles",
+                    "request_id": "1455d2cf-caa8-43c4-a683-c7f72d6220cc",
+                    "request_type": "bank_detail_change",
+                    "bank_fingerprint": "969dedbeeb3b767f",
+                    "payroll_effective": {
+                      "idempotent": false,
+                      "effective_id": 57,
+                      "payroll_lock": {
+                        "locked": false,
+                        "period_end": "2041-07-31",
+                        "period_status": "open"
+                      },
+                      "effective_from": "2026-08-09",
+                      "deferred_for_payroll_lock": false
+                    },
+                    "bank_profile_version": 1,
+                    "onboarding_bank_item": "accepted"
+                  },
+                  "applied_at": "2026-08-09T04:21:21.305641+00:00",
+                  "applied_by_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+                  "fail_reason": null,
+                  "created_at": "2026-08-09T04:21:20.976595+00:00",
+                  "updated_at": "2026-08-09T04:21:21.305641+00:00",
+                  "expected_personal_version": 0,
+                  "expected_bank_version": 0
+                },
+                "authority_ref": {
+                  "request_id": "1455d2cf-caa8-43c4-a683-c7f72d6220cc",
+                  "request_type": "bank_detail_change",
+                  "bank_profile_version": 1,
+                  "bank_fingerprint": "969dedbeeb3b767f",
+                  "key_id": "8d180c0cfb7f3a69",
+                  "overlay": "employee_ess_bank_profiles",
+                  "payroll_effective": {
+                    "idempotent": false,
+                    "effective_id": 57,
+                    "effective_from": "2026-08-09",
+                    "deferred_for_payroll_lock": false,
+                    "payroll_lock": {
+                      "locked": false,
+                      "period_status": "open",
+                      "period_end": "2041-07-31"
+                    }
+                  },
+                  "onboarding_bank_item": "accepted"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "ok": true,
+  "activations": {
+    "WATHEFNI-96550010001": {
+      "phone": "96550010001",
+      "activation_code": "135551",
+      "invite_expires_at": "2026-08-10 04:21:21.438599+00:00",
+      "bank_http": 200,
+      "submission_state": "pending_hr",
+      "has_verified_bank": true,
+      "has_payroll_effective_bank": true,
+      "next_step": "HR is reviewing your submission. Nothing else is needed from you."
+    },
+    "WATHEFNI-9655497001": {
+      "phone": "9655497001",
+      "activation_code": "703374",
+      "invite_expires_at": "2026-08-10 04:21:21.566832+00:00",
+      "bank_http": 200,
+      "submission_state": "pending_payroll",
+      "has_verified_bank": true,
+      "has_payroll_effective_bank": true,
+      "next_step": "HR verified your details. Payroll is reviewing them before they become effective."
+    },
+    "WATHEFNI-9655497002": {
+      "phone": "9655497002",
+      "activation_code": "529216",
+      "invite_expires_at": "2026-08-10 04:21:21.673785+00:00",
+      "bank_http": 200,
+      "submission_state": "needs_correction",
+      "has_verified_bank": false,
+      "has_payroll_effective_bank": false,
+      "next_step": "HR asked for a correction. Update the details and resubmit."
+    },
+    "WATHEFNI-9655497003": {
+      "phone": "9655497003",
+      "activation_code": "402183",
+      "invite_expires_at": "2026-08-10 04:21:21.768495+00:00",
+      "bank_http": 200,
+      "submission_state": "none",
+      "has_verified_bank": true,
+      "has_payroll_effective_bank": true,
+      "next_step": "Your bank details are verified. Submit a change if anything is different."
+    }
+  },
+  "shape_ok": true
+}
+SEED_OK

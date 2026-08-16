@@ -1,0 +1,64 @@
+{
+  "null_statuses": [
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "classification": "null_should_be_active",
+      "proposed_status": "active",
+      "confidence": "high",
+      "reasons": [
+        "employment_status IS NULL",
+        "hire-linked via app_key=96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "onboarding_status='in_progress'",
+        "attendance_records=14",
+        "shift_assignments=7",
+        "leave_requests=1",
+        "employee_messages=12",
+        "no employee_status_changes / left markers found",
+        "runtime already coerces null\u2192active via coalesce/canonical helpers"
+      ]
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "classification": "null_should_be_active",
+      "proposed_status": "active",
+      "confidence": "high",
+      "reasons": [
+        "employment_status IS NULL",
+        "hire-linked via app_key=96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "onboarding_status='in_progress'",
+        "attendance_records=14",
+        "shift_assignments=5",
+        "employee_messages=11",
+        "no employee_status_changes / left markers found",
+        "runtime already coerces null\u2192active via coalesce/canonical helpers"
+      ]
+    }
+  ],
+  "additional_null_statuses": [],
+  "orphan_messages": {
+    "employee_key": "WATHEFNI-P0-DUP-1",
+    "count": 3,
+    "classification": "synthetic_orphan_quarantine",
+    "proposed_remediation": "quarantine_archive",
+    "confidence": "high",
+    "reasons": [
+      "employee_key 'WATHEFNI-P0-DUP-1' matches synthetic naming pattern",
+      "no employees row exists for this key",
+      "no valid application/attendance/onboarding/doc references found",
+      "3 orphan employee_messages rows remain"
+    ],
+    "message_ids": [
+      "9131f0be-0330-4527-856d-6d254e494faa",
+      "593f8836-3a12-43d4-aec2-17c79b9416b6",
+      "35be03eb-bae6-4cc5-9153-e9e4291f064e"
+    ]
+  },
+  "integrity_after_wave1": {
+    "total_orphans": 3,
+    "only_orphan": "employee_messages \u2192 WATHEFNI-P0-DUP-1 (3)"
+  },
+  "production_mutated": false,
+  "production_hygiene_tables_present": false
+}

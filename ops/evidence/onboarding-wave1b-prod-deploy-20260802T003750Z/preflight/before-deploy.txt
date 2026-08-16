@@ -1,0 +1,20 @@
+stamp=20260802T003750Z
+time_utc=2026-08-02T00:40:21Z
+=== unit active ===
+active
+=== SHAs before ===
+0e3e10f1fb0596c3add6aedcd92a319deb8d75254167bbe3ee792c9fe37648e5  /opt/wathefni/orchestrator/app.py
+=== onboarding flags (systemd) ===
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+=== onboarding flags (process) ===
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+=== loader corruption before ===
+candidates_read_in_loader True
+has_load_onboarding_items False
+corruption_confirmed=true

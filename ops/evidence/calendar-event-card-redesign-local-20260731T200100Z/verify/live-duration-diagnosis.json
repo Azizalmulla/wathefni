@@ -1,0 +1,20 @@
+{
+  "event_id": "c3c3d8e7-dc0c-4fbd-9d57-8c91d1cc053b",
+  "title": "online meeting with aziz",
+  "event_type": "meeting",
+  "status": "cancelled",
+  "start_at": "2026-08-01T06:00:00+00:00",
+  "end_at": "2026-08-02T07:00:00+00:00",
+  "timezone": "Asia/Kuwait",
+  "all_day": false,
+  "location": null,
+  "meeting_url": null,
+  "visibility": "private",
+  "detail_level": "full",
+  "authority": null,
+  "interview_managed": null,
+  "duration_minutes": 1500.0,
+  "attendee_count": 1,
+  "guest_count": 0,
+  "links": []
+}

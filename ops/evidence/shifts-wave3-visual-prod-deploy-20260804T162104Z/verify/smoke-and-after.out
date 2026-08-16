@@ -1,0 +1,30 @@
+PASS posthire_bundle_present — PostHire-Cjhqi0Um.js
+PASS visual_wave3_marker
+PASS board_hero_marker
+PASS shared_priority_token
+PASS shared_review_token
+PASS no_legacy_scheduled_hex
+PASS no_legacy_conflict_hex
+PASS iq_wave2_marker
+PASS updating_overlay
+PASS filters_preserved
+PASS surfaces_preserved
+PASS mutation_concurrency
+PASS swap_actions
+PASS leave_still_present
+PASS iq_shell_still
+SHIFTS_WAVE3_DB {"db": "wathefni", "bundle": "PostHire-Cjhqi0Um.js"}
+PASS db_readable — wathefni
+SHIFTS_WAVE3_VISUAL_SMOKE_OK
+SHOT /tmp/shifts-w3-after/after-schedule-desktop-en.png
+SHOT /tmp/shifts-w3-after/after-requests-desktop-en.png
+SHOT /tmp/shifts-w3-after/after-schedule-mobile-en.png
+SHOT /tmp/shifts-w3-after/after-requests-mobile-en.png
+SHOT /tmp/shifts-w3-after/after-schedule-desktop-ar.png
+SHOT /tmp/shifts-w3-after/after-requests-desktop-ar.png
+SHOT /tmp/shifts-w3-after/after-schedule-mobile-ar.png
+SHOT /tmp/shifts-w3-after/after-requests-mobile-ar.png
+SHOTS_DIR /tmp/shifts-w3-after
+SHIFTS_WAVE3_SHOTS_OK
+a29106bb10767b5d33662533712c4c93  /tmp/shifts-w3-before/before-schedule-desktop-en.png
+10bbf8f9c53e886ebed2049ebfd925c6  /tmp/shifts-w3-after/after-schedule-desktop-en.png

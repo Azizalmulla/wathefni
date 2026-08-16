@@ -1,0 +1,455 @@
+{
+  "contract": "local_hybrid_pdf_engine_cv_staging_canary_wave1",
+  "enabled": true,
+  "authoritative_path": "poppler_mistral_cv_extraction",
+  "hybrid_authoritative": false,
+  "influences_routing": false,
+  "materializes_current_v2": false,
+  "publishes_profile_facts": false,
+  "ok": true,
+  "wall_ms": 2828,
+  "hybrid_extract_ms": 553,
+  "hybrid_v2_ms": 2274,
+  "document_envelope": {
+    "contract": "document_envelope@1",
+    "content_sha256": "681c09d8c991aa149cbbf3d618aee635d56f98142fb6abfab7c2cd75fb3900d7",
+    "document_class": "cv",
+    "processing": {
+      "route": "local_hybrid_pdf_engine",
+      "engine_id": "local_hybrid_pdf_engine_wave0",
+      "engine_version": "0.1.0",
+      "provider": "mistral",
+      "model": "mistral-ocr-4-0",
+      "inspector_version": "0.2.6",
+      "inspector_extension_sha256": "f1613e52d611e9d7fc0382327120c0afe06d5af9910b9dfd0606b50f27f53a1d",
+      "request_id": null,
+      "pages_local": [],
+      "pages_ocr": [
+        1
+      ],
+      "pages_failed": [],
+      "page_methods": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "inspector_needs_ocr": true,
+          "quality_forced_ocr": false,
+          "error": null,
+          "text_sha256": "dbfce7578c36e88aa4f4e49d1fdca3886fb1bc515e67c07ca7245a4ea8bf04cb",
+          "char_count": 139
+        }
+      ],
+      "quality_ok": true,
+      "confidence": null,
+      "estimated_cost_usd": 0.004,
+      "projected_cost_usd_if_ocr_executed": 0.004,
+      "billable_pages": 1,
+      "simulated_ocr": false,
+      "cache_hit": false,
+      "wall_ms": 545,
+      "limits": {
+        "max_pages": 15,
+        "max_bytes": 20971520,
+        "timeout_s": 120.0,
+        "max_retries": 2,
+        "max_projected_cost_usd": 0.12,
+        "allow_paid_ocr": true,
+        "cache_dir": null
+      },
+      "inspector": {
+        "pages_needing_ocr_raw": [
+          1
+        ],
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "is_complex": false,
+        "ocr_reasons_by_page": []
+      },
+      "ocr": {
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "simulated": false,
+        "pages_requested_1idx": [
+          1
+        ],
+        "pages_requested_0idx": [
+          0
+        ],
+        "projected_cost_usd": 0.004,
+        "retries": 0,
+        "error": null,
+        "request_id": null,
+        "latency_ms": 544,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004
+      },
+      "job_id": null,
+      "shadow": null
+    },
+    "error": null
+  },
+  "hybrid_error": null,
+  "hybrid_simulated_ocr": false,
+  "page_order_hybrid": [
+    1
+  ],
+  "page_methods": [
+    {
+      "page": 1,
+      "method": "ocr",
+      "reason": "inspector_needs_ocr",
+      "quality_forced_ocr": false
+    }
+  ],
+  "ocr_pages": {
+    "poppler": [
+      1
+    ],
+    "hybrid": [
+      1
+    ],
+    "false_skip_pages": [],
+    "zero_false_ocr_skips": true
+  },
+  "latency_ms": {
+    "authoritative_extract_sum": 556,
+    "hybrid_extract": 553,
+    "hybrid_v2": 2274,
+    "v2_auth_meta": 2121,
+    "v2_hybrid_meta": 2274
+  },
+  "mistral_calls_and_cost": {
+    "authoritative_extract": {
+      "engine_calls": 1,
+      "mistral_engine_calls": 1,
+      "billable_pages": 1,
+      "estimated_cost_usd": 0.004,
+      "latency_ms_sum": 556
+    },
+    "hybrid_ocr": {
+      "billable_pages": 1,
+      "estimated_cost_usd": 0.004,
+      "projected_cost_usd": 0.004,
+      "request_id": null,
+      "error": null
+    },
+    "v2_document_ai_auth": {
+      "billable_pages": 1,
+      "estimated_cost_usd": 0.005,
+      "model": "mistral-ocr-4-0",
+      "error": null,
+      "path": "ocr_document_annotation"
+    },
+    "v2_document_ai_hybrid": {
+      "billable_pages": 1,
+      "estimated_cost_usd": 0.005,
+      "model": "mistral-ocr-4-0",
+      "error": null,
+      "path": "ocr_document_annotation"
+    }
+  },
+  "layout": {
+    "hybrid_inspector": {
+      "pages_needing_ocr_raw": [
+        1
+      ],
+      "pages_with_tables": [],
+      "pages_with_columns": [],
+      "is_complex": false,
+      "ocr_reasons_by_page": []
+    },
+    "auth_method": "mistral-ocr-4-0",
+    "auth_text_chars": 139,
+    "hybrid_text_chars": 139,
+    "auth_arabic_chars": 0,
+    "hybrid_arabic_chars": 0
+  },
+  "v2_compare": {
+    "auth_ok": true,
+    "hybrid_ok": true,
+    "auth_path": "ocr_document_annotation",
+    "hybrid_path": "ocr_document_annotation",
+    "auth_extractor_version": "mistral-document-ai-v2",
+    "hybrid_extractor_version": "mistral-document-ai-v2",
+    "compare_mode": {
+      "mode": "shared_annotation_dual_text_validation",
+      "note": "Same Document AI annotation validated with Poppler text vs hybrid merged text; isolates evidence/text effects without dual-call noise."
+    },
+    "structured": {
+      "contact_match": true,
+      "contact_auth": {
+        "full_name": "dana wilkes",
+        "email": "dana.wilkes@example.com",
+        "phone": "96551110000",
+        "location": ""
+      },
+      "contact_hybrid": {
+        "full_name": "dana wilkes",
+        "email": "dana.wilkes@example.com",
+        "phone": "96551110000",
+        "location": ""
+      },
+      "contact_regression": false,
+      "employment_match": true,
+      "employment_auth_n": 0,
+      "employment_hybrid_n": 0,
+      "employment_missing_vs_auth": 0,
+      "education_match": true,
+      "education_auth_n": 0,
+      "education_hybrid_n": 0,
+      "education_missing_vs_auth": 0,
+      "skills_match": true,
+      "skills_auth_n": 1,
+      "skills_hybrid_n": 1,
+      "skills_missing_vs_auth": [],
+      "skills_missing_count": 0,
+      "evidence_auth": {
+        "with_evidence": 0,
+        "without_evidence": 1,
+        "fields_checked": 1
+      },
+      "evidence_hybrid": {
+        "with_evidence": 0,
+        "without_evidence": 1,
+        "fields_checked": 1
+      },
+      "evidence_regression": false,
+      "ranking_auth": {
+        "contact": {
+          "full_name": "dana wilkes",
+          "email": "dana.wilkes@example.com",
+          "phone": "96551110000",
+          "location": ""
+        },
+        "employment_n": 0,
+        "education_n": 0,
+        "skills_n": 1,
+        "languages_n": 0,
+        "source_evidence": {
+          "with_evidence": 0,
+          "without_evidence": 1,
+          "fields_checked": 1
+        },
+        "profile_facts_projection_keys": [
+          "availability",
+          "awards_honors",
+          "certifications",
+          "education",
+          "employment",
+          "experience_years",
+          "field_sources",
+          "languages",
+          "location",
+          "memberships_activities",
+          "primary_expertise",
+          "professional_summary",
+          "projects",
+          "publications",
+          "references",
+          "schema",
+          "skills",
+          "structured",
+          "training_courses",
+          "unmodeled_sections",
+          "volunteer_work"
+        ],
+        "projected_skill_count": 1,
+        "projected_employment_count": 0
+      },
+      "ranking_hybrid": {
+        "contact": {
+          "full_name": "dana wilkes",
+          "email": "dana.wilkes@example.com",
+          "phone": "96551110000",
+          "location": ""
+        },
+        "employment_n": 0,
+        "education_n": 0,
+        "skills_n": 1,
+        "languages_n": 0,
+        "source_evidence": {
+          "with_evidence": 0,
+          "without_evidence": 1,
+          "fields_checked": 1
+        },
+        "profile_facts_projection_keys": [
+          "availability",
+          "awards_honors",
+          "certifications",
+          "education",
+          "employment",
+          "experience_years",
+          "field_sources",
+          "languages",
+          "location",
+          "memberships_activities",
+          "primary_expertise",
+          "professional_summary",
+          "projects",
+          "publications",
+          "references",
+          "schema",
+          "skills",
+          "structured",
+          "training_courses",
+          "unmodeled_sections",
+          "volunteer_work"
+        ],
+        "projected_skill_count": 1,
+        "projected_employment_count": 0
+      },
+      "ranking_regression": false,
+      "v2_auth_ok": true,
+      "v2_hybrid_ok": true,
+      "v2_completion_regression": false,
+      "arabic_chars_auth_summary": 0,
+      "arabic_chars_hybrid_summary": 0,
+      "structured_field_accuracy_reduction": false
+    },
+    "structured_dual_document_ai_observation": {
+      "contact_match": true,
+      "contact_auth": {
+        "full_name": "dana wilkes",
+        "email": "dana.wilkes@example.com",
+        "phone": "96551110000",
+        "location": ""
+      },
+      "contact_hybrid": {
+        "full_name": "dana wilkes",
+        "email": "dana.wilkes@example.com",
+        "phone": "96551110000",
+        "location": ""
+      },
+      "contact_regression": false,
+      "employment_match": true,
+      "employment_auth_n": 0,
+      "employment_hybrid_n": 0,
+      "employment_missing_vs_auth": 0,
+      "education_match": true,
+      "education_auth_n": 0,
+      "education_hybrid_n": 0,
+      "education_missing_vs_auth": 0,
+      "skills_match": false,
+      "skills_auth_n": 1,
+      "skills_hybrid_n": 0,
+      "skills_missing_vs_auth": [
+        "automation frameworks"
+      ],
+      "skills_missing_count": 1,
+      "evidence_auth": {
+        "with_evidence": 0,
+        "without_evidence": 1,
+        "fields_checked": 1
+      },
+      "evidence_hybrid": {
+        "with_evidence": 0,
+        "without_evidence": 0,
+        "fields_checked": 0
+      },
+      "evidence_regression": false,
+      "ranking_auth": {
+        "contact": {
+          "full_name": "dana wilkes",
+          "email": "dana.wilkes@example.com",
+          "phone": "96551110000",
+          "location": ""
+        },
+        "employment_n": 0,
+        "education_n": 0,
+        "skills_n": 1,
+        "languages_n": 0,
+        "source_evidence": {
+          "with_evidence": 0,
+          "without_evidence": 1,
+          "fields_checked": 1
+        },
+        "profile_facts_projection_keys": [
+          "availability",
+          "awards_honors",
+          "certifications",
+          "education",
+          "employment",
+          "experience_years",
+          "field_sources",
+          "languages",
+          "location",
+          "memberships_activities",
+          "primary_expertise",
+          "professional_summary",
+          "projects",
+          "publications",
+          "references",
+          "schema",
+          "skills",
+          "structured",
+          "training_courses",
+          "unmodeled_sections",
+          "volunteer_work"
+        ],
+        "projected_skill_count": 1,
+        "projected_employment_count": 0
+      },
+      "ranking_hybrid": {
+        "contact": {
+          "full_name": "dana wilkes",
+          "email": "dana.wilkes@example.com",
+          "phone": "96551110000",
+          "location": ""
+        },
+        "employment_n": 0,
+        "education_n": 0,
+        "skills_n": 0,
+        "languages_n": 0,
+        "source_evidence": {
+          "with_evidence": 0,
+          "without_evidence": 0,
+          "fields_checked": 0
+        },
+        "profile_facts_projection_keys": [
+          "availability",
+          "awards_honors",
+          "certifications",
+          "education",
+          "employment",
+          "experience_years",
+          "field_sources",
+          "languages",
+          "location",
+          "memberships_activities",
+          "primary_expertise",
+          "professional_summary",
+          "projects",
+          "publications",
+          "references",
+          "schema",
+          "skills",
+          "structured",
+          "training_courses",
+          "unmodeled_sections",
+          "volunteer_work"
+        ],
+        "projected_skill_count": 0,
+        "projected_employment_count": 0
+      },
+      "ranking_regression": true,
+      "v2_auth_ok": true,
+      "v2_hybrid_ok": true,
+      "v2_completion_regression": false,
+      "arabic_chars_auth_summary": 0,
+      "arabic_chars_hybrid_summary": 0,
+      "structured_field_accuracy_reduction": true
+    }
+  },
+  "acceptance": {
+    "zero_structured_field_accuracy_reduction": true,
+    "zero_missing_ranking_evidence": true,
+    "zero_false_ocr_skips": true,
+    "v2_completion_same_or_better": true,
+    "all_pass": true
+  },
+  "acceptance_notes": {
+    "structured_compare_mode": "shared_annotation_dual_text_validation",
+    "dual_document_ai_observation_has_regression": true
+  }
+}

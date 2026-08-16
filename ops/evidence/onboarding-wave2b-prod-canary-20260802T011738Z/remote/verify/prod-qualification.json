@@ -1,0 +1,9 @@
+{
+  "seed_enabled": false,
+  "hr_mutate_enabled": false,
+  "synthetic_canary": true,
+  "item_count": 19,
+  "checklist_unchanged": true,
+  "bank_forbidden": true,
+  "employee_app_allowlist_unchanged_hint": true
+}

@@ -1,0 +1,13 @@
+{
+  "updateGroupId": "b9c90b4f-83c7-42fe-8145-d2c991324417",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/b9c90b4f-83c7-42fe-8145-d2c991324417",
+  "message": "Auth Wave 2 Phase 3 REBUILD: PIN-only unlock overlay",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC": "0",
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1"
+  },
+  "disableOtaGroup": "3c51b707-15c4-4793-8cf5-f933a62f236f",
+  "architecture": "needsLocalUnlock overlay \u2014 no AuthGate remount",
+  "faceIdOnOverlay": false
+}

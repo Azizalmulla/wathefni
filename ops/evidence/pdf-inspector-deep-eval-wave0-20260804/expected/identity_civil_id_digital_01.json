@@ -1,0 +1,22 @@
+{
+  "fixture_id": "identity_civil_id_digital_01",
+  "category": "identity_document",
+  "language": "ar_en",
+  "layout": "id_card",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "CIVIL ID",
+    "Yousef Al-Ahmad",
+    "290123456789"
+  ],
+  "expected_fields": {
+    "full_name": "Yousef Al-Ahmad",
+    "civil_id": "290123456789",
+    "doc_type": "civil_id"
+  },
+  "notes": "Synthetic Civil ID card-sized digital PDF (not a real person ID).",
+  "sha256": "8125b30eebba885f87f85249dc47ce84458fd79fd9eb2d9ac16c25d7300161fe",
+  "bytes": 42109
+}

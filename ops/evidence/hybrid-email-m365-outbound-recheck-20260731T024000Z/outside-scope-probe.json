@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "provider_accept_status": "failed",
+  "error": "microsoft_http_403",
+  "http": 403,
+  "body": "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access to OData is disabled: [RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings.\"}}"
+}

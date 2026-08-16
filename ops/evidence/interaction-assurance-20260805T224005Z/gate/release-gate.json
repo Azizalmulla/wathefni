@@ -1,0 +1,12 @@
+{
+  "matrix": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-interaction-dead-control-audit-20260805T195406Z/findings/interaction-control-matrix.json",
+  "blocking_confirmed_p0_p1": 0,
+  "blocking_by_status": {},
+  "blocking_by_severity": {},
+  "tracked_unproven_p1": 495,
+  "tracked_p2_broken": 92,
+  "release_fail": false,
+  "policy": "fail only on confirmed P0/P1 broken|dead|permission mismatch"
+}
+
+GO: no confirmed P0/P1 interaction regressions (residual register retained).

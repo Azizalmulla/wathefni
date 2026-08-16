@@ -1,0 +1,19 @@
+{
+  "headline": "Ask about hiring or your team.",
+  "chips": [
+    "What should I work on today?",
+    "Create or update a job opening",
+    "Review candidates",
+    "Who needs an interview scheduled?",
+    "What's on the hiring calendar?",
+    "Who needs an assessment?"
+  ],
+  "modules": "candidates · rankings · assessments · interviews · reports · jobs · overview · follow-ups · +7",
+  "dir": "ltr",
+  "navH": {
+    "assistant": 44,
+    "jobs": 44
+  },
+  "pageScrollExcess": 8,
+  "composerVisible": true
+}

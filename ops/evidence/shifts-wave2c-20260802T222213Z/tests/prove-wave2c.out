@@ -1,0 +1,29 @@
+shifts wave2c prove tag=ef8647ec
+[PASS] cleanup contract version
+[PASS] deletion order starts with reminders
+[PASS] deletion order ends with employees
+[PASS] protected orphans listed
+[PASS] wave1 cleanup residual zero for SHW1B
+[PASS] wave1 cleanup does not delete wave2 assignment
+[PASS] wave1 cleanup does not delete wave2 versions
+[PASS] wave1 assignment removed
+[PASS] interrupted wave2 cleanup completes to residual 0
+[PASS] idempotent wave2 cleanup rerun residual 0
+[PASS] wave2 cleanup does not delete wave1 assignment
+[PASS] final wave1 prove residual zero
+[PASS] SHW1B family residual zero after prove
+[PASS] SHW2B family residual zero after prove
+[PASS] real assignment fingerprints unchanged
+[PASS] real event ids unchanged
+[PASS] real swap count unchanged
+[PASS] real availability count unchanged
+[PASS] real version count unchanged
+[PASS] real reminder count unchanged
+[PASS] kill switch disables lifecycle job
+[PASS] advisory lock contention returns job_lock_held
+[PASS] lifecycle job ok after lock released
+[PASS] systemd job units installed
+[PASS] timers remain disabled
+[PASS] timers not active
+
+26 passed, 0 failed

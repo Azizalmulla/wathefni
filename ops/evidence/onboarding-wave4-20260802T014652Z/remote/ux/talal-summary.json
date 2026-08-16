@@ -1,0 +1,20 @@
+{
+  "planned_start_date": "2026-08-01",
+  "overdue_count": 3,
+  "next_item_label": "Signed employment contract",
+  "next_owner_group": "employee",
+  "pending_count": 4,
+  "bank_collection": {
+    "mode": "ess_encrypted",
+    "plaintext_forbidden": true,
+    "message": "Bank and IBAN setup uses encrypted Employee Self-Service \u2014 not onboarding plaintext."
+  },
+  "owner_groups": [
+    "compliance",
+    "employee",
+    "hr",
+    "it",
+    "payroll"
+  ],
+  "hr_mutate_company": true
+}

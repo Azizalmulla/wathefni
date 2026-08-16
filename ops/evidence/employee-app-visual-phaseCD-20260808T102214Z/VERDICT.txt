@@ -1,0 +1,24 @@
+EMPLOYEE APP VISUAL REFINEMENT — PHASE C+D
+Density, Hierarchy & Navigation Simplification
+
+VERDICT: PASS (local qualification)
+
+Scope:   Home hierarchy, bottom navigation, compact list primitive, Documents /
+         Inbox / Leave / Payslips / Bank / Onboarding / Profile density,
+         restraint pass, long-history scalability.
+Frozen:  Phase A+B (trust, terminology, layout tokens, safe area, responsive
+         text, accessibility, colour system) — unchanged, gates still green.
+Not run: physical-device qualification. Not started, as instructed.
+Not done: no new features; no certificates, announcements, shift
+         acknowledgement, leave edit, HR App, Auth Phase 6. No backend
+         authority modified.
+
+Local gates: 343 PASS, 0 FAIL.
+  typecheck 0 errors · strict-unused clean · iOS bundle 1368 modules, 0 errors
+  density+hierarchy behavioural 24 · density+hierarchy static 71
+  composition shapes 61 · push follow-through 14 · documents hierarchy 7
+  feature-unavailable copy 9 · capability foundation GREEN · colour system 32
+  a11y+i18n 21 · session/refresh 8 · PIN crypto PASS
+  EN/AR keysets identical; every t() key resolves in both.
+
+The Employee App is NOT frozen. The next phase is not started.

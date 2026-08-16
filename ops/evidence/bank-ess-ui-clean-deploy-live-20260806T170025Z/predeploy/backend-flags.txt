@@ -1,0 +1,8 @@
+WATHEFNI_ONBOARDING_COMPLETION_CONTRACT=on
+WATHEFNI_ONBOARDING_COMPLETION_CONTRACT_COMPANIES=WATHEFNI
+WATHEFNI_BANK_ESS_V1=on
+WATHEFNI_BANK_ESS_V1_COMPANIES=WATHEFNI
+WATHEFNI_BANK_ESS_V1_EMPLOYEE_ALLOWLIST=WATHEFNI-9655497001,WATHEFNI-9655497002,WATHEFNI-9655497003
+WATHEFNI_BANK_ESS_SCHEME=kw_iban
+WATHEFNI_BANK_ESS_ENFORCE_VALIDATION=off
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}

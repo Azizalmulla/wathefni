@@ -1,0 +1,37 @@
+{
+  "id": "three_four_modules",
+  "label": "Three to four modules",
+  "modules": [
+    "pre_hiring",
+    "assessments",
+    "interviews",
+    "calendar"
+  ],
+  "role": "owner",
+  "nav_groups": [
+    "prehire",
+    "settings"
+  ],
+  "nav_ids": [
+    "overview",
+    "ai",
+    "jobs",
+    "candidates",
+    "interviews",
+    "calendar",
+    "assessments",
+    "ranking",
+    "reports",
+    "notifications",
+    "activity",
+    "settings"
+  ],
+  "overview_layout": "three",
+  "offerable_tabs": {
+    "video_interviews": false
+  },
+  "settings": {
+    "team": true,
+    "integrations": true
+  }
+}

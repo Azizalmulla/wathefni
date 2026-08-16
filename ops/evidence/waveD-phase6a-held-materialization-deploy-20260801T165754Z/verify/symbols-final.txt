@@ -1,0 +1,7 @@
+57126:def _enqueue_held_intake_materialization(
+57144:        job_type="held_intake_materialization",
+57158:def _soft_contact_from_cv_bytes(
+57261:                    _enqueue_held_intake_materialization(
+57322:                soft = _soft_contact_from_cv_bytes(
+57445:                _enqueue_held_intake_materialization(
+57976:    if job_type == "held_intake_materialization":

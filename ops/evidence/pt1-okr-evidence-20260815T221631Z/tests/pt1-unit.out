@@ -1,0 +1,78 @@
+    pt1 okr evidence — unit prove
+      PASS  pt1 overlay stamp
+      PASS  c1 remains OKR SoT
+      PASS  okr cycle ≠ review cycle
+      PASS  alignment no score inheritance
+      PASS  check-in ≠ progress
+      PASS  confidence ≠ progress
+      PASS  no second goals table
+      PASS  no frontend progress truth
+      PASS  okr not goal_kind
+      PASS  no trajectory labels
+      PASS  no assistant talent tools
+      PASS  c1 stamp unchanged
+      PASS  pointer not second SoT
+      PASS  no universal talent score
+      PASS  no classification in PT1
+      PASS  AI not classification input
+      PASS  contradictions coexist
+      PASS  consume default off
+      PASS  okr ≠ potential
+      PASS  okr ≠ hipo
+      PASS  okr ≠ readiness
+      PASS  claimed not verified
+      PASS  no second analytics engine
+      PASS  no potential writes
+      PASS  no hipo writes
+      PASS  no readiness writes
+      PASS  no talent model writes
+      PASS  AI classification input false
+      PASS  okr consume default off
+      PASS  learning consume default off
+      PASS  ja consume default off
+      PASS  assessment consume default off
+      PASS  claimed display default on
+      PASS  EN okr cycle
+      PASS  AR okr cycle
+      PASS  EN review cycle distinct
+      PASS  AR review cycle distinct
+      PASS  EN confidence
+      PASS  AR confidence
+      PASS  EN claimed
+      PASS  AR claimed
+      PASS  EN AI provenance
+      PASS  AR AI provenance
+      PASS  employee cannot see private team objective
+      PASS  owner can see own restricted objective
+      PASS  company objective broadly visible
+      PASS  hr can see restricted
+      PASS  manager sees only scoped reports
+      PASS  c1 measure math unchanged
+      PASS  decorative % still forbidden
+      PASS  no okr_objectives_v2
+      PASS  no generic goal_kind storage
+      PASS  no accelerating label
+      PASS  no declining computation
+      PASS  HTTP okr-cycles
+      PASS  HTTP alignment
+      PASS  HTTP updates
+      PASS  app current cycle
+      PASS  no generic evidence storage API
+      PASS  talent evidence-index GET
+      PASS  talent okr index POST only
+      PASS  AI constraint in schema
+      PASS  no copied rating constraint
+      PASS  HR Web OKR cycle copy EN
+      PASS  HR Web OKR cycle copy AR
+      PASS  HR Web alignment on request
+      PASS  HR Web no default tree dump
+      PASS  Employee EN okrCycle
+      PASS  Employee AR okrCycle
+      PASS  Employee EN check-in ≠ progress
+      PASS  Employee AR check-in ≠ progress
+      PASS  Setup confidence policy
+      PASS  Setup OKR consume contract
+      PASS  payload hash stable
+
+    74 passed, 0 failed
+PT1_OKR_EVIDENCE_UNIT_PASS

@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=390"/>
+<title>الإجازات</title>
+<style>
+body{margin:0;background:linear-gradient(165deg,#f7f1e6,#efe4d4 45%,#fffdf8);font-family:ui-sans-serif,system-ui;color:#23211d}
+.wrap{max-width:360px;margin:24px auto;padding:0 16px 40px}
+.filters{display:flex;gap:8px;margin-bottom:14px}
+.chip{border:1px solid #e8dfd0;background:#fffdf8;border-radius:999px;padding:6px 12px;font-size:12px}
+.chip.on{background:#f3e7d6;font-weight:700}
+.banner{border:1px solid #e8dfd0;background:rgba(255,253,248,.85);border-radius:14px;padding:10px 12px;font-size:12px;color:#5c554a;margin-bottom:12px}
+.att{border:1px solid #e8c9a0;background:#f8efe4;border-radius:16px;padding:14px;margin-bottom:16px}
+.att h2{margin:0;font-size:15px}
+.att p{margin:4px 0 0;font-size:12px;color:#5c554a}
+.sec h3{margin:0 0 4px;font-size:14px}
+.sec .hint{font-size:12px;color:#7a7164;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid #e8dfd0;background:#fffdf8;border-radius:14px;padding:12px 14px;margin-bottom:8px;flex-wrap:wrap}
+.name{font-weight:700;font-size:14px}
+.meta{font-size:12px;color:#5c554a;margin-top:2px}
+.actions{display:flex;gap:6px}
+.btn{background:#2b2620;color:#fff;border:0;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600}
+.ghost{background:transparent;border:1px solid #e8dfd0;color:#2b2620}
+.stamp{margin-top:18px;font:12px ui-monospace,monospace;color:#7a7164}
+</style></head><body><div class="wrap" data-leave-queue>
+<div class="filters" data-leave-filters><span class="chip on">النشطة</span><span class="chip">السجل</span></div>
+<div class="banner">أرصدة الإجازات غير ملزمة حالياً (enforced=false)</div>
+<div class="att" data-leave-attention><h2>لا طلبات إجازة بانتظار القرار</h2><p>3 إجازة قادمة معتمدة</p></div>
+<section class="sec" data-leave-pending><h3>طلبات بانتظار القرار</h3><p class="hint">راجع التفاصيل ثم اعتمد أو ارفض أو اطلب معلومات.</p>
+<div class="row"><div><div class="name">مثال موظف</div><div class="meta">سنوية · يوم كامل · 12–14 آب</div><div class="meta">الإجراء التالي: بانتظار قرار الموارد البشرية</div></div>
+<div class="actions"><button class="btn" data-primary-action="approve">اعتماد</button><button class="btn ghost">المزيد</button></div></div>
+</section>
+<section class="sec" style="margin-top:18px;border-top:1px solid #e8dfd0;padding-top:14px" data-leave-upcoming>
+<h3>إجازات قادمة</h3><p class="hint">إجازات معتمدة يمكن إلغاؤها قبل البدء.</p>
+<div class="row"><div><div class="name">مثال موظف</div><div class="meta">بدون راتب · يوم كامل</div></div>
+<div class="actions"><button class="btn ghost">عرض التفاصيل</button></div></div>
+</section>
+<p class="stamp">Leave Wave 1 · 20260804T072450Z · mobile · ar</p>
+</div></body></html>

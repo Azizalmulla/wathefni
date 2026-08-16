@@ -1,0 +1,16 @@
+{
+  "mailbox_id": "e51803f4-c385-440f-a285-0f3088639be1",
+  "company_code": "WATHEFNI",
+  "address": "abdulazizalmulla@wathefni.onmicrosoft.com",
+  "display_name": "Wathefni Evidence",
+  "provider": "microsoft",
+  "allow_send": true,
+  "status": "approved",
+  "entra_user_id": "dcb6b7dd-8509-4a20-8069-ec0de9445dd7",
+  "exchange_scope_ref": "d3302de0-0dcc-4169-8937-17f440410a7b",
+  "last_probe_at": "2026-07-31 01:28:24.373285+00:00",
+  "last_probe_ok": true,
+  "last_error": null,
+  "created_at": "2026-07-31 01:24:07.606130+00:00",
+  "updated_at": "2026-07-31 01:29:27.729387+00:00"
+}

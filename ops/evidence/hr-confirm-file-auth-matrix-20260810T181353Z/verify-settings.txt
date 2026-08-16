@@ -1,0 +1,18 @@
+PASS cream PageScreen/ListRow
+PASS no WorkspaceHeader locale chip
+PASS no raw permission_authority
+PASS no scope.binding / configuration_error UI
+PASS My access humanized
+PASS role humanized
+PASS refresh /me
+PASS sign-out confirms Settings
+PASS sign-out confirm More
+PASS web note
+PASS device security section present
+PASS no push registration invent
+PASS no settings write API invent
+PASS switch employee optional
+PASS change pin wired
+PASS hrSettings keys EN+AR
+PASS More body is device-scoped
+hr-settings-operator-device: GREEN

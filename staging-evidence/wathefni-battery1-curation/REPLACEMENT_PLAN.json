@@ -1,0 +1,102 @@
+{
+  "status": "proposed_not_executed",
+  "provider_budget": "paused",
+  "do_not_run_until": "human_rewrite_of_package_1_applied_and_operator_explicitly_starts_replacement",
+  "missing_exact_counts": {
+    "numerical_reasoning": 5,
+    "verbal_reasoning": 3,
+    "logical_reasoning": 5,
+    "situational_judgment": 3,
+    "prioritization": 2
+  },
+  "batch_policy": {
+    "max_packages_per_batch": 2,
+    "one_category_at_a_time": true,
+    "stop_on_provider_circuit_open": true,
+    "retain_successes": true,
+    "no_ai_approval": true,
+    "no_publish": true,
+    "authoring_session_only": true
+  },
+  "pre_generation_prompt_fixes_without_weakening_safeguards": [
+    "Author prompt: every logical item proof MUST include an explicit uniqueness claim using only/unique/exactly one/sole (or Arabic واحد/فقط/فريدة) AND eliminate each distractor by key.",
+    "Author prompt: numerical items must be multi-step with a stated trap; forbid single-addition timelines as medium.",
+    "Author prompt: always emit non-empty answer_uniqueness_proof; include Correct key + uniqueness claim + per-distractor elimination.",
+    "Secondary-review prompt: review one draft item, never require a five-item batch inside a single draft; treat answer_uniqueness_proof as present when field length >= 48.",
+    "Blueprint allowed_context: remove wording that secondary can misread as requiring five items inside one draft review; keep uniqueness and ambiguity requirements."
+  ],
+  "ordered_batches": [
+    {
+      "batch_id": "R1",
+      "category": "logical_reasoning",
+      "count": 2,
+      "focus": "uniqueness-claim proof + non-obvious distractors"
+    },
+    {
+      "batch_id": "R2",
+      "category": "logical_reasoning",
+      "count": 2,
+      "focus": "same"
+    },
+    {
+      "batch_id": "R3",
+      "category": "logical_reasoning",
+      "count": 1,
+      "focus": "same"
+    },
+    {
+      "batch_id": "R4",
+      "category": "numerical_reasoning",
+      "count": 2,
+      "focus": "multi-step medium + unambiguous key"
+    },
+    {
+      "batch_id": "R5",
+      "category": "numerical_reasoning",
+      "count": 2,
+      "focus": "same"
+    },
+    {
+      "batch_id": "R6",
+      "category": "numerical_reasoning",
+      "count": 1,
+      "focus": "same"
+    },
+    {
+      "batch_id": "R7",
+      "category": "verbal_reasoning",
+      "count": 2,
+      "focus": "best-supported conclusion; complete AR"
+    },
+    {
+      "batch_id": "R8",
+      "category": "verbal_reasoning",
+      "count": 1,
+      "focus": "same"
+    },
+    {
+      "batch_id": "R9",
+      "category": "situational_judgment",
+      "count": 2,
+      "focus": "plausible distractors; complete AR"
+    },
+    {
+      "batch_id": "R10",
+      "category": "situational_judgment",
+      "count": 1,
+      "focus": "same"
+    },
+    {
+      "batch_id": "R11",
+      "category": "prioritization",
+      "count": 2,
+      "focus": "trade-off rationale; complete AR"
+    }
+  ],
+  "also_before_or_during_replacement": [
+    "Apply human rewrite for package #1 Arabic choice B typo (ستنظهر → ستظهر) as an immutable revision; re-check bilingual + key.",
+    "Do not regenerate the 6 approved packages.",
+    "Human-curate each successful replacement package before counting toward Battery-1."
+  ],
+  "success_gate": "Battery-1 ready_for_pilot only when category counts are 5/5/5/5/5 with complete EN/AR, human EN+AR approve, and independent key verification on every item."
+}

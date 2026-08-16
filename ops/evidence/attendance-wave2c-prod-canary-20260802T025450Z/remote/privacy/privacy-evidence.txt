@@ -1,0 +1,8 @@
+PASS  privacy reject images/templates  detail={'error': 'biometric_payload_forbidden', 'keys': ['fingerprint_image', 'template']}
+PASS  metadata card+face+biometric types  detail=['biometric', 'card', 'face']
+PASS  no biometric payloads retained  detail=None
+PASS  credentials sealed durable  detail=None
+PASS  invalid credentials fail  detail=None
+PASS  credential rotation recovers  detail=None
+PASS  secrets absent from evidence  detail=None
+synthetic_ids {'tag': '312feae3', 'employee_key': 'WATHEFNI-ATTW2C-312feae3', 'phone': '965524312fea', 'device_user_id': '9312', 'terminal_sn': 'LAB-W2C-312FEA', 'connector_id': 'w2c-lab-312feae3', 'shift_id': '5acbd482-ba82-4336-8092-45414fd6343a', 'oshift_id': '32004437-8a47-41ce-a97b-e58dafeb9065', 'projection_id': '8aad537f-ae64-4896-8b44-f7f114f95c8d', 'checkpoint': 'biotime:2302', 'quarantine_id': '49f04e4f-3661-4902-bc8e-f23bdc5f6430', 'snapshot_id': '41ee89c4-9de8-4bca-ae01-4b9b68d658c3'}

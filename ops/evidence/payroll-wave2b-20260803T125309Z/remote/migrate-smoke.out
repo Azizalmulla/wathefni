@@ -1,0 +1,57 @@
+wave2b 1.0.0
+policy payroll_preview_policy@1.0.0
+connected_db wathefni_staging
+preview_tables ['payroll_preview_adjustments', 'payroll_preview_employee_results', 'payroll_preview_events', 'payroll_preview_lines', 'payroll_preview_policies', 'payroll_preview_runs']
+MIGRATE_OK payroll_native_preview_wave2b
+    payroll native preview wave2b
+      PASS  version
+      PASS  payment disabled
+      PASS  not authoritative
+      PASS  preview only
+      PASS  no AI
+      PASS  external unchanged
+      PASS  no pifss
+      PASS  no bank
+      PASS  deterministic
+      PASS  money round half up
+      PASS  money 3dp
+      PASS  full-month ok
+      PASS  full-month earnings 550
+      PASS  full-month deductions 20
+      PASS  full-month net 530
+      PASS  mid join ok
+      PASS  mid join active 16
+      PASS  mid join earnings prorated
+      PASS  mid exit ok
+      PASS  mid exit active 15
+      PASS  mid exit earnings prorated
+      PASS  unpaid ok
+      PASS  unpaid deduction applied
+      PASS  adjustment ok
+      PASS  bonus included
+      PASS  fine rounded 3dp
+      PASS  missing contract blocked
+      PASS  missing contract code
+      PASS  overlap blocked
+      PASS  overlap code
+      PASS  pifss blocked
+      PASS  pifss review_only
+connected_db wathefni_staging
+      PASS  db draft
+      PASS  db approve
+      PASS  period
+      PASS  preview run ok
+      PASS  preview not authoritative
+      PASS  idempotent replay
+      PASS  recalc after input change
+      PASS  fingerprint changed
+      PASS  prior superseded
+      PASS  unsupported run failed closed
+      PASS  external mode blocks preview
+      FAIL  rollback ok :: {'ok': False, 'error': 'preview_run_not_found_or_bad_status'}
+      FAIL  rollback status :: {'ok': False, 'error': 'preview_run_not_found_or_bad_status'}
+      PASS  audit events present
+      PASS  real employee refused
+      PASS  wave1 still enabled
+
+    46 passed, 2 failed

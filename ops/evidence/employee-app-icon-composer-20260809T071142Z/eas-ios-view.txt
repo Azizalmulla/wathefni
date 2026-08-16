@@ -1,0 +1,20 @@
+- Fetching the build…
+✔ Found a matching build for the project @abdulazizalmullas-team/aziz
+
+ID                       4146bebf-3af3-4727-bf88-86e37c77fd47
+Platform                 iOS
+Status                   errored
+Profile                  production
+Distribution             internal
+Channel                  canary
+SDK Version              51.0.0
+Runtime Version          0.1.0
+Version                  0.1.0
+Build number             20
+Commit                   2fa16534c8846887472dabbd10cc164a6c788f3f
+Logs                     https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/4146bebf-3af3-4727-bf88-86e37c77fd47
+Application Archive URL  null
+Build Artifacts URL      null
+Started at               8/9/2026, 10:13:33 AM
+Finished at              8/9/2026, 10:17:51 AM
+Started by               abdulazizalmulla

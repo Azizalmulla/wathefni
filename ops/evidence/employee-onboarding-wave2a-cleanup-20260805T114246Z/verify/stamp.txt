@@ -1,0 +1,16 @@
+stamp=20260805T114246Z
+eas_build_id=78a25dd7-0731-4e27-95fe-f7f44b532c51
+eas_status=finished
+install=https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/78a25dd7-0731-4e27-95fe-f7f44b532c51
+build_number=7
+profile=production
+distribution=internal
+api=https://api.wathefni.ai
+activation_phone_field=99338566
+activation_code=356216
+invite_id=656c327b-f81b-4e62-a5f6-d345c45f274b
+aziz_smoke=AZIZ_SMOKE_OK
+en_ar_api_smoke=EN_AR_API_SMOKE_OK
+backend_backup=/opt/wathefni/backups/production-pre-onboarding-wave2a-cleanup-20260805T114246Z
+rollback_flag=WATHEFNI_ONBOARDING_LIFECYCLE_V2A=off
+prior_ipa_stamp=20260805T045200Z

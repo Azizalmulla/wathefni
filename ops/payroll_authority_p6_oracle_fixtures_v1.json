@@ -1,0 +1,185 @@
+{
+  "fixture_version": "KW_P6_ORACLE_v1.0.0",
+  "statutory_policy_version": "KW_PUBLIC_BASELINE_v1.0.0",
+  "oracle_version": "1.0.0",
+  "notes": "Independent expected-results fixtures for P6 qualification. Not legal advice. Amounts are deterministic qualification targets.",
+  "archetypes": {
+    "A_small_simple": {
+      "label": "Small/simple Kuwait company",
+      "attendance_payroll_mode": "informational",
+      "sod": "sme_defaults"
+    },
+    "B_shift_based": {
+      "label": "Shift-based company",
+      "attendance_payroll_mode": "deduct_unexcused",
+      "sod": "sme_defaults"
+    },
+    "C_medium_corporate": {
+      "label": "Medium corporate",
+      "attendance_payroll_mode": "informational",
+      "sod": "distinct_approver_finalizer"
+    },
+    "D_enterprise_external": {
+      "label": "Enterprise external coexistence",
+      "payroll_mode": "external",
+      "sod": "enterprise"
+    }
+  },
+  "scenarios": [
+    {
+      "id": "A_normal_full_period",
+      "archetype": "A_small_simple",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-01-01", "end": "2045-01-31", "calendar_days": 31},
+      "policy_versions": {"company_policy": "informational_no_ot_money", "statutory": "KW_PUBLIC_BASELINE_v1.0.0"},
+      "employee": {
+        "basic_salary": 600,
+        "days_worked_in_period": 31,
+        "allowances": [{"code": "TRANSPORT", "amount": 50}]
+      },
+      "expected_totals": {"gross": 650.0, "net": 650.0}
+    },
+    {
+      "id": "A_mid_month_hire",
+      "archetype": "A_small_simple",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-01-01", "end": "2045-01-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 620,
+        "mid_period_hire": true,
+        "prorate": true,
+        "days_worked_in_period": 16
+      },
+      "expected_totals": {"gross": 320.0, "net": 320.0}
+    },
+    {
+      "id": "A_mid_month_leaver",
+      "archetype": "A_small_simple",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-01-01", "end": "2045-01-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 620,
+        "mid_period_leaver": true,
+        "prorate": true,
+        "days_worked_in_period": 15
+      },
+      "expected_totals": {"gross": 300.0, "net": 300.0}
+    },
+    {
+      "id": "A_salary_increase_mid",
+      "archetype": "A_small_simple",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-01-01", "end": "2045-01-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 600,
+        "salary_increase": {"old_basic": 600, "new_basic": 700, "days_before": 15, "days_after": 16}
+      },
+      "expected_totals": {"gross": 651.613, "net": 651.613}
+    },
+    {
+      "id": "A_bonus_and_deduction",
+      "archetype": "A_small_simple",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-01-01", "end": "2045-01-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 500,
+        "bonuses": [{"code": "BONUS", "amount": 100}],
+        "deductions": [{"code": "LOAN", "amount": 75, "category": "deduction_recurring"}]
+      },
+      "expected_totals": {"gross": 600.0, "net": 525.0}
+    },
+    {
+      "id": "A_unpaid_leave",
+      "archetype": "A_small_simple",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-01-01", "end": "2045-01-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 620,
+        "unpaid_leave_days": 2,
+        "unpaid_leave_money": true
+      },
+      "expected_totals": {"gross": 620.0, "net": 580.0}
+    },
+    {
+      "id": "B_ot_rest_ph",
+      "archetype": "B_shift_based",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-02-01", "end": "2045-02-28", "calendar_days": 28},
+      "employee": {
+        "basic_salary": 560,
+        "hourly_divisor_hours": 208,
+        "ot_ordinary_hours": 8,
+        "ot_ordinary_multiplier": "1.25",
+        "rest_day_hours": 8,
+        "rest_day_multiplier": "1.5",
+        "public_holiday_hours": 8,
+        "public_holiday_multiplier": "2.0"
+      },
+      "expected_totals": {"gross": 662.296, "net": 662.296}
+    },
+    {
+      "id": "B_absence_lateness",
+      "archetype": "B_shift_based",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-02-01", "end": "2045-02-28", "calendar_days": 28},
+      "employee": {
+        "basic_salary": 560,
+        "absence_days": 1,
+        "absence_money": true,
+        "lateness_deduction": 5
+      },
+      "expected_totals": {"gross": 560.0, "net": 535.0}
+    },
+    {
+      "id": "C_pifss_resolvable",
+      "archetype": "C_medium_corporate",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-03-01", "end": "2045-03-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 800,
+        "allowances": [{"code": "HOUSING", "amount": 100}],
+        "pifss": {"contributory_wage": 900, "ee_pct": "0.075", "er_pct": "0.115"},
+        "pifss_resolvable": true
+      },
+      "expected_totals": {"gross": 900.0, "net": 832.5}
+    },
+    {
+      "id": "C_non_applicable_statutory",
+      "archetype": "C_medium_corporate",
+      "authoritative_eligible": true,
+      "period": {"start": "2045-03-01", "end": "2045-03-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 700,
+        "pifss_resolvable": false
+      },
+      "expected_totals": {"gross": 700.0, "net": 700.0},
+      "expected_warnings": ["statutory_not_applicable"]
+    },
+    {
+      "id": "C_gated_gcc_blocks",
+      "archetype": "C_medium_corporate",
+      "authoritative_eligible": false,
+      "period": {"start": "2045-03-01", "end": "2045-03-31", "calendar_days": 31},
+      "employee": {
+        "basic_salary": 900,
+        "statutory_gated": "gcc_extension_review_required"
+      },
+      "expected_blockers": ["gcc_extension_review_required"],
+      "expected_totals": {"gross": 900.0, "net": 900.0}
+    },
+    {
+      "id": "D_external_mode_b_mirror",
+      "archetype": "D_enterprise_external",
+      "authoritative_eligible": false,
+      "money_authority": "external",
+      "period": {"start": "2045-04-01", "end": "2045-04-30", "calendar_days": 30},
+      "employee": {
+        "basic_salary": 1000,
+        "external_gross": 1000,
+        "external_net": 950
+      },
+      "expected_totals": {"gross": 1000.0, "net": 950.0},
+      "expected_warnings": ["mode_b_external_authority"]
+    }
+  ]
+}

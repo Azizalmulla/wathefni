@@ -1,0 +1,11 @@
+{
+  "origin": "Application",
+  "displayName": "Read and create online meetings",
+  "id": "b8bb2037-6e08-44ac-a4ea-4674e010e2a4",
+  "description": "Allows the app to read and create online meetings as an application in your organization.",
+  "isEnabled": true,
+  "value": "OnlineMeetings.ReadWrite.All",
+  "allowedMemberTypes": [
+    "Application"
+  ]
+}

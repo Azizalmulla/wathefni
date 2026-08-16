@@ -1,0 +1,88 @@
+[07:43:42] qualification run 20260807T074340Z base=http://127.0.0.1:8010
+[07:43:42] canaries: WATHEFNI-9655497001 WATHEFNI-9655497002 WATHEFNI-9655497003
+[07:43:42] minted dashboard session for azizalmulla16@gmail.com role=owner
+[07:43:42] hr permissions resolved: 61 ess_hr=False manage=True unmask=False
+[07:43:42] === Bank ESS matrix ===
+[07:43:42]   [PASS] employee_view_status_no_bank :: {"code": 200, "state": "none"}
+[07:43:42]   [PASS] next_step_present_when_empty :: "Add your bank details so salary can be paid to you."
+[07:43:42]   [PASS] draft_save :: {"code": 200, "state": "draft"}
+[07:43:42]   [PASS] masking_default_employee :: {"leaked": false}
+[07:43:42]   [PASS] proposal_sealed_at_rest :: {"sealed": true, "leaked": false}
+[07:43:42]   [PASS] retry_idempotency_create :: {"code": 200, "idempotent": true}
+[07:43:43]   [PASS] submit_draft_for_review :: {"code": 200, "state": "pending_hr"}
+[07:43:43]   [PASS] change_under_review_flag
+[07:43:43]   [PASS] duplicate_submit_protection :: {"code": 409, "error": "bank_request_already_active"}
+[07:43:43]   [PASS] unauthorized_employee_isolation :: {"code": 200, "leaked": false, "other_request_id": null, "draft_id_present": true}
+[07:43:43]   [PASS] unauthorized_employee_cannot_withdraw :: {"code": 403, "error": "not_request_owner"}
+[07:43:43]   [PASS] hr_review_compare_current_vs_proposed :: {"code": 200, "changed_fields": ["account_holder", "bank_name", "iban"], "first": true}
+[07:43:43]   [PASS] hr_view_masked_by_default :: {"leaked": false}
+[07:43:43]   [PASS] hr_sees_evidence_list
+[07:43:43]   [PASS] hr_reject_requires_reason :: {"code": 422, "error": "decision_reason_required"}
+[07:43:43]   [PASS] hr_reject_with_reason :: {"state": "rejected", "reason": "QUAL: account holder name does not match your civil ID."}
+[07:43:43]   [PASS] employee_sees_rejection_next_step :: {"owner": "employee", "message": "Your submission was rejected. Review the reason, correct it and resubmit.", "message_en": "Your submission was rejected. Review the reason, correct it and resubmit.", "message_ar": "\u06
+[07:43:43]   [PASS] can_resubmit_after_reject
+[07:43:43]   [PASS] employee_correction_and_resubmit :: {"code": 200, "state": "pending_hr"}
+[07:43:43]   [PASS] withdrawal :: {"code": 200, "state": "withdrawn"}
+[07:43:43]   [PASS] withdraw_clears_onboarding_processing :: {"status": "pending"}
+[07:43:43]   [PASS] kw_iban_enforced_at_submit :: {"code": 422, "error": "bank_account_invalid", "detail": {"error": "bank_account_invalid", "message": "A Kuwait IBAN must contain 30 letters and numbers.", "message_en": "A Kuwait IBAN must contain 30 letters and numbers
+[07:43:43]   [PASS] needs_review_replace_recovery :: {"code": 200, "replaced": true, "state": "pending_hr", "error": ""}
+[07:43:43]   [PASS] first_submission_live :: {"code": 200}
+[07:43:44]   [PASS] hr_approve_stage_1 :: {"code": 200, "error": ""}
+[07:43:44]   [PASS] hr_approve_stamps_verified_not_effective :: {"verified_by_stage": "hr", "submission_state": "pending_payroll", "next_step": {"owner": "payroll", "message": "HR verified your details. Payroll is reviewing them before they become effective.", "message_en": "HR verif
+[07:43:44]   [PASS] concurrent_hr_review_guard :: {"code": 409, "error": "stale_concurrency_version"}
+[07:43:44]   [PASS] payroll_effective_transition :: {"code": 200, "request_state": "applied", "effective_from": "2026-08-07", "bank_profile_version": 1}
+[07:43:44]   [PASS] retry_idempotency_apply :: {"code": 200, "current_effective_rows": 1}
+[07:43:44]   [PASS] authority_layers_separated :: {"verified_rows": 1, "current_effective_rows": 1}
+[07:43:44]   [PASS] payroll_effective_never_plaintext :: {"leaked": false}
+[07:43:44]   [PASS] notification_deduplication :: {"groups": 4, "dupes": []}
+[07:43:44]   [PASS] audit_history :: {"event_count": 12, "actions": ["apply", "correct_and_resubmit", "create_draft", "decide_approve", "decide_reject", "submit", "withdraw"]}
+[07:43:44]   [PASS] onboarding_bank_item_synced_on_apply :: {"status": "accepted"}
+[07:43:44]   [PASS] existing_bank_change :: {"code": 200, "has_verified": true, "state": "pending_hr"}
+[07:43:44]   [PASS] verified_separate_from_submitted :: {"verified_present": true, "submitted_present": true}
+[07:43:44]   [PASS] unreviewed_input_not_payroll_truth :: {"effective_fingerprint_matches_previous": true}
+[07:43:44]   [PASS] evidence_upload :: {"evidence_id": "c26f44c5-d4de-4bc7-ac24-dbf36cb1019c"}
+[07:43:44]   [PASS] evidence_access_own :: {"code": 200}
+[07:43:44]   [PASS] evidence_access_denied_other_employee :: {"code": 404}
+[07:43:44]   [PASS] evidence_access_hr_authorized :: {"code": 200}
+[07:43:44]   [PASS] unauthorized_hr_access_denied :: {"code": 401, "error": "dashboard_auth_failed"}
+[07:43:44]   [PASS] cross_tenant_isolation_unknown_key :: {"code": 404}
+[07:43:44]   [PASS] cross_tenant_isolation_storage :: {"rows_outside_tenant": 0}
+[07:43:44]   [PASS] arabic_next_step :: {"message": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\
+[07:43:44]   [PASS] masking_and_permitted_reveal_contract :: {"masking": {"masked_by_default": true, "reveal_requires_permission": "employees.ess.unmask", "reveal_is_audited": true}, "leaked": false}
+[07:43:44]   [PASS] payroll_lock_state_defined :: {"locked": false, "period_status": null, "period_end": null}
+[07:43:44] === Onboarding completion matrix ===
+[07:43:44]   [PASS] new_employee_no_progress :: "not_started"
+[07:43:44]   [PASS] partial_progress :: {"satisfied": 0, "open": 3}
+[07:43:44]   [PASS] waiting_on_employee :: "waiting_on_employee"
+[07:43:44]   [PASS] waiting_on_hr :: "waiting_on_hr"
+[07:43:44]   [PASS] rejected_item :: "waiting_on_employee"
+[07:43:44]   [PASS] corrected_item :: ["qual_doc_a"]
+[07:43:44]   [PASS] waived_item :: {"waiting_hr": ["qual_doc_b"]}
+[07:43:44]   [PASS] not_applicable_item :: "completed"
+[07:43:44]   [PASS] completion :: "completed"
+[07:43:44]   [PASS] completion_evidence_recorded :: {"first_completed_at": "2026-08-07 07:43:44.442107+00:00", "evidence": 1}
+[07:43:44]   [PASS] legacy_columns_mirrored :: {"onboarding_status": "completed", "documents_pending": 0, "documents_complete": 1}
+[07:43:44]   [PASS] requirement_added_after_completion :: "reopened"
+[07:43:44]   [PASS] reopened_onboarding :: "reopened"
+[07:43:44]   [PASS] historical_evidence_preserved :: {"evidence": 1}
+[07:43:44]   [PASS] requirement_removed_after_progress :: "completed"
+[07:43:44]   [PASS] blocked_dependency_detected :: {"blocked": ["qual_dep_child"]}
+[07:43:44]   [PASS] accepted_satisfies_dependency :: {"blocked": []}
+[07:43:44]   [PASS] employee_transfer_new_requirement :: "reopened"
+[07:43:44]   [PASS] legacy_received_not_verified :: {"waiting_hr": ["qual_dep_child"]}
+[07:43:44]   [PASS] legacy_backfill_stamps_history :: {"pre": false, "stamped": true, "first_completed_at": "2025-01-15 00:00:00+00:00"}
+[07:43:44]   [PASS] legacy_backfill_idempotent :: {"restamped": false, "first_completed_at": "2025-01-15 00:00:00+00:00"}
+[07:43:44]   [PASS] legacy_employee_recompute_completed :: "completed"
+[07:43:44]   [PASS] legacy_employee_reopens_not_restarts :: "reopened"
+[07:43:44]   [PASS] cross_surface_status_consistency :: {"employee_app": "reopened", "hr_completion_endpoint": "reopened", "hr_onboarding_web": "reopened", "contract": "reopened"}
+[07:43:44]   [PASS] reminder_covers_correction_state :: {"party": "employee", "items": ["qual_dep_child", "qual_transfer_req"], "dedup_key": "onboarding:reopened:employee:qual_dep_child,qual_transfer_req"}
+[07:43:44]   [PASS] reminder_deduplication :: {"key": "onboarding:reopened:employee:qual_dep_child,qual_transfer_req"}
+[07:43:44]   [PASS] retry_idempotency_recompute :: {"state": "reopened", "history_before": 9, "history_after": 9}
+[07:43:44]   [PASS] permissions_unauthenticated_denied :: {"code": 401}
+[07:43:44]   [PASS] tenant_isolation :: {"code": 404}
+[07:43:44]   [PASS] arabic_next_action :: "\u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u0641\u062a\u062d \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u2014 \u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u
+[07:43:44]   [PASS] mobile_projection_contract :: {"code": 200, "lifecycle_version": "2a"}
+[07:43:44] cleanup: {"evidence_files_unlinked": 1, "employee_ess_request_events": 13, "employee_bank_notifications": 4, "employee_bank_evidence": 1, "employee_bank_effective": 1, "employee_bank_verified": 1, "employee_ess_bank_profiles": 1, "employee_ess_requests": 5, "employee_onboarding_completion_events": 15, "employee_onboarding_completion": 3, "onboarding_items": 14, "employee_onboarding_assignments": 0, "employee_sessions": 3, "employees": 4}
+[07:43:44] results: /opt/wathefni/production-evidence/bank-ess-p0/20260807T074024Z/qual/qual-20260807T074340Z.json
+[07:43:44] bank_ess: {"total": 47, "proven": 47, "failed": 0, "partial": 0, "skipped": 0}
+[07:43:44] onboarding_completion: {"total": 31, "proven": 31, "failed": 0, "partial": 0, "skipped": 0}

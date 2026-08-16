@@ -1,0 +1,31 @@
+PASS flag_on
+PASS enabled_for_allowlisted
+PASS disabled_for_other_employee
+PASS civil_id_is_dual_item
+PASS canary_is_dual_item
+PASS passport_not_dual_item
+PASS model_only_opposite_soft — {'detected_side': 'back', 'hr_warning': True, 'expected_part': 'front', 'side_decision': 'soft_accepted_opposite', 'side_evidence': {'model_side': 'back', 'side_confidence': 0.99, 'document_relationship': '', 'layout_evidence': [], 'layout_front_score': 0, 'layout_back_score': 0}, 'side_confidence': 0.99}
+PASS strong_front_into_back_blocks — wrong_side
+PASS mislabeled_back_with_reverse_cues_soft — {'detected_side': 'front', 'hr_warning': True, 'expected_part': 'back', 'side_decision': 'soft_accepted_opposite', 'side_evidence': {'model_side': 'front', 'side_confidence': 0.97, 'document_relationship': '', 'layout_evidence': ['field:address', 'field:blood_type'], 'layout_front_score': 0, 'layout_back_score': 2}, 'side_confidence': 0.97}
+PASS unknown_soft
+PASS front_matches
+PASS legacy_back_missing_side
+PASS dual_part_back_not_missing_side
+PASS json_ready_dates
+PASS json_dumps_ok
+PASS pair_incomplete_missing_back
+PASS pair_duplicate_sha
+PASS pair_identity_mismatch
+PASS pair_ok_with_unknown_hr_warn
+PASS canary_alias
+PASS wrong_side_in_clear_blocks
+PASS correction_wrong_side
+PASS legacy_accepted_schema
+PASS legacy_no_upload_front
+PASS collecting_upload_front
+PASS collecting_upload_back
+PASS collecting_no_generic_upload
+PASS one_side_replace_front
+PASS one_side_upload_back
+PASS one_side_incomplete
+OK civil_id_dual_side smoke

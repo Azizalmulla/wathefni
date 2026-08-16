@@ -1,0 +1,87 @@
+{
+  "honesty": {
+    "contract": "migration_wave1_foundation_cv_chunked",
+    "version": "1.0.0",
+    "real_customer_data": false,
+    "millions_claim": false,
+    "migration_center_ui": false,
+    "employee_leave_compensation": false,
+    "payroll_money": false,
+    "attendance_ingest": false,
+    "ai_assistant": false,
+    "mobile": false,
+    "authority_default": "held",
+    "auto_admit": false,
+    "auto_merge": false,
+    "synthetic_only": true,
+    "allowed_companies": [
+      "MIGW1ALPHA",
+      "MIGW1BRAVO",
+      "WATHEFNI"
+    ]
+  },
+  "fail": 0,
+  "pass": 3,
+  "core": {
+    "dry_run": {
+      "duplicate": 2,
+      "valid": 10
+    },
+    "core_batch": "a160ea52-e240-4db0-bfa5-5d8f7a5bfb94",
+    "held": {
+      "apps": 46,
+      "with_external_id": 46,
+      "held_ok": true
+    },
+    "exception_queue": 4,
+    "audit_events": 6,
+    "retry_replayed": 1
+  },
+  "lane_1k": {
+    "label": "1k",
+    "count": 1000,
+    "batch_id": "72c77141-ced5-4345-83f3-bb07c631184f",
+    "elapsed_s": 28.94,
+    "committed": 981,
+    "duplicates": 19,
+    "held": {
+      "apps": 981,
+      "with_external_id": 981,
+      "held_ok": true
+    },
+    "rollback": {
+      "applications": 981,
+      "documents": 981,
+      "files": 981,
+      "candidates": 981,
+      "extraction_jobs_cancelled": 0
+    }
+  },
+  "lane_10k": {
+    "label": "10k",
+    "count": 10000,
+    "batch_id": "9ef258cf-dc7b-4342-92db-c655e8c48554",
+    "elapsed_s": 284.11,
+    "committed": 9981,
+    "duplicates": 19,
+    "held": {
+      "apps": 9981,
+      "with_external_id": 9981,
+      "held_ok": true
+    },
+    "rollback": {
+      "applications": 9981,
+      "documents": 9981,
+      "files": 9981,
+      "candidates": 9981,
+      "extraction_jobs_cancelled": 0
+    }
+  },
+  "schema_counters": {
+    "apply_calls": 0,
+    "require_calls": 77232,
+    "blocked_apply_attempts": 0
+  },
+  "ok": true,
+  "verdict": "PASS"
+}

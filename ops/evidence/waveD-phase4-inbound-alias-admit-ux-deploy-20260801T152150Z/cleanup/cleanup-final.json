@@ -1,0 +1,15 @@
+{
+  "proof_intake_addresses_disabled": true,
+  "disabled_from_api": [],
+  "admit_apps": {
+    "single": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+    "bulk": [
+      "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT"
+    ]
+  },
+  "note": "Two pre-existing held import apps were assigned to OCCTST_044035 during admit proofs and left as ready_for_review (archive skipped). UI seed intake address disabled. Continuous Postmark default test address untouched (active count 1).",
+  "active_inbound_allowlist": "WATHEFNI",
+  "mailbox_sync": "off",
+  "external_tenants": "disabled",
+  "d5": "not_started"
+}

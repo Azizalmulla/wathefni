@@ -1,0 +1,43 @@
+    compensation planning c6 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  ja hard
+      PASS  no duplicate grade
+      PASS  not payroll
+      PASS  finalized not applied
+      PASS  plan approved not salary
+      PASS  change package not paid
+      PASS  performance optional
+      PASS  rating not auto
+      PASS  talent optional
+      PASS  hipo not auto
+      PASS  works payroll off
+      PASS  midpoint not recommended
+      PASS  promotion not role mutation
+      PASS  bonus not paid
+      PASS  currency explicit
+      PASS  assistant mutations out
+      PASS  no second analytics
+      PASS  employee draft hidden
+      PASS  setup wave6 comp
+      PASS  setup honesty ja hard
+      PASS  setup honesty not payroll
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  no local grade table
+      PASS  gate requires ja env
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on with ja
+      PASS  tenant gate
+      PASS  schema cycles
+      PASS  schema bands
+      PASS  schema handoffs
+      PASS  employment mutated check
+      PASS  payroll paid check
+      PASS  no cp_grade ddl
+      PASS  refs ja_grade
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    39 passed, 0 failed (unit-only)

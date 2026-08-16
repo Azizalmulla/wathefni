@@ -51,6 +51,9 @@ class Matrix:
 
 
 def require_staging() -> None:
+    import production_data_safety as _pds
+
+    _pds.require_fixture_tooling(company_code=COMPANY, extra_companies=[OTHER], destructive=True)
     if os.environ.get("WATHEFNI_EXPECTED_DATABASE_NAME") != "wathefni_staging":
         raise SystemExit("refusing non-staging database")
     if (os.environ.get("WATHEFNI_DELIVERY_MODE") or "").lower() not in {"dry_run", "dry-run", "dryrun"}:
@@ -58,6 +61,9 @@ def require_staging() -> None:
 
 
 def cleanup(orch: Any, company: str = COMPANY) -> dict[str, int]:
+    import production_data_safety as _pds
+
+    _pds.require_destructive_scope([company])
     counts: dict[str, int] = {}
     with orch.db_connect() as conn:
         with conn.cursor() as cur:
@@ -118,10 +124,12 @@ def seed_companies(orch: Any) -> None:
                 cur.execute(
                     """
                     INSERT INTO companies
-                      (company_code, name, metadata, raw_json, created_at, updated_at)
-                    VALUES (%s,%s,%s::jsonb,%s::jsonb,now(),now())
+                      (company_code, name, country, metadata, raw_json, created_at, updated_at)
+                    VALUES (%s,%s,'KW',%s::jsonb,%s::jsonb,now(),now())
                     ON CONFLICT (company_code) DO UPDATE
-                      SET metadata=companies.metadata || EXCLUDED.metadata,
+                      SET name=EXCLUDED.name,
+                          country=COALESCE(NULLIF(companies.country,''), 'KW'),
+                          metadata=companies.metadata || EXCLUDED.metadata,
                           raw_json=companies.raw_json || EXCLUDED.raw_json,
                           updated_at=now()
                     """,
@@ -132,16 +140,20 @@ def seed_companies(orch: Any) -> None:
                         json.dumps({"c01_marker": MARKER, "smoke": True}),
                     ),
                 )
-                cur.execute(
-                    """
-                    INSERT INTO company_modules
-                      (company_code, module_key, enabled, source, updated_at)
-                    VALUES (%s,'pre_hiring',true,'c01_staging_matrix',now())
-                    ON CONFLICT (company_code, module_key) DO UPDATE
-                      SET enabled=true, source=EXCLUDED.source, updated_at=now()
-                    """,
-                    (company,),
-                )
+                # C0/C1 exercises schedule_interview fail-closed entitlement. Seed
+                # interviews alongside pre_hiring so the fixture company matches
+                # production entitlement semantics (module_disabled otherwise).
+                for module_key in ("pre_hiring", "interviews"):
+                    cur.execute(
+                        """
+                        INSERT INTO company_modules
+                          (company_code, module_key, enabled, source, updated_at)
+                        VALUES (%s,%s,true,'c01_staging_matrix',now())
+                        ON CONFLICT (company_code, module_key) DO UPDATE
+                          SET enabled=true, source=EXCLUDED.source, updated_at=now()
+                        """,
+                        (company, module_key),
+                    )
         conn.commit()
 
 

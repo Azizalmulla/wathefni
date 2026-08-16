@@ -1,0 +1,139 @@
+=== W4 ===
+PASS  version 4.0.0
+PASS  wave4 enabled
+PASS  company WATHEFNI
+PASS  honesty templates true
+PASS  honesty recurring true
+PASS  honesty rotations false
+PASS  honesty publishing false
+PASS  honesty payroll false
+PASS  honesty leave false
+PASS  honesty attendance false
+PASS  honesty draft_publish false
+PASS  w3 honesty still templates false
+PASS  shw4 synthetic
+PASS  real phone not synth
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  same-day template
+PASS  overnight template
+PASS  split afternoon template
+PASS  fixed weekly recurrence
+PASS  six-on/one-off recurrence
+PASS  alternating day/night recurrence
+PASS  team-targeted recurrence
+PASS  split schedule second recurrence
+PASS  preview ok
+FAIL  preview has newly_generated :: {'unchanged': 0, 'newly_generated': 0, 'updated_future': 0, 'conflict': 0, 'detached': 0, 'cancelled_held': 0}
+FAIL  effective window present :: None
+PASS  materialize weekly ok
+FAIL  materialize created rows :: {'unchanged': 0, 'newly_generated': 0, 'updated_future': 0, 'conflict': 0, 'detached': 0, 'cancelled_held': 0, 'created_ids': [], 'updated_ids': [], 'conflicts': []}
+PASS  duplicate materialize idempotent
+FAIL  unchanged after rematerialize :: {'unchanged': 0, 'newly_generated': 0, 'updated_future': 0, 'conflict': 0, 'detached': 0, 'cancelled_held': 0, 'created_ids': [], 'updated_ids': [], 'conflicts': []}
+PASS  test lock acquired
+PASS  concurrent materialize lock held
+PASS  alternating materialize ok
+FAIL  overnight generated rows :: 0
+PASS  split PM materialize ok
+PASS  team materialize attempted
+PASS  six-on materialize ok
+PASS  one-off exception skip
+PASS  pause recurrence
+PASS  paused preview empty
+PASS  resume recurrence
+PASS  template edit ok
+PASS  template planning_version bumped
+PASS  no historical generated for weekly (skip today)
+FAIL  cancelled held on rematerialize :: no victim
+FAIL  cancelled does not return :: no victim
+PASS  manual override detached class
+PASS  end recurrence
+PASS  cleanup residual_total
+PASS  create_template present
+PASS  preview_recurrence present
+PASS  materialize_recurrence present
+PASS  app imports wave4
+
+47 passed, 7 failed
+W4_RC=1
+=== W3 UX ===
+PASS  version 3.1.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  SHW3B synthetic key
+PASS  965531 synthetic phone
+PASS  real phone not wave3 synth
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+43 passed, 0 failed
+W3_RC=0
+=== W1 ===
+      PASS  beyond-end soft-cancelled
+      PASS  lifecycle blocks terminated
+      PASS  tenant isolation company mismatch
+
+    90 passed, 0 failed
+W1_RC=0
+=== W2 ===
+      PASS  recon cancel is audited soft-cancel
+      PASS  recon cancel sets cancelled
+      PASS  recon cancel reason code
+      PASS  wave2 honesty denies leave balance mutation
+      PASS  wave2 module no leave balance SQL
+      PASS  wave2 module no payroll money calc
+
+    82 passed, 0 failed
+W2_RC=0
+=== E360 ===
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+=== ONB ===
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+=== ATT ===
+PASS  attendance freeze cursor rule present or evidence copy
+
+11 passed, 1 failed
+=== LEAVE ===
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+STAGING_REGRESSIONS_DONE

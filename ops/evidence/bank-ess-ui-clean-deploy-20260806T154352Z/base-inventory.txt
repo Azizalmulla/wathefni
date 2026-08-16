@@ -1,0 +1,23 @@
+=== base posthire ===
+ActivationHandoff.security.test.tsx
+AttendanceImport.tsx
+CloseExportWorkspace.tsx
+ExternalPayrollWorkspace.tsx
+PayslipWorkspace.tsx
+PostHire.tsx
+StatutoryWorksheetWorkspace.tsx
+actionInboxWave1.test.ts
+analyticsAttentionWave1.test.ts
+complianceFindingsWave1.test.ts
+employees360
+payrollCloseExportUx.ts
+payrollExternalUx.ts
+payrollPayslipUx.ts
+payrollStatutoryUx.ts
+ProfilePanels.tsx
+WorkforcePage.tsx
+chrome.test.tsx
+chrome.tsx
+    5862 /tmp/wf-bank-ess-ui-release-20260806T154352Z/apps/wathefni-dashboard/src/posthire/PostHire.tsx
+78:import { AssignmentHistoryPanel, EssBankMaskPanel } from '@/posthire/employees360/ProfilePanels'
+1766:          <EssBankMaskPanel access={access} employeeKey={employeeKey} onAccessIssue={onAccessIssue} />

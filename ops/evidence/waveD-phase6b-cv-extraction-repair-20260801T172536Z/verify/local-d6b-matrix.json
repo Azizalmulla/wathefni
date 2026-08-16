@@ -1,0 +1,55 @@
+{
+  "marker": "wave_d6b_cv_extraction",
+  "passed": true,
+  "app_keys": [
+    "imp-d6bbravo-8de0194a6e6e8357-D6BBRAVO-IMPORT",
+    "imp-d6bbravo-b20bb7c1f9a0652c-D6BBRAVO-IMPORT",
+    "imp-d6bbravo-4d2698c7b69d13fe-D6BBRAVO-IMPORT"
+  ],
+  "rich_path": {
+    "ok": true,
+    "held_timing": {
+      "intake_validation": 1,
+      "file_safety_scan": 1,
+      "cv_identity_resolution": 1,
+      "accepted_intake_preparation": 1,
+      "held_intake_materialization": 0
+    },
+    "extraction_processed": 1,
+    "job_result_status": "ok",
+    "authorization_mode": "accepted_identity_binding",
+    "promoted_email": "d6b.rich.94b1aec6@example.com",
+    "doc_count": 1
+  },
+  "idempotent_extraction": {
+    "ok": true,
+    "second_processed": 0
+  },
+  "duplicate_message": {
+    "ok": true
+  },
+  "conflict_path": {
+    "ok": true,
+    "authorization_mode": "held_identity_review_scan_clean",
+    "extraction_status": "ok",
+    "processed": 1
+  },
+  "opaque_path": {
+    "ok": true,
+    "held_warning": true,
+    "extraction": {
+      "ok": true,
+      "error": "low_quality_text",
+      "method": "pdftotext",
+      "status": "extraction_soft_failed",
+      "app_key": "imp-d6bbravo-4d2698c7b69d13fe-D6BBRAVO-IMPORT",
+      "terminal": true,
+      "document_id": "cb261c07-8304-4488-bc9d-6419c528f800",
+      "authorization_mode": "held_identity_review_scan_clean"
+    }
+  },
+  "no_indefinite_pending": true,
+  "cleanup": {
+    "archived": 3
+  }
+}

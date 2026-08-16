@@ -1,0 +1,179 @@
+=== E360 ===
+PASS  wave2 module present
+PASS  wave2 authority map referenced
+PASS  wave2 no silent map drop helper named bypass
+PASS  wave4 overlap guard present
+PASS  wave4 apply_assignment_change present
+PASS  wave4 history list present
+PASS  wave4 no unqualified assignment-history wipe SQL
+PASS  only KW verified pack
+PASS  KW pack enabled
+PASS  KW version 1.0.0
+PASS  payroll owns monetary calculations
+PASS  monetary owner payroll (overlay/default)
+PASS  exceptional manual only default
+PASS  resolve KW private
+PASS  SA fail closed
+PASS  AE fail closed
+PASS  incomplete classification fail closed
+PASS  dual-control create_classification_request
+PASS  classification self_approval_forbidden
+PASS  remediation excludes quarantined synthetics
+PASS  lifecycle synthetic gate fn
+PASS  lifecycle real allowlist fn
+PASS  lifecycle allowlist env wired
+PASS  lifecycle self_approval_forbidden
+PASS  lifecycle synthetic_only_gate error retained
+PASS  ess synthetic assert
+PASS  ess real allowlist
+PASS  ess bank real allowlist
+PASS  ess bank encryption helper
+PASS  ess bind identity
+PASS  ess revoke sessions
+PASS  ess synthetic-only error retained
+PASS  ess bank not allowlisted error
+PASS  ess plaintext bank forbidden
+PASS  ess self_approval_forbidden
+PASS  ess own_data_only
+PASS  ess real allowlist empty by default in test
+PASS  ess bank allowlist empty by default in test
+PASS  app require allowlist helper
+PASS  app assert allowlisted
+PASS  app session_epoch stale revoke
+PASS  app create_employee_session calls allowlist
+PASS  completion freeze doc present
+PASS  freeze doc mentions HR production use
+PASS  freeze doc mentions Talal
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions Manual only
+PASS  freeze doc mentions Payroll
+PASS  freeze doc mentions Wave D
+PASS  freeze doc mentions pre-hiring
+PASS  freeze doc mentions smoke-test-employees360-freeze-regression.py
+PASS  cursor freeze rule present
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+=== ONBOARDING ===
+PASS  load_onboarding_items exists
+PASS  loader joins employees
+PASS  loader has no candidates.read
+PASS  employee_onboarding_items wraps load
+PASS  wrapper has no candidates.read
+PASS  plaintext bank helper
+PASS  receipt rejects bank_details
+PASS  mask_onboarding_item_for_read
+PASS  wave2 bank ess authority
+PASS  canonical bank ESS encrypted
+PASS  SEED helper
+PASS  HR_MUTATE helper
+PASS  HR_MUTATE companies helper
+PASS  HR_MUTATE company gate
+PASS  mutate allowed_for helper
+PASS  SEED defaults off when unset
+PASS  HR_MUTATE defaults off when unset
+PASS  company allowlist WATHEFNI
+PASS  company allowlist OTHERCO denied
+PASS  SEED stays off for 'off'
+PASS  canonical template id
+PASS  canonical version 2.0.0
+PASS  FOUR_REALS defined
+PASS  is_four_real_employee helper
+PASS  migration plan read-only marker
+PASS  mark_item_wave2 expected_row_version
+PASS  stale_item_version error
+PASS  record_onboarding_audit
+PASS  mark_onboarding_item uses expected_row_version
+PASS  cancel history preserved
+PASS  cancel_onboarding registered
+PASS  reschedule_onboarding registered
+PASS  list_onboarding_page exists
+PASS  list uses _employee_scope_where
+PASS  detail uses context_manager_allows_employee
+PASS  mark checks manager_scope_allows_employee
+PASS  retired_legacy recognized
+PASS  onboarding freeze doc present
+PASS  freeze doc mentions HR production use
+PASS  freeze doc mentions scoped GO
+PASS  freeze doc mentions Talal
+PASS  freeze doc mentions disabled
+PASS  freeze doc mentions default_kuwait@2.0.0
+PASS  freeze doc mentions ESS-owned
+PASS  freeze doc mentions ONBOARDING_SEED
+PASS  freeze doc mentions smoke-test-onboarding-freeze-regression.py
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Wave D
+PASS  cursor onboarding freeze rule present
+PASS  E360 freeze intact
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+=== ATTENDANCE ===
+PASS  attendance freeze doc present
+PASS  freeze doc mentions CAPTURE_INGEST
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions punch immutability
+PASS  freeze doc mentions approve
+PASS  freeze doc mentions apply
+PASS  freeze doc mentions manager self
+PASS  freeze doc mentions payroll
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions NO-GO
+PASS  authority has synthetic-only gate
+PASS  authority punch append path present
+PASS  ops has manager_self_correction_denied
+PASS  ops has employee_outside_manager_scope
+PASS  ops has payroll_period_locked
+PASS  ops separates approve/apply
+PASS  ops dual approval
+PASS  ops stale_row_version
+PASS  E360 freeze doc present
+PASS  Onboarding freeze doc present
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+=== LEAVE ===
+PASS  leave freeze doc present
+PASS  freeze doc mentions self_approval
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions enforced=false
+PASS  freeze doc mentions legal_reviewed=false
+PASS  freeze doc mentions ledger
+PASS  freeze doc mentions attachment
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions Payroll
+PASS  freeze doc mentions NO-GO
+PASS  freeze doc mentions REAL_DECISION
+PASS  self_decision_denied present
+PASS  self_approval_forbidden string
+PASS  synthetic_only gate
+PASS  lifecycle_gate present
+PASS  policy pack version 2.1.0
+PASS  enforced false in pack
+PASS  ledger reservation idempotency index
+PASS  unpaid payroll_boundary
+PASS  attachment mask helper
+PASS  assert_handoff_has_no_money
+PASS  wave4 real decision gate
+PASS  wave4 dual control
+PASS  wave4 kill switch
+PASS  app wires wave4 gate on approve
+PASS  app attendance reverse event-before-delete
+PASS  app does not set enforced=true for leave policies in wave4
+PASS  LeaveWorkspace present (orch enrich fallback)
+PASS  leave freeze cursor rule present
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed

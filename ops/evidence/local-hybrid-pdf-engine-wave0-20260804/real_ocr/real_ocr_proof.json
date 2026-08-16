@@ -1,0 +1,695 @@
+{
+  "wave": "local_hybrid_pdf_engine_wave0_real_ocr_proof",
+  "created_at": "2026-08-03T22:54:24.499236+00:00",
+  "model": "mistral-ocr-4-0",
+  "docs": 12,
+  "plan": [
+    {
+      "file": "syn_scanned_image_only_cv_000.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "syn_scanned_image_only_cv_001.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "syn_scanned_arabic_cv_000.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "syn_mixed_digital_scanned_000.pdf",
+      "ocr_pages": [
+        2
+      ],
+      "native_pages": [
+        1
+      ]
+    },
+    {
+      "file": "syn_mixed_digital_scanned_001.pdf",
+      "ocr_pages": [
+        2
+      ],
+      "native_pages": [
+        1
+      ]
+    },
+    {
+      "file": "syn_rotated_scan_cv_000.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "syn_lowres_compressed_scan_cv_000.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "syn_broken_encoding_000.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "syn_broken_encoding_001.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "wave0_cv_scanned_en_01.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    },
+    {
+      "file": "wave0_cv_mixed_01.pdf",
+      "ocr_pages": [
+        2
+      ],
+      "native_pages": [
+        1
+      ]
+    },
+    {
+      "file": "wave0_cv_broken_encoding_01.pdf",
+      "ocr_pages": [
+        1
+      ],
+      "native_pages": []
+    }
+  ],
+  "hybrid_billable_pages_total": 12,
+  "hybrid_estimated_cost_usd_total": 0.048,
+  "hybrid_ocr_latency_ms_sum": 8830,
+  "poppler_compare_billable_pages_total": 11,
+  "poppler_compare_estimated_cost_usd_total": 0.044,
+  "note": "Poppler compare OCR is additional evidence cost; hybrid primary cap tracked separately",
+  "cost_per_page_assumption": 0.004,
+  "cap_pages": 30,
+  "within_cap_hybrid": true,
+  "production_routing_changed": false,
+  "results": [
+    {
+      "file": "syn_scanned_image_only_cv_000.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 185
+        }
+      ],
+      "hybrid_merged_preview": "# Huda AlRashid\n\nCompliance Specialist\n\nEmail: huda.alrashid.3526@synthetic-eval.example\n\nPhone: +96556693343\n\nSkills: Arabic NLP, Attendance, OCR, Compliance\n\nScanned synthetic CV page",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 185,
+        "words": 19
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 832,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 611,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 185,
+        "words": 19
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_scanned_image_only_cv_001.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 176
+        }
+      ],
+      "hybrid_merged_preview": "# Huda AlRashid\n\nSoftware Engineer\n\nEmail: huda.alrashid.4687@synthetic-eval.example\n\nPhone: +96551594875\n\nSkills: Kubernetes, Arabic NLP, SQL, React\n\nScanned synthetic CV page",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 176,
+        "words": 19
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 708,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 693,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 176,
+        "words": 19
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_scanned_arabic_cv_000.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 126
+        }
+      ],
+      "hybrid_merged_preview": "## جرفلا لينار\n\nجتنم ريدم\n\nجرفلا.لينار@synthetic-eval.example Email: 8790\n\nتاحتسملا ليلحتي ف قريخ\n\nتانايب ليلحتو قجمرب :تاراهم",
+      "hybrid_fields": {
+        "has_email": false,
+        "has_phone": false,
+        "has_experience_marker": false,
+        "has_skills_marker": false,
+        "arabic_chars": 70,
+        "chars": 126,
+        "words": 16
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 620,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 948,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": false,
+        "has_phone": false,
+        "has_experience_marker": false,
+        "has_skills_marker": false,
+        "arabic_chars": 70,
+        "chars": 126,
+        "words": 16
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_mixed_digital_scanned_000.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "native",
+          "reason": "accepted_native",
+          "chars": 445
+        },
+        {
+          "page": 2,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 175
+        }
+      ],
+      "hybrid_merged_preview": "# Yousef AlSabah\n\nHR Analyst Email: yousef.alsabah.6805@synthetic-eval.example Phone: +96559752367\n\nEXPERIENCE 2018-2020 Noto Demo Group — HR Analyst Delivered synthetic project 1 with measurable outcomes.\n\n2019-2021 Noto Demo Group — HR Analyst Delivered synthetic project 2 with measurable outcomes.\n\n2020-2022 Noto Demo Group — HR Analyst Delivered synthetic project 3 with measurable outcomes.\n\n## SKILLS: OCR, Postgres, Attendance, Payroll\n\n\n# Dana AlFaraj\n\nSecurity Engineer\n\nEmail: dana.alfara",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 622,
+        "words": 76
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 704,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        2
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 594,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 622,
+        "words": 74
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_mixed_digital_scanned_001.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "native",
+          "reason": "accepted_native",
+          "chars": 469
+        },
+        {
+          "page": 2,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 176
+        }
+      ],
+      "hybrid_merged_preview": "# Sara AlOtaibi\n\nSecurity Engineer Email: sara.alotaibi.6156@synthetic-eval.example Phone: +96559254345\n\nEXPERIENCE 2018-2020 Evalcorp Gulf — Security Engineer Delivered synthetic project 1 with measurable outcomes.\n\n2019-2021 Evalcorp Gulf — Security Engineer Delivered synthetic project 2 with measurable outcomes.\n\n2020-2022 Evalcorp Gulf — Security Engineer Delivered synthetic project 3 with measurable outcomes.\n\n## SKILLS: Python, Kubernetes, TypeScript, Docker\n\n\n# Noor AlQahtani\n\nHR Analyst\n",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 647,
+        "words": 74
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 985,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        2
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 831,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 647,
+        "words": 72
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_rotated_scan_cv_000.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 175
+        }
+      ],
+      "hybrid_merged_preview": "# Reem AlFaraj\n\nFinance Analyst\n\nEmail: reem.alfaraj.9674@synthetic-eval.example\n\nPhone: +96559469502\n\nSkills: TypeScript, OCR, Postgres, Arabic NLP\n\nScanned synthetic CV page",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 175,
+        "words": 19
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 693,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 657,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 175,
+        "words": 19
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_lowres_compressed_scan_cv_000.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 184
+        }
+      ],
+      "hybrid_merged_preview": "# Omar AlHarbi\n\nCompliance Specialist\n\nEmail: omar.alharbi.8143@synthetic-eval.example\n\nPhone: +96554881699\n\nSkills: Postgres, Kubernetes, TypeScript, Python\n\nScanned synthetic CV page",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 184,
+        "words": 18
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 694,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 610,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 184,
+        "words": 18
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_broken_encoding_000.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "mojibake_native_text",
+          "chars": 307
+        }
+      ],
+      "hybrid_merged_preview": "# Broken Encoding CV - Bassam AlMutairi\n\nEmail: bassam.almutairi.2111@synthetic-eval.example\n\nPhone: +96553452673\n\nName mojibake: Ù†ÙˆØ±Ø©\n\nGarbled Arabic proxy: ÃÑÃÓÇä ãÔÝÑ\n\nReplacement stress: ♦♦♦♦ corrupted glyphs\n\nEXPERIENCE: encoding stress case for quality gates\n\nSKILLS: OCR, TypeScript, Payroll, SQL",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 307,
+        "words": 36
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 736,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 823,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 307,
+        "words": 36
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "syn_broken_encoding_001.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "mojibake_native_text",
+          "chars": 315
+        }
+      ],
+      "hybrid_merged_preview": "## Broken Encoding CV - Mariam Benchmark\n\nEmail: mariam.benchmark.8708@synthetic-eval.example\n\nPhone: +96552279296\n\nName mojibake: Ù†ÙˆØ±Ø©\n\nGarbled Arabic proxy: ÃÑÃÓÇä ãÔÝÑ\n\nReplacement stress: ♦♦♦♦ corrupted glyphs\n\nEXPERIENCE: encoding stress case for quality gates\n\nSKILLS: Payroll, OCR, Compliance, Attendance",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 315,
+        "words": 36
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 960,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 714,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 314,
+        "words": 36
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "wave0_cv_scanned_en_01.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 139
+        }
+      ],
+      "hybrid_merged_preview": "# Scanned CV — Dana Wilkes\n\nEmail: dana.wilkes@example.com\n\nPhone: +96551110000\n\nRole: QA Lead\n\nExperience: automation frameworks 2018-2026",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": false,
+        "arabic_chars": 0,
+        "chars": 139,
+        "words": 17
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 613,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 612,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": false,
+        "arabic_chars": 0,
+        "chars": 139,
+        "words": 17
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "wave0_cv_mixed_01.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "native",
+          "reason": "accepted_native",
+          "chars": 120
+        },
+        {
+          "page": 2,
+          "method": "ocr",
+          "reason": "inspector_needs_ocr",
+          "chars": 98
+        }
+      ],
+      "hybrid_merged_preview": "Mixed Digital Scan Email: mixed01@example.com DIGITAL PAGE — readable native text Skills: Python, Postgres, OCR routing\n\n\n# SCANNED PAGE — certificate image\n\nIssuer: Kuwait Professional Board\n\nCredential: Cloud Architect",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": false,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 220,
+        "words": 29
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 469,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [
+        2
+      ],
+      "poppler_compare": {
+        "error": null,
+        "latency_ms": 493,
+        "billable_pages": 1,
+        "estimated_cost_usd": 0.004,
+        "request_id": null,
+        "model": "mistral-ocr-4-0"
+      },
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": false,
+        "has_experience_marker": false,
+        "has_skills_marker": true,
+        "arabic_chars": 0,
+        "chars": 219,
+        "words": 29
+      },
+      "envelope_contract": "document_envelope@1"
+    },
+    {
+      "file": "wave0_cv_broken_encoding_01.pdf",
+      "hybrid_ok": true,
+      "hybrid_error": null,
+      "hybrid_pages": [
+        {
+          "page": 1,
+          "method": "ocr",
+          "reason": "mojibake_native_text",
+          "chars": 177
+        }
+      ],
+      "hybrid_merged_preview": "Broken Encoding CV - Proxy\n\nEmail: broken.encoding@example.com\n\nPhone: +96556667788\n\nName mojibake: Ù■Ù■Ø±Ø©\n\nGarbled Arabic proxy: ÃÑÃÓÇä ãÓÝÑ\n\nEXPERIENCE: encoding stress case",
+      "hybrid_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": false,
+        "arabic_chars": 0,
+        "chars": 177,
+        "words": 21
+      },
+      "hybrid_billable_pages": 1,
+      "hybrid_cost_usd": 0.004,
+      "hybrid_ocr_latency_ms": 816,
+      "hybrid_request_id": null,
+      "poppler_ocr_pages": [],
+      "poppler_compare": {},
+      "poppler_fields": {
+        "has_email": true,
+        "has_phone": true,
+        "has_experience_marker": true,
+        "has_skills_marker": false,
+        "arabic_chars": 0,
+        "chars": 172,
+        "words": 21
+      },
+      "envelope_contract": "document_envelope@1"
+    }
+  ]
+}

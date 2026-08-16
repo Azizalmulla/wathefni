@@ -1,0 +1,36 @@
+                        List of relations
+ Schema |               Name               | Type  |    Owner     
+--------+----------------------------------+-------+--------------
+ public | attendance_authority_events      | table | wathefni_app
+ public | attendance_capture_audit_events  | table | wathefni_app
+ public | attendance_capture_checkpoints   | table | wathefni_app
+ public | attendance_capture_connectors    | table | wathefni_app
+ public | attendance_capture_credentials   | table | wathefni_app
+ public | attendance_capture_devices       | table | wathefni_app
+ public | attendance_capture_health        | table | wathefni_app
+ public | attendance_capture_health_events | table | wathefni_app
+ public | attendance_capture_idempotency   | table | wathefni_app
+ public | attendance_capture_mappings      | table | wathefni_app
+ public | attendance_capture_quarantine    | table | wathefni_app
+ public | attendance_capture_remediation   | table | wathefni_app
+ public | attendance_capture_replay_ledger | table | wathefni_app
+ public | attendance_capture_sites         | table | wathefni_app
+ public | attendance_compat_drift          | table | wathefni_app
+ public | attendance_corrections           | table | wathefni_app
+ public | attendance_day_projections       | table | wathefni_app
+ public | attendance_events                | table | wathefni_app
+ public | attendance_import_batch_rows     | table | wathefni_app
+ public | attendance_import_batches        | table | wathefni_app
+ public | attendance_import_mappings       | table | wathefni_app
+ public | attendance_ops_attachments       | table | wathefni_app
+ public | attendance_ops_audit_events      | table | wathefni_app
+ public | attendance_ops_cases             | table | wathefni_app
+ public | attendance_ops_comments          | table | wathefni_app
+ public | attendance_ops_disputes          | table | wathefni_app
+ public | attendance_ops_exceptions        | table | wathefni_app
+ public | attendance_ops_idempotency       | table | wathefni_app
+ public | attendance_payroll_snapshots     | table | wathefni_app
+ public | attendance_punches               | table | wathefni_app
+ public | attendance_records               | table | wathefni_app
+(31 rows)
+

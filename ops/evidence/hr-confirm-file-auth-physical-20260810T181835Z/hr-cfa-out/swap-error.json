@@ -1,0 +1,4 @@
+{
+  "err": "relation \"shift_swaps\" does not exist\nLINE 2:                 SELECT * FROM shift_swaps\n                                      ^\n",
+  "tb": "Traceback (most recent call last):\n  File \"/tmp/hr-cfa-seed-and-exercise.py\", line 247, in <module>\n    cur.execute(\n  File \"/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py\", line 236, in execute\n    return super().execute(query, vars)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npsycopg2.errors.UndefinedTable: relation \"shift_swaps\" does not exist\nLINE 2:                 SELECT * FROM shift_swaps\n                                      ^\n\n"
+}

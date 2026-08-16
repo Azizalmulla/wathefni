@@ -1,0 +1,27 @@
+PASS  landing leave inbox=False
+PASS  landing shifts inbox=False
+PASS  landing attendance inbox=False
+PASS  landing payroll inbox=False
+PASS  landing onboarding+compliance inbox=True
+PASS  landing onboarding+compliance inbox=False
+PASS  landing shifts+attendance+leave inbox=True
+PASS  landing shifts+attendance+leave inbox=False
+PASS  landing leave+attendance+shifts+payroll inbox=True
+PASS  landing pre_hiring+leave+attendance+shifts+payroll+onboarding+compliance+analytics inbox=True
+PASS  leave nav has employees
+PASS  leave nav has leave
+PASS  leave nav no overview
+PASS  leave nav no jobs
+PASS  catalog leave on
+PASS  catalog prehire jobs off without module
+PASS  catalog overview off without pre_hiring
+PASS  catalog e360 follows people surface
+PASS  catalog jobs on with pre_hiring
+PASS  leave inbox omits analytics
+PASS  leave inbox omits compliance
+PASS  leave inbox not partial when employees live
+PASS  entitled analytics error is partial
+PASS  empty en
+PASS  empty ar
+
+25 passed, 0 failed

@@ -1,0 +1,47 @@
+{
+  "db": "wathefni",
+  "leave_requests": [
+    {
+      "leave_id": "51cd940f-a04b-4ad1-9a6a-43e3da59a222",
+      "employee_key": "WATHEFNI-96597727743",
+      "leave_type": "sick",
+      "status": "rejected",
+      "start_date": "2026-06-12",
+      "end_date": "2026-06-12",
+      "fp": "8f6d67e3cc4fbf5ee321af235ecbb20d"
+    },
+    {
+      "leave_id": "dbf82ecf-7ac4-451b-b41c-03de943f2161",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "annual",
+      "status": "requested",
+      "start_date": "2026-06-16",
+      "end_date": "2026-06-18",
+      "fp": "34c7cf18a4d758698bbf7cac6da70d1f"
+    },
+    {
+      "leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "sick",
+      "status": "approved",
+      "start_date": "2026-05-11",
+      "end_date": "2026-05-11",
+      "fp": "abf4cba7cb8702b2d7c067db795d0701"
+    }
+  ],
+  "leave_events": 10,
+  "leave_ledger": 28,
+  "leave_balances": 4,
+  "policies": [
+    {
+      "leave_type": "annual",
+      "enforced": false,
+      "legal_reviewed": false
+    },
+    {
+      "leave_type": "sick",
+      "enforced": false,
+      "legal_reviewed": false
+    }
+  ]
+}

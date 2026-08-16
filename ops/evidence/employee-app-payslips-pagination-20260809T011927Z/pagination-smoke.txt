@@ -1,0 +1,13 @@
+PASS  cursor round-trips
+PASS  malformed cursor raises
+PASS  page1 has_more
+PASS  page1 size
+PASS  page1 next_cursor
+PASS  pages do not overlap
+PASS  final page drains — has_more=False n=1
+PASS  all five rows reachable — 5
+PASS  compat wrapper returns list
+PASS  invalid cursor → HTTP 400
+PASS  HTTP page exposes has_more + next_cursor — {'has_more': True, 'next_cursor': 'eyJjYSI6IjIwMjYtMDgtMDhUMTk6MTk6NTkuOTI0MTMxKzAwOjAwIiwiaWQiOiI5YzM2MDYwNi05MjVkLTQyZDgtOGM5Yy05YTY2NjJjMjU4MTgiLCJwZSI6IjIwMjQtMDUtMDMiLCJ2IjoxfQ', 'count': 2}
+---
+PASS employee payslip pagination contract

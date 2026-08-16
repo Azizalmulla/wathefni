@@ -1,0 +1,94 @@
+{
+  "held_import_statuses_app_and_communication": [
+    "needs_role",
+    "import_review",
+    "import_archived"
+  ],
+  "inbound_retention_held": [
+    "import_archived",
+    "import_review",
+    "needs_role",
+    "review_pending"
+  ],
+  "production_predicate_excludes": [
+    "needs_role",
+    "import_review",
+    "import_archived"
+  ],
+  "review_pending_divergence": {
+    "fixture_id": "review_pending_policy_matrix",
+    "status": "review_pending",
+    "domains": {
+      "production_search_predicate": {
+        "excluded": false,
+        "note": "production_application_predicate excludes needs_role/import_review/import_archived only"
+      },
+      "communication_gate": {
+        "treated_as_held": false,
+        "note": "communication hold set mirrors production predicate held statuses"
+      },
+      "inbound_identity_retention": {
+        "treated_as_held": true,
+        "note": "inbound_retention_policy.HELD_APPLICATION_STATUSES includes review_pending"
+      },
+      "registry_rank_boost_order": {
+        "boost_rank": 1,
+        "note": "action_registry semantic ORDER BY boosts review_pending after screening_complete"
+      }
+    }
+  },
+  "phase1_fixtures_held": [
+    {
+      "fixture_id": "held_needs_role",
+      "company_code": "WATHEFNI",
+      "display_name": "Held Needs Role",
+      "phone": "96550005555",
+      "app_key": "app-held-needs-role",
+      "status": "needs_role",
+      "expected": {
+        "talent_pool_search_eligible": false,
+        "job_ranking_eligible": false,
+        "readable": true,
+        "actionable": false,
+        "held_state": "needs_role"
+      }
+    },
+    {
+      "fixture_id": "held_import_review",
+      "company_code": "WATHEFNI",
+      "display_name": "Held Import Review",
+      "phone": "96550006666",
+      "app_key": "app-held-import-review",
+      "status": "import_review",
+      "expected": {
+        "talent_pool_search_eligible": false,
+        "job_ranking_eligible": false,
+        "readable": true,
+        "actionable": false,
+        "held_state": "import_review"
+      }
+    },
+    {
+      "fixture_id": "held_import_archived",
+      "company_code": "WATHEFNI",
+      "display_name": "Held Import Archived",
+      "phone": "96550007777",
+      "app_key": "app-held-import-archived",
+      "status": "import_archived",
+      "expected": {
+        "talent_pool_search_eligible": false,
+        "job_ranking_eligible": false,
+        "readable": true,
+        "actionable": false,
+        "held_state": "import_archived"
+      }
+    }
+  ],
+  "policy_inputs_required_for_CandidateRecordStatePolicy": [
+    "application.status",
+    "application.data_source",
+    "candidate_record_governance row (archived/restricted/legal_hold/deletion)",
+    "inbound identity review open/conflict state",
+    "domain decision requested (communication|search|ranking|retention|read)"
+  ]
+}

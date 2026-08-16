@@ -1,0 +1,47 @@
+---
+description: Freeze Leave controlled WATHEFNI UX + allowlisted real decisions; block enforcement and Payroll money
+globs: wathefni-orchestrator/leave_*.py,wathefni-orchestrator/canary-prod-leave*.py,wathefni-orchestrator/smoke-test-leave*.py,wathefni-orchestrator/ops/deploy-leave*.sh,wathefni-orchestrator/ops/qualify-leave*.sh,apps/wathefni-dashboard/src/posthire/Leave*.tsx,apps/wathefni-dashboard/src/posthire/leaveUx.ts,ops/LEAVE*.md,ops/evidence/leave-*/**
+alwaysApply: false
+---
+
+# Leave freeze
+
+Leave is **production-qualified for controlled WATHEFNI HR/manager UX + Talal employee-app leave** and **frozen** against balance enforcement, Payroll money, and broad employee-app rollout. See `ops/LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- HR production Leave use: **GO (controlled, allowlist)**
+- Manager production Leave use: **scoped GO** (self-approval banned)
+- Talal employee-app Leave: **GO** (`WATHEFNI-96550252254` only)
+- Broad employee-app rollout: **NO-GO**
+- Real balance enforcement: **NO-GO** (`enforced=false`)
+- Payroll monetary impact: **NO-GO**
+- Employees 360 / Onboarding / Attendance: **unchanged freezes**
+
+## Hard bans for future post-hiring PRs
+
+1. **Do not remove or weaken self-approval bans** (`self_approval_forbidden`).
+2. **Do not bypass lifecycle gates** for authority subjects.
+3. **Do not set `enforced=true` / `legal_reviewed=true`** without an explicit owner wave.
+   - Wave 2 C2 amendment: `ops/LEAVE_ENFORCEMENT_C2_FREEZE_AMENDMENT.md` — company-scoped enforcement after pack attestation; global enforcement remains off.
+4. **Do not break ledger reservation/consumption idempotency**.
+5. **Do not unmask sensitive leave attachments by default** or skip attachment audit.
+6. **Do not weaken Attendance leave-derived reverse safety** (event before delete).
+7. **Do not disable the real-decision allowlist gate** while claiming Leave is open for all HR/managers.
+8. **Do not broaden `EMPLOYEE_APP_REAL_ALLOWLIST`** beyond Talal without a new wave.
+9. **Do not calculate Payroll money** from unpaid leave handoffs.
+10. **Do not change frozen Employees 360, Onboarding, or Attendance** to unblock Leave.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- `smoke-test-leave-freeze-regression.py`
+- Kill switch `WATHEFNI_LEAVE_WAVE4_KILL` and backup `ROLLBACK.sh`
+
+## Not allowed without owner change-control
+
+- Real balance enforcement
+- Payroll money from Leave
+- Broad employee-app leave access
+- Emptying or bypassing `LEAVE_REAL_DECISION_ALLOWLIST` in production

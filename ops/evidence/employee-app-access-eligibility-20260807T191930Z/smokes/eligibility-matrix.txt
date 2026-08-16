@@ -1,0 +1,35 @@
+PASS  create status created — created
+PASS  create skipped auto invite
+PASS  company off → zero invites — 0
+PASS  company off blocks issue_and_deliver — employee_app_not_enabled_for_company
+PASS  create while company on still no invite
+PASS  employee access off by default
+PASS  not eligible until enabled — employee_access_disabled
+PASS  legacy auto_create skipped — legacy_create_onboarding_invite_disabled
+PASS  enable ok
+PASS  invite after enable — 1
+PASS  invite delivery stamped — delivered
+PASS  re-enable does not spam invites — 1->1
+PASS  import create 0 no invite
+PASS  import create 1 no invite
+PASS  import create 2 no invite
+PASS  selected invited
+PASS  non-selected untouched
+PASS  bulk dept ok — {"requested": 10, "errors": 0}
+PASS  ops emp invited 110479
+PASS  ops emp invited 111479
+PASS  ops emp invited 112479
+PASS  enable keys invites
+PASS  disable ok
+PASS  disabled not eligible
+PASS  disabled blocks new invite — employee_access_disabled
+PASS  flag remains after device revoke when still enabled
+PASS  reinvite after revoke ok — None
+PASS  snapshot has eligibility fields
+PASS  snapshot no activation_code
+PASS  no phase6 devices route
+PASS  eligibility route present
+PASS  policy route present
+---
+PASS employee app access eligibility matrix
+MATRIX_EXIT=0

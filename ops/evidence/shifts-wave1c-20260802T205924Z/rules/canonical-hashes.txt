@@ -1,0 +1,3 @@
+4310835c7b6ff1c713d48eef19e5a9a641247e0e672ade969717ca6479db1b13  /Users/azizalmulla/Desktop/claw/.cursor/rules/attendance-freeze.mdc
+4310835c7b6ff1c713d48eef19e5a9a641247e0e672ade969717ca6479db1b13  /Users/azizalmulla/Desktop/claw/ops/evidence/attendance-final-20260802T131146Z/freeze/attendance-freeze.mdc
+4310835c7b6ff1c713d48eef19e5a9a641247e0e672ade969717ca6479db1b13  /Users/azizalmulla/Desktop/claw/ops/evidence/attendance-final-20260802T131146Z/sources/attendance-freeze.mdc

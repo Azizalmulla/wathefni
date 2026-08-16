@@ -1,0 +1,9 @@
+PAYROLL_WAVE4 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW4', 'PYW4-SYNTH|', 'PYW3', 'PYW3-SYNTH|', 'PYW2B', 'PYW2B-SYNTH|', 'PYW2A', 'PYW2ACB', 'PYW1', 'PYW1-SYNTH|', 'W2BB', 'W3B', 'W4B', 'W4')
+prefixes ('965541', '965540', '965539')
+honesty {'payment_processing': 'disabled', 'posts_payment': False, 'journal_drafts': True, 'journals': False, 'bank_export_contract': True, 'bank_files': False, 'bank_connection': False, 'wps': False, 'ashal': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'ai_calculations': False, 'pifss': False, 'eos': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK

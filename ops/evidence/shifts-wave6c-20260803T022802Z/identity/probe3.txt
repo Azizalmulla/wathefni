@@ -1,0 +1,49 @@
+Pager usage is off.
+=== SECTION reminder_queue_owners ===
+=== SECTION lifecycle_flag_owners ===
+       employee_key       | n 
+--------------------------+---
+ WATHEFNI-96552202357     | 1
+ WATHEFNI-96552263564     | 1
+ WATHEFNI-96596552203     | 1
+ WATHEFNI-ORPHAN-1db8844d | 2
+ WATHEFNI-ORPHAN-329c9917 | 2
+ WATHEFNI-ORPHAN-3aa6fe67 | 2
+ WATHEFNI-ORPHAN-58477ca4 | 2
+ WATHEFNI-ORPHAN-5b6fc7bd | 2
+ WATHEFNI-ORPHAN-b5521366 | 2
+ WATHEFNI-ORPHAN-cb1963ca | 2
+ WATHEFNI-ORPHAN-ce3cea2e | 2
+ WATHEFNI-ORPHAN-d76dbdb7 | 2
+ WATHEFNI-SHW1-1db8844d   | 1
+ WATHEFNI-SHW1-329c9917   | 1
+ WATHEFNI-SHW1-3aa6fe67   | 1
+ WATHEFNI-SHW1-58477ca4   | 1
+ WATHEFNI-SHW1-5b6fc7bd   | 1
+ WATHEFNI-SHW1-b5521366   | 1
+ WATHEFNI-SHW1-cb1963ca   | 1
+ WATHEFNI-SHW1-ce3cea2e   | 1
+ WATHEFNI-SHW1-d76dbdb7   | 1
+(21 rows)
+
+=== SECTION orphan_quarantine ===
+ n  
+----
+ 21
+(1 row)
+
+psql:/tmp/w6c_probe3.sql:8: ERROR:  column "scheduled_for" does not exist
+LINE 2:        coalesce(to_char(min(scheduled_for),'YYYY-MM-DD'),'-'...
+                                    ^
+Pager usage is off.
+      employee_key       |     status      | n 
+-------------------------+-----------------+---
+ WATHEFNI-SHW2-11f4acfb  | cancelled       | 5
+ WATHEFNI-SHW2-11f4acfb  | pending         | 6
+ WATHEFNI-SHW2-11f4acfb  | sent            | 1
+ WATHEFNI-SHW2-11f4acfb  | terminal_failed | 1
+ WATHEFNI-SHW2B-11f4acfb | cancelled       | 1
+ WATHEFNI-SHW2B-11f4acfb | pending         | 2
+ WATHEFNI-SHW2C-11f4acfb | pending         | 4
+(7 rows)
+

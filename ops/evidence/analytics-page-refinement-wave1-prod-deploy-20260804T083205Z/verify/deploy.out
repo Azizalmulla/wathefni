@@ -1,0 +1,39 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-CoNDfF7D.js
+BACKUP=/opt/wathefni/backups/production-pre-analytics-page-refinement-wave1-20260804T083205Z
+PASS data-analytics-insights
+PASS data-analytics-narrative
+PASS data-analytics-period
+PASS data-analytics-methodology
+PASS Open Needs Attention
+STATIC_GATES_OK
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permissi
+PASS posthire_bundle_present — PostHire-CoNDfF7D.js
+PASS insights_marker
+PASS snapshot_marker
+PASS narrative_marker
+PASS patterns_marker
+PASS period_marker
+PASS comparison_marker
+PASS methodology_marker
+PASS triage_deeplink
+FAIL no_duplicate_inbox_title
+PASS posthire_bundle_present — PostHire-CoNDfF7D.js
+PASS insights_marker
+PASS snapshot_marker
+PASS narrative_marker
+PASS patterns_marker
+PASS period_marker
+PASS comparison_marker
+PASS methodology_marker
+PASS triage_deeplink
+PASS no_analytics_attention_card
+PASS purpose_copy
+PASS arabic_surface
+PASS payroll_still_present
+PASS shifts_still_present
+PASS inbox_still_present
+ANALYTICS_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ANALYTICS_PAGE_WAVE1_SMOKE_OK
+SMOKE_OK
+DEPLOY_OK

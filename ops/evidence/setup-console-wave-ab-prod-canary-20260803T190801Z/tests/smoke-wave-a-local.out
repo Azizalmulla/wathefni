@@ -1,0 +1,26 @@
+PASS  wave a version
+PASS  wathefni only constant
+PASS  honest states complete
+PASS  six stages
+PASS  honesty operator only
+PASS  honesty no payroll money
+PASS  honesty no attendance ingest
+PASS  honesty no wave b
+PASS  honesty entitlements cannot bypass
+PASS  external company helper denied
+PASS  refuses non-wathefni
+PASS  launch readiness page present
+PASS  UI overall status
+PASS  UI important blockers
+PASS  UI pause impact
+PASS  UI EN launch title
+PASS  UI AR launch title
+PASS  UI rtl
+PASS  UI mobile wrap
+PASS  app wires launch view
+PASS  no giant form in launch page
+PASS  route registered
+PASS  module imported in app
+db path skipped (no postgres env)
+
+23 passed, 0 failed

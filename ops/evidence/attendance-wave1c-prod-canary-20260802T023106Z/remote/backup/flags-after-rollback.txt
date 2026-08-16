@@ -1,0 +1,3 @@
+ATTENDANCE_FLAGS_CLEARED
+modules_removed=true
+dropin_removed=true

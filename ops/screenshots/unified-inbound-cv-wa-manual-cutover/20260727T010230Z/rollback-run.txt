@@ -1,0 +1,2 @@
+ROLLBACK_OK
+health_after_rollback=200

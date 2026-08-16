@@ -1,0 +1,35 @@
+---
+description: Freeze HR Local Lock after Auth Wave 2 Phases 0–5 parity with Employee
+globs: apps/wathefni-employee-mobile/src/hr/auth/**,apps/wathefni-employee-mobile/src/hr/features/local-lock/**,apps/wathefni-employee-mobile/app/hr/_layout.tsx,apps/wathefni-employee-mobile/app/hr/settings.tsx,apps/wathefni-employee-mobile/app/hr/change-pin.tsx
+alwaysApply: false
+---
+
+# HR Local Lock — freeze
+
+HR Local Lock parity with Employee Auth Wave 2 Phases 0–5 is **accepted and frozen**.
+Do **not** merge sessions, start Phase 6, or reuse employee SecureStore keys.
+
+Canonical debt: `ops/HR_MOBILE_LOCAL_LOCK_CONTRACT_DEBT.md`
+
+## Frozen product shape
+
+- Separate operator AuthProvider + `wathefni.hr.*` tokens + `/dashboard/mobile/auth/*`
+- Namespaced PIN/bio/autolock material bound to `company_code:user_id`
+- Shared UX: PinFlows, UnlockWithBiometricGate (injected HR attempt), cream overlay/privacy cover
+- Recovery = operator email/password re-auth (not employee OTP)
+- `HRLocalUnlockShell` mounted only in HR mode
+- Independent Employee ↔ HR unlock state
+- Device Security on HR Settings; no Phase 6
+
+## Allowed without owner change-control
+
+- Bugfixes restoring isolation / seal / has_task-style lock invariants
+- Docs / canary log / debt notes
+- Shared UI primitive fixes that do not cross principal stores
+
+## Not allowed without an explicit owner wave
+
+- Unifying employee/operator sessions or SecureStore keys
+- Binding HR PIN to `employee_key`
+- Phase 6 / device screen-lock trust work
+- HR push registration on `/app/push`

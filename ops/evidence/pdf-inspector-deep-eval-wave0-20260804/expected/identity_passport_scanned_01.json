@@ -1,0 +1,25 @@
+{
+  "fixture_id": "identity_passport_scanned_01",
+  "category": "identity_document",
+  "language": "en",
+  "layout": "passport_biodata",
+  "pdf_nature": "scanned_image_only",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [
+    1
+  ],
+  "expected_text_needles": [
+    "PASSPORT",
+    "ALMUTAIRI",
+    "P1234567"
+  ],
+  "expected_fields": {
+    "surname": "ALMUTAIRI",
+    "given_names": "HAYA",
+    "passport_no": "P1234567",
+    "doc_type": "passport"
+  },
+  "notes": "Synthetic passport biodata rendered as scanned image-only page.",
+  "sha256": "ab964861b3675205f13b1ad3cadcb3c159f7046af734f0ed3ac569b5238f2a4a",
+  "bytes": 30992
+}

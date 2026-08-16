@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "failed": [],
+  "checks": {
+    "overview_no_company_to_mine_flicker": true,
+    "overview_loaded": false,
+    "candidates_no_empty_flash": true,
+    "reports_skeleton_not_empty_flash": true,
+    "assessments_tab_preserves_reports": true,
+    "calendar_no_desktop_to_mobile_snap": true,
+    "no_wrong_page_flash_jobs": true,
+    "nav_skeleton_or_pulse_observed": false,
+    "posthire_leave_no_stale_rows": true,
+    "ar_rtl": true,
+    "ar_mobile": true,
+    "back_forward": true,
+    "hard_refresh_interviews": true,
+    "slow_network_simulation": true,
+    "candidates_skeleton": true,
+    "candidates_no_empty_before_skeleton": true,
+    "reports_skeleton": true,
+    "reports_no_empty_before_skeleton": true,
+    "live_chunk_smoothness": true
+  }
+}

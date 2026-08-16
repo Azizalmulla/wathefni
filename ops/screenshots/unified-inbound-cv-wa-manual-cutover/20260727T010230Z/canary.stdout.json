@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "out": "/opt/wathefni/production-evidence/unified-inbound-cv-wa-manual-cutover/20260727T010230Z",
+  "assertions": {
+    "failed_names": [],
+    "enforce_enabled": false,
+    "email_cutover": false,
+    "stage_b_cutover": false
+  }
+}

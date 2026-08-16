@@ -1,0 +1,2 @@
+/var/www/wathefni-dashboard/assets/PostHire-CUJvv77p.js
+721e502e24a248b78d525417a8493c50c2f085ccfcb315ed2a5a9ae9587fc945  /var/www/wathefni-dashboard/assets/PostHire-CUJvv77p.js

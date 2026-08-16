@@ -1,0 +1,18 @@
+stamp=20260802T153617Z
+time_utc=2026-08-02T15:36:25Z
+active
+=== SHAs before ===
+2653c70f285691f90e6b72f1ddc04a8fc50881b5ad47f73bdba72266658e12b7  /opt/wathefni/orchestrator/app.py
+-rw-r--r-- 1 501 staff 18510 Aug  2 15:32 /opt/wathefni/orchestrator/leave_authority_wave1.py
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_ONBOARDING_SEED=off
+=== accrual timer ===
+enabled
+NextElapseUSecRealtime=Mon 2026-08-03 02:30:03 UTC
+ActiveState=active
+SubState=waiting

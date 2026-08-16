@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_multicolumn_02",
+  "category": "multicolumn_cv",
+  "language": "en",
+  "layout": "two_column",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Rita Gomez",
+    "rita.gomez@example.com",
+    "LEFT COLUMN",
+    "RIGHT COLUMN",
+    "Experience",
+    "Education"
+  ],
+  "expected_fields": {
+    "full_name": "Rita Gomez",
+    "email": "rita.gomez@example.com",
+    "phone": "+96550003344"
+  },
+  "notes": "Two-column layout with a vertical divider; reading-order stress.",
+  "sha256": "3d634308c999b0f78b2cb66a5908e712392cd9a1aba989cee5798f763fce7e08",
+  "bytes": 32370
+}

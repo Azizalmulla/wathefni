@@ -1,0 +1,14 @@
+{
+  "service": "wathefni-orchestrator-staging.service",
+  "listen": "127.0.0.1:8011",
+  "database_name": "wathefni_staging",
+  "database_host": "127.0.0.1",
+  "delivery_mode": "dry_run",
+  "feature_dropin": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=on\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI",
+  "dashboard_dist": "/opt/wathefni/staging/dashboard-dist",
+  "evidence": "/opt/wathefni/staging/staging-evidence/unified-candidates/20260725T142706Z",
+  "backup": "/opt/wathefni/backups/staging-pre-unified-candidates-20260725T142706Z",
+  "secrets_paths_redacted": [
+    "/root/.openclaw/secrets/postgres.staging.env"
+  ]
+}

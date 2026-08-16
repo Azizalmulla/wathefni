@@ -1,0 +1,13 @@
+{
+  "prefix": "CLSQ1FCF25",
+  "keys": {
+    "job_app": "CLSQ1FCF25-JOB",
+    "multi_a": "CLSQ1FCF25-MULTI-A",
+    "multi_b": "CLSQ1FCF25-MULTI-B",
+    "wa": "CLSQ1FCF25-WA",
+    "general_email": "CLSQ1FCF25-GEN-EMAIL",
+    "dup1": "CLSQ1FCF25-DUP1",
+    "dup2": "CLSQ1FCF25-DUP2"
+  },
+  "email_shared": "clsq.shared.clsq1fcf25@example.invalid"
+}

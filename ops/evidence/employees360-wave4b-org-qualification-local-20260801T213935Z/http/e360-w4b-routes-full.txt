@@ -1,0 +1,14 @@
+/dashboard/posthire/employee-org/activate-due
+/dashboard/posthire/employee-org/bulk-assign
+/dashboard/posthire/employee-org/change-requests
+/dashboard/posthire/employee-org/export
+/dashboard/posthire/employee-org/migration-batches
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/commit
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/dry-run
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/pause
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/rollback
+/dashboard/posthire/employee-org/policy
+/dashboard/posthire/employee-org/reconcile
+/dashboard/posthire/employee-org/units
+/dashboard/posthire/employees/{employee_key}/org-as-of
+/dashboard/posthire/employees/{employee_key}/org-history

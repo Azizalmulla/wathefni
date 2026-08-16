@@ -1,0 +1,3116 @@
+{
+  "created_at": "2026-08-03T22:14:31.116380+00:00",
+  "package": {
+    "package": "pdf-inspector",
+    "pypi_version": "0.2.6",
+    "binding": "Python via PyO3 (Rust abi3 extension)",
+    "module_file": "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/pdf_inspector/__init__.py",
+    "extension_so": "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/pdf_inspector/pdf_inspector.abi3.so",
+    "extension_so_sha256": "696e3bde5c1114fea03f9edd4c4276b27df4104eebdc7f034761b457ab27f53e",
+    "license": "MIT",
+    "project_urls": "Documentation, https://github.com/firecrawl/pdf-inspector/blob/main/docs/python.md",
+    "github_tag_note": "PyPI publishes 0.2.6; GitHub tags observed around evaluation time include v0.2.0–v0.2.3 then v0.3.x…v0.7.0. No matching GitHub tag named v0.2.6 was found; report package version + wheel digest instead of inventing a commit.",
+    "wheel_arm64_sha256_from_pypi": "d2b2aaa95b242da38630bbd0644ffe9a929466f9c4e6406d6f1957b59b413d08",
+    "apis_invoked": [
+      "process_pdf",
+      "detect_pdf",
+      "classify_pdf",
+      "extract_pages_markdown",
+      "extract_text"
+    ],
+    "scan_strategy": {
+      "python_exposed": false,
+      "rust_strategies_documented": [
+        "EarlyExit",
+        "Full",
+        "Sample(n)",
+        "Pages(vec)"
+      ],
+      "python_process_pdf_signature": "process_pdf(path, pages=None)",
+      "wave0_strategy": "Python binding does not expose ScanStrategy. Wave 0 uses process_pdf() default detection path for full detect+extract+markdown, plus extract_pages_markdown() for per-page Markdown/OCR flags. Full strategy is documented for Rust process_pdf_with_options only."
+    }
+  },
+  "summary": {
+    "fixtures": 24,
+    "total_pages": 29,
+    "routing": {
+      "inspector_exact_match_rate": 0.958,
+      "poppler_exact_match_rate": 0.833,
+      "inspector_poppler_agreement_rate": 0.875,
+      "fixtures_with_inspector_false_skips": 1,
+      "fixtures_with_inspector_unnecessary_ocr": 0,
+      "fixtures_with_poppler_false_skips": 1
+    },
+    "speed_ms": {
+      "inspector_process_avg": 1.125,
+      "inspector_library_avg": 1.125,
+      "poppler_assess_avg": 58.625
+    },
+    "digital_native_needle_hit_avg": 0.935,
+    "poppler_digital_needle_hit_avg": 0.78,
+    "arabic_integrity_markdown_avg": 0.688,
+    "field_accuracy_avg": {
+      "inspector_markdown": 0.756,
+      "poppler": 0.668
+    },
+    "projected_mistral": {
+      "usd_per_page_assumption": 0.004,
+      "pages_total": 29,
+      "ocr_pages_expected": 7,
+      "ocr_pages_poppler": 9,
+      "ocr_pages_inspector": 6,
+      "cost_all_pages_usd": 0.116,
+      "cost_poppler_usd": 0.036,
+      "cost_inspector_usd": 0.024,
+      "savings_vs_all_pages_usd": 0.092,
+      "savings_vs_poppler_usd": 0.012,
+      "note": "Projection only; Wave 0 did not call Mistral."
+    },
+    "subset_counts": {
+      "digital_like": 18,
+      "scanned": 4,
+      "mixed": 2
+    },
+    "arabic_integrity_markdown_digital_only_avg": 0.786
+  },
+  "decisions": {
+    "native_pdf_text_extraction": {
+      "verdict": "NO-GO",
+      "reasons": [
+        "Digital needle hit=0.935, arabic_integrity=0.688; below safe replace threshold."
+      ]
+    },
+    "ocr_page_advising": {
+      "verdict": "CONDITIONAL-GO",
+      "reasons": [
+        "Exact match 0.958; false-skip fixtures=1; usable only behind Poppler veto."
+      ]
+    },
+    "primary_routing_with_poppler_veto": {
+      "verdict": "NO-GO",
+      "reasons": [
+        "Primary routing requires durable false-skip=0 on broken encoding + Arabic/real-scan soak, Python Full scan strategy exposure, and production shadow metrics. Not met for Wave 0."
+      ]
+    },
+    "smallest_safe_implementation_wave": {
+      "name": "pdf_inspector_shadow_advisor_wave1",
+      "scope": "CV PDF intake only: record pdf-inspector process_pdf signals beside Poppler assess_pdf_pages; never change paid OCR routing; emit disagreement metrics.",
+      "feature_flag": "WATHEFNI_PDF_INSPECTOR_SHADOW=1",
+      "authoritative_router": "Poppler assess_pdf_pages / page_text_usable",
+      "shadow_signals": [
+        "pdf_type",
+        "confidence",
+        "pages_needing_ocr",
+        "has_encoding_issues",
+        "pages_with_tables",
+        "pages_with_columns",
+        "markdown_len",
+        "processing_time_ms"
+      ],
+      "observability": [
+        "cv_extraction_runs.raw_json.pdf_inspector_shadow",
+        "metric: pdf_inspector_poppler_ocr_page_disagreement",
+        "metric: pdf_inspector_false_skip_candidate",
+        "metric: pdf_inspector_encoding_issue_rate"
+      ],
+      "rollback": "Unset WATHEFNI_PDF_INSPECTOR_SHADOW; no routing code path depends on it.",
+      "acceptance_thresholds_before_advisor_canary": {
+        "false_ocr_skips_on_known_need_ocr_set": 0,
+        "broken_encoding_flag_or_ocr_rate": "100%",
+        "arabic_needle_integrity_avg": ">=0.90",
+        "digital_needle_hit_avg": ">=0.90",
+        "shadow_overhead_p95_ms": "<=150 on <=10 page CVs"
+      },
+      "explicitly_out_of_scope": [
+        "Replace Poppler",
+        "Call/skip Mistral based on inspector alone",
+        "Identity/contract/payroll routing changes",
+        "Migration Wave 1-B resume"
+      ]
+    }
+  },
+  "rows": [
+    {
+      "fixture_id": "cv_en_digital_01",
+      "category": "english_digital_cv",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_en_digital_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 73,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 3,
+        "library_processing_time_ms": 3,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_en_digital_02",
+      "category": "english_digital_cv",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_en_digital_02.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_en_digital_03",
+      "category": "english_digital_cv",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_en_digital_03.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 50,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_ar_digital_01",
+      "category": "arabic_digital_cv",
+      "language": "ar",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_ar_digital_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 50,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [
+          1
+        ],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 2,
+          "total": 5,
+          "ratio": 0.4,
+          "missing": [
+            "نورة العتيبي",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "نورة العتيبي",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": true,
+            "phone": true,
+            "title": false
+          },
+          "hit": 2,
+          "total": 4,
+          "ratio": 0.5
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 2,
+          "total": 5,
+          "ratio": 0.4,
+          "missing": [
+            "نورة العتيبي",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "نورة العتيبي",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": false,
+        "inspector_exact": true,
+        "poppler_vs_inspector": false
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": -1
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_ar_digital_02",
+      "category": "arabic_digital_cv",
+      "language": "ar",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_ar_digital_02.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 81,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [
+          1
+        ],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 2,
+          "total": 5,
+          "ratio": 0.4,
+          "missing": [
+            "فهد الشمري",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "فهد الشمري",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": true,
+            "phone": true,
+            "title": false
+          },
+          "hit": 2,
+          "total": 4,
+          "ratio": 0.5
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 2,
+          "total": 5,
+          "ratio": 0.4,
+          "missing": [
+            "فهد الشمري",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "فهد الشمري",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": false,
+        "inspector_exact": true,
+        "poppler_vs_inspector": false
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": -1
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_ar_digital_03",
+      "category": "arabic_digital_cv",
+      "language": "ar",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_ar_digital_03.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 52,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [
+          1
+        ],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 2,
+          "total": 5,
+          "ratio": 0.4,
+          "missing": [
+            "مريم الصباح",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "مريم الصباح",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": true,
+            "phone": true,
+            "title": false
+          },
+          "hit": 2,
+          "total": 4,
+          "ratio": 0.5
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 2,
+          "total": 5,
+          "ratio": 0.4,
+          "missing": [
+            "مريم الصباح",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "مريم الصباح",
+            "الخبرة العملية",
+            "المهارات"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": false,
+        "inspector_exact": true,
+        "poppler_vs_inspector": false
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": -1
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_bilingual_01",
+      "category": "bilingual_cv",
+      "language": "ar_en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_bilingual_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 6,
+          "ratio": 0.667,
+          "missing": [
+            "عبدالله الراشد",
+            "الخبرة العملية"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "عبدالله الراشد",
+            "الخبرة العملية"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "full_name_ar": false,
+            "email": true,
+            "phone": true,
+            "title": false
+          },
+          "hit": 3,
+          "total": 5,
+          "ratio": 0.6
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 6,
+          "ratio": 0.833,
+          "missing": [
+            "عبدالله الراشد"
+          ]
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 6,
+          "ratio": 0.667,
+          "missing": [
+            "عبدالله الراشد",
+            "الخبرة العملية"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 1,
+          "total": 2,
+          "ratio": 0.5,
+          "missing": [
+            "عبدالله الراشد"
+          ]
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "عبدالله الراشد",
+            "الخبرة العملية"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "full_name_ar": false,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 5,
+          "ratio": 0.8
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_bilingual_02",
+      "category": "bilingual_cv",
+      "language": "ar_en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_bilingual_02.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 48,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 6,
+          "ratio": 0.667,
+          "missing": [
+            "حصة العلي",
+            "الخبرة العملية"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "حصة العلي",
+            "الخبرة العملية"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "full_name_ar": false,
+            "email": true,
+            "phone": true,
+            "title": false
+          },
+          "hit": 3,
+          "total": 5,
+          "ratio": 0.6
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 6,
+          "ratio": 0.667,
+          "missing": [
+            "حصة العلي",
+            "الخبرة العملية"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "حصة العلي",
+            "الخبرة العملية"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "full_name_ar": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_multicolumn_01",
+      "category": "multicolumn_cv",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_multicolumn_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 52,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true
+          },
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": true,
+        "pages_with_tables": [
+          1
+        ],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true
+          },
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_multicolumn_02",
+      "category": "multicolumn_cv",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_multicolumn_02.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 50,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true
+          },
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": true,
+        "pages_with_tables": [
+          1
+        ],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 6,
+          "total": 6,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true
+          },
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_scanned_en_01",
+      "category": "scanned_image_only_cv",
+      "language": "en",
+      "pdf_nature": "scanned_image_only",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_scanned_en_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 47,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "Scanned CV — Dana Wilkes",
+            "Email: dana.wilkes@example.com",
+            "Phone: +96551110000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": false,
+            "phone": false
+          },
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 0,
+        "library_processing_time_ms": 0,
+        "pdf_type": "scanned",
+        "confidence": 0.949999988079071,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "Scanned CV — Dana Wilkes",
+            "Email: dana.wilkes@example.com",
+            "Phone: +96551110000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "needle_score_plain": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "Scanned CV — Dana Wilkes",
+            "Email: dana.wilkes@example.com",
+            "Phone: +96551110000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": false,
+            "phone": false
+          },
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0
+        },
+        "detect_pdf_type": "scanned",
+        "classify_confidence": 0.949999988079071
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [
+          1
+        ],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [
+          1
+        ],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.004,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.0,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_scanned_ar_01",
+      "category": "scanned_image_only_cv",
+      "language": "ar",
+      "pdf_nature": "scanned_image_only",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_scanned_ar_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 47,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "سيرة ذاتية ممسوحة — خالد المنصور",
+            "البريد: khaled.mansour@example.com",
+            "الهاتف: +96552220000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "سيرة ذاتية ممسوحة — خالد المنصور",
+            "البريد: khaled.mansour@example.com",
+            "الهاتف: +96552220000"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": false,
+            "phone": false
+          },
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 0,
+        "library_processing_time_ms": 0,
+        "pdf_type": "scanned",
+        "confidence": 0.949999988079071,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "سيرة ذاتية ممسوحة — خالد المنصور",
+            "البريد: khaled.mansour@example.com",
+            "الهاتف: +96552220000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "needle_score_plain": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "سيرة ذاتية ممسوحة — خالد المنصور",
+            "البريد: khaled.mansour@example.com",
+            "الهاتف: +96552220000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "سيرة ذاتية ممسوحة — خالد المنصور",
+            "البريد: khaled.mansour@example.com",
+            "الهاتف: +96552220000"
+          ]
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0,
+          "missing": [
+            "سيرة ذاتية ممسوحة — خالد المنصور",
+            "البريد: khaled.mansour@example.com",
+            "الهاتف: +96552220000"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": false,
+            "phone": false
+          },
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0
+        },
+        "detect_pdf_type": "scanned",
+        "classify_confidence": 0.949999988079071
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [
+          1
+        ],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [
+          1
+        ],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.004,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.0,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_scanned_en_02",
+      "category": "scanned_image_only_cv",
+      "language": "en",
+      "pdf_nature": "scanned_image_only",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_scanned_en_02.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "Scanned CV — Priya Shah",
+            "Email: priya.shah@example.com",
+            "Phone: +96553330000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": false,
+            "phone": false
+          },
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 0,
+        "library_processing_time_ms": 0,
+        "pdf_type": "scanned",
+        "confidence": 0.949999988079071,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "Scanned CV — Priya Shah",
+            "Email: priya.shah@example.com",
+            "Phone: +96553330000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "needle_score_plain": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "Scanned CV — Priya Shah",
+            "Email: priya.shah@example.com",
+            "Phone: +96553330000"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": false,
+            "email": false,
+            "phone": false
+          },
+          "hit": 0,
+          "total": 3,
+          "ratio": 0.0
+        },
+        "detect_pdf_type": "scanned",
+        "classify_confidence": 0.949999988079071
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [
+          1
+        ],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [
+          1
+        ],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.004,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.0,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_mixed_01",
+      "category": "mixed_digital_scanned",
+      "language": "en",
+      "pdf_nature": "mixed",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_mixed_01.pdf",
+      "page_count": 2,
+      "poppler": {
+        "elapsed_ms": 81,
+        "pages_needing_ocr_1idx": [
+          2
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "mixed",
+        "confidence": 0.6499999761581421,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [
+          2
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "mixed",
+        "classify_confidence": 0.6499999761581421
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 2,
+        "ocr_pages_expected": [
+          2
+        ],
+        "ocr_pages_poppler": [
+          2
+        ],
+        "ocr_pages_inspector": [
+          2
+        ],
+        "cost_if_all_pages_usd": 0.008,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.004,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_mixed_02",
+      "category": "mixed_digital_scanned",
+      "language": "en",
+      "pdf_nature": "mixed",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_mixed_02.pdf",
+      "page_count": 2,
+      "poppler": {
+        "elapsed_ms": 80,
+        "pages_needing_ocr_1idx": [
+          2
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "mixed",
+        "confidence": 0.6499999761581421,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [
+          2
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "mixed",
+        "classify_confidence": 0.6499999761581421
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 2,
+        "ocr_pages_expected": [
+          2
+        ],
+        "ocr_pages_poppler": [
+          2
+        ],
+        "ocr_pages_inspector": [
+          2
+        ],
+        "cost_if_all_pages_usd": 0.008,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.004,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_tounicode_proper_01",
+      "category": "cid_tounicode",
+      "language": "ar_en",
+      "pdf_nature": "digital_text_tounicode",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_tounicode_proper_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 48,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 4,
+          "ratio": 0.75,
+          "missing": [
+            "نادية فارس"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 1,
+          "ratio": 0.0,
+          "missing": [
+            "نادية فارس"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true
+          },
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 4,
+          "ratio": 0.75,
+          "missing": [
+            "نادية فارس"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 1,
+          "total": 1,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 1,
+          "ratio": 0.0,
+          "missing": [
+            "نادية فارس"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true
+          },
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_broken_encoding_01",
+      "category": "broken_encoding",
+      "language": "en_broken",
+      "pdf_nature": "digital_broken_encoding",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_broken_encoding_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [
+          1
+        ],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "email": true,
+            "phone": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 0,
+        "library_processing_time_ms": 0,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [
+          1
+        ],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "email": true,
+            "phone": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": false,
+        "inspector_exact": false,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [
+          1
+        ],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "contract_employment_en_01",
+      "category": "contract",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/contract_employment_en_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 4,
+          "ratio": 0.75,
+          "missing": [
+            "Kuwait Labor Law"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "employee_name": true,
+            "civil_id": true,
+            "salary_kwd": false
+          },
+          "hit": 2,
+          "total": 3,
+          "ratio": 0.667
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 4,
+          "ratio": 0.75,
+          "missing": [
+            "Kuwait Labor Law"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "employee_name": true,
+            "civil_id": true,
+            "salary_kwd": false
+          },
+          "hit": 2,
+          "total": 3,
+          "ratio": 0.667
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "contract_kuwait_labor_law_real_01",
+      "category": "contract",
+      "language": "ar",
+      "pdf_nature": "digital_text_real_world",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/contract_kuwait_labor_law_real_01.pdf",
+      "page_count": 3,
+      "poppler": {
+        "elapsed_ms": 124,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "قانون",
+            "العمل"
+          ]
+        },
+        "arabic_integrity": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "قانون",
+            "العمل"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "document_type": false,
+            "source": false
+          },
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 7,
+        "library_processing_time_ms": 7,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": true,
+        "pages_with_tables": [],
+        "pages_with_columns": [
+          2
+        ],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "قانون",
+            "العمل"
+          ]
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "قانون",
+            "العمل"
+          ]
+        },
+        "arabic_integrity_markdown": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "قانون",
+            "العمل"
+          ]
+        },
+        "arabic_integrity_plain": {
+          "applicable": true,
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0,
+          "missing": [
+            "قانون",
+            "العمل"
+          ]
+        },
+        "field_score": {
+          "checks": {
+            "document_type": false,
+            "source": false
+          },
+          "hit": 0,
+          "total": 2,
+          "ratio": 0.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 3,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.012,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.012,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "identity_civil_id_digital_01",
+      "category": "identity_document",
+      "language": "ar_en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/identity_civil_id_digital_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 50,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "civil_id": true,
+            "doc_type": false
+          },
+          "hit": 2,
+          "total": 3,
+          "ratio": 0.667
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 3,
+          "total": 3,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "civil_id": true,
+            "doc_type": false
+          },
+          "hit": 2,
+          "total": 3,
+          "ratio": 0.667
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "identity_passport_scanned_01",
+      "category": "identity_document",
+      "language": "en",
+      "pdf_nature": "scanned_image_only",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/identity_passport_scanned_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "PASSPORT",
+            "ALMUTAIRI",
+            "P1234567"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "surname": false,
+            "given_names": false,
+            "passport_no": false,
+            "doc_type": false
+          },
+          "hit": 0,
+          "total": 4,
+          "ratio": 0.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 0,
+        "library_processing_time_ms": 0,
+        "pdf_type": "scanned",
+        "confidence": 0.949999988079071,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [
+          1
+        ],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "PASSPORT",
+            "ALMUTAIRI",
+            "P1234567"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "needle_score_plain": {
+          "mode": "native_should_miss_ocr_targets",
+          "found": [],
+          "missing": [
+            "PASSPORT",
+            "ALMUTAIRI",
+            "P1234567"
+          ],
+          "native_leak_ratio": 0.0
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "surname": false,
+            "given_names": false,
+            "passport_no": false,
+            "doc_type": false
+          },
+          "hit": 0,
+          "total": 4,
+          "ratio": 0.0
+        },
+        "detect_pdf_type": "scanned",
+        "classify_confidence": 0.949999988079071
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [
+          1
+        ],
+        "ocr_pages_poppler": [
+          1
+        ],
+        "ocr_pages_inspector": [
+          1
+        ],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.004,
+        "cost_if_inspector_ocr_usd": 0.004,
+        "cost_if_expected_ocr_usd": 0.004,
+        "inspector_vs_all_pages_savings_usd": 0.0,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "table_compensation_01",
+      "category": "table_heavy",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/table_compensation_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 49,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "basic_salary": true,
+            "total_cash": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": true,
+        "pages_with_tables": [
+          1
+        ],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "basic_salary": true,
+            "total_cash": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "table_experience_matrix_01",
+      "category": "table_heavy",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/table_experience_matrix_01.pdf",
+      "page_count": 1,
+      "poppler": {
+        "elapsed_ms": 50,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "email": true,
+            "latest_employer": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": true,
+        "pages_with_tables": [
+          1
+        ],
+        "pages_with_columns": [
+          1
+        ],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "email": true,
+            "latest_employer": true
+          },
+          "hit": 2,
+          "total": 2,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 1,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.004,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.004,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    },
+    {
+      "fixture_id": "cv_en_digital_multipage_01",
+      "category": "english_digital_cv",
+      "language": "en",
+      "pdf_nature": "digital_text",
+      "path": "/Users/azizalmulla/Desktop/claw/ops/evidence/pdf-inspector-deep-eval-wave0-20260804/fixtures/cv_en_digital_multipage_01.pdf",
+      "page_count": 2,
+      "poppler": {
+        "elapsed_ms": 81,
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "encoding_signal": false
+      },
+      "pdf_inspector": {
+        "process_wall_ms": 1,
+        "library_processing_time_ms": 1,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "has_encoding_issues": false,
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "pages_needing_ocr_1idx": [],
+        "false_skips_vs_expected": [],
+        "unnecessary_vs_expected": [],
+        "needle_score_markdown": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "needle_score_plain": {
+          "mode": "native_should_hit",
+          "hit": 5,
+          "total": 5,
+          "ratio": 1.0,
+          "missing": []
+        },
+        "arabic_integrity_markdown": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "arabic_integrity_plain": {
+          "applicable": false,
+          "hit": 0,
+          "total": 0,
+          "ratio": null,
+          "missing": []
+        },
+        "field_score": {
+          "checks": {
+            "full_name": true,
+            "email": true,
+            "phone": true,
+            "title": true
+          },
+          "hit": 4,
+          "total": 4,
+          "ratio": 1.0
+        },
+        "detect_pdf_type": "text_based",
+        "classify_confidence": 1.0
+      },
+      "routing_agreement_with_expected": {
+        "poppler_exact": true,
+        "inspector_exact": true,
+        "poppler_vs_inspector": true
+      },
+      "projected_cost": {
+        "pages_total": 2,
+        "ocr_pages_expected": [],
+        "ocr_pages_poppler": [],
+        "ocr_pages_inspector": [],
+        "cost_if_all_pages_usd": 0.008,
+        "cost_if_poppler_ocr_usd": 0.0,
+        "cost_if_inspector_ocr_usd": 0.0,
+        "cost_if_expected_ocr_usd": 0.0,
+        "inspector_vs_all_pages_savings_usd": 0.008,
+        "inspector_vs_poppler_delta_pages": 0
+      },
+      "mistral_reference": {
+        "called": false,
+        "reason": "Wave 0 default: no paid OCR; capped sample requires separate owner approval"
+      }
+    }
+  ],
+  "constraints_honored": {
+    "production_routing_unchanged": true,
+    "poppler_authoritative": true,
+    "pdf_inspector_shadow_only": true,
+    "migration_wave1b_not_resumed": true,
+    "paid_ocr_called": false,
+    "real_pdf_fixtures_only": true
+  }
+}

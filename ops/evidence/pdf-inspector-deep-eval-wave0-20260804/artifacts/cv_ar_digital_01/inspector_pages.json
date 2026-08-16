@@ -1,0 +1,14 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "# نورة العتيبي مهندسة برمجيات\n\nEmail: noura.otaibi@example.com Phone: +96551112233\n\nالخبرة العملية ٠٢٠٢-٦٢٠٢ شركة وطني — تطوير أنظمة الموارد البشرية التعليم بكالوريوس علوم حاسوب — جامعة الكويت المهارات بايثون، قواعد البيانات، معالجة الوثائق\n",
+      "markdown_len": 241
+    }
+  ]
+}

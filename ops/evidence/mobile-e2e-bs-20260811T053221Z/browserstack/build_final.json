@@ -1,0 +1,70 @@
+{
+  "id": "b48b55b4640337bad1775cb785439129016f4b0d",
+  "framework": "maestro",
+  "duration": 46,
+  "status": "skipped",
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786426346",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://d5fd26f9a6ad5ccd1c333df3abec904dd7be31b8",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml"
+    ]
+  },
+  "start_time": "2026-08-11 05:32:28 UTC",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "test_suite_details": {
+    "url": "bs://d5fd26f9a6ad5ccd1c333df3abec904dd7be31b8",
+    "bundle_id": null,
+    "version": null,
+    "name": "maestro-suite.zip",
+    "custom_id": "wathefni-bs-smoke-1786426341"
+  },
+  "devices": [
+    {
+      "device": "iPhone 15",
+      "os": "ios",
+      "os_version": "17.5",
+      "sharding": false,
+      "sessions": [
+        {
+          "id": "db00bbd49ea1556614b89e2f6302341e72d35e59",
+          "status": "skipped",
+          "start_time": "2026-08-11 05:32:47 +0000",
+          "duration": 26,
+          "error": {
+            "message": "[BROWSERSTACK_TESTSUITE_PARSE_ERROR] The testSuite build specified in the 'testSuite' parameter could not be successfully parsed. Ensure the right test suite is uploaded and the guidelines mentioned in this doc are followed: https://www.browserstack.com/docs/app-automate/maestro/get-started/structure-your-tests",
+            "code": null,
+            "short_error_message": "No Tests Ran"
+          },
+          "testcases": {
+            "count": 0,
+            "status": {
+              "passed": 0,
+              "failed": 0,
+              "skipped": 0,
+              "timedout": 0,
+              "error": 0,
+              "running": 0,
+              "queued": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

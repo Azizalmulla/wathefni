@@ -1,0 +1,52 @@
+[
+  {
+    "run_id": "90e77bab-5fe6-4212-924d-b008e03bb61f",
+    "status": "succeeded",
+    "terminations_executed": 1,
+    "revokes_executed": 1,
+    "lag_seconds": 0,
+    "started_at": "2026-08-01 21:21:02.436303+00:00",
+    "finished_at": "2026-08-01 21:21:02.505301+00:00",
+    "error_text": null
+  },
+  {
+    "run_id": "cecea888-9a9c-455f-afa9-1292a79ad940",
+    "status": "failed",
+    "terminations_executed": 0,
+    "revokes_executed": 0,
+    "lag_seconds": null,
+    "started_at": "2026-08-01 21:20:03.076825+00:00",
+    "finished_at": "2026-08-01 21:20:03.112912+00:00",
+    "error_text": "injected_scheduler_failure"
+  },
+  {
+    "run_id": "30158c7d-90aa-4c54-b0a8-3b0ee1593c81",
+    "status": "succeeded",
+    "terminations_executed": 0,
+    "revokes_executed": 0,
+    "lag_seconds": 0,
+    "started_at": "2026-08-01 21:19:47.822437+00:00",
+    "finished_at": "2026-08-01 21:19:47.878929+00:00",
+    "error_text": null
+  },
+  {
+    "run_id": "83c76e7f-2a38-48ba-b6d3-fb8ec2186024",
+    "status": "succeeded",
+    "terminations_executed": 1,
+    "revokes_executed": 1,
+    "lag_seconds": 0,
+    "started_at": "2026-08-01 21:10:18.152136+00:00",
+    "finished_at": "2026-08-01 21:10:18.246771+00:00",
+    "error_text": null
+  },
+  {
+    "run_id": "0e8762be-263b-4040-a32a-68a30760fed5",
+    "status": "succeeded",
+    "terminations_executed": 1,
+    "revokes_executed": 1,
+    "lag_seconds": 0,
+    "started_at": "2026-08-01 21:09:30.484599+00:00",
+    "finished_at": "2026-08-01 21:09:30.545134+00:00",
+    "error_text": null
+  }
+]

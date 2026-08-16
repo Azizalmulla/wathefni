@@ -1,0 +1,79 @@
+ M apps/wathefni-employee-mobile/.env.example
+ M apps/wathefni-employee-mobile/app.json
+ M apps/wathefni-employee-mobile/app/(tabs)/_layout.tsx
+ M apps/wathefni-employee-mobile/app/(tabs)/index.tsx
+ M apps/wathefni-employee-mobile/app/(tabs)/leave.tsx
+ M apps/wathefni-employee-mobile/app/(tabs)/payslips.tsx
+ M apps/wathefni-employee-mobile/app/_layout.tsx
+ M apps/wathefni-employee-mobile/app/bank.tsx
+ M apps/wathefni-employee-mobile/app/change-pin.tsx
+ M apps/wathefni-employee-mobile/app/documents.tsx
+ M apps/wathefni-employee-mobile/app/leave/request.tsx
+ M apps/wathefni-employee-mobile/app/notifications.tsx
+ M apps/wathefni-employee-mobile/app/onboarding.tsx
+ M apps/wathefni-employee-mobile/app/settings.tsx
+ M apps/wathefni-employee-mobile/assets/adaptive-icon.png
+ M apps/wathefni-employee-mobile/assets/icon.png
+ M apps/wathefni-employee-mobile/assets/notification-icon.png
+ M apps/wathefni-employee-mobile/assets/splash.png
+ M apps/wathefni-employee-mobile/docs/DESIGN_SYSTEM.md
+ M apps/wathefni-employee-mobile/eas.json
+ M apps/wathefni-employee-mobile/scripts/high-value-additions-test.js
+ M apps/wathefni-employee-mobile/scripts/verify-capability-foundation.py
+ M apps/wathefni-employee-mobile/scripts/verify-color-system.py
+ M apps/wathefni-employee-mobile/scripts/verify-density-hierarchy.py
+ M apps/wathefni-employee-mobile/src/api/types.ts
+ M apps/wathefni-employee-mobile/src/auth/autoLockPolicy.ts
+ M apps/wathefni-employee-mobile/src/auth/biometricPolicy.ts
+ M apps/wathefni-employee-mobile/src/auth/pinPolicy.ts
+ M apps/wathefni-employee-mobile/src/components/States.tsx
+ M apps/wathefni-employee-mobile/src/components/layout.tsx
+ M apps/wathefni-employee-mobile/src/components/lists.tsx
+ M apps/wathefni-employee-mobile/src/components/premium.tsx
+ M apps/wathefni-employee-mobile/src/composition/employeeAppComposition.ts
+ M apps/wathefni-employee-mobile/src/features/bank/BankView.tsx
+ M apps/wathefni-employee-mobile/src/features/documents/DocumentsView.tsx
+ M apps/wathefni-employee-mobile/src/features/home/HomeView.tsx
+ M apps/wathefni-employee-mobile/src/features/onboarding/OnboardingView.tsx
+ M apps/wathefni-employee-mobile/src/features/pin/LocalUnlockShell.tsx
+ M apps/wathefni-employee-mobile/src/features/profile/ProfileView.tsx
+ M apps/wathefni-employee-mobile/src/features/remaining/RemainingViews.tsx
+ M apps/wathefni-employee-mobile/src/features/schedule/ScheduleView.tsx
+ M apps/wathefni-employee-mobile/src/i18n/ar.json
+ M apps/wathefni-employee-mobile/src/i18n/en.json
+ M apps/wathefni-employee-mobile/src/lib/employeeSoftRefresh.ts
+ M apps/wathefni-employee-mobile/src/lib/format.ts
+ M apps/wathefni-employee-mobile/src/native/haptics.ts
+ M apps/wathefni-employee-mobile/src/push/PushLifecycle.tsx
+ M apps/wathefni-employee-mobile/src/push/registerForPush.ts
+ M apps/wathefni-employee-mobile/src/push/resolvePushDestination.ts
+ M apps/wathefni-employee-mobile/src/theme.ts
+?? apps/wathefni-employee-mobile/app.config.js
+?? apps/wathefni-employee-mobile/app/leave/history.tsx
+?? apps/wathefni-employee-mobile/app/schedule/
+?? apps/wathefni-employee-mobile/assets/WathefniAppIcon.icon/
+?? apps/wathefni-employee-mobile/assets/brand/
+?? apps/wathefni-employee-mobile/assets/feedback/
+?? apps/wathefni-employee-mobile/assets/sounds/
+?? apps/wathefni-employee-mobile/plugins/
+?? apps/wathefni-employee-mobile/scripts/attendance-history-contract-test.js
+?? apps/wathefni-employee-mobile/scripts/leave-history-contract-test.js
+?? apps/wathefni-employee-mobile/scripts/publish-canary-ota.sh
+?? apps/wathefni-employee-mobile/scripts/verify-auth-wave2-flags.py
+?? apps/wathefni-employee-mobile/scripts/verify-push-sound.py
+?? apps/wathefni-employee-mobile/scripts/verify-semantic-feedback.py
+?? apps/wathefni-employee-mobile/src/components/ambient.tsx
+?? apps/wathefni-employee-mobile/src/components/geometry.tsx
+?? apps/wathefni-employee-mobile/src/features/bank/bankLifeMarks.tsx
+?? apps/wathefni-employee-mobile/src/features/documents/documentStatusPills.tsx
+?? apps/wathefni-employee-mobile/src/features/home/homeComposition.ts
+?? apps/wathefni-employee-mobile/src/features/inbox/
+?? apps/wathefni-employee-mobile/src/features/leave/LeaveHistoryView.tsx
+?? apps/wathefni-employee-mobile/src/features/leave/leaveRequests.ts
+?? apps/wathefni-employee-mobile/src/features/leave/leaveStatusPills.tsx
+?? apps/wathefni-employee-mobile/src/features/onboarding/onboardingLifeMarks.tsx
+?? apps/wathefni-employee-mobile/src/features/schedule/AttendanceHistoryView.tsx
+?? apps/wathefni-employee-mobile/src/features/schedule/ScheduleWeekStrip.tsx
+?? apps/wathefni-employee-mobile/src/features/schedule/attendancePills.tsx
+?? apps/wathefni-employee-mobile/src/features/schedule/scheduleDayModel.ts
+?? apps/wathefni-employee-mobile/src/push/pushSound.ts

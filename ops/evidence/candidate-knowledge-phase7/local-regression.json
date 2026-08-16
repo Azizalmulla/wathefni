@@ -1,0 +1,19 @@
+{
+  "errors": 0,
+  "failure_details": [],
+  "failures": 0,
+  "modules": [
+    "test_candidate_knowledge_phase0_contracts",
+    "test_candidate_knowledge_phase1",
+    "test_candidate_knowledge_phase2",
+    "test_candidate_knowledge_phase3",
+    "test_candidate_knowledge_phase4",
+    "test_candidate_knowledge_phase5",
+    "test_ranking_evidence_adapter",
+    "test_candidate_ranking",
+    "test_candidate_knowledge_phase7_qualification"
+  ],
+  "ok": true,
+  "skipped": 0,
+  "tests_run": 174
+}

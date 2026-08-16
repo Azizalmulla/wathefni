@@ -81,6 +81,21 @@ def parser() -> argparse.ArgumentParser:
     revoke_sessions.add_argument("--actor-user-id", required=True)
     revoke_sessions.add_argument("--reason", required=True)
     revoke_sessions.add_argument("--review-reference", required=True)
+
+    promote = sub.add_parser(
+        "promote-legacy-bootstrap",
+        help="Convert one legacy_hr_phone_bootstrap user to a normal workspace operator",
+    )
+    promote.add_argument("--company", required=True)
+    promote.add_argument("--user-id", required=True)
+    promote.add_argument("--actor-user-id", required=True)
+    promote.add_argument("--reason", required=True)
+    promote.add_argument("--review-reference", required=True)
+    promote.add_argument(
+        "--new-password",
+        default=None,
+        help="Optional password rotation (min 8). Omit to keep an existing password hash.",
+    )
     return root
 
 
@@ -106,6 +121,15 @@ def main() -> int:
                 "ok": False,
                 "error": "active_recovery_sessions_remain",
             }
+    elif args.command == "promote-legacy-bootstrap":
+        result = app.promote_legacy_bootstrap_dashboard_user(
+            args.company,
+            args.user_id,
+            actor_user_id=args.actor_user_id,
+            reason=args.reason,
+            review_reference=args.review_reference,
+            new_password=args.new_password,
+        )
     else:
         result = app.revoke_dashboard_recovery_sessions(
             args.company,

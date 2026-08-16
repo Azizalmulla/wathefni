@@ -1,0 +1,17 @@
+PASS UPCOMING_PREVIEW == 5
+PASS RECENT_PREVIEW == 5
+PASS usePagedList for both lists
+PASS ShowMoreButton present
+PASS no WathefniBloom
+PASS no dump data.recent.map
+PASS no dump data.upcoming.map
+PASS order Today < Upcoming < Recent < HR
+PASS summary nested under Recent section
+PASS expected/recorded labels retained
+PASS HR authority retained
+PASS window note retained (no fake years)
+PASS Show more uses common.showMore
+PASS no View full history claim
+PASS EN+AR common.showMore
+---
+PASS schedule root UX structure

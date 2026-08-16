@@ -1,0 +1,9 @@
+wave1_version 1.0.0
+wave2_version 1.0.0
+contract platform_assistant_wave2_safe_ops_reads
+honesty_ok {'wathefni_only': True, 'hr_dashboard_only': True, 'mutations': False, 'payroll': False, 'shifts': False, 'attendance_ingest': False, 'capture_ingest': 'off', 'attendance_records_basis': 'existing_records_only', 'whatsapp_widening': False, 'wave2_scope': ['leave_queue_reads', 'attendance_exception_reads']}
+connected_db wathefni
+ack_event_id 862f3848-146e-42fe-a114-db6926bfbd09
+ACK_PRODUCTION_PLATFORM_ASSISTANT_W2B=YES
+residual_policy=canary_tagged_cleaned_ack_retained
+MIGRATE_OK

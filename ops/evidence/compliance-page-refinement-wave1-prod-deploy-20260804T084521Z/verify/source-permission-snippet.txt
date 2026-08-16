@@ -1,0 +1,9 @@
+can(permissions, 'compliance.manage' YES
+compliance_send_reminder YES
+reviewEmployeeDocument YES
+sendFindingReminder YES
+Open in Findings YES
+Delivery via Alerts YES
+primaryOnly YES
+confirm.withReason YES
+window.prompt count 2

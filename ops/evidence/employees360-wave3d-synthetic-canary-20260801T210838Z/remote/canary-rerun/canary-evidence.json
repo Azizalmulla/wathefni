@@ -1,0 +1,250 @@
+{
+  "checks": [
+    {
+      "label": "lifecycle enabled WATHEFNI",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "lifecycle disabled OTHERCO",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic only on",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "notice hints default hidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reinstate default off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "self approval forbidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96550252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96566363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96597727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "block real WATHEFNI-96599411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "actors distinct",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "counsel gate signed or will sign",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "policy notice hidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "policy reinstate off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "create synthetic employee",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "impact ack required",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "create future term + ack",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "idempotent retry",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "self-approval forbidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "separate approval committed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "notice period",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "hub active during notice",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "access revoke scheduled",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "session active before LWD cutoff",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cancel-before-effective",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "same employment after cancel",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "stale conflict fail-closed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "manager scope deny",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "tenant isolation",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "scheduler execution ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "terminated via scheduler",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "hub left after effective",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "session revoked after cutoff",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "settlement handed off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "settlement inputs present",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "settlement no amounts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "downstream shift cancel",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "downstream reverse restored",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire new employment",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire new assignment",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire same person",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rehire same employee_key preferred",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reinstate still disabled in policy",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "cleanup rollback ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "real employees still active",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "tag": "2ac2b5b8",
+    "phone": "96552202357",
+    "employee_key": "WATHEFNI-96552202357",
+    "idempotency_prefix": "wave3d-prod-canary:WATHEFNI:2ac2b5b8",
+    "requester_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+    "approver_user_id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+    "person_id": "cca60e2f-f88e-572b-9055-ab7e1e1f1382",
+    "employment_id": "c24d1604-7430-5183-97c4-64e80cd972d6",
+    "assignment_id": "144e53fe-bfca-5d7b-b955-6a5e0bea53e2",
+    "future_request_id": "d13c9c92-5943-4347-8672-5c3b560ad921",
+    "rehire_employee_key": "WATHEFNI-96552202357",
+    "rehire_employment_id": "068c496c-269d-59ba-8028-e183fd58eadf",
+    "rehire_assignment_id": "cdfcc085-3320-531b-ab19-8e58bf7c2b18",
+    "same_employee_key": true,
+    "synthetic_hub_rows_after_rollback": 1
+  },
+  "summary": {
+    "passed": 45,
+    "failed": 0
+  }
+}

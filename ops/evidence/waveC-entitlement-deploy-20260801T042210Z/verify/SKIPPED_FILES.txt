@@ -1,0 +1,2 @@
+offer_service.py: SKIP — production already rejects expired preview (_expire_token_offer_if_due + token_expired)
+operator_mobile.py: SKIP — production already omits assessments when OFF (if assessments else {})

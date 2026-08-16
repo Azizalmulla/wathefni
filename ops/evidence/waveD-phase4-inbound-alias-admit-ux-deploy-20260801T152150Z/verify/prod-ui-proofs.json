@@ -1,0 +1,119 @@
+{
+  "passed": 4,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "prod-en-desktop",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "ok": true,
+      "signals": {
+        "dir": null,
+        "rtl": false,
+        "hasIntakeCard": true,
+        "hasGeneral": true,
+        "hasJobAlias": true,
+        "hasNeedsJob": true,
+        "hasBound": false,
+        "hasHeld": true,
+        "hasIdentity": true,
+        "hasQuarantine": true,
+        "hasRecovery": true,
+        "noIntakeOps": true,
+        "settingsSnippet": "Wathefni HR WORKSPACE PRE-HIRING Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking Reports POST-HIRE Employees Onboarding Attendance Leave Shifts Payroll Analytics Compliance WORKSPACE Alerts & Delivery Activity Settings WORKSPACE Settings Manage your workspace, tea",
+        "candSnippet": "Wathefni HR WORKSPACE PRE-HIRING Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking Reports POST-HIRE Employees Onboarding Attendance Leave Shifts Payroll Analytics Compliance WORKSPACE Alerts & Delivery Activity Settings PRE-HIRING Candidates Review candidates, see ",
+        "ok": true
+      },
+      "note": "desktop",
+      "held_mock": true
+    },
+    {
+      "name": "prod-ar-desktop",
+      "locale": "ar",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "ok": true,
+      "signals": {
+        "dir": null,
+        "rtl": true,
+        "hasIntakeCard": true,
+        "hasGeneral": true,
+        "hasJobAlias": true,
+        "hasNeedsJob": true,
+        "hasBound": false,
+        "hasHeld": true,
+        "hasIdentity": true,
+        "hasQuarantine": true,
+        "hasRecovery": true,
+        "noIntakeOps": true,
+        "settingsSnippet": "Wathefni مساحة الموارد البشرية ما قبل التوظيف نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب التقارير ما بعد التوظيف الموظفون التهيئة الحضور الإجازات الورديات الرواتب التحليلات الامتثال مساحة العمل التنبيهات والتسليم النشاط الإعدادات مساحة العمل الإعدادات أدِر مساحة العم",
+        "candSnippet": "Wathefni مساحة الموارد البشرية ما قبل التوظيف نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب التقارير ما بعد التوظيف الموظفون التهيئة الحضور الإجازات الورديات الرواتب التحليلات الامتثال مساحة العمل التنبيهات والتسليم النشاط الإعدادات ما قبل التوظيف المرشحون راجع المرشحين",
+        "ok": true
+      },
+      "note": "desktop",
+      "held_mock": true
+    },
+    {
+      "name": "prod-en-mobile",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "ok": true,
+      "signals": {
+        "dir": null,
+        "rtl": false,
+        "hasIntakeCard": true,
+        "hasGeneral": true,
+        "hasJobAlias": true,
+        "hasNeedsJob": true,
+        "hasBound": false,
+        "hasHeld": true,
+        "hasIdentity": true,
+        "hasQuarantine": true,
+        "hasRecovery": true,
+        "noIntakeOps": true,
+        "settingsSnippet": "Settings Overview Wathefni Assistant Jobs Candidates Interviews Calendar Assessments Ranking Reports More WORKSPACE Settings Manage your workspace, team access, and account settings. Refresh Platform Integrations Company Google Workspace and Microsoft 365 connections. Requires settings and calendar ",
+        "candSnippet": "Candidates Overview Wathefni Assistant Jobs Interviews Calendar Assessments Ranking Reports More PRE-HIRING Candidates Review candidates, see evidence, and choose the next hiring step. Refresh Held CVs waiting for a job 1 Assign a job, then admit the candidate explicitly from Candidates. Hide Needs ",
+        "ok": true
+      },
+      "note": "mobile_via_more",
+      "held_mock": true
+    },
+    {
+      "name": "prod-ar-mobile",
+      "locale": "ar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "ok": true,
+      "signals": {
+        "dir": null,
+        "rtl": true,
+        "hasIntakeCard": true,
+        "hasGeneral": true,
+        "hasJobAlias": true,
+        "hasNeedsJob": true,
+        "hasBound": false,
+        "hasHeld": true,
+        "hasIdentity": true,
+        "hasQuarantine": true,
+        "hasRecovery": true,
+        "noIntakeOps": true,
+        "settingsSnippet": "الإعدادات نظرة عامة مساعد واثقني الوظائف المرشحون المقابلات التقويم التقييمات الترتيب التقارير المزيد مساحة العمل الإعدادات أدِر مساحة العمل وصلاحيات الفريق وإعدادات الحساب. تحديث Platform Integrations Company Google Workspace and Microsoft 365 connections. Requires settings and calendar sync author",
+        "candSnippet": "المرشحون نظرة عامة مساعد واثقني الوظائف المقابلات التقويم التقييمات الترتيب التقارير المزيد ما قبل التوظيف المرشحون راجع المرشحين، اطّلع على الأدلة، واختر خطوة التوظيف التالية. تحديث سير معلّقة بانتظار وظيفة 1 عيّن وظيفة ثم أضف المرشح صراحةً ضمن المرشحين. إخفاء تحتاج وظيفة مراجعة الهوية محجورة جاهزة",
+        "ok": true
+      },
+      "note": "mobile_via_more",
+      "held_mock": true
+    }
+  ],
+  "note": "Held card rendered against live production dashboard bundle; import/intake response mocked only when queue empty after admit cleanup. Alias/settings and admit APIs proven live separately."
+}

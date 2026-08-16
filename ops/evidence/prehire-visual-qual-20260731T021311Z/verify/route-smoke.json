@@ -1,0 +1,322 @@
+[
+  {
+    "page": "overview",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=overview"
+  },
+  {
+    "page": "overview",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=overview"
+  },
+  {
+    "page": "overview",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=overview"
+  },
+  {
+    "page": "jobs",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=jobs"
+  },
+  {
+    "page": "jobs",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=jobs"
+  },
+  {
+    "page": "jobs",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=jobs"
+  },
+  {
+    "page": "candidates",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=candidates"
+  },
+  {
+    "page": "candidates",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=candidates"
+  },
+  {
+    "page": "candidates",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=candidates"
+  },
+  {
+    "page": "interviews",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=interviews&status=upcoming&tab=upcoming"
+  },
+  {
+    "page": "interviews",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=interviews&status=upcoming&tab=upcoming"
+  },
+  {
+    "page": "interviews",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=interviews&status=upcoming&tab=upcoming"
+  },
+  {
+    "page": "calendar",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=calendar"
+  },
+  {
+    "page": "calendar",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=calendar"
+  },
+  {
+    "page": "calendar",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=calendar"
+  },
+  {
+    "page": "assessments",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=assessments&assessment_cohort=assessment_ready_to_send&overview_cohort=assessment_ready_to_send&cohort_key=assessment_ready_to_send&tab=send"
+  },
+  {
+    "page": "assessments",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=assessments&assessment_cohort=assessment_ready_to_send&overview_cohort=assessment_ready_to_send&cohort_key=assessment_ready_to_send&tab=send"
+  },
+  {
+    "page": "assessments",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=assessments&assessment_cohort=assessment_ready_to_send&overview_cohort=assessment_ready_to_send&cohort_key=assessment_ready_to_send&tab=send"
+  },
+  {
+    "page": "ranking",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ranking"
+  },
+  {
+    "page": "ranking",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ranking"
+  },
+  {
+    "page": "ranking",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ranking"
+  },
+  {
+    "page": "reports",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=reports"
+  },
+  {
+    "page": "reports",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=reports"
+  },
+  {
+    "page": "reports",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=reports"
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ai"
+  },
+  {
+    "page": "ai",
+    "locale": "ar",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ai"
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ai"
+  },
+  {
+    "page": "overview",
+    "locale": "ar",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=overview"
+  },
+  {
+    "page": "candidates",
+    "locale": "ar",
+    "viewport": "mobile",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=candidates"
+  },
+  {
+    "page": "ranking",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ranking"
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=ai"
+  },
+  {
+    "page": "overview",
+    "locale": "en",
+    "viewport": "desktop",
+    "status": 200,
+    "login_wall": false,
+    "shell_visible": true,
+    "title": "Wathefni",
+    "url": "http://127.0.0.1:4177/dashboard/?page=overview"
+  }
+]

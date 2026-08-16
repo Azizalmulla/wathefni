@@ -1,0 +1,45 @@
+# Smoke: walk Employee bottom tabs that are visible for the signed-in employee.
+# Module-off tabs (schedule/leave/payslips) are skipped when not rendered.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - employee
+  - tabs
+  - requires_session
+---
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.employee.home"
+    timeout: 30000
+- tapOn:
+    id: "e2e.tab.employee.home"
+- takeScreenshot: employee-tab-home
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.employee.schedule"
+    commands:
+      - tapOn:
+          id: "e2e.tab.employee.schedule"
+      - takeScreenshot: employee-tab-schedule
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.employee.leave"
+    commands:
+      - tapOn:
+          id: "e2e.tab.employee.leave"
+      - takeScreenshot: employee-tab-leave
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.employee.payslips"
+    commands:
+      - tapOn:
+          id: "e2e.tab.employee.payslips"
+      - takeScreenshot: employee-tab-payslips
+- tapOn:
+    id: "e2e.tab.employee.profile"
+- takeScreenshot: employee-tab-profile
+- tapOn:
+    id: "e2e.tab.employee.home"

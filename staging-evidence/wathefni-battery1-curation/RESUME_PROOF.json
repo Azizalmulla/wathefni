@@ -1,0 +1,118 @@
+{
+  "run": {
+    "environment": "staging",
+    "company_code": "WATHEFNI",
+    "started_at": "2026-07-18T19:05:56.771400+00:00",
+    "finished_at": "2026-07-18T19:35:57.951535+00:00",
+    "resumed_from_manifest_sha256": "16bf9e707629f7630fb6e22102283b4e38cb39a92f17938456de9ebd0cec2c2d",
+    "updated_manifest_sha256": "c6a69171db6610e3b614a84cc58c3ee82812383d33c60d38fa8b463a53629033"
+  },
+  "provider_health": {
+    "ok": true,
+    "http_status": 200,
+    "response_id": "resp_004d3206caf56b92016a5bcddd2a1c819d9c31484a83837dd7",
+    "model": "gpt-5.4-mini-2026-03-17",
+    "status": "completed",
+    "input_tokens": 11,
+    "output_tokens": 5,
+    "total_tokens": 16,
+    "latency_ms": 876,
+    "provider_failures_during_curation": 0
+  },
+  "authoring_session": {
+    "session_id": "c31d8119-099c-4e09-a177-a6eb02c84cb8",
+    "operator_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+    "started_at": "2026-07-18T19:05:56.862115+00:00",
+    "ended_at": "2026-07-18T19:35:57.937620+00:00",
+    "end_reason": "battery1_curation_session_complete",
+    "active_session_after": null,
+    "global_authoring_flag_after": false
+  },
+  "generation": {
+    "bounded_batches_per_category": 3,
+    "generated_english_drafts": 67,
+    "generated_by_category": {
+      "numerical_reasoning": 15,
+      "verbal_reasoning": 13,
+      "logical_reasoning": 15,
+      "situational_judgment": 12,
+      "prioritization": 12
+    },
+    "note": "Initial five-item category batches were followed by at most two gap-only replacement batches after content rejection. No provider retry batch was needed."
+  },
+  "curation": {
+    "complete_automated_en_ar_packages": 7,
+    "complete_by_category": {
+      "numerical_reasoning": 0,
+      "verbal_reasoning": 2,
+      "logical_reasoning": 0,
+      "situational_judgment": 2,
+      "prioritization": 3
+    },
+    "missing_by_category": {
+      "numerical_reasoning": 5,
+      "verbal_reasoning": 3,
+      "logical_reasoning": 5,
+      "situational_judgment": 3,
+      "prioritization": 2
+    },
+    "automated_answer_key_or_scoring_checks_passed": 7,
+    "independent_human_key_verifications": 0,
+    "human_approved": 0,
+    "human_rewrite": 0,
+    "human_rejected": 0,
+    "pending_human_review": 7,
+    "automated_rewrite_recommendations": 47,
+    "automated_reject_recommendations": 13,
+    "content_failures": {
+      "secondary_review_not_passed": 44,
+      "deterministic_source_review_failed": 13,
+      "adaptation_failed_closed": 2,
+      "bilingual_model_review_not_passed": 1
+    }
+  },
+  "usage": {
+    "model_runs": 87,
+    "input_tokens": 127264,
+    "output_tokens": 195971,
+    "estimated_cost_usd": 1.783326,
+    "latency_p50_ms": 10021,
+    "latency_p95_ms": 51439,
+    "adaptation_retries": 2,
+    "provider_health_cost_usd": null
+  },
+  "retention": {
+    "successful_packages_retained": 7,
+    "successful_en_drafts": 7,
+    "successful_ar_drafts": 7,
+    "translation_pairs_in_human_review": 7,
+    "manifest_path": "staging-evidence/wathefni-battery1-curation/BATTERY_MANIFEST.json"
+  },
+  "safety": {
+    "production_touched": false,
+    "publish_route_used": false,
+    "live_bank_insertion": false,
+    "ai_human_approval_recorded": false,
+    "qualification_cohort_run": false,
+    "assessment_items_delta": 0,
+    "assessment_batteries_delta": 0,
+    "assessment_content_versions_delta": 0,
+    "assessment_attempts_delta": 0,
+    "assessment_responses_delta": 0,
+    "assessment_scores_delta": 0,
+    "assessment_reports_delta": 0,
+    "applications_delta": 0,
+    "employees_delta": 0
+  },
+  "result": {
+    "status": "blocked_content_or_provider_gaps",
+    "ready_for_pilot": false,
+    "unresolved_complete_package_gap": 18,
+    "blockers": [
+      "fewer_than_25_complete_automated_bilingual_candidates",
+      "human_en_review_pending",
+      "separate_human_ar_review_pending",
+      "independent_human_answer_key_verification_pending"
+    ]
+  }
+}

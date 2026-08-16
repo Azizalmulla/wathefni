@@ -1,0 +1,240 @@
+{
+  "ok": true,
+  "failed": [],
+  "checks": {
+    "candidates_skeleton": true,
+    "candidates_no_empty_before_skeleton": true,
+    "reports_skeleton": true,
+    "reports_no_empty_before_skeleton": true,
+    "live_chunk_smoothness": true
+  },
+  "detail": {
+    "candidates": {
+      "skel": true,
+      "navSkel": false,
+      "samples": [
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 0,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 18,
+          "navSkel": true
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 18,
+          "navSkel": true
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 10,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 10,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 10,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 10,
+          "navSkel": false
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 10,
+          "navSkel": false
+        },
+        {
+          "skeleton": true,
+          "emptyText": false,
+          "emptyNode": false,
+          "pulse": 4,
+          "navSkel": false
+        }
+      ],
+      "sawSkeleton": true,
+      "sawEmptyWithoutSkeleton": false
+    },
+    "reports": {
+      "skel": true,
+      "navSkel": false,
+      "samples": [
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        },
+        {
+          "skeleton": false,
+          "emptyText": false,
+          "pulse": 0,
+          "navSkel": false,
+          "title": ""
+        }
+      ],
+      "sawSkeleton": true,
+      "sawEmptyWithoutSkeleton": false
+    },
+    "liveChunk": "dashboard-CmztGRNg.js"
+  }
+}

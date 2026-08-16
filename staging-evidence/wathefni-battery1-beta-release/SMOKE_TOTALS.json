@@ -1,0 +1,104 @@
+{
+  "ok": true,
+  "passed": 18,
+  "failed": 0,
+  "total": 18,
+  "checks": [
+    {
+      "name": "production_binding",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authoring_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "systemd_authoring_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "safari_state_progress",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "safari_no_data_progress",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "safari_replaceChildren",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "safari_svh",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "safari_html_sha_matches_staging_fix",
+      "ok": true,
+      "detail": "ebc49418533c597c31851d0952150d920bc043f75287eaa115c7f333083ede60"
+    },
+    {
+      "name": "no_http_publish_route",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "battery_items_route",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authoring_product2_absent_or_gated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "release_row_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "only_wathefni_tenant",
+      "ok": true,
+      "detail": [
+        "WATHEFNI"
+      ]
+    },
+    {
+      "name": "no_external_batteries",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "global_ability_still_default_active",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "beta_not_default_active",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_cleaned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "item7_revised",
+      "ok": true,
+      "detail": {
+        "answer_key": "C",
+        "rev": "58b443fb-dfa0-47b8-a947-4721f2be3ae7"
+      }
+    }
+  ],
+  "html_sha256": "ebc49418533c597c31851d0952150d920bc043f75287eaa115c7f333083ede60"
+}

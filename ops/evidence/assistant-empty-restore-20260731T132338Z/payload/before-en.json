@@ -1,0 +1,1 @@
+{"detail":{"error":"assistant_capabilities_failed","message":"cannot import name 'build_dashboard_assistant_capabilities' from 'tool_call_orchestrator' (/opt/wathefni/orchestrator/tool_call_orchestrator.py)"}}

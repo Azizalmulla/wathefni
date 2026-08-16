@@ -1,0 +1,13 @@
+PASS Aziz /me :: {"http": 200}
+PASS Aziz refresh rotates :: {"old": 401, "new": 200}
+PASS Aziz bank ESS :: {"http": 200, "snippet": "{\"contract_version\": \"bank_ess_v1\", \"employee_key\": \"WATHEFNI-96599338566\", \"has_verified_bank\": true, \"verified\": {\"display\": {\"iban\": \"**************************9548\", \"swift\": \""}
+PASS Aziz onboarding :: {"http": 200, "state": "completed"}
+PASS Aziz logout :: {"http": 200}
+PASS Talal /me :: {"http": 200}
+PASS Talal refresh rotates :: {"old": 401, "new": 200}
+PASS Talal bank 403 :: {"http": 403, "error": "bank_ess_not_allowlisted"}
+PASS Talal onboarding :: {"http": 200, "state": "in_progress"}
+PASS Talal logout :: {"http": 200}
+Traceback (most recent call last):
+  File "<stdin>", line 62, in <module>
+NameError: name 'PASS' is not defined

@@ -1,0 +1,27 @@
+    probation wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  settings default disabled
+      PASS  gate off before enable
+      PASS  gate on after enable
+      PASS  other company disabled without enable
+      PASS  create case ok
+      PASS  case status active
+      PASS  seeded 3 milestones
+      PASS  milestone keys 30/60/90
+      PASS  idempotent replay
+      PASS  complete day_30
+      PASS  overdue marked
+      PASS  active→under_review
+      PASS  under_review→confirmed
+      PASS  confirmed terminal
+      PASS  extend ok
+      PASS  status extended
+      PASS  probation_end advanced
+      PASS  under_review→failed
+      PASS  decision reason required
+      PASS  tenant isolation get_case
+      PASS  runtime flag kill-switch
+
+    22 passed, 0 failed
+PROBATION_WAVE1_DB_FULL_PASS
+STAGING_DB_RC=0

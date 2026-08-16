@@ -1,0 +1,39 @@
+                            Table "public.onboarding_items"
+       Column       |           Type           | Collation | Nullable |     Default     
+--------------------+--------------------------+-----------+----------+-----------------
+ employee_key       | text                     |           | not null | 
+ item_id            | text                     |           | not null | 
+ label              | text                     |           |          | 
+ item_type          | text                     |           |          | 
+ required           | boolean                  |           | not null | true
+ document_type      | text                     |           |          | 
+ status             | text                     |           | not null | 'pending'::text
+ value              | text                     |           |          | 
+ local_path         | text                     |           |          | 
+ drive_file_id      | text                     |           |          | 
+ drive_url          | text                     |           |          | 
+ expiry_date        | date                     |           |          | 
+ raw_json           | jsonb                    |           | not null | '{}'::jsonb
+ created_at         | timestamp with time zone |           | not null | now()
+ updated_at         | timestamp with time zone |           | not null | now()
+ storage_provider   | text                     |           |          | 
+ storage_object_key | text                     |           |          | 
+ external_file_id   | text                     |           |          | 
+ storage_url        | text                     |           |          | 
+ content_sha256     | text                     |           |          | 
+ mime_type          | text                     |           |          | 
+ stored_at          | timestamp with time zone |           |          | 
+ storage_status     | text                     |           |          | 
+ storage_error      | text                     |           |          | 
+ reminder_count     | integer                  |           | not null | 0
+ last_reminded_at   | timestamp with time zone |           |          | 
+ escalated_at       | timestamp with time zone |           |          | 
+ category           | text                     |           |          | 
+ owner              | text                     |           |          | 
+ sort_order         | integer                  |           |          | 
+Indexes:
+    "onboarding_items_pkey" PRIMARY KEY, btree (employee_key, item_id)
+    "idx_onboarding_status" btree (status)
+Foreign-key constraints:
+    "onboarding_items_employee_key_fkey" FOREIGN KEY (employee_key) REFERENCES employees(employee_key) ON DELETE CASCADE
+

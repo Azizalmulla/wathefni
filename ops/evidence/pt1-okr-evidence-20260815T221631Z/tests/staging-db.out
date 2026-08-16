@@ -1,0 +1,95 @@
+    pt1 okr evidence — db journeys
+      PASS  enable performance
+      PASS  enable talent
+      PASS  okr consume starts off
+      PASS  A create okr cycle
+      PASS  A cycle authority exists
+      PASS  A not a review cycle id
+      PASS  A activate cycle
+      PASS  A C2 table unused
+      PASS  A perf_okr_cycles exists
+      PASS  A company objective
+      PASS  A company KR
+      PASS  A department objective
+      PASS  A department KR
+      PASS  A team objective
+      PASS  A team KR
+      PASS  A individual objective
+      PASS  A individual KR
+      PASS  A objective has multiple KRs
+      PASS  A alignments
+      PASS  A alignment does not inherit
+      PASS  A tree ok
+      PASS  A company root
+      PASS  A company→dept→team→individual
+      PASS  A alignment is not a permission bypass
+      PASS  A private individual hidden from other employee
+      PASS  B child progress recorded
+      PASS  B child rollup moved
+      PASS  B parent unchanged by alignment
+      PASS  B parent not forced to 70
+      PASS  C update recorded
+      PASS  C check-in did not change progress
+      PASS  C thread has update
+      PASS  C confidence disabled by default
+      PASS  C optional confidence stored
+      PASS  C confidence is not progress
+      PASS  C confidence did not change progress
+      PASS  D target versioned
+      PASS  D history ok
+      PASS  D trajectory ready without labels
+      PASS  D target versions present
+      PASS  D progress entries present
+      PASS  D updates present
+      PASS  D alignment history present
+      PASS  F consume off blocks
+      PASS  F talent cannot consume OKR
+      PASS  G contract enabled
+      PASS  G indexed
+      PASS  G idempotent
+      PASS  G same evidence id
+      PASS  G OKR appears as evidence
+      PASS  G pointer fields
+      PASS  G no copied rating
+      PASS  G no potential mutation
+      PASS  G no hipo mutation
+      PASS  G no readiness mutation
+      PASS  G no master score
+      PASS  G potential rows unchanged
+      PASS  G readiness rows unchanged
+      PASS  G hipo rows unchanged
+      PASS  source permission preserved
+      PASS  talent permission required
+      PASS  H claimed skill
+      PASS  H claimed indexed
+      PASS  H claimed not verified
+      PASS  H claimed not classification input
+      PASS  H manager fact
+      PASS  H manager indexed
+      PASS  H potential assessment
+      PASS  H potential indexed
+      PASS  H system-derived OKR
+      PASS  H AI explanation allowed
+      PASS  H AI not classification input
+      PASS  H AI cannot be skill evidence
+      PASS  H contradictions unresolved
+      PASS  H employee-declared present
+      PASS  H manager-assessed present
+      PASS  H system-derived present
+      PASS  H AI not in classification set
+      PASS  H sensitive existence-only
+      PASS  lifecycle preserves history
+      PASS  disabled module not hard-deleted
+      PASS  tenant isolation cycles
+      PASS  tenant isolation evidence
+      PASS  Performance works Talent OFF
+      PASS  Talent OFF gate
+      PASS  Talent works Performance OFF
+      PASS  OKR blocked when Performance OFF
+      PASS  current cycle bilingual
+      PASS  EN journey labels
+      PASS  AR/RTL journey labels
+
+    90 passed, 0 failed
+PT1_OKR_EVIDENCE_DB_PASS
+STAGING_RC=0

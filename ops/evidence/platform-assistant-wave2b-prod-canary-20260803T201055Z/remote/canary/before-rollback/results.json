@@ -1,0 +1,432 @@
+[
+  {
+    "name": "wave1 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave2 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wathefni company",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutations off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no payroll",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no shifts",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no onboarding surface",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no attendance ingest",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "capture ingest off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "existing records basis",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no whatsapp widen",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no mutations honesty",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "hr dashboard only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ingest env off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "production db",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "audit event written",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tool leave queue",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tool attendance exceptions",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave1 inbox still present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation approve_leave hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation mark_absent hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation export_payroll hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "whatsapp wave2 tools hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "external wave2 tools hidden",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave tool ran",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave freshness",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave authority label",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave citations list",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave no mutate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave proposed actions prepare-only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave deep links present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave groups present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave viewer_phone injected",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave summary en",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave summary ar",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave soa leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave ar locale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance tool ran",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance freshness",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance authority label",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance citations list",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance no mutate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance proposed actions prepare-only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance capture_ingest off",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance existing records",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance ingest-off in summary",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance groups present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance viewer_phone injected",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance authority synthetic-or-partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance ar locale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance ar differs or bilingual",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tenant isolation leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "tenant isolation attendance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "permission denial leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "permission denial attendance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "manager scope denial surfaced",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "manager scope denial attendance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en missing",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar missing",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en stale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar stale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar partial",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en unavailable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar unavailable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en unsupported",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar unsupported",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback en mutations_killed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fallback ar mutations_killed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mutation denial status",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "approve_leave is mutation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "leave queue not mutation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance exceptions not mutation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill engaged",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill leave",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "master kill cleared",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "whatsapp leave denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "whatsapp attendance denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "canary events deleted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "residual canary 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "durable wave2 ack retained",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "durable wave1 ack retained",
+    "ok": true,
+    "detail": null
+  }
+]

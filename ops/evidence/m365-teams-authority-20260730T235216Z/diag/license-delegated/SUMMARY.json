@@ -1,0 +1,63 @@
+{
+  "evidence_upn": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com",
+  "user_id": "dcb6b7dd-8509-4a20-8069-ec0de9445dd7",
+  "account_enabled": true,
+  "sku_part_numbers": [
+    "O365_BUSINESS_ESSENTIALS"
+  ],
+  "teams_related_plans": [
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MESH_IMMERSIVE_FOR_TEAMS",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MESH_AVATARS_ADDITIONAL_FOR_TEAMS",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MESH_AVATARS_FOR_TEAMS",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "TEAMS1",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MCOSTANDARD",
+      "provisioningStatus": "Success"
+    }
+  ],
+  "has_active_teams_plan": true,
+  "all_success_teams_like": [
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MESH_IMMERSIVE_FOR_TEAMS",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MESH_AVATARS_ADDITIONAL_FOR_TEAMS",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MESH_AVATARS_FOR_TEAMS",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "TEAMS1",
+      "provisioningStatus": "Success"
+    },
+    {
+      "skuPartNumber": "O365_BUSINESS_ESSENTIALS",
+      "servicePlanName": "MCOSTANDARD",
+      "provisioningStatus": "Success"
+    }
+  ]
+}

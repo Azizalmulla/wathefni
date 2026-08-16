@@ -1,0 +1,12 @@
+# Placeholder: HR ↔ Employee principal mode switch.
+# Not part of smoke. Will FAIL until dual-principal session exists — do not treat as PASS.
+appId: ai.wathefni.employee
+tags:
+  - full
+  - principals
+  - requires_session
+  - needs_dual_principal
+---
+- assertVisible:
+    id: "e2e.tab.hr.home"
+# TODO: mode switcher → Employee shell → back to HR without session bleed

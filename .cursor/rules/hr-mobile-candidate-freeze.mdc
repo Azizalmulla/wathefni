@@ -1,0 +1,39 @@
+---
+description: Freeze HR mobile Candidate decision detail after cream honesty lock; no workflow expansion
+globs: apps/wathefni-employee-mobile/src/hr/features/recruiting/**,apps/wathefni-employee-mobile/app/hr/candidates/**,apps/wathefni-employee-mobile/scripts/verify-hr-candidate-detail.py,apps/wathefni-employee-mobile/scripts/physical-hr-candidate-en-ar.py,wathefni-orchestrator/operator_mobile_data.py
+alwaysApply: false
+---
+
+# HR mobile Candidate detail — freeze
+
+HR mobile Candidate decision detail (`/hr/candidates/[appKey]`) is **accepted and frozen** after the cream + honesty lock (`20260810T172200Z`).
+Do **not** expand recruiting workflow, invent an unscoped candidate list, or redesign the decision spine while auditing/implementing Hiring home / Interviews.
+
+Canonical evidence: `ops/evidence/hr-candidate-detail-cream-20260810T172200Z/`  
+Prior audit: `ops/evidence/hr-candidate-detail-qual-20260810T171500Z/`  
+Debt: `ops/HR_MOBILE_CANDIDATE_CONTRACT_DEBT.md`
+
+## Frozen product shape
+
+- Cream `PageScreen` + `HrPushedNav`; one cream surface + one attention callout (not-informed)
+- Stage chip tone from real canonical stage / status
+- No raw `#appKey` chrome
+- Localized CV empty, confirm action labels, and consequence mapping (known EN templates → i18n; unknown passthrough)
+- `already_decided` when terminal (`hired` / `rejected` / `withdrawn` / `import_archived`)
+- Offer section when `offer.current` is present (read-only facts; no offer mutations)
+- SOD prepare → confirm; invalidate priorities + candidate (+ candidates); `useHrSafeBack`
+- CV preview/download and schedule-interview only when permission-gated in `allowed_actions`
+- Rankings list remains job-scoped; unscoped calls surface `requires_position` / `ranking_unavailable` honestly
+
+## Allowed without owner change-control
+
+- Bugfixes restoring freeze invariants / tenant isolation / RBAC / SOD
+- Docs / canary log / contract-debt notes
+- Shared Hiring home position-scoped rankings wiring that does not change Candidate detail UX
+
+## Not allowed without an explicit owner wave
+
+- Inventing a company-wide parallel candidate list that bypasses job-scoped ranking
+- Offer withdraw/send/hire mutations from this detail surface
+- Reintroducing plum/multi-tone card stack or `#appKey` chrome
+- Weakening feature-action gates for CV / decision endpoints

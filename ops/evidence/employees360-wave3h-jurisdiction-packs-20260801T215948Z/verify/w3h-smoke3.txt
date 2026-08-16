@@ -1,0 +1,53 @@
+PASS  actors distinct
+PASS  create employee
+PASS  authority backfill
+PASS  impact future shifts
+PASS  impact open leave
+PASS  impact attendance
+PASS  impact payroll
+PASS  impact no auto legal
+PASS  impact disclaimer
+PASS  lifecycle projection active
+PASS  out-of-scope manager denied
+PASS  create cancel-pending request
+PASS  cancel pending request
+PASS  create future termination
+PASS  idempotent retry same payload
+PASS  idempotency conflict fail-closed
+PASS  self-approval forbidden
+PASS  approve future termination
+PASS  state notice_period
+PASS  hub still active during notice
+PASS  effective date stored
+PASS  create reversal-before-effective
+PASS  approve reversal-before-effective
+PASS  restored active
+PASS  term fields cleared
+PASS  same employment after cancel
+PASS  stale decide fail-closed
+PASS  normal termination committed
+PASS  state terminated
+PASS  hub left
+PASS  term type stored
+PASS  reversal after termination
+PASS  reversed to active
+PASS  same employment after reversal
+PASS  hub active after reversal
+PASS  rehire committed
+PASS  rehire same person
+PASS  rehire new employment
+PASS  rehire new assignment
+PASS  history count >= 2
+PASS  prior employment remains terminated
+PASS  prior authority status left
+PASS  immutable history rows
+PASS  new key active
+PASS  new key same person
+PASS  same tenant ok
+PASS  cross-tenant fail-closed
+PASS  lifecycle disabled for OTHERCO
+PASS  rollback ok
+PASS  lifecycle requests cleared
+PASS  wave2 authority survives rollback
+
+51 passed, 0 failed

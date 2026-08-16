@@ -1,0 +1,8 @@
+ACTION_INBOX_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('AIW1', 'AIW1-SYNTH|')
+prefixes ('965542',)
+honesty {'read_only': True, 'mutates_records': False, 'ai': False, 'hiring_reports_separate': True, 'alerts_delivery_owns_notifications': True, 'compliance_wave2': False, 'analytics_wave2': False, 'payroll_money': False, 'attendance_ingest': False, 'shifts_manager_expansion': False, 'synthetic_only': True}
+flags_ok_synthetic=true

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Fast smoke — development safety net. No screenshot oracle.
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ORCH="$REPO_ROOT/wathefni-orchestrator"
+if [[ -x "$ORCH/.venv/bin/python" ]]; then PY="$ORCH/.venv/bin/python"; else PY="$(command -v python3)"; fi
+
+echo "== smoke: R9 unit =="
+"$PY" "$ORCH/smoke-test-r9-permission-tenant-attack.py"
+echo "== smoke: R2 unit =="
+"$PY" "$ORCH/smoke-test-r2-security.py"
+echo "== smoke: owner bootstrap unit =="
+"$PY" "$ORCH/smoke-test-setup-owner-bootstrap.py"
+echo "== smoke: app links unit =="
+"$PY" "$ORCH/smoke-test-app-links.py"
+echo "== smoke: web structural =="
+"$PY" "$REPO_ROOT/ops/e2e/web-structural-sanity.py"
+echo "== smoke: dead controls =="
+"$PY" "$REPO_ROOT/ops/e2e/dead-control-scan.py"
+echo "== smoke: employee i18n =="
+"$PY" "$REPO_ROOT/apps/wathefni-employee-mobile/scripts/a11y-i18n-static-scan.py"
+echo "== smoke: mobile host readiness (honest, never invents MOBILE_PASS) =="
+bash "$REPO_ROOT/ops/mobile-e2e/host-readiness.sh" || true
+echo SMOKE_OK

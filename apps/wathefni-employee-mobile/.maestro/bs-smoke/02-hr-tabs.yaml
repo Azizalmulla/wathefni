@@ -1,0 +1,50 @@
+# BrowserStack: HR bottom tabs after login.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - browserstack
+  - hr
+  - tabs
+  - requires_credentials
+---
+- runFlow:
+    when:
+      notVisible:
+        id: "e2e.tab.hr.home"
+    file: 01-hr-login.yaml
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000
+- tapOn:
+    id: "e2e.tab.hr.home"
+- takeScreenshot: bs-hr-tab-home
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.people"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.people"
+      - takeScreenshot: bs-hr-tab-people
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.inbox"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.inbox"
+      - takeScreenshot: bs-hr-tab-inbox
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.hiring"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.hiring"
+      - takeScreenshot: bs-hr-tab-hiring
+- tapOn:
+    id: "e2e.tab.hr.more"
+- takeScreenshot: bs-hr-tab-more
+- tapOn:
+    id: "e2e.tab.hr.home"

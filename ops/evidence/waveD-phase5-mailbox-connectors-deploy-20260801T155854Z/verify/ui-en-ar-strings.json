@@ -1,0 +1,35 @@
+{
+  "en": {
+    "Recruitment mailbox connector (optional)": true,
+    "Forwarding remains the default": false,
+    "Gmail": true,
+    "Microsoft 365": true,
+    "gmail.readonly": false,
+    "Mail.Read": false
+  },
+  "ar_sample": [
+    "يلزم إعادة الاتصال`:` · reconnect required`:``,t.expiry_warning?` · ${t.expiry_wa",
+    "تمت إعادة الاتصال`:`Reconnected`,`success`),i.invalidateQueries({queryKey:R.calen",
+    "إعادة`:`Reconnect`})]})]})},t.connection_id))})]})}function fe({access:e,busy:t,c",
+    "سياسة ظهور التوظيف`:`Pre-hiring visibility`}),(0,Z.jsx)(`p`,{className:`mt-1 text",
+    "تعذر تحميل إعدادات البريد.`:`Could not load email settings.`,t))}),()=>{e=!1}},[y",
+    "إرسال البريد`:`Email sending`}),(0,Z.jsx)(G,{children:n?`كيف ترسل وظفني رسائل الم",
+    "أرسل أيضاً بريداً مع دعوات التقويم`:`Also send an email with calendar invitations",
+    "إذا تعذّر الإرسال من بريد شركتك، اسمح لوظفني بالإرسال مؤقتاً وسجّل ذلك بوضوح.`:`I",
+    "تدوير العنوان؟`:`Rotate this address?`,body:i?`سيتم إيقاف ${r} وإنشاء عنوان جديد.",
+    "حدّث قاعدة التحويل في بريد شركتك.`:`${r} will be disabled and a new address creat",
+    "إيقاف العنوان؟`:`Disable this address?`,body:i?`لن يستقبل ${r} سيرًا جديدة بعد ال",
+    "آن.`:`${r} will stop accepting new CVs.`,confirmLabel:i?`إيقاف`:`Disable`})){_(!0",
+    "تعذر إيقاف العنوان.`:`Could not disable the address.`,t))}finally{_(!1)}}};return",
+    "استقبال البريد والمستندات`:`Email & document intake`}),(0,Z.jsx)(G,{children:i?`أ",
+    "نشئ عنواناً عاماً أو اسماً مستعاراً لوظيفة، ثم حوّل بريد التوظيف إليه. هذا هو الم",
+    "لم يُستلم بريد بعد عبر هذا المسار.`:`No mail received on this path yet.`})]}),I?n",
+    "إيقاف`:`Disable`})]}):null]})]})},e.intake_id||e.address)})}):(0,Z.jsx)(`p`,{clas",
+    "تسمية اختيارية`:`Optional label`}),(0,Z.jsx)(V,{value:v,onChange:e=>y(e.target.va",
+    "مثل: التوظيف العام`:`e.g. General careers`})]}),b===`job`?(0,Z.jsxs)(`div`,{class",
+    "تم ربط صندوق التوظيف. اختر مجلداً ثم فعّل المزامنة.`:`Recruitment mailbox connect"
+  ],
+  "ar_count": 38,
+  "file": "/var/www/wathefni-dashboard/assets/SettingsPage-DBF5JtBV.js",
+  "sha256": "87c8d7b374c8349b210023d0cbd56ff83d059c00ab4306f0eabfe5c4af54df94"
+}

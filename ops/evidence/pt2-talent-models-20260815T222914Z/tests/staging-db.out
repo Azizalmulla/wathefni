@@ -1,0 +1,62 @@
+    pt2 talent models — db journeys
+      PASS  enable talent
+      PASS  enable succession
+      PASS  consume contracts default off
+      PASS  perf consume default off
+      PASS  A create model
+      PASS  A draft version
+      PASS  A publish
+      PASS  A already published
+      PASS  A published config immutable
+      PASS  A list models tenant scoped
+      PASS  B evaluate ok
+      PASS  B insufficient_evidence
+      PASS  B missing listed
+      PASS  B no fabricated 0
+      PASS  B no fabricated 100
+      PASS  B contradictions not reconciled
+      PASS  B hipo not mutated
+      PASS  B potential not mutated
+      PASS  B master score none
+      PASS  C incomplete weighted refused
+      PASS  C complete weighted draft
+      PASS  D low potential
+      PASS  D high OKR setup
+      PASS  D high performance fact
+      PASS  D evaluate
+      PASS  D derived is not HiPo signal
+      PASS  D human potential remains low
+      PASS  D human hipo not designated
+      PASS  D WHY keeps contradiction
+      PASS  D high OKR consumed or excluded honestly
+      PASS  D C6 HiPo unchanged
+      PASS  E high potential
+      PASS  E derived high potential signal
+      PASS  E still not designated HiPo
+      PASS  E override note present
+      PASS  E hipo_written false
+      PASS  E no C6 HiPo row written
+      PASS  F AI not classification input flag
+      PASS  F AI excluded or unused
+      PASS  G AI narration forbidden by default
+      PASS  H talent-only evaluate
+      PASS  H talent-only derived signal
+      PASS  I other company cannot see model
+      PASS  I other company cannot read WHY
+      PASS  I cannot evaluate foreign model
+      PASS  J profile has derived classifications
+      PASS  J profile honesty flag
+      PASS  J profile WHY present
+      PASS  K human designate HiPo
+      PASS  K designated HiPo now true
+      PASS  K derived still side-by-side
+      PASS  K WHY model/version present
+      PASS  K WHY consumed present
+      PASS  K WHY excluded present
+      PASS  K WHY missing present
+      PASS  K WHY provenance present
+      PASS  K WHY rules fired present
+
+    57 passed, 0 failed
+PT2_TALENT_MODELS_WHY_DB_PASS
+STAGING_RC=0

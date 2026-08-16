@@ -1,0 +1,17 @@
+## PROD
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_ONBOARDING_HR_MUTATE=on
+WATHEFNI_ONBOARDING_HR_MUTATE_COMPANIES=WATHEFNI
+WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_ONBOARDING_SYNTHETIC_CANARY=on
+WATHEFNI_ONBOARDING_SYNTHETIC_NAME_PREFIX=W2B-SYNTH|
+WATHEFNI_ONBOARDING_SYNTHETIC_PHONE_PREFIXES=965523
+## SHAs
+e6b670f958f18d32a572a2ae47e80f17e4e397c1b907eadea1f0e3e94cdc6222  /opt/wathefni/orchestrator/app.py
+b55c79d3fb1840ba8de4f616a0aeb1c43e621da29bb022de9b87c396452371d3  /opt/wathefni/orchestrator/action_registry.py
+0f13238daf5431b087da549c57abf17e3eb890453302af21ce409c7d64c349aa  /var/www/wathefni-dashboard/assets/PostHire-BrW2GlcR.js
+42aa780ec3869e810ad4749dc4f2208681cbd09bd3ab6239fd312f30ccb44882  /var/www/wathefni-dashboard/index.html
+## health
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_log

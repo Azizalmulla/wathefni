@@ -1,0 +1,11 @@
+43397:@app.patch("/dashboard/superadmin/setup/companies/{company_code}/lifecycle")
+64661:class DashboardEmployeeLifecycleRequest(BaseModel):
+64681:class DashboardEmployeeLifecycleDecision(BaseModel):
+64686:@app.get("/dashboard/posthire/employees/{employee_key}/lifecycle")
+64703:@app.get("/dashboard/posthire/employees/{employee_key}/lifecycle/impact-preview")
+64724:@app.get("/dashboard/posthire/employee-lifecycle/pending")
+64750:@app.post("/dashboard/posthire/employees/{employee_key}/lifecycle/requests")
+64753:    request: DashboardEmployeeLifecycleRequest,
+64778:@app.post("/dashboard/posthire/employee-lifecycle/requests/{request_id}/cancel")
+64795:@app.post("/dashboard/posthire/employee-lifecycle/requests/{request_id}/decide")
+64798:    body: DashboardEmployeeLifecycleDecision,

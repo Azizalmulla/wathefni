@@ -1,0 +1,3 @@
+EnvironmentFile=-/opt/wathefni/staging/var/employees360-wave4.env
+Environment=WATHEFNI_ENV=staging
+Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1

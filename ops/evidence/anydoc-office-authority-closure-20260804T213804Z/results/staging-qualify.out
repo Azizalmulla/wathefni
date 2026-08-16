@@ -1,0 +1,36 @@
+ANYDOC_OFFICE_AUTHORITY_SMOKE_START
+ANYDOC_OFFICE_AUTHORITY_SMOKE_OK
+anydoc .docx promoted=True contract_offer_ar_en.docx
+anydoc .docx promoted=True cv_ar_en.docx
+anydoc .docx promoted=True cv_en.docx
+anydoc .pptx promoted=True deck_ar.pptx
+anydoc .pptx promoted=True deck_onboarding_en.pptx
+existing_structured .xlsx promoted=None employee_list_ar_en.xlsx
+anydoc .odt promoted=True gov_notice_ar.odt
+anydoc .ods promoted=True gov_roster.ods
+anydoc .docx promoted=True hr_letter_en.docx
+existing .doc promoted=None legacy_stub.doc
+existing .rtf promoted=None memo_ar.rtf
+existing_structured .csv promoted=None payroll_aug2026.csv
+existing_structured .xlsx promoted=None payroll_aug2026.xlsx
+anydoc .docx promoted=True prior_cv_ar_en.docx
+anydoc .pptx promoted=True prior_deck_ar.pptx
+existing_structured .xlsx promoted=None prior_roster_ar.xlsx
+anydoc .ods promoted=True prior_sample.ods
+anydoc .odt promoted=True prior_sample_ar.odt
+existing_structured .csv promoted=None prior_table_ar.csv
+{
+  "mode": "staging",
+  "host": "vps",
+  "files": 19,
+  "promoted_total": 12,
+  "fallback_total": 2,
+  "material_disagreement_total": 1,
+  "structured_xlsx_integrity": true,
+  "structured_csv_integrity": true,
+  "live_docx_engine": "anydoc",
+  "live_docx_promoted": true,
+  "live_csv_structured_unchanged": true,
+  "pinned_version": "0.1.2"
+}
+STAGING_AUTHORITY_QUALIFY_OK

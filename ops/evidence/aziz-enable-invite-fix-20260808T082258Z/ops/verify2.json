@@ -1,0 +1,324 @@
+{
+  "started_at": "2026-08-08T08:25:31.742984+00:00",
+  "checks": {
+    "aziz_in_policy": {
+      "ok": true,
+      "detail": [
+        "WATHEFNI-96599338566"
+      ]
+    },
+    "already_enabled": {
+      "ok": true,
+      "detail": null
+    },
+    "email_gmail": {
+      "ok": true,
+      "detail": "azizalmulla16@gmail.com"
+    },
+    "no_pending_before_mint": {
+      "ok": true,
+      "detail": 0
+    },
+    "invite_id_present": {
+      "ok": true,
+      "detail": "f902ddd3-8423-4f5b-a186-414c7d455813"
+    },
+    "not_skipped_duplicate": {
+      "ok": true,
+      "detail": null
+    },
+    "delivered_or_sent": {
+      "ok": true,
+      "detail": "delivered"
+    },
+    "invite_pending": {
+      "ok": true,
+      "detail": "pending"
+    },
+    "channel_email": {
+      "ok": true,
+      "detail": "email"
+    },
+    "delivery_status_ok": {
+      "ok": true,
+      "detail": "delivered"
+    },
+    "exactly_one_pending": {
+      "ok": true,
+      "detail": null
+    },
+    "delivered_to_gmail": {
+      "ok": true,
+      "detail": {
+        "channel": "outbound_layer",
+        "status": "sent",
+        "external_message_id": null,
+        "send_result": null,
+        "last_error": null,
+        "recipient_email": "azizalmulla16@gmail.com"
+      }
+    },
+    "email_only_no_reconcile": {
+      "ok": true,
+      "detail": null
+    },
+    "enabled_after_email_edit": {
+      "ok": true,
+      "detail": null
+    },
+    "dept_change_reconcile_ran": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "changed": false,
+        "desired": true,
+        "trigger": "department_edit"
+      }
+    },
+    "enabled_after_dept_change_while_selected": {
+      "ok": true,
+      "detail": null
+    },
+    "final_enabled": {
+      "ok": true,
+      "detail": null
+    }
+  },
+  "pass": true,
+  "idem_before": [
+    {
+      "invite_id": "0a5d2f40-2a73-457a-857a-40f0461013fa",
+      "status": "superseded",
+      "idempotency_key": "access_enabled:WATHEFNI-96599338566:WATHEFNI:WATHEFNI-96599338566"
+    }
+  ],
+  "enable_deliver": {
+    "ok": true,
+    "changed": false,
+    "enabled": true,
+    "invitation": {
+      "ok": true,
+      "reused": false,
+      "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+      "delivered": true,
+      "delivery_status": "delivered",
+      "channel": "email",
+      "error": null,
+      "snapshot": {
+        "ok": true,
+        "employee_key": "WATHEFNI-96599338566",
+        "invitation_status": "delivered",
+        "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+        "channel": "email",
+        "sent_at": "2026-08-08 08:25:32.314922+00:00",
+        "expires_at": "2026-08-09 08:25:31.802130+00:00",
+        "delivery_mode": "auto_delivery",
+        "last_error": null,
+        "app_access_active": false,
+        "app_access_enabled": true,
+        "app_access_eligible": true,
+        "company_app_on": true,
+        "actions": {
+          "resend": true,
+          "reinvite": false,
+          "revoke_access": false,
+          "enable_access": false,
+          "disable_access": true,
+          "show_code_exception": false
+        }
+      }
+    }
+  },
+  "mint_path": "set_employee_app_access_auto",
+  "invite_row": {
+    "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+    "status": "pending",
+    "delivery_status": "delivered",
+    "delivery_channel": "email",
+    "trigger_source": "app_access_enabled",
+    "idempotency_key": "access_enabled:WATHEFNI-96599338566:WATHEFNI:WATHEFNI-96599338566",
+    "created_at": "2026-08-08 08:25:31.802188+00:00",
+    "last_delivery_error": null,
+    "last_delivery_at": "2026-08-08 08:25:32.314922+00:00",
+    "metadata": {
+      "auto_delivery": true,
+      "trigger_source": "app_access_enabled"
+    }
+  },
+  "outbound_events": [
+    {
+      "created_at": "2026-08-08 08:25:32.310728+00:00",
+      "channel": "outbound_layer",
+      "status": "sent",
+      "message_kind": "app_activation",
+      "last_error": null,
+      "external_message_id": null,
+      "recipient_email": "azizalmulla16@gmail.com",
+      "send_result": null
+    },
+    {
+      "created_at": "2026-08-08 08:25:32.306767+00:00",
+      "channel": "email",
+      "status": "sent",
+      "message_kind": "app_activation",
+      "last_error": null,
+      "external_message_id": "c8f49944-f4af-4eee-8d70-81ca5f709916",
+      "recipient_email": "azizalmulla16@gmail.com",
+      "send_result": {
+        "ok": true,
+        "error": null,
+        "dry_run": false,
+        "provider": "postmark",
+        "message_id": "c8f49944-f4af-4eee-8d70-81ca5f709916",
+        "sender_mode": "wathefni",
+        "visible_from": "hr@wathefni.ai",
+        "intended_mode": "wathefni",
+        "visible_reply_to": "hr@wathefni.ai",
+        "provider_accept_status": "accepted_by_provider",
+        "emergency_fallback_used": false
+      }
+    },
+    {
+      "created_at": "2026-08-08 08:25:31.866321+00:00",
+      "channel": "octopus",
+      "status": "failed",
+      "message_kind": "app_activation",
+      "last_error": "no_usable_conversation_id",
+      "external_message_id": null,
+      "recipient_email": "",
+      "send_result": {
+        "ok": false,
+        "error": "no_usable_conversation_id",
+        "phone": "96599338566",
+        "unhealthy_conversation_ids": [
+          "1021",
+          "1154",
+          "1170",
+          "1431",
+          "1537",
+          "1555",
+          "1588",
+          "1594",
+          "1606",
+          "1611",
+          "1621",
+          "685",
+          "920",
+          "97453460@lid",
+          "cleanup-hr-smoke",
+          "deploy-dialog-manager-compare-hr",
+          "deploy-neutral-fallback-probe",
+          "deploy-smalltalk-shlonk",
+          "deploy-style-compare",
+          "deploy-style-hala",
+          "deploy-style-idk",
+          "smoke-fastlane-removal",
+          "smoke-invite-status-42c195f1",
+          "smoke-invite-status-59a47736",
+          "smoke-job-opening-preflight",
+          "smoke-language-yo",
+          "smoke-leave-readonly",
+          "smoke-leave-readonly-2",
+          "smoke-payroll-export-guard",
+          "smoke-payroll-hours",
+          "smoke-payroll-policy-restore",
+          "smoke-payroll-policy-restore-2",
+          "smoke-payroll-policy-set",
+          "smoke-payroll-policy-set-2",
+          "smoke-payroll-preview",
+          "smoke-preflight-force",
+          "smoke-relative-date-fix",
+          "smoke-screening-complete-3af7ddfe",
+          "smoke-screening-complete-live-ba148063",
+          "smoke-timesheet-no-period",
+          "smoke-timesheet-review",
+          "smoke-timesheet-vague-after-fix",
+          "smoke-timesheet-vague-clarify"
+        ]
+      }
+    }
+  ],
+  "provider_result": {
+    "channel": "outbound_layer",
+    "status": "sent",
+    "external_message_id": null,
+    "send_result": null,
+    "last_error": null,
+    "recipient_email": "azizalmulla16@gmail.com"
+  },
+  "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+  "idem_after": [
+    {
+      "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+      "status": "pending",
+      "idempotency_key": "access_enabled:WATHEFNI-96599338566:WATHEFNI:WATHEFNI-96599338566"
+    }
+  ],
+  "email_only_edit": {
+    "status": "updated",
+    "reconcile": null
+  },
+  "dept_change": {
+    "status": "updated",
+    "old": "Internal QA",
+    "new": "Internal QA QA-FIX",
+    "reconcile": {
+      "ok": true,
+      "changed": false,
+      "desired": true,
+      "trigger": "department_edit"
+    }
+  },
+  "dept_restore": {
+    "status": "updated",
+    "reconcile_ran": true
+  },
+  "FINAL_CANONICAL_STATE": {
+    "app_access_enabled": true,
+    "email": "azizalmulla16@gmail.com",
+    "employment_status": "active",
+    "department": "Internal QA",
+    "selected_employee_keys": [
+      "WATHEFNI-96599338566"
+    ],
+    "invitation_status": "delivered",
+    "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+    "provider_result": {
+      "channel": "outbound_layer",
+      "status": "sent",
+      "external_message_id": null,
+      "send_result": null,
+      "last_error": null,
+      "recipient_email": "azizalmulla16@gmail.com"
+    },
+    "recent_invites": [
+      {
+        "invite_id": "f902ddd3-8423-4f5b-a186-414c7d455813",
+        "status": "pending",
+        "delivery_status": "delivered",
+        "delivery_channel": "email",
+        "idempotency_key": "access_enabled:WATHEFNI-96599338566:WATHEFNI:WATHEFNI-96599338566",
+        "created_at": "2026-08-08 08:25:31.802188+00:00"
+      },
+      {
+        "invite_id": "0a5d2f40-2a73-457a-857a-40f0461013fa",
+        "status": "superseded",
+        "delivery_status": "delivered",
+        "delivery_channel": "email",
+        "idempotency_key": null,
+        "created_at": "2026-08-08 07:54:51.953430+00:00"
+      },
+      {
+        "invite_id": "5748856a-c77f-44f3-8174-27df8cf7d2a1",
+        "status": "redeemed",
+        "delivery_status": "delivered",
+        "delivery_channel": "email",
+        "idempotency_key": null,
+        "created_at": "2026-08-07 06:49:04.298762+00:00"
+      }
+    ],
+    "mint_path": "set_employee_app_access_auto"
+  },
+  "failed_checks": [],
+  "finished_at": "2026-08-08T08:25:32.406842+00:00"
+}

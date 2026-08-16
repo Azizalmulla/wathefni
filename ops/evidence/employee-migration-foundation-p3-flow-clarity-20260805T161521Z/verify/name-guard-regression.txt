@@ -1,0 +1,3 @@
+OK name compatibility helpers
+TOTALS create=0 update=1 skip=3 review=1
+FAIL emf-p3-name-guard: expected 1/2/1/1 got 0/1/3/1

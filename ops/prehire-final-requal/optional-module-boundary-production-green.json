@@ -1,0 +1,20 @@
+{
+  "status": "production-green",
+  "module": "optional_module_boundary",
+  "artifact_sha256": "077103b2c4463470197e9c5fa44ebeb377b4aea86112fe5cb17d9b4d9b652af7",
+  "frozen": true,
+  "promoted_at": "2026-07-25T02:24:28Z",
+  "backup": "/opt/wathefni/backups/pre-optional-module-boundary-prod-20260725T021957Z",
+  "matrix_evidence": "/opt/wathefni/orchestrator/reports/optional-module-boundary-production-matrix.json",
+  "file_sha256": {
+    "app.py": "6c237cab102fce5073964ffbf9efe3978136427b06868a585fc21692147ac4ea",
+    "module_catalog.py": "2a1d4264343e17e40668adc7c6ddfe4d7696b6418b1a9b6cbd09ef4129fd8f36",
+    "action_registry.py": "d5d9b587f3ec217ec4d07320f3d9cc6a301740e9a8ddd99462a42913ba6bcf2a",
+    "interview_service.py": "17e1a33d85eea15bdb1773891b49b8746cf0ff9b4a537f4fc0cf5e226f505e9d",
+    "offer_service.py": "993c1bbdea97d30165fb909343cb1c68dab1d4a0c8551e4d4d5cf7ff2457cc7b",
+    "reports_v1.py": "52c7bade5335141630bbfd7723f6bb382e2ad3f677d3f4a13fbcae1e50257965",
+    "operator_mobile.py": "72c492297e1aaa36da6d35356a0dde70b9a5431d74c6885278f07ef4cc0e13ba",
+    "operator_mobile_data.py": "aaccb47ea332d9f28cc7586ebe362ea65357be310f02024847a2f3d6ebfd99f5"
+  },
+  "production": "do_not_begin_another_project"
+}

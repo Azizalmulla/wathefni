@@ -1,0 +1,21 @@
+[
+  "WATHEFNI-96550252254|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96550252254|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96550252254|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96550252254|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96550252254|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96550252254|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96566363363|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+  "WATHEFNI-96566363363|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+  "WATHEFNI-96566363363|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96566363363|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96566363363|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+  "WATHEFNI-96566363363|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+  "WATHEFNI-96597727743|bank_details|True|received|bad78241880ae6d5ae7d9512cb8bb321|0",
+  "WATHEFNI-96597727743|civil_id|True|received|fd1de835a88e1a642bc3fc17125e19e8|0",
+  "WATHEFNI-96597727743|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96597727743|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+  "WATHEFNI-96597727743|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+  "WATHEFNI-96597727743|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+  "WATHEFNI-96599411617|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0"
+]

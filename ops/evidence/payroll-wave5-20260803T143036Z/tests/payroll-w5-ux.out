@@ -1,0 +1,22 @@
+    payroll pifss eos wave5 UX EN/AR/mobile
+      PASS  posthire dir
+      PASS  ux file
+      PASS  workspace file
+      PASS  posthire file
+      PASS  EN title
+      PASS  AR title
+      PASS  honesty EN
+      PASS  honesty AR
+      PASS  payment disabled EN
+      PASS  payment disabled AR
+      PASS  no remittance EN
+      PASS  no remittance AR
+      PASS  counsel EN
+      PASS  counsel AR
+      PASS  workspace rtl
+      PASS  mobile hint
+      PASS  testid
+      PASS  posthire tab
+      PASS  review only
+
+    19 passed, 0 failed

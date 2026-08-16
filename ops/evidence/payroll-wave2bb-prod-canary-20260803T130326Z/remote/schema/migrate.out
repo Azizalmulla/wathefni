@@ -1,0 +1,10 @@
+wave2b_version 1.0.0
+policy payroll_preview_policy@1.0.0
+wave1_version 1.0.0
+wave2a_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'authoritative': False, 'preview_only': True, 'ai_calculations': False, 'external_flows_unchanged': True, 'synthetic_only': True}
+connected_db wathefni
+preview_tables ['payroll_preview_adjustments', 'payroll_preview_employee_results', 'payroll_preview_events', 'payroll_preview_lines', 'payroll_preview_policies', 'payroll_preview_runs']
+wave1_wave2a_tables_ok
+MIGRATE_OK payroll_native_preview_wave2b_prod
+ACK_PRODUCTION_PAYROLL_W2BB=YES

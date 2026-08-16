@@ -1,0 +1,4 @@
+wave4 4.0.0 enabled True
+allowlist ['96588009911', '96599338566']
+honesty {'balances_enforced': False, 'legal_reviewed': False, 'balances_binding': False, 'observe_only': True}
+flags_ok_wave4=true

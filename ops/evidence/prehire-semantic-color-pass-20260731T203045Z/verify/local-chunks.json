@@ -1,0 +1,11 @@
+{
+  "jobs": "JobsPage-DBa-Hljw.js",
+  "reports": "ReportsPage-B-piDZZn.js",
+  "dashboard": "dashboard-BKkQL2X2.js",
+  "jobs_sha256": "1ce52b16124486ee995c19389aa43f1371e3f5c77951fa4f7ab864511bf06c6a",
+  "reports_sha256": "ee89bbc57b662bfe4cf95967fafb75ac09253e799e905f7c282b3c96995d4d45",
+  "markers": {
+    "jobs_priority_soft": true,
+    "reports_black_pill": true
+  }
+}

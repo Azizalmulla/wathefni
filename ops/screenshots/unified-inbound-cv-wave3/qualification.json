@@ -1,0 +1,90 @@
+{
+  "stamp": "20260726T235903Z",
+  "results": [
+    {
+      "name": "health_200",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "staging_env",
+      "ok": true,
+      "detail": "staging"
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "staging_db_connect",
+      "ok": true,
+      "detail": "wathefni_staging"
+    },
+    {
+      "name": "envelope_idempotent",
+      "ok": true,
+      "detail": "aaa4f20a-5292-53a1-95a5-75a1ec2f304a"
+    },
+    {
+      "name": "one_envelope_event",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "document_checksum_parity",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "cv_version_dual_write_parity",
+      "ok": true,
+      "detail": "23edad47-696f-55a2-8e50-682d072a2546"
+    },
+    {
+      "name": "whatsapp_unsolicited_adapter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "zero_duplicate_authority_writes",
+      "ok": true,
+      "detail": "{\"candidates\": [97, 97], \"applications\": [86, 86], \"ocr\": [41, 41], \"classification\": [0, 0], \"ck\": [6467, 6467]}"
+    },
+    {
+      "name": "retry_helper",
+      "ok": true,
+      "detail": "retrying"
+    },
+    {
+      "name": "dead_letter_helper",
+      "ok": true,
+      "detail": "dead_letter"
+    },
+    {
+      "name": "malware_kill_switch",
+      "ok": true,
+      "detail": "on"
+    },
+    {
+      "name": "rollback_flag_off_skips",
+      "ok": true,
+      "detail": "dual_write_disabled"
+    },
+    {
+      "name": "job_gate_fail_closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "staging_commit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production_dual_write_untouched",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

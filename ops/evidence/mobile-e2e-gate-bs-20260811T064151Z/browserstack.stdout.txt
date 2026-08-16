@@ -1,0 +1,238 @@
+{"phase": "upload_suite", "zip": "/Users/azizalmulla/Desktop/claw/ops/evidence/mobile-e2e-gate-bs-20260811T064151Z/browserstack/maestro-suite.zip", "execute": ["bs-smoke/00-launch-unsigned.yaml", "bs-smoke/01-hr-login.yaml", "bs-smoke/02-hr-tabs.yaml", "bs-smoke/03-hr-leave-approve.yaml", "bs-smoke/04-hr-leave-reject.yaml"]}
+{"phase": "start_build", "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67", "suite": "bs://71054e13ca4fc3377458fb8dbadea42d49640e32", "devices": ["iPhone 15-17.0"]}
+{"phase": "poll", "build_id": "2d5ce7f652ba62a83bc539becd3aa9df55cc5a60"}
+{
+  "build_id": "2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+  "status": "failed",
+  "passed_sessions": 0,
+  "failed_sessions": 1,
+  "error_sessions": 0,
+  "passed_flows": 1,
+  "failed_flows": 4,
+  "flows": [
+    {
+      "flow": "bs-smoke/00-launch-unsigned",
+      "status": "passed",
+      "duration": 28.254,
+      "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148",
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/video#t=0,29"
+    },
+    {
+      "flow": "bs-smoke/01-hr-login",
+      "status": "failed",
+      "duration": 187.074,
+      "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3",
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/video#t=43,231"
+    },
+    {
+      "flow": "bs-smoke/02-hr-tabs",
+      "status": "failed",
+      "duration": 194.211,
+      "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a",
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/video#t=244,439"
+    },
+    {
+      "flow": "bs-smoke/03-hr-leave-approve",
+      "status": "failed",
+      "duration": 185.5,
+      "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e",
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/video#t=450,637"
+    },
+    {
+      "flow": "bs-smoke/04-hr-leave-reject",
+      "status": "failed",
+      "duration": 195.766,
+      "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55",
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/video#t=663,859"
+    }
+  ],
+  "sessions": [
+    {
+      "device": "iPhone 15",
+      "os_version": "17.3",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c",
+      "status": "failed",
+      "duration": 953,
+      "testcases": {
+        "count": 5,
+        "status": {
+          "passed": 1,
+          "failed": 4,
+          "skipped": 0,
+          "timedout": 0,
+          "error": 0,
+          "running": 0,
+          "queued": 0
+        },
+        "data": [
+          {
+            "class": "bs-smoke/00-launch-unsigned",
+            "testcases": [
+              {
+                "name": "bs-smoke/00-launch-unsigned",
+                "start_time": "2026-08-11 06:42:35 +0000",
+                "status": "passed",
+                "duration": 28.254,
+                "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/video#t=0,29",
+                "crash_logs_count": 0,
+                "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148",
+                "device_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/devicelogs",
+                "network_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/networklogs",
+                "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/commandlogs",
+                "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/maestrologs",
+                "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/maestroScreenshot"
+              }
+            ]
+          },
+          {
+            "class": "bs-smoke/01-hr-login",
+            "testcases": [
+              {
+                "name": "bs-smoke/01-hr-login",
+                "start_time": "2026-08-11 06:42:35 +0000",
+                "status": "failed",
+                "duration": 187.074,
+                "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/video#t=43,231",
+                "crash_logs_count": 0,
+                "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3",
+                "device_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/devicelogs",
+                "network_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/networklogs",
+                "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/commandlogs",
+                "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/maestrologs",
+                "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/maestroScreenshot"
+              }
+            ]
+          },
+          {
+            "class": "bs-smoke/02-hr-tabs",
+            "testcases": [
+              {
+                "name": "bs-smoke/02-hr-tabs",
+                "start_time": "2026-08-11 06:42:35 +0000",
+                "status": "failed",
+                "duration": 194.211,
+                "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/video#t=244,439",
+                "crash_logs_count": 0,
+                "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a",
+                "device_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/devicelogs",
+                "network_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/networklogs",
+                "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/commandlogs",
+                "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/maestrologs",
+                "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/maestroScreenshot"
+              }
+            ]
+          },
+          {
+            "class": "bs-smoke/03-hr-leave-approve",
+            "testcases": [
+              {
+                "name": "bs-smoke/03-hr-leave-approve",
+                "start_time": "2026-08-11 06:42:35 +0000",
+                "status": "failed",
+                "duration": 185.5,
+                "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/video#t=450,637",
+                "crash_logs_count": 0,
+                "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e",
+                "device_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/devicelogs",
+                "network_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/networklogs",
+                "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/commandlogs",
+                "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/maestrologs",
+                "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/maestroScreenshot"
+              }
+            ]
+          },
+          {
+            "class": "bs-smoke/04-hr-leave-reject",
+            "testcases": [
+              {
+                "name": "bs-smoke/04-hr-leave-reject",
+                "start_time": "2026-08-11 06:42:35 +0000",
+                "status": "failed",
+                "duration": 195.766,
+                "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/video#t=663,859",
+                "crash_logs_count": 0,
+                "id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55",
+                "device_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/devicelogs",
+                "network_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/networklogs",
+                "maestro_commands": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/commandlogs",
+                "maestro_log": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/maestrologs",
+                "screenshots": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/maestroScreenshot"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786430518",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://71054e13ca4fc3377458fb8dbadea42d49640e32",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml",
+      "bs-smoke/01-hr-login.yaml",
+      "bs-smoke/02-hr-tabs.yaml",
+      "bs-smoke/03-hr-leave-approve.yaml",
+      "bs-smoke/04-hr-leave-reject.yaml"
+    ],
+    "setEnvVariables": {
+      "MAESTRO_HR_COMPANY": "WATHEFNI",
+      "MAESTRO_HR_EMAIL": "e2e-hr+mobile@wathefni.internal",
+      "MAESTRO_HR_PASSWORD": "***REDACTED***",
+      "MAESTRO_LEAVE_ID": "60822864-fff9-4f22-a8c3-077a90907128",
+      "MAESTRO_LEAVE_REJECT_ID": "d42c4045-f96e-4b34-b338-c5480846d75f",
+      "MAESTRO_PIN": "246810",
+      "MAESTRO_HR_EMAIL_LOCAL": "e2e-hr+mobile",
+      "MAESTRO_HR_EMAIL_DOMAIN": "wathefni.internal"
+    }
+  },
+  "poll_timeout": false,
+  "raw_status": "failed",
+  "execute": [
+    "bs-smoke/00-launch-unsigned.yaml",
+    "bs-smoke/01-hr-login.yaml",
+    "bs-smoke/02-hr-tabs.yaml",
+    "bs-smoke/03-hr-leave-approve.yaml",
+    "bs-smoke/04-hr-leave-reject.yaml"
+  ],
+  "app_url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+  "test_suite_url": "bs://71054e13ca4fc3377458fb8dbadea42d49640e32",
+  "evidence": "ops/evidence/mobile-e2e-gate-bs-20260811T064151Z",
+  "MOBILE_PASS": 1,
+  "ui_runtime": "browserstack_real_device",
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "flows_pass=1 flows_fail=4 sessions_pass=0 sessions_fail=1 status=failed",
+  "rule": "API PASS \u2260 MOBILE PASS \u2014 BrowserStack real-device execution required"
+}

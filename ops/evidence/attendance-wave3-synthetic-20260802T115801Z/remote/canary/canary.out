@@ -1,0 +1,86 @@
+PASS  production database
+PASS  ops enabled
+PASS  ops companies WATHEFNI
+PASS  ops store postgres
+PASS  ops synthetic only
+PASS  authority synthetic only
+PASS  capture ingest off
+PASS  app capture ingest off
+PASS  import off
+PASS  synthetic employee allowed
+PASS  real denied ops 99411617
+PASS  real denied authority 99411617
+PASS  real denied ops 66363363
+PASS  real denied authority 66363363
+PASS  real denied ops 50252254
+PASS  real denied authority 50252254
+PASS  real denied ops 97727743
+PASS  real denied authority 97727743
+PASS  baseline 42 attendance rows
+PASS  four reals present
+PASS  open kind absence
+PASS  open kind ambiguous_punches
+PASS  open kind connector_issue
+PASS  open kind early_leave
+PASS  open kind incomplete_session
+PASS  open kind lateness
+PASS  open kind missing_check_in
+PASS  open kind missing_check_out
+PASS  real employee ops denied
+PASS  external tenant ops denied
+PASS  missing_check_in synced
+PASS  exception assigned
+PASS  correction requested
+PASS  approve without apply
+PASS  projection unchanged pre-apply
+PASS  apply creates new version
+PASS  before/after present
+PASS  idempotent apply replay
+PASS  concurrent apply single winner
+PASS  concurrent same idempotency both ok
+PASS  lateness exception
+PASS  early_leave exception
+PASS  dual approval required
+PASS  dual first pending
+PASS  dual same approver denied
+PASS  dual second completes
+PASS  early leave applied
+PASS  absence correction applied
+PASS  reject without apply
+PASS  dispute base applied
+PASS  employee dispute raised
+PASS  dispute resolved
+PASS  reopen after evidence
+PASS  stale row_version fail-closed
+PASS  out-of-scope manager denied
+PASS  unconfigured manager denied
+PASS  manager self-correction denied
+PASS  payroll lock denies correction
+PASS  post-leave correction applied
+PASS  leave reverse preserves correction
+PASS  synthetic day approved
+PASS  snapshot reconciles projection
+PASS  raw punch immutable retained
+PASS  correction punches separate source
+PASS  comment added
+PASS  attachment ref stored
+PASS  append-only audit events present
+PASS  audit update blocked
+PASS  42 attendance rows unchanged
+PASS  attendance fingerprint unchanged
+PASS  synthetic absent from attendance_records
+PASS  real payroll timesheets unchanged
+PASS  synthetic absent from payroll_timesheets
+PASS  real authority snapshots unchanged
+PASS  real day projections unchanged
+PASS  synthetic not in employees table
+PASS  synthetic not in leave balances
+PASS  real employee report excludes synthetic
+PASS  payroll summary four-reals excludes synthetic
+PASS  no canary devices registered
+PASS  post-cleanup 42 rows
+PASS  post-cleanup exceptions gone
+PASS  post-cleanup punches gone
+PASS  post-cleanup projections gone
+
+Wave 3 prod synthetic canary: 84/84 passed, 0 failed

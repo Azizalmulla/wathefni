@@ -1,0 +1,89 @@
+{
+  "passed": 9,
+  "failed": 0,
+  "checks": [
+    {
+      "id": "health_bootstrap",
+      "result": "PASS",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "id": "orphan_410",
+      "result": "PASS",
+      "detail": {
+        "status": 410,
+        "detail": {
+          "error": "assessment_queue_route_removed",
+          "message": "This assessments queue path is not part of the product API. Use GET /dashboard/prehire/applications with overview_cohort and assessment_cohort (for example assessment_ready_to_send)."
+        }
+      }
+    },
+    {
+      "id": "orphan_never_500",
+      "result": "PASS",
+      "detail": {
+        "status": 410
+      }
+    },
+    {
+      "id": "orphan_error_key",
+      "result": "PASS",
+      "detail": {
+        "detail": {
+          "error": "assessment_queue_route_removed",
+          "message": "This assessments queue path is not part of the product API. Use GET /dashboard/prehire/applications with overview_cohort and assessment_cohort (for example assessment_ready_to_send)."
+        }
+      }
+    },
+    {
+      "id": "orphan_message_points_applications",
+      "result": "PASS",
+      "detail": {
+        "message": "This assessments queue path is not part of the product API. Use GET /dashboard/prehire/applications with overview_cohort and assessment_cohort (for example assessment_ready_to_send)."
+      }
+    },
+    {
+      "id": "cohort_path_200",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "count": 2
+      }
+    },
+    {
+      "id": "assessments_list_200",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "count": 5
+      }
+    },
+    {
+      "id": "assessments_config_200",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "keys": [
+          "company_code",
+          "ok",
+          "battery",
+          "available_batteries",
+          "item_bank",
+          "framework",
+          "role_profiles",
+          "norms",
+          "guardrails"
+        ]
+      }
+    },
+    {
+      "id": "caller_audit_zero",
+      "result": "PASS",
+      "detail": {
+        "hits": []
+      }
+    }
+  ]
+}

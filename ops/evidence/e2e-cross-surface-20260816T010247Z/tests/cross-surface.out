@@ -1,0 +1,16 @@
+    E2E cross-surface leave convergence
+    tenant: R9E478693
+      PASS  HR login
+      PASS  employee request accepted or validated
+      PASS  employee leave list readable
+      PASS  HR sees company leave
+      PASS  HR leave payload stays on this tenant
+      PASS  HR approve is a real domain result
+      PASS  HR approve succeeds for a valid pending request
+      PASS  employee refresh stays on this tenant
+      PASS  employee payload does not leak another tenant
+      PASS  employee attendance is tenant-scoped or fail-closed
+      PASS  HR Setup can disable leave
+      FAIL  employee leave fails closed after module disable :: (200, '{"ok":true,"leave":{"leave_id":"d19c082a-0f85-4200-a8aa-f06146395f72","company_code":"R9E478693","employee_key":"R9E478693-9658147869","employee_phone":"9658147')
+
+    CROSS_SURFACE_FAIL  11 passed, 1 failed

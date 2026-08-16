@@ -1,0 +1,27 @@
+auth wave2 phase4 pin recovery unit
+  PASS  EN forgot keys present
+  PASS  AR forgot keys present
+  PASS  EN/AR pin key parity
+  PASS  EN confirm copy exact
+  PASS  recoverPinByReactivation exported
+  PASS  recover clears PIN material
+  PASS  recover clears via clearLocalAuthMaterial
+  PASS  recover sets signedOut
+  PASS  recover in-flight guard
+  PASS  5-fail unlock uses recover
+  PASS  5-fail changePin uses recover
+  PASS  no new backend auth routes
+  PASS  network soft-fail does not recover
+  PASS  max attempts still 5
+  PASS  clear disables biometric preference
+  PASS  clear clears session
+  PASS  Forgot PIN confirmation Alert
+  PASS  UnlockPinFlow accepts onForgotPin
+  PASS  PinView shows Forgot on unlock
+  PASS  gate forwards onForgotPin
+  PASS  AuthGate wires Forgot PIN
+  PASS  overlay Forgot + 5-fail recover
+  PASS  overlay lockedOut recovers
+  PASS  mobile tsc --noEmit
+
+24 passed, 0 failed

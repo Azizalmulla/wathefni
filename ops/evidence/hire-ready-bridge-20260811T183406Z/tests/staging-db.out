@@ -1,0 +1,38 @@
+    hire-ready bridge — DB E2E prove
+      PASS  dry-run ok before writers
+      PASS  writers company canary only
+      PASS  j1 offer bridge ok
+      PASS  j1 employee_key
+      PASS  j1 provisional ok
+      PASS  j1 preboard created
+      PASS  j1 hub pending_start
+      PASS  j1 hub joining date
+      PASS  j2 provisional
+      PASS  j2 preboard without recruiting
+      PASS  j3 set joining ok
+      PASS  j3 one canonical date hub+preboard
+      PASS  j4 blocked≠ready
+      PASS  j4 cosmetic ready forbidden
+      PASS  j4/5 readiness derived ready
+      PASS  j5 convert ok
+      PASS  j5 same employment_id
+      PASS  j5 no duplicate employment
+      PASS  j6 onboarding auto-start attempted
+      PASS  j6 onboarding started
+      PASS  j7 convert without onboarding
+      PASS  j7 onboarding skipped cleanly
+      PASS  j8 dedupe ok
+      PASS  j8 stamped or preboard_done
+      PASS  j5b future stays pending_start
+      PASS  j5b convert still ok
+      PASS  j5b same employment
+      PASS  j9 cancel ok
+      PASS  j9 hub not active
+      PASS  j9 closed as left
+      PASS  pending_start ESS probe soft
+      PASS  cross-surface convert route
+      PASS  cross-surface web+mobile+app routes
+
+    33 passed, 0 failed
+HIRE_READY_BRIDGE_DB_FULL_PASS
+STAGING_DB_RC=0

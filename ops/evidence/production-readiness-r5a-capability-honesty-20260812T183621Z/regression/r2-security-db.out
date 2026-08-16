@@ -1,0 +1,142 @@
+security denial route=/orchestrator/audit/turns class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+security denial route=/orchestrator/audit/pending-actions class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+security denial route=/orchestrator/audit/action-results class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+security denial route=/orchestrator/audit/turns class=company_scope_required policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-operations class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+security denial route=/orchestrator/debug/intake-documents/{document_id}/signed-download class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+security denial route=/orchestrator/debug/intake-jobs/{job_id}/replay class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+security denial route=/orchestrator/debug/intake-quarantine/sweep class=break_glass_disabled policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-worker/run class=break_glass_disabled policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-outage-replay class=break_glass_disabled policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-quarantine/sweep class=break_glass_requires_platform_principal policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-quarantine/sweep class=break_glass_forbidden policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-quarantine/sweep class=break_glass_operator_required policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/debug/intake-quarantine/sweep class=break_glass_forbidden policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+break-glass executed route=/orchestrator/debug/intake-quarantine/sweep operation=intake_quarantine_sweep_report operator=r2-smoke-EB6D31 company=- destructive=False
+security denial route=/orchestrator/posthire/documents/email-intake class=intake_routing_conflict policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=R2ALPHAEB6D31
+security denial route=/orchestrator/posthire/documents/email-intake class=intake_routing_unresolved policy=- dimension=- principal=d294fcce0cc88587843099d85dd805ae company=-
+security denial route=/orchestrator/posthire/documents/email-intake class=tenant_scope_violation policy=- dimension=- principal=31e543a0b609ddc32c11d3875bfe76db company=R2ALPHAEB6D31
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+link signing secret unusable purpose=video_interview var=WATHEFNI_VIDEO_INTERVIEW_LINK_SECRET reason=missing
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+security denial route=/internal/video-interviews/process-transcripts class=internal_worker_forbidden policy=- dimension=- principal=12ca17b49af2289436f303e0166030a2 company=-
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=896dd2bed0a4c9c055272853852e7ffd company=NOSUCHEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=71700e944e1a540a773ee1064cd7186f company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=rate_limited policy=dashboard_login dimension=identity principal=022daccf27ff4d3561084c686896b3ad company=R2ALPHAEB6D31
+security denial route=/dashboard/auth/login class=dashboard_auth_failed policy=dashboard_login dimension=- principal=5b393d6659635b507f97ae308cabbd9c company=R2ALPHAEB6D31
+security denial route=/dashboard/superadmin/setup/auth/login class=operator_auth_failed policy=setup_operator_login dimension=- principal=587012e24140e65944a3e95bff7dbaa1 company=-
+security denial route=/dashboard/superadmin/setup/auth/login class=operator_auth_failed policy=setup_operator_login dimension=- principal=1226063176e6422c2f8fca44120e43ae company=-
+security denial route=/dashboard/superadmin/setup/auth/login class=operator_auth_failed policy=setup_operator_login dimension=- principal=1226063176e6422c2f8fca44120e43ae company=-
+security denial route=/dashboard/superadmin/setup/auth/login class=operator_auth_failed policy=setup_operator_login dimension=- principal=1226063176e6422c2f8fca44120e43ae company=-
+security denial route=/dashboard/superadmin/setup/auth/login class=operator_auth_failed policy=setup_operator_login dimension=- principal=1226063176e6422c2f8fca44120e43ae company=-
+security denial route=/dashboard/superadmin/setup/auth/login class=operator_auth_failed policy=setup_operator_login dimension=- principal=1226063176e6422c2f8fca44120e43ae company=-
+security denial route=/dashboard/superadmin/setup/auth/login class=rate_limited policy=setup_operator_login dimension=identity principal=1226063176e6422c2f8fca44120e43ae company=-
+security denial route=/calendar/guest/{token}/state class=rate_limited policy=calendar_guest_token dimension=identity principal=7983a38c31b9d03824ba53e3bfd428db company=-
+    PRODUCTION READINESS R2 — live security negative paths
+    tenants: R2ALPHAEB6D31 / R2BETAEB6D31    source: 10.174.154.43
+
+    P0-5 — tenant isolation on internal audit reads
+      PASS  tenant A reads its own turns
+      PASS  tenant A sees only its own conversation text
+      PASS  tenant A cannot request tenant B turns
+      PASS  tenant A cannot request tenant B pending_actions
+      PASS  tenant A reads its own pending_actions
+      PASS  tenant A cannot request tenant B action_results
+      PASS  tenant A reads its own action_results
+      PASS  platform token cannot perform an unscoped global read
+      PASS  platform token with an explicit company reads only that company
+      PASS  unknown internal token is denied
+
+    P0-5 — tenant isolation on intake artifacts
+      PASS  tenant A cannot read tenant B intake operations
+      PASS  tenant A cannot mint a download for tenant B
+      PASS  tenant A cannot replay tenant B intake jobs
+
+    P0-5 — break-glass authority for platform operations
+      PASS  platform token alone cannot run the global sweep
+      PASS  platform token alone cannot run the shared worker
+      PASS  unscoped outage replay requires break-glass
+      PASS  a tenant principal can never reach platform administration
+      PASS  enabled break-glass still needs its own secret
+      PASS  destructive apply=true is refused without operator attribution
+      PASS  destructive apply=true is refused with a wrong break-glass secret
+      PASS  fully authorized non-destructive break-glass succeeds
+      PASS  break-glass use is attributed and audited
+
+    P0-5 — email intake tenant routing
+      PASS  tenant is derived from the destination mailbox
+      PASS  a request-body company that contradicts the mailbox is refused
+      PASS  a request-body company with no routing evidence is refused
+      PASS  a tenant principal cannot route mail into another company
+
+    P0-5 — caller-supplied dashboard tenant metadata
+      PASS  channel=web_dashboard alone does not select a tenant
+      PASS  a guessed authority marker does not select a tenant
+      PASS  an in-process dashboard session still binds its own tenant
+      PASS  the HTTP boundary strips any claimed authority marker
+
+    P0-2 — live public link capability
+      PASS  a link forged with the old committed constant is refused
+      PASS  a link forged with the database URL is refused
+      PASS  readiness reports link signing healthy
+      PASS  readiness never exposes secret material
+      PASS  a missing signing secret makes the capability unavailable, not permissive
+      PASS  readiness degrades when the signing secret is absent
+
+    P0-4 — internal worker endpoint from localhost
+      PASS  no token from 127.0.0.1 is denied
+      PASS  wrong worker token is denied
+      PASS  the shared platform token is not worker authority
+      PASS  the dedicated worker token is accepted
+      PASS  a missing worker secret fails closed rather than trusting localhost
+
+    P0-3 — dashboard login throttling and enumeration safety
+      PASS  unknown company, unknown email and wrong password return one status
+      PASS  ...and one identical body
+      PASS  dashboard brute force locks out within the 8-failure window
+      PASS  lockout returns retry metadata
+      PASS  lockout does not disclose the account
+      PASS  throttling is per-identity, so it is not an existence oracle
+      PASS  valid credentials still sign in
+      PASS  successful login clears the failure counter
+
+    P0-3 — Setup Console operator login throttling
+      PASS  unknown operator and wrong token are indistinguishable
+      PASS  Setup operator brute force locks out within the 5-failure window
+
+    P1-22 — public calendar guest-token throttling
+      PASS  guest-token semantics unchanged: unknown token is still 404
+      PASS  repeated use of one guest token throttles at 40
+      PASS  guest throttle returns retry metadata
+
+    R2 — denial audit is usable and leaks nothing
+      PASS  rate-limited attempts are recorded
+      PASS  failed logins are recorded
+      PASS  tenant scope violations are recorded
+      PASS  break-glass denials are recorded
+      PASS  worker denials are recorded
+      PASS  every record names its route
+      PASS  audit never stores the password
+      PASS  audit never stores the operator token
+      PASS  audit never stores the platform internal token
+      PASS  audit never stores the tenant token
+      PASS  audit never stores the worker token
+      PASS  audit never stores the break-glass token
+      PASS  audit never stores the assessment signing secret
+      PASS  audit never stores the video signing secret
+      PASS  audit never stores the raw account email
+
+    R2_SECURITY_FULL_PASS
+    69 passed, 0 failed
+
+STAGING_RC=0

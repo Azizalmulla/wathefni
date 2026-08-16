@@ -1,0 +1,72 @@
+
+Environment: production
+Variables for this project:
+ID            b36f681e-a283-4776-b570-9a75d4e45d66
+Name          EXPO_PUBLIC_API_BASE_URL
+Value         https://api.wathefni.ai
+Scope         PROJECT
+Visibility    PUBLIC
+Environments  production
+type          string
+Created at    Aug 09 07:39:05
+Updated at    Aug 09 07:39:05
+
+———
+
+ID            83adab58-d963-4f33-b723-13c89a249f3d
+Name          EXPO_PUBLIC_LOCAL_AUTO_LOCK
+Value         1
+Scope         PROJECT
+Visibility    PUBLIC
+Environments  production
+type          string
+Created at    Aug 09 07:38:56
+Updated at    Aug 09 07:38:56
+
+———
+
+ID            9d36f888-75a2-4367-94aa-52a158ea7c38
+Name          EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+Value         1
+Scope         PROJECT
+Visibility    PUBLIC
+Environments  production
+type          string
+Created at    Aug 09 07:39:00
+Updated at    Aug 09 07:39:00
+
+———
+
+ID            83050e62-063f-44a4-adb0-fe822b0e454b
+Name          EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+Value         1
+Scope         PROJECT
+Visibility    PUBLIC
+Environments  production
+type          string
+Created at    Aug 09 07:38:52
+Updated at    Aug 09 07:38:52
+
+———
+
+ID            5a677840-c386-439c-a02f-39433dccc8ad
+Name          EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+Value         1
+Scope         PROJECT
+Visibility    PUBLIC
+Environments  production
+type          string
+Created at    Aug 09 07:38:48
+Updated at    Aug 09 07:38:48
+
+———
+
+ID            d0e81c6e-afbc-4f2b-a4c4-a9cc017f10f9
+Name          EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED
+Value         0
+Scope         PROJECT
+Visibility    PUBLIC
+Environments  production
+type          string
+Created at    Aug 09 07:39:09
+Updated at    Aug 09 07:39:09

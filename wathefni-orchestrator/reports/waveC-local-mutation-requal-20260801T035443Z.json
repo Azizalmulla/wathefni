@@ -1,0 +1,197 @@
+{
+  "marker": "waveC-local-mutation-requal-v1",
+  "started_at": "20260801T035442Z",
+  "environment": {
+    "env": "test",
+    "database": "wathefni_local_boundary",
+    "delivery_mode": "dry_run",
+    "binding": {
+      "application_environment": "test",
+      "database_environment": "test",
+      "database_environment_marker": "cb317868f25b",
+      "database_logical_name": "cfb68af4bec9",
+      "database_host": "aaf075b7b4bf",
+      "match": true
+    }
+  },
+  "tenants": [
+    {
+      "code": "WCAVLO",
+      "combo": "asm_ON__live_ON__video_ON__offers_ON",
+      "assessments": true,
+      "live": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "WCALXO",
+      "combo": "asm_ON__live_ON__video_OFF__offers_ON",
+      "assessments": true,
+      "live": true,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "WCAXVO",
+      "combo": "asm_ON__live_OFF__video_ON__offers_ON",
+      "assessments": true,
+      "live": false,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "WCAXXO",
+      "combo": "asm_ON__live_OFF__video_OFF__offers_ON",
+      "assessments": true,
+      "live": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "WCXVLO",
+      "combo": "asm_OFF__live_ON__video_ON__offers_ON",
+      "assessments": false,
+      "live": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "WCXXXO",
+      "combo": "asm_OFF__live_OFF__video_OFF__offers_ON",
+      "assessments": false,
+      "live": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "WCNOOF",
+      "combo": "all_optional_OFF",
+      "assessments": false,
+      "live": false,
+      "video": false,
+      "offers": false
+    },
+    {
+      "code": "WCPEER",
+      "combo": "peer_isolation_and_history",
+      "assessments": true,
+      "live": true,
+      "video": true,
+      "offers": true
+    }
+  ],
+  "gates": [
+    {
+      "gate": "catalog_has_assessments_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "prehire=['assessments', 'calendar', 'employment_offers', 'interviews', 'pre_hiring', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_offers_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "keys=['analytics', 'assessments', 'attendance', 'calendar', 'compliance', 'employee_app', 'employment_offers', 'interviews', 'leave', 'onboarding', 'payroll', 'pre_hiring', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_live_interviews_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "interview-related=['interviews', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_video_interviews_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "live_and_video_interview_modules_are_independent",
+      "scope": "contract",
+      "ok": true,
+      "detail": "live.depends_on=('pre_hiring',) video.depends_on=('pre_hiring',)"
+    },
+    {
+      "gate": "toolcall_gated_covers_optional_interview_and_assessment_modules",
+      "scope": "contract",
+      "ok": true,
+      "detail": "TOOLCALL_GATED_MODULES=['analytics', 'assessments', 'attendance', 'compliance', 'interviews', 'leave', 'onboarding', 'payroll', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "employment_offers_has_no_assistant_mutation_surface",
+      "scope": "contract",
+      "ok": true,
+      "detail": "offers are dashboard/API entitled; Assistant must not expose offer mutation tools (checked per-tenant)"
+    },
+    {
+      "gate": "unconditional_interviews_or_True_removed",
+      "scope": "contract",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "ranking_default_policy_assessment_and_interview_unused",
+      "scope": "contract",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "matrix_uncaught_exception",
+      "scope": "global",
+      "ok": false,
+      "detail": "JobsError: This save needs the current version. Reload the latest record, then try again.\nert_fresh\n    require_expected_token(\n    ~~~~~~~~~~~~~~~~~~~~~~^\n        expected_version=expected_version,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<2 lines>...\n        entity_id=entity_id,\n        ^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/concurrency_safety.py\", line 188, in require_expected_token\n    raise ConcurrencyError(\n    ...<8 lines>...\n    )\nconcurrency_safety.ConcurrencyError: This save needs the current version. Reload the latest record, then try again.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/azizalmulla/Desktop/claw/ops/waveC-local/waveC-local-mutation-requal-matrix.py\", line 783, in main\n    published = jobs.transition_job(\n        company=company,\n    ...<3 lines>...\n        to_status=\"open\",\n    )\n  File \"/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/prehire_jobs.py\", line 1266, in transition_job\n    _assert_fresh(current, expected_updated_at=expected_updated_at, expected_version=expected_version)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/prehire_jobs.py\", line 1345, in _assert_fresh\n    raise JobsError"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "scope": "cleanup",
+      "ok": true,
+      "detail": "{}"
+    }
+  ],
+  "findings": {},
+  "cleanup": {
+    "removed_files": 0,
+    "cleanup_errors": []
+  },
+  "residue_after_cleanup": {
+    "companies": 0,
+    "company_modules": 0,
+    "positions": 0,
+    "applications": 0,
+    "lifecycle_events": 0,
+    "confirmations": 0,
+    "ranking_runs": 0,
+    "ranking_items": 0,
+    "cv_evidence": 0,
+    "cv_facts": 0,
+    "semantic_docs": 0,
+    "files": 0,
+    "assessment_attempts": 0,
+    "assessment_invitations": 0,
+    "interviews": 0,
+    "interview_events": 0,
+    "offers": 0,
+    "offer_events": 0,
+    "offer_tokens": 0,
+    "offer_deliveries": 0,
+    "offer_send_ops": 0,
+    "hire_operations": 0,
+    "hire_override_audits": 0,
+    "employees": 0,
+    "compliance_documents": 0,
+    "employee_documents": 0,
+    "interview_schedule_ops": 0,
+    "onboarding_items": 0,
+    "report_export_audits": 0,
+    "candidates": 0
+  },
+  "finished_at": "20260801T035443Z",
+  "passed": 11,
+  "failed": 1
+}

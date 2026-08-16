@@ -1,0 +1,70 @@
+npm warn exec The following package was not found and will be installed: eas-cli@21.6.0
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:51012) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] iOS Bundled 2488ms node_modules/expo-router/entry.js (1314 modules)
+[expo-cli] Android Bundled 3870ms node_modules/expo-router/entry.js (1319 modules)
+[expo-cli] 
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-bb35d690181a6ab0a0d324420f2240e6.hbc (1.77 MB)
+[expo-cli] _expo/static/js/ios/entry-bb35d690181a6ab0a0d324420f2240e6.hbc.map (6.68 MB)
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-13b11f86dd7accaf27dbbb85fd140325.hbc (1.77 MB)
+[expo-cli] _expo/static/js/android/entry-13b11f86dd7accaf27dbbb85fd140325.hbc.map (6.7 MB)
+[expo-cli] 
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.06 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 6.9 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+[
+  {
+    "id": "019fd434-8846-7f37-8412-88938a8dc1f6",
+    "createdAt": "2026-08-05T23:14:00.390Z",
+    "group": "18b27224-09d0-4fcf-b6da-cd91e28c21bf",
+    "branch": "canary",
+    "message": "DocVal Try again reopens picker 20260805T231332Z",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd434-8846-7f37-8412-88938a8dc1f6",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "cf26d59512a22a7634eb4edd28b4425ec1624405"
+  },
+  {
+    "id": "019fd434-8846-742c-9f4d-066d8beb4359",
+    "createdAt": "2026-08-05T23:14:00.390Z",
+    "group": "18b27224-09d0-4fcf-b6da-cd91e28c21bf",
+    "branch": "canary",
+    "message": "DocVal Try again reopens picker 20260805T231332Z",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd434-8846-742c-9f4d-066d8beb4359",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "cf26d59512a22a7634eb4edd28b4425ec1624405"
+  }
+]

@@ -1,0 +1,169 @@
+PASS  prior_run_residue_retired
+PASS  real_subject_has_no_live_future_schedule
+
+=== posture / honesty ===
+PASS  w6c_version_6_2
+PASS  w6c_enabled_for_wathefni
+PASS  w6c_disabled_other_tenant
+PASS  hr_allowlist_is_named_only
+PASS  manager_allowlist_empty
+PASS  manager_real_rollout_nogo
+PASS  notify_allowlist_single_recipient
+PASS  notify_channels_app_email_only
+PASS  real_delivery_enabled
+PASS  kill_switch_off_at_start
+PASS  operator_timers_off
+PASS  broad_employee_app_off
+PASS  talal_read_and_ack_only
+PASS  pam_submission_false
+PASS  payroll_money_false
+PASS  leave_balances_not_mutated
+PASS  attendance_authority_not_mutated
+PASS  ack_authority_wathefni
+PASS  cleanup_contract_1_5
+PASS  no_payroll_money_sql
+PASS  no_leave_balance_sql
+PASS  no_attendance_authority_sql
+PASS  no_pam_submit_call
+
+=== controlled subject exclusions ===
+PASS  excluded_HAN-1db8844d
+PASS  excluded_OCK-0F290BF7
+PASS  talal_not_excluded
+PASS  empty_key_excluded
+PASS  consent_refused_for_excluded_1db8844d
+PASS  delivery_blocked_for_excluded_1db8844d
+PASS  consent_refused_for_excluded_0F290BF7
+PASS  delivery_blocked_for_excluded_0F290BF7
+
+=== consent and fail-closed delivery guards ===
+PASS  email_blocked_before_consent
+PASS  consent_recorded
+PASS  consent_destination_is_talal
+PASS  email_allowed_after_consent
+PASS  app_channel_needs_no_external_consent
+PASS  unapproved_channel_blocked
+PASS  non_allowlisted_recipient_blocked
+
+=== controlled HR real scheduling (Talal, future dates only) ===
+PASS  non_allowlisted_actor_denied
+PASS  audit_reason_required
+PASS  hr_same_day_created
+PASS  idempotent_repeat_no_duplicate
+PASS  hr_split_shift_both_parts
+PASS  hr_overnight_created
+PASS  all_real_rows_future_dated
+PASS  created_rows_visible_in_db
+PASS  overnight_flagged_ends_next_day
+PASS  split_same_date_two_windows
+PASS  no_unexpected_active_real_rows
+PASS  hr_reschedule_with_token
+PASS  stale_concurrency_token_rejected
+PASS  unauthorized_reschedule_denied
+
+=== real notification canary (app + email to Talal) ===
+PASS  event_emitted
+PASS  no_duplicate_business_notification
+PASS  drafts_do_not_notify
+PASS  delivery_ok
+PASS  app_inbox_delivered
+PASS  app_not_counted_as_real_send
+PASS  email_attempted
+PASS  email_delivered
+PASS  email_real_sent_true
+PASS  provider_receipt_captured
+PASS  recipient_ref_is_consented_email
+PASS  inbox_row_written_once
+PASS  redelivery_still_single_business_event
+PASS  ack_recorded_once
+PASS  second_channel_ack_is_noop
+PASS  exactly_one_ack_row
+PASS  acked_event_not_redelivered
+
+=== delivery kill switch ===
+PASS  kill_switch_engaged
+PASS  real_delivery_off_while_killed
+PASS  kill_switch_skips_every_channel
+PASS  kill_switch_no_real_send
+PASS  kill_switch_reason_recorded
+PASS  kill_switch_released
+PASS  invalidate_on_cancel_runs
+
+=== terminal failure visibility ===
+PASS  terminal_failure_recorded
+PASS  terminal_failure_not_real_sent
+PASS  terminal_failure_visible_to_hr
+
+=== tenant isolation ===
+PASS  cross_tenant_event_rejected
+PASS  cross_tenant_delivery_blocked
+
+=== Talal employee-app read + acknowledge ===
+PASS  talal_sees_own_upcoming
+PASS  talal_sees_only_own_rows
+PASS  talal_inbox_has_shift_notification
+PASS  employee_app_write_disabled
+PASS  talal_read_only_flag
+PASS  talal_cannot_mutate
+PASS  talal_can_acknowledge
+PASS  talal_no_open_shift_claim
+PASS  talal_no_swap_request
+PASS  broad_app_read_false
+
+=== scoped manager qualification (synthetic subjects) ===
+PASS  synthetic_manager_subjects_seeded
+PASS  manager_real_rollout_blocked
+PASS  manager_self_decision_banned
+PASS  manager_publish_needs_matrix
+PASS  manager_synthetic_scope_in_scope_only
+PASS  unallowlisted_manager_cannot_touch_real
+PASS  synthetic_subject_path_open
+
+=== operator jobs: bounded batch, advisory lock, no overlap ===
+PASS  job_ran
+PASS  job_batch_bounded
+PASS  job_run_recorded_completed
+PASS  job_batch_clamped
+PASS  job_clamped_run_ok
+PASS  job_failure_recorded
+PASS  job_failure_visible
+PASS  no_overlapping_execution
+PASS  locked_out_job_did_not_process
+PASS  locked_out_run_recorded
+PASS  job_runs_again_once_lock_released
+PASS  job_kill_switch
+
+=== PAM export-only posture ===
+PASS  pam_export_only
+PASS  pam_manual_submission_required
+PASS  compliance_warn_default
+
+=== return real subject to a clean state ===
+PASS  real_canary_rows_soft_cancelled
+PASS  soft_cancel_not_hard_delete
+PASS  every_created_row_retired
+PASS  no_active_future_real_rows_left
+PASS  historical_rows_untouched_count
+
+=== synthetic cleanup (SHW6C) and drift ===
+PASS  cleanup_contract_version
+PASS  cleanup_residual_zero
+PASS  residual_recount_zero
+PASS  historical_assignment_fps_unchanged
+PASS  employee_records_unchanged
+PASS  orphan_quarantine_unchanged
+PASS  other_real_employees_untouched
+
+=== freeze invariants exposed ===
+PASS  invariant_canonical_l0_authority
+PASS  invariant_published_version_immutability
+PASS  invariant_self_decision_ban
+PASS  invariant_manager_scope_enforcement
+PASS  invariant_notification_deduplication
+PASS  invariant_real_notify_allowlist_fail_closed
+PASS  invariant_notify_kill_switch
+PASS  invariant_controlled_subject_exclusions
+PASS  invariant_no_payroll_money
+PASS  invariant_pam_export_only
+
+137 passed, 0 failed

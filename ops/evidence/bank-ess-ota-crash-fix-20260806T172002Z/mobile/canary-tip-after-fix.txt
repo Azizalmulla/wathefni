@@ -1,0 +1,44 @@
+
+Branch:
+Name  canary
+ID    019fd252-ff83-7881-82d0-47a97c1add86
+
+Recent update groups:
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Fix Bank ESS OTA syncLayoutLocale clean 20260806T172002Z (runtime 0.1.0)" (17 seconds ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  85f648c9-73a0-4b14-9d8e-838913496a4d
+
+———
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Fix Bank ESS OTA crash syncLayoutLocale 20260806T172002Z (runtime 0.1.0)" (1 minute ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  f65e46d0-50ae-41c6-b4ce-d75233f87168
+
+———
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Rollback Bank ESS UI OTA crash 326e2040 (fresh start)" (4 minutes ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  cb2655a4-6451-4724-b321-0d20929aa838
+
+———
+
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Bank ESS + onboarding completion UI 20260806T170025Z (release 6547a25)" (12 minutes ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  326e2040-6603-4c34-a6db-1022ff8095a6

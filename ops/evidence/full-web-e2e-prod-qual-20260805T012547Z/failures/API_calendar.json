@@ -1,0 +1,8 @@
+{
+  "id": "API_calendar",
+  "module": "calendar",
+  "title": "GET /dashboard/calendar/events",
+  "result": "FAIL",
+  "severity": 422,
+  "detail": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"start\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"end\"],\"msg\":\"Field required\",\"input\":null}]}"
+}

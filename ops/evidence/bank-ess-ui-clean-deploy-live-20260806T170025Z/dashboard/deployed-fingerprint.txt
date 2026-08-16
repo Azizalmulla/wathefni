@@ -1,0 +1,8 @@
+Extraction & validation summary True
+data-document-extraction-summary True
+data-compliance-findings True
+data-compliance-register True
+Currently verified True
+data-completion-state True
+Bank details True
+SHA_MATCH True

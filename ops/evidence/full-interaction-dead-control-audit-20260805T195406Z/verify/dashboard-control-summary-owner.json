@@ -1,0 +1,601 @@
+{
+  "generated_at": "2026-08-05T20:39:15.555Z",
+  "controls": 1021,
+  "pages": 40,
+  "status_counts": {
+    "dead": 9,
+    "unproven": 807,
+    "pass": 190,
+    "broken": 15
+  },
+  "page_summaries": [
+    {
+      "key": "owner-en-desktop-overview",
+      "screen": "overview",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 72,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-jobs",
+      "screen": "jobs",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 57,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-candidates",
+      "screen": "candidates",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 23,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-interviews",
+      "screen": "interviews",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 41,
+      "exercised": 10,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-assessments",
+      "screen": "assessments",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 49,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-ranking",
+      "screen": "ranking",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 25,
+      "exercised": 9,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-calendar",
+      "screen": "calendar",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 54,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-employees",
+      "screen": "employees",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 29,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-en-desktop-workforce",
+      "screen": "workforce",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 25,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-inbox",
+      "screen": "inbox",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 28,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-onboarding",
+      "screen": "onboarding",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 38,
+      "exercised": 11,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-attendance",
+      "screen": "attendance",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 34,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-leave",
+      "screen": "leave",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-shifts",
+      "screen": "shifts",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 38,
+      "exercised": 8,
+      "keyboardFocus": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 502 ()",
+        "Failed to load resource: the server responded with a status of 502 ()",
+        "Failed to load resource: the server responded with a status of 502 ()",
+        "Failed to load resource: the server responded with a status of 502 ()",
+        "Failed to load resource: the server responded with a status of 502 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-payroll",
+      "screen": "payroll",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-en-desktop-analytics",
+      "screen": "analytics",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-compliance",
+      "screen": "compliance",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 31,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-notifications",
+      "screen": "notifications",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 23,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-en-desktop-activity",
+      "screen": "activity",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 82,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "key": "owner-en-desktop-settings",
+      "screen": "settings",
+      "role": "owner",
+      "locale": "en",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 33,
+      "exercised": 8,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-overview",
+      "screen": "overview",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 23,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-jobs",
+      "screen": "jobs",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 23,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-candidates",
+      "screen": "candidates",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 1,
+      "exercised": 1,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-interviews",
+      "screen": "interviews",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 1,
+      "exercised": 1,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-assessments",
+      "screen": "assessments",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 23,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-ranking",
+      "screen": "ranking",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 1,
+      "exercised": 1,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-calendar",
+      "screen": "calendar",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 34,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-employees",
+      "screen": "employees",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-workforce",
+      "screen": "workforce",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-inbox",
+      "screen": "inbox",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 28,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-onboarding",
+      "screen": "onboarding",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 4,
+      "keyboardFocus": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 500 ()",
+        "Failed to load resource: the server responded with a status of 500 ()"
+      ]
+    },
+    {
+      "key": "owner-ar-desktop-attendance",
+      "screen": "attendance",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 0,
+      "exercised": 0,
+      "keyboardFocus": false,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-leave",
+      "screen": "leave",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 0,
+      "exercised": 0,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-shifts",
+      "screen": "shifts",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-payroll",
+      "screen": "payroll",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 22,
+      "exercised": 4,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-analytics",
+      "screen": "analytics",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 23,
+      "exercised": 5,
+      "keyboardFocus": false,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-compliance",
+      "screen": "compliance",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "dir": "ltr",
+      "authWall": false,
+      "controls": 0,
+      "exercised": 0,
+      "keyboardFocus": true,
+      "consoleErrors": []
+    },
+    {
+      "key": "owner-ar-desktop-notifications",
+      "screen": "notifications",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "fatal": "Error: page.goto: net::ERR_ABORTED at https://api.wathefni.ai/dashboard/?page=notifications\nCall log:\n  - navigating to \"https://api.wathefni.ai/dashboard/?page=notifications\", waiting until \"domcontentloaded\"\n",
+      "controls": 0,
+      "exercised": 0
+    },
+    {
+      "key": "owner-ar-desktop-activity",
+      "screen": "activity",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "fatal": "Error: page.goto: Target page, context or browser has been closed",
+      "controls": 0,
+      "exercised": 0
+    },
+    {
+      "key": "owner-ar-desktop-settings",
+      "screen": "settings",
+      "role": "owner",
+      "locale": "ar",
+      "viewport": "desktop",
+      "fatal": "Error: page.goto: Target page, context or browser has been closed",
+      "controls": 0,
+      "exercised": 0
+    }
+  ]
+}

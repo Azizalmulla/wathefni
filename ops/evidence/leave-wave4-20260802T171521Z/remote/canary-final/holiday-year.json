@@ -1,0 +1,7 @@
+{
+  "year": 2026,
+  "status": "unknown",
+  "fail_closed_if_enforced": true,
+  "reason": "holiday_year_status_unavailable",
+  "enforced": false
+}

@@ -1,0 +1,51 @@
+    shifts mss c3 — prove
+      PASS  mss module
+      PASS  rollback guidance
+      PASS  EN status scheduled
+      PASS  AR status scheduled
+      PASS  EN status open
+      PASS  AR status open
+      PASS  self_decision false in honesty
+      PASS  attendance not required
+      PASS  global mss off
+      PASS  empty company allowlist denies
+      PASS  empty manager allowlist denies
+      PASS  canary company entitled
+      PASS  other company denied
+      PASS  global MANAGER_ALLOWLIST still empty
+      PASS  wave6c boundary still holds
+      PASS  legacy manager_real_rollout remains False
+      PASS  C3 manager unlock recognized
+      PASS  non-allowlisted denied by real_mutation
+      PASS  C3 manager allowed by real_mutation
+      FAIL  manager has real scope :: {'ok': False, 'error': 'mss_manager_scope_required', 'configuration_error': 'manager_scope_unconfigured', 'phase': 'shifts_mss_c3', 'scope': {'restricted': True, 'company_code': 'MSS89B3C991', 'manager_phone': '9655401893', 'dashboard_user_id': '', 'branch_keys': [], 'team_keys': [], 'direct_employee_keys': [], 'scopes': [], 'configuration_error': 'manager_scope_unconfigured'}}
+      FAIL  mss manager ready :: {'ok': False, 'error': 'mss_manager_scope_required', 'configuration_error': 'manager_scope_unconfigured', 'phase': 'shifts_mss_c3', 'scope': {'restricted': True, 'company_code': 'MSS89B3C991', 'manager_phone': '9655401893', 'dashboard_user_id': '', 'branch_keys': [], 'team_keys': [], 'direct_employee_keys': [], 'scopes': [], 'configuration_error': 'manager_scope_unconfigured'}, 'contract_version': 'shifts_mss_c3_v1', 'mss_enabled': True, 'payroll_money': False, 'leave_balances_mutated': False, 'attendance_authority_mutated': False, 'attendance_required': False, 'global_manager_allowlist_untouched': True, 'self_decision': False, 'read_only': False}
+      PASS  allowlisted without scope fails when required
+      PASS  mss manager without scope denied
+      PASS  manager rosters scoped report
+      FAIL  manager cannot mutate out-of-scope :: {'ok': True, 'employee': {'employee_key': 'MSS89B3C991-OUT-89b3c991', 'company_code': 'MSS89B3C991', 'phone': '965540589b3c', 'name': 'Out of scope 89b3c991'}, 'created': [{'shift_id': '4639a724-8d5c-4cea-880e-9c30f7dad835', 'company_code': 'MSS89B3C991', 'employee_key': 'MSS89B3C991-OUT-89b3c991', 'employee_phone': '9655405893', 'employee_name': 'Out of scope 89b3c991', 'shift_date': '2026-09-01', 'start_time': '09:00:00', 'end_time': '17:00:00', 'timezone': 'Asia/Kuwait', 'role': None, 'location': None, 'status': 'scheduled', 'notes': None, 'source_text': '', 'metadata': {'action': {'date': '2026-09-01', 'reason': 'c3 mss out of scope attempt', 'end_time': '17:00', 'start_time': '09:00', 'company_code': 'MSS89B3C991', 'employee_key': 'MSS89B3C991-OUT-89b3c991', 'viewer_phone': '965540189b3c', 'idempotency_key': 'mss-c3-roster-out-89b3c991'}, 'source': 'hr_whatsapp', 'shifts_wave1': True, 'payroll_money': False}, 'reminder_sent_at': None, 'created_by_phone': '9655401893', 'created_at': '2026-08-11T19:50:18.112018+00:00', 'updated_at': '2026-08-11T19:50:18.112018+00:00', 'ends_next_day': False, 'break_minutes': None, 'site_key': None, 'branch_key': None, 'team_key': None, 'position_key': None, 'idempotency_key': 'mss-c3-roster-out-89b3c991', 'row_version': 1, 'current_version_no': 1, 'schedule_reason_code': None, 'lineage_json': {}, 'source_kind': 'manual', 'template_id': None, 'recurrence_id': None, 'occurrence_key': None, 'regen_detached': False, 'generated_from_version': None, 'schedule_period_id': None, 'schedule_version_id': None, 'schedule_source': None, 'rotation_pattern_id': None, 'rotation_assignment_id': None, 'assignment_type': 'general'}], 'conflicts': [], 'requested_dates': ['2026-09-01'], 'shifts_wave1_version': '1.1.0', 'allow_overnight': True, 'leave_conflict_mode': 'require_ack', 'beyond_end_mode': 'require_ack', 'garden_leave_during_notice': False, 'rest_weekdays': [4], 'payroll_money': False, 'leave_balances_mutated': False, 'note': 'Shifts records scheduled hours only; Attendance owns worked time; Payroll owns money.', 'shifts_wave2_version': '2.0.0', 'owns_planned_intervals': True, 'attendance_owns_worked_time': True, 'leave_owns_leave_decisions': True, 'synthetic_only': False, 'companies': ['*']}
+      PASS  manager rosters second report
+      PASS  employee sees only own key
+      PASS  employee cannot see other key
+      PASS  employee own shift data scoped
+      PASS  open shift publish
+      PASS  open shift claim
+      PASS  open-shift self-approval denied
+      PASS  open-shift claim approved by manager
+      PASS  stale/duplicate open-shift decision fails safely
+      PASS  swap requested
+      PASS  manager/employee cannot approve own swap
+      PASS  requested swap reject works
+      PASS  requested swap approve works
+      PASS  stale concurrent swap decision fails safely
+      PASS  module-off is read-only
+      PASS  module-off manager mutation denied
+      PASS  empty-allowlist read-only
+      PASS  tenant isolation other company
+      PASS  leave not mutated
+      PASS  payroll money false
+      PASS  attendance authority not mutated
+      PASS  shifts independent of attendance module
+      PASS  global manager allowlist still empty after prove
+
+    45 passed, 3 failed

@@ -1,0 +1,51 @@
+    wave2 product acceptance — unit
+      PASS  setup wave2 policies module
+      PASS  setup patch wave2
+      PASS  modularity matrix configs
+      PASS  setup owns wave2
+      PASS  not env-only ownership
+      PASS  EN attendance label
+      PASS  AR payroll label
+      PASS  C1 module-off
+      PASS  C2 module-off
+      PASS  C3 module-off
+      PASS  C4 module-off
+      PASS  C5 module-off
+      PASS  C6 module-off
+      PASS  C5 ack ≠ paid
+      PASS  C6 settlement ≠ paid
+      PASS  C6 settlement ≠ clearance
+      PASS  C4 payroll independent
+      PASS  assistant mutations explicit off
+      PASS  assistant mutations denied when spine wave on
+      PASS  app merges wave2 policies
+      PASS  Setup Wave2 card
+      PASS  Setup wires Wave2 card
+      PASS  Setup ModuleCompanyPoliciesCard
+      PASS  Setup PayrollSetupCard
+      PASS  HR web leave workspace
+      PASS  HR web setup console
+      PASS  employee mobile app
+      PASS  HR mobile features
+      PASS  manager/HR mobile present
+      PASS  EN/AR/RTL surface markers
+      PASS  queue/customer-scale honesty surfaces
+      PASS  freeze/stamp ATTENDANCE_TRUTH_FULL_PASS.md
+      PASS  freeze/stamp LEAVE_ENFORCEMENT_FULL_PASS.md
+      PASS  freeze/stamp SHIFTS_MSS_FULL_PASS.md
+      PASS  freeze/stamp PAYROLL_AUTHORITY_FULL_PASS.md
+      PASS  freeze/stamp PAYSLIP_PAYMENT_FULL_PASS.md
+      PASS  freeze/stamp SETTLEMENT_OT_FULL_PASS.md
+      PASS  freeze/stamp WAVE1_PRODUCT_FULL_PASS.md
+      PASS  freeze/stamp WAVE1_PRODUCT_FREEZE.md
+      PASS  freeze/stamp WATHEFNI_HCM_WAVE2_WORKFORCE_TRUTH_BUILD_CHARTER.md
+      PASS  product db smoke present
+      PASS  regression smoke smoke-test-attendance-truth-c1.py
+      PASS  regression smoke smoke-test-leave-enforcement-c2.py
+      PASS  regression smoke smoke-test-shifts-mss-c3.py
+      PASS  regression smoke smoke-test-payroll-authoritative-c4.py
+      PASS  regression smoke smoke-test-payroll-payslip-payment-c5.py
+      PASS  regression smoke smoke-test-payroll-settlement-ot-c6.py
+
+    47 passed, 0 failed
+WAVE2_PRODUCT_UNIT_PASS

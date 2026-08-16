@@ -1,0 +1,333 @@
+{
+  "pass": 63,
+  "fail": 0,
+  "tag": "22ada742",
+  "ids": {
+    "tag": "22ada742",
+    "phone": "965526122742",
+    "name": "LVW2C-SYNTH| Emp 22ada742",
+    "cleanup_keys": [
+      "WATHEFNI-965526122742"
+    ],
+    "employee_key": "WATHEFNI-965526122742",
+    "leave_a": "b28863e5-97ab-49ae-97e5-d440a9e3e1e6",
+    "leave_b": "54e428ea-e7ba-4aa6-8b7d-532d5875c41c"
+  },
+  "results": [
+    {
+      "name": "wave2 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pack version 2.1.0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "enforced false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "legal_reviewed false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "carryover writers disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eligibility months 6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwait midnight boundary",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pre: real leave count 3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pre: real fp 51cd940f",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pre: real fp dbf82ecf",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pre: real fp e3217e0e",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "db wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "binding 2.1.0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "holiday year pending_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "annual eligibility_months 6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "annual days_per_year 30",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "annual enforced false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "weekend fri/sat",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sick tiers present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "enforced holiday fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "national/liberation excluded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eligibility can_take_from = hire+6m",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "under-6-months can_take_from future",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "over-6-months can_take_from past/today",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "accrual posted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "annual balance exists",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "can_take_from set",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request A ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reservation A posted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request B created observe",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "B no double-reserve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel B observe request",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve A",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "consume exactly once",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reservation converted open=0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance derived list",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request C ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reject C",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reject released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request D ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel pending D",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel pending released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale expire released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sick request ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sick tiers payroll_owned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unpaid reservation skipped payroll boundary",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unpaid pack payroll_boundary",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel approved A",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reversal restored balance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance reverse safe",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "request F ok for lifecycle",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle decline applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle decline released reservation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ledger/rollup reconcile",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no payment keys in cancel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "policies still unenforced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "post-cleanup: real leave count 3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "post-cleanup: real fp 51cd940f",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "post-cleanup: real fp dbf82ecf",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "post-cleanup: real fp e3217e0e",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "post-cleanup: real rows unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic residual 0",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

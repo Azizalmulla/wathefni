@@ -1,0 +1,41 @@
+[
+  {
+    "i": 1,
+    "short_materializations": [
+      "accepted",
+      "accepted",
+      "accepted"
+    ],
+    "rich": "new_candidate",
+    "conflict": "conflict",
+    "opaque_held_ms": 16,
+    "opaque_terminal": "low_quality_text",
+    "dup_ok": true
+  },
+  {
+    "i": 2,
+    "short_materializations": [
+      "accepted",
+      "accepted",
+      "accepted"
+    ],
+    "rich": "new_candidate",
+    "conflict": "conflict",
+    "opaque_held_ms": 17,
+    "opaque_terminal": "low_quality_text",
+    "dup_ok": true
+  },
+  {
+    "i": 3,
+    "short_materializations": [
+      "accepted",
+      "accepted",
+      "accepted"
+    ],
+    "rich": "new_candidate",
+    "conflict": "conflict",
+    "opaque_held_ms": 17,
+    "opaque_terminal": "low_quality_text",
+    "dup_ok": true
+  }
+]

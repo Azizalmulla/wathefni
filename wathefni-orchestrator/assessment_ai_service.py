@@ -1556,6 +1556,36 @@ def process_queued_run(
                 return {**run, "idempotent": True}
             if run["status"] != "queued":
                 raise AssessmentAIError("assessment_ai_run_not_queued", "Only queued runs can be processed.")
+            try:
+                import tenant_control_queue_gate as _tc_qg
+
+                company = str(run.get("company_code") or "WATHEFNI").upper()
+                queued_epoch = _tc_qg.persist_work_epoch(
+                    cur,
+                    company_code=company,
+                    work_kind="assessment_ai",
+                    work_ref=str(run_id),
+                    module_key="assessments",
+                )
+                allowed, decision = _tc_qg.gate_or_skip(
+                    cur,
+                    company_code=company,
+                    module_key="assessments",
+                    work_kind="assessment_ai",
+                    work_ref=str(run_id),
+                    queued_epoch=queued_epoch,
+                    surface="workers",
+                )
+                if not allowed:
+                    return {
+                        **run,
+                        "status": "held",
+                        "held": True,
+                        "reason": decision.reason_code,
+                        "correlation_id": decision.audit_correlation_id,
+                    }
+            except Exception:
+                pass
             budget = registry.get("budget_profile") if isinstance(registry.get("budget_profile"), dict) else {}
             estimated_input_tokens = max(1, len(canonical_json(run["input_json"])) // 4)
             if estimated_input_tokens > int(budget.get("max_input_tokens") or 30000):

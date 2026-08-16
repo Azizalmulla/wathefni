@@ -1,0 +1,40 @@
+PASS  kind selection
+PASS  kind weekSnap
+PASS  kind tab
+PASS  kind lightImpact
+PASS  kind success
+PASS  kind warning
+PASS  kind error
+PASS  export selectionFeedback
+PASS  export weekSnapFeedback
+PASS  export tabFeedback
+PASS  export lightImpactFeedback
+PASS  export successFeedback
+PASS  export warningFeedback
+PASS  export errorFeedback
+PASS  per-kind throttle present
+PASS  fire-and-forget (non-blocking)
+PASS  selection uses Soft impact
+PASS  Medium impact present for snap/warning
+PASS  respects iOS silent switch
+PASS  sound asset snap.wav
+PASS  sound asset success.wav
+PASS  sound asset warning.wav
+PASS  sound asset error.wav
+PASS  no ripped Apple-named sound assets
+PASS  no raw expo-haptics/expo-av outside central layer
+PASS  PremiumButton primary CTA light impact on press
+PASS  CTA haptic gated to primary
+PASS  ScheduleWeekStrip day vs week snap split
+PASS  ScheduleWeekStrip haptic gated to tap + swipe settle
+PASS  bottom tabs use tabFeedback
+PASS  app/onboarding.tsx wired
+PASS  app/documents.tsx wired
+PASS  app/bank.tsx wired
+PASS  app/(tabs)/leave.tsx wired
+PASS  app/leave/request.tsx wired
+PASS  app/(tabs)/payslips.tsx wired
+PASS  app/settings.tsx wired
+PASS  app/change-pin.tsx wired
+PASS  selectionFeedback is haptic-only (no tick spam)
+PASS semantic feedback (39 checks)

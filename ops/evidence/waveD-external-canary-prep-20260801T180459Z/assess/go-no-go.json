@@ -1,0 +1,27 @@
+{
+  "stamp": "20260801T180459Z",
+  "mode": "external_canary_preparation_only",
+  "enabled": false,
+  "mailbox_sync": "off",
+  "connectors": "dark",
+  "post_hiring": "not_started",
+  "prepare_pack": "GO",
+  "enable_tenant_now": "NO-GO",
+  "broader_ga": "NO-GO",
+  "recommended_profile": {
+    "volume": "low_to_moderate_le_50_cv_per_day",
+    "plan": "starter",
+    "product": "forwarding_only",
+    "requires_existing_wathefni_account": true,
+    "avoid": ["high_volume_agency", "mailbox_sync_required", "untrained_first_logo"]
+  },
+  "allowlist_draft": "WATHEFNI,<COMPANY_CODE>",
+  "canary_window_days": {"core": 7, "stretch": 14},
+  "activation_blocked_until": [
+    "named_company_code_approved",
+    "privacy_ack",
+    "owner_admin_ready",
+    "ops_daily_owner_assigned",
+    "explicit_enable_GO"
+  ]
+}

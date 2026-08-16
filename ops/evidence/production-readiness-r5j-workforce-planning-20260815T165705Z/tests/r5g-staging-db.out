@@ -1,0 +1,93 @@
+    PRODUCTION READINESS R5G — employee relations surface (staging DB)
+    tenant: R5GBBA3E5
+      PASS  sync catalog entitlement
+      PASS  second tenant enabled
+      PASS  ER enableable
+      PASS  empty assignment is empty not company-wide
+      PASS  empty counts are zeros
+      PASS  performance off
+      PASS  talent off
+      PASS  payroll off
+      PASS  benefits off
+      PASS  engagement off
+      PASS  case type created
+      PASS  A intake
+      PASS  intake is not finding
+      PASS  case B opened
+      PASS  A triage
+      PASS  A assign investigator
+      PASS  grant sensitive evidence to INV_A
+      PASS  A investigation note
+      PASS  note metadata only
+      PASS  A evidence attached
+      PASS  attach response hides raw URL
+      PASS  C authorized evidence
+      PASS  C raw URL stripped
+      PASS  C unauthorized evidence denied
+      PASS  C unauthorized hides raw URL
+      PASS  A finding
+      PASS  investigation is not finding/outcome
+      PASS  ER HTTP routes registered
+      PASS  ER mobile HTTP routes registered
+      PASS  unauthenticated workspace not public
+      PASS  HR without ER authority workspace 403
+      PASS  403 is not empty-cases
+      PASS  HR without ER authority cannot read case
+      PASS  manager workspace 403
+      PASS  manager case detail 403
+      PASS  investigator A can list
+      PASS  investigator A sees case A
+      PASS  investigator A does not see case B
+      PASS  investigator A IDOR on case B blocked
+      PASS  authorized evidence retrieve
+      PASS  authorized evidence hides raw URL
+      PASS  authorized evidence sealed
+      PASS  unauthorized evidence 403
+      PASS  unauthorized evidence hides raw URL
+      PASS  export without er.export is 403
+      PASS  export with er.export
+      PASS  export hides raw URL
+      PASS  authorized mobile queue
+      PASS  mobile queue privacy-safe
+      PASS  mobile queue generic copy
+      PASS  authorized mobile summary
+      PASS  mobile summary has no notes
+      PASS  unauthorized mobile fail-closed
+      PASS  tenant isolation blocks foreign case
+      PASS  A outcome
+      PASS  outcome does not mutate employment
+      PASS  E handoff created
+      PASS  E handoff not applied
+      PASS  E ER did not mutate employment
+      PASS  E handoff idempotent
+      PASS  A history preserved
+      PASS  history reconstructable
+      PASS  B INV_A lists case A
+      PASS  B INV_A cannot list case B
+      PASS  B INV_A cannot read case B
+      PASS  B ordinary HR empty assignment
+      PASS  D manager has zero cases
+      PASS  D manager cannot read case
+      PASS  D manager contribution without grant denied
+      PASS  D scoped contribution allowed
+      PASS  D contribution is not full case access
+      PASS  B INV_B can see granted case header
+      PASS  investigator notes hidden from view-only
+      PASS  assistant unauthorized denied
+      PASS  assistant mutation forbidden
+      PASS  assistant authorized metadata only
+      PASS  wave5 forbids allegation text
+      PASS  wave5 allows typed fact
+      PASS  EN status label
+      PASS  AR status label
+      PASS  G disable ok
+      PASS  G history preserved flag
+      PASS  G historical cases retained
+      PASS  G new intake blocked
+      PASS  G disabled workspace unavailable
+      PASS  G disabled counts are not fake zeros
+      PASS  G notifications suppressed when module off
+
+    87 passed, 0 failed
+R5G_EMPLOYEE_RELATIONS_SURFACE_DB_PASS
+STAGING_RC=0

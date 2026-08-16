@@ -1,0 +1,84 @@
+    engagement c5 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  recognition out
+      PASS  works without er
+      PASS  works without perf/talent
+      PASS  works without learning
+      PASS  works without payroll
+      PASS  min 5 default
+      PASS  threshold upward only
+      PASS  no respondent map
+      PASS  participation separated
+      PASS  fail closed below
+      PASS  complementary suppression
+      PASS  enps explicit only
+      PASS  action plan distinct
+      PASS  no auto er
+      PASS  no second analytics
+      PASS  assistant mutations out
+      PASS  setup wave6 engagement
+      PASS  setup honesty
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  recognition absent
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema campaigns
+      PASS  anonymous null employee check
+      PASS  no recognition ddl
+      PASS  min responses check
+      PASS  disabled blocks ops
+      PASS  enable company
+      PASS  default min 5
+      PASS  cannot lower below 5
+      PASS  threshold upward ok
+      PASS  setup policy get
+      PASS  survey template
+      PASS  enps rejects 1-5
+      PASS  survey version
+      PASS  campaign draft
+      PASS  launch freezes
+      PASS  population frozen
+      PASS  transfer does not rewrite campaign
+      PASS  privacy disclosed E1
+      PASS  submit E1
+      PASS  privacy disclosed E2
+      PASS  submit E2
+      PASS  privacy disclosed E3
+      PASS  submit E3
+      PASS  below threshold suppressed
+      PASS  no respondent answer map
+      PASS  admin cannot resolve anonymous
+      PASS  submitted immutable
+      PASS  hr edit forbidden
+      PASS  aggregate unsuppressed
+      FAIL  enps present :: {'ok': False, 'error': 'enps_requires_0_to_10_scale'}
+      PASS  manager small team fail closed
+      PASS  manager no raw anonymous
+      PASS  segment below or complementary suppressed
+      PASS  free text anonymous strips identity
+      PASS  free text manager denied
+      PASS  action plan distinct
+      PASS  identified mode labeled
+      PASS  identified vs anonymous distinct
+      PASS  employee open surveys
+      PASS  assistant aggregates
+      PASS  assistant privacy forbidden
+      PASS  notify first
+      PASS  notify dedupe
+      PASS  typed facts emitted
+      PASS  launched version not rewritten
+      PASS  other company gated
+      PASS  disable retains history
+      PASS  ops blocked when off
+      PASS  history retained
+      PASS  modularity without er
+      PASS  modularity recognition still out
+      PASS  manager results off
+
+    80 passed, 1 failed

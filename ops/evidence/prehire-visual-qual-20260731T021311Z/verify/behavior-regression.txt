@@ -1,0 +1,31 @@
+=== Visual chrome git status ===
+ M apps/wathefni-dashboard/src/App.tsx
+ M apps/wathefni-dashboard/src/components/ui/card.tsx
+ M apps/wathefni-dashboard/src/index.css
+?? apps/wathefni-dashboard/src/components/CalendarShell.tsx
+?? apps/wathefni-dashboard/src/components/ui/page-chrome.tsx
+?? apps/wathefni-dashboard/src/components/ui/surface.tsx
+?? apps/wathefni-dashboard/src/pages/AdminAIPage.tsx
+?? apps/wathefni-dashboard/src/pages/AssessmentsPage.tsx
+?? apps/wathefni-dashboard/src/pages/CandidatesPage.tsx
+?? apps/wathefni-dashboard/src/pages/InterviewsPage.tsx
+?? apps/wathefni-dashboard/src/pages/JobsPage.tsx
+?? apps/wathefni-dashboard/src/pages/OverviewPage.tsx
+?? apps/wathefni-dashboard/src/pages/RankingPage.tsx
+?? apps/wathefni-dashboard/src/pages/ReportsPage.tsx
+
+=== Diffstat visual pages (className/tokens only heuristic) ===
+-- apps/wathefni-dashboard/src/index.css
+ apps/wathefni-dashboard/src/index.css | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+-- apps/wathefni-dashboard/src/components/ui/card.tsx
+ apps/wathefni-dashboard/src/components/ui/card.tsx | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+-- apps/wathefni-dashboard/src/components/ui/surface.tsx
+-- apps/wathefni-dashboard/src/components/ui/page-chrome.tsx
+
+=== API/permission symbols in visual page diffs (should be empty-ish for this phase) ===
+
+=== Untracked visual primitives exist ===
+-rw-r--r--@ 1 azizalmulla  staff  2120 Jul 31 04:57 apps/wathefni-dashboard/src/components/ui/page-chrome.tsx
+-rw-r--r--@ 1 azizalmulla  staff   956 Jul 31 04:57 apps/wathefni-dashboard/src/components/ui/surface.tsx

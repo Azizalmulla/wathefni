@@ -1,0 +1,27 @@
+{
+  "tenants_global_on": {
+    "WATHEFNI": true,
+    "ISOID1": true,
+    "ISOID2": true
+  },
+  "tenants_with_disable_list": {
+    "WATHEFNI": true,
+    "ISOID1": false,
+    "ISOID2": false
+  },
+  "kill_switch_off": true,
+  "residual": {
+    "hub_calls_shared": true,
+    "ess_renew_calls_shared": true,
+    "ess_onboarding_calls_shared": true,
+    "no_extraction_empty_literal_near_receipt": true,
+    "email_intake_route": true,
+    "backfill_has_contract": true,
+    "gpt_auto_ocr_off": true,
+    "identity_route_mistral": true,
+    "verify_onboarding_media_item_no_planner": true,
+    "classify_onboarding_media_upload_no_planner": true,
+    "extract_compliance_document_metadata_no_planner": true
+  },
+  "residual_ok": true
+}

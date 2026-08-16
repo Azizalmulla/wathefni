@@ -1,0 +1,440 @@
+{
+  "wave": "attendance-wave3-prod-synthetic",
+  "passed": 84,
+  "failed": 0,
+  "total": 84,
+  "tag": "6e6d8e84",
+  "employee_key": "W3-SYNTH|6e6d8e84",
+  "company": "WATHEFNI",
+  "results": [
+    {
+      "label": "production database",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ops enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ops companies WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ops store postgres",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ops synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "authority synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "capture ingest off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "app capture ingest off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "import off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic employee allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied ops 99411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied authority 99411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied ops 66363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied authority 66363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied ops 50252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied authority 50252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied ops 97727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied authority 97727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "baseline 42 attendance rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "four reals present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind absence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind ambiguous_punches",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind connector_issue",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind early_leave",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind incomplete_session",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind lateness",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind missing_check_in",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "open kind missing_check_out",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real employee ops denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "external tenant ops denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "missing_check_in synced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "exception assigned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction requested",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "approve without apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "projection unchanged pre-apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "apply creates new version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "before/after present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "idempotent apply replay",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "concurrent apply single winner",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "concurrent same idempotency both ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lateness exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "early_leave exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dual approval required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dual first pending",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dual same approver denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dual second completes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "early leave applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "absence correction applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "reject without apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dispute base applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "employee dispute raised",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dispute resolved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "reopen after evidence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale row_version fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "out-of-scope manager denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unconfigured manager denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager self-correction denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "payroll lock denies correction",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-leave correction applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "leave reverse preserves correction",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic day approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "snapshot reconciles projection",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "raw punch immutable retained",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction punches separate source",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "comment added",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "attachment ref stored",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "append-only audit events present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "audit update blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "42 attendance rows unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "attendance fingerprint unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic absent from attendance_records",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real payroll timesheets unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic absent from payroll_timesheets",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real authority snapshots unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real day projections unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic not in employees table",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic not in leave balances",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real employee report excludes synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "payroll summary four-reals excludes synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no canary devices registered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-cleanup 42 rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-cleanup exceptions gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-cleanup punches gone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "post-cleanup projections gone",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "flags": {
+    "WATHEFNI_ATTENDANCE_OPS": "on",
+    "WATHEFNI_ATTENDANCE_OPS_COMPANIES": "WATHEFNI",
+    "WATHEFNI_ATTENDANCE_OPS_STORE": "postgres",
+    "WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY": "on",
+    "WATHEFNI_ATTENDANCE_CAPTURE_INGEST": "off",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY": "on",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES": "WATHEFNI"
+  }
+}

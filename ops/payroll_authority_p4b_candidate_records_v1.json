@@ -1,0 +1,327 @@
+{
+  "pack_id": "KW_STATUTORY_SOURCE_PACK_P4B_PREP_v1.0.0",
+  "created_at": "2026-08-08",
+  "country_code": "KW",
+  "activation_forbidden": true,
+  "defaults": {
+    "approval_status": "awaiting_legal_validation",
+    "legal_claim": false,
+    "counsel_signed": false,
+    "is_architecture_fixture": false,
+    "money_authority": "preview_non_authoritative"
+  },
+  "package": {
+    "package_code": "KW_P4B_PREP_CANDIDATE",
+    "version_label": "p4b_prep_v1",
+    "title_en": "Kuwait statutory candidate pack (P4B prep — awaiting legal validation)",
+    "title_ar": "حزمة مرشحة للقواعد النظامية الكويتية — بانتظار التحقق القانوني",
+    "effective_from": "2010-02-21",
+    "decision_note": "Candidate only. Derived from PIFSS FAQ + Law 6/2010 Arts. Not legally approved. legal_claim=false."
+  },
+  "pifss_contribution_specs": [
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "basic",
+      "contribution_side": "employee_deduction",
+      "output_class": "A_employee_net",
+      "rate_percent": 5.0,
+      "cap_kwd": 1500.0,
+      "base_definition": "pifss_basic_insured_salary",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "primary_source_url": "https://www.pifss.gov.kw/sites/En/Pages/PensionSocialSecuritySector/FAQ.aspx",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation",
+      "notes": "Rate from official FAQ table. Wage-element mapping still counsel."
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "basic",
+      "contribution_side": "employer_contribution",
+      "output_class": "B_employer_liability",
+      "rate_percent": 10.0,
+      "cap_kwd": 1500.0,
+      "base_definition": "pifss_basic_insured_salary",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "supplementary",
+      "contribution_side": "employee_deduction",
+      "output_class": "A_employee_net",
+      "rate_percent": 5.0,
+      "cap_kwd": 1250.0,
+      "base_definition": "pifss_supplementary_insured_salary",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "supplementary",
+      "contribution_side": "employer_contribution",
+      "output_class": "B_employer_liability",
+      "rate_percent": 10.0,
+      "cap_kwd": 1250.0,
+      "base_definition": "pifss_supplementary_insured_salary",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "pension_increase",
+      "contribution_side": "employee_deduction",
+      "output_class": "A_employee_net",
+      "rate_percent": 2.5,
+      "cap_kwd": 2750.0,
+      "base_definition": "pifss_pension_increase_salary",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "pension_increase",
+      "contribution_side": "employer_contribution",
+      "output_class": "B_employer_liability",
+      "rate_percent": 1.0,
+      "cap_kwd": 2750.0,
+      "base_definition": "pifss_pension_increase_salary",
+      "primary_source": "PIFSS official FAQ — monthly contribution ratios table",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "financial_remuneration",
+      "contribution_side": "employee_deduction",
+      "output_class": "A_employee_net",
+      "rate_percent": 2.5,
+      "cap_kwd": 1500.0,
+      "base_definition": "pifss_basic_insured_salary",
+      "primary_source": "PIFSS official FAQ — Financial remuneration (for 18 years of contribution)",
+      "confidence": "UC",
+      "counsel_status": "COUNSEL_REVIEW_REQUIRED",
+      "notes": "Eligibility condition '18 years of contribution' unresolved — do not auto-apply."
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "unemployment_private_oil",
+      "contribution_side": "employee_deduction",
+      "output_class": "A_employee_net",
+      "rate_percent": 0.5,
+      "cap_kwd": 2750.0,
+      "base_definition": "pifss_unemployment_salary",
+      "effective_from": "2013-05-01",
+      "primary_source": "PIFSS FAQ — Unemployment Insurance Law subjects from 05/01/2013; contribution table 0.5%/0.5%",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "unemployment_private_oil",
+      "contribution_side": "employer_contribution",
+      "output_class": "B_employer_liability",
+      "rate_percent": 0.5,
+      "cap_kwd": 2750.0,
+      "base_definition": "pifss_unemployment_salary",
+      "effective_from": "2013-05-01",
+      "primary_source": "PIFSS FAQ contribution table",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "kuwaiti_national",
+      "fund": "aggregate_remittance",
+      "contribution_side": "remittance_obligation",
+      "output_class": "D_remittance_reporting",
+      "rate_percent": null,
+      "base_definition": "sum_of_applicable_funds",
+      "remittance_notes": "Payable beginning of month following accrual month per PIFSS FAQ. Remittance prep ≠ payment processing.",
+      "primary_source": "PIFSS FAQ — When are contributions paid?",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "gcc_national",
+      "fund": "home_scheme_extension",
+      "contribution_side": "remittance_obligation",
+      "output_class": "D_remittance_reporting",
+      "rate_percent": null,
+      "base_definition": "home_country_scheme_via_gcc_extension",
+      "primary_source": "PIFSS Extension of Insurance Protection (journey/legislative materials)",
+      "confidence": "UC",
+      "counsel_status": "COUNSEL_REVIEW_REQUIRED",
+      "notes": "Do not invent home-country percentages."
+    },
+    {
+      "rule_family": "pifss",
+      "employee_category": "expatriate",
+      "fund": "not_applicable",
+      "contribution_side": "employee_deduction",
+      "output_class": "A_employee_net",
+      "rate_percent": 0.0,
+      "base_definition": "not_subject_to_kuwait_pifss",
+      "primary_source": "Social Security coverage design; confirm with counsel",
+      "confidence": "M",
+      "counsel_status": "COUNSEL_REVIEW_REQUIRED",
+      "notes": "Negative applicability candidate — counsel must confirm."
+    }
+  ],
+  "time_pay_rule_tables": [
+    {
+      "rule_family": "ot_ordinary",
+      "output_class": "A_employee_net",
+      "version_label": "law6_2010_art66_candidate",
+      "effective_from": "2010-02-21",
+      "multiplier": 1.25,
+      "rate_payload": {
+        "premium_percent": 25,
+        "pay_base": "original_remuneration",
+        "requires_written_order": true,
+        "max_hours_per_day": 2,
+        "max_hours_per_year": 180,
+        "max_days_per_week": 3,
+        "max_days_per_year": 90,
+        "article": "66",
+        "law": "Law No. 6/2010",
+        "night_premium_encoded": false,
+        "night_premium_note": "COUNSEL REVIEW REQUIRED — not encoded from Art.66 EN text"
+      },
+      "primary_source": "Kuwait Law No. 6/2010 Article 66",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "rest_day_work",
+      "output_class": "A_employee_net",
+      "version_label": "law6_2010_art67_candidate",
+      "effective_from": "2010-02-21",
+      "multiplier": 1.5,
+      "rate_payload": {
+        "formula": "original_remuneration + at_least_50_percent + compensatory_day_off",
+        "weekly_rest_minimum_hours": 24,
+        "distinct_from_ordinary_ot": true,
+        "article": "67",
+        "law": "Law No. 6/2010",
+        "divisor_note": "Art.67 para2 — divide by actual working days excluding weekends; 26-day practice is COUNSEL REVIEW REQUIRED"
+      },
+      "primary_source": "Kuwait Law No. 6/2010 Article 67",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "public_holiday_work",
+      "output_class": "A_employee_net",
+      "version_label": "law6_2010_art68_candidate",
+      "effective_from": "2010-02-21",
+      "multiplier": 2.0,
+      "rate_payload": {
+        "formula": "double_remuneration + additional_day_off",
+        "distinct_from_ordinary_ot": true,
+        "distinct_from_rest_day": true,
+        "statutory_holidays_art68": [
+          "hegeira_new_year",
+          "isra_miraj",
+          "eid_al_fitr_3",
+          "waqfat_arafat",
+          "eid_al_adha_3",
+          "prophet_birthday",
+          "national_day",
+          "gregorian_new_year"
+        ],
+        "article": "68",
+        "law": "Law No. 6/2010",
+        "calendar_note": "COUNSEL REVIEW REQUIRED for annually declared additions beyond Art.68 list"
+      },
+      "primary_source": "Kuwait Law No. 6/2010 Article 68",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    },
+    {
+      "rule_family": "sick_leave_fractions",
+      "output_class": "A_employee_net",
+      "version_label": "law6_2010_art69_candidate",
+      "effective_from": "2010-02-21",
+      "multiplier": null,
+      "fraction_payload": {
+        "bands": [
+          {"order": 1, "days": 15, "pay_fraction": 1.0},
+          {"order": 2, "days": 10, "pay_fraction": 0.75},
+          {"order": 3, "days": 10, "pay_fraction": 0.5},
+          {"order": 4, "days": 10, "pay_fraction": 0.25},
+          {"order": 5, "days": 30, "pay_fraction": 0.0}
+        ],
+        "total_days": 75,
+        "year_basis": "COUNSEL_REVIEW_REQUIRED",
+        "pay_base": "COUNSEL_REVIEW_REQUIRED_art55_vs_basic",
+        "medical_report_required": true,
+        "article": "69",
+        "law": "Law No. 6/2010"
+      },
+      "primary_source": "Kuwait Law No. 6/2010 Article 69",
+      "confidence": "H",
+      "counsel_status": "awaiting_legal_validation"
+    }
+  ],
+  "eos_rule_tables": [
+    {
+      "rule_family": "eos_indemnity",
+      "output_class": "C_settlement",
+      "version_label": "law6_2010_art51_53_candidate",
+      "effective_from": "2010-02-21",
+      "rate_payload": {
+        "monthly_paid": {
+          "first_5_years_days_per_year": 15,
+          "after_5_years_days_per_year": 30,
+          "cap_years_of_remuneration": 1.5
+        },
+        "daily_weekly_hourly_piece": {
+          "first_5_years_days_per_year": 10,
+          "after_5_years_days_per_year": 15,
+          "cap_years_of_remuneration": 1.0
+        },
+        "fraction_of_year_pro_rata": true,
+        "full_entitlement_events_art52": [
+          "employer_terminates",
+          "fixed_term_expires_unrenewed",
+          "termination_arts_48_49_50",
+          "female_resigns_within_1_year_of_marriage"
+        ],
+        "resignation_indefinite_art53": [
+          {"service_years_min": 0, "service_years_max_exclusive": 3, "fraction": 0.0, "note": "no entitlement under Art.53 thresholds"},
+          {"service_years_min": 3, "service_years_max_exclusive": 5, "fraction": 0.5},
+          {"service_years_min": 5, "service_years_max_exclusive": 10, "fraction": 0.6666667},
+          {"service_years_min": 10, "service_years_max_exclusive": null, "fraction": 1.0}
+        ],
+        "remuneration_base_articles": ["55", "62"],
+        "law_17_2018_kuwaiti_pifss_interaction": "COUNSEL_REVIEW_REQUIRED",
+        "article": "51/52/53",
+        "law": "Law No. 6/2010; Law No. 17/2018 amend Art.51"
+      },
+      "primary_source": "Kuwait Law No. 6/2010 Arts 51–53; Law 17/2018 (Official Gazette / NATLEX)",
+      "confidence": "H structure / UC Law17 interaction",
+      "counsel_status": "awaiting_legal_validation"
+    }
+  ],
+  "p4b_activation_gates": [
+    "human_counsel_signoff",
+    "arabic_primary_text_review",
+    "no_legal_claim_until_signed",
+    "no_mode_a_unlock",
+    "synthetic_only_retained"
+  ]
+}

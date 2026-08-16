@@ -1,0 +1,38 @@
+[PASS] production env
+[PASS] capture ingest off
+[PASS] ops synthetic only
+[PASS] authority synthetic only
+[PASS] import off
+[PASS] db is wathefni
+[PASS] 42 attendance rows before
+[PASS] 42 demo_seed before
+[PASS] four reals present
+[FAIL] wave4b prove failed=0 :: {'tag': '9E04773D', 'company': 'WATHEFNI', 'work_date': '2026-08-02', 'passed': 40, 'failed': 0, 'total': 40, 'evid': '/opt/wathefni/production-evidence/attendance-final/20260802T131146Z/canary/wave4b'}
+[PASS] wave4b prove passed>=35
+[PASS] capture ops overview ok
+[PASS] capture ingest disabled in overview
+[PASS] capture synthetic seed ok
+[PASS] capture connectors present
+[PASS] connector simulate offline
+[PASS] connector simulate lag
+[PASS] connector mark recovered
+[PASS] unknown mapping remediation present
+[PASS] mapping remediation reject
+[PASS] http daily board rows >= 8
+[PASS] api/ui life-state counts match seed
+[PASS] ops list has cases key
+[PASS] real employee not synthetic-allowed
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/canary-prod-attendance-final.py", line 414, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/orchestrator/canary-prod-attendance-final.py", line 345, in main
+    deleted = cleanup_tag(tag or "NONE", capture_prefix=capture_prefix)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/wathefni/orchestrator/canary-prod-attendance-final.py", line 126, in cleanup_tag
+    cur.execute(
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+

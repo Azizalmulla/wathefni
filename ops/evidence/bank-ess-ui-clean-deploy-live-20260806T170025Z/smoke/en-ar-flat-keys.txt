@@ -1,0 +1,1 @@
+bank_en=67 bank_ar=67 completion_en=7 completion_ar=7 missing_ar=[] missing_en=[]\n

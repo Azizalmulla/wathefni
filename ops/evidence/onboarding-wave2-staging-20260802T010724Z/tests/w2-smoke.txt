@@ -1,0 +1,34 @@
+=== Onboarding Wave 2 smoke ===
+PASS  template version 2.0.0
+PASS  bank is ESS authority
+PASS  compliance mirrors present
+PASS  deps on first_day_checklist
+PASS  transition model has cancelled
+PASS  migration plan read-only
+PASS  plan mode read_only
+PASS  seed on for synthetic
+PASS  hr mutate on for synthetic
+PASS  delayed start ok
+PASS  delayed does not seed yet
+PASS  reschedule ok
+PASS  start in_progress
+PASS  seeded template rows
+PASS  seed idempotent
+PASS  assignment pinned version
+PASS  bank collection_mode ess
+PASS  due dates populated
+PASS  duplicate start idempotent
+PASS  dependency blocks residence
+PASS  mark civil received
+PASS  audit event on mark
+PASS  stale mark fail closed
+PASS  waive ok
+PASS  bank plaintext mark blocked
+PASS  bank receipt blocked
+PASS  wrong tenant empty
+PASS  cancel ok
+PASS  cancel keeps rows
+PASS  restart blocked when cancelled
+PASS  brian partial flagged
+
+RESULT pass=31 fail=0

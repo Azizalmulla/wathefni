@@ -1,0 +1,32 @@
+{
+  "id": "kill_switch_and_restore",
+  "status": "PASS",
+  "kill": {
+    "health": {
+      "http_code": 200,
+      "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+    },
+    "search": {
+      "success": false,
+      "error": "ck_tools_disabled"
+    }
+  },
+  "restore": {
+    "health": {
+      "http_code": 200,
+      "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host"
+    },
+    "search_owner": {
+      "success": true,
+      "total": 2,
+      "error": null
+    },
+    "viewer_denied": true,
+    "flags": {
+      "TOOLS": "on",
+      "RANKING_READER": "on",
+      "INDEX_WORKERS": "on",
+      "LIVE_TOOL_ACTORS": "88b17ca9-aff4-4721-a553-c1b5514ef95f,b69f4cad-589d-4029-8a2d-cfa85399966c"
+    }
+  }
+}

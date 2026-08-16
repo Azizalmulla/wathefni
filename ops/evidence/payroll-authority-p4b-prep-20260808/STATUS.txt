@@ -1,0 +1,6 @@
+pack_id=KW_STATUTORY_SOURCE_PACK_P4B_PREP_v1.0.0
+status=awaiting_legal_validation_only
+legal_claim=false
+counsel_signed=false
+p4b_activated=false
+mode_a_unlocked=false

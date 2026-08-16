@@ -1,0 +1,12 @@
+{
+  "phase": "before",
+  "shots": [
+    "/opt/wathefni/production-evidence/candidates-list-polish/20260727T141613Z/before/before/before-candidates-desktop.png"
+  ],
+  "assertions": {
+    "snippet": "2 CVs need attention\nReview\nCandidate list\n\nWho they are, their expertise, which job they connect to, and where they stand.\n\n\u0627\u0644\u0639\u0631\u0628\u064a\u0629\nImport CVs\nAll\nWith a job\nNo job assigned\nHired\nArchived\nRestricted\nAll jobs\nWathefni Jobs Phase 2 Production Test\nIT manager\nAccounting Excel\nAccounting\nFinance\nFull Stack Developer\nHR\nIT Maintenance\nMarketing Specialist\nPython Developer\nSocial Media Manager\nAll stages\nNew\nReady for review\nShortlisted\nInterview\nHired\nRejected\nWithdrawn\nFilters\nApply\nSave view\nCANDIDATE\tEXPERTISE\tJOB\tSTAGE\tRECEIVED\n\nYD\nyasser al dossary\n\tSoftware Engineering\tNo job assigned\tNew\tEmail \u00b7 Yesterday\n\nAA\nAZIZ ALMULLA\n\tNot identified\tHR +3\tShortlisted\tUnknown source \u00b7 12 May\n\nHA\nHamad Almulla\n\tNot identified\tHR +1\tShortlisted\tUnknown source \u00b7 13 May\n\nFA\nFaisal Almulla\n\tNot identified\tSocial Media Manager\tShortlisted\tUnknown source \u00b7 13 May\n\nTF\nTalal Fadhli\n\tNot identified\tSocial Media Manager\tHired\tUnknown source \u00b7 12 May\n\nMQ\nMOHAMMAD QATTAN\n\tNot identified\tMarketing Specialist\tHired\tUnknown source \u00b7 12 May\n\nFB\nFouad Burhamad\n\tNot identified\tIT Maintenance\tHired\tUnknown source \u00b7 12 May\nShowing 1-14 of 14 \u00b7 7 people on this page\nPrevious\nNext",
+    "footer": "",
+    "has_mixed_footer": true
+  },
+  "ok": true
+}

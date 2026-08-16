@@ -1,0 +1,94 @@
+{
+  "schema_version": "employees360-wave5-selfservice-v1",
+  "states": [
+    "applied",
+    "approved",
+    "draft",
+    "failed",
+    "needs_information",
+    "pending_hr",
+    "pending_manager",
+    "pending_payroll",
+    "rejected",
+    "submitted",
+    "withdrawn"
+  ],
+  "request_types": {
+    "employee": [
+      "bank_detail_change",
+      "document_change",
+      "emergency_contact_change",
+      "employment_letter",
+      "personal_detail_change",
+      "service_certificate"
+    ],
+    "manager": [
+      "assignment_correction",
+      "manager_change",
+      "transfer"
+    ]
+  },
+  "routes": {
+    "assignment_correction": [
+      "hr"
+    ],
+    "bank_detail_change": [
+      "hr",
+      "payroll"
+    ],
+    "document_change": [
+      "hr"
+    ],
+    "emergency_contact_change": [
+      "hr"
+    ],
+    "employment_letter": [
+      "hr"
+    ],
+    "manager_change": [
+      "hr"
+    ],
+    "personal_detail_change": [
+      "hr"
+    ],
+    "service_certificate": [
+      "hr"
+    ],
+    "transfer": [
+      "hr"
+    ]
+  },
+  "permissions": {
+    "employees.ess.request": "create/submit/withdraw own or in-scope manager requests",
+    "employees.ess.approve.manager": "decide pending_manager",
+    "employees.ess.approve.hr": "decide pending_hr",
+    "employees.ess.approve.payroll": "decide pending_payroll (bank)",
+    "employees.ess.apply": "apply approved \u2192 canonical ESS overlays / Wave 4",
+    "employees.ess.unmask": "view unmasked sensitive proposed/bank fields",
+    "employees.read / employees.manage": "compatible HR fallbacks"
+  },
+  "rules": [
+    "approval and apply are separate",
+    "no self-approval",
+    "apply is idempotent",
+    "stale hub updated_at fails closed",
+    "assignment apply uses Wave 4 effective-dated authority",
+    "lifecycle/jurisdiction remain Wave 3 governed",
+    "bank requires payroll stage",
+    "document replacement preserves prior versions",
+    "managers cannot act outside reporting + dashboard scope",
+    "sensitive fields masked by permission"
+  ],
+  "eligibility": {
+    "terminated": "letters/service_certificate only",
+    "suspended": [
+      "document_change",
+      "emergency_contact_change",
+      "employment_letter",
+      "personal_detail_change",
+      "service_certificate"
+    ],
+    "future_start": "blocked types=['assignment_correction', 'bank_detail_change', 'manager_change', 'transfer']",
+    "active": "all types per requester_kind"
+  }
+}

@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from 'react'
-import { useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/auth/AuthProvider'
@@ -7,6 +6,8 @@ import { useI18n } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
 import { FeatureUnavailableState } from '@/components/AccessStates'
 import { approvedErrorMessage } from '@/api/errors'
+import { errorFeedback, successFeedback } from '@/native/haptics'
+import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
 import { LeaveRequestView } from '@/features/remaining/RemainingViews'
 import type { LeaveDurationResponse, LeaveResponse } from '@/api/types'
 
@@ -15,7 +16,7 @@ type Selection = { startDate: string; endDate: string; leaveType: string }
 export default function LeaveRequestScreen() {
   const { t } = useI18n()
   const { request, me, hasFeature, can, refreshMe } = useAuth()
-  const router = useRouter()
+  const onBack = useEmployeeSafeBack()
   const queryClient = useQueryClient()
 
   const leaveTypes = me?.leave.types ?? []
@@ -63,9 +64,11 @@ export default function LeaveRequestScreen() {
         method: 'POST',
         json: { start_date: startDate, end_date: endDate, leave_type: leaveType, reason: reason.trim() || null },
       })
+      successFeedback()
       await queryClient.invalidateQueries({ queryKey: ['leave'] })
-      router.back()
+      onBack()
     } catch (err) {
+      errorFeedback()
       setError(approvedErrorMessage(err, t))
     } finally {
       submitLock.current = false
@@ -84,7 +87,7 @@ export default function LeaveRequestScreen() {
       duration={durationQuery.data ?? null}
       onRangeChange={onRangeChange}
       onSubmit={(value) => void onSubmit(value)}
-      onBack={() => router.back()}
+      onBack={onBack}
     />
   )
 }

@@ -1,0 +1,17 @@
+PASS  flow payroll maps to payslips
+PASS  flow shift maps to schedule
+PASS  explicit deep_link path wins
+PASS  payslip_id is appended to payslips path
+PASS  flat path is accepted
+PASS  empty data yields null candidate
+PASS  unknown flow yields null candidate
+PASS  FLOW_DEFAULT_PATHS covers payroll and leave
+PASS  FLOW_DEFAULT_PATHS covers preboarding and probation
+PASS  entitled push follow-through opens the destination
+PASS  unentitled push destination falls back to Inbox
+PASS  malformed absolute URL falls back to Inbox
+PASS  unknown path falls back to Inbox
+PASS  flow-only entitled hint opens schedule
+PASS  flow-only unentitled hint falls back to Inbox
+---
+PASS push follow-through (15 checks)

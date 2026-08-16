@@ -1,0 +1,393 @@
+{
+  "completed_at": "2026-07-18T21:18:19.901968+00:00",
+  "environment": "staging",
+  "source_manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "pilot_company_code": "B1PILOT",
+  "pilot_battery_version_ids": {
+    "en": {
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "content_sha256": "a7f27b5146755edf606889d63d6cccbb37582bd852d653234e6815a820e980d2",
+      "item_count": 25
+    },
+    "ar": {
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "content_sha256": "49f7369df065b1c2ff0e974b0f58fab14b88b58499f27d74697a566ddcbe1637",
+      "item_count": 25
+    }
+  },
+  "staging_insertion_proof": {
+    "company_code": "B1PILOT",
+    "batteries": {
+      "en": {
+        "battery_key": "b1_gawj_v1_en_pilot",
+        "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+        "content_sha256": "a7f27b5146755edf606889d63d6cccbb37582bd852d653234e6815a820e980d2",
+        "item_count": 25
+      },
+      "ar": {
+        "battery_key": "b1_gawj_v1_ar_pilot",
+        "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+        "content_sha256": "49f7369df065b1c2ff0e974b0f58fab14b88b58499f27d74697a566ddcbe1637",
+        "item_count": 25
+      }
+    },
+    "approved_for_use": false,
+    "isolated_from_wathefni_tenant": true
+  },
+  "participant_count": 16,
+  "completion_totals": {
+    "completed": 14,
+    "dropout": 2,
+    "completion_rate": 0.875,
+    "dropout_rate": 0.125
+  },
+  "en_ar_split": {
+    "en_participants": 8,
+    "ar_participants": 8,
+    "en_completed": 8,
+    "ar_completed": 6
+  },
+  "timing_metrics": {
+    "mean_completion_ms": 1265862,
+    "median_completion_ms": 1197534,
+    "mean_en_completion_ms": 1160601,
+    "mean_ar_completion_ms": 1406210,
+    "en_ar_timing_ratio": 1.212,
+    "mean_time_per_item_ms": 50881,
+    "mean_completion_minutes": 21.1,
+    "mean_en_completion_minutes": 19.34,
+    "mean_ar_completion_minutes": 23.44,
+    "mean_time_per_item_seconds": 50.9
+  },
+  "score_distribution": {
+    "n": 14,
+    "mean_percent": 76.57,
+    "median_percent": 78.0,
+    "min_percent": 64.0,
+    "max_percent": 88.0,
+    "stdev_percent": 7.23
+  },
+  "item_recommendations": [
+    {
+      "order": 1,
+      "category": "verbal_reasoning",
+      "p_correct": 0.812,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 2,
+      "category": "verbal_reasoning",
+      "p_correct": 0.875,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 3,
+      "category": "situational_judgment",
+      "p_correct": 0.688,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 4,
+      "category": "situational_judgment",
+      "p_correct": 0.875,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 5,
+      "category": "prioritization",
+      "p_correct": 0.688,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 6,
+      "category": "prioritization",
+      "p_correct": 0.75,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 7,
+      "category": "prioritization",
+      "p_correct": 0.875,
+      "n": 16,
+      "recommendation": "revise",
+      "reasons": [
+        "confusing_wording_reports"
+      ]
+    },
+    {
+      "order": 8,
+      "category": "numerical_reasoning",
+      "p_correct": 0.5,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 9,
+      "category": "numerical_reasoning",
+      "p_correct": 0.688,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 10,
+      "category": "numerical_reasoning",
+      "p_correct": 0.733,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 11,
+      "category": "logical_reasoning",
+      "p_correct": 0.733,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 12,
+      "category": "logical_reasoning",
+      "p_correct": 0.867,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 13,
+      "category": "logical_reasoning",
+      "p_correct": 0.933,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 14,
+      "category": "logical_reasoning",
+      "p_correct": 0.733,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 15,
+      "category": "verbal_reasoning",
+      "p_correct": 0.929,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 16,
+      "category": "verbal_reasoning",
+      "p_correct": 0.571,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 17,
+      "category": "situational_judgment",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 18,
+      "category": "situational_judgment",
+      "p_correct": 0.571,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 19,
+      "category": "prioritization",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 20,
+      "category": "numerical_reasoning",
+      "p_correct": 0.857,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 21,
+      "category": "logical_reasoning",
+      "p_correct": 0.929,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 22,
+      "category": "verbal_reasoning",
+      "p_correct": 1.0,
+      "n": 14,
+      "recommendation": "collect more data",
+      "reasons": [
+        "suspiciously_high_success"
+      ]
+    },
+    {
+      "order": 23,
+      "category": "situational_judgment",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 24,
+      "category": "numerical_reasoning",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    },
+    {
+      "order": 25,
+      "category": "prioritization",
+      "p_correct": 0.786,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ]
+    }
+  ],
+  "recommendation_counts": {
+    "keep": 23,
+    "revise": 1,
+    "retire": 0,
+    "collect_more_data": 1
+  },
+  "watchlist_not_auto_revise": [
+    {
+      "order": 8,
+      "category": "numerical_reasoning",
+      "p_correct": 0.5,
+      "note": "lowest success; keep for now, monitor in larger pilot"
+    }
+  ],
+  "participant_feedback_summary": {
+    "clarity": "mostly good/ok; some somewhat_unclear",
+    "confusing_item_reports": {
+      "order_7_prioritization": 3
+    },
+    "answer_key_challenges": [],
+    "free_text_themes": [
+      "One prioritization item felt generically virtuous",
+      "Arabic read naturally",
+      "Early stop due to time (dropouts)"
+    ]
+  },
+  "technical_defects": [
+    {
+      "attempt_id": "286f3d04-407b-4f92-bcb4-b33e301a6657",
+      "locale": "en",
+      "device": "mobile",
+      "browser": "safari",
+      "note": "Mobile Safari: brief blank render between items; recovered on refresh."
+    },
+    {
+      "attempt_id": "c84ad234-b01a-4ded-bd4d-06eb6c543eb7",
+      "locale": "ar",
+      "device": "mobile",
+      "browser": "safari",
+      "note": "Mobile Safari: brief blank render between items; recovered on refresh."
+    }
+  ],
+  "skipped_items": [
+    {
+      "attempt_id": "be7c6fba-6807-48c4-9d94-8f04f4b836a3",
+      "locale": "ar",
+      "answered": 9,
+      "total": 25,
+      "skipped_from_index": 9
+    },
+    {
+      "attempt_id": "0f8e0f57-b3a2-47a8-8477-ec7689d3381d",
+      "locale": "ar",
+      "answered": 14,
+      "total": 25,
+      "skipped_from_index": 14
+    }
+  ],
+  "rollback_rehearsal": {
+    "global_wathefni_unchanged": true,
+    "pilot_batteries_retired": true,
+    "approved_for_use": false,
+    "production_untouched": true,
+    "employees_created": 0,
+    "offers_created": 0
+  },
+  "ready_for_larger_validation_pilot": true,
+  "approved_for_use": false,
+  "production_live_bank_inserted": false
+}

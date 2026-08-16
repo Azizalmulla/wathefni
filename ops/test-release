@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Release qualification — broader than smoke, still no screenshot/video oracle.
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ORCH="$REPO_ROOT/wathefni-orchestrator"
+if [[ -x "$ORCH/.venv/bin/python" ]]; then PY="$ORCH/.venv/bin/python"; else PY="$(command -v python3)"; fi
+
+allow_blocked() {
+  local rc=0
+  set +e
+  "$@"
+  rc=$?
+  set -e
+  if [[ "$rc" -eq 0 || "$rc" -eq 2 ]]; then
+    return 0
+  fi
+  return "$rc"
+}
+
+echo "== release: smoke =="
+bash "$REPO_ROOT/ops/test-smoke"
+
+echo "== release: R9 live permission attack (staging) =="
+bash "$REPO_ROOT/ops/qualify-production-readiness-r9-permission-tenant-attack.sh"
+
+echo "== release: R10 measured performance =="
+bash "$REPO_ROOT/ops/qualify-production-readiness-r10-measured-performance.sh"
+
+echo "== release: R11 release language =="
+"$PY" "$ORCH/smoke-test-r11-release-language.py"
+
+echo "== release: store build gate + live /ready =="
+bash "$REPO_ROOT/ops/qualify-store-build-live.sh"
+
+echo "== release: cross-surface API convergence (staging DB) =="
+bash "$REPO_ROOT/ops/qualify-cross-surface-convergence.sh"
+
+echo "== release: clean Setup canary =="
+bash "$REPO_ROOT/ops/qualify-store-release-clean-canary.sh"
+
+echo "== release: physical RP matrix (honest; UNPROVEN without devices) =="
+allow_blocked bash "$REPO_ROOT/ops/qualify-physical-device-matrix.sh"
+
+echo "== release: mobile Maestro gate (BLOCKED unless a real UI target exists) =="
+allow_blocked "$PY" "$REPO_ROOT/ops/mobile-e2e/run-release-gate.py"
+
+echo RELEASE_HARNESS_COMPLETED

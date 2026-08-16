@@ -1,0 +1,90 @@
+payroll wave2adb prod synthetic canary tag=8e643786
+[PASS] wave2a enabled
+[PASS] wave2a company
+[PASS] synthetic_only on
+[PASS] payment disabled
+[PASS] money authority external
+[PASS] wathefni not money authority
+[PASS] vendor unclaimed
+[PASS] no bank files
+[PASS] no native g2n
+[PASS] no AI
+[PASS] wave1 contracts unchanged
+[PASS] wave2a adapter contracts unchanged
+[PASS] operability version
+[PASS] package includes contracts
+[PASS] package excludes attendance live
+[PASS] attendance not packaged
+[PASS] wave1 still enabled
+[PASS] route external workspace
+[PASS] route readiness
+[PASS] route exports
+[PASS] route quarantine
+[PASS] route quarantine acknowledge
+[PASS] route events
+[PASS] helper _payroll_w2a_require
+[PASS] helper scope keys
+[PASS] rollback requires concurrency helper
+[PASS] rollback concurrency required
+[PASS] UI setup panel
+[PASS] UI checklist
+[PASS] UI package honesty
+[PASS] UI csv guide
+[PASS] UI rollback concurrency
+[PASS] UI EN who pays
+[PASS] UI AR title
+[PASS] UI hours review tab
+[PASS] UI payslip picker
+[PASS] UI close picker
+[PASS] UI tab separation
+[PASS] UI rtl
+[PASS] UI mobile wrap
+[PASS] db is wathefni
+[PASS] real employee export refused
+[PASS] synth contract draft
+[PASS] synth contract approve
+[PASS] period create
+[PASS] readiness ready
+[PASS] readiness not authoritative
+[PASS] bootstrap ok
+[PASS] bootstrap not authoritative
+[PASS] bootstrap payment disabled
+[PASS] setup status present
+[PASS] setup payment ok flag
+[PASS] package contents present
+[PASS] readiness has setup
+[PASS] manager empty scope blocks export assembly
+[PASS] assemble has synth employee
+[PASS] export ok
+[PASS] history list exports
+[PASS] upload import ok
+[PASS] import money external
+[PASS] duplicate upload idempotent
+[PASS] fingerprint drift blocked
+[PASS] fingerprint drift quarantined
+[PASS] malformed quarantined
+[PASS] quarantine acknowledge ok
+[PASS] ack money unchanged
+[PASS] ack not authoritative
+[PASS] quarantine ack idempotent
+[PASS] quarantine queue non-empty
+[PASS] reconcile ok
+[PASS] reconciliation stored
+[PASS] employee-level lines
+[PASS] replace import ok
+[PASS] replace flagged
+[PASS] replace not authoritative
+[PASS] replace money external
+[PASS] audit history events
+[PASS] replace event in history
+[PASS] quarantine ack in audit
+[PASS] rollback without token denied
+[PASS] rollback with concurrency ok
+[PASS] rollback money still external
+[PASS] native mode blocks readiness
+[PASS] residual synthetic zero
+{
+  "passed": 84,
+  "failed": 0,
+  "residual": 0
+}

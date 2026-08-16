@@ -1,0 +1,9 @@
+analytics freeze: 34 passed, 0 failed
+compliance-findings-wave1 smoke tests passed
+employees360: 57 passed
+onboarding: 54 passed
+attendance: 22 passed
+leave: 34 passed
+shifts: 96 passed
+{"contract": "compliance_findings_wave1", "integrity_ok": true, "ui_ok": true, "analytics_excludes_compliance": true, "health": "ok"}
+STAGING_COMPLIANCE_W1_OK

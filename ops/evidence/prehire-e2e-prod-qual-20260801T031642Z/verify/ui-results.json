@@ -1,0 +1,693 @@
+{
+  "passed": 40,
+  "failed": 0,
+  "total": 40,
+  "results": [
+    {
+      "id": "UI_en-desktop_overview",
+      "module": "overview",
+      "title": "UI en-desktop overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "Good morning, Aziz",
+        "active": "Overview",
+        "dir": "ltr",
+        "bodyLen": 1224,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-overview.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_jobs",
+      "module": "jobs",
+      "title": "UI en-desktop jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "Jobs",
+        "active": "Jobs",
+        "dir": "ltr",
+        "bodyLen": 1035,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-jobs.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_candidates",
+      "module": "candidates",
+      "title": "UI en-desktop candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "Candidates",
+        "active": "Candidates",
+        "dir": "ltr",
+        "bodyLen": 1517,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-candidates.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_ranking",
+      "module": "ranking",
+      "title": "UI en-desktop ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "Ranking",
+        "active": "Ranking",
+        "dir": "ltr",
+        "bodyLen": 752,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-ranking.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_assessments",
+      "module": "assessments",
+      "title": "UI en-desktop assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "Assessments",
+        "active": "Assessments",
+        "dir": "ltr",
+        "bodyLen": 921,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-assessments.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_interviews",
+      "module": "interviews",
+      "title": "UI en-desktop interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "Interviews",
+        "active": "Interviews",
+        "dir": "ltr",
+        "bodyLen": 710,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-interviews.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_calendar",
+      "module": "calendar",
+      "title": "UI en-desktop calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "Calendar",
+        "active": "Calendar",
+        "dir": "ltr",
+        "bodyLen": 647,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-calendar.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_reports",
+      "module": "reports",
+      "title": "UI en-desktop reports",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "reports",
+        "urlPage": "reports",
+        "title": "Reports",
+        "active": "Reports",
+        "dir": "ltr",
+        "bodyLen": 1345,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-reports.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_ai",
+      "module": "assistant",
+      "title": "UI en-desktop ai",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ai",
+        "urlPage": "ai",
+        "title": "Wathefni Assistant",
+        "active": "Wathefni Assistant",
+        "dir": "ltr",
+        "bodyLen": 656,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-desktop/en-desktop-ai.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_back_forward",
+      "module": "cross",
+      "title": "Back/forward candidates↔reports",
+      "result": "PASS",
+      "detail": {
+        "back": "https://api.wathefni.ai/dashboard/?page=candidates",
+        "fwd": "https://api.wathefni.ai/dashboard/?page=reports"
+      }
+    },
+    {
+      "id": "UI_AS04_tab_reports",
+      "module": "assessments",
+      "title": "Assessments URL tab=reports preserved",
+      "result": "PASS",
+      "detail": {
+        "url": "https://api.wathefni.ai/dashboard/?page=assessments&assessment_cohort=assessment_ready_to_send&overview_cohort=assessment_ready_to_send&cohort_key=assessment_ready_to_send&tab=reports",
+        "tab": "reports"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_overview",
+      "module": "overview",
+      "title": "UI ar-desktop overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "صباح الخير، Aziz",
+        "active": "نظرة عامة",
+        "dir": "rtl",
+        "bodyLen": 1142,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-overview.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_jobs",
+      "module": "jobs",
+      "title": "UI ar-desktop jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "الوظائف",
+        "active": "الوظائف",
+        "dir": "rtl",
+        "bodyLen": 1044,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-jobs.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_candidates",
+      "module": "candidates",
+      "title": "UI ar-desktop candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "المرشحون",
+        "active": "المرشحون",
+        "dir": "rtl",
+        "bodyLen": 389,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-candidates.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_ranking",
+      "module": "ranking",
+      "title": "UI ar-desktop ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "الترتيب",
+        "active": "الترتيب",
+        "dir": "rtl",
+        "bodyLen": 728,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-ranking.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_assessments",
+      "module": "assessments",
+      "title": "UI ar-desktop assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "التقييمات",
+        "active": "التقييمات",
+        "dir": "rtl",
+        "bodyLen": 395,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-assessments.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_interviews",
+      "module": "interviews",
+      "title": "UI ar-desktop interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "المقابلات",
+        "active": "المقابلات",
+        "dir": "rtl",
+        "bodyLen": 398,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-interviews.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_calendar",
+      "module": "calendar",
+      "title": "UI ar-desktop calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "التقويم",
+        "active": "التقويم",
+        "dir": "rtl",
+        "bodyLen": 748,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-calendar.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_reports",
+      "module": "reports",
+      "title": "UI ar-desktop reports",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "reports",
+        "urlPage": "reports",
+        "title": "التقارير",
+        "active": "التقارير",
+        "dir": "rtl",
+        "bodyLen": 1199,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-reports.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_ai",
+      "module": "assistant",
+      "title": "UI ar-desktop ai",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ai",
+        "urlPage": "ai",
+        "title": "مساعد واثقني",
+        "active": "مساعد واثقني",
+        "dir": "rtl",
+        "bodyLen": 592,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-desktop/ar-desktop-ai.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_rtl",
+      "module": "cross",
+      "title": "RTL active (ar-desktop)",
+      "result": "PASS",
+      "detail": {
+        "rtl": true
+      }
+    },
+    {
+      "id": "UI_en-mobile_overview",
+      "module": "overview",
+      "title": "UI en-mobile overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "Good morning, Aziz",
+        "active": "Overview",
+        "dir": "ltr",
+        "bodyLen": 1066,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-overview.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_jobs",
+      "module": "jobs",
+      "title": "UI en-mobile jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "Jobs",
+        "active": "Jobs",
+        "dir": "ltr",
+        "bodyLen": 970,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-jobs.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_candidates",
+      "module": "candidates",
+      "title": "UI en-mobile candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "Candidates",
+        "active": "Candidates",
+        "dir": "ltr",
+        "bodyLen": 1359,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-candidates.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_ranking",
+      "module": "ranking",
+      "title": "UI en-mobile ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "Ranking",
+        "active": "Ranking",
+        "dir": "ltr",
+        "bodyLen": 594,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-ranking.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_assessments",
+      "module": "assessments",
+      "title": "UI en-mobile assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "Assessments",
+        "active": "Assessments",
+        "dir": "ltr",
+        "bodyLen": 763,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-assessments.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_interviews",
+      "module": "interviews",
+      "title": "UI en-mobile interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "Interviews",
+        "active": "Interviews",
+        "dir": "ltr",
+        "bodyLen": 552,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-interviews.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_calendar",
+      "module": "calendar",
+      "title": "UI en-mobile calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "Calendar",
+        "active": "Calendar",
+        "dir": "ltr",
+        "bodyLen": 485,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-calendar.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_reports",
+      "module": "reports",
+      "title": "UI en-mobile reports",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "reports",
+        "urlPage": "reports",
+        "title": "Reports",
+        "active": "Reports",
+        "dir": "ltr",
+        "bodyLen": 1187,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-reports.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_ai",
+      "module": "assistant",
+      "title": "UI en-mobile ai",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ai",
+        "urlPage": "ai",
+        "title": "Wathefni Assistant",
+        "active": "Wathefni Assistant",
+        "dir": "ltr",
+        "bodyLen": 498,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/en-mobile/en-mobile-ai.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_overview",
+      "module": "overview",
+      "title": "UI ar-mobile overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "صباح الخير، Aziz",
+        "active": "نظرة عامة",
+        "dir": "rtl",
+        "bodyLen": 971,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-overview.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_jobs",
+      "module": "jobs",
+      "title": "UI ar-mobile jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "الوظائف",
+        "active": "الوظائف",
+        "dir": "rtl",
+        "bodyLen": 895,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-jobs.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_candidates",
+      "module": "candidates",
+      "title": "UI ar-mobile candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "المرشحون",
+        "active": "المرشحون",
+        "dir": "rtl",
+        "bodyLen": 1333,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-candidates.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_ranking",
+      "module": "ranking",
+      "title": "UI ar-mobile ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "الترتيب",
+        "active": "الترتيب",
+        "dir": "rtl",
+        "bodyLen": 557,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-ranking.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_assessments",
+      "module": "assessments",
+      "title": "UI ar-mobile assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "التقييمات",
+        "active": "التقييمات",
+        "dir": "rtl",
+        "bodyLen": 708,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-assessments.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_interviews",
+      "module": "interviews",
+      "title": "UI ar-mobile interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "المقابلات",
+        "active": "المقابلات",
+        "dir": "rtl",
+        "bodyLen": 484,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-interviews.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_calendar",
+      "module": "calendar",
+      "title": "UI ar-mobile calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "التقويم",
+        "active": "التقويم",
+        "dir": "rtl",
+        "bodyLen": 409,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-calendar.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_reports",
+      "module": "reports",
+      "title": "UI ar-mobile reports",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "reports",
+        "urlPage": "reports",
+        "title": "التقارير",
+        "active": "التقارير",
+        "dir": "rtl",
+        "bodyLen": 1028,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-reports.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_ai",
+      "module": "assistant",
+      "title": "UI ar-mobile ai",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ai",
+        "urlPage": "ai",
+        "title": "مساعد واثقني",
+        "active": "مساعد واثقني",
+        "dir": "rtl",
+        "bodyLen": 421,
+        "fatal": false,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/prehire-e2e-prod-qual-20260801T031642Z/screenshots/ar-mobile/ar-mobile-ai.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_rtl",
+      "module": "cross",
+      "title": "RTL active (ar-mobile)",
+      "result": "PASS",
+      "detail": {
+        "rtl": true
+      }
+    }
+  ]
+}

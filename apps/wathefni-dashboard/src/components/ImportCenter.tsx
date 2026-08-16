@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DragEvent } from 'react'
-import { Archive, AlertTriangle, Check, CheckCheck, CheckCircle2, ChevronDown, ChevronUp, Download, FileText, Loader2, UploadCloud, X } from 'lucide-react'
+import { Archive, AlertTriangle, Check, CheckCheck, CheckCircle2, ChevronDown, ChevronUp, Download, Eye, FileText, Loader2, UploadCloud, X } from 'lucide-react'
 
 import {
   bulkImportAction,
   DashboardApiError,
   downloadImportReport,
   getImportIntake,
+  previewCandidateCv,
   uploadBulkCvImport,
 } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
@@ -641,6 +642,7 @@ export function ImportReviewQueue({
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [assignDraft, setAssignDraft] = useState<Record<string, string>>({})
   const [busyGroup, setBusyGroup] = useState<string>('')
+  const [previewingKey, setPreviewingKey] = useState('')
   const confirm = useConfirm()
 
   const positionTitleFor = (code: string) => positions.find((p) => p.position_code === code)?.position_title || code
@@ -670,6 +672,26 @@ export function ImportReviewQueue({
   useEffect(() => {
     void refresh()
   }, [refresh, reloadKey])
+
+  // Lets HR see the actual CV before deciding which role to route it to, instead of
+  // guessing from filename/candidate name alone. Reuses the same preview endpoint the
+  // main Candidates table uses — it works for any application regardless of status.
+  async function handlePreview(appKey: string) {
+    setError('')
+    setPreviewingKey(appKey)
+    try {
+      await previewCandidateCv(access, appKey)
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) {
+        onAccessIssue?.(issue)
+        return
+      }
+      setError(friendlyImportError(err, 'We couldn’t open this CV. Please try again.'))
+    } finally {
+      setPreviewingKey('')
+    }
+  }
 
   // Items the action applies to: the selected ones in a group, or all of them if none picked.
   function targetKeys(group: ImportIntakeGroup): string[] {
@@ -898,6 +920,20 @@ export function ImportReviewQueue({
                           {IMPORT_SOURCE_CHIPS[item.import_source] || item.import_source}
                         </span>
                       ) : null}
+                      <button
+                        aria-label={`Preview CV for ${item.candidate_name || item.original_filename || 'this candidate'}`}
+                        className="shrink-0 rounded-full p-1.5 text-subtle hover:bg-white/80 hover:text-text disabled:opacity-50"
+                        disabled={previewingKey === item.app_key}
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          void handlePreview(item.app_key)
+                        }}
+                        title="Preview CV"
+                        type="button"
+                      >
+                        {previewingKey === item.app_key ? <Loader2 className="animate-spin" size={14} /> : <Eye size={14} />}
+                      </button>
                     </label>
                   ))}
                 </div>

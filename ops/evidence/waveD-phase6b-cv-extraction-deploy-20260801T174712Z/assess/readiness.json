@@ -1,0 +1,8 @@
+{
+  "verdict": "PASS",
+  "gate_passed": true,
+  "external_tenants": "disabled",
+  "post_hiring": "not_started",
+  "mailbox_sync": "off",
+  "canary": "WATHEFNI-only"
+}

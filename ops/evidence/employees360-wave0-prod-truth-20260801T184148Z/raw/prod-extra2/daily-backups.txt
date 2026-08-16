@@ -1,0 +1,8 @@
+total 28
+drwx------ 2 root root 4096 Aug  1 02:30 20260801T023033Z
+drwx------ 2 root root 4096 Aug  1 01:51 20260801T015146Z
+drwx------ 2 root root 4096 Jul 31 02:33 20260731T023258Z
+drwx------ 2 root root 4096 Jul 30 02:33 20260730T023340Z
+drwx------ 2 root root 4096 Jul 29 02:30 20260729T023030Z
+drwx------ 2 root root 4096 Jul 28 02:32 20260728T023226Z
+drwx------ 2 root root 4096 Jul 27 02:32 20260727T023237Z

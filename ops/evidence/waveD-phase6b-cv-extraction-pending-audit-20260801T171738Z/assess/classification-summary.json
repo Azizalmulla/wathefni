@@ -1,0 +1,22 @@
+{
+  "audit_stamp": "20260801T171738Z",
+  "open_retrying_now": 28,
+  "original_d6a_deploy_snapshot_count": 32,
+  "reconcile_note": "At D6A deploy close, 32 WATHEFNI cv_extraction jobs were pending/retrying. At audit time 28 remain retrying (all D6A prod-gate synthetics). Same UTC window also shows 5 completed + earlier 3 dead_letter from D6 held-admit seed (16:22Z). No legacy non-durable jobs in the open set.",
+  "classification_counts": {
+    "legacy_old_cv_pipeline": 0,
+    "current_durable_ingress": 28,
+    "test_synthetic_leftovers": 28,
+    "genuine_stuck_production_customer": 0
+  },
+  "error_breakdown": {
+    "cv_extraction_failed": 17,
+    "intake_document_not_clean": 11
+  },
+  "app_status_breakdown": {
+    "import_archived": 26,
+    "needs_role": 2
+  },
+  "worker_processes_cv_extraction": true,
+  "current_pipeline_blocker_for_real_traffic": false
+}

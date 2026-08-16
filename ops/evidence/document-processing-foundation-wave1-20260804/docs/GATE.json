@@ -1,0 +1,10 @@
+{
+  "wave": "document_processing_foundation_production_authority_wave1",
+  "qualify": "PASS",
+  "hybrid_accepted": "9/9",
+  "production_cv_pdf_authority": "GO_ENABLED",
+  "gpt_auto_ocr_fallback": "DISABLED",
+  "rollback_proven": true,
+  "backup": "/opt/wathefni/backups/production-pre-doc-foundation-wave1-20260803T232714Z/",
+  "report": "ops/DOCUMENT_PROCESSING_FOUNDATION_PRODUCTION_AUTHORITY_WAVE1.md"
+}

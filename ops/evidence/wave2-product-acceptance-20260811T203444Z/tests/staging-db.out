@@ -1,0 +1,48 @@
+    wave2 product acceptance — db
+      PASS  released payslip visibility helper
+      PASS  unreleased not visible
+      PASS  released visible
+      PASS  payment ack ≠ paid
+      PASS  settlement finalized ≠ paid
+      PASS  settlement ≠ clearance
+      PASS  assistant read-only (mutations off)
+      PASS  assistant read-only under spine wave
+      PASS  EN/AR settlement labels
+      PASS  EN/AR payment labels
+      PASS  rollout canary allowlist
+      PASS  rollout gate structured
+      PASS  rollback global off
+      PASS  rollback guidance present
+      PASS  setup get_all wave2 ok
+      PASS  setup has attendance policy
+      PASS  setup has settlement policy
+      PASS  setup EN/AR labels
+      PASS  setup patch attendance
+      PASS  setup attendance persisted
+      PASS  setup patch leave
+      PASS  setup patch payroll independence defaults
+      PASS  setup payroll manual_inputs_ok
+      PASS  setup payment_processing default off
+      PASS  setup ack≠paid contract
+      PASS  setup settlement honesty
+      PASS  matrix[attendance_alone] attendance gate
+      PASS  matrix[attendance_alone] leave runtime path
+      PASS  matrix[attendance_alone] shifts gate
+      PASS  matrix[attendance_alone] payroll gate
+      PASS  matrix[attendance_alone] payment gate
+      PASS  matrix[attendance_alone] settlement gate
+      PASS  matrix[attendance_alone] tenant isolation
+      PASS  matrix[leave_alone] attendance gate
+      PASS  matrix[leave_alone] leave runtime path
+      PASS  matrix[leave_alone] shifts gate
+      PASS  matrix[leave_alone] payroll gate
+      PASS  matrix[leave_alone] payment gate
+      PASS  matrix[leave_alone] settlement gate
+      PASS  matrix[leave_alone] tenant isolation
+      PASS  matrix[shifts_alone] attendance gate
+      PASS  matrix[shifts_alone] leave runtime path
+      PASS  matrix[shifts_alone] shifts gate
+      PASS  matrix[shifts_alone] payroll gate
+      PASS  matrix[shifts_alone] payment gate
+      PASS  matrix[shifts_alone] settlement gate
+      PASS  matrix[shifts_alone] tenant isolation

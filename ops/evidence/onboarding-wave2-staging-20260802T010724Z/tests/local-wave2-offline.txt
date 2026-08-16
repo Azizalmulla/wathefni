@@ -1,0 +1,12 @@
+=== Onboarding Wave 2 smoke ===
+PASS  template version 2.0.0
+PASS  bank is ESS authority
+PASS  compliance mirrors present
+PASS  deps on first_day_checklist
+PASS  transition model has cancelled
+PASS  migration plan read-only
+PASS  plan mode read_only
+PASS  seed on for synthetic
+PASS  hr mutate on for synthetic
+SKIP DB behavioural: no database env
+RESULT pass=9 fail=0

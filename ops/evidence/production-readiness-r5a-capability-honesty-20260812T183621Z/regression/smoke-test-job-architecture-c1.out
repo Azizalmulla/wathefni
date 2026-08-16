@@ -1,0 +1,31 @@
+    job architecture c1 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  not commercial sku
+      PASS  platform key
+      PASS  salary bands out
+      PASS  no fuzzy ai
+      PASS  edges not eligibility
+      PASS  recruiting boundary
+      PASS  org position boundary
+      PASS  talent boundary
+      PASS  assistant mutations out
+      PASS  comp hard
+      PASS  wfp hard
+      PASS  talent optional
+      PASS  recruiting optional
+      PASS  setup wave6 module
+      PASS  setup honesty
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  setup primary authoring
+      PASS  mobile thin
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on
+      PASS  tenant gate
+      PASS  no salary band table
+      PASS  no eligibility score
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    27 passed, 0 failed (unit-only)

@@ -1,0 +1,157 @@
+{
+  "checks": [
+    {
+      "check": "before: API response captured",
+      "ok": true,
+      "detail": {
+        "has_verified_bank": false,
+        "verified_bank": null,
+        "submission_state": "none",
+        "payroll_effective": null
+      }
+    },
+    {
+      "check": "after: /app/bank HTTP 200",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "after: has_verified_bank is false",
+      "ok": true,
+      "detail": {
+        "has_verified_bank": false
+      }
+    },
+    {
+      "check": "after: verified block is null",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "after: payroll_effective is null",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "after: submission_state is none (no synthetic history projected)",
+      "ok": true,
+      "detail": {
+        "submission_state": "none",
+        "submission": null
+      }
+    },
+    {
+      "check": "after: can submit new bank details",
+      "ok": true,
+      "detail": {
+        "can_submit_new": true,
+        "next_step": {
+          "owner": "employee",
+          "message": "Add your bank details so salary can be paid to you.",
+          "message_en": "Add your bank details so salary can be paid to you.",
+          "message_ar": "\u0623\u0636\u0641 \u0628\u064a\u0627\u0646\u0627\u062a \u062d\u0633\u0627\u0628\u0643 \u0627\u0644\u0628\u0646\u0643\u064a \u0644\u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u0631\u0627\u062a\u0628."
+        }
+      }
+    },
+    {
+      "check": "after: next step asks employee to add bank details",
+      "ok": true,
+      "detail": {
+        "owner": "employee",
+        "message": "Add your bank details so salary can be paid to you.",
+        "message_en": "Add your bank details so salary can be paid to you.",
+        "message_ar": "\u0623\u0636\u0641 \u0628\u064a\u0627\u0646\u0627\u062a \u062d\u0633\u0627\u0628\u0643 \u0627\u0644\u0628\u0646\u0643\u064a \u0644\u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u0631\u0627\u062a\u0628."
+      }
+    },
+    {
+      "check": "after: no Walkthrough / 0000 values anywhere in response",
+      "ok": true,
+      "detail": {
+        "has_walkthrough": false,
+        "has_0000": false
+      }
+    },
+    {
+      "check": "audit history retained (revoked verified + effective + requests)",
+      "ok": true,
+      "detail": {
+        "revoked_verified": 4,
+        "effective_rows": 4,
+        "requests": 6
+      }
+    }
+  ],
+  "failed": 0,
+  "actions": [
+    {
+      "revoke_verified": [],
+      "targeted_ids": []
+    },
+    {
+      "supersede_any_live_effective": []
+    },
+    {
+      "ensure_profile_deleted": []
+    },
+    {
+      "bank_item_status": "pending"
+    }
+  ],
+  "before": {
+    "http": 200,
+    "body": {
+      "contract_version": "bank_ess_v1",
+      "employee_key": "WATHEFNI-96599338566",
+      "has_verified_bank": false,
+      "verified": null,
+      "payroll_effective": null,
+      "submission": null,
+      "submission_state": "none",
+      "change_under_review": false,
+      "next_step": {
+        "owner": "employee",
+        "message": "Add your bank details so salary can be paid to you.",
+        "message_en": "Add your bank details so salary can be paid to you.",
+        "message_ar": "\u0623\u0636\u0641 \u0628\u064a\u0627\u0646\u0627\u062a \u062d\u0633\u0627\u0628\u0643 \u0627\u0644\u0628\u0646\u0643\u064a \u0644\u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u0631\u0627\u062a\u0628."
+      },
+      "can_submit_new": true,
+      "masking": {
+        "masked_by_default": true,
+        "reveal_requires_permission": "employees.ess.unmask",
+        "reveal_is_audited": true
+      },
+      "validation_scheme": "kw_iban"
+    }
+  },
+  "after_item": {
+    "status": "pending"
+  },
+  "after": {
+    "http": 200,
+    "body": {
+      "contract_version": "bank_ess_v1",
+      "employee_key": "WATHEFNI-96599338566",
+      "has_verified_bank": false,
+      "verified": null,
+      "payroll_effective": null,
+      "submission": null,
+      "submission_state": "none",
+      "change_under_review": false,
+      "next_step": {
+        "owner": "employee",
+        "message": "Add your bank details so salary can be paid to you.",
+        "message_en": "Add your bank details so salary can be paid to you.",
+        "message_ar": "\u0623\u0636\u0641 \u0628\u064a\u0627\u0646\u0627\u062a \u062d\u0633\u0627\u0628\u0643 \u0627\u0644\u0628\u0646\u0643\u064a \u0644\u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u0631\u0627\u062a\u0628."
+      },
+      "can_submit_new": true,
+      "masking": {
+        "masked_by_default": true,
+        "reveal_requires_permission": "employees.ess.unmask",
+        "reveal_is_audited": true
+      },
+      "validation_scheme": "kw_iban"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+    benefits administration c3 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  no dependent master
+      PASS  no payroll ownership
+      PASS  claims out
+      PASS  no claim tables
+      PASS  eligible not enrolled
+      PASS  election not coverage
+      PASS  contrib not deduction
+      PASS  payroll optional
+      PASS  works payroll off
+      PASS  ja optional
+      PASS  no invented KW statute
+      PASS  manager fail closed
+      PASS  assistant mutations out
+      PASS  facts not analytics
+      PASS  setup wave6 benefits
+      PASS  setup honesty claims
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  hr web primary
+      PASS  manager no private
+      PASS  employee my benefits
+      PASS  hr mobile thin
+      PASS  claims engine absent
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema plans
+      PASS  schema coverage
+      PASS  no claim ddl
+      PASS  no employee table
+      PASS  payroll rewrite check
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    36 passed, 0 failed (unit-only)

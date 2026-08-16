@@ -1,0 +1,86 @@
+{
+  "artifact_sha256": "bf638375b90b714da108d58dd8fc1b22bf2ffb361054a2988bcc547a78354ad6",
+  "environment": {
+    "application_environment": "staging",
+    "database_environment": "staging",
+    "database_logical_name_fingerprint": "15cab0f44aae",
+    "database_environment_marker_fingerprint": "65aede205f95",
+    "binding_match": true
+  },
+  "migration": {
+    "key": "assessments_cleanup1_staging_v1",
+    "attempts_seen": 4,
+    "attempts_pinned": 4,
+    "attempts_expired": 3,
+    "responses_backfilled": 22,
+    "scores_frozen": 1,
+    "reports_frozen": 1,
+    "events_added": 7,
+    "historical_screening_json_changed": false
+  },
+  "migration_idempotency_rerun": {
+    "attempts_seen": 4,
+    "attempts_pinned": 0,
+    "attempts_expired": 0,
+    "responses_backfilled": 0,
+    "scores_frozen": 0,
+    "reports_frozen": 0,
+    "events_added": 0
+  },
+  "cleanup1_smoke": {
+    "passed": 29,
+    "failed": 0,
+    "real_delivery_sent": false,
+    "production_touched": false,
+    "synthetic_cleanup": {
+      "applications": 0,
+      "attempts": 0,
+      "companies": 0,
+      "drafts": 0,
+      "modules": 0
+    },
+    "proved": [
+      "duplicate answer is idempotent",
+      "duplicate answer does not advance",
+      "concurrent duplicate inserts one response",
+      "concurrent duplicate advances once",
+      "wrong tenant cannot answer attempt",
+      "WhatsApp returns browser link",
+      "WhatsApp cannot advance answers",
+      "HR cancel terminalizes attempt",
+      "cancelled link rejected",
+      "durable attempt expiry enforced",
+      "expired status persisted",
+      "resend revokes prior token",
+      "resend new token is active",
+      "dry-run delivery is intentionally skipped",
+      "last answer completes from frozen version",
+      "answer after completion rejected",
+      "score and report immutable",
+      "score and report pinned to same version",
+      "completion does not rewrite screening facet",
+      "assessment completion creates no offer",
+      "assessment completion cannot hire",
+      "exact attempt report opens",
+      "incomplete assessment earns zero ranking points",
+      "completed assessment without percent earns zero",
+      "ready_for_review included in assessment queue",
+      "queue and action count are identical",
+      "authoring automated review passes deterministic checks",
+      "human-gated authoring lifecycle reaches approved",
+      "approved draft is not published to live bank"
+    ]
+  },
+  "suite": {
+    "dashboard_tests": "38 passed",
+    "dashboard_build": "passed",
+    "hr_mobile_tests": "44 passed",
+    "hr_mobile_typecheck": "passed",
+    "full_staging_smoke": "passed"
+  },
+  "production": {
+    "deployed": false,
+    "migrated": false,
+    "written": false
+  }
+}

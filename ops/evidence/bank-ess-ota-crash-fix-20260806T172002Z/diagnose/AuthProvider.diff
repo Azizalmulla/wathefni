@@ -1,0 +1,126 @@
+--- /tmp/wf-bank-ess-ota-clean-20260806T170025Z/src/auth/AuthProvider.tsx	2026-08-06 19:01:53
++++ /Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/src/auth/AuthProvider.tsx	2026-08-06 18:23:31
+@@ -1,6 +1,7 @@
+ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+ import { AppState } from 'react-native'
+ import * as FileSystem from 'expo-file-system'
++import { useQueryClient } from '@tanstack/react-query'
+ 
+ import { API_BASE_URL, ApiError, rawRequest } from '@/api/client'
+ import type { ActivateResponse, EmployeeFeatureKey, EmployeeProfile, MeResponse } from '@/api/types'
+@@ -22,6 +23,25 @@
+   progress: number
+ }
+ 
++export type DocumentUploadResult = {
++  ok?: boolean
++  item_id?: string
++  file_id?: string
++  status?: string
++  part?: string
++  parts_complete?: boolean
++  attempt_id?: string
++  validation?: {
++    gate?: string
++    decision?: string
++    reason?: string
++    hr_review_recommended?: boolean
++    message?: string
++    message_en?: string
++    message_ar?: string
++  }
++}
++
+ export type CancellableTransfer<T> = {
+   promise: Promise<T>
+   cancel: () => Promise<void>
+@@ -45,7 +65,7 @@
+     file: PickedFile,
+     parameters: Record<string, string>,
+     onProgress?: (progress: TransferProgress) => void,
+-  ) => CancellableTransfer<void>
++  ) => CancellableTransfer<DocumentUploadResult>
+   downloadFile: (
+     path: string,
+     target: string,
+@@ -56,6 +76,7 @@
+ const AuthContext = createContext<AuthContextValue | null>(null)
+ 
+ export function AuthProvider({ children }: { children: ReactNode }) {
++  const queryClient = useQueryClient()
+   const [status, setStatus] = useState<AuthStatus>('loading')
+   const [accessState, setAccessState] = useState<AppAccessState>('active')
+   const [profile, setProfile] = useState<EmployeeProfile | null>(null)
+@@ -75,11 +96,12 @@
+     if (next === 'session_expired' || next === 'employee_inactive') {
+       sessionRef.current = null
+       await Promise.all([clearSession(), savePushPreference(false)])
++      queryClient.clear()
+     }
+     setAccessState(next)
+     setStatus('blocked')
+     return true
+-  }, [])
++  }, [queryClient])
+ 
+   const refreshMe = useCallback(async (): Promise<boolean> => {
+     const current = sessionRef.current
+@@ -169,11 +191,12 @@
+     }
+     sessionRef.current = null
+     await Promise.all([clearSession(), savePushPreference(false)])
++    queryClient.clear()
+     setProfile(null)
+     setMe(null)
+     setAccessState('active')
+     setStatus('signedOut')
+-  }, [])
++  }, [queryClient])
+ 
+   const request = useCallback(
+     async <T,>(path: string, opts: { method?: 'GET' | 'POST'; json?: unknown; body?: FormData; signal?: AbortSignal } = {}): Promise<T> => {
+@@ -237,7 +260,7 @@
+       file: PickedFile,
+       parameters: Record<string, string>,
+       onProgress?: (progress: TransferProgress) => void,
+-    ): CancellableTransfer<void> => {
++    ): CancellableTransfer<DocumentUploadResult> => {
+       const current = sessionRef.current
+       if (!current) throw new ApiError(401, 'app_auth_failed', 'Please sign in again.')
+       let activeTask: FileSystem.UploadTask | null = null
+@@ -269,6 +292,11 @@
+           if (error.code === 'employee_feature_disabled') await refreshMe()
+           else await blockForError(error)
+           throw error
++        }
++        try {
++          return (result.body ? JSON.parse(result.body) : {}) as DocumentUploadResult
++        } catch {
++          return { ok: true }
+         }
+       })()
+ 
+@@ -447,11 +475,20 @@
+ 
+ function uploadApiError(result: FileSystem.FileSystemUploadResult): ApiError {
+   try {
+-    const payload = JSON.parse(result.body) as { detail?: { error?: string; message?: string } }
++    const payload = JSON.parse(result.body) as {
++      detail?: {
++        error?: string
++        message?: string
++        message_en?: string
++        message_ar?: string
++      }
++    }
++    const detail = payload.detail || {}
+     return new ApiError(
+       result.status,
+-      payload.detail?.error || 'upload_failed',
+-      payload.detail?.message || 'The document could not be uploaded.',
++      detail.error || 'upload_failed',
++      detail.message || detail.message_en || detail.message_ar || 'The document could not be uploaded.',
++      { messageEn: detail.message_en, messageAr: detail.message_ar },
+     )
+   } catch {
+     return new ApiError(result.status, 'upload_failed', 'The document could not be uploaded.')

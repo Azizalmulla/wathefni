@@ -1,0 +1,214 @@
+{
+  "pass": 36,
+  "fail": 0,
+  "proof": {
+    "checks": [
+      {
+        "label": "real staging owner login",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "real /dashboard/mobile/me",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "me permission_authority backend_current",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "me advertises shortlist",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "me does not enable reschedule",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "candidate list readable",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "candidate appears in list",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "list advertises shortlist+reject",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "list omits schedule_interview",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "list omits hire from ready_for_review",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "candidate detail readable",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "detail advertises shortlist",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "detail omits schedule_interview",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "detail omits hire",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "permitted shortlist prepare succeeds",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "permitted prepare not permission_denied",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "advertised shortlist executes through registry",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "candidate status shortlisted",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "recruiter staging login",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "recruiter detail omits hire",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "recruiter detail omits reject",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "restricted hire rejected",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "schedule_interview unsupported on mobile decision",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview detail readable",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview advertises write notes",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview omits cancel",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "interview omits reschedule",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "EN stage label present",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "AR ready_for_review label contract",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "re-login after logout (restart)",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "me after restart still backend_current",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "actions after restart omit schedule_interview",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "actions after shortlist include hire",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "hire prepare while shortlisted",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "stale transition returns stale_decision",
+        "ok": true,
+        "detail": null
+      },
+      {
+        "label": "stale error distinct from permission_denied",
+        "ok": true,
+        "detail": null
+      }
+    ],
+    "proof": {
+      "owner_login": {
+        "status": 200,
+        "has_token": true
+      },
+      "candidate_detail_actions": [
+        "download_cv",
+        "preview_cv",
+        "reject",
+        "shortlist"
+      ],
+      "interview_actions": [
+        "read",
+        "write"
+      ],
+      "labels": {
+        "en": "Ready for review",
+        "ar_ready_for_review": "جاهز للمراجعة"
+      },
+      "after_restart_actions": [
+        "download_cv",
+        "hire",
+        "preview_cv",
+        "reject"
+      ]
+    }
+  }
+}

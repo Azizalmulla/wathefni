@@ -1,0 +1,23 @@
+PASS settings_marker
+PASS ia_closure_marker
+PASS nav_marker
+PASS account_marker
+PASS team_marker
+PASS company_marker
+PASS comms_marker
+PASS integrations_marker
+PASS advanced_marker
+PASS ownership_marker
+PASS no_page_purpose_dup
+PASS nav_labels
+PASS setup_guide_collapsible
+PASS plain_legacy_label
+PASS no_ensure_legacy_copy
+PASS no_platform_integrations_title
+PASS no_c6b_jargon
+PASS arabic_surface
+PASS activity_still_present
+PASS alerts_still_present
+SETTINGS_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+SETTINGS_PAGE_WAVE1_SMOKE_OK

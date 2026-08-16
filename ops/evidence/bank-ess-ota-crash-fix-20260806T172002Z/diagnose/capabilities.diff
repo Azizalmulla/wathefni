@@ -1,0 +1,19 @@
+--- /tmp/wf-bank-ess-ota-clean-20260806T170025Z/src/capabilities.ts	2026-08-06 19:01:53
++++ /Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/src/capabilities.ts	2026-08-05 04:42:38
+@@ -9,6 +9,7 @@
+   | 'company_archived'
+   | 'company_app_disabled'
+   | 'employee_inactive'
++  | 'not_allowlisted'
+   | 'session_expired'
+   | 'unknown_error'
+ 
+@@ -25,6 +26,8 @@
+       return 'company_archived'
+     case 'employee_app_not_enabled_for_company':
+       return 'company_app_disabled'
++    case 'employee_app_not_allowlisted':
++      return 'not_allowlisted'
+     case 'account_inactive':
+       return 'employee_inactive'
+     case 'app_auth_failed':

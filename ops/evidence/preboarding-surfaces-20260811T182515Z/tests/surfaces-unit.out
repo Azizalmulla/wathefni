@@ -1,0 +1,29 @@
+    preboarding surfaces — wiring + freeze + EN/AR + module gates
+      PASS  backend freeze doc
+      PASS  http register present
+      PASS  list_assignments helper
+      PASS  surfaces queue helper
+      PASS  employee self helper
+      PASS  explain blockers helper
+      PASS  ready not cosmetic
+      PASS  app registers preboarding_http
+      PASS  preboarding feature in employee contract
+      PASS  pending_start access mode
+      PASS  preboarding RBAC perms
+      PASS  hr mobile capability preboarding_review
+      PASS  HR Web workspace
+      PASS  web api client
+      PASS  web nav EN
+      PASS  web nav AR
+      PASS  web RTL via dir
+      PASS  HR mobile queue
+      PASS  HR mobile detail
+      PASS  employee preboarding screen
+      PASS  mobile EN keys
+      PASS  mobile AR keys
+      PASS  assistant deep link
+      PASS  employee route composition
+      PASS  converted still terminal
+
+25 passed, 0 failed
+PREBOARDING_SURFACES_UNIT_PASS

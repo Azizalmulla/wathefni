@@ -1,0 +1,4 @@
+public_device_security=401
+{"detail":{"error":"app_auth_failed","message":"Please sign in again."}}
+public_app_access=401
+{"detail":{"error":"dashboard_auth_failed","message":"Access needs to be verified.","permission_authority_required":"backend_current"}}

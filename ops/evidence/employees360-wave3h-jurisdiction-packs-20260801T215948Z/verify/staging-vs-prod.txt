@@ -1,0 +1,4 @@
+45:SCHEMA_VERSION = "employees360-wave3d-public-law-policy-v1"
+ls: cannot access '/opt/wathefni/orchestrator/employee_policy_packs_wave3h.py': No such file or directory
+prod_packs_absent_ok
+47:SCHEMA_VERSION = "employees360-wave3h-jurisdiction-packs-v1"

@@ -1,0 +1,306 @@
+{
+  "stamp": "20260807T220018Z",
+  "tag": "b98fcbda",
+  "pass": 54,
+  "fail": 0,
+  "verdict": "PASS",
+  "authority_model": {
+    "employee_visible_iff": "status=active AND employee_visibility=released",
+    "official_pdf_requires": "source_kind=external_import AND money_authority=external",
+    "native_preview_never_official": true,
+    "payment_date": null
+  },
+  "production_authority_blockers": {
+    "official_pdf_capability": true,
+    "official_pdf_eligible_source": "external_import + sealed authority_snapshot",
+    "native_preview_never_official": true,
+    "native_reason": "Wave 2B native preview is intentionally preview_non_authoritative; Wave 3 labels native_preview payslips as preview_non_authoritative and honesty_payload.native_payslips_authoritative=False. P1 Mode A seal path refuses wathefni authority until authoritative-finalize.",
+    "external_is_mirror_not_wathefni_money_authority": true,
+    "external_reason": "External sealed snapshots mirror imported results; money_authority=external, authoritative_in_wathefni=False, wathefni_money_authority=False.",
+    "period_close_is_money_seal": false,
+    "payment_processing": "disabled",
+    "payment_date_field": null,
+    "payment_date_invented": false,
+    "wave3_synthetic_only_in_production": true,
+    "remaining_production_authority_gate": "Enable non-synthetic payroll with a real money-authority source (external payroll system of record, or a future Wathefni-authoritative engine), plus a genuine payment_date/payment-confirmation field when available. Do not flip native preview to authoritative merely to ship a PDF."
+  },
+  "sample_pdfs": [
+    "pdf/employee-2b0e9387-fcd4-41c6-8e00-17e87ed7e95b-ar.pdf",
+    "pdf/employee-2b0e9387-fcd4-41c6-8e00-17e87ed7e95b-en.pdf",
+    "pdf/employee-567e6057-0cd2-48fe-b5b6-41f53ed9cfa1-en.pdf",
+    "pdf/unit-sample-ar.pdf",
+    "pdf/unit-sample-en.pdf"
+  ],
+  "results": [
+    {
+      "name": "reportlab installed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native never official documented",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external mirror not wathefni money authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "remaining gate present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native ineligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external without seal ineligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external sealed eligible (id present)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unit pdf magic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unit pdf no invented payment date string",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unit pdf AR magic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payslip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native money authority preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native official ineligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external import",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external payslip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external money authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "linked sealed authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external official eligible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "starts not_released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee cannot view unreleased",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf generate before release ok (immutable snapshot)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unreleased detail 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unreleased download 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "HR release",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "released detail",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official_document true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment_date null",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "download PDF 200",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "official header true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "content-type pdf",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf contains net amount",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf omits payment date label when unknown",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stored totals_net matches API",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "download PDF AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "peer detail 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "peer download 404",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native released viewable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native official_document false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native official download refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replacement not released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "old version unavailable after replace",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new version invisible until re-release",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "re-released new version visible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "new version PDF",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unrelease removes access",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "revoke removes access",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf ensure idempotent for same fingerprint",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

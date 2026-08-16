@@ -1,0 +1,76 @@
+{
+  "actions": [
+    {
+      "action": "set_employment_status",
+      "employee_key": "WATHEFNI-96597727743",
+      "from": null,
+      "to": "active",
+      "classification": "null_should_be_active",
+      "confidence": "high",
+      "reasons": [
+        "employment_status IS NULL",
+        "hire-linked via app_key=96597727743-WATHEFNI-MARKETING_SPECIALIST",
+        "onboarding_status='in_progress'",
+        "attendance_records=14",
+        "shift_assignments=7",
+        "leave_requests=1",
+        "employee_messages=12",
+        "no employee_status_changes / left markers found",
+        "runtime already coerces null\u2192active via coalesce/canonical helpers"
+      ],
+      "idempotency_key": "wave1c-null-status:WATHEFNI-96597727743:active",
+      "apply_when": "owner_approved_production"
+    },
+    {
+      "action": "set_employment_status",
+      "employee_key": "WATHEFNI-96550252254",
+      "from": null,
+      "to": "active",
+      "classification": "null_should_be_active",
+      "confidence": "high",
+      "reasons": [
+        "employment_status IS NULL",
+        "hire-linked via app_key=96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+        "onboarding_status='in_progress'",
+        "attendance_records=14",
+        "shift_assignments=5",
+        "employee_messages=11",
+        "no employee_status_changes / left markers found",
+        "runtime already coerces null\u2192active via coalesce/canonical helpers"
+      ],
+      "idempotency_key": "wave1c-null-status:WATHEFNI-96550252254:active",
+      "apply_when": "owner_approved_production"
+    },
+    {
+      "action": "quarantine_employee_messages",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "count": 3,
+      "classification": "synthetic_orphan_quarantine",
+      "confidence": "high",
+      "reasons": [
+        "employee_key 'WATHEFNI-P0-DUP-1' matches synthetic naming pattern",
+        "no employees row exists for this key",
+        "no valid application/attendance/onboarding/doc references found",
+        "3 orphan employee_messages rows remain"
+      ],
+      "idempotency_key": "wave1c-quarantine:WATHEFNI-P0-DUP-1",
+      "apply_when": "owner_approved_production"
+    }
+  ],
+  "non_actions": [
+    "no uniqueness constraints",
+    "no Wave 2 schema migration",
+    "no frozen pre-hiring / Wave D changes",
+    "no silent deletes"
+  ],
+  "integrity_expectation_after": {
+    "employee_messages_orphans": 0,
+    "additional_null_statuses": 0
+  },
+  "rollback": {
+    "null_status": "rollback_null_employment_status(idempotency_key)",
+    "orphan_messages": "restore_quarantined_employee_messages(idempotency_key)",
+    "journal_table": "employee_hygiene_remediation_journal",
+    "archive_table": "employee_messages_quarantine"
+  }
+}

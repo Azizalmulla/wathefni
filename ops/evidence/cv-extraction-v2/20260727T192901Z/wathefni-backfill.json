@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/ops/backfill-cv-extraction-v2.py", line 327, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/orchestrator/ops/backfill-cv-extraction-v2.py", line 300, in main
+    cur.execute(
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.DeadlockDetected: deadlock detected
+LINE 1: SELECT count(*) AS n FROM application_cv_fact_snapshots WHER...
+                                  ^
+DETAIL:  Process 3522026 waits for AccessShareLock on relation 162526 of database 16385; blocked by process 3522338.
+Process 3522338 waits for ShareLock on relation 316469 of database 16385; blocked by process 3522026.
+HINT:  See server log for query details.
+

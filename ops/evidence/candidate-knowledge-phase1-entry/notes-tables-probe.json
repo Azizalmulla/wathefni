@@ -1,0 +1,29 @@
+{
+  "probed_at": "2026-07-26",
+  "mode": "read-only production information_schema",
+  "found": [
+    "application_notes",
+    "application_note_events",
+    "application_ownership_events",
+    "application_recruiter_tasks",
+    "application_recruiter_task_events",
+    "application_tags",
+    "application_tag_events",
+    "candidate_tag_dictionary",
+    "candidate_record_governance",
+    "applications",
+    "candidates"
+  ],
+  "missing": [],
+  "phase0_manifest_gap": [
+    "application_notes",
+    "application_note_events",
+    "application_ownership_events",
+    "application_recruiter_tasks",
+    "application_recruiter_task_events",
+    "application_tags",
+    "application_tag_events",
+    "candidate_tag_dictionary"
+  ],
+  "impact": "documentation gap only; tables exist for later Phase 3 notes federation"
+}

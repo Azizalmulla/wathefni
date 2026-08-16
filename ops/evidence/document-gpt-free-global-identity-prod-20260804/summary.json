@@ -1,0 +1,148 @@
+{
+  "stamp": "20260804",
+  "created_at": "2026-08-04T03:45:11.392859+00:00",
+  "wathefni_env": "production",
+  "cv_rescue_proof": {
+    "gpt_vision_rescue_enabled": false,
+    "cv_gpt_rescue_retired": true,
+    "plan_gpt_vision_rescue_eligible": false,
+    "plan_mistral_ocr_eligible": true,
+    "extract_image_cv_text_with_vision": {
+      "text_empty": true,
+      "method": "gpt_vision_rescue",
+      "error": "cv_gpt_vision_rescue_retired"
+    },
+    "adapter_error": "cv_gpt_vision_rescue_retired",
+    "adapter_text_empty": true,
+    "blocked_attempts": 2,
+    "stale_flag_true_ignored": true
+  },
+  "identity_gate": {
+    "wathefni_on": true,
+    "isoid1_on": true,
+    "isoid2_on": true,
+    "future_tenant_on": true,
+    "kill_switch_blocks": true,
+    "per_tenant_disable_isoid2": true,
+    "per_tenant_disable_spares_isoid1": true
+  },
+  "circuit_needs_review_ok": true,
+  "isolation_rows": [
+    {
+      "tenant": "WATHEFNI",
+      "extract_ok": true,
+      "verify_ok": true,
+      "classify_ok": true,
+      "proposal": {
+        "company_code": "WATHEFNI",
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "document_number": "289123456789",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "envelope_company": "WATHEFNI",
+        "gpt_used": false,
+        "provider": "mistral"
+      },
+      "hr_correction": {
+        "company_code": "WATHEFNI",
+        "document_number": "289123456789",
+        "hr_confirmed": true,
+        "authoritative": true,
+        "corrected_from": "289123456789",
+        "persisted_separately_from_machine_proposal": true
+      },
+      "gpt_free": true
+    },
+    {
+      "tenant": "ISOID1",
+      "extract_ok": true,
+      "verify_ok": true,
+      "classify_ok": true,
+      "proposal": {
+        "company_code": "ISOID1",
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "document_number": "289123456789",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "envelope_company": "ISOID1",
+        "gpt_used": false,
+        "provider": "mistral"
+      },
+      "hr_correction": {
+        "company_code": "ISOID1",
+        "document_number": "289123456789",
+        "hr_confirmed": true,
+        "authoritative": true,
+        "corrected_from": "289123456789",
+        "persisted_separately_from_machine_proposal": true
+      },
+      "gpt_free": true
+    },
+    {
+      "tenant": "ISOID2",
+      "extract_ok": true,
+      "verify_ok": true,
+      "classify_ok": true,
+      "proposal": {
+        "company_code": "ISOID2",
+        "content_sha256": "22fea4d6725257c8b11ee7731c711d8be900cfec1e06307b65ff9a32c46fb7c2",
+        "document_number": "289123456789",
+        "authoritative": false,
+        "hr_confirmation_required": true,
+        "envelope_company": "ISOID2",
+        "gpt_used": false,
+        "provider": "mistral"
+      },
+      "hr_correction": {
+        "company_code": "ISOID2",
+        "document_number": "289123456789",
+        "hr_confirmed": true,
+        "authoritative": true,
+        "corrected_from": "289123456789",
+        "persisted_separately_from_machine_proposal": true
+      },
+      "gpt_free": true
+    }
+  ],
+  "leakage": [],
+  "runtime_counters": {
+    "mistral_calls": 6,
+    "gpt_identity_calls": 0,
+    "needs_review": 0,
+    "classify_calls": 3,
+    "verify_calls": 3,
+    "extract_calls": 4,
+    "last_provider": "mistral",
+    "cache_hits": 4
+  },
+  "cv_gpt_rescue_runtime": {
+    "blocked_attempts": 2
+  },
+  "source_proof": {
+    "identity_functions_no_planner": true,
+    "extract_image_cv_no_openai_request": true,
+    "gpt_vision_rescue_enabled_hard_false": true,
+    "stale_cv_prompt_removed": true
+  },
+  "sibling_freezes": {
+    "cv_v2_structuring_unchanged": true,
+    "ranking_unchanged": true,
+    "candidate_knowledge_unchanged": true,
+    "migration_wave1_unchanged": true,
+    "payroll_unchanged": true,
+    "document_processing_foundation_route_matrix_unchanged": true,
+    "assistant_tool_agent_gpt_retained": true
+  },
+  "flags": {
+    "WATHEFNI_IDENTITY_MISTRAL_AUTHORITY": "on (global default)",
+    "WATHEFNI_IDENTITY_MISTRAL_DISABLE_COMPANIES": "(optional override)",
+    "WATHEFNI_IDENTITY_MISTRAL_COMPANIES": "retired as primary gate (canary-only legacy)",
+    "WATHEFNI_CV_GPT_VISION_RESCUE": "off/ignored — hard retired in code",
+    "WATHEFNI_DOC_FOUNDATION_GPT_AUTO_OCR_FALLBACK": "off"
+  },
+  "gates": {
+    "GLOBAL_IDENTITY_AUTHORITY": "GO",
+    "CV_GPT_RESCUE_RETIRED": "GO",
+    "PRODUCTION_DOCUMENT_PIPELINE_GPT_FALLBACK_FREE": "GO"
+  }
+}

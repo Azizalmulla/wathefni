@@ -1,0 +1,43 @@
+# Shared: Create PIN → Confirm PIN → skip biometric opt-in when shown.
+# Env: MAESTRO_PIN (6 digits). Production PIN UI — not a test-only bypass.
+# Accept either Create a PIN (fresh) or Enter your PIN (reused device material) or Home.
+appId: ai.wathefni.employee
+---
+- runFlow:
+    when:
+      visible: "Create a PIN"
+    commands:
+      - tapOn:
+          id: "e2e.pin.input"
+      - inputText: ${MAESTRO_PIN}
+      - tapOn:
+          id: "e2e.pin.continue"
+      - extendedWaitUntil:
+          visible: "Confirm your PIN"
+          timeout: 30000
+      - tapOn:
+          id: "e2e.pin.input"
+      - inputText: ${MAESTRO_PIN}
+      - tapOn:
+          id: "e2e.pin.continue"
+- runFlow:
+    when:
+      visible: "Enter your PIN"
+    commands:
+      - tapOn:
+          id: "e2e.pin.input"
+      - inputText: ${MAESTRO_PIN}
+      - tapOn:
+          id: "e2e.pin.continue"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.biometric.notNow"
+    commands:
+      - tapOn:
+          id: "e2e.biometric.notNow"
+- runFlow:
+    when:
+      visible: "Not now"
+    commands:
+      - tapOn: "Not now"

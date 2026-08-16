@@ -1,0 +1,104 @@
+PASS  Home orders the day before the work and the work before the destinations
+PASS  the workday reads larger than the label above it
+PASS  the compact workday headline stays strong without outranking the page title
+PASS  the workday headline has no fixed line height that can clip Dynamic Type
+PASS  Arabic workday text does not inherit Latin negative tracking
+PASS  an attendance-only Home does not label its hero as a shift
+PASS  Home greets by Kuwait morning/afternoon/evening, not a flat Hi
+PASS  Home does not decorate the greeting with geometry
+PASS  a document task and the Documents launcher do not stack as the same yellow
+PASS  only employee-action work earns the yellow card; informational work stays a row
+PASS  Home takes its destinations from the contract and hardcodes no module list
+PASS  Home keeps the leave request action but not a second route to the Leave tab
+PASS  the Home inbox strip is gone, replaced by the header bell
+PASS  onboarding has one presence on Home, not a task and a progress card
+PASS  an empty task list is only called 'all caught up' when the server says so
+PASS  a lone destination is a lightweight cream-ground link with a green accent
+PASS  Home priority colour is role-based, not index-rotated
+PASS  Home does not invent leave balances on the page
+PASS  Request leave sits in the action cluster after tasks, not as a nav footer
+PASS  Documents is omitted when the yellow priority already opens that work
+PASS  Request leave is not a mid-page paired tile
+PASS  the workday hero nests no second card inside itself
+PASS  Home spends no card on the 30-day attendance count
+PASS  Home does not invent an At a glance section without projection facts
+PASS  Home uses a deliberate page rhythm rather than a sparse stack
+PASS  a quiet Home grows the workday hero instead of inventing filler
+PASS  the tab bar is Home, Schedule, Leave, Payslips, Profile
+PASS  the tab bar supplies the black visual anchor
+PASS  an unentitled module leaves no dead tab slot
+PASS  Inbox is a pushed screen, not a tab
+PASS  Payslips is a tab and no longer also a pushed screen
+PASS  the Inbox route is declared once and reused by push and the bell
+PASS  the pre-bell Inbox path is kept as an explicit alias, not guessed
+PASS  unread is a number and a spoken label, never colour alone
+PASS  a shared compact row primitive exists
+PASS  the row is a surface, and colour on it is opt-in
+PASS  emphasis on a row is semantic, not ambient
+PASS  Home builds its lists from the shared row
+PASS  Onboarding uses lifecycle-colored cards (not a pink wall)
+PASS  Payslips uses a flat cream ledger row, not white ListRow cards
+PASS  Inbox uses a flat cream ledger row, not white ListRow cards
+PASS  Documents uses cream ledger rows, not white ListRow cards
+PASS  Documents keeps three visibly different sections
+PASS  attention is compact pink-accent emphasis; current and history are ledger rows
+PASS  only items needing action get pink emphasis
+PASS  history is grouped by year with older years closed
+PASS  history is paged inside a year
+PASS  renew, re-upload and open flows survive the restructure
+PASS  no raw backend document key reaches the employee
+PASS  Inbox is a message list with unread first
+PASS  a row carries relative time
+PASS  repeated system activity is demoted but never hidden, and unread is never demoted
+PASS  an unrecognised backend flow is treated as real HR mail, not demoted
+PASS  the Inbox invents no message authority: no compose, no reply, no chat
+PASS  Inbox pages long histories
+PASS  a leave row is type, dates and status
+PASS  leave balances share one surface instead of one card each
+PASS  leave requests are paged
+PASS  leave hides balances unless enabled with canonical facts
+PASS  leave separates current requests from recent history
+PASS  Leave history is a dense cursor list, not a card archive
+PASS  leave authority is untouched: cancel still gated by the same capability
+PASS  net pay stays the headline of a payslip
+PASS  payslip history is grouped by year and paged, with only the current year open
+PASS  a historical payslip is a row, not a coloured card
+PASS  the PDF is still one tap from the payslip
+PASS  payslip list uses server has_more rather than a silent hard cap
+PASS  Bank answers where the salary goes with one account surface
+PASS  the same masked account is not printed under two headings
+PASS  Bank merges next-step and submitted into one Pending change section
+PASS  a submitted change is shown only while it is still a change
+PASS  Bank ESS lifecycle and canonical states are untouched
+PASS  Bank uses calm life marks and cream ledger blocks, not stacked white panels
+PASS  Bank actions distinguish primary from secondary
+PASS  onboarding has one progress hierarchy: state, count, bar, next action
+PASS  HR-owned work is named rather than reduced to a count
+PASS  finished onboarding items are a closed record, not a task list
+PASS  onboarding still reads the canonical Wave 2A completion contract
+PASS  Onboarding maps card colour by lifecycle state
+PASS  the hero owns identity and no detail row repeats it
+PASS  Personal is contact detail
+PASS  Employment is department, start date and manager
+PASS  no raw internal identifier is presented as an employee-facing value
+PASS  Bank stays under Profile
+PASS  src/features/home/HomeView.tsx paints at most 4 large ambient surfaces
+PASS  src/features/documents/DocumentsView.tsx paints at most 3 large ambient surfaces
+PASS  src/features/remaining/RemainingViews.tsx paints at most 2 large ambient surfaces
+PASS  app/(tabs)/payslips.tsx paints at most 3 large ambient surfaces
+PASS  src/features/bank/BankView.tsx paints at most 4 large ambient surfaces
+PASS  src/features/onboarding/OnboardingView.tsx paints at most 16 large ambient surfaces
+PASS  src/features/profile/ProfileView.tsx paints at most 2 large ambient surfaces
+PASS  Home gives one filled task emphasis to onboarding or a featured task, never both
+PASS  Home onboarding progress uses its ambient accent rather than a semantic status colour
+PASS  WathefniBloom stays a rare moment, not a decoration on every card
+PASS  IconBadge is opt-in: it is not applied by the shared row
+PASS  no list-position-driven colour survived the restructure
+PASS  src/features/documents/DocumentsView.tsx bounds its growth list (HISTORY_PAGE)
+PASS  src/features/remaining/RemainingViews.tsx bounds its growth list (INBOX_PAGE)
+PASS  app/(tabs)/payslips.tsx bounds its growth list (PAYSLIP_PAGE)
+PASS  src/features/schedule/ScheduleView.tsx bounds its growth list (UPCOMING_PREVIEW)
+PASS  Schedule root previews Upcoming then Recent within the fetched window
+PASS  Attendance history is a dense cursor list, not a card archive
+---
+PASS density + hierarchy static scan (102 checks) — not a physical QA pass

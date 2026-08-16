@@ -1,0 +1,4 @@
+92addc3b7d132ee1d9f6900d6fe6d9625303c57e04589545be9da616c467b58b  /opt/wathefni/orchestrator/app.py
+6c00e31b3ea58fb5c8aea964677be515d5787d2c25cf6b7af22c3aefb4a7e587  /opt/wathefni/orchestrator/hire_operations.py
+d5e16ff81f933dcb8c51f7d17b43c38179b7442b26145a805d4781c89f8bd326  /opt/wathefni/orchestrator/employee_authority_wave2.py
+e0a7d213a85430c40d143c2d54c5db42b20a149f86c51550325c5967bcd9befc  /opt/wathefni/orchestrator/employee_hygiene_wave1c.py

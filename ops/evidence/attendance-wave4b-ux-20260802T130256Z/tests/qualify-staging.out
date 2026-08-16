@@ -1,0 +1,140 @@
+active
+=== staging onboarding freeze (must pass — drift eliminated) ===
+PASS  load_onboarding_items exists
+PASS  loader joins employees
+PASS  loader has no candidates.read
+PASS  employee_onboarding_items wraps load
+PASS  wrapper has no candidates.read
+PASS  plaintext bank helper
+PASS  receipt rejects bank_details
+PASS  mask_onboarding_item_for_read
+PASS  wave2 bank ess authority
+PASS  canonical bank ESS encrypted
+PASS  SEED helper
+PASS  HR_MUTATE helper
+PASS  HR_MUTATE companies helper
+PASS  HR_MUTATE company gate
+PASS  mutate allowed_for helper
+PASS  SEED defaults off when unset
+PASS  HR_MUTATE defaults off when unset
+PASS  company allowlist WATHEFNI
+PASS  company allowlist OTHERCO denied
+PASS  SEED stays off for 'off'
+PASS  canonical template id
+PASS  canonical version 2.0.0
+PASS  FOUR_REALS defined
+PASS  is_four_real_employee helper
+PASS  migration plan read-only marker
+PASS  mark_item_wave2 expected_row_version
+PASS  stale_item_version error
+PASS  record_onboarding_audit
+PASS  mark_onboarding_item uses expected_row_version
+PASS  cancel history preserved
+PASS  cancel_onboarding registered
+PASS  reschedule_onboarding registered
+PASS  list_onboarding_page exists
+PASS  list uses _employee_scope_where
+PASS  detail uses context_manager_allows_employee
+PASS  mark checks manager_scope_allows_employee
+PASS  retired_legacy recognized
+PASS  onboarding freeze doc present
+PASS  freeze doc mentions HR production use
+PASS  freeze doc mentions scoped GO
+PASS  freeze doc mentions Talal
+PASS  freeze doc mentions disabled
+PASS  freeze doc mentions default_kuwait@2.0.0
+PASS  freeze doc mentions ESS-owned
+PASS  freeze doc mentions ONBOARDING_SEED
+PASS  freeze doc mentions smoke-test-onboarding-freeze-regression.py
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Wave D
+PASS  cursor onboarding freeze rule present
+PASS  E360 freeze intact
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+=== staging E360 freeze ===
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+=== staging Wave 4B seed+prove ===
+[PASS] normal day approved + payroll eligible
+[PASS] overnight projection present
+[PASS] multi-session day has 2+ sessions
+[PASS] paid and unpaid breaks present
+[PASS] missing check-in exception
+[PASS] missing check-out exception
+[PASS] late minutes > 0
+[PASS] early leave minutes > 0
+[PASS] absence status
+[PASS] dispute base correction requested
+[PASS] dispute base approved (single — lateness)
+[PASS] dispute base applied (approve≠apply)
+[PASS] employee dispute raised
+[PASS] locked metadata on projection
+[PASS] payroll lock denies correction
+[PASS] click exception opened
+[PASS] click exception assigned
+[PASS] correction requested
+[PASS] case status requested (not applied)
+[PASS] reject without apply
+[PASS] absence exception for dual
+[PASS] dual correction requested
+[PASS] first approval dual_pending
+[PASS] not applied after first approve
+[PASS] same approver blocked
+[PASS] second approval ready to apply
+[PASS] approve and apply remain separate
+[PASS] apply after dual approval
+[PASS] dispute resolved
+[PASS] reopen after evidence
+[PASS] stale row_version fail-closed
+[PASS] out-of-scope manager denied
+[PASS] manager self-correction denied
+[PASS] daily board seed rows >= 8
+[PASS] has approved row
+[PASS] has incomplete rows
+[PASS] has absent row
+[PASS] has locked row
+[PASS] exclusion reasons sample non-empty
+[PASS] API/UI totals exact match
+{
+  "tag": "461445D7",
+  "company": "WATHEFNI",
+  "work_date": "2026-08-02",
+  "passed": 40,
+  "failed": 0,
+  "total": 40,
+  "evid": "/opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/clickthrough"
+}
+SEED_TAG=461445D7
+WORK_DATE=2026-08-02
+WORK_DATE=2026-08-02
+{
+  "http_rows": 12,
+  "counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  },
+  "seed_counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  },
+  "exclusion_n": 11,
+  "ok": true
+}

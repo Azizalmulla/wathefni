@@ -1,0 +1,375 @@
+{
+  "id": "passport_bilingual_mobile_01",
+  "label": {
+    "document_type": "passport",
+    "document_number": "N9988776",
+    "full_name_ar": "نورة خالد إبراهيم الصباح",
+    "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+    "nationality": "KUWAITI / كويتي",
+    "date_of_birth": "1992-04-09",
+    "issue_date": "2023-01-12",
+    "expiry_date": "2033-01-11",
+    "employer_or_sponsor": null,
+    "side": "single",
+    "lang": "bilingual",
+    "variant": "mobile_photo",
+    "document_relationship": "standalone"
+  },
+  "mistral": {
+    "extraction_status": "extracted",
+    "extraction_error": null,
+    "confidence": 0.97,
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "cost_usd": 0.004,
+    "latency_ms": 3385,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "validation": {
+      "ok": true,
+      "issues": [],
+      "has_issue_date": true,
+      "has_expiry_date": true,
+      "has_dob": true
+    },
+    "duplicate_keys": {
+      "content_sha256": "17a267cf6f2b730b5a5d9bb12834f78a474d14cadd814ed0f41b5e60e16412ff",
+      "identifier_key": "passport:n9988776"
+    },
+    "fields": {
+      "document_type": {
+        "value": "passport",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "side": {
+        "value": "single",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_relationship": {
+        "value": "standalone",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_ar": {
+        "value": "نورة خالد إبراهيم الصباح",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_en": {
+        "value": "NOURA KHALED IBRAHIM ALSABAH",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_number": {
+        "value": "N9988776",
+        "confidence": 0.99,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "nationality": {
+        "value": "KUWAITI / كويتي",
+        "confidence": 0.95,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "date_of_birth": {
+        "value": "1992-04-09",
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issue_date": {
+        "value": "2023-01-12",
+        "confidence": 0.96,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "expiry_date": {
+        "value": "2033-01-11",
+        "confidence": 0.96,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employer_or_sponsor": {
+        "value": null,
+        "confidence": 0.97,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name": {
+        "value": "NOURA KHALED IBRAHIM ALSABAH",
+        "confidence": 0.98,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issued_date": {
+        "value": "2023-01-12",
+        "confidence": 0.96,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      }
+    },
+    "flat_fields": {
+      "document_type": "passport",
+      "document_number": "N9988776",
+      "full_name_ar": "نورة خالد إبراهيم الصباح",
+      "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+      "nationality": "KUWAITI / كويتي",
+      "date_of_birth": "1992-04-09",
+      "issue_date": "2023-01-12",
+      "expiry_date": "2033-01-11",
+      "employer_or_sponsor": null,
+      "side": "single",
+      "full_name": "NOURA KHALED IBRAHIM ALSABAH"
+    },
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 9,
+      "scored": 9,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": true,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "arabic"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    },
+    "envelope_contract": "document_envelope@1",
+    "attempts": [
+      {
+        "attempt": 1,
+        "ok": true,
+        "latency_ms": 3385
+      }
+    ]
+  },
+  "gpt": {
+    "ok": true,
+    "extraction_status": "extracted",
+    "confidence": 0.99,
+    "provider": "gpt",
+    "model": "gpt-5.6-terra",
+    "cost_usd": 0.003827,
+    "latency_ms": 2408,
+    "fields": {
+      "document_type": "passport",
+      "document_number": "N9988776",
+      "full_name_ar": "نورة خالد إبراهيم الصباح",
+      "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+      "nationality": "KUWAITI",
+      "date_of_birth": "1992-04-09",
+      "issue_date": "2023-01-12",
+      "expiry_date": "2033-01-11",
+      "employer_or_sponsor": null,
+      "side": "single",
+      "full_name": "NOURA KHALED IBRAHIM ALSABAH"
+    },
+    "authoritative": false,
+    "raw": {
+      "document_type": "passport",
+      "document_number": "N9988776",
+      "issued_date": "2023-01-12",
+      "expiry_date": "2033-01-11",
+      "nationality": "KUWAITI",
+      "full_name": "NOURA KHALED IBRAHIM ALSABAH",
+      "full_name_ar": "نورة خالد إبراهيم الصباح",
+      "full_name_en": "NOURA KHALED IBRAHIM ALSABAH",
+      "side": "single",
+      "employer_or_sponsor": null,
+      "date_of_birth": "1992-04-09",
+      "confidence": 0.99,
+      "reason": "Passport details clearly visible."
+    },
+    "usage": {
+      "input_tokens": 1019,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 128,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "total_tokens": 1147
+    },
+    "api": "openai-responses",
+    "temperature_omitted_for_terra": true,
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 9,
+      "scored": 9,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": true,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "arabic"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    }
+  }
+}

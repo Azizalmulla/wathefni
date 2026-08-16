@@ -1,0 +1,201 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5A — capability honesty (unit)
+
+    readiness contract
+      PASS  eight unreleased capabilities after R5B
+      PASS  unreleased tuple matches
+      PASS  performance left unreleased set
+      PASS  performance customer enableable
+      PASS  talent still not enableable
+      PASS  unreleased keys absent from catalog
+      PASS  analytics remains a catalog SKU
+      PASS  leave remains a catalog SKU
+      PASS  onboarding remains a catalog SKU
+      PASS  employee_app remains a catalog SKU
+      PASS  catalog leave customer enableable
+      PASS  catalog attendance customer enableable
+      PASS  catalog payroll customer enableable
+      PASS  catalog analytics customer enableable
+      PASS  catalog requisitions customer enableable
+      PASS  catalog preboarding customer enableable
+      PASS  talent domain_authority_ready
+      PASS  talent http_ready false
+      PASS  talent hr_web_ready false
+      PASS  talent customer_enableable false
+      PASS  talent customer_visible false
+      PASS  talent domain pass is not enableable
+      PASS  talent stored enabled is not usable
+      PASS  talent setup write blocked
+      PASS  talent write preserves rows
+      PASS  job_architecture domain_authority_ready
+      PASS  job_architecture http_ready false
+      PASS  job_architecture hr_web_ready false
+      PASS  job_architecture customer_enableable false
+      PASS  job_architecture customer_visible false
+      PASS  job_architecture domain pass is not enableable
+      PASS  job_architecture stored enabled is not usable
+      PASS  job_architecture setup write blocked
+      PASS  job_architecture write preserves rows
+      PASS  learning domain_authority_ready
+      PASS  learning http_ready false
+      PASS  learning hr_web_ready false
+      PASS  learning customer_enableable false
+      PASS  learning customer_visible false
+      PASS  learning domain pass is not enableable
+      PASS  learning stored enabled is not usable
+      PASS  learning setup write blocked
+      PASS  learning write preserves rows
+      PASS  benefits domain_authority_ready
+      PASS  benefits http_ready false
+      PASS  benefits hr_web_ready false
+      PASS  benefits customer_enableable false
+      PASS  benefits customer_visible false
+      PASS  benefits domain pass is not enableable
+      PASS  benefits stored enabled is not usable
+      PASS  benefits setup write blocked
+      PASS  benefits write preserves rows
+      PASS  employee_relations domain_authority_ready
+      PASS  employee_relations http_ready false
+      PASS  employee_relations hr_web_ready false
+      PASS  employee_relations customer_enableable false
+      PASS  employee_relations customer_visible false
+      PASS  employee_relations domain pass is not enableable
+      PASS  employee_relations stored enabled is not usable
+      PASS  employee_relations setup write blocked
+      PASS  employee_relations write preserves rows
+      PASS  engagement domain_authority_ready
+      PASS  engagement http_ready false
+      PASS  engagement hr_web_ready false
+      PASS  engagement customer_enableable false
+      PASS  engagement customer_visible false
+      PASS  engagement domain pass is not enableable
+      PASS  engagement stored enabled is not usable
+      PASS  engagement setup write blocked
+      PASS  engagement write preserves rows
+      PASS  comp_planning domain_authority_ready
+      PASS  comp_planning http_ready false
+      PASS  comp_planning hr_web_ready false
+      PASS  comp_planning customer_enableable false
+      PASS  comp_planning customer_visible false
+      PASS  comp_planning domain pass is not enableable
+      PASS  comp_planning stored enabled is not usable
+      PASS  comp_planning setup write blocked
+      PASS  comp_planning write preserves rows
+      PASS  workforce_planning domain_authority_ready
+      PASS  workforce_planning http_ready false
+      PASS  workforce_planning hr_web_ready false
+      PASS  workforce_planning customer_enableable false
+      PASS  workforce_planning customer_visible false
+      PASS  workforce_planning domain pass is not enableable
+      PASS  workforce_planning stored enabled is not usable
+      PASS  workforce_planning setup write blocked
+      PASS  workforce_planning write preserves rows
+      PASS  wave4 performance write unblocked
+      PASS  HTTP block wave4_talent_profile
+      PASS  HTTP block wave6_job_architecture
+      PASS  HTTP block wave6_learning
+      PASS  HTTP block wave6_benefits
+      PASS  HTTP block wave6_employee_relations
+      PASS  HTTP block wave6_engagement
+      PASS  HTTP block wave6_comp_planning
+      PASS  HTTP block wave6_workforce_planning
+      PASS  stored_enabled preserved on GET
+      PASS  usable true when performance released and stored enabled
+      PASS  customer_facing_state enabled
+      PASS  leave is not an unreleased capability
+      PASS  wave1 write not blocked
+      PASS  wave2 write not blocked
+      PASS  wave3 write not blocked
+      PASS  catalog enable performance unblocked
+      PASS  catalog enable leave not blocked
+      PASS  catalog enable analytics not blocked
+
+    Setup UX omission
+      PASS  Wave1 card still mounted
+      PASS  Wave2 card still mounted
+      PASS  Wave3 card still mounted
+      PASS  Wave4 Performance card remounted
+      PASS  Wave4 card file retained
+      PASS  Wave6JobArchitecturePoliciesCard omitted from Setup
+      PASS  Wave6JobArchitecturePoliciesCard file retained
+      PASS  Wave6LearningPoliciesCard omitted from Setup
+      PASS  Wave6LearningPoliciesCard file retained
+      PASS  Wave6BenefitsPoliciesCard omitted from Setup
+      PASS  Wave6BenefitsPoliciesCard file retained
+      PASS  Wave6EmployeeRelationsPoliciesCard omitted from Setup
+      PASS  Wave6EmployeeRelationsPoliciesCard file retained
+      PASS  Wave6EngagementPoliciesCard omitted from Setup
+      PASS  Wave6EngagementPoliciesCard file retained
+      PASS  Wave6CompensationPlanningPoliciesCard omitted from Setup
+      PASS  Wave6CompensationPlanningPoliciesCard file retained
+      PASS  Wave6WorkforcePlanningPoliciesCard omitted from Setup
+      PASS  Wave6WorkforcePlanningPoliciesCard file retained
+      PASS  classic-wave4-performance mounted
+      PASS  no classic-wave6 mount
+      PASS  Wave 5 Intelligence workspace present
+      PASS  Intelligence workspace still a real surface
+      PASS  PostHire still mounts Intelligence
+
+    fail-closed HTTP
+      PASS  fail-closed HTTP does not import performance_goals_c1
+      PASS  fail-closed HTTP does not import talent_profile_c5
+      PASS  fail-closed HTTP does not import job_architecture_c1
+      PASS  fail-closed HTTP does not import learning_development_c2
+      PASS  fail-closed HTTP does not import benefits_administration_c3
+      PASS  fail-closed HTTP does not import employee_relations_c4
+      PASS  fail-closed HTTP does not import engagement_c5
+      PASS  fail-closed HTTP does not import compensation_planning_c6
+      PASS  fail-closed HTTP does not import workforce_planning_c7
+      PASS  app registers fail-closed namespaces
+      PASS  app blocks unreleased Setup writes
+      PASS  app annotates wave4/wave6 GET
+      PASS  GET /dashboard/posthire/talent is 404
+      PASS  GET /dashboard/posthire/talent capability_not_released
+      PASS  GET /dashboard/posthire/talent names talent
+      PASS  POST /dashboard/posthire/talent is 404
+      PASS  POST /dashboard/posthire/talent not released
+      PASS  GET /app/talent is 404
+      PASS  GET /app/talent capability_not_released
+      PASS  GET /app/talent names talent
+      PASS  POST /app/talent is 404
+      PASS  POST /app/talent not released
+      PASS  GET /dashboard/job-architecture is 404
+      PASS  GET /dashboard/job-architecture capability_not_released
+      PASS  GET /dashboard/job-architecture names job_architecture
+      PASS  POST /dashboard/job-architecture is 404
+      PASS  POST /dashboard/job-architecture not released
+      PASS  GET /app/learning is 404
+      PASS  GET /app/learning capability_not_released
+      PASS  GET /app/learning names learning
+      PASS  POST /app/learning is 404
+      PASS  POST /app/learning not released
+      PASS  GET /dashboard/benefits is 404
+      PASS  GET /dashboard/benefits capability_not_released
+      PASS  GET /dashboard/benefits names benefits
+      PASS  POST /dashboard/benefits is 404
+      PASS  POST /dashboard/benefits not released
+      PASS  GET /dashboard/employee-relations/cases is 404
+      PASS  GET /dashboard/employee-relations/cases capability_not_released
+      PASS  GET /dashboard/employee-relations/cases names employee_relations
+      PASS  POST /dashboard/employee-relations/cases is 404
+      PASS  POST /dashboard/employee-relations/cases not released
+      PASS  GET /app/engagement is 404
+      PASS  GET /app/engagement capability_not_released
+      PASS  GET /app/engagement names engagement
+      PASS  POST /app/engagement is 404
+      PASS  POST /app/engagement not released
+      PASS  GET /dashboard/compensation-planning is 404
+      PASS  GET /dashboard/compensation-planning capability_not_released
+      PASS  GET /dashboard/compensation-planning names comp_planning
+      PASS  POST /dashboard/compensation-planning is 404
+      PASS  POST /dashboard/compensation-planning not released
+      PASS  GET /dashboard/workforce-planning/plans is 404
+      PASS  GET /dashboard/workforce-planning/plans capability_not_released
+      PASS  GET /dashboard/workforce-planning/plans names workforce_planning
+      PASS  POST /dashboard/workforce-planning/plans is 404
+      PASS  POST /dashboard/workforce-planning/plans not released
+      PASS  fail-closed does not steal Intelligence namespace
+
+    189 passed, 0 failed
+R5A_CAPABILITY_HONESTY_UNIT_PASS

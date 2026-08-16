@@ -1,0 +1,2 @@
+REPRO_BROKEN TypeError 'NoneType' object is not callable
+REPRO_FIXED_OK

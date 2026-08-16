@@ -1,0 +1,57 @@
+stamp=20260803T163105Z-redeploy
+time_utc=2026-08-03T16:34:59Z
+active
+=== SHAs before ===
+0269396aa7b64221ad8dd50dd93cec5e95f9f7511b0f564317141321b58979d2  /opt/wathefni/orchestrator/app.py
+ls: cannot access '/opt/wathefni/orchestrator/compliance_findings_wave1.py': No such file or directory
+compliance_findings_wave1.py absent
+=== flags before ===
+WATHEFNI_ANALYTICS_WAVE1=1
+WATHEFNI_ANALYTICS_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_KEY_MARKERS=ANW1,ANW1-SYNTH|
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_PHONE_PREFIXES=965540
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[16:34:59] backing up modules + dropins + dashboard
+643001b762d833c8566cb2769a8f2db0c3231461380896a832b48fcfc2ff0325  modules/kuwait_first_client_foundation.py
+0269396aa7b64221ad8dd50dd93cec5e95f9f7511b0f564317141321b58979d2  modules/app.py
+78befeb08da1f94dca5cb10f3bc6514d4799a6ad71e383fda0eeb50b294f99f4  modules/kuwait_pilot_document_journey.py
+1a5b9d10915cb2c33a1822b0d4ab7d7b8fcb485db65a7eb4f24851c81e09b056  modules/analytics_attention_wave1.py
+[16:35:00] deploying compliance wave1 modules
+[16:35:00] deploying dashboard dist
+[16:35:00] writing synthetic-only drop-in
+[16:35:00] migrate ACK schema
+wave1_version 1.0.0
+contract compliance_findings_wave1
+honesty_ok {'document_compliance_only': True, 'government_verified': False, 'synthetic_only': True, 'ai': False, 'legal_compliance_claims': False}
+connected_db wathefni
+ack_id 3
+ACK_PRODUCTION_COMPLIANCE_W1B=YES
+MIGRATE_OK
+health_ok
+active
+=== SHAs after ===
+1da1a2b8e530670df7b1e853f4ece46876ed3f37197c68829faecee6ae27ed60  /opt/wathefni/orchestrator/app.py
+45187b44253bdad1ed543defb2eb1a424dbaa23c18787c5b07208f55c28f4a6e  /opt/wathefni/orchestrator/compliance_findings_wave1.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_COMPLIANCE_WAVE1=1
+WATHEFNI_COMPLIANCE_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_COMPLIANCE_WAVE1_SYNTHETIC_KEY_MARKERS=CFW1,CFW1-SYNTH|
+WATHEFNI_COMPLIANCE_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_COMPLIANCE_WAVE1_SYNTHETIC_PHONE_PREFIXES=965541
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+COMPLIANCE_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('CFW1', 'CFW1-SYNTH|')
+prefixes ('965541',)
+honesty {'document_compliance_only': True, 'government_verified': False, 'legal_compliance_claims': False, 'fine_calculations': False, 'ai': False, 'analytics_excludes_compliance': True, 'synthetic_only': True}
+flags_ok_synthetic=true
+UI_FINDINGS_COPY_OK
+UI_HONESTY_COPY_OK
+UI_RESPONSIVE_GRID_OK
+DEPLOY_OK stamp=20260803T163105Z-redeploy backup=/opt/wathefni/backups/production-pre-compliance-wave1b-20260803T163105Z-redeploy evid=/opt/wathefni/production-evidence/compliance-wave1b-prod-canary/20260803T163105Z-redeploy

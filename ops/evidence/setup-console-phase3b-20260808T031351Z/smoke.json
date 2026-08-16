@@ -1,0 +1,257 @@
+{
+  "pass": 44,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "source:sync_calendar_consumers",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:get_leave_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:get_attendance_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:get_shifts_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:get_documents_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:get_onboarding_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:historical_rewritten",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:module-policies",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:calendar_fields_stripped",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:setup_console_payroll_working_calendar",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:consumer_sync",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-phase=\"3b\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-module-leave",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-module-attendance",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-module-shifts",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-module-documents",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-module-onboarding",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Required",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Optional",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Advanced",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_internal_jargon",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:leave_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:documents_compliance_company_policy",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:classic-module-leave",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:classic-module-shifts",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:classic-module-attendance",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:classic-module-onboarding",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ownership_banner:classic-module-documents",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "get_all_module_policies",
+      "detail": {
+        "keys": [
+          "attendance",
+          "documents",
+          "leave",
+          "onboarding",
+          "shifts"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "leave_policy_persist",
+      "detail": [
+        {
+          "action": "sync_calendar",
+          "ok": true,
+          "weekend_days": [
+            "fri",
+            "sat"
+          ],
+          "leave_rows": 2,
+          "shifts_updated": true,
+          "rest_weekdays": [
+            5,
+            6
+          ]
+        },
+        {
+          "action": "update_leave_policy",
+          "leave_type": "annual",
+          "updated": 1
+        },
+        {
+          "action": "update_leave_overlay"
+        }
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "leave_calendar_reference",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "attendance_policy_persist",
+      "detail": 12
+    },
+    {
+      "status": "PASS",
+      "name": "attendance_payroll_reference",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "shifts_calendar_canonical",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "shifts_policy_persist",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "documents_policy_persist",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "documents_ocr_wathefni_owned",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "onboarding_no_history_rewrite",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "onboarding_pins_preserved",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "tenant_other_company_missing_or_isolated",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "attendance_get_single",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "leave_overlay_preserved_after_read",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "audit_reason_required",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "weekday_map",
+      "detail": null
+    }
+  ]
+}

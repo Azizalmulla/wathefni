@@ -1,0 +1,53 @@
+{
+  "passed": 8,
+  "failed": 0,
+  "checks": [
+    {
+      "id": "AS02_caller_audit_clean",
+      "result": "PASS",
+      "detail": {
+        "hits": []
+      }
+    },
+    {
+      "id": "AS02_ui_uses_applications_cohort",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "id": "AS02_orphan_route_controlled",
+      "result": "PASS",
+      "detail": {
+        "status": 410,
+        "error": "assessment_queue_route_removed"
+      }
+    },
+    {
+      "id": "AS02_never_500",
+      "result": "PASS",
+      "detail": {
+        "status": 410
+      }
+    },
+    {
+      "id": "happy_route_present:/dashboard/prehire/assessments",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "id": "happy_route_present:/dashboard/prehire/assessments/config",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "id": "happy_route_present:/dashboard/prehire/assessments/{attempt_id}",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "id": "happy_route_present:/dashboard/prehire/applications",
+      "result": "PASS",
+      "detail": {}
+    }
+  ]
+}

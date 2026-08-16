@@ -1,0 +1,14 @@
+Environment=WATHEFNI_INBOUND_ALLOWED_COMPANIES=WATHEFNI
+Environment=WATHEFNI_INBOUND_EMAIL=on
+Environment=WATHEFNI_INTAKE_RETENTION_EXECUTE=off
+Environment=WATHEFNI_MAILBOX_SYNC=off
+Environment=WATHEFNI_POSTMARK_INBOUND_ENV=production
+Environment=WATHEFNI_POSTMARK_INBOUND_ENV_PIN=production
+---
+active
+active
+---
+[Service]
+Environment=WATHEFNI_INBOUND_ALLOWED_COMPANIES=WATHEFNI
+# Mailbox sync must remain off for Phase 2
+Environment=WATHEFNI_MAILBOX_SYNC=off

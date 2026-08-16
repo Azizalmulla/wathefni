@@ -1,0 +1,43 @@
+{
+  "item_rows": 150,
+  "by_employee": {
+    "WATHEFNI-96550252254": 38,
+    "WATHEFNI-96566363363": 38,
+    "WATHEFNI-96597727743": 38,
+    "WATHEFNI-96599411617": 36
+  },
+  "employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "template_version": "2.0.0",
+      "documents_pending": 4,
+      "documents_complete": 0,
+      "onboarding_status": "in_progress"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "name": "Fouad Burhamad",
+      "template_version": "2.0.0",
+      "documents_pending": 4,
+      "documents_complete": 0,
+      "onboarding_status": "in_progress"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "template_version": "2.0.0",
+      "documents_pending": 2,
+      "documents_complete": 2,
+      "onboarding_status": "in_progress"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "name": "Brian Saleh",
+      "template_version": "2.0.0",
+      "documents_pending": 4,
+      "documents_complete": 0,
+      "onboarding_status": "in_progress"
+    }
+  ]
+}

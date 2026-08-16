@@ -1,0 +1,66 @@
+PASS email_is_gmail azizalmulla16@gmail.com
+
+=== policy_before ===
+{
+  "ux_mode": "employees",
+  "access_mode": "selected",
+  "selection_scope": "employees",
+  "selected_employee_keys": [],
+  "module_enabled": true
+}
+
+=== policy_after_add ===
+{
+  "ok": true,
+  "selected_employee_keys": [
+    "WATHEFNI-96599338566"
+  ],
+  "raw_keys": [
+    "WATHEFNI-96599338566"
+  ]
+}
+PASS aziz_in_selected_employees ['WATHEFNI-96599338566']
+
+=== idempotency_rows_before ===
+[
+  {
+    "invite_id": "0a5d2f40-2a73-457a-857a-40f0461013fa",
+    "status": "superseded",
+    "idempotency_key": "access_enabled:WATHEFNI-96599338566:WATHEFNI:WATHEFNI-96599338566"
+  }
+]
+
+=== enable_result ===
+{
+  "ok": true,
+  "changed": true,
+  "enabled": true,
+  "invitation": {
+    "ok": false,
+    "skipped": true,
+    "reason": "auto_invite_disabled"
+  }
+}
+PASS enable_ok 
+FAIL invite_minted {'ok': False, 'skipped': True, 'reason': 'auto_invite_disabled'}
+FAIL invite_delivered_flag 
+PASS app_access_enabled_true {'app_access_enabled': True, 'email': 'azizalmulla16@gmail.com'}
+PASS email_unchanged_gmail azizalmulla16@gmail.com
+EXCEPTION InvalidTextRepresentation: invalid input syntax for type uuid: ""
+LINE 4:                 FROM employee_app_invites WHERE invite_id=''
+                                                                  ^
+
+Traceback (most recent call last):
+  File "/tmp/aziz_fix_verify.py", line 135, in <module>
+    cur.execute(
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type uuid: ""
+LINE 4:                 FROM employee_app_invites WHERE invite_id=''
+                                                                  ^
+
+
+
+VERDICT FAIL
+WROTE /tmp/aziz_verify.json

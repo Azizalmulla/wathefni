@@ -1,0 +1,1 @@
+health_after_deploy=200

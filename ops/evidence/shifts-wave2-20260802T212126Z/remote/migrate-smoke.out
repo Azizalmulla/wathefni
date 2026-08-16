@@ -1,0 +1,68 @@
+env staging
+schema_version 2.0.0
+expected_db wathefni_staging
+connected_db wathefni_staging
+shift_integrity_settings shift_integrity_settings
+shift_assignment_versions shift_assignment_versions
+shift_reminder_queue shift_reminder_queue
+shift_seasonal_policies shift_seasonal_policies
+shift_reconciliation_flags shift_reconciliation_flags
+shift_assignment_wave2_cols ['current_version_no', 'lineage_json', 'schedule_reason_code']
+SHIFTS_W2_MIGRATE_OK
+    shifts schedule integrity wave2 — history + availability + swap + attendance + reminders
+      PASS  wave2 version pinned 2.0.0
+      PASS  wave2 enabled
+      PASS  wave1 enabled
+      PASS  honesty payroll_money false
+      PASS  honesty leave_balances_mutated false
+      PASS  create records assignment version
+      PASS  create enqueues reminder
+      PASS  create does not touch leave_balances
+      PASS  wave2 reminder scan wired
+      PASS  terminal failure visibility
+      PASS  create ok
+      PASS  create returns shift_id
+      PASS  reschedule #1 ok
+      PASS  reschedule #2 ok
+      PASS  stale update denied
+      PASS  version history length >= 3
+      PASS  exactly one current version
+      PASS  priors immutable superseded
+      PASS  current-row version_no matches
+      PASS  current authority start 11:00
+      PASS  reason codes audited
+      PASS  availability request ok
+      PASS  pending (unapproved) availability does not block
+      PASS  availability approve ok
+      PASS  availability approve replay idempotent
+      PASS  availability require_ack mode
+      PASS  availability ack allows create
+      PASS  availability block mode ignores ack
+      PASS  availability warn mode allows create
+      PASS  availability warn attaches warnings
+      PASS  swap fixture requester
+      PASS  swap fixture target
+      PASS  overlap fixture for swap
+      PASS  swap request (overlap case) ok
+      PASS  swap overlap denial
+      PASS  swap leave denial
+      PASS  swap lifecycle denial
+      PASS  swap approve ok
+      PASS  swap approve replay idempotent
+      PASS  swap reassigned requester shift to B
+      PASS  swap reassigned target shift to A
+      PASS  swap lineage version recorded
+      PASS  swap preserves previous_employee_key
+      PASS  swap reject ok
+      PASS  swap reject replay idempotent
+      PASS  attendance fixtures
+      PASS  attendance normal match
+      PASS  attendance split without time fail-closed
+      PASS  attendance split with punch time
+      PASS  attendance overnight next-day attribution
+      PASS  attendance matcher does not mutate assignments
+      PASS  reminder enqueue idempotent (no duplicate)
+      PASS  reminder claimed once
+      PASS  reminder retry claim
+      PASS  reminder terminal_failed
+      PASS  terminal failure ops visibility

@@ -1,0 +1,48 @@
+    employment change c1 — prove
+      PASS  c1 module
+      PASS  rollback guidance
+      PASS  EN promotion
+      PASS  AR transfer
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  offboarding not required
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  create transfer case
+      PASS  submit → pending
+      PASS  SoD self-approve forbidden
+      PASS  stale approval fails
+      PASS  approve transfer
+      PASS  apply transfer mutates employment
+      PASS  append-only history id
+      PASS  department updated
+      PASS  position updated
+      PASS  history retained
+      PASS  reject path
+      PASS  cancel draft
+      PASS  promotion applied
+      PASS  promotion position
+      PASS  secondment create requires end
+      PASS  secondment applied
+      PASS  secondment active
+      PASS  secondment return applied
+      PASS  secondment returned
+      PASS  home department restored
+      PASS  salary without payroll link
+      PASS  payroll independence (link off)
+      PASS  salary links payroll contract when OPTIONAL on
+      PASS  EN/AR case labels
+      PASS  independent of offboarding module
+      PASS  independent of attendance_truth
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  history intact after rollback
+
+    42 passed, 0 failed
+EMPLOYMENT_CHANGE_UNIT_PASS
+EMPLOYMENT_CHANGE_FULL_PASS
+STAGING_RC=0

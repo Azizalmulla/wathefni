@@ -1,0 +1,4 @@
+contract wave1br-runtime-ddl-ban-v1
+lock_id 770911001
+post_apply_validate_ok {'apply_calls': 0, 'require_calls': 7, 'blocked_apply_attempts': 0}
+MIGRATE_SCHEMA_WAVE1BR_OK

@@ -1,0 +1,21 @@
+{
+  "ready": true,
+  "stamp": "20260726T004321Z",
+  "evidence": "/opt/wathefni/staging/staging-evidence/owner-manual-intake/20260726T004321Z",
+  "inbound_address": "965f89c46a9dfbca61a0831f8ba1f631@inbound.postmarkapp.com",
+  "tenant": "WATHEFNI",
+  "job_binding": null,
+  "default_behavior": "held_intake",
+  "classification_workers": "off",
+  "classification_ui": "on",
+  "classification_manual": "on",
+  "classification_master": "off",
+  "unified_candidates": "on for WATHEFNI",
+  "sender_acknowledgment": "off",
+  "delivery_mode": "dry_run",
+  "persistent_intake_worker": "disabled/inactive (one-shot monitor only)",
+  "monitor_pid_file": "/opt/wathefni/staging/staging-evidence/owner-manual-intake/20260726T004321Z/monitor.pid",
+  "dashboard": "http://127.0.0.1:8011/dashboard via SSH tunnel (staging dist)",
+  "cleanup": "forbidden until owner confirms",
+  "acceptance_report": "ops/PREHIRING_TALENT_POOL_CLASSIFICATION_OWNER_MANUAL_STAGING_ACCEPTANCE.md \u2014 after owner finishes"
+}

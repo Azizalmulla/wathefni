@@ -1,0 +1,32 @@
+{
+  "stamp": "20260803T211505Z",
+  "scope": "migration_wave1_foundation_cv_chunked",
+  "environment": "staging",
+  "synthetic_only": true,
+  "real_customer_data": false,
+  "millions_claim": false,
+  "migration_wave2_started": false,
+  "proof": {
+    "smoke_pass": true,
+    "sibling_freezes": true,
+    "lanes": {
+      "1k": {
+        "elapsed_s": 36.7,
+        "committed": 981,
+        "duplicates": 19
+      },
+      "10k": {
+        "elapsed_s": 521.51,
+        "committed": 9981,
+        "duplicates": 19
+      }
+    }
+  },
+  "gates": {
+    "STAGING_MIGRATION_WAVE1_FOUNDATION_CV": "GO",
+    "PROD_SYNTHETIC_MIGRATION_WAVE1_FOUNDATION_CV": "NO-GO",
+    "REAL_CUSTOMER_MIGRATION": "NO-GO",
+    "MILLIONS_CV_CUTOVER": "NO-GO",
+    "MIGRATION_WAVE2": "NO-GO_NOT_STARTED"
+  }
+}

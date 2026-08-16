@@ -1,0 +1,44 @@
+    workforce planning c7 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  ja hard
+      PASS  no shadow actual
+      PASS  actual≠plan≠scenario
+      PASS  planned never actual wave5
+      PASS  planned≠actual position
+      PASS  planned cost≠payroll
+      PASS  recruiting optional
+      PASS  comp optional
+      PASS  talent optional
+      PASS  approved≠execution
+      PASS  no auto post/hire
+      PASS  handoff idempotent
+      PASS  no universal gap score
+      PASS  no ai authority
+      PASS  assistant mutations out
+      PASS  no second analytics
+      PASS  employee no leak
+      PASS  setup wave6 wfp
+      PASS  setup honesty
+      PASS  setup not actual hc
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  no local job catalog
+      PASS  gate requires ja
+      PASS  gate off
+      PASS  empty allowlist admits after R5J
+      PASS  gate on with ja
+      PASS  tenant gate
+      PASS  schema plans
+      PASS  schema baselines
+      PASS  schema handoffs
+      PASS  no employment mutate
+      PASS  no headcount mutate
+      PASS  no job posted
+      PASS  no hire created
+      PASS  no wfp_grade ddl
+      PASS  truth_plane facts
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    40 passed, 0 failed (unit-only)

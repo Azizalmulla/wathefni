@@ -1,0 +1,63 @@
+    hr intelligence time pay c4 — prove
+      PASS  c4 module
+      PASS  c4 contract
+      PASS  c4 stamp
+      PASS  commercial analytics
+      PASS  c3 import regression
+      PASS  uses c1 evaluator
+      PASS  projection not SoT
+      PASS  no fx
+      PASS  EN status
+      PASS  AR status
+      PASS  all semantic keys
+      PASS  c4 global off
+      PASS  empty allowlist
+      PASS  canary gate
+      PASS  tenant runtime isolation
+      PASS  enable c4
+      PASS  publish all c4 kpis
+      PASS  raw punch is not authority
+      PASS  correction reconciles without audit rewrite
+      PASS  attendance uses expected work
+      PASS  attendance ignores raw punches
+      PASS  approved leave not absenteeism
+      PASS  lateness measures are distinct
+      PASS  early leave occurrences
+      PASS  missing punches
+      PASS  manager time allowed and scoped
+      PASS  leave ledger rejected excluded
+      PASS  leave utilization entitlement
+      PASS  shifts optional enabled path
+      PASS  shifts optional off unavailable
+      PASS  approved OT differs from export and paid
+      PASS  OT not paid without sealed proof
+      PASS  payroll money blocked before finalize
+      PASS  sealed payroll produces cost
+      PASS  sealed period movement
+      PASS  stable component drill
+      PASS  OT paid only with sealed component
+      PASS  settlement finalized is not paid
+      PASS  payment acknowledgement is not paid
+      PASS  manager payroll forbidden
+      PASS  payroll independent of time modules
+      PASS  module off unavailable not zero
+      PASS  population reconciliation explains differences
+      PASS  rebuild idempotent
+      PASS  bilingual governed definition
+      PASS  payroll money permission class
+      PASS  enable H4E99616
+      PASS  publish H4E99616
+      PASS  enable H4S99616
+      PASS  publish H4S99616
+      PASS  attendance without expected work insufficient
+      PASS  zero entitlement not applicable
+      PASS  small monetary cohort suppressed
+      PASS  tenant write isolation
+      PASS  disable preserves history
+      PASS  disable retains payroll projections
+      PASS  disabled evaluation unavailable
+      PASS  all c4 gates off
+
+    58 passed, 0 failed
+HR_INTELLIGENCE_TIME_PAY_FULL_PASS
+STAGING_RC=0

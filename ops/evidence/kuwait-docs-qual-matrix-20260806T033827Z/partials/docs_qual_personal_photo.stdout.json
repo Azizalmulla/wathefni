@@ -1,0 +1,171 @@
+[2026-08-06T03:26:46.865465+00:00]   HTTP upload item=docs_qual_personal_photo part=None file=kuwait_paci_civil_id_front_v1.png attempt=1
+[2026-08-06T03:26:49.397905+00:00]   → http=422 kind=http_error
+[2026-08-06T03:26:49.401177+00:00]   HTTP upload item=docs_qual_personal_photo part=None file=personal_photo_aziz_v1.png attempt=1
+[2026-08-06T03:26:51.319732+00:00]   → http=200 kind=ok
+[2026-08-06T03:26:51.387572+00:00]   HTTP upload item=docs_qual_personal_photo part=None file=personal_photo_aziz_v1.png attempt=1
+[2026-08-06T03:26:51.415348+00:00]   → http=404 kind=http_error
+{
+  "item_id": "docs_qual_personal_photo",
+  "validation_item": "personal_photo",
+  "started_at": "2026-08-06T03:26:45.041663+00:00",
+  "checks": {
+    "civil_untouched": {
+      "status": "accepted",
+      "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+      "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+    },
+    "linkage": {
+      "employee_key": "WATHEFNI-96599338566",
+      "item_id": "docs_qual_personal_photo",
+      "document_type": "docs_qual_personal_photo",
+      "status": "pending",
+      "required": false,
+      "owner": "employee",
+      "collection_mode": "document"
+    },
+    "wrong_document": {
+      "http": 422,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "document_validation_looks_like_id_not_photo",
+          "message": "That looks like an ID document. Please upload a clear personal photo of yourself instead.",
+          "message_en": "That looks like an ID document. Please upload a clear personal photo of yourself instead.",
+          "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0627 \u0645\u0633\u062a\u0646\u062f \u0647\u0648\u064a\u0629. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0635\u0648\u0631\u0629 \u0634\u062e\u0635\u064a\u0629 \u0648\u0627\u0636\u062d\u0629 \u0644\u0643 \u0628\u062f\u0644\u0627\u064b \u0645\u0646\u0647.",
+          "reason": "looks_like_id_not_photo",
+          "gate": "soft",
+          "detected_item": "civil_id",
+          "validation": {
+            "decision": "block",
+            "confidence": 0.97,
+            "route": {
+              "document_class": "identity",
+              "file_type": "png",
+              "extension": ".png",
+              "reading_route": "shared_envelope_intake",
+              "gpt_auto_ocr_fallback": false,
+              "file_types": [
+                "jpg",
+                "jpeg",
+                "png",
+                "pdf",
+                "tif",
+                "tiff",
+                "webp"
+              ],
+              "fallback_reading": "needs_review",
+              "structuring": "identity_document_extraction_mistral",
+              "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+              "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+              "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+              "gpt_fallback_forbidden": true
+            },
+            "gpt_used": false
+          }
+        }
+      }
+    },
+    "upload": {
+      "http": 200,
+      "kind": "ok",
+      "body": {
+        "ok": true,
+        "item_id": "docs_qual_personal_photo",
+        "file_id": "8497a707-fda4-4177-a260-9891c69d91f3",
+        "storage_status": "stored",
+        "status": "processing",
+        "lifecycle_version": "2a",
+        "validation": {
+          "gate": "soft",
+          "decision": "allow",
+          "reason": null,
+          "hr_review_recommended": false,
+          "message": null,
+          "message_en": null,
+          "message_ar": null,
+          "gpt_used": false
+        }
+      }
+    },
+    "version": {
+      "version_id": "8551a7e8-2ab6-47cc-84df-6d768664c170",
+      "review_status": "pending_hr_review",
+      "parts_complete": false,
+      "document_number": null,
+      "expiry_date": null,
+      "issue_date": null,
+      "file_id": "8497a707-fda4-4177-a260-9891c69d91f3"
+    },
+    "identity": "not_applicable_for_item",
+    "hr_journey_hit": true,
+    "hr_projection": {
+      "review_status": "pending_hr_review",
+      "expiry_date": null,
+      "issue_date": null,
+      "has_ocr_proposal": true,
+      "ocr_keys": [
+        "authoritative",
+        "confidence",
+        "extraction_status"
+      ],
+      "versions_count": 1
+    },
+    "hr_fields_shown_in_ui": [
+      "expiry_date",
+      "issue_date",
+      "review_status",
+      "rejection_reason",
+      "versions"
+    ],
+    "hr_fields_in_api_not_ui": [
+      "confidence"
+    ],
+    "preview_file_id": "8497a707-fda4-4177-a260-9891c69d91f3",
+    "preview_http": 200,
+    "employee_status_after_approve": "accepted",
+    "employee_status_after_reject": "replacement_required",
+    "cross_employee_upload": {
+      "http": 404,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "item_not_found",
+          "message": "We couldn't find that document on your checklist."
+        }
+      }
+    }
+  },
+  "proven": [
+    "linkage",
+    "wrong_document_rejection",
+    "supported_upload",
+    "classification_allow",
+    "ocr_stored",
+    "identity_matching_na",
+    "expiry_na",
+    "version_history",
+    "hr_receives_submission",
+    "preview",
+    "hr_approve_roundtrip",
+    "hr_reject_replacement",
+    "cross_employee_blocked"
+  ],
+  "partial": [
+    "hr_ocr_summary_ui_hidden"
+  ],
+  "missing": [],
+  "extracted_schema": {
+    "confidence": 0.0,
+    "extraction_status": "needs_review",
+    "_top_level_keys": [
+      "authoritative",
+      "confidence",
+      "extraction_status"
+    ],
+    "_field_keys": []
+  },
+  "errors": [],
+  "failing_request": null,
+  "verdict": "partially proven",
+  "finished_at": "2026-08-06T03:26:51.415445+00:00"
+}

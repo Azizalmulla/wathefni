@@ -1,0 +1,118 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5J — workforce planning surface (unit)
+      PASS  workforce planning customer enableable
+      PASS  workforce planning customer visible
+      PASS  JA still enableable (hard dep)
+      PASS  comp planning still enableable
+      PASS  engagement still enableable
+      PASS  no remaining unreleased keys
+      PASS  workforce planning is catalog SKU
+      PASS  workforce planning people_surface off
+      PASS  workforce planning audience is hr
+      PASS  workforce planning has no employee app surface
+      PASS  workforce planning domain_authority_ready
+      PASS  workforce planning http_ready
+      PASS  workforce planning hr_web_ready
+      PASS  workforce planning employee surface not required
+      PASS  workforce planning employee surface not ready
+      PASS  workforce planning manager surface not required
+      PASS  workforce planning manager surface ready (optional)
+      PASS  workforce planning mobile not required
+      PASS  workforce planning mobile not ready
+      PASS  workforce planning depends on JA
+      PASS  fail-closed skips workforce planning namespaces
+      PASS  actual ≠ baseline
+      PASS  actual ≠ plan
+      PASS  baseline ≠ scenario
+      PASS  scenario ≠ approved execution
+      PASS  planned HC never actual Wave 5
+      PASS  planned position ≠ actual
+      PASS  planned cost ≠ payroll
+      PASS  approval ≠ actual change
+      PASS  JA is hard
+      PASS  no duplicate job catalog
+      PASS  no AI forecast
+      PASS  no frontend forecast
+      PASS  no universal gap score
+      PASS  no FX
+      PASS  KWD explicit
+      PASS  recruiting optional
+      PASS  comp optional
+      PASS  talent optional
+      PASS  empty manager is zero rows
+      PASS  assistant mutations out
+      PASS  C7 remains canonical
+      PASS  Setup remounts Workforce Planning
+      PASS  Setup still remounts Comp Planning
+      PASS  Setup still remounts JA
+      PASS  PostHire mounts Workforce Planning workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace names actual/baseline boundary
+      PASS  workspace names planned cost
+      PASS  workspace names KWD
+      PASS  403 is not empty-plans copy
+      PASS  403 copy is not No workforce gap
+      PASS  403 copy is not 0 planned hires
+      PASS  Page includes workforce-planning
+      PASS  nav.workforce-planning registered
+      PASS  nav allows manager or read
+      PASS  workforce_planning is a canonical posthire SKU
+      PASS  workforce_planning is not a people-360 module
+      PASS  app registers Workforce Planning HTTP
+      PASS  workforce_planning.read permission exists
+      PASS  workforce_planning.manage permission exists
+      PASS  workforce_planning.plan permission exists
+      PASS  workforce_planning.cost permission exists
+      PASS  workforce_planning.approve permission exists
+      PASS  workforce_planning.execute permission exists
+      PASS  workforce_planning.export permission exists
+      PASS  workforce_planning.manager permission exists
+      PASS  notification flow workforce_planning
+      PASS  manager fixture has workforce_planning.manager
+      PASS  manager fixture has no workforce_planning.manage
+      PASS  viewer fixture has no workforce_planning admin
+      PASS  HR full has workforce_planning.read
+      PASS  HR full has workforce_planning.cost
+      PASS  HTTP mentions /dashboard/workforce-planning
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /plans
+      PASS  HTTP mentions /baseline
+      PASS  HTTP mentions /scenarios
+      PASS  HTTP mentions /assumptions
+      PASS  HTTP mentions /demand
+      PASS  HTTP mentions /planned-positions
+      PASS  HTTP mentions /projection
+      PASS  HTTP mentions /cost
+      PASS  HTTP mentions /gaps
+      PASS  HTTP mentions /compare
+      PASS  HTTP mentions /submit
+      PASS  HTTP mentions /approve
+      PASS  HTTP mentions /handoffs
+      PASS  HTTP mentions /execution
+      PASS  HTTP mentions /actual-vs-plan
+      PASS  HTTP mentions /history
+      PASS  HTTP mentions /export
+      PASS  HTTP mentions /manager
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP derives actor_key from context
+      PASS  HTTP refuses manager admin workspace
+      PASS  no Employee App workforce-planning namespace
+      PASS  no HR Mobile workforce-planning namespace
+      PASS  notification copy is generic
+      PASS  notification text does not leak restructuring/cost
+      PASS  no second workforce planning model
+      PASS  projection stays C7
+      PASS  handoff idempotent wrapper
+      PASS  assistant wrapper exists
+      PASS  no local job catalog
+      PASS  actual vs plan queries canonical actual
+      PASS  no employee hub
+      PASS  no employee workforce dir
+      PASS  no HR mobile workforce-planning dir
+      PASS  fail-closed no longer steals Workforce Planning
+
+    112 passed, 0 failed
+R5J_WORKFORCE_PLANNING_SURFACE_UNIT_PASS

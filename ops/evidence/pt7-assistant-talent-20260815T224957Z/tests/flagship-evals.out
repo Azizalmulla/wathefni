@@ -1,0 +1,42 @@
+    pt flagship evals 1-9 — db journeys
+      PASS  1 evaluate low
+      PASS  1 high-perf fact present
+      PASS  1 human potential stays low
+      PASS  1 not designated HiPo
+      PASS  1 not derived HiPo signal
+      PASS  1 contradiction not reconciled
+      PASS  2 missing evaluate
+      PASS  2 overall not_assessed
+      PASS  2 no fabricated 0%
+      PASS  2 no fabricated 100%
+      PASS  2 suggestion not not_ready
+      PASS  2 suggestion unassessed
+      PASS  5 derived high-potential signal
+      PASS  5 still not designated HiPo
+      PASS  4 map both lenses
+      PASS  4 same canonical potential
+      PASS  4 same designated hipo false
+      PASS  4 only projection may differ
+      PASS  3 profile WHY present
+      PASS  3 map WHY present
+      PASS  3 profile/model id matches evaluate
+      PASS  6 nominate
+      PASS  6 single-successor risk
+      PASS  6 does not invent candidates
+      PASS  7 mobility advisory
+      PASS  7 no candidate created
+      PASS  7 no employment mutate
+      PASS  7 no silent application
+      PASS  8 unique capability vulnerable
+      PASS  8 employment not mutated
+      PASS  8 baseline unchanged after analytic exclusion
+      PASS  8 employee still active
+      PASS  9 assistant explain ok
+      PASS  9 assistant uses WHY model
+      PASS  9 assistant does not claim designated HiPo
+      PASS  9 assistant names model/version
+      PASS  3 assistant WHY matches profile
+
+    37 passed, 0 failed
+PT_FLAGSHIP_EVALS_DB_PASS
+STAGING_RC=0

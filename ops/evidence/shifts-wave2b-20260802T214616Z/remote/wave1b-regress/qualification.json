@@ -1,0 +1,363 @@
+{
+  "passed": 56,
+  "failed": 1,
+  "tag": "428c6509",
+  "ids": {
+    "tag": "428c6509",
+    "marker": "SHW1B",
+    "phones": {
+      "a": "965529428650",
+      "b": "965529286509"
+    },
+    "employee_keys": {
+      "a": "WATHEFNI-SHW1B-428c6509",
+      "b": "WATHEFNI-SHW1B-B-428c6509"
+    },
+    "shift_ids": [
+      "58fac025-e919-43e5-b7f8-d17027ad4ec2",
+      "1eb986d5-e685-45c3-8e55-761e775f733e",
+      "199da490-6857-4d85-9d48-a46b98af65a5",
+      "ca8fc455-bf7c-4635-8560-755536e5a2f4",
+      "dd078fad-6269-4490-b13a-ed93a9ba476f",
+      "ff26dd71-0697-4236-b9f5-18326978558f",
+      "723e8fc7-21aa-4f32-8c7b-09d19bf8f0f6",
+      "151ef092-a910-4795-b21d-a7bedb2954a4"
+    ],
+    "swap_ids": [
+      "3d1eb72c-fdac-49dc-9efc-1a0c9656b4d2",
+      "c3dbdb80-2156-4fc4-bb77-8cc3a0d21d44"
+    ],
+    "leave_ids": [
+      "bf453feb-2477-4628-bedb-de494644e256"
+    ],
+    "quarantine_ids": [],
+    "orphan_shift_ids": [
+      "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+      "6a84a671-eb7f-43ea-870e-af859a440467",
+      "f9ebecf3-8838-456a-8124-c34c3c7600ca"
+    ]
+  },
+  "cleanup": {
+    "deleted_shift_ids": [
+      "1eb986d5-e685-45c3-8e55-761e775f733e",
+      "199da490-6857-4d85-9d48-a46b98af65a5",
+      "ca8fc455-bf7c-4635-8560-755536e5a2f4",
+      "dd078fad-6269-4490-b13a-ed93a9ba476f",
+      "ff26dd71-0697-4236-b9f5-18326978558f",
+      "58fac025-e919-43e5-b7f8-d17027ad4ec2",
+      "151ef092-a910-4795-b21d-a7bedb2954a4",
+      "723e8fc7-21aa-4f32-8c7b-09d19bf8f0f6"
+    ],
+    "residual_assignments": 2,
+    "residual_swaps": 2,
+    "residual_employees": 0,
+    "residual_total": 4
+  },
+  "results": [
+    {
+      "name": "version 1.1.0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "other company gated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "SHW1B marker synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real employee not synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "CAPTURE_INGEST off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "future_start blocks before",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "future_start allows on start",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notice allows through end",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "garden leave blocks notice",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "suspended overlap blocks",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight past employment end fails closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "Attendance overnight parity",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no leave_balances mutation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no payroll money calc",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty payroll_money false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dashboard dist expected_updated_at",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "db is wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan 0a6e73dd-9c6d-49a0-b253-39a9922ebd70 already cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan 6a84a671-eb7f-43ea-870e-af859a440467 already cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan f9ebecf3-8838-456a-8124-c34c3c7600ca already cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no allowlist collision with valid employees",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unknown employee fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "same-day create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "break_minutes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "site_key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "idempotent create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "split morning",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "split afternoon",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "split overlap detected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight ends_next_day",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cross-midnight overlap",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dashboard overnight reschedule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale reschedule denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent reschedule one winner",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave require_ack",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave ack allows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave block mode",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave cancel_shift mode requires ack",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancel idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap request",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap self-denial",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap scoped decision",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap idempotent replay",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap first wins",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "swap stale second",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tenant isolation",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle terminated blocks",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual synthetic zero",
+      "ok": false,
+      "detail": {
+        "deleted_shift_ids": [
+          "1eb986d5-e685-45c3-8e55-761e775f733e",
+          "199da490-6857-4d85-9d48-a46b98af65a5",
+          "ca8fc455-bf7c-4635-8560-755536e5a2f4",
+          "dd078fad-6269-4490-b13a-ed93a9ba476f",
+          "ff26dd71-0697-4236-b9f5-18326978558f",
+          "58fac025-e919-43e5-b7f8-d17027ad4ec2",
+          "151ef092-a910-4795-b21d-a7bedb2954a4",
+          "723e8fc7-21aa-4f32-8c7b-09d19bf8f0f6"
+        ],
+        "residual_assignments": 2,
+        "residual_swaps": 2,
+        "residual_employees": 0,
+        "residual_total": 4
+      }
+    },
+    {
+      "name": "real assignment fingerprints unchanged except orphans",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan 0a6e73dd-9c6d-49a0-b253-39a9922ebd70 soft-cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan 6a84a671-eb7f-43ea-870e-af859a440467 soft-cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan f9ebecf3-8838-456a-8124-c34c3c7600ca soft-cancelled",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "orphan_allowlist": [
+    "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+    "6a84a671-eb7f-43ea-870e-af859a440467",
+    "f9ebecf3-8838-456a-8124-c34c3c7600ca"
+  ]
+}

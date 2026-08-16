@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Wathefni Calendar C5 sync worker every minute
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=1m
+AccuracySec=15s
+Unit=wathefni-calendar-sync.service
+
+[Install]
+WantedBy=timers.target

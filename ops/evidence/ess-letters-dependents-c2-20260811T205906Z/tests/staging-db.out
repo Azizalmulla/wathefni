@@ -1,0 +1,71 @@
+    ess letters + dependents c2 — prove
+      PASS  c2 module
+      PASS  rollback guidance
+      PASS  EN salary cert
+      PASS  AR employment cert
+      PASS  assistant mutations out
+      PASS  payroll not required
+      PASS  benefits not required
+      PASS  no silent invent
+      PASS  global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  letters visible when on
+      PASS  dependents hidden when off
+      PASS  employee requests letter
+      PASS  status requested
+      PASS  under_review
+      PASS  SoD self-approve forbidden
+      PASS  stale approval fails
+      PASS  approved
+      PASS  no silent invent when fulfill off
+      PASS  HR fulfills and issues
+      PASS  status issued
+      PASS  artifact content hash
+      PASS  employee downloads issued
+      PASS  download body tied to employment
+      PASS  self-scope blocks other employee
+      PASS  issued cannot silently change
+      PASS  hash unchanged after mutate attempt
+      PASS  correction creates new request
+      PASS  corrected letter new version
+      PASS  version number incremented
+      PASS  prior version still immutable
+      PASS  AR experience letter issued
+      PASS  AR body path
+      PASS  reject path
+      PASS  cancel path
+      PASS  salary cert without payroll
+      PASS  payroll independence (link off)
+      PASS  payroll draft for salary cert
+      PASS  payroll contract approved
+      PASS  salary cert with optional payroll
+      PASS  salary uses payroll truth when on
+      PASS  dependent add
+      PASS  duplicate protection
+      PASS  dependent edit
+      PASS  stale/concurrent edit blocked
+      PASS  employee-requested dependent change
+      PASS  dependent SoD self-approve forbidden
+      PASS  HR reviews dependent change
+      PASS  dependent applied after review
+      PASS  list dependents
+      PASS  dependent archive
+      PASS  tenant isolation dependents
+      PASS  dependents hide when disabled
+      PASS  dependents disabled blocks create
+      PASS  independent of offboarding
+      PASS  independent of benefits
+      PASS  disable preserves history flag
+      PASS  module-off after disable
+      PASS  issued history intact after rollback
+      PASS  dependent history intact after rollback
+      PASS  module-off hides letter list
+
+    65 passed, 0 failed
+ESS_LETTERS_DEPENDENTS_UNIT_PASS
+ESS_LETTERS_DEPENDENTS_FULL_PASS
+STAGING_RC=0

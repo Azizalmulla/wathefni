@@ -1,0 +1,2339 @@
+[
+  {
+    "doc_id": "wave0_cv_ar_digital_01",
+    "filename": "wave0_cv_ar_digital_01.pdf",
+    "category": "arabic_digital_cv",
+    "source_id": "wave0_synthetic",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 241,
+      "plain_len": 238,
+      "chars": 241,
+      "words": 32,
+      "arabic_chars": 155,
+      "alpha_ratio": 0.8502,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "b2299487a5be4c90205c70b880e82fd51e01a1c9bbcf1038079f196d4a41c549",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "too_few_words": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "wave0_cv_ar_digital_02",
+    "filename": "wave0_cv_ar_digital_02.pdf",
+    "category": "arabic_digital_cv",
+    "source_id": "wave0_synthetic",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 231,
+      "plain_len": 225,
+      "chars": 231,
+      "words": 30,
+      "arabic_chars": 147,
+      "alpha_ratio": 0.8442,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "464d21d8f87af7cc617131007827fe2f72ba3848f998ad0850177f286ebf049b",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "too_few_words": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "wave0_cv_ar_digital_03",
+    "filename": "wave0_cv_ar_digital_03.pdf",
+    "category": "arabic_digital_cv",
+    "source_id": "wave0_synthetic",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 244,
+      "plain_len": 238,
+      "chars": 244,
+      "words": 31,
+      "arabic_chars": 159,
+      "alpha_ratio": 0.8531,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "d6bf4651ad5ac697b486544f970feb7273e8c422d319d19ce873ec4ec281ebca",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "too_few_words": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "wave0_cv_broken_encoding_01",
+    "filename": "wave0_cv_broken_encoding_01.pdf",
+    "category": "broken_encoding",
+    "source_id": "wave0_synthetic",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 169,
+      "plain_len": 175,
+      "chars": 169,
+      "words": 19,
+      "arabic_chars": 2,
+      "alpha_ratio": 0.86,
+      "replacement_chars": 0,
+      "mojibake_hits": 4,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "9e6a4a2d3555dfffa1d6318a6666f5008471b4b3f2657caad16b06b3f1aa0f2c",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "wave0_cv_tounicode_proper_01",
+    "filename": "wave0_cv_tounicode_proper_01.pdf",
+    "category": "cid_tounicode",
+    "source_id": "wave0_synthetic",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 224,
+      "plain_len": 224,
+      "chars": 224,
+      "words": 29,
+      "arabic_chars": 43,
+      "alpha_ratio": 0.8505,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "01228eb08188228135e45d9580857c14df05fdbd20be0f0ee76ec8eea72c49f8",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_000",
+    "filename": "syn_broken_encoding_000.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 296,
+      "plain_len": 300,
+      "chars": 296,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8621,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "2af914a3904cff11f818a1bab86510228d582b427d2ae248825e968cfa608c03",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_001",
+    "filename": "syn_broken_encoding_001.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 303,
+      "plain_len": 307,
+      "chars": 303,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8657,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "5073334803ccba6b474a88b47115c4467463e4cfcd3964a032e415111f02073d",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_002",
+    "filename": "syn_broken_encoding_002.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 304,
+      "plain_len": 308,
+      "chars": 304,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8662,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "ef8b1c7bf4b1e6a4c5a9d86ed620de089c31792de3806d880b79bc82a646f3a1",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_003",
+    "filename": "syn_broken_encoding_003.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 292,
+      "plain_len": 296,
+      "chars": 292,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8599,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "8deaa6e9e6c709ee01127257689c9e97ea3a8100246d5bf2a055df29a0044204",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_004",
+    "filename": "syn_broken_encoding_004.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 294,
+      "plain_len": 298,
+      "chars": 294,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.861,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "f12c5535fe3f80bd91b7e9b3b09b54c210d3c49b12ba3ab33ac81699b847b638",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_005",
+    "filename": "syn_broken_encoding_005.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 290,
+      "plain_len": 294,
+      "chars": 290,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8588,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "cda16289fc0e4f74d613bb95deb877229f82283a18ddde08fc25f36832f12a25",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_006",
+    "filename": "syn_broken_encoding_006.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 306,
+      "plain_len": 310,
+      "chars": 306,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8667,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "807ce329286d9c42a82e405463401c2b01f849a8449bbe0011242279a0a9e710",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_007",
+    "filename": "syn_broken_encoding_007.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 299,
+      "plain_len": 303,
+      "chars": 299,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8631,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "5de910644a4321861d45802372715ec018c8607bc5870bec4a64bbfa150f1169",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_008",
+    "filename": "syn_broken_encoding_008.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 303,
+      "plain_len": 307,
+      "chars": 303,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8652,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "8055f329a66a5ba19b387b352362242664c9ad0d3323bfeefe036910248799be",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_009",
+    "filename": "syn_broken_encoding_009.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 311,
+      "plain_len": 315,
+      "chars": 311,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8691,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "a75ef4e8b94d0fad83eadf5fa0e2e9bca66fed48033e3b25f5607c5b5d148ef9",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_010",
+    "filename": "syn_broken_encoding_010.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 302,
+      "plain_len": 306,
+      "chars": 302,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8647,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "ee3d64bcb28e9899053d0e8e4c6473d68ee084b9b4f2370bf7aca97192f7082a",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_011",
+    "filename": "syn_broken_encoding_011.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 298,
+      "plain_len": 302,
+      "chars": 298,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8626,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "59c3d37989f7b352e8cdecb7762e055722d1f3188c13f3d3a81fd662f8f5966d",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_012",
+    "filename": "syn_broken_encoding_012.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 294,
+      "plain_len": 298,
+      "chars": 294,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.861,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "041ebf78f3a94f6e937b7ab7354c4fddbbc392784b12304d747c1815ba8d8213",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_013",
+    "filename": "syn_broken_encoding_013.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 295,
+      "plain_len": 299,
+      "chars": 295,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.861,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "3b536a4f357dc4e9fbe193557d65570518e96aefbcf2661beca7999982e9e025",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_014",
+    "filename": "syn_broken_encoding_014.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 295,
+      "plain_len": 299,
+      "chars": 295,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.861,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "143f04c87d16ef46f955d78f7634f157feb4fe7db03ccff0eb2d572ecf3b6aee",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_015",
+    "filename": "syn_broken_encoding_015.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 304,
+      "plain_len": 308,
+      "chars": 304,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8662,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "80ded980f4a2d77649eb2b6ba0045a12c6956da66180a6bd24334e989c7085ac",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_016",
+    "filename": "syn_broken_encoding_016.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 300,
+      "plain_len": 304,
+      "chars": 300,
+      "words": 34,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8636,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "8c335888c1457bdfda1b4da09f7bcb9cf048895d33f85428d8d687c37256ca66",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_017",
+    "filename": "syn_broken_encoding_017.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 289,
+      "plain_len": 293,
+      "chars": 289,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8583,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "84787f9d70d3db09e9ce7187d8a4d0d6c952a7994830c71c789ad1ea93455cc1",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_018",
+    "filename": "syn_broken_encoding_018.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 289,
+      "plain_len": 293,
+      "chars": 289,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8583,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "c0fba46597b563d3ae1eaf9a92e47ea410e257d2cdde94d7e841d462dc085876",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_broken_encoding_019",
+    "filename": "syn_broken_encoding_019.pdf",
+    "category": "broken_encoding",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [
+      1
+    ],
+    "inspector_ocr_pages": [],
+    "agreement": false,
+    "false_skip_candidates_1idx": [
+      1
+    ],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": true,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 296,
+      "plain_len": 300,
+      "chars": 296,
+      "words": 33,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8621,
+      "replacement_chars": 0,
+      "mojibake_hits": 6,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "9c78d8f28dab1357a483b9cfcc311a06c851a8192359be1651507b9f1cda83bc",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": false
+    },
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": true,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "corrupt_or_unusable_text": 1
+      },
+      "quality_gate_failed_pages": [
+        1
+      ]
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_000",
+    "filename": "syn_cid_tounicode_missing_font_000.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 225,
+      "plain_len": 217,
+      "chars": 225,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8844,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "6d112e1eb39b5eb9645e010801d8281eb93eb097dcdc971211f78cb6e74ebf04",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_001",
+    "filename": "syn_cid_tounicode_missing_font_001.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 222,
+      "plain_len": 214,
+      "chars": 222,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8832,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "20c4e3000c3aa6abce1e336cc5d7a8d0de259044b50b3835f3e89dbd79f50fb2",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_002",
+    "filename": "syn_cid_tounicode_missing_font_002.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 217,
+      "plain_len": 209,
+      "chars": 217,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8802,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "7fccabea0ddb5fc039839a6c0996de7608a0a9d561fde9c7677331d9e7de78b6",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_003",
+    "filename": "syn_cid_tounicode_missing_font_003.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 221,
+      "plain_len": 213,
+      "chars": 221,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8827,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "535a434014eec01f67546e299fdfebd23bd2951f7cc2f7899e8ff7bd5ca2a552",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_004",
+    "filename": "syn_cid_tounicode_missing_font_004.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 227,
+      "plain_len": 219,
+      "chars": 227,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8861,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "d923d677076fed4b351f7c447668ab1e79698dcb09b607a423730db5b5ab5de4",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_005",
+    "filename": "syn_cid_tounicode_missing_font_005.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 2.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 227,
+      "plain_len": 219,
+      "chars": 227,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8856,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "8a0b815e9e8716d8d62191aac2911b342e5811658bf8e6876af0c3473f481e73",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_006",
+    "filename": "syn_cid_tounicode_missing_font_006.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 224,
+      "plain_len": 216,
+      "chars": 224,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8844,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "2f2e593d759a342c2e8086fd27c55ef894789faf078848138cdac058184c9bf3",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_007",
+    "filename": "syn_cid_tounicode_missing_font_007.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 224,
+      "plain_len": 216,
+      "chars": 224,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8844,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "725f77c161988400f916ecdd16a51cc7e3e2db4d0f7d6cc8d8d8392798e064bb",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_008",
+    "filename": "syn_cid_tounicode_missing_font_008.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 224,
+      "plain_len": 216,
+      "chars": 224,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8844,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "1d909a5a94ea8ffa8db63f304e6f89453eb584a8c0577922a9a39320dfd606e4",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_009",
+    "filename": "syn_cid_tounicode_missing_font_009.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 219,
+      "plain_len": 211,
+      "chars": 219,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8814,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "aed092eb86e8ca907c18dd9155f790e84632e5b4c8018635c868e369310b82ed",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_010",
+    "filename": "syn_cid_tounicode_missing_font_010.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 225,
+      "plain_len": 217,
+      "chars": 225,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8844,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "6e04f6e19170146a7d7fd9a274cf22404c373ac49b8bcf704cf00d7f3963e56f",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_011",
+    "filename": "syn_cid_tounicode_missing_font_011.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 224,
+      "plain_len": 216,
+      "chars": 224,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8838,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "6f49dc2167478c5c6095e9d8c13e4565086d0fb44acbe9b811dd0b44c091d300",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_012",
+    "filename": "syn_cid_tounicode_missing_font_012.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 220,
+      "plain_len": 212,
+      "chars": 220,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8821,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "58e43adea9027aae53dc7d6efb405458844408ea399bec09d2e1d1b9eb5f27ee",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_013",
+    "filename": "syn_cid_tounicode_missing_font_013.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 221,
+      "plain_len": 213,
+      "chars": 221,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8827,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "0ae16fea6d469f78894b4e2544259d28522bc2afffda51ceb9e18357397b32bb",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_014",
+    "filename": "syn_cid_tounicode_missing_font_014.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 221,
+      "plain_len": 213,
+      "chars": 221,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8827,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "1446ee97c1269f1c1246b1c7f321b7b7d558586370013ea43335175569ff569e",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_015",
+    "filename": "syn_cid_tounicode_missing_font_015.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 225,
+      "plain_len": 217,
+      "chars": 225,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.885,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "241e7447befd3995011e73bf5db1c57becde83ac3924e04051453ab8c6770099",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_016",
+    "filename": "syn_cid_tounicode_missing_font_016.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 228,
+      "plain_len": 220,
+      "chars": 228,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8861,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "2e10fc4713a097c2d0678990cc763a1fdb25812d3c50748d68b7aa3a2a5c0fe8",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_017",
+    "filename": "syn_cid_tounicode_missing_font_017.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 226,
+      "plain_len": 218,
+      "chars": 226,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.885,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "983a6b9a563bd0b6a5adaadf5d011705593a6a1c2d0c2628390bc17256d695f4",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_018",
+    "filename": "syn_cid_tounicode_missing_font_018.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 229,
+      "plain_len": 221,
+      "chars": 229,
+      "words": 21,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8873,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "9fcc6810d6d063f337a46ea0d5d337f9d4bfbe422a1e74c88ffa2b74f4e66056",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  },
+  {
+    "doc_id": "syn_cid_tounicode_missing_font_019",
+    "filename": "syn_cid_tounicode_missing_font_019.pdf",
+    "category": "cid_tounicode_missing_font",
+    "source_id": "synthetic_wave2_generated",
+    "pages": 1,
+    "ok": true,
+    "status": "ok",
+    "elapsed_ms": 1.0,
+    "poppler_ocr_pages": [],
+    "inspector_ocr_pages": [],
+    "agreement": true,
+    "false_skip_candidates_1idx": [],
+    "unnecessary_ocr_candidates_1idx": [],
+    "high_risk_false_skip_candidate": false,
+    "inspector_type": "text_based",
+    "inspector_confidence": 1.0,
+    "has_encoding_issues": false,
+    "markdown_quality": {
+      "markdown_len": 225,
+      "plain_len": 217,
+      "chars": 225,
+      "words": 22,
+      "arabic_chars": 0,
+      "alpha_ratio": 0.8844,
+      "replacement_chars": 0,
+      "mojibake_hits": 0,
+      "arabic_presentation_forms": 0,
+      "markdown_sha256": "b8cfa4afde6e7046782e5438cf11281dcf6c15283d8f05ac1a813b2a5279e167",
+      "suspicious_printable_but_meaningless": false,
+      "reversed_or_corrupted_arabic": false,
+      "cid_tounicode_hint": true
+    },
+    "detections": {
+      "mojibake": false,
+      "cid_tounicode_failures": true,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "poppler_quality_gates": {
+      "reason_counts": {
+        "accepted_local": 1
+      },
+      "quality_gate_failed_pages": []
+    },
+    "influences_ocr_routing": false
+  }
+]

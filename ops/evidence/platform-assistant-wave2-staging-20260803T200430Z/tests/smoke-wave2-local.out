@@ -1,0 +1,36 @@
+PASS  wave2 requires wave1
+PASS  wave2 company
+PASS  wave2 external denied
+PASS  mutations off
+PASS  honesty no payroll
+PASS  honesty ingest off
+PASS  honesty existing records
+PASS  contracts leave+attendance
+PASS  tool leave queue
+PASS  tool attendance exceptions
+PASS  mutations hidden
+PASS  whatsapp hide wave2
+PASS  catalog leave queue
+PASS  catalog attendance exceptions
+PASS  chips leave
+PASS  chips ar
+PASS  leave grounding
+PASS  leave citations
+PASS  leave groups
+PASS  leave deep links prepare-only
+PASS  leave no mutate
+PASS  attendance grounding
+PASS  attendance ingest-off label
+PASS  attendance citations
+PASS  attendance no mutate
+PASS  tenant isolation
+PASS  permission denial
+PASS  disabled module denial
+PASS  fallback missing en/ar
+PASS  fallback stale en/ar
+PASS  fallback partial en/ar
+PASS  fallback unavailable en/ar
+PASS  fallback blocked en/ar
+db path skipped (no postgres env)
+
+33 passed, 0 failed

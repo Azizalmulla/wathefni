@@ -1,0 +1,15 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "group": "41239180-9b5a-4cc1-88f7-7a2f8d2ad7f8",
+  "androidUpdateId": "019fd946-5812-78fc-8dc7-5adff5f502b7",
+  "iosUpdateId": "019fd946-5812-7d9f-87b4-e79c85359de6",
+  "message": "Auth Wave 2 Phase 1 hardening: definitive session wipe only",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "0"
+  },
+  "nativeBuildRequired": false,
+  "priorGroup": "7a0d99fc-0e0e-44be-8b9f-5cc4ad9c8b20",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/41239180-9b5a-4cc1-88f7-7a2f8d2ad7f8"
+}

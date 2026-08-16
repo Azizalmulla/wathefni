@@ -1,0 +1,62 @@
+=== wave2b synthetic canary ===
+PASS  seed globally off
+PASS  hr_mutate globally off
+PASS  synthetic canary on
+PASS  template 2.0.0
+PASS  bank ESS only
+PASS  nineteen real checklist rows
+PASS  seed blocked for real 50252254
+PASS  mutate blocked for real 50252254
+PASS  start blocked for real 50252254
+PASS  seed blocked for real 66363363
+PASS  mutate blocked for real 66363363
+PASS  start blocked for real 66363363
+PASS  seed blocked for real 97727743
+PASS  mutate blocked for real 97727743
+PASS  start blocked for real 97727743
+PASS  seed blocked for real 99411617
+PASS  mutate blocked for real 99411617
+PASS  start blocked for real 99411617
+PASS  synthetic recognized
+PASS  seed allowed synthetic
+PASS  mutate allowed synthetic
+PASS  delayed start
+PASS  delayed no seed
+PASS  reschedule to today
+PASS  unattended activate
+PASS  seeded after activate
+PASS  assignment version pinned
+PASS  seed idempotent
+PASS  duplicate start idempotent
+PASS  due dates present
+PASS  dependency blocks residence
+PASS  employee/hr document store
+PASS  hr waive
+PASS  stale mutation fail closed
+PASS  reminder recorded
+PASS  bank plaintext mark blocked
+PASS  bank receipt blocked
+PASS  bank forbidden helper
+PASS  bank ess confirm without plaintext
+PASS  mark employment_contract
+PASS  second delayed
+PASS  emp2 in progress
+PASS  cancel ok
+PASS  cancel preserves history
+PASS  cancel idempotent
+PASS  abandon ok
+PASS  abandon preserves history
+PASS  abandon idempotent
+PASS  cross-tenant empty
+PASS  out-of-scope or terminal fail closed
+PASS  audit events recorded
+PASS  due-proof start
+PASS  reschedule future
+PASS  reschedule updates open due dates
+PASS  four reals fingerprint unchanged
+PASS  synthetic employees cleaned
+PASS  synthetic items cleaned
+PASS  synthetic assignments cleaned
+PASS  synthetic audit cleaned
+
+RESULT pass=59 fail=0

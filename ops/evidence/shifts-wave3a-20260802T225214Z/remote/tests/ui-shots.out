@@ -1,0 +1,5 @@
+SEED {"prefix": "SHW3AUI2E2672", "day": "2026-08-04", "create": {"status": 405, "ok": false, "body": {"detail": "Method Not Allowed"}}, "list": {"status": 200, "wave3": {"enabled": true, "version": "3.0.0", "actor_hr_allowlisted": false, "actor_manager_allowlisted": false, "real_mutation_gate": false, "can_mutate_real": true, "permission_matrix": {"hr_allowlisted": {"create": true, "reschedule": true, "soft_cancel": true, "swap_decide": true, "availability_decide": true, "reconciliation_resolve": tru
+SHOT /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots/shifts-wave3a-desktop-board.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots/shifts-wave3a-desktop-composer.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots/shifts-wave3a-mobile-rtl.png
+SHOTS_DIR /opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/screenshots

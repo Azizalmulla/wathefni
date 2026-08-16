@@ -1,0 +1,572 @@
+{
+  "counts": {
+    "total": 315,
+    "p0_named_surface": 0,
+    "named_display_default_review": 82,
+    "safe_display_default": 229
+  },
+  "p0": [],
+  "named_review": [
+    {
+      "file": "App.tsx",
+      "line": 212,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "candidate.allowed_actions || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 338,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "payload.candidate_cards || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 339,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "payload.navigation || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 654,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "recent_applications || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 733,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "positions || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 1159,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "payload.sessions || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 1631,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "page.applications || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 1640,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "legacy.applications || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 1946,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "payload.messages || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 2578,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "role_next_steps || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 2693,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "permissions || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 2817,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "interviews || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 2858,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "status_counts || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 2859,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "feedback_counts || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 2925,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "attempts || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 3132,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "permissions || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 3136,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "action_items || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 3138,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "notifications || []"
+    },
+    {
+      "file": "App.tsx",
+      "line": 3202,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "permissions || []"
+    },
+    {
+      "file": "components/candidates/CandidateGovernedProfile.tsx",
+      "line": 110,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "app.completeness || []"
+    },
+    {
+      "file": "components/candidates/CandidateGovernedProfile.tsx",
+      "line": 175,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "held_applications || []"
+    },
+    {
+      "file": "components/candidates/CandidateGovernedProfile.tsx",
+      "line": 184,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "live_applications || []"
+    },
+    {
+      "file": "components/candidates/CandidateGovernedProfile.tsx",
+      "line": 208,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "documents || []"
+    },
+    {
+      "file": "components/candidates/CandidateGovernedProfile.tsx",
+      "line": 232,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "files || []"
+    },
+    {
+      "file": "components/candidates/CandidateGovernedProfile.tsx",
+      "line": 285,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "processing_timeline || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 888,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "interview.allowed_actions || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 889,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "allowed_actions || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 940,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "allowed_actions || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1040,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "strengths || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1041,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "concerns || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1042,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "follow_up_points || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1074,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "role_fit_evidence || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1075,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "communication_notes || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1076,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "missing_evidence || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1099,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "interview.video_answers || []"
+    },
+    {
+      "file": "pages/InterviewsPage.tsx",
+      "line": 1100,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "covered_questions || []"
+    },
+    {
+      "file": "pages/NotificationsPage.tsx",
+      "line": 509,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "openRes.tasks ?? []"
+    },
+    {
+      "file": "pages/NotificationsPage.tsx",
+      "line": 511,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "resolvedRes.tasks ?? []"
+    },
+    {
+      "file": "pages/NotificationsPage.tsx",
+      "line": 512,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "outboundRes.messages ?? []"
+    },
+    {
+      "file": "pages/NotificationsPage.tsx",
+      "line": 606,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "res.messages ?? []"
+    },
+    {
+      "file": "pages/OverviewPage.tsx",
+      "line": 277,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "items || []"
+    },
+    {
+      "file": "pages/OverviewPage.tsx",
+      "line": 279,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "roleNextSteps || []"
+    },
+    {
+      "file": "pages/OverviewPage.tsx",
+      "line": 559,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "item.applications || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 830,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "res.units || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 1244,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "r.warnings || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 1386,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "summary.results.updated || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 2250,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "policy.eligible_approvers || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3963,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.pending || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3963,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.received || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3964,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.available_tasks || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3985,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.being_reviewed || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3986,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.your_actions || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3987,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.handled_by_others || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 3988,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "detail.completed || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 7080,
+      "kind": "or_empty",
+      "class": "named_display_default_review",
+      "snippet": "item.secondary_links || []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 1506,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "employees ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 1550,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "res.employees ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 2528,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "next_actions ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 4212,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "in_progress ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 4290,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "in_progress ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 4352,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "res.in_progress ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 4960,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "attendance ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 4971,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "res.attendance ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5300,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "preview_rows ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5546,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "periods ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5559,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "preview_rows ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5583,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "timesheets ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5586,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "exports ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5603,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "res.timesheets ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5992,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "items ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5993,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "definitions ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 5995,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "unavailable_source_keys ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6397,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "attention ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6398,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "headlines ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6399,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "insights ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6400,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "definitions ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6402,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "unavailable_source_keys ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6744,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "findings ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6745,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "definitions ?? []"
+    },
+    {
+      "file": "posthire/PostHire.tsx",
+      "line": 6747,
+      "kind": "nullish_empty",
+      "class": "named_display_default_review",
+      "snippet": "unavailable_source_keys ?? []"
+    }
+  ],
+  "note": "R4 fixes named blocker surfaces. Remaining || [] after a successful payload or for local UI lists are classified as safe display defaults."
+}

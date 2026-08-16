@@ -1,0 +1,130 @@
+{
+  "stamp": "2026-08-01T03:41:53.948800+00:00",
+  "proofs": {
+    "mail_sp_configured": {
+      "ok": true
+    },
+    "mail_sp_differs_from_calendar": {
+      "ok": true,
+      "mail_client_suffix": "5c95b496",
+      "calendar_suffix": "13de3131"
+    },
+    "mail_sp_token_mint": {
+      "ok": true,
+      "roles": [
+        "Mail.Send"
+      ]
+    },
+    "mail_sp_has_mail_send_role_or_rbacfa": {
+      "ok": true,
+      "note": "RBACfA may omit roles claim"
+    },
+    "mail_sp_no_mail_read_roles": {
+      "ok": true,
+      "roles": [
+        "Mail.Send"
+      ]
+    },
+    "calendar_sp_cannot_send_mail": {
+      "ok": true,
+      "http": 403
+    },
+    "email_sp_cannot_use_calendar_authority": {
+      "ok": true,
+      "http": 403
+    },
+    "mailbox_probe_ok": {
+      "ok": true,
+      "mailbox_id": "e51803f4-c385-440f-a285-0f3088639be1"
+    },
+    "microsoft_mode_activated_evidence_only": {
+      "ok": true
+    },
+    "only_evidence_tenant_microsoft": {
+      "ok": true,
+      "branded": [
+        {
+          "company_code": "WATHEFNI",
+          "outbound_mode": "microsoft_mailbox"
+        }
+      ]
+    },
+    "approved_mailbox_send": {
+      "ok": true,
+      "provider_accept_status": "accepted_by_provider",
+      "error": null,
+      "raw": {
+        "http_status": 202,
+        "body": ""
+      }
+    },
+    "accept_status_not_delivered": {
+      "ok": true
+    },
+    "resolve_microsoft_activatable": {
+      "ok": true
+    },
+    "dispatch_accepted_by_provider": {
+      "ok": true,
+      "provider": "microsoft_graph",
+      "provider_accept_status": "accepted_by_provider",
+      "error": null,
+      "sender_mode": "microsoft_mailbox"
+    },
+    "outside_scope_send_denied": {
+      "ok": true,
+      "error": "microsoft_http_403",
+      "raw": {
+        "http_status": 403,
+        "body": "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access to OData is disabled: [RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings.\"}}"
+      }
+    },
+    "inbound_still_postmark": {
+      "ok": true
+    },
+    "calendar_client_unchanged": {
+      "ok": true
+    },
+    "calendar_module_untouched_by_mail_client": {
+      "ok": true
+    },
+    "tenant_isolation_no_mailbox_leak": {
+      "ok": true,
+      "other": "C1A1EFB783A",
+      "leak_count": 0
+    },
+    "tenant_isolation_get_by_id": {
+      "ok": true,
+      "other": "C1A1EFB783A"
+    },
+    "switch_back_to_wathefni": {
+      "ok": true
+    },
+    "resolve_wathefni_after_restore": {
+      "ok": true,
+      "resolved": {
+        "mode": "wathefni",
+        "selected_mode": "wathefni",
+        "from_address": "hr@wathefni.ai",
+        "reply_to": "hr@wathefni.ai",
+        "display_name": "Wathefni Evidence",
+        "provider": "postmark",
+        "mailbox_id": null,
+        "activatable": true,
+        "block_reason": null,
+        "purpose": "after_restore",
+        "branding": {
+          "company_name_en": null,
+          "company_name_ar": null,
+          "logo_url": null
+        },
+        "emergency_fallback_used": false,
+        "intended_mode": null,
+        "intended_from": null,
+        "user_status": null,
+        "hr_notice": null
+      }
+    }
+  },
+  "company": "WATHEFNI"
+}

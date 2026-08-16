@@ -1,0 +1,312 @@
+[
+  {
+    "name": "wave3 version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave3 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave2 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "needs_info status",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "withdrawn status",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "enforced=false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "legal_reviewed=false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "full vs half overlap",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "am vs pm no overlap",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overnight shift hours",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "hourly inside overnight",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid handoff no money (unit)",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "db is wathefni",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: real leave count 3",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: real fp 51cd940f",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: real fp dbf82ecf",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: real fp e3217e0e",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic employee",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "accrual posted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "half-day request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "half chargeable ~0.5",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "half reservation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "half-day PM no overlap with AM",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "full vs partial overlap denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "hourly request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "hourly hours=2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overnight hourly",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "split-shift hourly",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "concurrent fractional reservations",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "approve half",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance derived",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "self-approval denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "stale concurrency denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "reject",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "needs_info",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "resubmit",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "withdraw",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "cancel future approved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "cancel temporal future",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance reverse safe",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "already taken denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "already started denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid reservation skipped",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid request no money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid approve",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid approve no money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "handoff event recorded",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "handoff monetary false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attachment upload",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attachment replace",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sensitive upload",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sensitive masked / denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attachment reject",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attachment audit trail",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: real leave count 3",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: real fp 51cd940f",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: real fp dbf82ecf",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: real fp e3217e0e",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: real rows unchanged",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "company real totals restored for real fps",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic residual 0",
+    "ok": true,
+    "detail": null
+  }
+]

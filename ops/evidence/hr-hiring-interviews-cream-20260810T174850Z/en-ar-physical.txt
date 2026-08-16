@@ -1,0 +1,26 @@
+PASS EN/AR key parity
+PASS AR arabic · hrHiring.statusInterview · مقابلة
+PASS AR arabic · hrHiring.statusFeedbackDue · ملاحظات مستحقة
+PASS AR arabic · hrHiring.priorityReviewTitle · مرشحون جاهزون للمراجعة
+PASS AR arabic · hrHiring.priorityRoleBody · افتح المسار المرتّب لـ {{position}} لمتابعة التو
+PASS AR arabic · hrHiring.browseRankingBody · اختر دوراً لعرض الأدلة المرتبة
+PASS AR arabic · hrCandidates.requiresPositionTitle · اختر منصباً أولاً
+PASS AR arabic · hrCandidates.requiresPositionBody · ترتيب المرشحين مرتبط بدور مفتوح. اختر وظيفة لترى
+PASS AR arabic · hrCandidates.rankingUnavailableTitle · الترتيب غير متاح
+PASS AR arabic · hrJobs.title · الوظائف
+PASS AR arabic · hrInterviews.title · المقابلات
+PASS AR arabic · hrInterviews.staleTitle · تغيّرت هذه الملاحظات
+PASS AR arabic · hrInterviews.staleBody · حدّث الصفحة وراجع الملاحظات الحالية قبل الحفظ مر
+PASS AR arabic · hrInterviews.notesPlaceholder · أضف ملاحظات واقعية عن المقابلة
+PASS AR arabic · hrCandidate.scheduleInterview · فتح المقابلات
+PASS EN requires_position calm
+PASS EN schedule honest list
+PASS no EN Interview hardcode in compose
+PASS priority uses titleKey
+PASS candidates cream + requiresPosition
+PASS requiresPosition wired
+PASS interviews cream list/detail
+PASS jobs cream
+PASS notes tokens
+PASS stale inline not whole-page blank
+hr-hiring-interviews-en-ar-physical: PASS

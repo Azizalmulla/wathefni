@@ -1,0 +1,40 @@
+OK      25.10ms  from_prior_eval/anydoc_fixture_text.pdf  err=None
+OK       6.61ms  from_prior_eval/contract_kuwait_labor_law_real_01.pdf  err=None
+OK       0.83ms  from_prior_eval/cv_mixed_02.pdf  err=None
+OK       0.99ms  from_prior_eval/cv_multicolumn_01.pdf  err=None
+OK       0.82ms  from_prior_eval/table_compensation_01.pdf  err=None
+OK       7.50ms  generated/cv_ar_en.docx  err=None
+OK       4.83ms  generated/cv_en.docx  err=None
+FAIL     0.29ms  generated/cv_mixed_text_scan.pdf  err=ConvertError: unsupported input: PDF has no extractable text (ImageBased, 2 pages): OCR is required
+FAIL     0.28ms  generated/cv_scanned_image_only.pdf  err=ConvertError: unsupported input: PDF has no extractable text (Scanned, 1 pages): OCR is required
+OK       0.84ms  generated/cv_text_ar_en.pdf  err=None
+OK       0.32ms  generated/cv_text_en.pdf  err=None
+OK       0.74ms  generated/deck_ar.pptx  err=None
+OK       0.52ms  generated/deck_en.pptx  err=None
+FAIL     0.03ms  generated/legacy_stub.doc  err=ConvertError: malformed document: not an OLE2 compound file: Invalid CFB byte order mark (expected 0xFFFE, found 0x0000)
+FAIL     0.04ms  generated/legacy_stub.ppt  err=ConvertError: malformed document: not an OLE2 compound file: Invalid CFB byte order mark (expected 0xFFFE, found 0x0000)
+FAIL     0.08ms  generated/legacy_stub.xls  err=ConvertError: malformed document: unreadable workbook: Cannot detect file format
+OK       0.07ms  generated/memo_ar.rtf  err=None
+OK       0.03ms  generated/memo_en.rtf  err=None
+OK       0.23ms  generated/roster_ar.xlsx  err=None
+OK       0.12ms  generated/roster_en.xlsx  err=None
+OK       0.05ms  generated/sample.odp  err=None
+OK       0.06ms  generated/sample.ods  err=None
+OK       0.04ms  generated/sample_ar.odt  err=None
+OK       0.04ms  generated/sample_en.odt  err=None
+OK       0.12ms  generated/table_ar.csv  err=None
+OK       0.10ms  generated/table_en.csv  err=None
+FAIL     0.04ms  malformed/not_a_docx.docx  err=ConvertError: malformed document: not a readable zip archive: invalid Zip archive: Could not find EOCD
+FAIL     0.03ms  malformed/truncated.pdf  err=ConvertError: malformed document: invalid PDF structure
+FAIL     0.05ms  malformed/zip_bomb_tiny.xlsx  err=ConvertError: malformed document: unreadable workbook: Cannot detect file format
+{
+  "corpus_files": 29,
+  "anydoc_ok": 21,
+  "anydoc_fail": 8,
+  "rss_max_mb_approx": 43.171875,
+  "rss_delta_mb_approx": 18.6875,
+  "median_ok_ms": 0.31908301752991974,
+  "p95_ok_ms": 7.500292005715892,
+  "max_ok_ms": 25.09958401788026
+}
+WROTE /Users/azizalmulla/Desktop/claw/ops/evidence/anydoc-technical-audit-20260804/results/benchmark.json

@@ -1,0 +1,18 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "f6364b3b-5b9f-4ec9-8c97-3ec22f560a89",
+  "androidUpdateId": "019fda1a-a124-7f1c-86fb-5d51a5180d73",
+  "iosUpdateId": "019fda1a-a124-7b05-a447-cc11f84571c6",
+  "message": "Auth Wave 2 Phase 3: PIN overlay Modal + Settings auto-lock diagnostics (al-overlay-v3:1)",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/f6364b3b-5b9f-4ec9-8c97-3ec22f560a89",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC": "0"
+  },
+  "buildMarker": "al-overlay-v3:1",
+  "priorGroupForRollback": "b9c90b4f-83c7-42fe-8145-d2c991324417",
+  "disableAutolockGroup": "3c51b707-15c4-4793-8cf5-f933a62f236f"
+}

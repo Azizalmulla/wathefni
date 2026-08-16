@@ -1,0 +1,17 @@
+{
+  "prefix": "ATTW2FUI4E7174",
+  "company": "WATHEFNI",
+  "store_mode": "postgres",
+  "shots": [
+    "capture-ops-ar-desktop.png",
+    "capture-ops-ar-mobile.png",
+    "capture-ops-en-desktop.png",
+    "capture-ops-en-mobile.png",
+    "capture-ops-mapping-ar-desktop.png",
+    "capture-ops-mapping-ar-mobile.png",
+    "capture-ops-mapping-en-desktop.png",
+    "capture-ops-mapping-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false
+}

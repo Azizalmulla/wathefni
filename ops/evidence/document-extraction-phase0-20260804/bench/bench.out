@@ -1,0 +1,33 @@
+PHASE0_SHADOW_BENCH_START
+{"id": "cv_en_digital", "agree": true, "pop": [], "insp": [], "type": "text_based"}
+{"id": "cv_ar_digital_translit", "agree": true, "pop": [], "insp": [], "type": "text_based"}
+{"id": "cv_bilingual_digital", "agree": true, "pop": [], "insp": [], "type": "text_based"}
+{"id": "cv_multicolumn_digital", "agree": true, "pop": [], "insp": [], "type": "text_based"}
+{"id": "cv_scanned_image_only", "agree": true, "pop": [1], "insp": [1], "type": "scanned"}
+{"id": "cv_mixed_digital_plus_scan", "agree": false, "pop": [2], "insp": [1, 2], "type": "image_based"}
+{"id": "cv_broken_encoding", "agree": false, "pop": [1], "insp": [], "type": "text_based"}
+{"id": "contract_table_heavy", "agree": true, "pop": [], "insp": [], "type": "text_based"}
+{"id": "identity_civil_id_proxy", "agree": true, "pop": [], "insp": [], "type": "text_based"}
+{"id": "contract_offer_en_real", "agree": true, "pop": [1], "insp": [1], "type": "text_based"}
+{"id": "contract_offer_ar_real", "agree": true, "pop": [1], "insp": [1], "type": "text_based"}
+{
+  "matrix_size": 11,
+  "agreement_count": 9,
+  "agreement_rate": 0.818,
+  "false_ocr_skips_vs_poppler": 1,
+  "extra_ocr_vs_poppler": 1,
+  "total_projected_poppler_ocr_pages": 5,
+  "total_projected_inspector_ocr_pages": 5,
+  "projected_cost_poppler_usd": 0.02,
+  "projected_cost_inspector_usd": 0.02,
+  "paid_ocr_called": false,
+  "authoritative_router": "poppler",
+  "limitations": [
+    "Synthetic matrix; Helvetica cannot embed true Arabic glyphs \u2014 arabic_cv uses transliteration proxy",
+    "Image-only pages are synthetic RGB XObjects, not camera scans",
+    "No Mistral calls; cost figures are projected from page counts only",
+    "Downstream field-extraction accuracy not measured (would require OCR/LLM)"
+  ]
+}
+PHASE0_SHADOW_BENCH_PASS
+RESULTS=/tmp/pdf-inspector-phase0/results/shadow_benchmark.json

@@ -1,0 +1,265 @@
+{
+  "employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "onboarding_status": "in_progress",
+      "documents_pending": 4,
+      "documents_complete": 0
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "name": "Fouad Burhamad",
+      "onboarding_status": "in_progress",
+      "documents_pending": 4,
+      "documents_complete": 0
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "onboarding_status": "in_progress",
+      "documents_pending": 2,
+      "documents_complete": 2
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "name": "Brian Saleh",
+      "onboarding_status": "in_progress",
+      "documents_pending": 1,
+      "documents_complete": 0
+    }
+  ],
+  "item_rows": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "item_id": "bank_details",
+      "label": "Bank account (IBAN)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "item_id": "civil_id",
+      "label": "Civil ID (front + back)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "item_id": "education_cert",
+      "label": "Educational certificates",
+      "required": false,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "item_id": "medical",
+      "label": "Medical fitness certificate",
+      "required": false,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "item_id": "passport",
+      "label": "Passport (photo page)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "item_id": "personal_photo",
+      "label": "Personal photo",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "item_id": "bank_details",
+      "label": "Bank account (IBAN)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 2,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "item_id": "civil_id",
+      "label": "Civil ID (front + back)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 2,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "item_id": "education_cert",
+      "label": "Educational certificates",
+      "required": false,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "item_id": "medical",
+      "label": "Medical fitness certificate",
+      "required": false,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "item_id": "passport",
+      "label": "Passport (photo page)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 2,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "item_id": "personal_photo",
+      "label": "Personal photo",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 2,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "item_id": "bank_details",
+      "label": "Bank account (IBAN)",
+      "required": true,
+      "status": "received",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "bad78241880ae6d5ae7d9512cb8bb321"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "item_id": "civil_id",
+      "label": "Civil ID (front + back)",
+      "required": true,
+      "status": "received",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "fd1de835a88e1a642bc3fc17125e19e8"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "item_id": "education_cert",
+      "label": "Educational certificates",
+      "required": false,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "item_id": "medical",
+      "label": "Medical fitness certificate",
+      "required": false,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "item_id": "passport",
+      "label": "Passport (photo page)",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 4,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "item_id": "personal_photo",
+      "label": "Personal photo",
+      "required": true,
+      "status": "pending",
+      "owner": null,
+      "category": null,
+      "reminder_count": 4,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "item_id": "personal_photo",
+      "label": "Personal photo",
+      "required": true,
+      "status": "pending",
+      "owner": "employee",
+      "category": "identity_legal",
+      "reminder_count": 0,
+      "value_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  ],
+  "item_count": 19,
+  "item_fingerprint": [
+    "WATHEFNI-96550252254|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96550252254|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96566363363|bank_details|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96566363363|civil_id|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96566363363|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96566363363|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96566363363|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96566363363|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|2",
+    "WATHEFNI-96597727743|bank_details|True|received|bad78241880ae6d5ae7d9512cb8bb321|0",
+    "WATHEFNI-96597727743|civil_id|True|received|fd1de835a88e1a642bc3fc17125e19e8|0",
+    "WATHEFNI-96597727743|education_cert|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96597727743|medical|False|pending|d41d8cd98f00b204e9800998ecf8427e|0",
+    "WATHEFNI-96597727743|passport|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+    "WATHEFNI-96597727743|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|4",
+    "WATHEFNI-96599411617|personal_photo|True|pending|d41d8cd98f00b204e9800998ecf8427e|0"
+  ]
+}

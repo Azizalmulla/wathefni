@@ -12,8 +12,8 @@ async function request<T>(path: string, access: DashboardAccess, init: RequestIn
     const detail = payload?.detail || payload
     const message =
       typeof detail === 'string'
-        ? detail
-        : detail?.message || detail?.error || 'Offer request failed.'
+        ? (/^[a-z][a-z0-9_]+$/.test(detail) ? 'Offer request failed.' : detail)
+        : detail?.message || 'Offer request failed.'
     throw new Error(message)
   }
   return payload as T

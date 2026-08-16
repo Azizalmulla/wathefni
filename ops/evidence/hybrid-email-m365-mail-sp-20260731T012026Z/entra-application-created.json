@@ -1,0 +1,93 @@
+{
+  "tags": [],
+  "isDeviceOnlyAuthSupported": null,
+  "info": {
+    "supportUrl": null,
+    "termsOfServiceUrl": null,
+    "logoUrl": null,
+    "privacyStatementUrl": null,
+    "marketingUrl": null
+  },
+  "publisherDomain": "wathefni.onmicrosoft.com",
+  "optionalClaims": null,
+  "applicationTemplateId": null,
+  "tokenEncryptionKeyId": null,
+  "signInAudience": "AzureADMyOrg",
+  "requestSignatureVerification": null,
+  "servicePrincipalLockConfiguration": {
+    "identifierUris": null,
+    "allProperties": true,
+    "credentialsWithUsageSign": null,
+    "credentialsWithUsageVerify": null,
+    "tokenEncryptionKeyId": null,
+    "isEnabled": true
+  },
+  "verifiedPublisher": {
+    "addedDateTime": null,
+    "displayName": null,
+    "verifiedPublisherId": null
+  },
+  "appRoles": [],
+  "samlMetadataUrl": null,
+  "requiredResourceAccess": [],
+  "identifierUris": [],
+  "isDisabled": null,
+  "isFallbackPublicClient": null,
+  "addIns": [],
+  "serviceManagementReference": null,
+  "certification": null,
+  "web": {
+    "redirectUriSettings": [],
+    "implicitGrantSettings": {
+      "enableAccessTokenIssuance": false,
+      "enableIdTokenIssuance": false
+    },
+    "homePageUrl": null,
+    "redirectUris": [],
+    "logoutUrl": null
+  },
+  "createdByAppId": "14d82eec-204b-4c2f-b7e8-296a70dab67e",
+  "parentalControlSettings": {
+    "countriesBlockedForMinors": [],
+    "legalAgeGroupRule": "Allow"
+  },
+  "api": {
+    "oauth2PermissionScopes": [],
+    "requestedAccessTokenVersion": null,
+    "acceptMappedClaims": null,
+    "preAuthorizedApplications": [],
+    "knownClientApplications": []
+  },
+  "nativeAuthenticationApisEnabled": null,
+  "spa": {
+    "redirectUris": []
+  },
+  "passwordCredentials": [],
+  "publicClient": {
+    "redirectUris": []
+  },
+  "notes": null,
+  "deletedDateTime": null,
+  "keyCredentials": [
+    {
+      "usage": "Verify",
+      "keyId": "1a737bd3-af28-4f59-9e14-737b8d9503f2",
+      "customKeyIdentifier": "RadpO6sKYGydYIykHaoBOSjsSJ4=",
+      "key": null,
+      "displayName": "wathefni-m365-mail",
+      "type": "AsymmetricX509Cert",
+      "startDateTime": "2026-07-31T01:17:11Z",
+      "endDateTime": "2028-07-30T01:17:11Z"
+    }
+  ],
+  "id": "9985a994-72e0-4236-9f6b-199efb313f62",
+  "groupMembershipClaims": null,
+  "defaultRedirectUri": null,
+  "disabledByMicrosoftStatus": null,
+  "createdDateTime": "2026-07-31T01:20:37.7818344Z",
+  "description": null,
+  "displayName": "Wathefni Email Send",
+  "uniqueName": null,
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications/$entity",
+  "appId": "8994e095-0605-4baa-86c0-54185c95b496"
+}

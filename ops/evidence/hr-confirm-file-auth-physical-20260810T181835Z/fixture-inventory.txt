@@ -1,0 +1,9 @@
+ATT_TOTAL 0 items 0
+ATT_ALL 0 0
+SWAP requested 0 0
+SWAP approved 2 2
+SWAP rejected 5 5
+OB_LIST 0 0 keys ['ok', 'items', 'completed_count', 'total', 'total_count', 'limit', 'offset', 'has_more', 'hr_mutate_enabled']
+DOCS 0 0 ['ok', 'items', 'summary', 'total', 'offset', 'limit', 'has_more', 'status', 'source']
+CV 96597485758-WATHEFNI-HR {'available': True, 'preview_path': '/dashboard/mobile/candidates/96597485758-WATHEFNI-HR/cv/preview', 'download_path': '/dashboard/mobile/candidates/96597485758-WATHEFNI-HR/cv', 'filename': 'Hamad_Almulla_HR_CV.docx', 'mime_type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'size_bytes': 37143}
+CV 96598900677-WATHEFNI-HR {'available': True, 'preview_path': '/dashboard/mobile/candidates/96598900677-WATHEFNI-HR/cv/preview', 'download_path': '/dashboard/mobile/candidates/96598900677-WATHEFNI-HR/cv', 'filename': 'Aziz_Almulla_HR_CV.docx', 'mime_type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'size_bytes': 37379}

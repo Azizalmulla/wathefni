@@ -1,0 +1,113 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "authority_backend_current",
+      "ok": true,
+      "detail": "backend_current"
+    },
+    {
+      "name": "subject_user",
+      "ok": true,
+      "detail": "88b17ca9-aff4-4721-a553-c1b5514ef95f"
+    },
+    {
+      "name": "projection_hr_web",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "lifecycle_2a",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "main_5",
+      "ok": true,
+      "detail": 5
+    },
+    {
+      "name": "available_dormant_collapsed",
+      "ok": true,
+      "detail": 27
+    },
+    {
+      "name": "owner_reschedule",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "message": "Onboarding start date for W5C-SYNTH|Aziz Mobile QA was updated.",
+        "error": null
+      }
+    },
+    {
+      "name": "owner_mark_accepted",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "message": "Job offer / appointment letter accepted.",
+        "error": null,
+        "result_status": "accepted"
+      }
+    },
+    {
+      "name": "restored",
+      "ok": true,
+      "detail": "processing"
+    },
+    {
+      "name": "viewer_mark_403",
+      "ok": true,
+      "detail": {
+        "status": 403,
+        "detail": {
+          "detail": {
+            "error": "permission_denied",
+            "message": "You do not have access to do that."
+          }
+        }
+      }
+    },
+    {
+      "name": "tenant_isolation",
+      "ok": true,
+      "detail": 403
+    },
+    {
+      "name": "audit_recentish",
+      "ok": true,
+      "detail": {
+        "table": "onboarding_audit_events",
+        "count": 3
+      }
+    },
+    {
+      "name": "viewer_actions_hidden",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "audit_tables": [
+    "application_cv_facts_migration_audit",
+    "attendance_capture_audit_events",
+    "attendance_ops_audit_events",
+    "calendar_event_audit",
+    "calendar_sync_audit",
+    "canonical_cv_evidence_migration_audit",
+    "company_policy_audit",
+    "employee_ess_audit_journal",
+    "employment_offer_hire_override_audits",
+    "leave_attachment_audit",
+    "leave_holiday_audit",
+    "onboarding_audit_events",
+    "platform_company_integration_audit",
+    "report_export_audits",
+    "tc_audit_events",
+    "tc_decision_audit"
+  ],
+  "audit_probe": {
+    "table": "onboarding_audit_events",
+    "count": 3
+  }
+}
+CANARY_QUAL_OK

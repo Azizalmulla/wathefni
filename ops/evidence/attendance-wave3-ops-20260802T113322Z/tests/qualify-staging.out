@@ -1,0 +1,79 @@
+wrote /etc/systemd/system/wathefni-orchestrator-staging.service.d/attendance-ops-wave3.conf
+APP_PATCHED_WAVE3_SCHEMA
+APP_PATCHED_WAVE3_ROUTES
+app.py wave3 hooks ok
+env staging
+expected_db wathefni_staging
+connected_db wathefni_staging
+tables ['attendance_ops_attachments', 'attendance_ops_audit_events', 'attendance_ops_cases', 'attendance_ops_comments', 'attendance_ops_disputes', 'attendance_ops_exceptions', 'attendance_ops_idempotency']
+triggers ['trg_att_ops_audit_immutable']
+OK wave3 schema
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"staging","database_environment":"staging","database_environment_marker":"65aede205f95","database_logical_name":"15cab0f44aae","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}[PASS] state model has exception kinds
+[PASS] state model separates apply
+[PASS] missing check-in exception opened
+[PASS] exception assigned with owner/priority/due
+[PASS] exception has due date
+[PASS] correction case requested
+[PASS] review approve does not apply
+[PASS] punches unchanged before apply
+[PASS] apply creates projection version
+[PASS] before/after captured
+[PASS] idempotent apply replay
+[PASS] lateness exception
+[PASS] early_leave exception
+[PASS] early leave high-risk dual required
+[PASS] dual approval first stage
+[PASS] dual approval rejects same approver
+[PASS] dual approval second completes
+[PASS] early leave applied
+[PASS] absence exception
+[PASS] absence correction applied
+[PASS] missing checkout for reject path
+[PASS] reject without apply
+[PASS] dispute base applied
+[PASS] employee dispute raised
+[PASS] manager resolves dispute
+[PASS] reopen after new evidence
+[PASS] stale row_version fail-closed
+[PASS] manager in-scope allowed (not outside_scope)
+[PASS] manager out-of-scope denied
+[PASS] branch/team manager in-scope
+[PASS] unconfigured manager denied
+[PASS] manager self-correction denied
+[PASS] locked payroll period denied
+[PASS] post-leave correction applied
+[PASS] leave reverse preserves correction
+[PASS] day approved for payroll
+[PASS] approved attendance reconciles to payroll snapshot
+[PASS] incomplete not payroll eligible before fix
+[PASS] disputed stays payroll-excluded or unapproved
+[PASS] comment added
+[PASS] attachment ref stored
+[PASS] secret storage_ref rejected
+[PASS] audit events present
+[PASS] tenant isolation ATTW3
+[PASS] tenant isolation OTHERCO
+[PASS] cross-tenant get denied
+[PASS] connector issue exception
+[PASS] ambiguous kind supported
+[PASS] raw punch still present after corrections
+[PASS] correction punches are separate source
+[PASS] freeze smoke-test-employees360-freeze-regression.py
+[FAIL] freeze smoke-test-onboarding-freeze-regression.py :: SS  freeze doc mentions smoke-test-onboarding-freeze-regression.py
+PASS  freeze doc mentions Attendance
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Wave D
+PASS  cursor onboarding freeze rule present
+PASS  E360 freeze intact
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+51 passed, 3 failed
+
+[PASS] app registers ops routes
+[PASS] app ensures ops schema
+[PASS] http module present
+[PASS] postgres module present
+
+Wave 3 smoke: 55/56 passed, 1 failed

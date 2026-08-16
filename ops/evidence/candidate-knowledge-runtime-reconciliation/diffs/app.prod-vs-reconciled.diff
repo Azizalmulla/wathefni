@@ -1,0 +1,480 @@
+--- /Users/azizalmulla/Desktop/claw/ops/evidence/candidate-knowledge-runtime-reconciliation/production/app.py	2026-07-26 20:29:14
++++ /Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py	2026-07-26 20:32:44
+@@ -60115,3 +60115,477 @@
+                 response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+             return response
+     raise HTTPException(status_code=404, detail="Not found")
++
++
++# ---------------------------------------------------------------------------
++# LOCAL-ONLY ADDITIVE SURFACE (reconciled onto production base)
++# Preserved from checkout: unified candidate profile/facts/views + intake debug ops.
++# Production remains authority for shared symbols and CV facts/evidence/ranking wiring.
++# ---------------------------------------------------------------------------
++
++
++# local-only: _unified_candidate_profile_payload (from checkout L46974-47091)
++def _unified_candidate_profile_payload(company: str, app_key: str, context: dict[str, Any]) -> dict[str, Any]:
++    import unified_candidates as _uc
++
++    ensure_schema()
++    application = find_application_by_key(app_key, company_code=company)
++    if not application:
++        raise HTTPException(status_code=404, detail={"error": "application_not_found"})
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            cur.execute(
++                """
++                SELECT a.*, c.name AS candidate_name, c.email AS candidate_email,
++                       c.profile AS candidate_profile, c.raw_json AS candidate_raw_json,
++                       sd.content AS semantic_content
++                FROM applications a
++                LEFT JOIN candidates c ON c.phone=a.phone
++                LEFT JOIN semantic_documents sd ON sd.entity_type='application' AND sd.entity_key=a.app_key
++                WHERE a.company_code=%s AND a.app_key=%s
++                LIMIT 1
++                """,
++                (company, app_key),
++            )
++            row = dict(cur.fetchone() or application)
++            gov = _uc.load_governance(cur, company_code=company, app_key=app_key)
++            events = _uc.list_fact_review_events(cur, company_code=company, app_key=app_key)
++            cur.execute(
++                """
++                SELECT file_id, file_kind, document_type, original_filename, storage_provider,
++                       storage_url, storage_status, storage_error, stored_at, updated_at, created_at
++                FROM file_registry
++                WHERE company_code=%s AND subject_type='application' AND subject_key=%s
++                ORDER BY updated_at DESC, created_at DESC
++                LIMIT 25
++                """,
++                (company, app_key),
++            )
++            files = [json_safe(dict(item)) for item in cur.fetchall()]
++            try:
++                cur.execute(
++                    """
++                    SELECT document_id, document_type, checksum, mime_type, metadata, created_at, updated_at
++                    FROM candidate_documents
++                    WHERE company_code=%s AND app_key=%s
++                    ORDER BY updated_at DESC NULLS LAST, created_at DESC
++                    LIMIT 25
++                    """,
++                    (company, app_key),
++                )
++                documents = [json_safe(dict(item)) for item in cur.fetchall()]
++            except Exception:
++                documents = []
++            # Sibling applications for same compatibility phone within tenant.
++            cur.execute(
++                """
++                SELECT app_key, status, position_code, position_title, ingested_at, updated_at
++                FROM applications
++                WHERE company_code=%s AND phone=%s
++                ORDER BY ingested_at DESC NULLS LAST
++                """,
++                (company, row.get("phone")),
++            )
++            siblings = [json_safe(dict(item)) for item in cur.fetchall()]
++            conn.commit()
++
++    summary = prehire_application_summary(
++        row,
++        include_raw=True,
++        include_assessment=company_has_module(company, "assessments"),
++        permissions=context.get("permissions") or [],
++    )
++    summary = _uc.enrich_application_summary(
++        summary,
++        row,
++        gov=gov,
++        permissions=context.get("permissions") or [],
++    )
++    snapshot = _uc.extract_facts_snapshot(row)
++    effective = _uc.effective_facts_from_events(snapshot, events)
++    held_rows = [s for s in siblings if str(s.get("status") or "") in HELD_IMPORT_STATUSES]
++    live_rows = [s for s in siblings if str(s.get("status") or "") not in HELD_IMPORT_STATUSES]
++    timeline = [
++        {"label": "Received", "at": summary.get("ingested_at")},
++        {"label": "Updated", "at": summary.get("updated_at")},
++    ]
++    for event in events[-10:]:
++        timeline.append(
++            {
++                "label": f"Fact review: {event.get('action')} {event.get('fact_path')}",
++                "at": json_safe(event.get("created_at")),
++                "actor": event.get("actor_email") or event.get("actor_user_id"),
++            }
++        )
++    return {
++        "company_code": company,
++        "application": summary,
++        "record_state": summary.get("record_state"),
++        "held_reason": _uc.held_reason(row),
++        "source_channel": summary.get("intake_source"),
++        "sender_provenance": _uc.sender_provenance(row),
++        "grounded_contacts": summary.get("grounded_contacts"),
++        "documents": documents,
++        "files": files,
++        "facts": {
++            "extraction_snapshot": snapshot,
++            "effective": effective.get("effective"),
++            "reviews_by_path": effective.get("reviews_by_path"),
++            "events": json_safe(events),
++            "completeness": summary.get("completeness"),
++            "missing_policy": "Not extracted or Unknown — never a negative fact",
++        },
++        "privacy": summary.get("privacy"),
++        "held_applications": held_rows,
++        "live_applications": live_rows,
++        "processing_timeline": timeline,
++        "link_to_job": summary.get("link_to_job"),
++        "cv_truth": candidate_cv_truth(row),
++    }
++
++# local-only: dashboard_prehire_application_fact_review (from checkout L47105-47172)
++@app.post("/dashboard/prehire/applications/{app_key}/facts/review")
++def dashboard_prehire_application_fact_review(
++    app_key: str,
++    request: dict[str, Any],
++    context: dict[str, Any] = Depends(prehire_dashboard_context),
++):
++    require_entitlement(context, "pre_hiring", "candidate.manage")
++    import unified_candidates as _uc
++
++    company = context["company_code"]
++    application = find_application_by_key(app_key, company_code=company)
++    if not application:
++        raise HTTPException(status_code=404, detail={"error": "application_not_found"})
++    body = request or {}
++    preview = bool(body.get("preview"))
++    action = str(body.get("action") or "").strip().lower()
++    fact_path = str(body.get("fact_path") or "").strip()
++    if action not in _uc.FACT_EVENT_ACTIONS:
++        raise HTTPException(status_code=422, detail={"error": "invalid_fact_review_action"})
++    if not fact_path:
++        raise HTTPException(status_code=422, detail={"error": "fact_path_required"})
++    preview_payload = {
++        "ok": True,
++        "preview": True,
++        "company_code": company,
++        "app_key": app_key,
++        "action": action,
++        "fact_path": fact_path,
++        "new_value": body.get("new_value"),
++        "previous_value": body.get("previous_value"),
++        "note": body.get("note"),
++        "confirmation_required": True,
++        "message": "Confirm to append an immutable HR fact-review event. Extraction snapshots are never overwritten.",
++    }
++    if preview or not bool(body.get("confirm")):
++        return preview_payload
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            try:
++                event = _uc.append_fact_review_event(
++                    cur,
++                    company_code=company,
++                    app_key=app_key,
++                    fact_path=fact_path,
++                    action=action,
++                    actor_user_id=str(context.get("actor_user_id") or "") or None,
++                    actor_email=str(context.get("actor_email") or context.get("hr_email") or "") or None,
++                    new_value=body.get("new_value"),
++                    previous_value=body.get("previous_value"),
++                    evidence_refs=body.get("evidence_refs") if isinstance(body.get("evidence_refs"), list) else [],
++                    note=str(body.get("note") or "") or None,
++                    document_version_id=str(body.get("document_version_id") or "") or None,
++                    extraction_version_id=str(body.get("extraction_version_id") or "") or None,
++                    supersedes_event_id=str(body.get("supersedes_event_id") or "") or None,
++                )
++            except ValueError as exc:
++                raise HTTPException(status_code=422, detail={"error": str(exc)}) from exc
++            conn.commit()
++    record_admin_audit(
++        context,
++        "candidate_fact_review",
++        summary=f"Appended fact review {action} on {fact_path} for {app_key}.",
++        target_type="application",
++        target=app_key,
++        details={"action": action, "fact_path": fact_path, "event_id": event.get("event_id")},
++    )
++    return {"ok": True, "company_code": company, "app_key": app_key, "event": json_safe(event), "preview": False}
++
++# local-only: dashboard_prehire_application_facts (from checkout L47099-47102)
++@app.get("/dashboard/prehire/applications/{app_key}/facts")
++def dashboard_prehire_application_facts(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
++    payload = _unified_candidate_profile_payload(context["company_code"], app_key, context)
++    return {"company_code": payload["company_code"], "app_key": app_key, "facts": payload["facts"]}
++
++# local-only: dashboard_prehire_application_profile (from checkout L47094-47096)
++@app.get("/dashboard/prehire/applications/{app_key}/profile")
++def dashboard_prehire_application_profile(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
++    return _unified_candidate_profile_payload(context["company_code"], app_key, context)
++
++# local-only: dashboard_prehire_delete_saved_view (from checkout L47221-47236)
++@app.delete("/dashboard/prehire/candidates/saved-views/{view_id}")
++def dashboard_prehire_delete_saved_view(view_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
++    import unified_candidates as _uc
++
++    company = context["company_code"]
++    actor = str(context.get("actor_user_id") or "").strip()
++    if not actor:
++        raise HTTPException(status_code=400, detail={"error": "actor_required"})
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            deleted = _uc.delete_saved_view(cur, company_code=company, actor_user_id=actor, view_id=view_id)
++            conn.commit()
++    if not deleted:
++        raise HTTPException(status_code=404, detail={"error": "saved_view_not_found"})
++    return {"ok": True, "company_code": company, "view_id": view_id}
++
++# local-only: dashboard_prehire_intake_attention (from checkout L47253-47269)
++@app.get("/dashboard/prehire/intake-operations/attention")
++def dashboard_prehire_intake_attention(context: dict[str, Any] = Depends(prehire_dashboard_context)):
++    """Lightweight banner count for Candidates page. Does not list candidates."""
++    import unified_candidates as _uc
++
++    company = context["company_code"]
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            summary = _uc.intake_operations_summary(cur, company_code=company)
++            conn.commit()
++    return {
++        "company_code": company,
++        "attention_count": summary.get("attention_count") or 0,
++        "banner": summary.get("banner"),
++        "link": "/intake-operations",
++    }
++
++# local-only: dashboard_prehire_intake_operations (from checkout L47239-47250)
++@app.get("/dashboard/prehire/intake-operations")
++def dashboard_prehire_intake_operations(context: dict[str, Any] = Depends(prehire_dashboard_context)):
++    import unified_candidates as _uc
++
++    require_entitlement(context, "pre_hiring", "candidate.import")
++    company = context["company_code"]
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            summary = _uc.intake_operations_summary(cur, company_code=company)
++            conn.commit()
++    return summary
++
++# local-only: dashboard_prehire_save_view (from checkout L47191-47218)
++@app.post("/dashboard/prehire/candidates/saved-views")
++def dashboard_prehire_save_view(
++    request: dict[str, Any],
++    context: dict[str, Any] = Depends(prehire_dashboard_context),
++):
++    import unified_candidates as _uc
++
++    company = context["company_code"]
++    actor = str(context.get("actor_user_id") or "").strip()
++    if not actor:
++        raise HTTPException(status_code=400, detail={"error": "actor_required"})
++    body = request or {}
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            try:
++                view = _uc.upsert_saved_view(
++                    cur,
++                    company_code=company,
++                    actor_user_id=actor,
++                    name=str(body.get("name") or ""),
++                    filters=body.get("filters") if isinstance(body.get("filters"), dict) else {},
++                    view_id=str(body.get("view_id") or "") or None,
++                )
++            except ValueError as exc:
++                raise HTTPException(status_code=422, detail={"error": str(exc)}) from exc
++            conn.commit()
++    return {"ok": True, "company_code": company, "view": json_safe(view)}
++
++# local-only: dashboard_prehire_saved_views (from checkout L47175-47188)
++@app.get("/dashboard/prehire/candidates/saved-views")
++def dashboard_prehire_saved_views(context: dict[str, Any] = Depends(prehire_dashboard_context)):
++    import unified_candidates as _uc
++
++    company = context["company_code"]
++    actor = str(context.get("actor_user_id") or "").strip()
++    if not actor:
++        raise HTTPException(status_code=400, detail={"error": "actor_required"})
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            _uc.ensure_unified_candidates_schema(cur)
++            views = _uc.list_saved_views(cur, company_code=company, actor_user_id=actor)
++            conn.commit()
++    return {"company_code": company, "views": json_safe(views)}
++
++# local-only: internal_intake_job_replay (from checkout L51266-51283)
++@app.post("/orchestrator/debug/intake-jobs/{job_id}/replay")
++def internal_intake_job_replay(
++    job_id: str,
++    company_code: str = Query(...),
++    _internal: dict[str, Any] = Depends(require_internal_access),
++):
++    try:
++        return _durable_email_ingress.replay_dead_letter(
++            db_connect=db_connect,
++            company_code=company_code,
++            job_id=job_id,
++            actor="internal_operator",
++        )
++    except _durable_email_ingress.IngressValidationError as exc:
++        raise HTTPException(
++            status_code=404 if exc.code == "intake_job_not_found" else 409,
++            detail={"error": exc.code},
++        ) from exc
++
++# local-only: internal_intake_operations (from checkout L51232-51246)
++@app.get("/orchestrator/debug/intake-operations")
++def internal_intake_operations(
++    company_code: str | None = Query(default=None),
++    include_orphans: bool = Query(default=True),
++    _internal: dict[str, Any] = Depends(require_internal_access),
++):
++    ensure_schema()
++    return json_safe(
++        _durable_email_ingress.operations_summary(
++            db_connect=db_connect,
++            config=durable_email_ingress_config(),
++            company_code=company_code,
++            include_orphans=include_orphans,
++        )
++    )
++
++# local-only: internal_intake_quarantine_download (from checkout L51345-51397)
++@app.get("/orchestrator/debug/intake-documents/{document_id}/download")
++def internal_intake_quarantine_download(
++    document_id: str,
++    company_code: str = Query(...),
++    expires: int = Query(...),
++    signature: str = Query(...),
++    _internal: dict[str, Any] = Depends(require_internal_access),
++):
++    company = str(company_code or "").strip().upper()
++    secret = str(os.environ.get("WATHEFNI_INTAKE_QUARANTINE_SIGNING_SECRET") or "")
++    if not _durable_email_ingress.verify_quarantine_download(
++        company_code=company,
++        document_id=document_id,
++        expires_at_epoch=expires,
++        signature=signature,
++        secret=secret,
++        now_epoch=int(time_module.time()),
++    ):
++        raise HTTPException(status_code=401, detail={"error": "invalid_download_signature"})
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            cur.execute(
++                """
++                SELECT quarantine_key, content_sha256, size_bytes, original_filename,
++                       detected_mime
++                FROM intake_documents
++                WHERE company_code=%s AND document_id=%s AND storage_status='stored'
++                """,
++                (company, document_id),
++            )
++            document = cur.fetchone()
++    if not document:
++        raise HTTPException(
++            status_code=404, detail={"error": "intake_document_not_found"}
++        )
++    store = _durable_email_ingress.LocalQuarantineStore(
++        durable_email_ingress_config().quarantine_root
++    )
++    try:
++        path = store.verify(
++            document["quarantine_key"],
++            document["content_sha256"],
++            document["size_bytes"],
++        )
++    except _durable_email_ingress.RetryableJobError as exc:
++        raise HTTPException(status_code=409, detail={"error": exc.code}) from exc
++    return FileResponse(
++        path,
++        media_type=document.get("detected_mime") or "application/octet-stream",
++        filename=document.get("original_filename") or "attachment",
++        content_disposition_type="attachment",
++        headers={"Cache-Control": "no-store"},
++    )
++
++# local-only: internal_intake_quarantine_sweep (from checkout L51286-51297)
++@app.post("/orchestrator/debug/intake-quarantine/sweep")
++def internal_intake_quarantine_sweep(
++    apply: bool = Query(default=False),
++    _internal: dict[str, Any] = Depends(require_internal_access),
++):
++    return json_safe(
++        _durable_email_ingress.orphan_storage_report(
++            db_connect=db_connect,
++            config=durable_email_ingress_config(),
++            delete=bool(apply),
++        )
++    )
++
++# local-only: internal_intake_signed_download (from checkout L51300-51342)
++@app.post("/orchestrator/debug/intake-documents/{document_id}/signed-download")
++def internal_intake_signed_download(
++    document_id: str,
++    company_code: str = Query(...),
++    ttl_seconds: int = Query(default=300, ge=30, le=900),
++    _internal: dict[str, Any] = Depends(require_internal_access),
++):
++    company = str(company_code or "").strip().upper()
++    with db_connect() as conn:
++        with conn.cursor() as cur:
++            cur.execute(
++                """
++                SELECT 1 FROM intake_documents
++                WHERE company_code=%s AND document_id=%s AND storage_status='stored'
++                """,
++                (company, document_id),
++            )
++            if not cur.fetchone():
++                raise HTTPException(
++                    status_code=404, detail={"error": "intake_document_not_found"}
++                )
++    secret = str(os.environ.get("WATHEFNI_INTAKE_QUARANTINE_SIGNING_SECRET") or "")
++    expires = int(time_module.time()) + ttl_seconds
++    try:
++        signature = _durable_email_ingress.sign_quarantine_download(
++            company_code=company,
++            document_id=document_id,
++            expires_at_epoch=expires,
++            secret=secret,
++        )
++    except _durable_email_ingress.IngressValidationError as exc:
++        raise HTTPException(status_code=503, detail={"error": exc.code}) from exc
++    return {
++        "company_code": company,
++        "document_id": document_id,
++        "expires": expires,
++        "signature": signature,
++        "download_path": (
++            f"/orchestrator/debug/intake-documents/{document_id}/download"
++            f"?company_code={urllib.parse.quote(company)}&expires={expires}"
++            f"&signature={signature}"
++        ),
++    }
++
++# local-only: internal_intake_worker_run (from checkout L51249-51263)
++@app.post("/orchestrator/debug/intake-worker/run")
++def internal_intake_worker_run(
++    limit: int = Query(default=10, ge=1, le=500),
++    job_type: list[str] | None = Query(default=None),
++    _internal: dict[str, Any] = Depends(require_internal_access),
++):
++    invalid = sorted(set(job_type or []) - set(_durable_email_ingress.JOB_TYPES))
++    if invalid:
++        raise HTTPException(
++            status_code=400,
++            detail={"error": "unsupported_intake_job_type", "job_types": invalid},
++        )
++    return json_safe(
++        run_durable_email_ingress_worker(limit=limit, job_types=job_type or None)
++    )

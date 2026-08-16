@@ -1,0 +1,11 @@
+wave4_version 1.0.0
+wave3_version 1.0.0
+wave2b_version 1.0.0
+wave2a_version 1.0.0
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'posts_payment': False, 'journal_drafts': True, 'journals': False, 'bank_export_contract': True, 'bank_files': False, 'native_results_authoritative': False, 'external_payroll_authority': 'external', 'ai_calculations': False, 'synthetic_only': True}
+connected_db wathefni
+wave4_tables ['payroll_account_mappings', 'payroll_bank_export_drafts', 'payroll_close_dual_control', 'payroll_close_run_events', 'payroll_close_runs', 'payroll_finance_exports', 'payroll_journal_drafts', 'payroll_journal_lines']
+wave1_2a_2b_3_tables_ok
+MIGRATE_OK payroll_close_export_wave4_prod
+ACK_PRODUCTION_PAYROLL_W4B=YES

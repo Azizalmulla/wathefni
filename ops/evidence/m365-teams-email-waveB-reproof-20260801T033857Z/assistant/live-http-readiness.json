@@ -1,0 +1,10 @@
+{
+  "microsoft_calendar_provider": false,
+  "teams_meet_status": "enabled_but_not_configured",
+  "teams_meet_offerable": false,
+  "email_status": "enabled_but_not_configured",
+  "email_offerable": false,
+  "email_provider_flag": false,
+  "google_calendar": true,
+  "interviews_schedule_offerable": true
+}

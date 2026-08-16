@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/posthire/ShiftsBoardRangeContract.test.ts src/posthire/ShiftsWave2InteractionContract.test.ts src/posthire/ShiftsWave3BContract.test.tsx
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  3 passed (3)
+      Tests  14 passed (14)
+   Start at  21:27:59
+   Duration  1.20s (transform 159ms, setup 487ms, import 185ms, tests 40ms, environment 2.29s)
+

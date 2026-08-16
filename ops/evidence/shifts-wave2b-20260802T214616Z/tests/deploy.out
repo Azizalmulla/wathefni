@@ -1,0 +1,204 @@
+stamp=20260802T214616Z
+time_utc=2026-08-02T21:46:56Z
+active
+=== SHAs before ===
+4b55894a7a9249bb5a86276095fd44f49d2c8c2a1ac15ff942a3202375702ee1  /opt/wathefni/orchestrator/app.py
+82262f2e0e7b6e9dc04c7a6e3305d50eef4816659a6b931bb40742d8160f0da7  /opt/wathefni/orchestrator/shifts_authority_wave1.py
+ls: cannot access '/opt/wathefni/orchestrator/shifts_schedule_integrity_wave2.py': No such file or directory
+shifts_schedule_integrity_wave2.py absent
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SHIFTS_ALLOW_OVERNIGHT=1
+WATHEFNI_SHIFTS_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_KEY_MARKERS=SHW1B,SHW1B-SYNTH|
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965529
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1
+{
+  "db": "wathefni",
+  "assignment_count": 23,
+  "assignment_fps": {
+    "09e99905-0d03-4c32-ba62-d8a57ba34b1e": "37d68b3fa0a099c1cd2b0e3d25b53228",
+    "0a6e73dd-9c6d-49a0-b253-39a9922ebd70": "03a3a4c85a1142eca7f24822e70305ca",
+    "13a07e6c-57f9-4053-b166-b81ec35e7eb7": "74ebe87ffdf199c51d0c34c588d78bc4",
+    "18b6da7e-e08b-4a95-b9d3-d4439411241a": "2b87815a88c787d502c96bd29eb0a845",
+    "1b1e64f9-fb35-4ac6-b02f-34109a38f1ae": "76c178414011c3f56e97ff3b19668f78",
+    "1f74e534-9a35-4a85-a0d3-5ffcdb544eb1": "45ec45228f978c851817c217e9e57ee3",
+    "3de94a86-e61c-498d-9a28-56d50d452613": "2327ff33ac32eecbdbab34cac48d3f86",
+    "4b435014-b22b-436f-b411-1240152fe669": "8381e0389a087017726e0e5679c5be00",
+    "5759604c-8cd1-4608-a385-0d77c7d6c603": "c115445f8185013aa359cdcc1e04a7cf",
+    "57cd5c44-ee11-4873-b77e-cbb1073d6f6e": "1e2a2060a73726d117aaa969dfcbe3fb",
+    "6a84a671-eb7f-43ea-870e-af859a440467": "d9f676675b01fcba40f937178698c0b2",
+    "7a03af13-03d3-4ad9-baf3-e519cc528e5c": "0b60a0e138d1f6a87593b97e772c1ead",
+    "a3dc09a7-b407-41ef-9030-91c2968b8439": "eaa02121892fefc4e186e6898fdaaf76",
+    "b85842f8-09aa-4a9d-9eda-4be14b4ac9de": "ac20053ff43103d622c13eafdf0f2f1d",
+    "bc4364a3-76c7-4ddd-858f-a112e78c0e8a": "9e8953d71ca209d278ce21d565ab8eee",
+    "c6e116e2-9981-4ebf-93f5-a1c5bf981ad5": "d1619208da466201c90d9561d35dc1da",
+    "ca7e5289-21bd-4ca6-9035-b10ff65fd854": "203bf609b8aa4050b80df7dc4b63985b",
+    "cb445860-b7c8-4184-9c37-fdbb5db4b754": "de225ae360d71ff50b5881c2b2870e91",
+    "cb617cff-7c9c-45de-8ea2-1ae053694348": "c58374cbc3a7d196ab25e9a5ca410478",
+    "da2a27fe-182c-4a84-af9e-1a1dd0ff7dce": "8995e3486ffc1560c3f9d3a4a3b88575",
+    "e3cadd8e-1790-447f-a68b-e45a04bb4075": "562b04a6591852b7ebd080dba970543c",
+    "eff09bbd-1ddc-4d3b-8f77-a15144dcfe00": "0e85b7d63aba00f9670097ea10cf62d6",
+    "f9ebecf3-8838-456a-8124-c34c3c7600ca": "7a9fb480195f590a40855450d5d07e86"
+  },
+  "orphan_fps": {
+    "0a6e73dd-9c6d-49a0-b253-39a9922ebd70": "03a3a4c85a1142eca7f24822e70305ca",
+    "6a84a671-eb7f-43ea-870e-af859a440467": "d9f676675b01fcba40f937178698c0b2",
+    "f9ebecf3-8838-456a-8124-c34c3c7600ca": "7a9fb480195f590a40855450d5d07e86"
+  },
+  "event_count": 31,
+  "swap_count": 0,
+  "availability_count": 0,
+  "version_count": null,
+  "reminder_count": null,
+  "seasonal_count": null,
+  "recon_count": null
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[21:46:58] backing up code, dashboard dist, dropins, table dumps
+4b55894a7a9249bb5a86276095fd44f49d2c8c2a1ac15ff942a3202375702ee1  app.py
+e5b65c7a048bcd63eaf69c510693a09e25591b037829e6ca34943789f6aa0dbb  shift-assignments.csv
+55169fcf51ccab03394879083852eab95684e8e1936031188e810b3535289b2c  shift-events.csv
+82262f2e0e7b6e9dc04c7a6e3305d50eef4816659a6b931bb40742d8160f0da7  modules/shifts_authority_wave1.py
+9043f99a96169e3387d51e6513a0e5fc0b2b15967efb20abab0d4d06b5083c11  dashboard-dist/setup-console.html
+61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66  dashboard-dist/favicon.svg
+1a285dc3495a2be24441983deb96d53983c6fdc511e2d1980562288af1519d0b  dashboard-dist/index.html
+5ca2fa3980667b2c2853315337ea43a44e5b244ebca277d824e973d77056fb90  dashboard-dist/assets/SettingsPage-BaXoDVhr.js
+e47b5eaf5e73cdf9cb5fb2ce06b253b8c7dc8b6ccb37ac6361a43c81ae15cfa8  dashboard-dist/assets/dashboardPerf-YTc1theN.js
+05082737b3ad3e6f89cb93c40e81738edbd4399f309a1cbc544d03e5a03f0189  dashboard-dist/assets/ConfirmDialog-DujmJTQ2.js
+c599ed4b8bc06a08b8cb872e817c72ea744ba7713640655c474cc1636496f6e5  dashboard-dist/assets/PostHire-BXoMxfm_.js
+ad5aa5a863d89aa2c07246a5cb143221b79de23cf0c52b1cdcefcdf8f54de136  dashboard-dist/assets/ReportsPage-3TW1WzFZ.js
+6fd3fc7d0952dc85e2d0cd4117a5b69decd1c7c612fd2dbf5c9d2b2059835f36  dashboard-dist/assets/field-yb05WhDn.js
+cca26b2f14ab5c025707111932fdb1ba7fb98b0b56b0547b12ac9997e3916c76  dashboard-dist/assets/access-CO2N9Muy.js
+785597bca2e7dd97a652a20a197c077079e635a5663433448e0e1d9fd8c98a64  dashboard-dist/assets/src-MUo5jgFJ.js
+180b8ed7856dc5a1ad45f7e4f6ba5ef055ac9b135cc01ac8de9c08d64fe7e684  dashboard-dist/assets/CandidateProfilePage-C9U8s5jF.js
+8b513cec9dde5daf69260b17481ab455c9ece92547379f40220eb0b46f4cc6bb  dashboard-dist/assets/badge-FSitur2o.js
+54f68af9a4007976db7696db5a82ee814f0bfc1d1d6f3478a7af02887c18b4df  dashboard-dist/assets/card-DRF9lkZs.js
+a9801a03dbafe40b53a0b24f307db622e13aaa4d26debe8a33c393bfd95b25ff  dashboard-dist/assets/fetchers-QYlge8xw.js
+74f224077356b887d80967a7baf2b02357678e77d0611bdad1e2f9ffccff5842  dashboard-dist/assets/load-more-bar-76BZ1SYf.js
+f37e82f94605befecfe56b541c0badf6e1805906e4c735c685d47d6f6d432f7d  dashboard-dist/assets/InterviewsPage-qWphEgaM.js
+0b73b977b2f54e03135fc06727fba74318caf51c15b657ba74165605a2b3483b  dashboard-dist/assets/recruitingLifecycle-DXQht60b.js
+d2a1df3eb275c16f30f44b6e8b960ab4be21449ab50aa3f25bf366612f82370b  dashboard-dist/assets/dashboard-C5_9qaoH.js
+66841894ae6f7af1388501bb9d4cccfa3c1bb1d2d1aaa340e89e849ae7dc593c  dashboard-dist/assets/lucide-ikZu0qKv.js
+908aed395ebdf8d6474340064f8017ae4544f9afcd9c51e290fadd0a01ade03f  dashboard-dist/assets/JobsPage-en6Ubmae.js
+cc9906e35a42b4c09ebbd061c2f13866a946b8ebece6e44297ceaa2872b0cdad  dashboard-dist/assets/CalendarShell-CsavrzLQ.js
+5f71a4f71cf87191f72d4339afa3c206254a4547482754dd7224c754bf698e40  dashboard-dist/assets/button-DlTujqIP.js
+5548a53ced0de58e883351f1be0de9ad9120482d7ef73a7ba26e2c5e0a75f5d4  dashboard-dist/assets/AssessmentsPage-LcHt8bXt.js
+eb49831945e535f47b87f0749978d1b60e04f35c7570e939c77c7db08f9f5b04  dashboard-dist/assets/src-j-sX7gof.css
+80909eac2ab6a8d5909023d66dc05fcba0b4209da8f912314500442526d3a3bb  dashboard-dist/assets/useOverlayA11y-B6E0imkd.js
+bead715146548c981807aa11fce8f65694d1f5bd2a4075d15975c2a69337b430  dashboard-dist/assets/NotificationsPage-DjRRNIYN.js
+e20031c7529a29b0571afe06e7df1ca1aa155a8d4e957c4f22863cacd148c245  dashboard-dist/assets/inboundIntakePresentation-B5lLioGw.js
+1b13387cb23dc39bf70e31677c21f6db5cad3377b96f286b6ee444496e5bfea7  dashboard-dist/assets/rolldown-runtime-ciTZEWaI.js
+b4a57adf9a542cc2eebbf4364a20584b0c4921fd69a2a30dac650c5147422fdf  dashboard-dist/assets/RankingPage-CWm9MiDx.js
+95bf18260f3de9d793723778c2012253ecf656856e35e1b6eb40531bbfa7da09  dashboard-dist/assets/api-4eghFNHt.js
+8135502a78a2d185cfb074281514a9bf77a4681db3bf106fa6afd05c8e37abcd  dashboard-dist/assets/react-vendor-BWtRT0Qn.js
+d6c30f0177f9033517af7c0387f9e9dae47b51747d946dc98a3cee3121272915  dashboard-dist/assets/JobWorkspace-DMETLQKt.js
+ee3e684629d64fcf1864042b323bb950aeaae201d2686f78892f15c969970873  dashboard-dist/assets/AdminAIPage-CmSRheo4.js
+f6e4ab3c03660a35bcc5a2a5fc331d01edca4ea3a9277e4d130c190e68c87998  dashboard-dist/assets/setupConsole-CFFLsyxe.js
+00ff5eaad2fe541f55ca0d5c5173f3f96f41574c64f0501afcc10544b940548a  dashboard-dist/assets/react-query-CEOcdruo.js
+b0c7b84620184a249cdb0a88872853496539cbbdbafe69b036837858d68a4588  dashboard-dist/assets/utils-B-Q60V4B.js
+861bb2275aefc927175a3e05f802a68866f2b957270d7b9519b295f96bda661d  dashboard-dist/assets/CandidatesPage-CyQeqBhP.js
+52ad46e1e19f1e0aeecc53b5b44c2df77d2d4f8faa4e6cc69a44ba51769ba0df  systemd-dropins/waveD-phase5-mailbox-connectors.conf
+72e0448fd7861b1cd438633f64126b7402e79444701c6469beb6fda0864dc1c2  systemd-dropins/doc-upload.conf
+ec0c49ed64974667122c17a391e87048e37ced25cd026aaaa807a4a756d120e0  systemd-dropins/jobs-apply-whatsapp.conf
+a55c1ac93b6f6edab44c66878edd26400d38f8fb15c84f6668d219f0a3263087  systemd-dropins/zz-onboarding-wave2b-synthetic-canary.conf
+0a70143fbeb2434025d8d2ac5bb9489153ceecbcdf34eb60f81d3a6c19afbb55  systemd-dropins/zzz-attendance-final-freeze.conf
+aeac1a2b67ea86fa4b9bfece2694ff3fb78c36056f1fc28d227934fb0f6f890f  systemd-dropins/tool-agent-terra.conf
+cc519d6f30eb9dee25645ee280fdadd86860b531911a5ca16f3df99517e93cd3  systemd-dropins/talent-pool-classification.conf
+915b7bfc5f893807608dadbb18a573924b2202749cf685aaf15a7a6d5847f6f1  systemd-dropins/zzzzzzzz-shifts-authority-wave1b-synthetic.conf
+09e37734137aabe7a4042785f4f91a8fc574d0a2f3e07a9179a593ac619eeb6d  systemd-dropins/zzzzz-leave-policy-wave2c.conf
+5e8fa932cfa62424dec33a170a2aba47476a98f5d850cc90c816a4f184bfaaba  systemd-dropins/cv-mistral-ocr.conf
+94bbdff164bb863f0932c04acdf21c301f62b9f154ba3d1d7a29bfbd044e06ed  systemd-dropins/m365-mail.conf
+845f77511bef7c8d0dd75b036579f85c59a251b6320f762c22ce5c81e468c2ec  systemd-dropins/leave-balances.conf
+4d8091271229999cdd920733cc3d09f297d1a4168b4f9a6fe8d281624cfc1c5f  systemd-dropins/20-assessment-authoring-off.conf
+161c166454498e83fecf2c176b59ae07c9773496c860386b9adab0f26cb397f7  systemd-dropins/assistant-hr-reads.conf
+aec3eb9eb8debdd66981e2ad52a066182dfe365e50011f43de17070d84fa50ea  systemd-dropins/waveD-phase3-enterprise.conf
+a9a664f969d1047e74511a2dc3d2c4dda8c43f076da620f21d21b41fcb383793  systemd-dropins/zz-attendance-wave2e-capture-ops-dark.conf
+ae359282597c2368d56c659961bda9d9a92303fcd43fd4a3d9430ec20e12bfc5  systemd-dropins/environment.conf
+da766d1b6cf6b1139d922506de744535b9b4491959662ff3aecf6b41492f4b79  systemd-dropins/durable-email-ingress.conf
+676c138331a3eea21e2c817657368d410b6757504c877c9b3e00208bb986722a  systemd-dropins/outbound-layer.conf.bak.20260609T175724Z
+92659eab262ff6feae322653aec64683dda778a421f22379f7c215eb801684cd  systemd-dropins/talent-pool-auto-email-classification.conf
+b38e4acc119568c2866f5e73d3374ce013fac21d6052d8b223f262a6efba8b60  systemd-dropins/mailbox-secret.conf
+9bb601ddd45a33200c35c05cb00abfd35c504be470fedd5e0e2ec90bc1e7d480  systemd-dropins/candidate-knowledge.conf
+c57cee726ab59257146cb4a56fd5cd4521ee851ad92e914c0a8e79f86d034cec  systemd-dropins/canonical-lifecycle.conf
+d33188d4f919ffb861894b49824a0edf8e5138d74e13e42565b742d607707595  systemd-dropins/zzzzzz-leave-workflow-wave3b.conf
+c41a3de239bf026b2cddf42c59f9c1c980b8640293f49cc8162b4c5bf9aa44a2  systemd-dropins/waveD-phase2-inbound-allowlist.conf
+e6c7ed59f36583e6a98a3727c7343947a2d80b34f8b24e3ab54a6aaad6d676d7  systemd-dropins/toolcall-responses.conf
+d02371da3faac086bcaa543a711a92b9d2f1f70b9d982e9a0bca6366ad1f00c9  systemd-dropins/cv-extraction-v2.conf
+ddb8a8a713aefedcf4cc107e5e0fff362bc0736d8350679b645e5b2daf0f6d91  systemd-dropins/unified-candidates.conf
+30832f47ffa868884c322d51db98d2abc86c0d9e1582e2da8a7e43441323d2fd  systemd-dropins/retrieval-models.conf
+0614340567d86f044ef3d5c89ec198dae946063d003f5b61a830f5cec4803770  systemd-dropins/sender-acknowledgment-off.conf
+9768a0a6396e6be4e3502b4da4b23e17823a21f7d5ca9e3c60f8537cee4ecb17  systemd-dropins/google-oauth.conf
+0e3b8eaf830f5ac1453f67f5e576bc2a4924c45c39a3c37b3b920a69bba86dd8  systemd-dropins/m365-oauth.conf
+3dd5d70f7532e51003fe60a610942e2c4fff2b2a3261425dc2800a28ba3098d5  systemd-dropins/runtime-env.conf
+9619b226505238c373f55cfd48b5d12217c6102e73ffa298e2e923261e9944fc  systemd-dropins/strict-whatsapp-perms.conf
+104e1749f452a39d1269f4f9fe2c33a3d333a1bcea184606b64cf1084986b2c3  systemd-dropins/employee-authority-v2.conf
+9f73cf13718179a97a7ef6c7ecf95f7af7feb731caaa78c8fb33b0e8fd939861  systemd-dropins/channel-presets.conf
+edcfc412cab0ffe110a9b883f98a6c6c4e99b4b32f3ee6ff84c1f6407afb510f  systemd-dropins/employee-lifecycle-v3-synthetic.conf
+2ab1ae515f93349e1d247071950b872cc6efed2400ae39968ec057b5eaefa141  systemd-dropins/setup-console-v2.conf
+ff4987827f54a5c4983aaa4c5faab583f2acf38c120b24e81d688232af0ee646  systemd-dropins/employee-org-v4.conf
+c549f5113c76e58215cc740839f4c9d8df2b81c3b52985e20bf3ab38414868ab  systemd-dropins/unified-inbound-cv.conf
+ae66b050c0c188943363d5424e38bb429a1a9e17e657320be3c419f326798230  systemd-dropins/employee-next-actions.conf
+ed191d6c510d8b113ebf226544661bef684914b59c62d5d3c67dc3e35590a4ed  systemd-dropins/zzzzzzz-leave-wave4.conf
+a11d271e4178d3a84ac789419ab34ce403e97b79457d8d270337b11761fc6878  systemd-dropins/public-links.conf
+eac84b13dff57449de2d400669397e7c8c32a92f467a52d5705d0ff5baaf41e6  systemd-dropins/feature-flags.conf
+a9245839b4b4de735749da00d417a182e2c024afc0616a850495b8176dc4e8dd  systemd-dropins/runtime-environment-identity.conf
+b58eb05bca8890fea923e1cdd747941454eecc3494a48701807dcea453e9517e  systemd-dropins/assistant-remediation.conf
+8adec6837c9df7c61ded2764b163e89d8b424525658f9c1e31bd180e6a623643  systemd-dropins/zz-employee-final-controlled-rollout.conf
+a8e48e21435319eaded04574d833a5740611c53c2da9ae891c2ab91e1b831acb  systemd-dropins/zz-attendance-wave2g-capture-store-postgres.conf
+6a7cc69796c7733b2a441b9be8e15f4149e60c62a8be5b0590094fd25ae71e0e  systemd-dropins/zz-attendance-wave2c-synthetic-canary.conf
+0665e36abbb5c6a94dfdc0a7dafb1e8b9c2a0adf99630e31397fd42853fa3019  systemd-dropins/zzzz-leave-authority-wave1b-synthetic.conf
+1441d3064f3647fa77175a1f5c9966f819e42f839c36ebb47134879cec79876f  systemd-dropins/zz-attendance-wave3-ops-synthetic.conf
+33789a79ed7bc5f506a231835bc36c2a4fdea248c0f1ba94866d91141eaeadc2  systemd-dropins/zz-onboarding-wave4-hr-mutate.conf
+43a5b8ca3d685f5ac63648d47fb743584da39b3968e98be5671c7792f450a3e9  systemd-dropins/dashboard-auth.conf
+904c249d0db34bfd855b7596ffdfccb0edd53783399211a9274e583909d967d2  systemd-dropins/civil-id.conf
+70f1894835a88edaf7aa4740f3c9ed07d0e5e8e9b01680c35cf089b2f5ac428e  systemd-dropins/toolcall.conf
+df2803bc27f648bb7556b67bc39e21f5dc4f23f65b6cc5fe5c83ee857af09133  systemd-dropins/employee-ess-v5.conf
+71da6e122820fa155af7388c8ca1df3ba062301dda0b0593b5ea53fd6b328c2b  systemd-dropins/ranking-retrieval.conf
+77ef3b34dbd74a4fc0bff97d78fa15d113168afc4bfea71f01cee2cd20d4d3aa  systemd-dropins/offer-token.conf
+4889e2f5b0e1deb47407c605bbb38fbfe7452366ac46b9e9363dbacc98549862  systemd-dropins/outbound-layer.conf
+4cb44eaa4002d2e6c678a7c3ffa3bf4d0d6036e86619fd8088df6611393cdfa9  systemd-dropins/setup-operator-credentials.conf
+[21:46:59] deploying modules + canary + freeze scripts
+[21:46:59] writing Wave 2B synthetic-only drop-in (keeps Wave 1B + extends markers)
+[21:46:59] migrate Wave 2 schema
+schema_version 2.0.0
+connected_db wathefni
+shift_integrity_settings ok
+shift_assignment_versions ok
+shift_reminder_queue ok
+shift_seasonal_policies ok
+shift_reconciliation_flags ok
+shift_assignment_wave2_cols ['current_version_no', 'lineage_json', 'schedule_reason_code']
+SHIFTS_W2B_PROD_MIGRATE_OK
+health_ok
+=== SHAs after ===
+0990a085361f5585cdbb7eb79e0593bfef41c17a3bea36a601a8617ffe414207  /opt/wathefni/orchestrator/app.py
+0f26fa3c65e4a81976f4ddec4ee515a4b66727d6d9e72599d81ca66ad7582593  /opt/wathefni/orchestrator/shifts_authority_wave1.py
+af4c283f0bff577ae9eca461426c92d025fbbc08d43dbea420296589632efaad  /opt/wathefni/orchestrator/shifts_schedule_integrity_wave2.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SHIFTS_ALLOW_OVERNIGHT=1
+WATHEFNI_SHIFTS_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_KEY_MARKERS=SHW1B,SHW1B-SYNTH|,SHW2B,SHW2B-SYNTH|
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965529,965530
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1
+WATHEFNI_SHIFTS_INTEGRITY_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_INTEGRITY_JOBS=1
+WATHEFNI_SHIFTS_INTEGRITY_SYNTHETIC_KEY_MARKERS=SHW2B,SHW2B-SYNTH|
+WATHEFNI_SHIFTS_INTEGRITY_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_INTEGRITY_SYNTHETIC_PHONE_PREFIXES=965530
+WATHEFNI_SHIFTS_INTEGRITY_WAVE2=1
+WAVE2 1
+W2_COMPANIES WATHEFNI
+W2_SYNTHETIC_ONLY 1
+W2_MARKERS SHW2B,SHW2B-SYNTH|
+W2_PHONES 965530
+W2_JOBS 1
+WAVE1 1
+W1_SYNTHETIC_ONLY 1
+CAPTURE_INGEST off
+w2_version 2.0.0
+flags_ok_synthetic=true
+DEPLOY_OK stamp=20260802T214616Z backup=/opt/wathefni/backups/production-pre-shifts-wave2b-20260802T214616Z evid=/opt/wathefni/production-evidence/shifts-wave2b-prod-canary/20260802T214616Z

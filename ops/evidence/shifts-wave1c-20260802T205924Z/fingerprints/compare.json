@@ -1,0 +1,18 @@
+{
+  "non_orphan_unchanged": true,
+  "drift": [],
+  "missing": [],
+  "extra": [],
+  "residual_before": {
+    "assignments": 0,
+    "employees": 0,
+    "swaps": 0,
+    "total": 0
+  },
+  "residual_after": {
+    "assignments": 0,
+    "employees": 0,
+    "swaps": 0,
+    "total": 0
+  }
+}

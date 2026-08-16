@@ -1,0 +1,261 @@
+=== W3 UX ===
+PASS  version 3.1.0
+PASS  wave3 enabled in staging default
+PASS  company WATHEFNI
+PASS  other company gated
+PASS  real mutation gate on
+PASS  empty allowlist denies real
+PASS  synthetic allowed
+PASS  SHW3B synthetic key
+PASS  965531 synthetic phone
+PASS  real phone not wave3 synth
+PASS  hr allowlisted ok
+PASS  manager allowlist separate
+PASS  manager allowlisted
+PASS  audit reason required
+PASS  audit reason ok
+PASS  payroll_money false
+PASS  leave_balances_mutated false
+PASS  attendance_authority_mutated false
+PASS  templates false
+PASS  recurring false
+PASS  talal read only
+PASS  real reminders off
+PASS  broad employee app false
+PASS  self_decision false for managers
+PASS  talal mutate false
+PASS  recon ui_state
+PASS  overnight display spans next
+PASS  no leave_balances mutation SQL
+PASS  honesty payroll_money false in source
+PASS  ShiftsWorkspace present
+PASS  shiftsUx present
+PASS  EN/AR dir support
+PASS  overnight span without duplicate authority comment
+PASS  reconciliation tab
+PASS  terminal reminders tab
+PASS  calendar foundation canvas
+PASS  calendar toolbar pills
+PASS  shift blocks not generic scheduler
+PASS  roster rows / schedule columns
+PASS  history aside panel
+PASS  ack availability
+PASS  mobile day-first
+PASS  bulk readiness note
+
+43 passed, 0 failed
+W3_RC=0
+=== W1 ===
+    shifts authority wave1a — lifecycle + overnight + swap + dashboard
+      PASS  version pinned 1.1.0
+      PASS  wave1 enabled
+      PASS  WATHEFNI company allowed
+      PASS  other company gated
+      PASS  allow_overnight default true
+      PASS  overnight windows equal Attendance
+      PASS  overnight ends next calendar day
+      PASS  ends_next_day_for 22-06
+      PASS  ends_next_day_for 09-17
+      PASS  same-day normalize
+      PASS  overnight normalize
+      PASS  overnight banned
+      PASS  split abut no overlap
+      PASS  split mid overlap
+      PASS  overnight vs next-morning overlap
+      PASS  future_start blocks before start date
+      PASS  future_start allows on start date
+      PASS  notice allows through last working day
+      PASS  notice blocks past employment end
+      PASS  garden leave blocks notice assignments
+      PASS  suspended blocks overlapping interval
+      PASS  suspended allows outside suspension window
+      PASS  terminated allows on last working day daytime
+      PASS  terminated blocks overnight past employment end
+      PASS  existing beyond-end requires ack (not silent delete)
+      PASS  notice label no longer blanket-blocks by default
+      PASS  self-swap approve banned
+      PASS  other actor swap ok
+      PASS  leave conflict block
+      PASS  leave conflict require_ack
+      PASS  leave conflict ack ok
+      PASS  honesty payroll_money false
+      PASS  honesty leave_balances_mutated false
+      PASS  rest_weekdays configurable default Fri
+      PASS  synthetic marker SHW1
+      PASS  synthetic phone prefix
+      PASS  create does not touch leave_balances
+      PASS  create does not calculate payment
+      PASS  create refuses empty employee
+      PASS  overnight allowed in extract
+      PASS  self swap wired
+      PASS  dashboard reschedule expects concurrency
+      PASS  create uses interval lifecycle
+      PASS  dashboard dist embeds expected_updated_at
+      PASS  unknown employee creation fails closed
+      PASS  same-day fixed create
+      PASS  break_minutes persisted
+      PASS  site_key persisted
+      PASS  ends_next_day false for day shift
+      PASS  duplicate create idempotent
+      PASS  split morning ok
+      PASS  split afternoon ok
+      PASS  split overlap detected
+      PASS  overnight 22-06 create
+      PASS  overnight ends_next_day true
+      PASS  overnight vs next-morning overlap
+      PASS  Attendance overnight interval matches Shifts
+      PASS  client payload includes expected_updated_at
+      PASS  dashboard overnight reschedule ok
+      PASS  dashboard overnight ends_next_day persisted
+      PASS  dashboard overnight start moved
+      PASS  dashboard stale concurrency denied
+      PASS  approved-leave conflict requires handling
+      PASS  leave conflict ack allows create
+      PASS  cancel ok
+      PASS  duplicate cancel idempotent
+      PASS  soft-cancel status cancelled
+      PASS  append-only cancel event
+      PASS  reschedule subject created
+      PASS  stale concurrent reschedule one winner
+      PASS  swap fixture requester shift
+      PASS  swap fixture target shift
+      PASS  swap request ok
+      PASS  swap self-decision denied
+      … rejecting scoped swap (decision path without assignment mutation)
+      … scoped reject ok=True err=None
+      PASS  swap scoped decision ok
+      … replay swap decision
+      PASS  swap idempotent replay
+      … approving assignment swap
+      … approve ok=True err=None
+      PASS  swap first decision wins
+      PASS  swap stale second decision denied or idempotent-reject
+      PASS  orphan quarantine ok
+      PASS  orphan quarantine audit event
+      PASS  orphan lifecycle flag open
+      PASS  restore blocked while still orphan
+      PASS  orphan quarantine reversible
+      PASS  restored shift scheduled again
+      PASS  orphan restore audit event
+      PASS  beyond-end flagged audited
+      PASS  beyond-end never silent-deleted
+      PASS  beyond-end soft-cancelled
+      PASS  lifecycle blocks terminated
+      PASS  tenant isolation company mismatch
+
+    90 passed, 0 failed
+W1_RC=0
+=== W2 ===
+    shifts schedule integrity wave2 — history + availability + swap + attendance + reminders
+      PASS  wave2 version pinned 2.0.0
+      PASS  wave2 enabled
+      PASS  wave1 enabled
+      PASS  honesty payroll_money false
+      PASS  honesty leave_balances_mutated false
+      PASS  create records assignment version
+      PASS  create enqueues reminder
+      PASS  create does not touch leave_balances
+      PASS  wave2 reminder scan wired
+      PASS  terminal failure visibility
+      PASS  create ok
+      PASS  create returns shift_id
+      PASS  reschedule #1 ok
+      PASS  reschedule #2 ok
+      PASS  stale update denied
+      PASS  version history length >= 3
+      PASS  exactly one current version
+      PASS  priors immutable superseded
+      PASS  current-row version_no matches
+      PASS  current authority start 11:00
+      PASS  reason codes audited
+      PASS  availability request ok
+      PASS  pending (unapproved) availability does not block
+      PASS  availability approve ok
+      PASS  availability approve replay idempotent
+      PASS  availability require_ack mode
+      PASS  availability ack allows create
+      PASS  availability block mode ignores ack
+      PASS  availability warn mode allows create
+      PASS  availability warn attaches warnings
+      PASS  swap fixture requester
+      PASS  swap fixture target
+      PASS  overlap fixture for swap
+      PASS  swap request (overlap case) ok
+      PASS  swap overlap denial
+      PASS  swap leave denial
+      PASS  swap lifecycle denial
+      PASS  swap approve ok
+      PASS  swap approve replay idempotent
+      PASS  swap reassigned requester shift to B
+      PASS  swap reassigned target shift to A
+      PASS  swap lineage version recorded
+      PASS  swap preserves previous_employee_key
+      PASS  swap reject ok
+      PASS  swap reject replay idempotent
+      PASS  attendance fixtures
+      PASS  attendance normal match
+      PASS  attendance split without time fail-closed
+      PASS  attendance split with punch time
+      PASS  attendance overnight next-day attribution
+      PASS  attendance matcher does not mutate assignments
+      PASS  reminder enqueue idempotent (no duplicate)
+      PASS  reminder claimed once
+      PASS  reminder retry claim
+      PASS  reminder terminal_failed
+      PASS  terminal failure ops visibility
+      PASS  reminder sent status
+      PASS  no duplicate after sent
+      PASS  reminder scan dry_run ok
+      PASS  reminder scan exposes terminal_failures
+      PASS  ramadan policy upserted
+      PASS  midday policy upserted
+      PASS  ramadan outside effective dates quiet
+      PASS  ramadan inside effective dates warns
+      PASS  midday restriction site hit warns
+      PASS  midday other site not matched
+      PASS  midday block mode denied
+      PASS  ramadan warn allows create
+      PASS  ramadan create carries warnings
+      PASS  midday block denies create
+      PASS  recon subject created
+      PASS  lifecycle recon flags without cancel
+      PASS  no silent lifecycle cancel
+      PASS  leave recon flags without cancel
+      PASS  no silent leave cancel
+      PASS  recon acknowledge audited
+      PASS  recon cancel is audited soft-cancel
+      PASS  recon cancel sets cancelled
+      PASS  recon cancel reason code
+      PASS  wave2 honesty denies leave balance mutation
+      PASS  wave2 module no leave balance SQL
+      PASS  wave2 module no payroll money calc
+
+    82 passed, 0 failed
+W2_RC=0
+=== E360 ===
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+E360_RC=0
+=== ONB ===
+PASS  prehire freeze intact PREHIRING_UNIFIED_INBOUND_CV_FINAL_ENFORCEMENT_AND_FREEZE.md
+PASS  prehire freeze intact PREHIRING_CANDIDATE_KNOWLEDGE_FINAL_LIVE_RELEASE_AND_FREEZE.md
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+=== ATT ===
+PASS  E360 freeze doc present
+PASS  Onboarding freeze doc present
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed
+=== LEAVE ===
+PASS  frozen module doc intact EMPLOYEES360_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+34 passed, 0 failed
+WATHEFNI_SHIFTS_INTEGRITY_JOBS=0
+REGRESSIONS_DONE

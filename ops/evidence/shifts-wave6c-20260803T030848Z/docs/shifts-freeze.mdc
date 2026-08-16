@@ -1,0 +1,59 @@
+---
+description: Freeze Shifts controlled WATHEFNI rollout; block real manager rollout, broad employee app, unallowlisted delivery, and Payroll money
+globs: wathefni-orchestrator/shifts_*.py,wathefni-orchestrator/canary-prod-shifts*.py,wathefni-orchestrator/smoke-test-shifts*.py,wathefni-orchestrator/ops/deploy-shifts*.sh,wathefni-orchestrator/ops/qualify-shifts*.sh,wathefni-orchestrator/ops/sql/shifts_*.sql,apps/wathefni-dashboard/src/posthire/Shift*.tsx,ops/SHIFTS*.md,ops/evidence/shifts-*/**
+alwaysApply: false
+---
+
+# Shifts freeze
+
+Shifts is **production-qualified for controlled WATHEFNI HR scheduling, Talal employee-app schedule access, and a single-recipient real email notification canary**, and **frozen** against scoped-manager real rollout, broad employee-app rollout, automated PAM submission and Payroll money. See `ops/SHIFTS_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- HR production scheduling: **GO (controlled, named allowlist — one operator)**
+- Scoped manager production scheduling: **NO-GO** (no manager identity, scope, branch or team exists in production)
+- Talal employee-app schedule access: **GO** (`WATHEFNI-96550252254`, read + acknowledge only)
+- Real notification canary: **GO** (one recipient, `app` + `email`, consent recorded)
+- Reminder / reconciliation timers: **NO-GO** (manual invocation only)
+- Broad employee-app rollout: **NO-GO**
+- PAM automated submission: **NO-GO** (`manual_submission_required`)
+- Payroll monetary impact: **NO-GO**
+- Employees 360 / Onboarding / Attendance / Leave: **unchanged freezes**
+
+## Hard bans for future post-hiring PRs
+
+1. **Do not weaken canonical L0 authority** — `shift_assignments` stays the single source of truth for a published schedule.
+2. **Do not mutate a published schedule version in place**; publish a new version instead.
+3. **Do not bypass lifecycle or leave gates** for authority subjects.
+4. **Do not remove self-decision bans** — no actor decides their own swap or open-shift claim.
+5. **Do not weaken manager scope enforcement** (`employee_outside_manager_scope`, fail-closed on missing scope).
+6. **Do not drop concurrency tokens or idempotency keys** from real mutations.
+7. **Do not change overnight/split semantics** (`ends_next_day`, same-date multi-window).
+8. **Do not make template/rotation regeneration overwrite detached rows** (`regen_detached`).
+9. **Do not weaken notification deduplication, ack-once, or tenant isolation.**
+10. **Do not send a real notification to anyone outside `WATHEFNI_SHIFTS_NOTIFY_REAL_ALLOWLIST`**, on a channel outside `WATHEFNI_SHIFTS_NOTIFY_REAL_CHANNELS`, or without a `shift_notification_consent` row.
+11. **Do not remove the `WATHEFNI_SHIFTS_NOTIFY_KILL` switch** or make real delivery default-on.
+12. **Do not act on excluded subjects** (`WATHEFNI-ORPHAN-*`, `*-REALBLOCK-*`).
+13. **Do not populate `WATHEFNI_SHIFTS_MANAGER_ALLOWLIST`** without a new owner-approved wave that first establishes manager identities and scopes.
+14. **Do not broaden `WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST`** beyond Talal.
+15. **Do not enable operator timers, real reminders, or integrity jobs** in production without a new wave.
+16. **Do not calculate Payroll money, mutate Leave balances, or mutate Attendance authority** from Shifts.
+17. **Do not automate PAM submission** — export only.
+18. **Do not change frozen Employees 360, Onboarding, Attendance or Leave** to unblock Shifts.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- `smoke-test-shifts-freeze-regression.py`
+- Kill switches (`WATHEFNI_SHIFTS_NOTIFY_KILL`, `WATHEFNI_SHIFTS_WAVE3_KILL`, per-wave disables) and backup `ROLLBACK.sh`
+- Synthetic canary work under SHW1–SHW6C markers and 965528–965538 phone prefixes
+
+## Not allowed without owner change-control
+
+- Real scoped-manager scheduling
+- Additional real notification recipients or channels
+- Broad employee-app schedule write access
+- Enabling reminder/reconciliation timers
+- Automated PAM submission
+- Any Payroll monetary calculation from Shifts

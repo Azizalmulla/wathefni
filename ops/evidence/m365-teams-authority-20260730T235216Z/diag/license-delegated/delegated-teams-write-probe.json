@@ -1,0 +1,12 @@
+{
+  "allowedOnlineMeetingProviders": [],
+  "defaultOnlineMeetingProvider": "unknown",
+  "onlineMeeting_joinWebUrl": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MDQxZmUwMzgtODM1My00NzUwLWJhOWEtNjVlODY0ZjUyMzQw%40thread.v2/0?context=%7b%22Tid%22%3a%22ffd171d7-94a7-41a2-a38a-b9bc3ba4a082%22%2c%22Oid%22%3a%22dcb6b7dd-8509-4a20-8069-ec0de9445dd7%22%7d",
+  "onlineMeeting_id": "MSpkY2I2YjdkZC04NTA5LTRhMjAtODA2OS1lYzBkZTk0NDVkZDcqMCoqMTk6bWVldGluZ19NRFF4Wm1Vd016Z3RPRE0xTXkwME56VXdMV0poT1dFdE5qVmxPRFkwWmpVeU16UXdAdGhyZWFkLnYy",
+  "onlineMeeting_error": null,
+  "event_isOnlineMeeting": false,
+  "event_provider": "unknown",
+  "event_joinUrl": null,
+  "event_id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAENAACJEHvw6fDsRpSbpMyyeozuAAAAY0ktAAA=",
+  "event_error": null
+}

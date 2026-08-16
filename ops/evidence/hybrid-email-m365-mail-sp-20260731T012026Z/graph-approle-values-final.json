@@ -1,0 +1,18 @@
+{
+  "values": [
+    "Mail.Send"
+  ],
+  "assignments": [
+    {
+      "deletedDateTime": null,
+      "principalDisplayName": "Wathefni Email Send",
+      "resourceId": "d56ff723-dc12-4139-a5be-cc65fba22268",
+      "id": "RPzrpF2lUE6jZJePVcHTXIglPxv5YsFHiDmPfUSGhiw",
+      "resourceDisplayName": "Microsoft Graph",
+      "appRoleId": "b633e1c5-b582-4048-a93e-9f11b44c7e96",
+      "principalType": "ServicePrincipal",
+      "createdDateTime": "2026-07-31T01:31:46.4426633Z",
+      "principalId": "a4ebfc44-a55d-4e50-a364-978f55c1d35c"
+    }
+  ]
+}

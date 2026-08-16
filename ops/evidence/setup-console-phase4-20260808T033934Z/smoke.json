@@ -1,0 +1,186 @@
+{
+  "pass": 34,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "access_summary_human",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "privilege_viewer_cannot_grant_owner",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "privilege_owner_can_grant_viewer",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "privilege_owner_can_grant_owner",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:last_owner_protected",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:privilege_escalation_denied",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:team-access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:integrations-catalog",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:secrets_never_returned",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:api_stub_not_advertised",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:settings_team",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:personal_hr_whatsapp",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-phase=\"4\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-team-access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:classic-integrations",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Manage team",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Manage sync",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Credentials are never shown",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:team_access_summary",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:integrations_catalog",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_permission_codes",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "team_access_get",
+      "detail": {
+        "members": 9,
+        "owners": 2
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "invite_writer_settings_team",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "team_payload_no_perm_codes",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "safety_flags_present",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "integrations_catalog_get",
+      "detail": [
+        "company_messaging",
+        "connected_systems",
+        "google_calendar",
+        "inbound_email",
+        "microsoft_365",
+        "outbound_email"
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "integrations_no_secrets",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "integrations_no_api_stub_card",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "migration_sync_deep_link",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "channel_personal_vs_company",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "tenant_other_missing_or_isolated",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "last_owner_helper_blocks_when_one",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "last_owner_helper_allows_when_multiple",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "last_owner_helper_blocks_disable",
+      "detail": null
+    }
+  ]
+}

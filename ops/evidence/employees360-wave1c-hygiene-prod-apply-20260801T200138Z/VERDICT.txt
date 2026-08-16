@@ -1,0 +1,16 @@
+PASS
+
+Employees 360 Wave 1C production hygiene apply
+Stamp: 20260801T200138Z
+Evidence: ops/evidence/employees360-wave1c-hygiene-prod-apply-20260801T200138Z/
+
+Journal IDs:
+- 4e3c08f1-75fc-47be-8e0f-e00fd022101e (96597727743 null→active)
+- 5228deb9-25ae-4ac0-821f-5d21f56caee2 (96550252254 null→active)
+- 84c5c7cc-ac1f-44dc-a51d-d08002fe01b8 (P0-DUP-1 quarantine ×3)
+
+Before: 2 null statuses, 3 orphan messages, integrity=3
+After: 2 active, 0 live orphans, 3 quarantined, integrity=0
+Rollback drill + restore-new: PASS
+Health: 200
+Wave 2: not started

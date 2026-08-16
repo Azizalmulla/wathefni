@@ -1,0 +1,38 @@
+    leave policy wave2 — holidays, reservations, reconcile, sick tiers, Kuwait TZ
+      PASS  version
+      PASS  carryover disabled
+      PASS  eligibility conflict noted
+      PASS  weekends excluded
+      PASS  holiday excluded
+      PASS  span year+holiday
+      PASS  sick tiers 15+5
+      PASS  kuwait date near midnight
+      PASS  employee seeded
+      PASS  accrual posted
+      PASS  balance exists
+      PASS  available > 0
+      PASS  national+liberation seeded
+      PASS  feb week chargeable=3
+      PASS  request A ok
+      PASS  reservation A posted
+      PASS  request B created (observe)
+      PASS  concurrent B insufficient — no double-reserve
+      PASS  approve A
+      PASS  consume exactly once
+      PASS  approve converted reservation (open=0)
+      PASS  C reserved before reject
+      PASS  reject C
+      PASS  reject released reservation
+      PASS  cancel pending D
+      PASS  cancel pending released reservation
+      PASS  stale expire released reservation
+      PASS  sick tiers present
+      PASS  sick tiers observe-only payroll_owned
+      PASS  cancel approved
+      PASS  reversal restored balance >= mid
+      PASS  attendance reverse path safe
+      PASS  ledger/rollup reconcile
+      PASS  enforced false
+      PASS  wave2 pack legal_reviewed false
+
+    35 passed, 0 failed

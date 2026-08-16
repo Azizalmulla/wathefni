@@ -1,0 +1,8 @@
+{
+  "wave": "pdf_inspector_shadow_advisor_wave1",
+  "staging": "GO",
+  "production_shadow_observation": "PENDING_ENABLE",
+  "influences_ocr": false,
+  "p95_shadow_wall_ms": 14,
+  "rollback": "Remove staging drop-in zzzz-pdf-inspector-shadow-wave1.conf and unset WATHEFNI_PDF_INSPECTOR_SHADOW"
+}

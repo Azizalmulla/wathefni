@@ -1,0 +1,96 @@
+{
+  "mailbox_rows_left": 0,
+  "active_intake_addresses": 1,
+  "forward_intake_disabled": "2033e515-2516-4c7a-8678-bd3a626254a7",
+  "intake_rows": [
+    {
+      "intake_id": "2493b577-09e3-45c2-b923-b0c382c251df",
+      "label": "Postmark default test",
+      "status": "active"
+    },
+    {
+      "intake_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+      "label": "waveD2-prod-proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "80da2266-f722-4084-aadb-3b525cccb309",
+      "label": "waveD2-prod-proof role",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+      "label": "waveD2-prod-proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "078e9694-b845-4548-a906-473109f08c59",
+      "label": "wave_d3_prod_proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "685c33ce-942f-4ada-bdf8-f85c22623ceb",
+      "label": "wave_d3_prod_proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "071c7d72-ea32-43f5-8d87-54f7f73b6123",
+      "label": "wave_d3_prod_proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "f26751dc-b4bb-401d-94d9-cd4a08d3d78d",
+      "label": "wave_d3_prod_proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "a862b4fc-68e6-4648-bab5-49832fc244e2",
+      "label": "wave_d3_prod_proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "bc8b2fbf-06ee-4fae-9042-d5eb8c5f42d1",
+      "label": "wave_d3_prod_proof general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "67e86403-4ba1-418e-8d79-8c2018774919",
+      "label": "waveD4-prod-proof-20260801T152150Z-general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "d1cdb476-cb59-433d-a6f6-4fd4fdfa9ad4",
+      "label": "waveD4-prod-proof-20260801T152150Z-job",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "6743a284-8bd9-452d-b847-db25a2c74bb2",
+      "label": "waveD4-prod-proof-20260801T152150Z-general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "cdc7afa9-dc1a-451b-910e-8b426a0284b8",
+      "label": "waveD4-prod-proof-20260801T152150Z-job",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "389b58f0-b2b4-49de-8b07-1b7fa96d26a5",
+      "label": "waveD4-ui-seed-general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "2033e515-2516-4c7a-8678-bd3a626254a7",
+      "label": "waveD5-prod-20260801T155854Z-forward",
+      "status": "disabled"
+    }
+  ],
+  "active_after_cleanup": [
+    {
+      "intake_id": "2493b577-09e3-45c2-b923-b0c382c251df",
+      "label": "Postmark default test",
+      "status": "active"
+    }
+  ],
+  "mailbox_connections_remaining": 0,
+  "secret_proof_mailbox_deleted": true
+}

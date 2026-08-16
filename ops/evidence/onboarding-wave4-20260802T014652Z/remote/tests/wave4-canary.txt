@@ -1,0 +1,70 @@
+=== wave4 HR mutate canary ===
+PASS  SEED off
+PASS  HR_MUTATE on
+PASS  HR_MUTATE companies WATHEFNI-only
+PASS  employee app Talal-only
+PASS  template 2.0.0
+PASS  four reals present
+PASS  pinned 2.0.0
+PASS  migrated row volume
+PASS  queue enrichment keys
+PASS  mutate allowed 252254
+PASS  seed still blocked for real 252254
+PASS  owner groups present 252254
+PASS  bank plaintext flag 252254
+PASS  planned start 252254
+PASS  bank ESS authority 252254
+PASS  bank plaintext blocked 252254
+PASS  dependency blocks residence 252254
+PASS  stale version fail 252254
+PASS  mutate allowed 363363
+PASS  seed still blocked for real 363363
+PASS  owner groups present 363363
+PASS  bank plaintext flag 363363
+PASS  planned start 363363
+PASS  bank ESS authority 363363
+PASS  bank plaintext blocked 363363
+PASS  dependency blocks residence 363363
+PASS  stale version fail 363363
+PASS  mutate allowed 727743
+PASS  seed still blocked for real 727743
+PASS  owner groups present 727743
+PASS  bank plaintext flag 727743
+PASS  planned start 727743
+PASS  bank ESS authority 727743
+PASS  bank plaintext blocked 727743
+PASS  mutate allowed 411617
+PASS  seed still blocked for real 411617
+PASS  owner groups present 411617
+PASS  bank plaintext flag 411617
+PASS  planned start 411617
+PASS  bank ESS authority 411617
+PASS  bank plaintext blocked 411617
+PASS  dependency blocks residence 411617
+PASS  stale version fail 411617
+PASS  cross-tenant mutate denied
+PASS  OTHERCO company gate off
+PASS  reversible mark candidate
+PASS  real mark ok
+PASS  real mark audited
+PASS  fingerprint after real prove
+PASS  synthetic recognized
+PASS  synthetic mutate allowed
+PASS  synthetic seed allowed via canary
+PASS  delayed start
+PASS  reschedule to today
+PASS  activate delayed
+PASS  seeded rows
+PASS  synth mark
+PASS  synth stale fail
+PASS  synth waive
+PASS  synth remind path exercised
+PASS  remind action registered
+PASS  synth cancel
+PASS  cancel history preserved
+PASS  synthetic cleaned
+PASS  kill switch blocks mutate flag
+PASS  kill switch blocks real mutate
+PASS  kill switch restored
+PASS  four-real fingerprint unchanged
+RESULT pass=68 fail=0

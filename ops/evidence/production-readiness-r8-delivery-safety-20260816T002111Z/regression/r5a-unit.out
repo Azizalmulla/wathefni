@@ -1,0 +1,158 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5A — capability honesty (unit)
+
+    readiness contract
+      PASS  zero unreleased capabilities after R5J
+      PASS  unreleased tuple matches
+      PASS  performance left unreleased set
+      PASS  talent left unreleased set
+      PASS  job architecture left unreleased set
+      PASS  learning left unreleased set
+      PASS  benefits left unreleased set
+      PASS  employee relations left unreleased set
+      PASS  engagement left unreleased set
+      PASS  comp planning left unreleased set
+      PASS  workforce planning left unreleased set
+      PASS  performance customer enableable
+      PASS  talent customer enableable
+      PASS  job architecture customer enableable
+      PASS  learning customer enableable
+      PASS  benefits customer enableable
+      PASS  employee relations customer enableable
+      PASS  engagement customer enableable
+      PASS  comp planning customer enableable
+      PASS  workforce planning customer enableable
+      PASS  engagement is a catalog SKU
+      PASS  comp planning is a catalog SKU
+      PASS  workforce planning is a catalog SKU
+      PASS  learning is a catalog SKU
+      PASS  benefits is a catalog SKU
+      PASS  employee relations is a catalog SKU
+      PASS  benefits http_ready
+      PASS  benefits hr_web_ready
+      PASS  benefits employee surface ready
+      PASS  benefits manager surface not required
+      PASS  benefits mobile not required
+      PASS  employee relations http_ready
+      PASS  employee relations hr_web_ready
+      PASS  employee relations mobile ready
+      PASS  employee relations employee surface not required
+      PASS  employee relations manager surface not required
+      PASS  employee relations people_surface off
+      PASS  engagement http_ready
+      PASS  engagement hr_web_ready
+      PASS  engagement employee surface ready
+      PASS  engagement manager surface ready
+      PASS  engagement mobile not required
+      PASS  engagement people_surface off
+      PASS  comp planning http_ready
+      PASS  comp planning hr_web_ready
+      PASS  comp planning employee surface not required
+      PASS  comp planning mobile not required
+      PASS  comp planning people_surface off
+      PASS  comp planning depends on JA
+      PASS  workforce planning http_ready
+      PASS  workforce planning hr_web_ready
+      PASS  workforce planning employee surface not required
+      PASS  workforce planning mobile not required
+      PASS  workforce planning people_surface off
+      PASS  workforce planning depends on JA
+      PASS  job architecture is not a catalog SKU
+      PASS  job architecture http_ready
+      PASS  job architecture hr_web_ready
+      PASS  job architecture employee surface not required
+      PASS  job architecture manager surface not required
+      PASS  unreleased keys absent from catalog
+      PASS  analytics remains a catalog SKU
+      PASS  leave remains a catalog SKU
+      PASS  onboarding remains a catalog SKU
+      PASS  employee_app remains a catalog SKU
+      PASS  catalog leave customer enableable
+      PASS  catalog attendance customer enableable
+      PASS  catalog payroll customer enableable
+      PASS  catalog analytics customer enableable
+      PASS  catalog requisitions customer enableable
+      PASS  catalog preboarding customer enableable
+      PASS  wave4 performance write unblocked
+      PASS  wave4 talent write unblocked
+      PASS  wave6 job architecture write unblocked
+      PASS  wave6 learning write unblocked
+      PASS  wave6 benefits write unblocked
+      PASS  wave6 employee relations write unblocked
+      PASS  wave6 engagement write unblocked
+      PASS  wave6 comp planning write unblocked
+      PASS  wave6 workforce planning write unblocked
+      PASS  stored_enabled preserved on GET
+      PASS  usable true when performance released and stored enabled
+      PASS  customer_facing_state enabled
+      PASS  leave is not an unreleased capability
+      PASS  wave1 write not blocked
+      PASS  wave2 write not blocked
+      PASS  wave3 write not blocked
+      PASS  catalog enable performance unblocked
+      PASS  catalog enable talent unblocked
+      PASS  catalog enable learning unblocked
+      PASS  catalog enable benefits unblocked
+      PASS  catalog enable employee relations unblocked
+      PASS  catalog enable engagement unblocked
+      PASS  catalog enable comp planning unblocked
+      PASS  catalog enable workforce planning unblocked
+      PASS  catalog enable leave not blocked
+      PASS  catalog enable analytics not blocked
+
+    Setup UX omission
+      PASS  Wave1 card still mounted
+      PASS  Wave2 card still mounted
+      PASS  Wave3 card still mounted
+      PASS  Wave4 Performance card remounted
+      PASS  Wave4 Talent card remounted
+      PASS  Wave4 card file retained
+      PASS  Wave6 Job Architecture card remounted
+      PASS  Wave6 Job Architecture card file retained
+      PASS  classic-wave4-performance mounted
+      PASS  classic-wave6-job-architecture mounted
+      PASS  Wave6 Learning card remounted
+      PASS  classic-wave6-learning mounted
+      PASS  Wave6 Benefits card remounted
+      PASS  classic-wave6-benefits mounted
+      PASS  Wave6 Employee Relations card remounted
+      PASS  classic-wave6-employee-relations mounted
+      PASS  Wave6 Engagement card remounted
+      PASS  classic-wave6-engagement mounted
+      PASS  Wave6 Compensation Planning card remounted
+      PASS  classic-wave6-comp-planning mounted
+      PASS  Wave6 Workforce Planning card remounted
+      PASS  classic-wave6-workforce-planning mounted
+      PASS  Wave6 Engagement card file retained
+      PASS  Wave6 Employee Relations card file retained
+      PASS  Wave6 Benefits card file retained
+      PASS  Wave6 Compensation Planning card file retained
+      PASS  Wave6 Workforce Planning card file retained
+      PASS  Wave 5 Intelligence workspace present
+      PASS  Intelligence workspace still a real surface
+      PASS  PostHire still mounts Intelligence
+
+    fail-closed HTTP
+      PASS  fail-closed HTTP does not import performance_goals_c1
+      PASS  fail-closed HTTP does not import talent_profile_c5
+      PASS  fail-closed HTTP does not import job_architecture_c1
+      PASS  fail-closed HTTP does not import learning_development_c2
+      PASS  fail-closed HTTP does not import benefits_administration_c3
+      PASS  fail-closed HTTP does not import employee_relations_c4
+      PASS  fail-closed HTTP does not import engagement_c5
+      PASS  fail-closed HTTP does not import compensation_planning_c6
+      PASS  fail-closed HTTP does not import workforce_planning_c7
+      PASS  app registers fail-closed namespaces
+      PASS  app blocks unreleased Setup writes
+      PASS  app annotates wave4/wave6 GET
+      PASS  no remaining unreleased fail-closed namespaces
+      PASS  fail-closed does not steal Benefits namespace
+      PASS  fail-closed does not steal Employee Relations namespace
+      PASS  fail-closed does not steal Engagement namespace
+      PASS  fail-closed does not steal Compensation Planning namespace
+      PASS  fail-closed does not steal Workforce Planning namespace
+      PASS  fail-closed does not steal Intelligence namespace
+
+    146 passed, 0 failed
+R5A_CAPABILITY_HONESTY_UNIT_PASS

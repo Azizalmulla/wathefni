@@ -43,6 +43,7 @@ import {
   getCompany,
   linkHrWhatsApp,
   listCompanies,
+  onSetupSessionChange,
   saveChannelAccount,
   SetupConsoleApiError,
   updateCompanyLifecycle,
@@ -50,6 +51,38 @@ import {
   updateCompanyProfile,
   updateCompanySettings,
 } from './api'
+import {
+  clearStoredSession,
+  credentialsFromSession,
+  loginWithOperatorSecret,
+  logoutSetupSession,
+  probeSetupSession,
+  readStoredSession,
+  refreshSetupSession,
+  type SetupSession,
+} from './session'
+import { CompanyControlPage } from './CompanyControlPage'
+import { EmployeeAppAccessPolicyCard } from './EmployeeAppAccessPolicyCard'
+import { LaunchReadinessPage } from './LaunchReadinessPage'
+import { OnboardingWizard } from './OnboardingWizard'
+import { OwnershipDeepLinksCard } from './OwnershipDeepLinksCard'
+import { IntegrationsCatalogCard } from './IntegrationsCatalogCard'
+import { ModuleCompanyPoliciesCard } from './ModuleCompanyPoliciesCard'
+import { Wave1HireReadyPoliciesCard } from './Wave1HireReadyPoliciesCard'
+import { Wave2WorkforceTruthPoliciesCard } from './Wave2WorkforceTruthPoliciesCard'
+import { Wave3EmployeeLifecyclePoliciesCard } from './Wave3EmployeeLifecyclePoliciesCard'
+import { Wave4PerformancePoliciesCard, Wave4TalentPoliciesCard } from './Wave4PerformanceTalentPoliciesCard'
+import { Wave6JobArchitecturePoliciesCard } from './Wave6JobArchitecturePoliciesCard'
+import { Wave6LearningPoliciesCard } from './Wave6LearningPoliciesCard'
+import { Wave6BenefitsPoliciesCard } from './Wave6BenefitsPoliciesCard'
+import { Wave6EmployeeRelationsPoliciesCard } from './Wave6EmployeeRelationsPoliciesCard'
+import { Wave6EngagementPoliciesCard } from './Wave6EngagementPoliciesCard'
+import { Wave6CompensationPlanningPoliciesCard } from './Wave6CompensationPlanningPoliciesCard'
+import { Wave6WorkforcePlanningPoliciesCard } from './Wave6WorkforcePlanningPoliciesCard'
+import { Wave5HrIntelligencePoliciesCard } from './Wave5HrIntelligencePoliciesCard'
+import { NotificationDeliveryPoliciesCard } from './NotificationDeliveryPoliciesCard'
+import { PayrollSetupCard } from './PayrollSetupCard'
+import { TeamAccessCard } from './TeamAccessCard'
 import type {
   AvailableModule,
   ChannelAccountInput,
@@ -71,15 +104,7 @@ import {
   softRecommendations,
 } from './moduleGuidance'
 
-const TOKEN_KEY = 'wathefni_setup_operator_token'
-const PHONE_KEY = 'wathefni_setup_operator_phone'
 const PAGE_SIZE = 20
-
-function storedCredentials(): SetupCredentials | null {
-  const token = sessionStorage.getItem(TOKEN_KEY)?.trim() || ''
-  const phone = sessionStorage.getItem(PHONE_KEY)?.trim() || ''
-  return token && phone ? { token, phone } : null
-}
 
 function messageFrom(error: unknown) {
   return error instanceof Error ? error.message : 'Something interrupted this request. Please try again.'
@@ -113,7 +138,8 @@ function lifecycleLabel(status: CompanyLifecycleStatus) {
 
 export default function SetupConsoleApp() {
   const confirm = useConfirm()
-  const [credentials, setCredentials] = useState<SetupCredentials | null>(storedCredentials)
+  const [credentials, setCredentials] = useState<SetupCredentials | null>(null)
+  const [authBootstrapping, setAuthBootstrapping] = useState(true)
   const [companies, setCompanies] = useState<CompanySummary[]>([])
   const [total, setTotal] = useState(0)
   const [queryInput, setQueryInput] = useState('')
@@ -125,6 +151,13 @@ export default function SetupConsoleApp() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState('')
   const [includeInactive, setIncludeInactive] = useState(false)
+  const [workspaceView, setWorkspaceView] = useState<'launch' | 'classic' | 'wizard' | 'control'>(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : ''
+    if (hash.startsWith('classic-') || hash === 'classic-ownership') return 'classic'
+    if (hash === 'control') return 'control'
+    return 'launch'
+  })
+  const [uiLocale, setUiLocale] = useState<'en' | 'ar'>('en')
 
   const loadCompanies = useCallback(
     async (access: SetupCredentials, searchQuery = query, pageOffset = offset, showInactive = includeInactive) => {
@@ -143,6 +176,10 @@ export default function SetupConsoleApp() {
         setError(messageFrom(loadError))
         if (loadError instanceof SetupConsoleApiError && [401, 403, 404].includes(loadError.status)) {
           setDetail(null)
+          if (loadError.status === 401) {
+            clearStoredSession()
+            setCredentials(null)
+          }
         }
       } finally {
         setListLoading(false)
@@ -152,13 +189,84 @@ export default function SetupConsoleApp() {
   )
 
   useEffect(() => {
+    let cancelled = false
+    async function bootstrap() {
+      const stored = readStoredSession()
+      if (!stored) {
+        if (!cancelled) {
+          setCredentials(null)
+          setAuthBootstrapping(false)
+        }
+        return
+      }
+      try {
+        let session: SetupSession | null = stored
+        const ok = await probeSetupSession(stored)
+        if (!ok) {
+          session = await refreshSetupSession(stored.refreshToken)
+        }
+        if (!cancelled) {
+          if (session) setCredentials(credentialsFromSession(session))
+          else {
+            clearStoredSession()
+            setCredentials(null)
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          clearStoredSession()
+          setCredentials(null)
+        }
+      } finally {
+        if (!cancelled) setAuthBootstrapping(false)
+      }
+    }
+    void bootstrap()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = onSetupSessionChange((next) => {
+      setCredentials(next)
+      if (!next) {
+        setCompanies([])
+        setDetail(null)
+        setSelectedCode('')
+      }
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
     if (credentials) queueMicrotask(() => void loadCompanies(credentials))
   }, [credentials, loadCompanies])
+
+  useEffect(() => {
+    if (workspaceView !== 'classic' || detailLoading) return
+    const hash = window.location.hash.replace(/^#/, '')
+    if (!hash) return
+    const timer = window.setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+    return () => window.clearTimeout(timer)
+  }, [workspaceView, detailLoading, selectedCode, detail])
 
   const selectCompany = useCallback(
     async (companyCode: string) => {
       if (!credentials) return
       setSelectedCode(companyCode)
+      const hash = window.location.hash.replace(/^#/, '')
+      setWorkspaceView(
+        hash.startsWith('classic-') || hash === 'classic-ownership'
+          ? 'classic'
+          : hash === 'control'
+            ? 'control'
+            : 'launch',
+      )
       setDetail(null)
       setDetailLoading(true)
       setError('')
@@ -185,13 +293,25 @@ export default function SetupConsoleApp() {
     }
   }, [credentials, selectedCode])
 
+  if (authBootstrapping) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-5 py-12">
+        <Card className="flex min-h-40 w-full max-w-lg items-center justify-center p-8">
+          <LoadingLine label="Restoring Setup Console session" />
+        </Card>
+      </main>
+    )
+  }
+
   if (!credentials) {
     return (
       <ConnectScreen
-        onConnect={(next) => {
-          sessionStorage.setItem(TOKEN_KEY, next.token.trim())
-          sessionStorage.setItem(PHONE_KEY, next.phone.trim())
-          setCredentials({ token: next.token.trim(), phone: next.phone.trim() })
+        onConnect={async (next) => {
+          const session = await loginWithOperatorSecret({
+            operatorToken: next.token,
+            phone: next.phone,
+          })
+          setCredentials(credentialsFromSession(session))
         }}
       />
     )
@@ -200,14 +320,13 @@ export default function SetupConsoleApp() {
 
   async function disconnect() {
     const approved = await confirm({
-      title: 'Disconnect this operator session?',
-      body: 'The setup token and authorised phone will be removed from this browser session.',
-      confirmLabel: 'Disconnect',
+      title: 'Sign out of Setup Console?',
+      body: 'This revokes the saved operator session on this browser. You will need the operator token again to reconnect.',
+      confirmLabel: 'Sign out',
       destructive: true,
     })
     if (!approved) return
-    sessionStorage.removeItem(TOKEN_KEY)
-    sessionStorage.removeItem(PHONE_KEY)
+    await logoutSetupSession(readStoredSession())
     setCredentials(null)
     setCompanies([])
     setDetail(null)
@@ -237,10 +356,24 @@ export default function SetupConsoleApp() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant={uiLocale === 'en' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setUiLocale('en')}
+            >
+              EN
+            </Button>
+            <Button
+              variant={uiLocale === 'ar' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setUiLocale('ar')}
+            >
+              AR
+            </Button>
             <Badge tone="success">Operator session connected</Badge>
             <Button variant="ghost" size="sm" onClick={() => void disconnect()}>
               <LogOut className="h-4 w-4" aria-hidden="true" />
-              Disconnect
+              Sign out
             </Button>
           </div>
         </div>
@@ -269,7 +402,7 @@ export default function SetupConsoleApp() {
                 onChange={(event) => setQueryInput(event.target.value)}
                 placeholder="Name or company code"
               />
-              <Button size="sm" className="h-11 w-11 px-0" aria-label="Search companies">
+              <Button type="submit" size="sm" className="h-11 w-11 px-0" aria-label="Search companies">
                 <Search className="h-4 w-4" aria-hidden="true" />
               </Button>
             </form>
@@ -359,8 +492,52 @@ export default function SetupConsoleApp() {
           <CreateCompanyCard onCreate={handleCreated} />
         </aside>
 
-        <section className="min-w-0">
+        <section className="min-w-0 space-y-4">
+          <Card>
+            <CardContent className="flex flex-wrap gap-2 py-4">
+              <Button
+                size="sm"
+                variant={workspaceView === 'launch' ? 'default' : 'ghost'}
+                disabled={!selectedCode}
+                onClick={() => setWorkspaceView('launch')}
+              >
+                {uiLocale === 'ar' ? 'جاهزية الإطلاق' : 'Launch readiness'}
+              </Button>
+              <Button size="sm" variant={workspaceView === 'classic' ? 'default' : 'ghost'} onClick={() => setWorkspaceView('classic')}>
+                {uiLocale === 'ar' ? 'إعداد كلاسيكي' : 'Classic setup'}
+              </Button>
+              <Button size="sm" variant={workspaceView === 'wizard' ? 'default' : 'ghost'} onClick={() => setWorkspaceView('wizard')}>
+                {uiLocale === 'ar' ? 'معالج الإعداد' : 'Onboarding wizard'}
+              </Button>
+              <Button
+                size="sm"
+                variant={workspaceView === 'control' ? 'default' : 'ghost'}
+                disabled={!selectedCode}
+                onClick={() => setWorkspaceView('control')}
+              >
+                {uiLocale === 'ar' ? 'تحكم الشركة' : 'Company control'}
+              </Button>
+            </CardContent>
+          </Card>
           {error ? <ErrorNotice message={error} /> : null}
+          {workspaceView === 'launch' && selectedCode ? (
+            <LaunchReadinessPage credentials={connectedCredentials} companyCode={selectedCode} locale={uiLocale} />
+          ) : null}
+          {workspaceView === 'wizard' ? (
+            <OnboardingWizard
+              credentials={connectedCredentials}
+              locale={uiLocale}
+              onOpenControl={(code) => {
+                void selectCompany(code)
+                setWorkspaceView('control')
+              }}
+            />
+          ) : null}
+          {workspaceView === 'control' && selectedCode ? (
+            <CompanyControlPage credentials={connectedCredentials} companyCode={selectedCode} locale={uiLocale} />
+          ) : null}
+          {workspaceView === 'classic' ? (
+            <>
           {detailLoading && !detail ? (
             <Card className="flex min-h-72 items-center justify-center">
               <LoadingLine label="Loading company setup" />
@@ -372,6 +549,7 @@ export default function SetupConsoleApp() {
               credentials={credentials}
               detail={detail}
               companyCode={selectedCode}
+              locale={uiLocale}
               refreshing={detailLoading}
               onRefresh={refreshDetail}
               onChanged={async () => {
@@ -381,15 +559,23 @@ export default function SetupConsoleApp() {
               onError={(nextError) => setError(messageFrom(nextError))}
             />
           ) : null}
+            </>
+          ) : null}
         </section>
       </main>
     </div>
   )
 }
 
-function ConnectScreen({ onConnect }: { onConnect: (credentials: SetupCredentials) => void }) {
+function ConnectScreen({
+  onConnect,
+}: {
+  onConnect: (credentials: SetupCredentials) => Promise<void>
+}) {
   const [token, setToken] = useState('')
   const [phone, setPhone] = useState('')
+  const [working, setWorking] = useState(false)
+  const [error, setError] = useState('')
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-12">
@@ -400,15 +586,20 @@ function ConnectScreen({ onConnect }: { onConnect: (credentials: SetupCredential
         <CardHeader>
           <CardTitle className="text-xl">Connect to Setup Console</CardTitle>
           <CardDescription>
-            Use your platform operator token and allowlisted phone. Credentials remain in this browser
-            session and are cleared when you disconnect or close the session.
+            Sign in once with your platform operator token and allowlisted phone. A session is saved in
+            this browser and restored automatically until it expires or you sign out.
           </CardDescription>
         </CardHeader>
         <form
           className="space-y-4"
           onSubmit={(event) => {
             event.preventDefault()
-            if (token.trim() && phone.trim()) onConnect({ token, phone })
+            if (!token.trim() || !phone.trim() || working) return
+            setWorking(true)
+            setError('')
+            void onConnect({ token, phone })
+              .catch((connectError) => setError(messageFrom(connectError)))
+              .finally(() => setWorking(false))
           }}
         >
           <Field label="Operator token" htmlFor="operator-token">
@@ -431,8 +622,9 @@ function ConnectScreen({ onConnect }: { onConnect: (credentials: SetupCredential
               required
             />
           </Field>
-          <Button className="w-full" type="submit" disabled={!token.trim() || !phone.trim()}>
-            Connect securely
+          {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+          <Button className="w-full" type="submit" disabled={!token.trim() || !phone.trim() || working}>
+            {working ? 'Signing in…' : 'Connect securely'}
           </Button>
         </form>
       </Card>
@@ -543,6 +735,7 @@ function CompanyWorkspace({
   credentials,
   detail,
   companyCode,
+  locale = 'en',
   refreshing,
   onRefresh,
   onChanged,
@@ -551,25 +744,29 @@ function CompanyWorkspace({
   credentials: SetupCredentials
   detail: CompanyDetailResponse
   companyCode: string
+  locale?: 'en' | 'ar'
   refreshing: boolean
   onRefresh: () => Promise<void>
   onChanged: () => Promise<void>
   onError: (error: unknown) => void
 }) {
-  const lifecycleStatus = companyLifecycleStatus(detail.readiness)
+  const readiness = detail?.readiness
+  const availableModules = Array.isArray(detail?.available_modules) ? detail.available_modules : []
+  const channelPolicy = detail?.channel_policy || {}
+  const lifecycleStatus = companyLifecycleStatus(readiness)
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="mb-2 flex items-center gap-2">
             <Badge tone={lifecycleBadgeTone(lifecycleStatus)}>{lifecycleLabel(lifecycleStatus)}</Badge>
-            <Badge tone={detail.readiness.ready ? 'success' : 'warning'}>
-              {detail.readiness.ready ? 'Ready' : 'Setup in progress'}
+            <Badge tone={readiness?.ready ? 'success' : 'warning'}>
+              {readiness?.ready ? 'Ready' : 'Setup in progress'}
             </Badge>
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-subtle">{companyCode}</span>
           </div>
           <h2 className="text-2xl font-semibold tracking-[-0.035em]">
-            {detail.readiness.name || companyCode}
+            {readiness?.name || companyCode}
           </h2>
         </div>
         <Button variant="secondary" size="sm" onClick={() => void onRefresh()} disabled={refreshing}>
@@ -587,14 +784,15 @@ function CompanyWorkspace({
       />
 
       <ReadinessCard detail={detail} />
+      <OwnershipDeepLinksCard locale={locale} />
       <div className="grid gap-6 xl:grid-cols-2">
         <ProfileCard
           key={[
             companyCode,
-            detail.readiness.name,
-            detail.readiness.country,
-            detail.readiness.timezone,
-            detail.readiness.currency,
+            readiness?.name,
+            readiness?.country,
+            readiness?.timezone,
+            readiness?.currency,
           ].join(':')}
           credentials={credentials}
           companyCode={companyCode}
@@ -603,20 +801,158 @@ function CompanyWorkspace({
           onError={onError}
         />
         <ModulesCard
-          key={detail.available_modules.map((module) => `${module.key}:${module.configured}:${module.effective}`).join('|')}
+          key={availableModules.map((module) => `${module.key}:${module.configured}:${module.effective}`).join('|')}
           credentials={credentials}
           companyCode={companyCode}
-          modules={detail.available_modules}
+          modules={availableModules}
           bundles={detail.module_bundles || detail.module_guidance?.bundles || []}
           onChanged={onChanged}
           onError={onError}
         />
       </div>
 
+      <EmployeeAppAccessPolicyCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        moduleEnabled={Boolean(
+          availableModules.find((module) => module.key === 'employee_app')?.configured ||
+            availableModules.find((module) => module.key === 'employee_app')?.effective,
+        )}
+        onChanged={onChanged}
+        onError={onError}
+      />
+
+      <PayrollSetupCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        moduleEnabled={Boolean(
+          availableModules.find((module) => module.key === 'payroll')?.configured ||
+            availableModules.find((module) => module.key === 'payroll')?.effective,
+        )}
+        onChanged={onChanged}
+        onError={onError}
+      />
+
+      <ModuleCompanyPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        availableModules={availableModules}
+        onChanged={onChanged}
+        onError={onError}
+      />
+
+      <Wave1HireReadyPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave2WorkforceTruthPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave3EmployeeLifecyclePoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave4PerformancePoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave4TalentPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave5HrIntelligencePoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6JobArchitecturePoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6LearningPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6BenefitsPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6EmployeeRelationsPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6EngagementPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6CompensationPlanningPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <Wave6WorkforcePlanningPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <IntegrationsCatalogCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
+      <NotificationDeliveryPoliciesCard
+        credentials={credentials}
+        companyCode={companyCode}
+        locale={locale}
+        onError={onError}
+      />
+
       <ChannelPolicyCard
         credentials={credentials}
         companyCode={companyCode}
-        policy={detail.channel_policy || {}}
+        policy={channelPolicy}
         onChanged={onChanged}
         onError={onError}
       />
@@ -628,7 +964,7 @@ function CompanyWorkspace({
             detail.channel_account?.provider_account_id,
             detail.channel_account?.status,
             (detail.channel_account?.audiences || []).join(','),
-            String(detail.channel_policy.company_channel_accounts_enabled === true),
+            String(channelPolicy.company_channel_accounts_enabled === true),
           ].join(':')}
           credentials={credentials}
           companyCode={companyCode}
@@ -651,7 +987,12 @@ function CompanyWorkspace({
           onChanged={onChanged}
           onError={onError}
         />
-        <TeamUsersCard users={detail.users || []} />
+        <TeamAccessCard
+          credentials={credentials}
+          companyCode={companyCode}
+          locale={locale}
+          onError={onError}
+        />
       </div>
     </div>
   )
@@ -675,7 +1016,7 @@ function LifecycleCard({
   const [reason, setReason] = useState('')
   const [working, setWorking] = useState(false)
   const protectedCompany = companyCode.toUpperCase() === 'WATHEFNI'
-  const reasonText = detail.readiness.lifecycle?.reason || detail.readiness.lifecycle_reason
+  const reasonText = detail.readiness?.lifecycle?.reason || detail.readiness?.lifecycle_reason
 
   async function transition(next: CompanyLifecycleStatus, title: string, body: string) {
     const trimmed = reason.trim()
@@ -867,7 +1208,7 @@ function ProfileCard({
   }
 
   return (
-    <Card>
+    <Card id="classic-profile" data-ownership="company_identity">
       <CardHeader>
         <CardTitle>Company profile</CardTitle>
         <CardDescription>Client-facing identity and regional defaults.</CardDescription>
@@ -972,9 +1313,9 @@ function ModulesCard({
   }
 
   return (
-    <Card>
+    <Card id="classic-modules" data-ownership="module_entitlements">
       <CardHeader>
-        <CardTitle>Canonical modules</CardTitle>
+        <CardTitle>What this company uses</CardTitle>
         <CardDescription>
           Enable product areas for this company. Hard dependencies are auto-included. Soft recommendations never block save.
         </CardDescription>
@@ -1171,7 +1512,7 @@ function ChannelPolicyCard({
   }
 
   return (
-    <Card>
+    <Card id="classic-channels" data-ownership="channel_policy">
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div>
           <CardTitle>Channel policy</CardTitle>
@@ -1222,7 +1563,7 @@ function CompanyChannelAccountCard({
 }) {
   const confirm = useConfirm()
   const account = detail.channel_account
-  const platformAvailable = detail.channel_policy.company_channel_accounts_enabled === true
+  const platformAvailable = detail.channel_policy?.company_channel_accounts_enabled === true
   const [form, setForm] = useState<ChannelAccountInput>({
     provider: account?.provider || 'octopus',
     provider_account_id: account?.provider_account_id || '',
@@ -1486,14 +1827,14 @@ function OwnerInviteCard({
   }
 
   return (
-    <Card>
+    <Card id="classic-owner" data-ownership="team_day_to_day">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <UserPlus className="h-4 w-4" aria-hidden="true" />
-          Owner invite
+          First Company Admin
         </CardTitle>
         <CardDescription>
-          Create the first Owner and copy their private invite link. The console does not send invitations.
+          Seed the first Company Admin invite for this company. Day-to-day invites and role changes stay in Settings → Team.
         </CardDescription>
       </CardHeader>
       <form className="space-y-4" onSubmit={(event) => void create(event)}>
@@ -1523,35 +1864,6 @@ function OwnerInviteCard({
           </Button>
         </div>
       ) : null}
-    </Card>
-  )
-}
-
-function TeamUsersCard({ users }: { users: CompanyDetailResponse['users'] }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-4 w-4" aria-hidden="true" />
-          Team users
-        </CardTitle>
-        <CardDescription>Current dashboard users and their account status.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {users.length === 0 ? <p className="text-sm text-subtle">No team users yet.</p> : null}
-        {users.map((user, index) => (
-          <div key={String(user.user_id || user.id || user.email || index)} className="flex items-center justify-between gap-4 rounded-2xl border border-line/55 bg-white/45 p-4">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user.name || user.email || 'Unnamed user'}</p>
-              <p className="mt-0.5 truncate text-xs text-subtle">{user.email || user.phone || 'No contact details'}</p>
-            </div>
-            <div className="flex shrink-0 gap-1.5">
-              {user.role ? <Badge>{humanize(user.role)}</Badge> : null}
-              {user.status ? <Badge tone={user.status === 'active' ? 'success' : 'muted'}>{humanize(user.status)}</Badge> : null}
-            </div>
-          </div>
-        ))}
-      </CardContent>
     </Card>
   )
 }

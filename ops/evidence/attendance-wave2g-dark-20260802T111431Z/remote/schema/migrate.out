@@ -1,0 +1,7 @@
+env production
+expected_db wathefni
+connected_db wathefni
+tables ['attendance_capture_audit_events', 'attendance_capture_checkpoints', 'attendance_capture_connectors', 'attendance_capture_credentials', 'attendance_capture_devices', 'attendance_capture_health', 'attendance_capture_health_events', 'attendance_capture_idempotency', 'attendance_capture_mappings', 'attendance_capture_quarantine', 'attendance_capture_remediation', 'attendance_capture_replay_ledger', 'attendance_capture_sites']
+triggers ['trg_att_cap_audit_immutable', 'trg_att_cap_replay_immutable']
+MIGRATE_OK
+authority_model=durable_postgres_capture_ops_wave2g_v1

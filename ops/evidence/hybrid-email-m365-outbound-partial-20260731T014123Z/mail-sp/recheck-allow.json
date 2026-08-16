@@ -1,0 +1,10 @@
+{
+  "RoleName": "Application Mail.Send",
+  "GrantedPermissions": "Mail.Send",
+  "AllowedResourceScope": "d3302de0-0dcc-4169-8937-17f440410a7b",
+  "ScopeType": "AdministrativeUnit",
+  "InScope": "True",
+  "Identity": "a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+  "IsValid": true,
+  "ObjectState": "New"
+}

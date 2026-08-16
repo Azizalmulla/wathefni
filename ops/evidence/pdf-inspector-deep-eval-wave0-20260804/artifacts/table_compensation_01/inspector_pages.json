@@ -1,0 +1,16 @@
+{
+  "pages_with_tables_1idx": [
+    1
+  ],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": true,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "# Compensation Breakdown — Employee Table\n\n|Component||Frequency|\n|---|---|---|\n|Basic Salary|900|Monthly|\n|Housing|200|Monthly|\n|Transport|50|Monthly|\n|Mobile|25|Monthly|\n|Total Cash|1175|Monthly|\n\n## Amount (KWD)\n",
+      "markdown_len": 215
+    }
+  ]
+}

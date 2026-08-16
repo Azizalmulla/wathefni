@@ -1,0 +1,10 @@
+total 539520
+-rw------- 1 root root 53359566 Aug  1 02:30 offsite-daily-20260801T023033Z.tar.zst.gpg
+-rw------- 1 root root 53327450 Aug  1 01:51 offsite-daily-20260801T015146Z.tar.zst.gpg
+-rw------- 1 root root 52912242 Jul 31 02:33 offsite-daily-20260731T023258Z.tar.zst.gpg
+-rw------- 1 root root 52998355 Jul 30 02:33 offsite-daily-20260730T023340Z.tar.zst.gpg
+-rw------- 1 root root 52375196 Jul 29 02:30 offsite-daily-20260729T023030Z.tar.zst.gpg
+-rw------- 1 root root 52325079 Jul 28 02:32 offsite-daily-20260728T023226Z.tar.zst.gpg
+-rw------- 1 root root 52118834 Jul 27 02:32 offsite-daily-20260727T023237Z.tar.zst.gpg
+-rw------- 1 root root 51499600 Jul 26 02:31 offsite-weekly-20260726T023109Z.tar.zst.gpg
+-rw------- 1 root root 50815794 Jul 26 00:51 offsite-weekly-20260726T005132Z.tar.zst.gpg

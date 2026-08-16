@@ -1,0 +1,23 @@
+{
+  "disabled_proof_intakes": [],
+  "active_intakes": [
+    {
+      "intake_id": "2493b577-09e3-45c2-b923-b0c382c251df",
+      "label": "Postmark default test",
+      "status": "active",
+      "address": "92d69b51cdadf3b594fc08710326ff6b@inbound.postmarkapp.com"
+    }
+  ],
+  "open_cv_extraction": 0,
+  "d6ga_job_preserved": {
+    "job_id": "90887c19-8492-4fcc-87bd-a3992f856dee",
+    "status": "dead_letter",
+    "attempts": 5,
+    "last_error_code": "cv_extraction_failed",
+    "updated_at": "2026-08-01 17:29:04.093135+00:00"
+  },
+  "posture": {
+    "INBOUND_ALLOWED": "WATHEFNI",
+    "MAILBOX_SYNC": "off"
+  }
+}

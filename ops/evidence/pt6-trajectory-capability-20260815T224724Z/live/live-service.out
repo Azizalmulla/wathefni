@@ -1,0 +1,5 @@
+staging_health=200
+      PASS  live health
+      PASS  live /dashboard/posthire/talent/capability/holder-dependency/x not public
+      PASS  live /dashboard/posthire/talent/map not public
+    LIVE_SERVICE 3 passed, 0 failed

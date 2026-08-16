@@ -1,0 +1,120 @@
+commit 5509e64ea81765f41e1786b16db507ad79d6d0c6
+Author: Azizalmulla <azizalmulla16@gmail.com>
+Date:   Thu Aug 6 19:03:57 2026 +0300
+
+    feat: add Bank ESS review UI and onboarding completion strip
+    
+    Applies only BankReviewPanel, OnboardingCompletionStrip, and employee
+    mobile bank/completion surfaces onto the recovered live OCR PostHire
+    baseline. No Migration Sync / Leave / Shifts / soft-keep changes.
+    
+    Co-authored-by: Cursor <cursoragent@cursor.com>
+
+diff --git a/apps/wathefni-employee-mobile/src/api/types.ts b/apps/wathefni-employee-mobile/src/api/types.ts
+index 24f7e2f..f85cea2 100644
+--- a/apps/wathefni-employee-mobile/src/api/types.ts
++++ b/apps/wathefni-employee-mobile/src/api/types.ts
+@@ -59,6 +59,28 @@ export type MeResponse = EmployeeProfile & {
+   leave_balances_enabled: boolean
+ }
+ 
++export type CivilIdPartSlot = {
++  present?: boolean
++  file_id?: string | null
++  filename?: string | null
++  mime_type?: string | null
++  detected_side?: string | null
++  hr_warning?: boolean
++  uploaded_at?: string | null
++}
++
++export type CivilIdParts = {
++  schema?: string
++  legacy_single?: boolean
++  parts_complete?: boolean
++  missing?: string[]
++  version_id?: string | null
++  review_status?: string | null
++  attempt_open?: boolean
++  front?: CivilIdPartSlot
++  back?: CivilIdPartSlot
++}
++
+ export type OnboardingItem = {
+   item_id?: string
+   label?: string
+@@ -67,18 +89,170 @@ export type OnboardingItem = {
+   status?: string
+   required?: boolean
+   file_id?: string | null
++  /** ISO date from shared onboarding_items.due_date when present. */
++  due_date?: string | null
++  authority?: string | null
++  collection_mode?: string | null
++  owner?: string | null
++  responsible_party?: string | null
++  waiting_on?: string | null
++  actions?: string[]
++  rejection_reason?: string | null
++  replacement_required?: boolean
++  completed_at?: string | null
++  current_version_id?: string | null
++  current_version_no?: number | null
++  review_status?: string | null
++  version_filename?: string | null
++  group?: string | null
++  legacy_status?: string | null
++  civil_id_parts?: CivilIdParts | null
++  parts_complete?: boolean
++}
++
++/** Canonical onboarding completion states. Backend: onboarding_completion_contract. */
++export type OnboardingCompletionState =
++  | 'not_started'
++  | 'in_progress'
++  | 'waiting_on_employee'
++  | 'waiting_on_hr'
++  | 'blocked'
++  | 'completed'
++  | 'reopened'
++
++export type ContractNextAction = {
++  owner?: 'employee' | 'hr' | 'system' | 'none' | string
++  message?: string
++  message_en?: string
++  message_ar?: string
++}
++
++export type OnboardingCompletion = {
++  contract_version?: string
++  state?: OnboardingCompletionState | string
++  reason?: string | null
++  is_complete?: boolean
++  required_total?: number
++  satisfied_count?: number
++  open_count?: number
++  waiting_employee_count?: number
++  waiting_hr_count?: number
++  blocked_count?: number
++  waiting_on_employee_items?: string[]
++  waiting_on_hr_items?: string[]
++  blocked_items?: string[]
++  next_action?: ContractNextAction
++  legacy_onboarding_status?: string | null
+ }
+ 
+ export type OnboardingResponse = {
+   ok: boolean
+   status: string | null
++  /** Canonical completion snapshot. Never recompute completion in the app. */
++  completion?: OnboardingCompletion
++  next_action?: ContractNextAction
++  lifecycle_version?: string | null
+   required_total: number
+   received_count: number
+   pending_count: number
++  accepted_count?: number
++  items?: OnboardingItem[]
++  groups?: {
++    your_actions?: OnboardingItem[]
++    being_reviewed?: OnboardingItem[]

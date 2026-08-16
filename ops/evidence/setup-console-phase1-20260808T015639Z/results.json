@@ -1,0 +1,143 @@
+{
+  "pass": 21,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "disable_semantics_standard_no_delete",
+      "detail": {
+        "stop_new_activity": true,
+        "hide_navigation_and_surfaces": true,
+        "block_module_apis": true,
+        "preserve_historical_records": true,
+        "preserve_audit_history": true,
+        "delete_data": false,
+        "silent_cancel_or_mutate_existing": false
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "disable_semantics_only_employee_app_exception",
+      "detail": [
+        "employee_app"
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "employee_app_disable_preserves_history",
+      "detail": [
+        "revoke_active_employee_app_sessions",
+        "supersede_open_invites"
+      ]
+    },
+    {
+      "status": "PASS",
+      "name": "ops_deep_link_payroll",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-modules",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-profile",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-channels",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-owner",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/setup-console#classic-app-access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "launch_readiness_contains:/dashboard?page=",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "frontend_source_skipped_no_checkout",
+      "detail": {
+        "path": "/opt/wathefni/apps/wathefni-dashboard/src"
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "canary_setup_console_dist_present",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:/dashboard/superadmin/setup/companies/{company_c",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:/dashboard/superadmin/setup/ownership",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:company_app_access_owned_by_setup_console",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:allow_module_toggle=False",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend_route_or_guard:module_enable_owned_by_setup_console",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_ownership_endpoint",
+      "detail": {
+        "company_identity": "setup_console",
+        "module_entitlements": "setup_console",
+        "employee_app_enabled": "setup_console",
+        "employee_app_access_policy": "setup_console",
+        "employee_app_per_employee": "operational_employees",
+        "channel_policy": "setup_console",
+        "hr_personal_whatsapp": "operational_settings_account",
+        "payroll_company_setup": "setup_console",
+        "payroll_runs": "operational_payroll",
+        "team_day_to_day": "operational_settings_team",
+        "integrations": "setup_console_control_and_migration_sync"
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_employee_app_access_get",
+      "detail": {
+        "module_enabled": true,
+        "access_mode": "selected"
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_tenant_scoped_policy",
+      "detail": "WATHEFNI"
+    },
+    {
+      "status": "PASS",
+      "name": "live_setup_policy_patch_allowed",
+      "detail": {
+        "status": 200
+      }
+    }
+  ]
+}

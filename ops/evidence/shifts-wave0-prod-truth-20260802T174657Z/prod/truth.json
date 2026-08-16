@@ -1,0 +1,658 @@
+{
+  "mode": "readonly",
+  "db": "wathefni",
+  "flags": {
+    "WATHEFNI_ATTENDANCE_AUTHORITY": "on",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES": "WATHEFNI",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_STORE": "postgres",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS": "ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,ATTW4B,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|,LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY": "on",
+    "WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES": "965524,965525,965526,965527",
+    "WATHEFNI_ATTENDANCE_CAPTURE_INGEST": "off",
+    "WATHEFNI_ATTENDANCE_CAPTURE_OPS": "on",
+    "WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES": "WATHEFNI",
+    "WATHEFNI_ATTENDANCE_CAPTURE_STORE": "postgres",
+    "WATHEFNI_ATTENDANCE_IMPORT": "off",
+    "WATHEFNI_ATTENDANCE_OPS": "on",
+    "WATHEFNI_ATTENDANCE_OPS_COMPANIES": "WATHEFNI",
+    "WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS": "absence,early_leave",
+    "WATHEFNI_ATTENDANCE_OPS_STORE": "postgres",
+    "WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY": "on",
+    "WATHEFNI_EMPLOYEE_APP": "on",
+    "WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST": "WATHEFNI-96550252254",
+    "WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST": "on",
+    "WATHEFNI_LEAVE_AUTHORITY": "on",
+    "WATHEFNI_LEAVE_AUTHORITY_COMPANIES": "WATHEFNI",
+    "WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS": "LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|",
+    "WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY": "on",
+    "WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES": "965525,965526,965527",
+    "WATHEFNI_LEAVE_BALANCES": "on",
+    "WATHEFNI_LEAVE_POLICY_WAVE2": "on",
+    "WATHEFNI_LEAVE_REAL_DECISION_ALLOWLIST": "96599338566,96588009911",
+    "WATHEFNI_LEAVE_REAL_DECISION_GATE": "on",
+    "WATHEFNI_LEAVE_WAVE4": "on",
+    "WATHEFNI_LEAVE_WORKFLOW_WAVE3": "on",
+    "WATHEFNI_OUTBOUND_EMAIL_PROVIDER": "postmark",
+    "WATHEFNI_OUTBOUND_FLOWS": "leave_decision,onboarding,compliance,shift",
+    "WATHEFNI_OUTBOUND_FROM": "hr@wathefni.ai",
+    "WATHEFNI_OUTBOUND_LAYER": "on",
+    "WATHEFNI_OUTBOUND_TEMPLATES": "off"
+  },
+  "counts": {
+    "assignments_all": 23,
+    "assignments_by_status": {
+      "cancelled": 3,
+      "scheduled": 20
+    },
+    "shift_events": 28,
+    "events_by_type": {
+      "created": 5,
+      "employee_notified": 4,
+      "reminder_sent": 4,
+      "employee_notification_failed": 4,
+      "cancelled": 3,
+      "reminder_attempt_failed": 3,
+      "rescheduled": 2,
+      "employee_cancellation_notified": 2,
+      "employee_shift_objection": 1
+    },
+    "shift_swap_requests": 0,
+    "shift_swap_requests_by_status": {},
+    "shift_swap_events": 0,
+    "employee_availability_requests": 0,
+    "employee_availability_requests_by_status": {},
+    "employee_availability_events": 0,
+    "by_date_bucket": {
+      "past": 20,
+      "today": 0,
+      "future": 3,
+      "min_date": "2026-05-11",
+      "max_date": "2026-08-11"
+    },
+    "by_employee": [
+      {
+        "employee_key": "WATHEFNI-96566363363",
+        "n": 8,
+        "future_scheduled": 0
+      },
+      {
+        "employee_key": "WATHEFNI-96597727743",
+        "n": 7,
+        "future_scheduled": 0
+      },
+      {
+        "employee_key": "WATHEFNI-96550252254",
+        "n": 5,
+        "future_scheduled": 0
+      },
+      {
+        "employee_key": "WATHEFNI-96552263564",
+        "n": 1,
+        "future_scheduled": 1
+      },
+      {
+        "employee_key": "WATHEFNI-96596552203",
+        "n": 1,
+        "future_scheduled": 1
+      },
+      {
+        "employee_key": "WATHEFNI-96552202357",
+        "n": 1,
+        "future_scheduled": 1
+      }
+    ],
+    "future_scheduled_by_employment_status": [
+      {
+        "status": "null",
+        "emp_n": 3,
+        "shift_n": 3
+      }
+    ],
+    "attendance_records_shift_link": {
+      "linked": 0,
+      "total": 42
+    },
+    "field_fill": {
+      "with_location": 15,
+      "with_role": 15,
+      "with_notes": 2,
+      "reminders_sent": 7
+    },
+    "split_day_employee_dates": 0,
+    "by_timezone": {
+      "Asia/Kuwait": 23
+    }
+  },
+  "anomalies": {
+    "overnight_or_zero_length_scheduled": 0,
+    "overlapping_scheduled_pairs": 0,
+    "duplicate_exact_windows": 0,
+    "orphan_employee_key": 3,
+    "cross_tenant": 0,
+    "scheduled_on_approved_leave_dates": 1,
+    "future_shifts_non_active_employees": []
+  },
+  "samples": {
+    "recent": [
+      {
+        "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+        "employee_key": "WATHEFNI-96596552203",
+        "employee_name": null,
+        "shift_date": "2026-08-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": null,
+        "role": null,
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+        "employee_key": "WATHEFNI-96552263564",
+        "employee_name": null,
+        "shift_date": "2026-08-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": null,
+        "role": null,
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+        "employee_key": "WATHEFNI-96552202357",
+        "employee_name": null,
+        "shift_date": "2026-08-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": null,
+        "role": null,
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "da2a27fe-182c-4a84-af9e-1a1dd0ff7dce",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-06-16",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "c6e116e2-9981-4ebf-93f5-a1c5bf981ad5",
+        "employee_key": "WATHEFNI-96597727743",
+        "employee_name": "mohammad alqattan",
+        "shift_date": "2026-06-16",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "a3dc09a7-b407-41ef-9030-91c2968b8439",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "shift_date": "2026-06-16",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "5759604c-8cd1-4608-a385-0d77c7d6c603",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "shift_date": "2026-06-15",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "57cd5c44-ee11-4873-b77e-cbb1073d6f6e",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-06-15",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "1b1e64f9-fb35-4ac6-b02f-34109a38f1ae",
+        "employee_key": "WATHEFNI-96597727743",
+        "employee_name": "mohammad alqattan",
+        "shift_date": "2026-06-15",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "4b435014-b22b-436f-b411-1240152fe669",
+        "employee_key": "WATHEFNI-96597727743",
+        "employee_name": "mohammad alqattan",
+        "shift_date": "2026-06-14",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "ca7e5289-21bd-4ca6-9035-b10ff65fd854",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "shift_date": "2026-06-14",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "13a07e6c-57f9-4053-b166-b81ec35e7eb7",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-06-14",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "bc4364a3-76c7-4ddd-858f-a112e78c0e8a",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-06-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "e3cadd8e-1790-447f-a68b-e45a04bb4075",
+        "employee_key": "WATHEFNI-96597727743",
+        "employee_name": "mohammad alqattan",
+        "shift_date": "2026-06-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "cb445860-b7c8-4184-9c37-fdbb5db4b754",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "shift_date": "2026-06-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "7a03af13-03d3-4ad9-baf3-e519cc528e5c",
+        "employee_key": "WATHEFNI-96550252254",
+        "employee_name": "Talal Fadhli",
+        "shift_date": "2026-06-10",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "18b6da7e-e08b-4a95-b9d3-d4439411241a",
+        "employee_key": "WATHEFNI-96597727743",
+        "employee_name": "mohammad alqattan",
+        "shift_date": "2026-06-10",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "cb617cff-7c9c-45de-8ea2-1ae053694348",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-06-10",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": "Main Branch",
+        "role": "Branch staff",
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "1f74e534-9a35-4a85-a0d3-5ffcdb544eb1",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-05-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "scheduled",
+        "location": null,
+        "role": null,
+        "timezone": "Asia/Kuwait"
+      },
+      {
+        "shift_id": "eff09bbd-1ddc-4d3b-8f77-a15144dcfe00",
+        "employee_key": "WATHEFNI-96566363363",
+        "employee_name": "Fouad Burhamad",
+        "shift_date": "2026-05-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "cancelled",
+        "location": null,
+        "role": null,
+        "timezone": "Asia/Kuwait"
+      }
+    ],
+    "swaps": [],
+    "availability": []
+  },
+  "schema": {
+    "shift_swap_requests": [
+      {
+        "column_name": "swap_id",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "company_code",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requester_employee_key",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requester_employee_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requester_employee_name",
+        "data_type": "text"
+      },
+      {
+        "column_name": "target_employee_key",
+        "data_type": "text"
+      },
+      {
+        "column_name": "target_employee_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "target_employee_name",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requester_shift_id",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "target_shift_id",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "shift_date",
+        "data_type": "date"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text"
+      },
+      {
+        "column_name": "reason",
+        "data_type": "text"
+      },
+      {
+        "column_name": "decision_note",
+        "data_type": "text"
+      },
+      {
+        "column_name": "source_text",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requested_by_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "decided_by_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requested_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "decided_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "metadata",
+        "data_type": "jsonb"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone"
+      }
+    ],
+    "employee_availability_requests": [
+      {
+        "column_name": "availability_id",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "company_code",
+        "data_type": "text"
+      },
+      {
+        "column_name": "employee_key",
+        "data_type": "text"
+      },
+      {
+        "column_name": "employee_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "employee_name",
+        "data_type": "text"
+      },
+      {
+        "column_name": "start_date",
+        "data_type": "date"
+      },
+      {
+        "column_name": "end_date",
+        "data_type": "date"
+      },
+      {
+        "column_name": "start_time",
+        "data_type": "time without time zone"
+      },
+      {
+        "column_name": "end_time",
+        "data_type": "time without time zone"
+      },
+      {
+        "column_name": "availability_type",
+        "data_type": "text"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text"
+      },
+      {
+        "column_name": "reason",
+        "data_type": "text"
+      },
+      {
+        "column_name": "decision_note",
+        "data_type": "text"
+      },
+      {
+        "column_name": "source_text",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requested_by_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "decided_by_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "requested_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "decided_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "metadata",
+        "data_type": "jsonb"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone"
+      }
+    ],
+    "shift_assignments": [
+      {
+        "column_name": "shift_id",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "company_code",
+        "data_type": "text"
+      },
+      {
+        "column_name": "employee_key",
+        "data_type": "text"
+      },
+      {
+        "column_name": "employee_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "employee_name",
+        "data_type": "text"
+      },
+      {
+        "column_name": "shift_date",
+        "data_type": "date"
+      },
+      {
+        "column_name": "start_time",
+        "data_type": "time without time zone"
+      },
+      {
+        "column_name": "end_time",
+        "data_type": "time without time zone"
+      },
+      {
+        "column_name": "timezone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "role",
+        "data_type": "text"
+      },
+      {
+        "column_name": "location",
+        "data_type": "text"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text"
+      },
+      {
+        "column_name": "notes",
+        "data_type": "text"
+      },
+      {
+        "column_name": "source_text",
+        "data_type": "text"
+      },
+      {
+        "column_name": "metadata",
+        "data_type": "jsonb"
+      },
+      {
+        "column_name": "reminder_sent_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "created_by_phone",
+        "data_type": "text"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone"
+      }
+    ]
+  },
+  "read_only": "on",
+  "module": {
+    "module_key": "shifts",
+    "enabled": true,
+    "settings": {
+      "timezone": "Asia/Kuwait",
+      "reminder_hours_before": 2
+    }
+  },
+  "tables_present": {
+    "shift_assignments": "shift_assignments",
+    "shift_events": "shift_events",
+    "shift_swap_requests": "shift_swap_requests",
+    "shift_swap_events": "shift_swap_events",
+    "employee_availability_requests": "employee_availability_requests",
+    "employee_availability_events": "employee_availability_events",
+    "shift_templates": null,
+    "shift_schedules": null,
+    "open_shifts": null,
+    "schedule_drafts": null
+  }
+}

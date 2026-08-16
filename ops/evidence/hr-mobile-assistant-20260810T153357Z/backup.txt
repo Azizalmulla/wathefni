@@ -1,0 +1,5 @@
+backup=/opt/wathefni/backups/hr-mobile-assistant-20260810T153357Z
+total 100
+drwxr-xr-x   2 root root   4096 Aug 10 15:34 .
+drwx------ 562 root root  45056 Aug 10 15:34 ..
+-rw-r--r--   1  501 staff 45475 Aug 10 08:05 operator_mobile.py

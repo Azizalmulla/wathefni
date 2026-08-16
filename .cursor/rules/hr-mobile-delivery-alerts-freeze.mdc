@@ -1,0 +1,36 @@
+---
+description: Freeze HR mobile Delivery Alerts as quiet read-only More monitor after lock wave
+globs: apps/wathefni-employee-mobile/src/hr/features/delivery-alerts/**,apps/wathefni-employee-mobile/app/hr/delivery-alerts.tsx,wathefni-orchestrator/operator_mobile_data.py,wathefni-orchestrator/outbound_delivery.py
+alwaysApply: false
+---
+
+# HR mobile Delivery Alerts — freeze
+
+HR mobile Delivery Alerts quiet read-only More monitor is **accepted and frozen**.
+Do **not** expand into mutations, Home/Inbox surfaces, or a duplicate Tasks queue.
+
+Canonical debt list: `ops/HR_MOBILE_DELIVERY_ALERTS_CONTRACT_DEBT.md`
+
+## Frozen product shape
+
+- Quiet **More-only** monitor (not Home, Inbox, Settings, or Tasks)
+- Non-task outbound delivery states; canonical **`has_task` / `hr_task_id`** dedupe
+- Backend does **not** emit `delivery_alerts` into mobile priorities
+- Capability parity with HR Tasks **read** authority (`hr_task_read`, includes `payroll.read`); actions `["read"]` only
+- Lightweight cream/black list: employee/recipient, channel, status, last attempt, reason
+- No resolve / resend / task mutations from this page
+- Task type vocabulary: canonical **`delivery_failed`** (accept `delivery_failure` as legacy alias only)
+- Future converge with web Alerts & Delivery: fold under **Tasks only** with `has_task` dedupe — never two queues
+
+## Allowed without owner change-control
+
+- Bugfixes restoring freeze invariants / tenant isolation / has_task dedupe
+- Docs / canary log / contract-debt notes
+- Shared capability/parity fixes that do not invent broader access
+
+## Not allowed without an explicit owner wave
+
+- Emitting delivery alerts into Home/Inbox priorities again
+- Resend, retry, resolve, or create-task actions on this page
+- Recreating full web Alerts & Delivery on mobile as a second actionable queue
+- Broadening capability beyond the HR Tasks read authority model

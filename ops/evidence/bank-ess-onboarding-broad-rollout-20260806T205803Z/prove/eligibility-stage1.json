@@ -1,0 +1,87 @@
+{
+  "checks": [
+    {
+      "check": "WATHEFNI-96599338566 bank enabled",
+      "ok": true,
+      "detail": {
+        "key": "WATHEFNI-96599338566",
+        "bank_http": 200,
+        "me_http": 200,
+        "bank_enabled": true,
+        "open_bank": true,
+        "bank_error": null
+      }
+    },
+    {
+      "check": "WATHEFNI-96566363363 bank enabled",
+      "ok": true,
+      "detail": {
+        "key": "WATHEFNI-96566363363",
+        "bank_http": 200,
+        "me_http": 200,
+        "bank_enabled": true,
+        "open_bank": false,
+        "bank_error": null
+      }
+    },
+    {
+      "check": "WATHEFNI-96550010001 bank enabled",
+      "ok": true,
+      "detail": {
+        "key": "WATHEFNI-96550010001",
+        "bank_http": 200,
+        "me_http": 200,
+        "bank_enabled": true,
+        "open_bank": false,
+        "bank_error": null
+      }
+    },
+    {
+      "check": "WATHEFNI-96550252254 bank denied",
+      "ok": true,
+      "detail": {
+        "key": "WATHEFNI-96550252254",
+        "bank_http": 403,
+        "me_http": 200,
+        "bank_enabled": false,
+        "open_bank": false,
+        "bank_error": "bank_ess_not_allowlisted"
+      }
+    }
+  ],
+  "failed": 0,
+  "probes": [
+    {
+      "key": "WATHEFNI-96599338566",
+      "bank_http": 200,
+      "me_http": 200,
+      "bank_enabled": true,
+      "open_bank": true,
+      "bank_error": null
+    },
+    {
+      "key": "WATHEFNI-96566363363",
+      "bank_http": 200,
+      "me_http": 200,
+      "bank_enabled": true,
+      "open_bank": false,
+      "bank_error": null
+    },
+    {
+      "key": "WATHEFNI-96550010001",
+      "bank_http": 200,
+      "me_http": 200,
+      "bank_enabled": true,
+      "open_bank": false,
+      "bank_error": null
+    },
+    {
+      "key": "WATHEFNI-96550252254",
+      "bank_http": 403,
+      "me_http": 200,
+      "bank_enabled": false,
+      "open_bank": false,
+      "bank_error": "bank_ess_not_allowlisted"
+    }
+  ]
+}

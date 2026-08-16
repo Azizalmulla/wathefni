@@ -1,0 +1,12 @@
+# Payroll Wave 2A-C staging qualify
+stamp=20260803T045904Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave2ac-20260803T045904Z
+payment_processing=disabled
+money_authority=external
+vendor_claimed=false
+authoritative_in_wathefni=false
+wave1_contracts_unchanged=true
+wave2a_adapter_contracts_unchanged=true
+wave2b_started=false
+production_deploy=false
+prod_synthetic_gate=NO-GO (staging-only wave; requires Wave 2A-C-B prod synthetic path)

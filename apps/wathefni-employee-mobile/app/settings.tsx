@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
 import Constants from 'expo-constants'
 import * as Notifications from 'expo-notifications'
 
@@ -13,10 +14,18 @@ import {
 import { isAutoLockDiagnosticsEnabled } from '@/auth/autoLockPolicy'
 import { useI18n } from '@/i18n'
 import { approvedErrorMessage } from '@/api/errors'
+import {
+  errorFeedback,
+  selectionFeedback,
+  successFeedback,
+  warningFeedback,
+} from '@/native/haptics'
 import type { DeviceSecurityResponse } from '@/api/types'
 import { PUSH_REGISTRATION_ENABLED, registerForPushToken } from '@/push/registerForPush'
-import { loadPushPreference, savePushPreference } from '@/push/preferences'
+import { isPushOptedOut, setPushOptedOut } from '@/push/preferences'
+import { syncInboxBadge } from '@/push/syncInboxBadge'
 import { SettingsView } from '@/features/remaining/RemainingViews'
+import { SwitchToHrControl } from '@/principals/SwitchToHrControl'
 
 export default function SettingsScreen() {
   const { t, locale, setLocale } = useI18n()
@@ -35,6 +44,7 @@ export default function SettingsScreen() {
     setAutoLockTimeout,
   } = useAuth()
   const router = useRouter()
+  const onBack = useEmployeeSafeBack()
   const [pushOn, setPushOn] = useState(false)
   const [pushBusy, setPushBusy] = useState(false)
   const [biometricBusy, setBiometricBusy] = useState(false)
@@ -59,9 +69,9 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     if (PUSH_REGISTRATION_ENABLED) {
-      void Promise.all([Notifications.getPermissionsAsync(), loadPushPreference()]).then(([p, preferred]) => {
+      void Promise.all([Notifications.getPermissionsAsync(), isPushOptedOut()]).then(([p, optedOut]) => {
         const permitted = p.granted || p.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
-        setPushOn(permitted && preferred)
+        setPushOn(permitted && !optedOut)
       })
     }
   }, [])
@@ -95,13 +105,17 @@ export default function SettingsScreen() {
         : t('biometric.settings')
 
   const togglePush = async (next: boolean) => {
+    selectionFeedback()
     setPushBusy(true)
     try {
       if (next) {
+        // Manage/enable — clear opt-out and register; OS dialog only if needed.
+        await setPushOptedOut(false)
         const result = await registerForPushToken({ requestPermission: true })
         if (!result) {
           setPushOn(false)
           const permission = await Notifications.getPermissionsAsync()
+          warningFeedback()
           Alert.alert(t('settings.push'), t('settings.pushDenied'), [
             { text: t('common.cancel'), style: 'cancel' },
             ...(!permission.canAskAgain
@@ -111,14 +125,16 @@ export default function SettingsScreen() {
           return
         }
         await request('/app/push/register', { method: 'POST', json: { push_token: result.token, platform: result.platform } })
-        await savePushPreference(true)
         setPushOn(true)
+        successFeedback()
       } else {
         await request('/app/push/unregister', { method: 'POST', json: {} })
-        await savePushPreference(false)
+        await setPushOptedOut(true)
+        await syncInboxBadge(0)
         setPushOn(false)
       }
     } catch (err) {
+      errorFeedback()
       Alert.alert(t('common.error'), approvedErrorMessage(err, t))
     } finally {
       setPushBusy(false)
@@ -126,6 +142,7 @@ export default function SettingsScreen() {
   }
 
   const toggleBiometric = async (next: boolean) => {
+    selectionFeedback()
     setBiometricBusy(true)
     try {
       await setBiometricUnlockEnabled(next, {
@@ -140,6 +157,7 @@ export default function SettingsScreen() {
 
   const onAutoLockTimeout = async (next: typeof autoLockTimeoutMs) => {
     if (next === autoLockTimeoutMs || autoLockBusy) return
+    selectionFeedback()
     setAutoLockBusy(true)
     try {
       await setAutoLockTimeout(next)
@@ -149,6 +167,7 @@ export default function SettingsScreen() {
   }
 
   const onSignOutDevice = () => {
+    warningFeedback()
     Alert.alert(t('deviceSecurity.signOutConfirmTitle'), t('deviceSecurity.signOutConfirmBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -163,6 +182,7 @@ export default function SettingsScreen() {
 
   const onRequestDeletion = () => {
     if (!canRequestDeletion || deletionLock.current) return
+    warningFeedback()
     Alert.alert(t('settings.deleteAccount'), t('settings.deleteAccountConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -175,9 +195,11 @@ export default function SettingsScreen() {
           try {
             await request('/app/account/request-deletion', { method: 'POST', json: {} })
             setDeletionRequested(true)
+            successFeedback()
             Alert.alert(t('settings.deleteRequested'))
           } catch (err) {
             deletionLock.current = false
+            errorFeedback()
             Alert.alert(t('common.error'), approvedErrorMessage(err, t))
           } finally {
             setDeletionBusy(false)
@@ -188,45 +210,40 @@ export default function SettingsScreen() {
   }
 
   return (
-    <SettingsView
-      locale={locale}
-      pushOn={pushOn}
-      pushBusy={pushBusy}
-      canManagePush={PUSH_REGISTRATION_ENABLED && can('settings', 'manage_push')}
-      canChangePin={pinEnabled}
-      canManageBiometric={biometricEnabled}
-      biometricOn={biometricPreferenceOn}
-      biometricBusy={biometricBusy}
-      biometricLabel={biometricLabel}
-      canManageAutoLock={autoLockEnabled}
-      autoLockTimeoutMs={autoLockTimeoutMs}
-      autoLockBusy={autoLockBusy}
-      autoLockDiagnostics={pinEnabled && isAutoLockDiagnosticsEnabled() ? autoLockDiag : null}
-      deviceSecurity={deviceSecurity}
-      deviceSecurityLoading={deviceSecurityLoading}
-      version={Constants.expoConfig?.version ?? '—'}
-      onLocale={(code) => {
-        void setLocale(code, { resumeUnlockedSession: status === 'signedIn' })
-      }}
-      onTogglePush={(next) => {
-        if (!next) {
-          void togglePush(false)
-          return
-        }
-        Alert.alert(t('settings.push'), t('settings.pushRationale'), [
-          { text: t('common.cancel'), style: 'cancel' },
-          { text: t('common.continue'), onPress: () => void togglePush(true) },
-        ])
-      }}
-      onToggleBiometric={(next) => void toggleBiometric(next)}
-      onAutoLockTimeout={(next) => void onAutoLockTimeout(next)}
-      onPrivacySupport={() => router.push('/privacy-support')}
-      onChangePin={pinEnabled ? () => router.push('/change-pin') : undefined}
-      onSignOutDevice={onSignOutDevice}
-      onDelete={canRequestDeletion ? onRequestDeletion : undefined}
-      deleteBusy={deletionBusy || deletionRequested}
-      onRetryDeviceSecurity={() => void loadDeviceSecurity()}
-      onBack={() => router.back()}
-    />
+    <>
+      <SettingsView
+        locale={locale}
+        pushOn={pushOn}
+        pushBusy={pushBusy}
+        canManagePush={PUSH_REGISTRATION_ENABLED && can('settings', 'manage_push')}
+        canChangePin={pinEnabled}
+        canManageBiometric={biometricEnabled}
+        biometricOn={biometricPreferenceOn}
+        biometricBusy={biometricBusy}
+        biometricLabel={biometricLabel}
+        canManageAutoLock={autoLockEnabled}
+        autoLockTimeoutMs={autoLockTimeoutMs}
+        autoLockBusy={autoLockBusy}
+        autoLockDiagnostics={pinEnabled && isAutoLockDiagnosticsEnabled() ? autoLockDiag : null}
+        deviceSecurity={deviceSecurity}
+        deviceSecurityLoading={deviceSecurityLoading}
+        version={Constants.expoConfig?.version ?? '—'}
+        onLocale={(code) => {
+          selectionFeedback()
+          void setLocale(code, { resumeUnlockedSession: status === 'signedIn' })
+        }}
+        onTogglePush={(next) => void togglePush(next)}
+        onToggleBiometric={(next) => void toggleBiometric(next)}
+        onAutoLockTimeout={(next) => void onAutoLockTimeout(next)}
+        onPrivacySupport={() => router.push('/privacy-support')}
+        onChangePin={pinEnabled ? () => router.push('/change-pin') : undefined}
+        onSignOutDevice={onSignOutDevice}
+        onDelete={canRequestDeletion ? onRequestDeletion : undefined}
+        deleteBusy={deletionBusy || deletionRequested}
+        onRetryDeviceSecurity={() => void loadDeviceSecurity()}
+        onBack={onBack}
+      />
+      <SwitchToHrControl />
+    </>
   )
 }

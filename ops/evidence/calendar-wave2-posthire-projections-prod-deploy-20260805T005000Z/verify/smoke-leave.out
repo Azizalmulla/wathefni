@@ -1,0 +1,5 @@
+=== ENABLE approved_leave (min=1) ===
+Environment=WATHEFNI_CALENDAR_PROJECTION_LEAVE=on
+health_ok
+SOURCE approved_leave meta {'enabled_sources': ['approved_leave'], 'injected': 2} count 2
+SMOKE_OK approved_leave 2

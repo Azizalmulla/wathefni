@@ -1,0 +1,3 @@
+STAMP=20260726T221015Z
+REMOTE_BACKUP=/opt/wathefni/backups/production-pre-ck-final-live-20260726T221015Z
+REMOTE_EVIDENCE=/opt/wathefni/production-evidence/candidate-knowledge-final-live/20260726T221015Z

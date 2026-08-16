@@ -1,0 +1,23 @@
+summary None
+synthetic_ids {
+  "employee_key": "WATHEFNI-ATTW1C-926c95ec",
+  "phone": "965524926c95",
+  "tag": "926c95ec",
+  "shift_id": "1028741b-7c8a-44bc-8204-9fd8662603c0",
+  "oshift_id": "db3ff406-d13d-49aa-a2c7-c723349d7a2c",
+  "punch_in": "fa5306ef-bb69-4cf4-bad4-dae991fe5835",
+  "projection_id": "376be87d-d4c4-4eb8-8edd-b83de124d89f",
+  "snapshot_id": "66d1c355-3ef3-48ea-a61e-63d5af6f2106"
+}
+PASS  cleanup GUC absent from app.py  detail=None
+PASS  restart projection  detail={'proj': '376be87d-d4c4-4eb8-8edd-b83de124d89f', 'worked': 480, 'punches': 2}
+PASS  concurrent ok  detail={'errors': [], 'ids': [[True, 'c08ebcba-b8f9-4153-b118-4000bd85de96'], [False, 'c08ebcba-b8f9-4153-b118-4000bd85de96'], [False, 'c08ebcba-b8f9-4153-b118-4000bd85de96'], [False, 'c08ebcba-b8f9-4153-b118-4000bd85de96'], [False, 'c08ebcba-b8f9-4153-b118-4000bd85de96'], [False, 'c08ebcba-b8f9-4153-b118-4000bd85de96']]}
+PASS  rebuild exact  detail=None
+PASS  payroll reconcile exact  detail=None
+PASS  snapshot immutable  detail=None
+PASS  drift detected+quarantined  detail={'ok': True, 'company_code': 'WATHEFNI', 'start_date': '2026-08-28', 'end_date': '2026-08-29', 'projection_count': 2, 'legacy_count': 2, 'matched': 1, 'drift_count': 1, 'orphan_authority_count': 0, 'orphan_legacy_count': 0, 'quarantined': 1, 'drifts': [{'kind': 'field_mismatch', 'projection_id': '8b1101b5-3da8-42a1-8869-4aa879f50302', 'attendance_id': '1ae7c1a5-9776-4918-9bc1-ff58f92b5ea8', 'employee_key': 'WATHEFNI-ATTW1C-926c95ec', 'work_date': '2026-08-29', 'shift_key': '', 'mismatches': {'status': {'authority': 'completed', 'legacy': 'absent'}, 'check_in_at': {'authority': '2026-08-29T09:00:00+03:00', 'legacy': None}, 'check_out_at': {'authority': '2026-08-29T17:00:00+03:00', 'legacy': None}}}], 'orphan_authority': [], 'orphan_legacy': [], 'silent_overwrite': False}
+PASS  demo rows untouched count  detail={'before': 42, 'after': 42}
+PASS  demo fingerprint unchanged  detail=None
+PASS  synthetic punches cleaned  detail=None
+PASS  synthetic projections cleaned  detail=None
+PASS  four reals still present  detail=4

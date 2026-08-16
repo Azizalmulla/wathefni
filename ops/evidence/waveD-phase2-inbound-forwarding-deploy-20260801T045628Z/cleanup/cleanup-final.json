@@ -1,0 +1,31 @@
+{
+  "app_key": "imp-wathefni-6fe7c151f3f171aa-WATHEFNI-IMPORT",
+  "before": {
+    "phone": "imp-wathefni-6fe7c151f3f171aa",
+    "status": "ready_for_review"
+  },
+  "deleted_application": 1,
+  "deleted_candidate": 1,
+  "extra_found": [],
+  "remaining_addresses": [
+    {
+      "intake_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+      "local_part": "wathefni-cv-1cb7e3",
+      "status": "disabled",
+      "label": "waveD2-prod-proof general"
+    },
+    {
+      "intake_id": "80da2266-f722-4084-aadb-3b525cccb309",
+      "local_part": "wathefni-d2-44a79e",
+      "status": "disabled",
+      "label": "waveD2-prod-proof role"
+    },
+    {
+      "intake_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+      "local_part": "wathefni-cv-d11603",
+      "status": "disabled",
+      "label": "waveD2-prod-proof general"
+    }
+  ],
+  "remaining_waved2_apps": 0
+}

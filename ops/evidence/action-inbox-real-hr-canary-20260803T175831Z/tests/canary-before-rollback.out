@@ -1,0 +1,77 @@
+[PASS] wave1 enabled
+[PASS] company WATHEFNI
+[PASS] exclude payroll on
+[PASS] read-only honesty
+[PASS] no AI
+[PASS] alerts owns notifications
+[PASS] analytics freeze intact
+[PASS] compliance freeze intact
+[PASS] viewer allowlist configured
+[PASS] subject allowlist configured
+[PASS] real canary enabled
+[PASS] approved boundary
+[PASS] viewer is Aziz phone
+[PASS] subject is Talal only
+[PASS] nav offerable for Aziz
+[PASS] nav hidden for Fouad
+[PASS] Aziz API access
+{"aziz_items_summary": {"total": 6, "by_source": {"compliance": 5, "onboarding": 1}, "by_soa": {"onboarding": 6}}}
+[PASS] Talal only subjects
+[PASS] item subject Talal::compliance:missing:WATHEFNI-96550252254:civil_id
+[PASS] item not payroll::compliance:missing:WATHEFNI-96550252254:civil_id
+[PASS] deep_link page present::compliance:missing:WATHEFNI-96550252254:civil_id
+[PASS] deep_link page safe::compliance:missing:WATHEFNI-96550252254:civil_id
+[PASS] deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:civil_id
+[PASS] deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:civil_id
+[PASS] item subject Talal::compliance:missing:WATHEFNI-96550252254:medical
+[PASS] item not payroll::compliance:missing:WATHEFNI-96550252254:medical
+[PASS] deep_link page present::compliance:missing:WATHEFNI-96550252254:medical
+[PASS] deep_link page safe::compliance:missing:WATHEFNI-96550252254:medical
+[PASS] deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:medical
+[PASS] deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:medical
+[PASS] item subject Talal::compliance:missing:WATHEFNI-96550252254:passport
+[PASS] item not payroll::compliance:missing:WATHEFNI-96550252254:passport
+[PASS] deep_link page present::compliance:missing:WATHEFNI-96550252254:passport
+[PASS] deep_link page safe::compliance:missing:WATHEFNI-96550252254:passport
+[PASS] deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:passport
+[PASS] deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:passport
+[PASS] item subject Talal::compliance:missing:WATHEFNI-96550252254:residence
+[PASS] item not payroll::compliance:missing:WATHEFNI-96550252254:residence
+[PASS] deep_link page present::compliance:missing:WATHEFNI-96550252254:residence
+[PASS] deep_link page safe::compliance:missing:WATHEFNI-96550252254:residence
+[PASS] deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:residence
+[PASS] deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:residence
+[PASS] item subject Talal::compliance:missing:WATHEFNI-96550252254:work_permit
+[PASS] item not payroll::compliance:missing:WATHEFNI-96550252254:work_permit
+[PASS] deep_link page present::compliance:missing:WATHEFNI-96550252254:work_permit
+[PASS] deep_link page safe::compliance:missing:WATHEFNI-96550252254:work_permit
+[PASS] deep_link employee Talal::compliance:missing:WATHEFNI-96550252254:work_permit
+[PASS] deep_link not payroll page::compliance:missing:WATHEFNI-96550252254:work_permit
+[PASS] item subject Talal::employees:WATHEFNI-96550252254:onboarding:incomplete
+[PASS] item not payroll::employees:WATHEFNI-96550252254:onboarding:incomplete
+[PASS] deep_link page present::employees:WATHEFNI-96550252254:onboarding:incomplete
+[PASS] deep_link page safe::employees:WATHEFNI-96550252254:onboarding:incomplete
+[PASS] deep_link employee Talal::employees:WATHEFNI-96550252254:onboarding:incomplete
+[PASS] deep_link not payroll page::employees:WATHEFNI-96550252254:onboarding:incomplete
+[PASS] lean perms still Talal-only
+[PASS] lean perms no payroll
+[PASS] fouad denied
+[PASS] viewer_no_phone denied
+[PASS] random_manager denied
+[PASS] soft-kill viewer empty
+[PASS] soft-kill viewer API denial
+[PASS] soft-kill subject empty
+[PASS] soft-kill subject removes items
+[PASS] soft-kill subject canary off
+[PASS] WAVE1=0 kill switch
+[PASS] restored Aziz access
+[PASS] restored Talal-only
+[PASS] restored real canary on
+[PASS] gate fail-closed viewer
+[PASS] payload composes via build_action_inbox
+[PASS] payload has no mutating SQL
+[PASS] honesty mutates_records false
+[PASS] production db
+[PASS] canary ack deleted
+[PASS] residual 0
+{"pass": 75, "fail": 0, "tag": "c36d022c", "residual": 0, "item_total": 6, "by_source": {"compliance": 5, "onboarding": 1}, "by_soa": {"onboarding": 6}, "viewer": "96599338566", "subject": "WATHEFNI-96550252254"}

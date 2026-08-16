@@ -1,0 +1,126 @@
+{
+  "stamp": "20260807T194447Z",
+  "base": "https://api.wathefni.ai",
+  "company": "WATHEFNI",
+  "employee_key": "WATHEFNI-96599338566",
+  "results": [
+    {
+      "name": "mobile softRefresh helper",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unlock dismiss soft-refreshes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "profile PTR refreshMe",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "documents renew→onboarding invalidate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "HR inboundQueue freshness",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Leave soft poll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Onboarding/Compliance/AppAccess soft poll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Org ESS Reject",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Org ESS payroll gate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "catalog_label bilingual",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "employee /app/me 200",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "employee /app/me re-fetch stable",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "profile fields present after re-fetch",
+      "ok": true,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "notifications EN",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "notifications AR",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "employee onboarding readable-or-gated",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "employee leave readable-or-gated",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "employee documents readable-or-gated",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "employee shifts readable-or-gated",
+      "ok": false,
+      "detail": "{'detail': {'error': 'app_auth_failed', 'message': 'Please sign in again.'}}"
+    },
+    {
+      "name": "HR leave queue",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR onboarding queue",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR compliance queue",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR app access/invitation",
+      "ok": true,
+      "detail": "200"
+    }
+  ],
+  "pass": false,
+  "required_pass_count": 15,
+  "required_total": 23
+}

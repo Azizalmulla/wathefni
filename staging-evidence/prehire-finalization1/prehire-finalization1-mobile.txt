@@ -1,0 +1,44 @@
+Mobile lifecycle authority staging proof — MLAUTH @ http://127.0.0.1:8011
+  PASS  real staging owner login
+  PASS  real /dashboard/mobile/me
+  PASS  me permission_authority backend_current
+  PASS  me advertises shortlist
+  PASS  me does not enable reschedule
+  PASS  candidate list readable
+  PASS  candidate appears in list
+  PASS  list advertises shortlist+reject
+  PASS  list omits schedule_interview
+  PASS  list omits hire from ready_for_review
+  PASS  candidate detail readable
+  PASS  detail advertises shortlist
+  PASS  detail omits schedule_interview
+  PASS  detail omits hire
+  PASS  permitted shortlist prepare succeeds
+  PASS  permitted prepare not permission_denied
+  PASS  advertised shortlist executes through registry
+  PASS  candidate status shortlisted
+  PASS  recruiter staging login
+  PASS  recruiter detail omits hire
+  PASS  recruiter detail omits reject
+  PASS  restricted hire rejected
+  PASS  schedule_interview unsupported on mobile decision
+  PASS  interview detail readable
+  PASS  interview advertises write notes
+  PASS  interview omits cancel
+  PASS  interview omits reschedule
+  PASS  EN stage label present
+  PASS  AR ready_for_review label contract
+  PASS  re-login after logout (restart)
+  PASS  me after restart still backend_current
+  PASS  actions after restart omit schedule_interview
+  PASS  actions after shortlist include hire
+  PASS  hire prepare while shortlisted
+  PASS  stale transition returns stale_decision
+  PASS  stale error distinct from permission_denied
+{
+  "pass": 36,
+  "fail": 0,
+  "report": "/tmp/mobile-authority-proof.json"
+}
+
+Mobile lifecycle authority proof: 36 passed, 0 failed

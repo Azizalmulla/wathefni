@@ -1,0 +1,44 @@
+PASS  schema version wave3f
+PASS  cancel_scheduled in cases
+PASS  reinstate in cases
+PASS  no self approval default
+PASS  kuwait tz default
+PASS  warn first default
+PASS  notice hints hidden by default
+PASS  reinstate disabled by default
+PASS  require LWD default
+PASS  require classification default
+PASS  require case class default
+PASS  kuwait only jurisdiction
+PASS  retain documents default
+PASS  retention floor 365
+PASS  no auto cancel shifts
+PASS  no auto decline leave
+PASS  payroll owns money
+PASS  counsel gate off for normal ops
+PASS  service certificate default
+PASS  public-law questions 10
+PASS  PL1 present
+PASS  contract types vocab
+PASS  exceptional classes include 41a
+PASS  synth phone prefix match
+PASS  real phone blocked pattern
+PASS  synth name prefix match
+PASS  synthetic only flag on
+PASS  revoke at end of LWD
+PASS  alt revoke at effective 00:00
+PASS  impact hash stable
+PASS  normalize hides notice UI
+PASS  normalize reinstate off
+PASS  normalize show hints false
+PASS  normalize migrates wave3f
+PASS  normalize counsel gate off on migrate
+PASS  normalize can expose labeled hints
+PASS  exposed hints labeled guidance
+PASS  classification ok unlimited
+PASS  notice eligible when hints on + unlimited
+PASS  missing classification fails closed
+PASS  exceptional requires escalation note
+PASS  notice hidden for fixed_term
+
+42 passed, 0 failed

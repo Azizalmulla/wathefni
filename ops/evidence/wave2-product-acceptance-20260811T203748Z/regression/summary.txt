@@ -1,0 +1,2 @@
+WAVE1_UNIT rc=0
+REG_OK=YES

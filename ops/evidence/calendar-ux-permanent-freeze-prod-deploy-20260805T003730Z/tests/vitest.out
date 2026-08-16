@@ -1,0 +1,12 @@
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  5 passed (5)
+      Tests  34 passed (34)
+   Start at  03:37:31
+   Duration  2.01s (transform 647ms, setup 955ms, import 865ms, tests 1.25s, environment 3.95s)
+

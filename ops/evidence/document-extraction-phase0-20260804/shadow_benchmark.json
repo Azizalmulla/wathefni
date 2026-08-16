@@ -1,0 +1,652 @@
+{
+  "summary": {
+    "matrix_size": 11,
+    "agreement_count": 9,
+    "agreement_rate": 0.818,
+    "false_ocr_skips_vs_poppler": 1,
+    "extra_ocr_vs_poppler": 1,
+    "total_projected_poppler_ocr_pages": 5,
+    "total_projected_inspector_ocr_pages": 5,
+    "projected_cost_poppler_usd": 0.02,
+    "projected_cost_inspector_usd": 0.02,
+    "paid_ocr_called": false,
+    "authoritative_router": "poppler",
+    "limitations": [
+      "Synthetic matrix; Helvetica cannot embed true Arabic glyphs — arabic_cv uses transliteration proxy",
+      "Image-only pages are synthetic RGB XObjects, not camera scans",
+      "No Mistral calls; cost figures are projected from page counts only",
+      "Downstream field-extraction accuracy not measured (would require OCR/LLM)"
+    ]
+  },
+  "rows": [
+    {
+      "id": "cv_en_digital",
+      "category": "english_cv_digital",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_en_digital.pdf",
+      "expect_ocr_pages": 0,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.0,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 76.8,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          }
+        ],
+        "text_chars": 241,
+        "text_words": 28,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "ENGLISH CV - Jane Doe\nEmail: jane.doe@example.com Phone: +96550000001\nExperience: 8 years platform engineering, durable queues, OCR pipelines.\nSkills: Python, PostgreSQL, FastAPI, Arabic/English documentation.\nEducation: BSc Computer Scienc"
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 3.28,
+        "process_ms": 3.22,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 240,
+        "markdown_words": 26,
+        "markdown_preview": "ENGLISH CV-Jane Doe Email: jane.doe@example.com Phone: +96550000001 Experience: 8 years platform engineering, durable queues, OCR pipelines. Skills: Python, PostgreSQL, FastAPI, Arabic/English documentation. Education: BSc Computer Science\n"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "cv_ar_digital_translit",
+      "category": "arabic_cv_proxy",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_ar_digital_translit.pdf",
+      "expect_ocr_pages": 0,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.0,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 44.69,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          }
+        ],
+        "text_chars": 273,
+        "text_words": 37,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "CV ARABIC (transliteration stand-in) - Ahmad Al-Sabah\nEmail: ahmad@example.com Phone: +96550000002\nKhebra: 6 sanawat fi majal al-nizam wa al-wathaeq.\nMaharat: Python, Postgres, Wathefni HR OS.\nNOTE: true Arabic glyph PDF requires embedded f"
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.28,
+        "process_ms": 0.4,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 274,
+        "markdown_words": 37,
+        "markdown_preview": "CV ARABIC (transliteration stand-in) - Ahmad Al-Sabah Email: ahmad@example.com Phone: +96550000002 Khebra: 6 sanawat fi majal al-nizam wa al-wathaeq. Maharat: Python, Postgres, Wathefni HR OS. NOTE: true Arabic glyph PDF requires embedded f"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "cv_bilingual_digital",
+      "category": "bilingual_cv",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_bilingual_digital.pdf",
+      "expect_ocr_pages": 0,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.0,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 44.32,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          }
+        ],
+        "text_chars": 249,
+        "text_words": 32,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "BILINGUAL CV / ???? ????? (latin+note)\nName: Sara Al-Mutawa / ???? ??????\nEmail: sara@example.com\nExperience EN: Recruitment operations Kuwait/GCC.\nExperience AR note: khibrat fi al-tawzeef wa al-imithal.\nLanguages: Arabic (native), English"
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.23,
+        "process_ms": 0.35,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 250,
+        "markdown_words": 32,
+        "markdown_preview": "BILINGUAL CV / ???? ????? (latin+note) Name: Sara Al-Mutawa / ???? ?????? Email: sara@example.com Experience EN: Recruitment operations Kuwait/GCC. Experience AR note: khibrat fi al-tawzeef wa al-imithal. Languages: Arabic (native), English"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "cv_multicolumn_digital",
+      "category": "multicolumn_cv",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_multicolumn_digital.pdf",
+      "expect_ocr_pages": 0,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.0,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 43.71,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          }
+        ],
+        "text_chars": 285,
+        "text_words": 30,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "COLUMN LEFT - Senior Engineer CV                COLUMN RIGHT - Education\nExperience: Platform systems, queues, OCR routing.\n                                                BSc Computer Science - Kuwait University\nSkills: Python, Postgres, A"
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.34,
+        "process_ms": 0.71,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 215,
+        "markdown_words": 23,
+        "markdown_preview": "COLUMN LEFT-Senior Engineer CV COLUMN RIGHT-Education Experience: Platform systems, queues, OCR routing.BSc Computer Science-Kuwait University Skills: Python, Postgres, Arabic/English docs. Certifications: PMP, AWS\n"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "cv_scanned_image_only",
+      "category": "scanned_pdf",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_scanned_image_only.pdf",
+      "expect_ocr_pages": 1,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "inspector_ocr_pages": [
+        1
+      ],
+      "projected_cost_if_poppler_usd": 0.004,
+      "projected_cost_if_inspector_usd": 0.004,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 42.96,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "pages_local": [],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "needs_ocr",
+            "reason": "image_only_page"
+          }
+        ],
+        "text_chars": 0,
+        "text_words": 0,
+        "arabic_ratio": 0.0,
+        "quality_ok": false,
+        "text_preview": ""
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.31,
+        "process_ms": 0.16,
+        "pdf_type": "scanned",
+        "confidence": 0.949999988079071,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 0,
+        "markdown_words": 0,
+        "markdown_preview": ""
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "cv_mixed_digital_plus_scan",
+      "category": "mixed_pdf",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_mixed_digital_plus_scan.pdf",
+      "expect_ocr_pages": 1,
+      "agreement_on_ocr_pages": false,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": true,
+      "poppler_ocr_pages": [
+        2
+      ],
+      "inspector_ocr_pages": [
+        1,
+        2
+      ],
+      "projected_cost_if_poppler_usd": 0.004,
+      "projected_cost_if_inspector_usd": 0.008,
+      "projected_savings_vs_poppler_usd": -0.004,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 73.47,
+        "page_count": 2,
+        "pages_needing_ocr": [
+          2
+        ],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          },
+          {
+            "page": 2,
+            "disposition": "needs_ocr",
+            "reason": "image_only_page"
+          }
+        ],
+        "text_chars": 85,
+        "text_words": 14,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "DIGITAL PAGE - readable CV text for hybrid test.\nSkills: Python Postgres OCR routing."
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.35,
+        "process_ms": 0.21,
+        "pdf_type": "image_based",
+        "confidence": 0.800000011920929,
+        "page_count": 2,
+        "pages_needing_ocr": [
+          1,
+          2
+        ],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 0,
+        "markdown_words": 0,
+        "markdown_preview": ""
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "cv_broken_encoding",
+      "category": "cid_broken_encoding",
+      "path": "/tmp/pdf-inspector-phase0/matrix/cv_broken_encoding.pdf",
+      "expect_ocr_pages": "maybe",
+      "agreement_on_ocr_pages": false,
+      "false_ocr_skip_vs_poppler": true,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.004,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.004,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 45.42,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "pages_local": [],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "needs_ocr",
+            "reason": "too_few_words"
+          }
+        ],
+        "text_chars": 41,
+        "text_words": 1,
+        "arabic_ratio": 0.0,
+        "quality_ok": false,
+        "text_preview": "`´ˆ˜¯˘˙¨˚¸˝˛ˇ—`´ˆ˜¯˘˙¨˚¸˝˛ˇ—`´ˆ˜¯˘˙¨˚¸˝˛ˇ"
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.27,
+        "process_ms": 0.26,
+        "pdf_type": "text_based",
+        "confidence": 0.5,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 42,
+        "markdown_words": 1,
+        "markdown_preview": "`´ˆ˜¯˘˙¨˚¸˝˛ˇ—`´ˆ˜¯˘˙¨˚¸˝˛ˇ—`´ˆ˜¯˘˙¨˚¸˝˛ˇ\n"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "contract_table_heavy",
+      "category": "contracts_tables",
+      "path": "/tmp/pdf-inspector-phase0/matrix/contract_table_heavy.pdf",
+      "expect_ocr_pages": 0,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.0,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 44.11,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          }
+        ],
+        "text_chars": 228,
+        "text_words": 43,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "EMPLOYMENT CONTRACT - TABLE HEAVY\nClause | EN | AR\n1 Salary | KWD 800 | ratib\n2 Leave | 30 days | ijaza\n3 Probation | 100 days | tajriba\n4 Notice | 30 days | ishaar\nSignatures: Employer ________________ Employee ________________"
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.28,
+        "process_ms": 0.34,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 227,
+        "markdown_words": 41,
+        "markdown_preview": "EMPLOYMENT CONTRACT-TABLE HEAVY Clause | EN | AR 1 Salary | KWD 800 | ratib 2 Leave | 30 days | ijaza 3 Probation | 100 days | tajriba 4 Notice | 30 days | ishaar Signatures: Employer ________________ Employee ________________\n"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "identity_civil_id_proxy",
+      "category": "identity_document",
+      "path": "/tmp/pdf-inspector-phase0/matrix/identity_civil_id_proxy.pdf",
+      "expect_ocr_pages": 0,
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [],
+      "inspector_ocr_pages": [],
+      "projected_cost_if_poppler_usd": 0.0,
+      "projected_cost_if_inspector_usd": 0.0,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 44.38,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "pages_local": [
+          1
+        ],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "accepted_local",
+            "reason": "accepted_local"
+          }
+        ],
+        "text_chars": 197,
+        "text_words": 29,
+        "arabic_ratio": 0.0,
+        "quality_ok": true,
+        "text_preview": "CIVIL ID / IDENTITY DOCUMENT PROXY (synthetic)\nCivil ID No: 289123456789\nName: PROXY PERSON\nNationality: KWT\nExpiry: 2028-12-31\nThis is a synthetic digital identity stand-in for routing tests only."
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.26,
+        "process_ms": 0.39,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 198,
+        "markdown_words": 29,
+        "markdown_preview": "CIVIL ID / IDENTITY DOCUMENT PROXY (synthetic) Civil ID No: 289123456789 Name: PROXY PERSON Nationality: KWT Expiry: 2028-12-31 This is a synthetic digital identity stand-in for routing tests only.\n"
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "contract_offer_en_real",
+      "category": "contracts_real",
+      "path": "/tmp/pdf-inspector-phase0/matrix/contract_offer_en_real.pdf",
+      "expect_ocr_pages": "unknown",
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "inspector_ocr_pages": [
+        1
+      ],
+      "projected_cost_if_poppler_usd": 0.004,
+      "projected_cost_if_inspector_usd": 0.004,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 44.32,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "pages_local": [],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "needs_ocr",
+            "reason": "scanned_or_empty"
+          }
+        ],
+        "text_chars": 0,
+        "text_words": 0,
+        "arabic_ratio": 0.0,
+        "quality_ok": false,
+        "text_preview": ""
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.3,
+        "process_ms": 0.2,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 0,
+        "markdown_words": 0,
+        "markdown_preview": ""
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    },
+    {
+      "id": "contract_offer_ar_real",
+      "category": "contracts_real_arabic",
+      "path": "/tmp/pdf-inspector-phase0/matrix/contract_offer_ar_real.pdf",
+      "expect_ocr_pages": "unknown",
+      "agreement_on_ocr_pages": true,
+      "false_ocr_skip_vs_poppler": false,
+      "extra_ocr_vs_poppler": false,
+      "poppler_ocr_pages": [
+        1
+      ],
+      "inspector_ocr_pages": [
+        1
+      ],
+      "projected_cost_if_poppler_usd": 0.004,
+      "projected_cost_if_inspector_usd": 0.004,
+      "projected_savings_vs_poppler_usd": 0.0,
+      "poppler": {
+        "engine": "poppler_assess_pdf_pages",
+        "ms": 43.73,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "pages_local": [],
+        "dispositions": [
+          {
+            "page": 1,
+            "disposition": "needs_ocr",
+            "reason": "scanned_or_empty"
+          }
+        ],
+        "text_chars": 0,
+        "text_words": 0,
+        "arabic_ratio": 0.0,
+        "quality_ok": false,
+        "text_preview": ""
+      },
+      "inspector": {
+        "engine": "pdf_inspector",
+        "detect_ms": 0.27,
+        "process_ms": 0.22,
+        "pdf_type": "text_based",
+        "confidence": 1.0,
+        "page_count": 1,
+        "pages_needing_ocr": [
+          1
+        ],
+        "is_complex_layout": false,
+        "pages_with_tables": [],
+        "pages_with_columns": [],
+        "has_encoding_issues": false,
+        "markdown_chars": 0,
+        "markdown_words": 0,
+        "markdown_preview": ""
+      },
+      "shadow_only": true,
+      "authoritative_router": "poppler",
+      "paid_ocr_called": false
+    }
+  ]
+}

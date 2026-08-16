@@ -1,0 +1,482 @@
+{
+  "tag": "479454D0",
+  "checks": [
+    {
+      "name": "db_is_wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave5_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave5_company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave5_synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "version_5_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "shw5b_synth_w5",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "shw5b_synth_w4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_phone_not_synth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3_gate_on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlists_empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_reminders_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_mutation_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synth_mutation_allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_publishing_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_open_shifts_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_draft_publish_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_coverage_rules_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_rotations_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_pam_export_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_payroll_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_leave_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_attendance_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w4_honesty_publishing_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3_honesty_templates_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_leave_balances_sql",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "day_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "weekly_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create_period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "generate_draft_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft_rows_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "l0_written_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "L0_unchanged_after_draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_in_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "return_to_draft_with_note",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_in_review_again",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "review_diff_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "coverage_warn_rule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "understaffed_warning",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "warn_blocks_publish_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "coverage_block_rule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "block_blocks_publish_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_blocked_by_coverage",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_coverage_rule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unresolved_open_shift",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "coverage_unresolved_open_shift",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "published_L0_provenance",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "republish_idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "test_lock_acquired",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent_publish_lock_held",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent_worker_finished",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create_draft_from_published",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_second_version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "rollback_to_version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "skipped_locked_field_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_open_shift",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "claim_by_A",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_approval_denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "claim_by_B",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve_A_wins",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "second_approve_B_rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "open_shift_for_direct_assign",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "direct_assign_open_shift",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gate_conflict_without_ack",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "optional_require_publish_period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manual_L0_optional_period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_assignment_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_template_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_recurrence_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_exception_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_assignment_version_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_schedule_period_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_schedule_version_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_open_shift_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_coverage_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_event_count_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_residual_zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract_version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_fps_unchanged_after_cleanup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual_total_zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "period_id": "fabb8edf-46ed-43e9-b1e9-a75b21638d48",
+    "version_ids": [
+      "0ff52dd3-f955-424e-8612-33f60771b136",
+      "14a0cc7b-61d7-4731-8cab-8e98e99cf11f"
+    ],
+    "open_shift_ids": [
+      "70a1202d-5e3f-49da-bd0e-1bc696bda4aa",
+      "f740843c-cd7a-4952-9a23-8a0ea65e0588",
+      "b5b93931-7fc7-45c8-9d5c-c0ca5ce2eb75",
+      "610997b4-aaed-443d-85c0-bef4ddca2cc4"
+    ],
+    "coverage_rule_names": [
+      "SHW5B Warn 479454D0",
+      "SHW5B Block 479454D0",
+      "SHW5B OvernightCov 479454D0"
+    ],
+    "shift_ids": [
+      "71c4aa64-36e5-4e04-82d7-57681d2ec920",
+      "78ac8125-78d5-4070-b272-e00f5755cc6a",
+      "01b5c625-2708-4dce-b9ae-1ff5b4b07ae1",
+      "68227367-f5ed-4c20-a54e-7e770bee5e8a",
+      "ff8e9cf7-3400-490b-86c2-3de227c80b2e",
+      "eaee9bcc-5b88-438e-abfa-a5a47b53eb7b",
+      "841c343c-65a0-4b14-af25-cf4a9881f6b4",
+      "80a77cc0-f4fb-4074-bdc9-d6bf42d80d16",
+      "c73b777a-6fb4-43bc-b752-f4c10531f1c5",
+      "71c4aa64-36e5-4e04-82d7-57681d2ec920",
+      "78ac8125-78d5-4070-b272-e00f5755cc6a",
+      "01b5c625-2708-4dce-b9ae-1ff5b4b07ae1",
+      "68227367-f5ed-4c20-a54e-7e770bee5e8a",
+      "ff8e9cf7-3400-490b-86c2-3de227c80b2e",
+      "eaee9bcc-5b88-438e-abfa-a5a47b53eb7b",
+      "841c343c-65a0-4b14-af25-cf4a9881f6b4",
+      "80a77cc0-f4fb-4074-bdc9-d6bf42d80d16",
+      "c73b777a-6fb4-43bc-b752-f4c10531f1c5",
+      "2b7828bb-05bb-462f-931f-5e44e5cfdd9a",
+      "37e341f7-e485-44aa-b483-5feea0d45ec7",
+      "21e753c7-02ff-44fc-b38f-ffe99e162426"
+    ],
+    "employees": [
+      "WATHEFNI-SHW5B-479454D0",
+      "WATHEFNI-SHW5B-B-479454D0"
+    ],
+    "day_template": "1cf9e6c4-0479-4466-9de3-d2bdbabfb672",
+    "night_template": "e1ec5406-cca2-4208-be7d-13da2cfa8e56",
+    "weekly_recurrence": "ddce0680-8b02-40a6-9822-58bdc64dbdf6"
+  },
+  "fps_before_counts": {
+    "assignments": 73,
+    "templates": 0,
+    "recurrences": 0,
+    "exceptions": 0,
+    "assignment_versions": 0,
+    "schedule_periods": 0,
+    "schedule_versions": 0,
+    "open_shifts": 0,
+    "coverage_rules": 0,
+    "events": 103
+  },
+  "passed": 83,
+  "failed": 0
+}

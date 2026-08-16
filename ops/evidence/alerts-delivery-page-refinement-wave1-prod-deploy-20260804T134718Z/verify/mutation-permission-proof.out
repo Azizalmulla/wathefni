@@ -1,0 +1,11 @@
+PASS resolveHrTask / hr-tasks resolve
+PASS getHrTasks open+done
+PASS outbound needs-follow-up
+PASS Mark done CTA
+PASS status non-action CTA
+PASS navigate CTAs present
+PASS no specialist strip
+PASS scoped rows path
+MUTATION_PERMISSION_PROOF_OK
+LIVE_POSTHIRE PostHire-BD2c6nFG.js
+LIVE_NOTIFICATIONS NotificationsPage-Jme8bOo7.js

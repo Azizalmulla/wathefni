@@ -1,0 +1,8 @@
+result=PASS
+pass=47
+fail=0
+mode_a_unlocked=false
+synthetic_only=true
+native_pdf=false
+payment_processing=disabled
+policy_version=KW_PUBLIC_BASELINE_v1.0.0

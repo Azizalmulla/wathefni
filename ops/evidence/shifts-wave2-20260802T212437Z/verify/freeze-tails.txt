@@ -1,0 +1,12 @@
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS  wave2 no unqualified onboarding_items wipe SQL
+
+54 passed, 0 failed
+PASS  attendance freeze cursor rule present or evidence copy
+
+26 passed, 0 failed
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+35 passed, 0 failed

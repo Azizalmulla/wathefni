@@ -1,0 +1,12 @@
+    pt7 assistant — db journeys
+      PASS  evaluate
+      PASS  assistant explain ok
+      PASS  same model id
+      PASS  does not claim designated HiPo
+      PASS  mentions model/version
+      PASS  list classifications
+      PASS  not HiPo language
+
+    7 passed, 0 failed
+PT7_ASSISTANT_TALENT_INTELLIGENCE_DB_PASS
+STAGING_RC=0

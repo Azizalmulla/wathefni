@@ -1,0 +1,14 @@
+{
+  "dashboard_chunk": "dashboard-CpBtsbVO.js",
+  "dashboard_sha256": "b2b902f24b559143bc926a60c4c9aa055c18e0d157c9e30f29a9bb0eb3ac5c57",
+  "lifecycle_chunk": "recruitingLifecycle-DXQht60b.js",
+  "lifecycle_sha256": "0b73b977b2f54e03135fc06727fba74318caf51c15b657ba74165605a2b3483b",
+  "has_my_work": true,
+  "has_company_work": true,
+  "has_roles_view_all": true,
+  "footer_key_present": true,
+  "footer_en_template": true,
+  "footer_ar_template": true,
+  "apps_hint_en": true,
+  "people_unit": true
+}

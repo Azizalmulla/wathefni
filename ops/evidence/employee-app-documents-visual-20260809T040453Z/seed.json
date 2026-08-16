@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "stamp": "20260809T040453Z",
+  "employee_key": "WATHEFNI-96550010001",
+  "name": "Noura Almutairi",
+  "phone": "96550010001",
+  "activation_code": "561188",
+  "invite_expires_at": "2026-08-10 04:05:23.840460+00:00",
+  "compliance_count": 8,
+  "attention_estimate": 3,
+  "current_estimate": 5,
+  "registry_count": 16,
+  "statuses": [
+    "expired",
+    "expiring_soon",
+    "hr_reviewed",
+    "rejected_reupload"
+  ],
+  "files_created": 16,
+  "protected_untouched": [
+    "WATHEFNI-96550252254",
+    "WATHEFNI-96599338566"
+  ]
+}

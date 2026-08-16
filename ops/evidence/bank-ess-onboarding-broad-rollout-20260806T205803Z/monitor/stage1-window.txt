@@ -1,0 +1,10 @@
+=== journal errors (since restart) ===
+0
+=== bank/onboarding 4xx/5xx lines ===
+Aug 06 21:04:54 srv1419988 uvicorn[1251530]: INFO:     127.0.0.1:60034 - "GET /app/bank HTTP/1.1" 200 OK
+Aug 06 21:04:54 srv1419988 uvicorn[1251530]: INFO:     127.0.0.1:60060 - "GET /app/onboarding HTTP/1.1" 200 OK
+=== reconcile write probe (idempotent) ===
+WATHEFNI-96599338566 first None second None
+WATHEFNI-96566363363 first None second None
+WATHEFNI-96550252254 first None second None
+WATHEFNI-96550010001 first None second None

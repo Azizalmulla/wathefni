@@ -1,0 +1,53 @@
+{
+  "stamp": "20260730T233551Z",
+  "proofs": {
+    "cert_token_mint": {
+      "ok": true
+    },
+    "outlook_create": {
+      "ok": true,
+      "status": 201,
+      "error": null,
+      "has_event_id": true,
+      "web_link_present": true
+    },
+    "teams_meeting": {
+      "ok": false,
+      "has_join_url": false,
+      "join_host": null
+    },
+    "outlook_update_same_id": {
+      "ok": true,
+      "status": 200,
+      "same_provider_event_id": true
+    },
+    "outlook_get_after_update": {
+      "ok": true,
+      "status": 200
+    },
+    "outlook_cancel": {
+      "ok": true,
+      "status": 204,
+      "error": null
+    },
+    "no_duplicate_after_retry_cancel": {
+      "ok": true,
+      "status": 404,
+      "note": "second delete must not create a new event"
+    },
+    "unapproved_mailbox_denied": {
+      "ok": true,
+      "status": 403,
+      "error": "http_403",
+      "denied_upn_suffix": "wathefni.onmicrosoft.com"
+    },
+    "provider_failure_wathefni_intact": {
+      "ok": false,
+      "error": "application_environment_missing_or_invalid"
+    }
+  },
+  "summary": {
+    "passed": 7,
+    "failed": 2
+  }
+}

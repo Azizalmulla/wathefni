@@ -1,0 +1,18 @@
+[
+  {
+    "path": "/dashboard/posthire/employee-org/policy",
+    "status": 200
+  },
+  {
+    "path": "/dashboard/posthire/employee-org/units",
+    "status": 200
+  },
+  {
+    "path": "/dashboard/posthire/employee-org/export",
+    "status": 200
+  },
+  {
+    "path": "/dashboard/posthire/employee-org/reconcile",
+    "status": 200
+  }
+]

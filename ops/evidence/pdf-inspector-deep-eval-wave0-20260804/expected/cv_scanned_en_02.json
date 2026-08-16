@@ -1,0 +1,24 @@
+{
+  "fixture_id": "cv_scanned_en_02",
+  "category": "scanned_image_only_cv",
+  "language": "en",
+  "layout": "single_column",
+  "pdf_nature": "scanned_image_only",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [
+    1
+  ],
+  "expected_text_needles": [
+    "Scanned CV — Priya Shah",
+    "Email: priya.shah@example.com",
+    "Phone: +96553330000"
+  ],
+  "expected_fields": {
+    "full_name": "Priya Shah",
+    "email": "priya.shah@example.com",
+    "phone": "+96553330000"
+  },
+  "notes": "Rendered text embedded as image-only page; native extractors should miss needles.",
+  "sha256": "aa1f2ac04c47c83513378aed37940fe9f46b3774407596157953b84747921a18",
+  "bytes": 30664
+}

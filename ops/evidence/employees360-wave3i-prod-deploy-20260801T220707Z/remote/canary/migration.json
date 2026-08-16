@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "idempotent": false,
+  "stats": {
+    "resolved": 0,
+    "already_resolved": 0,
+    "remediation": 10,
+    "skipped": 0,
+    "total": 10
+  },
+  "pack_code": "KW_PRIVATE_SECTOR",
+  "policy_version": "1.0.0"
+}

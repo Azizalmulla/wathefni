@@ -1,0 +1,1073 @@
+{
+  "ok": true,
+  "generated_at": "2026-08-10T19:42:36.904102+00:00",
+  "ranking_policy": "separated_authoritative_sections_no_invented_urgency",
+  "sections": [
+    {
+      "type": "leave_approvals",
+      "title": "Leave approvals",
+      "total": 3,
+      "items": [
+        {
+          "type": "leave_approval",
+          "target_id": "6ad2133d-ca56-4919-99c1-0864d328292b",
+          "summary": "mohammad alqattan \u00b7 sick",
+          "status": "requested",
+          "timestamp": "2026-08-09T09:00:24.912428+00:00",
+          "due_context": {
+            "start_date": "2026-08-12",
+            "end_date": "2026-08-12"
+          },
+          "permitted_actions": [
+            "read",
+            "approve",
+            "reject"
+          ],
+          "destination": "/leave/6ad2133d-ca56-4919-99c1-0864d328292b",
+          "severity": "high"
+        },
+        {
+          "type": "leave_approval",
+          "target_id": "2fc9c987-28b2-4480-9a8f-15806c8c55fb",
+          "summary": "Fouad Burhamad \u00b7 annual",
+          "status": "requested",
+          "timestamp": "2026-08-10T18:52:21.074650+00:00",
+          "due_context": {
+            "start_date": "2026-09-19",
+            "end_date": "2026-09-19"
+          },
+          "permitted_actions": [
+            "read",
+            "approve",
+            "reject"
+          ],
+          "destination": "/leave/2fc9c987-28b2-4480-9a8f-15806c8c55fb",
+          "severity": null
+        },
+        {
+          "type": "leave_approval",
+          "target_id": "9ed8b5d9-116f-4ce5-b15b-d86c6a1cf49e",
+          "summary": "Fouad Burhamad \u00b7 sick",
+          "status": "requested",
+          "timestamp": "2026-08-10T18:52:21.074650+00:00",
+          "due_context": {
+            "start_date": "2026-09-27",
+            "end_date": "2026-09-27"
+          },
+          "permitted_actions": [
+            "read",
+            "approve",
+            "reject"
+          ],
+          "destination": "/leave/9ed8b5d9-116f-4ce5-b15b-d86c6a1cf49e",
+          "severity": null
+        }
+      ]
+    },
+    {
+      "type": "onboarding_reviews",
+      "title": "Onboarding reviews",
+      "total": 2,
+      "items": [
+        {
+          "type": "onboarding_review",
+          "target_id": "WATHEFNI-9655237101",
+          "summary": "W2B-SYNTH| Onboarding Visual",
+          "status": "needs_hr_action",
+          "timestamp": "2026-08-09T04:53:43.464564+00:00",
+          "due_context": {
+            "hr_actionable_count": 1
+          },
+          "permitted_actions": [
+            "read",
+            "review"
+          ],
+          "destination": "/onboarding/WATHEFNI-9655237101",
+          "urgency": null
+        },
+        {
+          "type": "onboarding_review",
+          "target_id": "WATHEFNI-96597727743",
+          "summary": "mohammad alqattan",
+          "status": "needs_hr_action",
+          "timestamp": "2026-08-02T01:48:33.898794+00:00",
+          "due_context": {
+            "hr_actionable_count": 2
+          },
+          "permitted_actions": [
+            "read",
+            "review"
+          ],
+          "destination": "/onboarding/WATHEFNI-96597727743",
+          "urgency": "high"
+        }
+      ]
+    },
+    {
+      "type": "document_reviews",
+      "title": "Document reviews",
+      "total": 11,
+      "items": [
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96599338566:employment_contract",
+          "summary": "W5C-SYNTH|Aziz Mobile QA \u00b7 Employment contract",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": null,
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96599338566/employment_contract",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96566363363:civil_id",
+          "summary": "Fouad Burhamad \u00b7 Civil ID",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": "2026-07-30",
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96566363363/civil_id",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96566363363:medical",
+          "summary": "Fouad Burhamad \u00b7 Medical certificate",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": null,
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96566363363/medical",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:personal_photo",
+          "summary": "Noura Almutairi \u00b7 personal_photo",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": null,
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/personal_photo",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:civil_id",
+          "summary": "Noura Almutairi \u00b7 Civil ID",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": "2026-08-27",
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/civil_id",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:residence",
+          "summary": "Noura Almutairi \u00b7 Residence",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": "2026-07-28",
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/residence",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:passport",
+          "summary": "Noura Almutairi \u00b7 Passport",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": "2028-07-09",
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/passport",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:employment_contract",
+          "summary": "Noura Almutairi \u00b7 Employment contract",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": null,
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/employment_contract",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:medical",
+          "summary": "Noura Almutairi \u00b7 Medical certificate",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": "2027-09-13",
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/medical",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96550010001:education_cert",
+          "summary": "Noura Almutairi \u00b7 Education certificate",
+          "status": "needs_review",
+          "timestamp": null,
+          "due_context": {
+            "expiry_date": null,
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96550010001/education_cert",
+          "urgency": null
+        },
+        {
+          "type": "document_review",
+          "target_id": "WATHEFNI-96597727743:civil_id",
+          "summary": "mohammad alqattan \u00b7 Civil ID",
+          "status": "needs_review",
+          "timestamp": "2026-05-17T15:08:37.836315+00:00",
+          "due_context": {
+            "expiry_date": "2030-10-09",
+            "days_until_expiry": null
+          },
+          "permitted_actions": [
+            "review"
+          ],
+          "destination": "/documents/WATHEFNI-96597727743/civil_id",
+          "urgency": null
+        }
+      ]
+    },
+    {
+      "type": "attendance_exceptions",
+      "title": "Attendance exceptions",
+      "total": 0,
+      "items": []
+    },
+    {
+      "type": "shift_swap_decisions",
+      "title": "Shift swaps",
+      "total": 0,
+      "items": []
+    },
+    {
+      "type": "hr_tasks",
+      "title": "HR tasks",
+      "total": 48,
+      "items": [
+        {
+          "type": "delivery_failed",
+          "target_id": "2d51a053-fa7e-4eed-bacd-dc14e1b842ec",
+          "summary": "Fouad Burhamad \u00b7 Couldn't reach employee: Leave decision",
+          "status": "open",
+          "timestamp": "2026-08-10T18:51:45.763538+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/2d51a053-fa7e-4eed-bacd-dc14e1b842ec",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "bc1505f0-30f9-441a-af5c-423c6eda479c",
+          "summary": "Fouad Burhamad \u00b7 Couldn't reach employee: Leave approved",
+          "status": "open",
+          "timestamp": "2026-08-10T18:51:45.192809+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/bc1505f0-30f9-441a-af5c-423c6eda479c",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "f7a7528d-69a9-41ca-98b1-e2a76a5a4f8f",
+          "summary": "Fouad Burhamad \u00b7 Couldn't reach employee: Leave approved",
+          "status": "open",
+          "timestamp": "2026-08-10T18:37:49.926573+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/f7a7528d-69a9-41ca-98b1-e2a76a5a4f8f",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "38682e0e-8d02-47ae-b96e-72171276773b",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:30:30.033827+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/38682e0e-8d02-47ae-b96e-72171276773b",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "7525ade3-7f7a-4475-a86a-d2a91b5d514c",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:30:26.581737+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/7525ade3-7f7a-4475-a86a-d2a91b5d514c",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "846343a5-24f1-4ed9-b1c0-ccef61db0009",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:30:26.147414+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/846343a5-24f1-4ed9-b1c0-ccef61db0009",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "1f2263f2-7f9c-4be1-9b16-3be9533b6fc0",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:30:25.983912+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/1f2263f2-7f9c-4be1-9b16-3be9533b6fc0",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "5746fa2c-fa3d-4120-9608-ca9481989e05",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:30:25.735393+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/5746fa2c-fa3d-4120-9608-ca9481989e05",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "482b3cbc-8ad0-4486-bcc2-3b97737e8e2c",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:30:22.983751+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/482b3cbc-8ad0-4486-bcc2-3b97737e8e2c",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "d64ce4a8-58fb-48f4-bd60-19413a027e2c",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:17:32.312255+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/d64ce4a8-58fb-48f4-bd60-19413a027e2c",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "44653f59-e476-49b4-b7dc-30195f5c8b67",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:17:29.382280+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/44653f59-e476-49b4-b7dc-30195f5c8b67",
+          "urgency": "high"
+        },
+        {
+          "type": "delivery_failed",
+          "target_id": "b40ca01c-7dea-403b-abde-7eabd2663aa0",
+          "summary": "Couldn't reach employee: App activation code",
+          "status": "open",
+          "timestamp": "2026-08-07T10:17:29.242456+00:00",
+          "due_context": {
+            "priority": "high",
+            "task_type": "delivery_failed"
+          },
+          "permitted_actions": [
+            "read",
+            "resolve"
+          ],
+          "destination": "/tasks/b40ca01c-7dea-403b-abde-7eabd2663aa0",
+          "urgency": "high"
+        }
+      ]
+    },
+    {
+      "type": "prehire_priorities",
+      "title": "Hiring priorities",
+      "total": 11,
+      "items": [
+        {
+          "type": "prehire_follow_up",
+          "target_id": "follow_up_needed",
+          "summary": "2 candidates need follow-up",
+          "status": "follow_up_needed",
+          "timestamp": "2026-08-10T19:42:36.866794+00:00",
+          "due_context": {
+            "total": 2
+          },
+          "permitted_actions": [],
+          "destination": "/jobs",
+          "severity": "high",
+          "authority_source": "prehire_overview.follow_up_needed"
+        },
+        {
+          "type": "prehire_ready_for_review",
+          "target_id": "ready_for_review",
+          "summary": "7 candidates ready for review",
+          "status": "ready_for_review",
+          "timestamp": "2026-08-10T19:42:36.866794+00:00",
+          "due_context": {
+            "total": 7
+          },
+          "permitted_actions": [],
+          "destination": "/jobs",
+          "severity": null,
+          "authority_source": "prehire_overview.ready_for_review"
+        },
+        {
+          "type": "prehire_assessment_pending",
+          "target_id": "assessment_pending",
+          "summary": "2 candidates awaiting assessment",
+          "status": "assessment_pending",
+          "timestamp": "2026-08-10T19:42:36.866794+00:00",
+          "due_context": {
+            "total": 2
+          },
+          "permitted_actions": [],
+          "destination": "/jobs",
+          "severity": null,
+          "authority_source": "prehire_overview.assessment_pending"
+        },
+        {
+          "type": "prehire_role_priority",
+          "target_id": "HR",
+          "summary": "HR: 2 candidates need follow-up; 1 ready for review; 2 with assessment attention; oldest ready ~163h",
+          "status": "role_priority",
+          "timestamp": "2026-08-10T19:42:36.866794+00:00",
+          "due_context": {
+            "priority": 99,
+            "position_code": "HR",
+            "position_title": "HR"
+          },
+          "permitted_actions": [],
+          "destination": "/candidates?position=HR",
+          "urgency": null,
+          "authority_source": "prehire_overview.role_priority"
+        }
+      ],
+      "action_counts": {
+        "ready_for_review": 7,
+        "assessment_pending": 2,
+        "follow_up_needed": 2,
+        "ready_for_review_people": 7,
+        "ready_for_review_applications": 9,
+        "assessment_pending_people": 2,
+        "assessment_pending_applications": 3,
+        "follow_up_needed_people": 2,
+        "follow_up_needed_applications": 4,
+        "assessment_cohorts": {
+          "enabled": true,
+          "as_of": "2026-08-10T19:42:36.747165+00:00",
+          "authority_source": "assessment_cohorts",
+          "scope": "company",
+          "cohorts": {
+            "assessment_ready_to_send": {
+              "key": "assessment_ready_to_send",
+              "unit": "applications",
+              "people_count": 7,
+              "application_count": 8,
+              "people": 7,
+              "applications": 8,
+              "display_count": 8,
+              "primary_action": "send_assessment",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_ready_to_send",
+                  "overview_cohort": "assessment_ready_to_send",
+                  "cohort_key": "assessment_ready_to_send",
+                  "tab": "send"
+                },
+                "cohort_key": "assessment_ready_to_send"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_ready_to_send",
+                  "overview_cohort": "assessment_ready_to_send",
+                  "cohort_key": "assessment_ready_to_send",
+                  "assessment_status": "none"
+                },
+                "cohort_key": "assessment_ready_to_send"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_sent_pending": {
+              "key": "assessment_sent_pending",
+              "unit": "applications",
+              "people_count": 1,
+              "application_count": 1,
+              "people": 1,
+              "applications": 1,
+              "display_count": 1,
+              "primary_action": "resend_assessment",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_sent_pending",
+                  "overview_cohort": "assessment_sent_pending",
+                  "cohort_key": "assessment_sent_pending",
+                  "tab": "sent_pending"
+                },
+                "cohort_key": "assessment_sent_pending"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_sent_pending",
+                  "overview_cohort": "assessment_sent_pending",
+                  "cohort_key": "assessment_sent_pending",
+                  "assessment_status": "pending"
+                },
+                "cohort_key": "assessment_sent_pending"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_in_progress": {
+              "key": "assessment_in_progress",
+              "unit": "applications",
+              "people_count": 0,
+              "application_count": 0,
+              "people": 0,
+              "applications": 0,
+              "display_count": 0,
+              "primary_action": "view_assessment",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_in_progress",
+                  "overview_cohort": "assessment_in_progress",
+                  "cohort_key": "assessment_in_progress",
+                  "tab": "in_progress"
+                },
+                "cohort_key": "assessment_in_progress"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_in_progress",
+                  "overview_cohort": "assessment_in_progress",
+                  "cohort_key": "assessment_in_progress",
+                  "assessment_status": "in_progress"
+                },
+                "cohort_key": "assessment_in_progress"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_expired": {
+              "key": "assessment_expired",
+              "unit": "applications",
+              "people_count": 2,
+              "application_count": 2,
+              "people": 2,
+              "applications": 2,
+              "display_count": 2,
+              "primary_action": "resend_assessment",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_expired",
+                  "overview_cohort": "assessment_expired",
+                  "cohort_key": "assessment_expired",
+                  "tab": "resend"
+                },
+                "cohort_key": "assessment_expired"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_expired",
+                  "overview_cohort": "assessment_expired",
+                  "cohort_key": "assessment_expired",
+                  "assessment_status": "expired"
+                },
+                "cohort_key": "assessment_expired"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_resend_needed": {
+              "key": "assessment_resend_needed",
+              "unit": "applications",
+              "people_count": 2,
+              "application_count": 2,
+              "people": 2,
+              "applications": 2,
+              "display_count": 2,
+              "primary_action": "resend_assessment",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_resend_needed",
+                  "overview_cohort": "assessment_resend_needed",
+                  "cohort_key": "assessment_resend_needed",
+                  "tab": "resend"
+                },
+                "cohort_key": "assessment_resend_needed"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_resend_needed",
+                  "overview_cohort": "assessment_resend_needed",
+                  "cohort_key": "assessment_resend_needed",
+                  "assessment_status": "expired"
+                },
+                "cohort_key": "assessment_resend_needed"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_delivery_failed": {
+              "key": "assessment_delivery_failed",
+              "unit": "applications",
+              "people_count": 0,
+              "application_count": 0,
+              "people": 0,
+              "applications": 0,
+              "display_count": 0,
+              "primary_action": "resend_assessment",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_delivery_failed",
+                  "overview_cohort": "assessment_delivery_failed",
+                  "cohort_key": "assessment_delivery_failed",
+                  "tab": "delivery_failed"
+                },
+                "cohort_key": "assessment_delivery_failed"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_delivery_failed",
+                  "overview_cohort": "assessment_delivery_failed",
+                  "cohort_key": "assessment_delivery_failed",
+                  "assessment_status": "pending"
+                },
+                "cohort_key": "assessment_delivery_failed"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_completed": {
+              "key": "assessment_completed",
+              "unit": "applications",
+              "people_count": 1,
+              "application_count": 1,
+              "people": 1,
+              "applications": 1,
+              "display_count": 1,
+              "primary_action": "view_assessment_report",
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_completed",
+                  "overview_cohort": "assessment_completed",
+                  "cohort_key": "assessment_completed",
+                  "tab": "completed"
+                },
+                "cohort_key": "assessment_completed"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_completed",
+                  "overview_cohort": "assessment_completed",
+                  "cohort_key": "assessment_completed",
+                  "assessment_status": "completed"
+                },
+                "cohort_key": "assessment_completed"
+              },
+              "authority_source": "assessment_cohorts"
+            },
+            "assessment_attention": {
+              "key": "assessment_attention",
+              "unit": "people",
+              "people_count": 2,
+              "application_count": 3,
+              "people": 2,
+              "applications": 3,
+              "display_count": 2,
+              "primary_action": null,
+              "destination": {
+                "page": "assessments",
+                "filters": {
+                  "assessment_cohort": "assessment_attention",
+                  "overview_cohort": "assessment_attention",
+                  "cohort_key": "assessment_attention",
+                  "tab": "send"
+                },
+                "cohort_key": "assessment_attention"
+              },
+              "candidates_destination": {
+                "page": "candidates",
+                "filters": {
+                  "assessment_cohort": "assessment_attention",
+                  "overview_cohort": "assessment_attention",
+                  "cohort_key": "assessment_attention",
+                  "assessment_status": "awaiting"
+                },
+                "cohort_key": "assessment_attention"
+              },
+              "authority_source": "assessment_cohorts"
+            }
+          },
+          "primary": {
+            "action": "assessment_resend_needed",
+            "cohort_key": "assessment_resend_needed",
+            "label": "Resend expired assessments",
+            "unit": "people",
+            "people_count": 2,
+            "application_count": 2,
+            "total_matching": 2,
+            "destination": {
+              "page": "assessments",
+              "filters": {
+                "assessment_cohort": "assessment_resend_needed",
+                "overview_cohort": "assessment_resend_needed",
+                "cohort_key": "assessment_resend_needed",
+                "tab": "resend"
+              },
+              "cohort_key": "assessment_resend_needed"
+            },
+            "candidates_destination": {
+              "page": "candidates",
+              "filters": {
+                "assessment_cohort": "assessment_resend_needed",
+                "overview_cohort": "assessment_resend_needed",
+                "cohort_key": "assessment_resend_needed",
+                "assessment_status": "expired"
+              },
+              "cohort_key": "assessment_resend_needed"
+            },
+            "primary_action": "resend_assessment",
+            "authority_source": "assessment_cohorts.primary"
+          },
+          "definitions": {
+            "assessment_ready_to_send": {
+              "label": "Ready to send",
+              "means": "Eligible application with no assigned assessment attempt",
+              "cta": "Send",
+              "primary_action": "send_assessment"
+            },
+            "assessment_sent_pending": {
+              "label": "Sent / pending",
+              "means": "Assigned attempt status=pending and delivery not failed",
+              "cta": "View / resend",
+              "primary_action": "resend_assessment"
+            },
+            "assessment_in_progress": {
+              "label": "In progress",
+              "means": "Assigned attempt status=in_progress and delivery not failed",
+              "cta": "View in progress",
+              "primary_action": "view_assessment"
+            },
+            "assessment_expired": {
+              "label": "Expired",
+              "means": "Assigned attempt status=expired",
+              "cta": "Resend",
+              "primary_action": "resend_assessment"
+            },
+            "assessment_resend_needed": {
+              "label": "Resend needed",
+              "means": "Same records as expired",
+              "cta": "Resend",
+              "primary_action": "resend_assessment",
+              "alias_of": "assessment_expired"
+            },
+            "assessment_delivery_failed": {
+              "label": "Delivery failed",
+              "means": "Open attempt (pending/in_progress) with failed delivery",
+              "cta": "Review delivery failure",
+              "primary_action": "resend_assessment"
+            },
+            "assessment_completed": {
+              "label": "Completed",
+              "means": "Assigned attempt status=completed",
+              "cta": "View report",
+              "primary_action": "view_assessment_report"
+            },
+            "assessment_attention": {
+              "label": "Assessment attention",
+              "means": "Assigned pending|in_progress|expired (aggregate; not a send CTA label)",
+              "note": "Never label this aggregate as 'Send pending assessments'"
+            }
+          }
+        },
+        "assessment_ready_to_send": 7,
+        "assessment_ready_to_send_applications": 8,
+        "assessment_resend_needed": 2,
+        "assessment_resend_needed_applications": 2,
+        "assessment_delivery_failed": 0,
+        "assessment_delivery_failed_applications": 0,
+        "assessment_in_progress": 0,
+        "assessment_in_progress_applications": 0,
+        "assessment_sent_pending": 1,
+        "assessment_sent_pending_applications": 1,
+        "assessment_completed": 1,
+        "assessment_completed_applications": 1,
+        "assessment_primary": {
+          "action": "assessment_resend_needed",
+          "cohort_key": "assessment_resend_needed",
+          "label": "Resend expired assessments",
+          "unit": "people",
+          "people_count": 2,
+          "application_count": 2,
+          "total_matching": 2,
+          "destination": {
+            "page": "assessments",
+            "filters": {
+              "assessment_cohort": "assessment_resend_needed",
+              "overview_cohort": "assessment_resend_needed",
+              "cohort_key": "assessment_resend_needed",
+              "tab": "resend"
+            },
+            "cohort_key": "assessment_resend_needed"
+          },
+          "candidates_destination": {
+            "page": "candidates",
+            "filters": {
+              "assessment_cohort": "assessment_resend_needed",
+              "overview_cohort": "assessment_resend_needed",
+              "cohort_key": "assessment_resend_needed",
+              "assessment_status": "expired"
+            },
+            "cohort_key": "assessment_resend_needed"
+          },
+          "primary_action": "resend_assessment",
+          "authority_source": "assessment_cohorts.primary"
+        },
+        "units": {
+          "ready_for_review": "people",
+          "assessment_pending": "people",
+          "follow_up_needed": "people",
+          "assessment_ready_to_send": "people",
+          "assessment_resend_needed": "people",
+          "assessment_delivery_failed": "people",
+          "assessment_in_progress": "people"
+        },
+        "metrics": [
+          {
+            "key": "ready_for_review",
+            "unit": "people",
+            "people": 7,
+            "applications": 9,
+            "display": 7
+          },
+          {
+            "key": "assessment_pending",
+            "unit": "people",
+            "people": 2,
+            "applications": 3,
+            "display": 2
+          },
+          {
+            "key": "follow_up_needed",
+            "unit": "people",
+            "people": 2,
+            "applications": 4,
+            "display": 2
+          }
+        ]
+      },
+      "next_action": {
+        "action": "prioritize_role",
+        "priority": 99,
+        "unit": "people",
+        "reason": "HR: 2 candidates need follow-up; 1 ready for review; 2 with assessment attention; oldest ready ~163h",
+        "total_matching": 3,
+        "people_count": 3,
+        "application_count": 3,
+        "destination": {
+          "page": "candidates",
+          "filters": {
+            "overview_cohort": "role_active",
+            "position": "HR",
+            "cohort_key": "role_active:HR"
+          },
+          "cohort_key": "role_active:HR"
+        },
+        "ranking_destination": {
+          "page": "ranking",
+          "filters": {
+            "position_code": "HR",
+            "cohort_key": "ranking:HR"
+          },
+          "cohort_key": "ranking:HR"
+        },
+        "authority_source": "prehire_overview.role_priority",
+        "role": {
+          "position_code": "HR",
+          "position_title": "HR"
+        },
+        "label": "suggested_next_action",
+        "sla_hours": {
+          "follow_up_hours": 24,
+          "ready_for_review_hours": 48,
+          "assessment_pending_hours": 72,
+          "interview_scheduling_hours": 72
+        },
+        "as_of": "2026-08-10T19:42:36.803389+00:00",
+        "alternatives": [
+          {
+            "action": "follow_up_failed_delivery",
+            "priority": 98,
+            "total_matching": 2,
+            "unit": "people",
+            "people_count": 2,
+            "application_count": 4
+          },
+          {
+            "action": "ready_for_review",
+            "priority": 95,
+            "total_matching": 7,
+            "unit": "people",
+            "people_count": 7,
+            "application_count": 9
+          },
+          {
+            "action": "interview_scheduling_debt",
+            "priority": 64,
+            "total_matching": 7,
+            "unit": "people",
+            "people_count": 7,
+            "application_count": 10
+          }
+        ]
+      },
+      "authority_source": "prehire_overview"
+    },
+    {
+      "type": "candidate_decisions",
+      "title": "Candidate decisions",
+      "total": 0,
+      "items": []
+    }
+  ]
+}

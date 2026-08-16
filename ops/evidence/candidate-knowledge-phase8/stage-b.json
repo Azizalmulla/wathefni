@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "gates": [
+    {
+      "id": "mariam_surname",
+      "status": "PASS",
+      "detail": "candidate_ambiguous"
+    },
+    {
+      "id": "mariam_not_faisal",
+      "status": "PASS"
+    },
+    {
+      "id": "multi_app_sibling",
+      "status": "PASS",
+      "apps": 2
+    },
+    {
+      "id": "email_cv_current",
+      "status": "PASS"
+    },
+    {
+      "id": "whatsapp_gap_disclosed",
+      "status": "PASS",
+      "state": "not_recorded"
+    },
+    {
+      "id": "manual_gap_disclosed",
+      "status": "PASS",
+      "state": "not_recorded"
+    },
+    {
+      "id": "long_cv_tail",
+      "status": "PASS"
+    },
+    {
+      "id": "held_readable_not_rankable",
+      "status": "PASS"
+    },
+    {
+      "id": "restricted_no_contact",
+      "status": "PASS"
+    },
+    {
+      "id": "deletion_denied",
+      "status": "PASS",
+      "code": "candidate_restricted"
+    },
+    {
+      "id": "tenant_search_isolation",
+      "status": "PASS",
+      "refs": [
+        "app:p8-en"
+      ]
+    },
+    {
+      "id": "arabic_lexical",
+      "status": "PASS",
+      "hits": 2
+    },
+    {
+      "id": "held_ranking_denied",
+      "status": "PASS",
+      "reason": "held_or_job_ranking_ineligible"
+    },
+    {
+      "id": "concurrent_shadow_tools",
+      "status": "PASS"
+    },
+    {
+      "id": "compare_no_winner",
+      "status": "PASS"
+    }
+  ],
+  "blockers": [],
+  "fails": []
+}

@@ -1,0 +1,111 @@
+{
+  "lifecycle_version": "2a",
+  "raw_item_ids": [
+    "civil_id",
+    "personal_photo",
+    "employment_contract",
+    "bank_details",
+    "passport",
+    "residence",
+    "work_permit",
+    "offer_letter",
+    "personal_details_form",
+    "emergency_contact",
+    "salary_transfer_details",
+    "salary_allowances_confirmed",
+    "payroll_status",
+    "civil_id_expiry",
+    "passport_expiry",
+    "residency_expiry",
+    "work_permit_expiry",
+    "medical_check",
+    "visa_article_type",
+    "probation_end",
+    "department_assigned",
+    "job_title_confirmed",
+    "reporting_manager_assigned",
+    "work_location_assigned",
+    "shift_group_assigned",
+    "attendance_device_id",
+    "app_invite_sent",
+    "account_access_created",
+    "uniform_ppe_issued",
+    "access_card_issued",
+    "asset_handover",
+    "company_policy_ack",
+    "code_of_conduct_ack",
+    "nda_signed",
+    "training_completed",
+    "first_day_checklist"
+  ],
+  "visible_item_ids": [
+    "civil_id",
+    "personal_photo",
+    "employment_contract",
+    "bank_details",
+    "offer_letter"
+  ],
+  "groups": {
+    "your_actions": [
+      {
+        "item_id": "employment_contract",
+        "status": "replacement_required",
+        "required": true,
+        "rejection_reason": "Wave2A canary: please upload a clearer employment contract scan.",
+        "actions": [
+          "preview",
+          "view_versions",
+          "replace",
+          "resubmit"
+        ],
+        "has_file": true
+      },
+      {
+        "item_id": "bank_details",
+        "status": "pending",
+        "required": true,
+        "rejection_reason": null,
+        "actions": [],
+        "has_file": false
+      }
+    ],
+    "being_reviewed": [
+      {
+        "item_id": "personal_photo",
+        "status": "processing",
+        "required": true,
+        "rejection_reason": null,
+        "actions": [
+          "preview",
+          "view_versions"
+        ],
+        "has_file": true
+      },
+      {
+        "item_id": "offer_letter",
+        "status": "processing",
+        "required": false,
+        "rejection_reason": null,
+        "actions": [
+          "preview",
+          "view_versions"
+        ],
+        "has_file": true
+      }
+    ],
+    "handled_by_others": [],
+    "completed": [
+      {
+        "item_id": "civil_id",
+        "status": "accepted",
+        "required": true,
+        "rejection_reason": null,
+        "actions": [
+          "preview",
+          "view_versions"
+        ],
+        "has_file": true
+      }
+    ]
+  }
+}

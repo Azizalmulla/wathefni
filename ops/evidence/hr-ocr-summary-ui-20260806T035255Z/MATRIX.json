@@ -1,0 +1,164 @@
+{
+  "stamp": "20260806T035255Z",
+  "ok": true,
+  "civil_after": {
+    "status": "accepted",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+  },
+  "matrix": {
+    "civil_id_dual_side_canary": {
+      "verdict": "fully proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "hr_ocr_summary_ui",
+        "hr_ocr_no_raw_dump",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_passport": {
+      "verdict": "fully proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "hr_ocr_summary_ui",
+        "hr_ocr_no_raw_dump",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_residence": {
+      "verdict": "fully proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "hr_ocr_summary_ui",
+        "hr_ocr_no_raw_dump",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_work_permit": {
+      "verdict": "fully proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_extraction",
+        "version_history",
+        "hr_receives_submission",
+        "hr_ocr_summary_ui",
+        "hr_ocr_no_raw_dump",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_employment_contract": {
+      "verdict": "fully proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "cross_type_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "hr_ocr_summary_ui",
+        "hr_ocr_no_raw_dump",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [],
+      "missing": [],
+      "failing_request": null
+    },
+    "docs_qual_personal_photo": {
+      "verdict": "fully proven",
+      "proven": [
+        "linkage",
+        "wrong_document_rejection",
+        "supported_upload",
+        "classification_allow",
+        "ocr_stored",
+        "identity_matching_na",
+        "expiry_na",
+        "version_history",
+        "hr_receives_submission",
+        "hr_ocr_summary_ui",
+        "hr_ocr_no_raw_dump",
+        "preview",
+        "hr_approve_roundtrip",
+        "hr_reject_replacement",
+        "cross_employee_blocked"
+      ],
+      "partial": [],
+      "missing": [],
+      "failing_request": null
+    }
+  },
+  "canary_remaining": 0,
+  "notes": {
+    "shared_component": "DocumentExtractionSummary",
+    "surfaces": [
+      "Compliance findings details",
+      "Compliance register Summary",
+      "Onboarding checklist document rows"
+    ],
+    "bank_ess": "next",
+    "auth_wave2": "blocked_until_bank_ess"
+  }
+}

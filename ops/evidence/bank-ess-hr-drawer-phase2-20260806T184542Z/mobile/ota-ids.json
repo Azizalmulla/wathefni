@@ -1,0 +1,26 @@
+[
+  {
+    "id": "019fd868-2119-715e-9a88-8a70dbd302d9",
+    "createdAt": "2026-08-06T18:48:50.713Z",
+    "group": "59ec9dc5-2ffb-4018-b64c-788f3bb94b31",
+    "branch": "canary",
+    "message": "Bank ESS Phase2 submittedAt date + companion 20260806T184542Z",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd868-2119-715e-9a88-8a70dbd302d9",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "87ddbaac29ac8083fe5c6d028e5986ee97006db1"
+  },
+  {
+    "id": "019fd868-2119-77b2-8303-cf489eed4fe2",
+    "createdAt": "2026-08-06T18:48:50.713Z",
+    "group": "59ec9dc5-2ffb-4018-b64c-788f3bb94b31",
+    "branch": "canary",
+    "message": "Bank ESS Phase2 submittedAt date + companion 20260806T184542Z",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd868-2119-77b2-8303-cf489eed4fe2",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "87ddbaac29ac8083fe5c6d028e5986ee97006db1"
+  }
+]

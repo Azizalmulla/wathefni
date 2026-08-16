@@ -1,0 +1,16 @@
+WAVE1 1
+WAVE2 1
+COMPANIES_W1 WATHEFNI
+COMPANIES_W2 WATHEFNI
+KILL 0
+MUTATIONS 0
+CAPTURE_INGEST off
+wave1_enabled True
+wave2_enabled True
+company True
+company_external False
+mutations_allowed False
+kill_engaged False
+honesty {'wathefni_only': True, 'hr_dashboard_only': True, 'mutations': False, 'payroll': False, 'shifts': False, 'attendance_ingest': False, 'capture_ingest': 'off', 'attendance_records_basis': 'existing_records_only', 'whatsapp_widening': False}
+PAW2B_MARKER=PAW2B
+flags_ok_wave2b=true

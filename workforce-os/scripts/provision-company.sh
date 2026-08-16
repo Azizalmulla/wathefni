@@ -15,7 +15,7 @@ set -euo pipefail
 #     --hr-emails "sara@almulla.com,mohammed@almulla.com" \
 #     --hr-roles "manager,admin" \
 #     --google-account "almulla-hr@gmail.com" \
-#     --modules "hiring,onboarding,compliance" \
+#     --modules "hiring,onboarding,compliance,shifts,attendance,leave,payroll,analytics" \
 #     --country "KW" \
 #     --sector "General Trading"
 #
@@ -57,7 +57,7 @@ while [[ $# -gt 0 ]]; do
     --sector)          SECTOR="$2"; shift 2 ;;
     --dry-run)         DRY_RUN=true; shift ;;
     --help)
-      echo "Usage: $0 --company-code CODE --company-name NAME --whatsapp-number +965... --hr-phones +965...,+965... --hr-names Name1,Name2 --google-account email --modules hiring,onboarding,compliance"
+      echo "Usage: $0 --company-code CODE --company-name NAME --whatsapp-number +965... --hr-phones +965...,+965... --hr-names Name1,Name2 --google-account email --modules hiring,onboarding,compliance,shifts,attendance,leave,payroll,analytics"
       exit 0
       ;;
     *) echo "Unknown argument: $1"; exit 1 ;;
@@ -102,11 +102,21 @@ IFS=',' read -ra MODULE_ARR <<< "$MODULES"
 HAS_HIRING=false
 HAS_ONBOARDING=false
 HAS_COMPLIANCE=false
+HAS_SHIFTS=false
+HAS_ATTENDANCE=false
+HAS_LEAVE=false
+HAS_PAYROLL=false
+HAS_ANALYTICS=false
 for mod in "${MODULE_ARR[@]}"; do
   case "$(echo "$mod" | tr '[:upper:]' '[:lower:]' | xargs)" in
-    hiring)     HAS_HIRING=true ;;
-    onboarding) HAS_ONBOARDING=true ;;
-    compliance|pro) HAS_COMPLIANCE=true ;;
+    hiring|pre_hiring|pre-hiring|recruiting) HAS_HIRING=true ;;
+    onboarding|post_hiring|post-hiring)      HAS_ONBOARDING=true ;;
+    compliance|pro)                          HAS_COMPLIANCE=true ;;
+    shifts|shift|shifting|scheduling)        HAS_SHIFTS=true ;;
+    attendance|attendence|time_tracking|time-tracking|timekeeping|checkin|check-in) HAS_ATTENDANCE=true ;;
+    leave|time_off|time-off|vacation)        HAS_LEAVE=true ;;
+    payroll|payroll_hours|payroll-hours|timesheet|time_sheet|time-sheet) HAS_PAYROLL=true ;;
+    analytics|insights|dashboard|reports)     HAS_ANALYTICS=true ;;
   esac
 done
 
@@ -115,12 +125,24 @@ MODULE_DESC_PARTS=()
 $HAS_HIRING     && MODULE_DESC_PARTS+=("screen candidates and manage hiring")
 $HAS_ONBOARDING && MODULE_DESC_PARTS+=("onboard new employees")
 $HAS_COMPLIANCE && MODULE_DESC_PARTS+=("track document compliance and PRO operations")
+$HAS_SHIFTS     && MODULE_DESC_PARTS+=("manage employee shifts, coverage, availability, and shift swaps")
+$HAS_ATTENDANCE && MODULE_DESC_PARTS+=("track attendance, lateness, absences, and check-ins")
+$HAS_LEAVE      && MODULE_DESC_PARTS+=("manage employee leave and time off")
+$HAS_PAYROLL    && MODULE_DESC_PARTS+=("calculate payroll-ready working hours, policy previews, and locked payroll exports")
+$HAS_ANALYTICS  && MODULE_DESC_PARTS+=("answer workforce analytics and operational performance questions")
+MODULE_DESC_PARTS+=("enforce branch, team, and manager scope when configured")
 MODULE_DESCRIPTION="$(IFS=', '; echo "${MODULE_DESC_PARTS[*]}")"
 
 HR_SCOPE_PARTS=()
 $HAS_HIRING     && HR_SCOPE_PARTS+=("candidates, positions, interviews, assessments")
 $HAS_ONBOARDING && HR_SCOPE_PARTS+=("onboarding, employee setup")
 $HAS_COMPLIANCE && HR_SCOPE_PARTS+=("document compliance, renewals, PRO operations")
+$HAS_SHIFTS     && HR_SCOPE_PARTS+=("shift schedules, coverage, reminders, availability, shift swaps")
+$HAS_ATTENDANCE && HR_SCOPE_PARTS+=("attendance, check-ins, check-outs, lateness, absences")
+$HAS_LEAVE      && HR_SCOPE_PARTS+=("leave requests, approvals, time off")
+$HAS_PAYROLL    && HR_SCOPE_PARTS+=("payroll hours, timesheets, payroll policy, payroll exports, overtime, absence hours")
+$HAS_ANALYTICS  && HR_SCOPE_PARTS+=("workforce analytics, branch performance, exceptions, trends")
+HR_SCOPE_PARTS+=("branch/team manager-scoped workforce operations")
 HR_SCOPE="$(IFS=', '; echo "${HR_SCOPE_PARTS[*]}")"
 
 # Build modules JSON array
@@ -160,6 +182,12 @@ MODULES_BLOCK=""
 $HAS_HIRING     && MODULES_BLOCK+="- **Module 1: Hiring** — Job posting, QR intake, CV screening, interviews, assessments"$'\n'
 $HAS_ONBOARDING && MODULES_BLOCK+="- **Module 2: Onboarding** — Post-hire document collection, checklists, Drive upload"$'\n'
 $HAS_COMPLIANCE && MODULES_BLOCK+="- **Module 3: PRO/Compliance** — Document expiry tracking, renewal reminders, compliance alerts"$'\n'
+$HAS_SHIFTS     && MODULES_BLOCK+="- **Module 4: Shifts** — Staff schedules, coverage checks, shift reminders, availability, and shift swaps"$'\n'
+$HAS_ATTENDANCE && MODULES_BLOCK+="- **Module 5: Attendance** — Check-ins, check-outs, lateness, absence tracking, attendance dashboards"$'\n'
+$HAS_LEAVE      && MODULES_BLOCK+="- **Module 6: Leave** — Time-off requests, approvals, conflict checks, leave dashboards"$'\n'
+$HAS_PAYROLL    && MODULES_BLOCK+="- **Module 7: Payroll** — Payroll-ready hours, draft timesheets, approval workflow, policy previews, and locked exports from shifts, attendance, and approved leave"$'\n'
+$HAS_ANALYTICS  && MODULES_BLOCK+="- **Module 8: Analytics** — Workforce insights, branch performance, lateness, absences, overtime risk, and review priorities"$'\n'
+MODULES_BLOCK+="- **Manager / Multi-Branch Layer** — Optional branch, team, and manager scopes applied across enabled workforce modules"$'\n'
 
 # Build HR allowed actions for IDENTITY.md
 HR_ALLOWED_ACTIONS=""
@@ -182,6 +210,36 @@ $HAS_COMPLIANCE && HR_ALLOWED_ACTIONS+="- View expiring documents and compliance
 - Schedule PACI/MOI/medical appointments
 - Offboard employees
 - Add employees manually (not from hiring flow)
+"
+$HAS_SHIFTS && HR_ALLOWED_ACTIONS+="- Create and update shift schedules
+- Ask who is working today or tomorrow
+- Detect missing coverage, conflicts, and overtime risk
+- Record availability and unavailability
+- Review, approve, or reject shift swap requests
+- Send shift reminders to employees
+"
+$HAS_ATTENDANCE && HR_ALLOWED_ACTIONS+="- Check employees in or out
+- Mark employees absent or correct attendance records
+- Ask who is late, absent, checked in, or checked out
+- Review attendance exceptions and dashboard updates
+"
+$HAS_LEAVE && HR_ALLOWED_ACTIONS+="- Create, approve, reject, or cancel leave requests
+- Ask who is off or who has pending leave
+- Review leave conflicts with scheduled shifts
+"
+$HAS_PAYROLL && HR_ALLOWED_ACTIONS+="- Review payroll hours by employee or period
+- Ask for worked, scheduled, overtime, leave, and absence hours
+- Prepare, approve, or reject timesheets for a payroll period
+- View or update payroll policy and preview payroll from approved timesheets
+- Export payroll for an explicit approved period without processing payment
+- Update the Payroll Hours, Payroll Preview, and Payroll Export dashboards
+"
+$HAS_ANALYTICS && HR_ALLOWED_ACTIONS+="- Ask workforce analytics questions
+- Review lateness, absences, overtime risk, branch performance, and review priorities
+- Update the Analytics dashboard
+"
+HR_ALLOWED_ACTIONS+="- Ask branch/team-scoped workforce questions when manager scopes are configured
+- Manage only employees inside the sender's configured branch/team manager scope
 "
 
 # ─── Print Summary ────────────────────────────────────────────────────────────
@@ -274,6 +332,36 @@ render_template() {
     content="$(echo "$content" | perl -0pe 's/\{\{#MODULE_COMPLIANCE\}\}.*?\{\{\/MODULE_COMPLIANCE\}\}//gs')"
   fi
 
+  if $HAS_SHIFTS; then
+    content="$(echo "$content" | sed 's/{{#MODULE_SHIFTS}}//g; s/{{\/MODULE_SHIFTS}}//g')"
+  else
+    content="$(echo "$content" | perl -0pe 's/\{\{#MODULE_SHIFTS\}\}.*?\{\{\/MODULE_SHIFTS\}\}//gs')"
+  fi
+
+  if $HAS_ATTENDANCE; then
+    content="$(echo "$content" | sed 's/{{#MODULE_ATTENDANCE}}//g; s/{{\/MODULE_ATTENDANCE}}//g')"
+  else
+    content="$(echo "$content" | perl -0pe 's/\{\{#MODULE_ATTENDANCE\}\}.*?\{\{\/MODULE_ATTENDANCE\}\}//gs')"
+  fi
+
+  if $HAS_LEAVE; then
+    content="$(echo "$content" | sed 's/{{#MODULE_LEAVE}}//g; s/{{\/MODULE_LEAVE}}//g')"
+  else
+    content="$(echo "$content" | perl -0pe 's/\{\{#MODULE_LEAVE\}\}.*?\{\{\/MODULE_LEAVE\}\}//gs')"
+  fi
+
+  if $HAS_PAYROLL; then
+    content="$(echo "$content" | sed 's/{{#MODULE_PAYROLL}}//g; s/{{\/MODULE_PAYROLL}}//g')"
+  else
+    content="$(echo "$content" | perl -0pe 's/\{\{#MODULE_PAYROLL\}\}.*?\{\{\/MODULE_PAYROLL\}\}//gs')"
+  fi
+
+  if $HAS_ANALYTICS; then
+    content="$(echo "$content" | sed 's/{{#MODULE_ANALYTICS}}//g; s/{{\/MODULE_ANALYTICS}}//g')"
+  else
+    content="$(echo "$content" | perl -0pe 's/\{\{#MODULE_ANALYTICS\}\}.*?\{\{\/MODULE_ANALYTICS\}\}//gs')"
+  fi
+
   echo "$content" > "$output"
 }
 
@@ -283,6 +371,11 @@ mkdir -p "$WORKSPACE_DIR"/{data/companies/"$COMPANY_CODE"/{positions,sync-queue}
 
 $HAS_ONBOARDING && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/{employees,onboarding-templates}
 $HAS_COMPLIANCE && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/employees
+$HAS_SHIFTS && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/{employees,shifts}
+$HAS_ATTENDANCE && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/{employees,attendance}
+$HAS_LEAVE && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/{employees,leave}
+$HAS_PAYROLL && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/{employees,payroll}
+$HAS_ANALYTICS && mkdir -p "$WORKSPACE_DIR/data/companies/$COMPANY_CODE"/analytics
 
 # ─── Render Workspace Templates ──────────────────────────────────────────────
 echo "📝 Rendering workspace templates..."
@@ -393,6 +486,50 @@ EOF
   echo "   ✓ onboarding-cron.json"
 fi
 
+if $HAS_SHIFTS; then
+  cat > "$WORKSPACE_DIR/.openclaw/shifts-reminder-cron.json" << EOF
+{
+  "_comment": "Add via: openclaw cron add --agent $AGENT_ID ...",
+  "name": "shift-reminders-${COMPANY_CODE_LOWER}",
+  "schedule": { "kind": "cron", "expr": "0 * * * *", "tz": "Asia/Kuwait" },
+  "sessionTarget": "isolated",
+  "agentId": "$AGENT_ID",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run the Shifts reminder scan for upcoming shifts. Send employee reminders only once per shift and report summary to HR at $PRIMARY_HR_PHONE."
+  },
+  "delivery": {
+    "mode": "announce",
+    "channel": "whatsapp",
+    "to": "$PRIMARY_HR_PHONE"
+  }
+}
+EOF
+  echo "   ✓ shifts-reminder-cron.json"
+fi
+
+if $HAS_ATTENDANCE; then
+  cat > "$WORKSPACE_DIR/.openclaw/attendance-absence-cron.json" << EOF
+{
+  "_comment": "Add via: openclaw cron add --agent $AGENT_ID ...",
+  "name": "attendance-absence-scan-${COMPANY_CODE_LOWER}",
+  "schedule": { "kind": "cron", "expr": "*/30 * * * *", "tz": "Asia/Kuwait" },
+  "sessionTarget": "isolated",
+  "agentId": "$AGENT_ID",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run the Attendance absence scan. Mark no-shows only after the configured grace period, notify HR about exceptions, and update the Attendance dashboard. Never infer an employee from vague context."
+  },
+  "delivery": {
+    "mode": "announce",
+    "channel": "whatsapp",
+    "to": "$PRIMARY_HR_PHONE"
+  }
+}
+EOF
+  echo "   ✓ attendance-absence-cron.json"
+fi
+
 # ─── Post-Provisioning Checklist ─────────────────────────────────────────────
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -425,7 +562,17 @@ echo "  6. ADD onboarding cron job:"
 echo "     See: $WORKSPACE_DIR/.openclaw/onboarding-cron.json"
 echo ""
 fi
-echo "  7. RESTART Gateway:"
+if $HAS_SHIFTS; then
+echo "  7. ADD shifts reminder cron job:"
+echo "     See: $WORKSPACE_DIR/.openclaw/shifts-reminder-cron.json"
+echo ""
+fi
+if $HAS_ATTENDANCE; then
+echo "  8. ADD attendance absence cron job:"
+echo "     See: $WORKSPACE_DIR/.openclaw/attendance-absence-cron.json"
+echo ""
+fi
+echo "  FINAL. RESTART Gateway:"
 echo "     openclaw gateway restart"
 echo ""
 echo "Done! 🎉 $COMPANY_NAME is ready to go."

@@ -1,0 +1,2 @@
+/var/www/wathefni-dashboard/assets/PostHire-2OQypmOq.js
+0b22b240663f293391f82a94db1555009220a6bbe229c67c2428072a9ca05bfd  /var/www/wathefni-dashboard/assets/PostHire-2OQypmOq.js

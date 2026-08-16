@@ -1,0 +1,9 @@
+test_confirmed_review_records_admin_audit (test_talent_pool_classification_routes.ClassificationRouteContractTests.test_confirmed_review_records_admin_audit) ... ok
+test_invalid_action_returns_calm_422_not_500 (test_talent_pool_classification_routes.ClassificationRouteContractTests.test_invalid_action_returns_calm_422_not_500) ... ok
+test_preview_requires_a_real_tenant_application (test_talent_pool_classification_routes.ClassificationRouteContractTests.test_preview_requires_a_real_tenant_application) ... ok
+test_restricted_viewer_is_denied_before_review_processing (test_talent_pool_classification_routes.ClassificationRouteContractTests.test_restricted_viewer_is_denied_before_review_processing) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.004s
+
+OK

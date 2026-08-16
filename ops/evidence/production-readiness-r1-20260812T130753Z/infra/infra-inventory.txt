@@ -1,0 +1,89 @@
+== migration framework ==
+canary-prod-migration-wave1b.py
+employee_migration_connectors.py
+employee_migration_cutover.py
+employee_migration_field_model.py
+employee_migration_foundation.py
+employee_migration_lifecycle.py
+employee_migration_onboarding.py
+employee_migration_sftp.py
+migrate-onboarding-completion-backfill.py
+migrate-prod-onboarding-wave3.py
+migration-connector-scheduler-worker.py
+migration_wave1_cv_foundation.py
+onboarding_wave3_migration.py
+smoke-test-employee-migration-foundation-manager.py
+smoke-test-employee-migration-foundation.py
+smoke-test-employee-migration-sync-p2.py
+smoke-test-employee-migration-sync-p3.py
+smoke-test-employee-migration-sync-p4.py
+smoke-test-employee-migration-sync-p5.py
+smoke-test-employee-migration-sync-p5_1.py
+smoke-test-employee-migration-sync-p5_2.py
+smoke-test-employee-migration-sync-p6.py
+smoke-test-migration-wave1.py
+EMPLOYEE_MIGRATION_FOUNDATION_P0P2.md
+EMPLOYEE_MIGRATION_SYNC_EXPANSION.md
+EMPLOYEE_MIGRATION_SYNC_FIELD_MODEL.md
+EMPLOYEE_MIGRATION_SYNC_P3_ONBOARDING.md
+EMPLOYEE_MIGRATION_SYNC_P4_CUTOVER.md
+EMPLOYEE_MIGRATION_SYNC_P5_1_SCHEDULER_SFTP.md
+EMPLOYEE_MIGRATION_SYNC_P5_2_SECRET_HARDENING.md
+EMPLOYEE_MIGRATION_SYNC_P5_CONNECTORS.md
+EMPLOYEE_MIGRATION_SYNC_P6_1_LIVE_UI_REFRESH.md
+EMPLOYEE_MIGRATION_SYNC_P6_LEAVERS.md
+MIGRATION_WAVE1_FOUNDATION_CV_FREEZE.md
+WATHEFNI_DATA_MIGRATION_AND_IMPORT_ARCHITECTURE_AUDIT.md
+qualify-migration-wave1-staging.sh
+qualify-migration-wave1b-prod-synthetic.sh
+qualify-migration-wave1br-staging.sh
+
+== ensure_schema DDL surface ==
+83
+153
+
+== error reporting ==
+apps/wathefni-hr-mobile/package-lock.json:8431:        "@opentelemetry/api": "^1.9.0",
+apps/wathefni-hr-mobile/package-lock.json:8447:        "@opentelemetry/api": {
+apps/wathefni-dashboard/package-lock.json:4218:        "@opentelemetry/api": "^1.9.0",
+apps/wathefni-dashboard/package-lock.json:4234:        "@opentelemetry/api": {
+wathefni-orchestrator/ops/PHASE7E_E1B_PRIVACY_CHECKLIST.md:42:| Third-party analytics / ad SDKs in app deps | **CONFIRMED** absent | `package.json` has no Sentry/Amplitude/Segment/Firebase Analytics; PRIVACY claims no ad trackers |
+wathefni-orchestrator/ops/PHASE7E_E1B_PRIVACY_CHECKLIST.md:112:| Crash reporter (Sentry, etc.) | **CONFIRMED** none wired | |
+apps/wathefni-dashboard/src/index.css:123:/* Sidebar: only show a thin scrollbar when nav content overflows */
+apps/wathefni-dashboard/src/index.css:125:  scrollbar-width: thin;
+apps/wathefni-dashboard/src/index.css:126:  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+apps/wathefni-dashboard/src/index.css:129:.wf-sidebar-scroll::-webkit-scrollbar {
+(none above = absent)
+
+== health endpoints ==
+42142:@app.get("/health")
+42155:@app.get("/ready")
+
+== backups / restore ==
+PREHIRING_UNIFIED_CANDIDATES_RESTORED_BASELINE_REQUALIFICATION.md
+ROLLBACK_INTERVIEWS_PRODUCTION.sh
+restored-baseline-held-rollback-proof.py
+run-restored-baseline-final-sweep.py
+run-restored-baseline-matrices.py
+
+== deploy / CI ==
+CANDIDATES_C0_C1_LOCAL_IMPLEMENTATION.md
+CANDIDATES_C0_C1_PRODUCTION_GREEN.md
+CANONICAL_RECRUITING_LIFECYCLE_PRODUCTION.md
+CANONICAL_RECRUITING_LIFECYCLE_STAGING.md
+DEPLOY_RUNBOOK.md
+HR0A_CLOSURE.md
+HR0_SAFE_ROLLBACK.md
+HR1_CAPABILITY_MATRIX.md
+HR1_CONTRACT.md
+HR1_MOBILE_API_COMPATIBILITY.md
+HR1_SAFE_ROLLBACK.md
+HR1_STAGING_PROOF.md
+HR2A_MOBILE_DATA_CONTRACT.md
+HR2_DATABASE_ISOLATION_INCIDENT.md
+HR2_STAGING_PROOF.md
+HR3_MOBILE_DATA_CONTRACT.md
+JOBS_PHASE2_CLOSURE.md
+JOBS_PHASE2_STAGE_A_CONTRACT.md
+JOBS_PHASE2_STAGE_B_ASSESSMENT.md
+PHASE7A_FIRST_CLIENT_RUNBOOK.md

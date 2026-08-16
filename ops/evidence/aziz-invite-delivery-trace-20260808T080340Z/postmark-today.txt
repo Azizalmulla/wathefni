@@ -1,0 +1,77 @@
+proc_token_present False len 0
+proc_keys_postmark ['WATHEFNI_POSTMARK_INBOUND_ENV', 'WATHEFNI_POSTMARK_INBOUND_ENV_PIN', 'WATHEFNI_POSTMARK_INBOUND_SECRET']
+file_tokens [('/root/.openclaw/secrets/postgres.env', 'WATHEFNI_POSTMARK_SERVER_TOKEN', 36, '308c…9bd7')]
+
+==== TOKEN /root/.openclaw/secrets/postgres.env:WATHEFNI_POSTMARK_SERVER_TOKEN ====
+server 200 My First Server 19430066
+msg_details 422 701 This message was not found. None None
+recent_count_page 20 total 186
+{"MessageID": "361516ce-b0dc-456c-9561-c9a597142eee", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:30.0000000-04:00", "To": "['invite-smoke-0dcc4d6f@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "aa3fbc04-9e47-4a5b-be44-7768f2ea9faf", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:27.0000000-04:00", "To": "['access-elig-7c840041-02@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "095c1260-c17c-45a7-b083-dcb828fe9299", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:26.0000000-04:00", "To": "['access-elig-7c840041-99@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "95b0e9dd-68ec-4c27-8dcd-e4f23742615c", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:25.0000000-04:00", "To": "['access-elig-7c840041-11@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "1bfca9cc-5eeb-46bb-ac0f-e0f4d12575ac", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:25.0000000-04:00", "To": "['access-elig-7c840041-12@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "e9b175f5-d684-4c22-a769-fb0121a4c529", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:24.0000000-04:00", "To": "['access-elig-7c840041-10@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "3f6fba53-fe98-4edf-8e2a-0633afb9dbc2", "Status": "Sent", "ReceivedAt": "2026-08-08T01:50:23.0000000-04:00", "To": "['access-elig-7c840041-02@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "5bf5e3a8-f688-4aae-8e83-2d34f9534d58", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:40.0000000-04:00", "To": "['invite-smoke-8e3e02c1@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "56cc125d-bfd7-4237-889e-cd93e210d73c", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:37.0000000-04:00", "To": "['access-elig-17baf572-02@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "c3bc8ee8-3503-4194-b3bd-4a8d50d5760b", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:36.0000000-04:00", "To": "['access-elig-17baf572-12@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "3258b33a-1d26-4a8b-95d5-8f8ba05f365b", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:36.0000000-04:00", "To": "['access-elig-17baf572-99@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "d7a2ff95-dd3e-4df2-82dc-7200d12b170a", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:35.0000000-04:00", "To": "['access-elig-17baf572-11@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "b9881724-17c0-49cf-adae-1a015ef34332", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:35.0000000-04:00", "To": "['access-elig-17baf572-10@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "95c79330-8064-45d0-b99a-0d86d9edc57d", "Status": "Sent", "ReceivedAt": "2026-08-08T01:36:34.0000000-04:00", "To": "['access-elig-17baf572-02@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "8334cd5b-5acb-49be-8b3e-e74928f705ca", "Status": "Sent", "ReceivedAt": "2026-08-07T22:24:08.0000000-04:00", "To": "['briansaleh92@gmail.com']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "741e19d8-167d-4a48-a85b-126cfbfe9ff7", "Status": "Sent", "ReceivedAt": "2026-08-07T15:20:47.0000000-04:00", "To": "['invite-smoke-fac8da87@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "d63f3415-f834-44da-a601-65e03c461801", "Status": "Sent", "ReceivedAt": "2026-08-07T15:20:12.0000000-04:00", "To": "['access-elig-47f9ae49-02@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "5d0d7ea6-d764-47c5-882c-b9dbf6e7b39a", "Status": "Sent", "ReceivedAt": "2026-08-07T15:20:11.0000000-04:00", "To": "['access-elig-47f9ae49-99@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "c0ea1a75-596c-4f8e-8c95-79f09d5a2b29", "Status": "Sent", "ReceivedAt": "2026-08-07T15:20:10.0000000-04:00", "To": "['p5a-p5115352d14@example.invalid']", "Subject": "Your Wathefni app activation code"}
+{"MessageID": "39b3c0e9-b6e9-44d9-865d-147d56e4875c", "Status": "Sent", "ReceivedAt": "2026-08-07T15:20:10.0000000-04:00", "To": "['p51b-15352d14@example.invalid']", "Subject": "Your Wathefni app activation code"}
+today_stats 200 {'Sent': 14, 'Bounced': 14, 'SMTPApiErrors': 0, 'BounceRate': 100, 'SpamComplaints': 0, 'SpamComplaintsRate': 0, 'Tracked': 0, 'Opens': 0, 'UniqueOpens': 0, 'TotalClicks': 0, 'UniqueLinksClicked': 0, 'WithClientRecorded': 0, 'WithPlatformRecorded': 0, 'WithReadTimeRecorded': 0, 'WithLinkTracking': 0, 'WithOpenTracking': 0, 'TotalTrackedLinksSent': 0}
+
+streams 200 {
+  "MessageStreams": [
+    {
+      "ID": "inbound",
+      "ServerID": 19430066,
+      "Name": "Default Inbound Stream",
+      "Description": "Default stream used for receiving inbound messages",
+      "MessageStreamType": "Inbound",
+      "CreatedAt": "2026-06-01T08:41:24-04:00",
+      "UpdatedAt": null,
+      "ArchivedAt": null,
+      "ExpectedPurgeDate": null,
+      "SubscriptionManagementConfiguration": {
+        "UnsubscribeHandlingType": "None"
+      }
+    },
+    {
+      "ID": "outbound",
+      "ServerID": 19430066,
+      "Name": "Default Transactional Stream",
+      "Description": "Default stream used for sending transactional messages",
+      "MessageStreamType": "Transactional",
+      "CreatedAt": "2026-06-01T08:41:24-04:00",
+      "UpdatedAt": null,
+      "ArchivedAt": null,
+      "ExpectedPurgeDate": null,
+      "SubscriptionManagementConfiguration": {
+        "UnsubscribeHandlingType": "None"
+      }
+    },
+    {
+      "ID": "broadcast",
+      "ServerID": 19430066,
+      "Name": "Default Broadcast Stream",
+      "Description": "Default stream used for sending broadcast messages",
+      "MessageStreamType": "Broadcasts",
+      "CreatedAt": "2026-06-01T08:41:24-04:00",
+      "UpdatedAt": null,
+      "ArchivedAt": null,
+      "ExpectedPurgeDate": null,
+      "SubscriptionManagementConfiguration": {
+        "UnsubscribeHandlingType": "Postmark"
+      }
+    }
+  ],
+  "TotalCount": 3
+}

@@ -1,0 +1,4 @@
+4f9230048ded7b07ee89b77397e7f0e6da19f2763c75e86c394f05fddca1f945  /opt/wathefni/orchestrator/assistant_capability_catalog.py
+a76082655031691d2eee708bc9323059b4b9f13e0b3d098c0c63fa40d5b14bb5  /opt/wathefni/orchestrator/action_registry.py
+78f931a41622d50885caf4102312d15c33d5cd7f0813ea436bb34520b111a646  /opt/wathefni/orchestrator/workspace_capability.py
+3afa9f3d6114cbcab80280e5dd610b66893c91f94f974c08b80f67bb9ee0ed42  /var/www/wathefni-dashboard/assets/dashboard-CmztGRNg.js

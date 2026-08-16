@@ -1,0 +1,6 @@
+94904b94004385a28f03eddb71de3c9bf752cf4789a690b806494b3267286473  /Users/azizalmulla/Desktop/claw/ops/evidence/document-extraction-safety-remediation-20260804/sources/app.py
+58edc84c0aae2f014e185cf0eb597a07429076f524ce1d72962c925cc963c832  /Users/azizalmulla/Desktop/claw/ops/evidence/document-extraction-safety-remediation-20260804/sources/migration_wave1_cv_foundation.py
+43f59efef077de4757622088173b2b345f02ed0303c2fe1814a597cf757c6ef9  /Users/azizalmulla/Desktop/claw/ops/evidence/document-extraction-safety-remediation-20260804/sources/smoke-test-migration-wave1.py
+a1199d3f5c1b6f4284f66eb821021d535a3be6f50a413376086e6f14a4a0b7fc  /Users/azizalmulla/Desktop/claw/ops/evidence/document-extraction-safety-remediation-20260804/sources/canary-prod-migration-wave1b.py
+9da71d7b762103e7876b848318cede8266fd3a5d01c41b8a2529f42b231b81e2  /Users/azizalmulla/Desktop/claw/ops/evidence/document-extraction-safety-remediation-20260804/sources/deploy-migration-wave1b-prod-synthetic.sh
+edbef3e47c09e84d3b85fbddb1195375638c23f9f7675a73f5b4c6bdada19690  /Users/azizalmulla/Desktop/claw/ops/evidence/document-extraction-safety-remediation-20260804/sources/ops/qualify-migration-wave1b-prod-synthetic.sh

@@ -1,0 +1,12 @@
+{
+  "cwd": "/Users/azizalmulla/Desktop/claw",
+  "git_branch": "authority-cutover",
+  "git_commit": "40a4e2621f4818bf7c0f6ce3642032297bfbe7b2",
+  "git_short": "40a4e26",
+  "hostname": "Mac",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "python": "3.14.2",
+  "tree_dirty": true,
+  "voyage_enabled": "",
+  "voyage_key_present": false
+}

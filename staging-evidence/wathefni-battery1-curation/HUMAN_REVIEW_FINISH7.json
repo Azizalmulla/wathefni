@@ -1,0 +1,2427 @@
+{
+  "started_at": "2026-07-18T20:55:10.520197+00:00",
+  "purpose": "finish_en_human_review_orders_1_7_after_prompt_v2_retirement",
+  "packages": [
+    {
+      "order": 1,
+      "en_draft_id": "5d6b3e4a-8eaf-4e1a-9e13-977206b4bafe",
+      "ar_draft_id": "e067ee1e-4d83-4955-8cf7-56b2b4697af7",
+      "translation_pair_id": "47abf8c7-d35a-406f-8777-81bba2d9cd15",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "61148ace-dac6-45c4-8e67-320511e7776d",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "1f295366-fe67-48f1-97b2-cc56883f32ce",
+              "draft_id": "5d6b3e4a-8eaf-4e1a-9e13-977206b4bafe",
+              "draft_revision_id": "e223378f-41b3-4024-ab3a-fe592401bf8f",
+              "parent_run_id": "c4e3e096-402c-4308-82c2-4f5b16822c7c",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "A customer who cannot access an account at 7:00 a.m. Saturday should email the duty support desk."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Billing downloads scheduled at 7:00 a.m. Saturday will appear in the archive after maintenance."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Profile changes sent during maintenance will process once the window ends automatically."
+                    },
+                    {
+                      "key": "D",
+                      "text": "The portal will remain unavailable until billing downloads are complete."
+                    }
+                  ],
+                  "rationale": "This item targets careful separation of what the service note explicitly states from what it does not state about later processing or timing.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "inference",
+                    "time_condition_tracking",
+                    "best_supported_conclusion"
+                  ],
+                  "assumptions": [],
+                  "explanation": "The update directly states that urgent account access issues during the maintenance window should be emailed to the duty support desk.",
+                  "prompt_text": "Service update: The customer portal will be unavailable from 6:00 to 8:00 a.m. Saturday for maintenance. During that window, password resets and profile changes will not process. Billing downloads scheduled before 6:00 a.m. will still appear in the archive after maintenance. Urgent account access issues should be emailed to the duty support desk, which will monitor messages throughout the window.\n\nWhich conclusion is best supported?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "verbal_reasoning"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "A",
+                  "difficulty_rationale": "Medium because the passage includes multiple service details and a time condition that must be applied precisely while avoiding assumptions about what happens after maintenance.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "Plausible if the reader notices 'billing downloads' but misses the time condition 'scheduled before 6:00 a.m.'.",
+                      "choice_key": "B"
+                    },
+                    {
+                      "rationale": "A common inference error: assuming delayed processing when the passage only states non-processing during the window.",
+                      "choice_key": "C"
+                    },
+                    {
+                      "rationale": "Overly broad and invented; the passage gives a maintenance window but no dependency on billing-download completion.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: A.\nDerivation: (1) The portal is unavailable from 6:00 to 8:00 a.m. Saturday. (2) The update explicitly says urgent account access issues should be emailed to the duty support desk, which will monitor messages throughout that window. (3) Therefore, if someone cannot access an account at 7:00 a.m. Saturday, the best-supported conclusion is that they should email the duty support desk.\nEliminating distractors: B is unsupported because only billing downloads scheduled before 6:00 a.m. are said to appear after maintenance; 7:00 a.m. is during the window, not before it. C is unsupported because the update says profile changes will not process during the window, but says nothing about automatic processing afterward. D is unsupported because no link is stated between portal availability and completion of billing downloads.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 verbal_reasoning medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "verbal_reasoning"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a concise workplace passage and one best-supported conclusion.",
+                    "Keep the entire stem below 105 words and use no more than two assumptions.",
+                    "Distractors must be unsupported, contradicted, or overly broad conclusions.",
+                    "This single draft may use one of these scenario seeds: training notice, service update, operations email, workplace procedure, policy memo.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "a91d6b5d3f12988335ffe5efbc817f45d881e9c285e6dd8081ec7bad95e67f52",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 840
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "verbal_reasoning"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "e223378f-41b3-4024-ab3a-fe592401bf8f",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "6d2dfb4364ac2f172519c04603b6edeca53fa5de24c3a38dfe2f25f9fdeac7c3",
+              "dedupe_sha256": "6d2dfb4364ac2f172519c04603b6edeca53fa5de24c3a38dfe2f25f9fdeac7c3",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:55:10.596673+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "61148ace-dac6-45c4-8e67-320511e7776d",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0026766"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "5d6b3e4a-8eaf-4e1a-9e13-977206b4bafe",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 verbal_reasoning medium",
+              "competency_tags": [
+                "verbal_reasoning"
+              ],
+              "skill_tags": [
+                "inference",
+                "time_condition_tracking",
+                "best_supported_conclusion"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "Service update: The customer portal will be unavailable from 6:00 to 8:00 a.m. Saturday for maintenance. During that window, password resets and profile changes will not process. Billing downloads scheduled before 6:00 a.m. will still appear in the archive after maintenance. Urgent account access issues should be emailed to the duty support desk, which will monitor messages throughout the window.\n\nWhich conclusion is best supported?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "A customer who cannot access an account at 7:00 a.m. Saturday should email the duty support desk."
+                },
+                {
+                  "key": "B",
+                  "text": "Billing downloads scheduled at 7:00 a.m. Saturday will appear in the archive after maintenance."
+                },
+                {
+                  "key": "C",
+                  "text": "Profile changes sent during maintenance will process once the window ends automatically."
+                },
+                {
+                  "key": "D",
+                  "text": "The portal will remain unavailable until billing downloads are complete."
+                }
+              ],
+              "proposed_answer_key": "A",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "This item targets careful separation of what the service note explicitly states from what it does not state about later processing or timing.",
+              "explanation": "The update directly states that urgent account access issues during the maintenance window should be emailed to the duty support desk.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_verbal_reasoning_medium_1",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:55:22.050573+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:14:07.464194+00:00",
+              "updated_at": "2026-07-18T20:55:22.050573+00:00",
+              "current_revision_id": "e223378f-41b3-4024-ab3a-fe592401bf8f",
+              "blueprint_version_id": "1f295366-fe67-48f1-97b2-cc56883f32ce",
+              "source_run_id": "c4e3e096-402c-4308-82c2-4f5b16822c7c"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "product2_automated_review_not_passed",
+              "evidence": {
+                "deterministic": {},
+                "secondary": {},
+                "secondary_run_qualified": false,
+                "current_revision_id": "ec06a808-c330-401d-af84-1ddf07eed770",
+                "arabic_human_review_ready": false,
+                "arabic_human_review_missing": [
+                  "natural_professional_arabic",
+                  "no_literal_machine_translation",
+                  "gulf_kuwait_cultural_suitability",
+                  "same_construct_and_difficulty",
+                  "answer_key_equivalence",
+                  "no_language_specific_clueing"
+                ]
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "product2_automated_review_not_passed",
+            "evidence": {
+              "deterministic": {},
+              "secondary": {},
+              "secondary_run_qualified": false,
+              "current_revision_id": "ec06a808-c330-401d-af84-1ddf07eed770",
+              "arabic_human_review_ready": false,
+              "arabic_human_review_missing": [
+                "natural_professional_arabic",
+                "no_literal_machine_translation",
+                "gulf_kuwait_cultural_suitability",
+                "same_construct_and_difficulty",
+                "answer_key_equivalence",
+                "no_language_specific_clueing"
+              ]
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "order": 2,
+      "en_draft_id": "8e1c5670-58ac-4167-b710-d2b86023d843",
+      "ar_draft_id": "41bc8883-1438-47ee-928d-fb83dfcbc1ec",
+      "translation_pair_id": "a243e3c1-212a-43aa-835d-0bc07b3e76c9",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "255506ef-91cf-4ed2-bbf8-89f0c993dce5",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "77957a1b-6870-4fac-8bb5-d607ac86ae7b",
+              "draft_id": "8e1c5670-58ac-4167-b710-d2b86023d843",
+              "draft_revision_id": "97b2f279-d835-4340-9b48-ffdd1272fafd",
+              "parent_run_id": "6fd0ae97-3946-4caf-8594-8305ce18222a",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "A same-day access request may be considered for an employee a director asks to attend an in-person client meeting."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Any employee with a client meeting may enter headquarters the same day."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Once approved, building access remains active for one week."
+                    },
+                    {
+                      "key": "D",
+                      "text": "Remote staff always need a director’s approval to visit headquarters."
+                    }
+                  ],
+                  "rationale": "Assesses the ability to identify a conclusion supported by a policy memo containing a standard rule, a narrow exception, and a time limit.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "drawing_supported_conclusions",
+                    "reading_comprehension",
+                    "policy_interpretation"
+                  ],
+                  "assumptions": [],
+                  "explanation": "The memo explicitly states that same-day requests are considered only for employees asked by a director to attend an in-person client meeting, so that conclusion is directly supported.",
+                  "prompt_text": "Policy memo: “Remote staff must submit building access requests at least two business days before visiting headquarters. Same-day requests are considered only for employees asked to attend an in-person client meeting by a director. Approved access lasts for that day only.” Which conclusion is best supported?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "verbal_reasoning"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "A",
+                  "difficulty_rationale": "Medium difficulty because the reader must avoid converting a narrow exception into a general rule and must track the memo’s precise scope.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "Overly broad; the exception applies only to employees asked by a director to attend an in-person client meeting.",
+                      "choice_key": "B"
+                    },
+                    {
+                      "rationale": "Directly contradicted by the statement that approved access lasts for that day only.",
+                      "choice_key": "C"
+                    },
+                    {
+                      "rationale": "Unsupported; the memo does not say all visits require a director’s approval, only that one specific same-day exception involves a director.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: A.\nDerivation: (1) Standard rule: remote staff normally must request access at least two business days in advance. (2) Exception: same-day requests are considered only for employees asked by a director to attend an in-person client meeting. (3) Therefore, an employee in that stated situation may have a same-day request considered. (4) The memo also says approved access lasts only for that day, confirming the exception is limited.\nEliminating distractors: B is too broad because the memo does not allow any employee with any client meeting to enter the same day; it limits consideration to employees asked by a director to attend an in-person client meeting. C is contradicted because approved access lasts for that day only, not a week. D is unsupported because the memo requires a director-triggered condition only for same-day consideration, not for every headquarters visit.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 verbal_reasoning medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "verbal_reasoning"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a concise workplace passage and one best-supported conclusion.",
+                    "Keep the entire stem below 105 words and use no more than two assumptions.",
+                    "Distractors must be unsupported, contradicted, or overly broad conclusions.",
+                    "This single draft may use one of these scenario seeds: operations email, workplace procedure, policy memo, training notice.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "e4fc65f3ec00f873990afebc2652c78b26c7d6f6c523df97e4491fd4f89db2d6",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 894
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "verbal_reasoning"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "97b2f279-d835-4340-9b48-ffdd1272fafd",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "9d2724caa60e38e54fdca775d3fa59a1da6a895e633b45b76eac9654d907386e",
+              "dedupe_sha256": "9d2724caa60e38e54fdca775d3fa59a1da6a895e633b45b76eac9654d907386e",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:55:22.099818+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "255506ef-91cf-4ed2-bbf8-89f0c993dce5",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0026721"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "8e1c5670-58ac-4167-b710-d2b86023d843",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 verbal_reasoning medium",
+              "competency_tags": [
+                "verbal_reasoning"
+              ],
+              "skill_tags": [
+                "drawing_supported_conclusions",
+                "reading_comprehension",
+                "policy_interpretation"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "Policy memo: “Remote staff must submit building access requests at least two business days before visiting headquarters. Same-day requests are considered only for employees asked to attend an in-person client meeting by a director. Approved access lasts for that day only.” Which conclusion is best supported?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "A same-day access request may be considered for an employee a director asks to attend an in-person client meeting."
+                },
+                {
+                  "key": "B",
+                  "text": "Any employee with a client meeting may enter headquarters the same day."
+                },
+                {
+                  "key": "C",
+                  "text": "Once approved, building access remains active for one week."
+                },
+                {
+                  "key": "D",
+                  "text": "Remote staff always need a director’s approval to visit headquarters."
+                }
+              ],
+              "proposed_answer_key": "A",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "Assesses the ability to identify a conclusion supported by a policy memo containing a standard rule, a narrow exception, and a time limit.",
+              "explanation": "The memo explicitly states that same-day requests are considered only for employees asked by a director to attend an in-person client meeting, so that conclusion is directly supported.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_verbal_reasoning_medium_3",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:55:34.037274+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:17:22.068436+00:00",
+              "updated_at": "2026-07-18T20:55:34.037274+00:00",
+              "current_revision_id": "97b2f279-d835-4340-9b48-ffdd1272fafd",
+              "blueprint_version_id": "77957a1b-6870-4fac-8bb5-d607ac86ae7b",
+              "source_run_id": "6fd0ae97-3946-4caf-8594-8305ce18222a"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "bilingual_package_incomplete",
+              "message": "Partial bilingual packages cannot move to human review as complete.",
+              "evidence": {
+                "required_locales": [
+                  "en",
+                  "ar"
+                ],
+                "complete_targets": [],
+                "missing_locales": [
+                  "en"
+                ],
+                "partial_package": true,
+                "complete": false
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "bilingual_package_incomplete",
+            "message": "Partial bilingual packages cannot move to human review as complete.",
+            "evidence": {
+              "required_locales": [
+                "en",
+                "ar"
+              ],
+              "complete_targets": [],
+              "missing_locales": [
+                "en"
+              ],
+              "partial_package": true,
+              "complete": false
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "order": 3,
+      "en_draft_id": "6dacb122-197c-4838-93d4-6b805a2a81e8",
+      "ar_draft_id": "f602370a-36c5-4226-b528-643270bcc2fc",
+      "translation_pair_id": "130c84e2-6534-4c95-9e8c-fcc9715101a7",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "dd5f80a3-77b2-4ba0-826b-586b315779e9",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "e77edade-6892-465d-9664-62c6e56ac72d",
+              "draft_id": "6dacb122-197c-4838-93d4-6b805a2a81e8",
+              "draft_revision_id": "6f680ea7-8497-4bd3-94fe-2b7e6ce12ceb",
+              "parent_run_id": "42922346-3976-47dd-b7a2-e114a5c9a5db",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "Pause release of the affected batch, separate suspect units, alert QA and planning, and assign someone to gather facts."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Keep shipping while checking a few more samples so today’s target is not missed."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Wait for QA to return before changing anything so you do not overreact."
+                    },
+                    {
+                      "key": "D",
+                      "text": "Rework all units immediately without confirming the scope or notifying anyone else."
+                    }
+                  ],
+                  "rationale": "A is best because a possible labeling defect creates immediate customer and compliance risk. Containing the suspect batch limits impact while QA and planning are engaged quickly. It balances shipment pressure against quality exposure; a short delay is safer than releasing incorrect product and widening the incident.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "incident_containment",
+                    "cross_functional_coordination",
+                    "risk_management"
+                  ],
+                  "assumptions": [
+                    "The suspected issue is limited to the recent batch, not all production."
+                  ],
+                  "explanation": "The strongest supervisory response is fast containment plus coordination. It prevents suspect product from leaving, preserves time to verify scope, and alerts stakeholders who may need to adjust plans. The option is measured rather than extreme because it targets the affected batch instead of stopping everything or reworking blindly.",
+                  "prompt_text": "During packaging, you are told that several units from the last hour may have incorrect labels. Orders are due out today, and QA will be available in about 15 minutes. What is the best first step?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "situational_judgment",
+                    "quality_focus",
+                    "prioritization"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "A",
+                  "difficulty_rationale": "Medium difficulty because all options reflect recognizable workplace instincts: protect output, avoid overreaction, act decisively, or coordinate. The best answer requires selecting proportional containment that addresses the highest-impact risk without escalating unnecessarily.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "Plausible because it protects output, but it overweights urgency and underweights quality and customer impact.",
+                      "choice_key": "B"
+                    },
+                    {
+                      "rationale": "Looks cautious, yet it delays action when a simple containment step can reduce immediate risk without needing full diagnosis.",
+                      "choice_key": "C"
+                    },
+                    {
+                      "rationale": "Shows initiative, but it may waste effort, disrupt output unnecessarily, and bypass key stakeholders before scope is known.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: A.\nDerivation: (1) Incorrect labels can create immediate downstream harm: wrong shipments, customer complaints, and compliance issues. (2) Before root cause is known, the first priority is containment of potentially affected units. (3) Because shipping plans may change and QA input is needed, the supervisor should notify relevant stakeholders while facts are collected.\nEliminating distractors: B keeps output moving but knowingly risks releasing bad product. C avoids overreaction but allows exposure to continue for 15 minutes. D acts fast yet is inefficient and uncoordinated because scope is unconfirmed and planning is uninformed. Only A contains risk proportionately and coordinates the response.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 situational_judgment medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "situational_judgment"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a realistic supervisor scenario with legitimate competing demands.",
+                    "Distractors must be plausible workplace mistakes, not reckless or absurd behavior.",
+                    "The rationale must explain the priority, impact, stakeholder, and trade-off.",
+                    "Use no more than two assumptions and no more than 105 words.",
+                    "This single draft may use one of these scenario seeds: team handover, quality incident, deadline conflict, stakeholder communication, customer escalation.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "dc554d1789627983b092bbdefc932ce8e9ba19d594cd4cc7541dc344ded573f9",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 717
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "situational_judgment"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "6f680ea7-8497-4bd3-94fe-2b7e6ce12ceb",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "872831cd92eb8845fdf7498e26fba1e8f3872200936efa299438679ac5ba7289",
+              "dedupe_sha256": "872831cd92eb8845fdf7498e26fba1e8f3872200936efa299438679ac5ba7289",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:55:34.081314+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "dd5f80a3-77b2-4ba0-826b-586b315779e9",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0028578"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "6dacb122-197c-4838-93d4-6b805a2a81e8",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 situational_judgment medium",
+              "competency_tags": [
+                "situational_judgment",
+                "quality_focus",
+                "prioritization"
+              ],
+              "skill_tags": [
+                "incident_containment",
+                "cross_functional_coordination",
+                "risk_management"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "During packaging, you are told that several units from the last hour may have incorrect labels. Orders are due out today, and QA will be available in about 15 minutes. What is the best first step?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "Pause release of the affected batch, separate suspect units, alert QA and planning, and assign someone to gather facts."
+                },
+                {
+                  "key": "B",
+                  "text": "Keep shipping while checking a few more samples so today’s target is not missed."
+                },
+                {
+                  "key": "C",
+                  "text": "Wait for QA to return before changing anything so you do not overreact."
+                },
+                {
+                  "key": "D",
+                  "text": "Rework all units immediately without confirming the scope or notifying anyone else."
+                }
+              ],
+              "proposed_answer_key": "A",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "A is best because a possible labeling defect creates immediate customer and compliance risk. Containing the suspect batch limits impact while QA and planning are engaged quickly. It balances shipment pressure against quality exposure; a short delay is safer than releasing incorrect product and widening the incident.",
+              "explanation": "The strongest supervisory response is fast containment plus coordination. It prevents suspect product from leaving, preserves time to verify scope, and alerts stakeholders who may need to adjust plans. The option is measured rather than extreme because it targets the affected batch instead of stopping everything or reworking blindly.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_situational_judgment_medium_1",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:55:46.750564+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:23:00.752082+00:00",
+              "updated_at": "2026-07-18T20:55:46.750564+00:00",
+              "current_revision_id": "6f680ea7-8497-4bd3-94fe-2b7e6ce12ceb",
+              "blueprint_version_id": "e77edade-6892-465d-9664-62c6e56ac72d",
+              "source_run_id": "42922346-3976-47dd-b7a2-e114a5c9a5db"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "bilingual_package_incomplete",
+              "message": "Partial bilingual packages cannot move to human review as complete.",
+              "evidence": {
+                "required_locales": [
+                  "en",
+                  "ar"
+                ],
+                "complete_targets": [],
+                "missing_locales": [
+                  "en"
+                ],
+                "partial_package": true,
+                "complete": false
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "bilingual_package_incomplete",
+            "message": "Partial bilingual packages cannot move to human review as complete.",
+            "evidence": {
+              "required_locales": [
+                "en",
+                "ar"
+              ],
+              "complete_targets": [],
+              "missing_locales": [
+                "en"
+              ],
+              "partial_package": true,
+              "complete": false
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "order": 4,
+      "en_draft_id": "69fab1b2-ece5-4553-9b01-9339a5d0e475",
+      "ar_draft_id": "bd6df570-a7f2-496e-9f4f-340dc07c9429",
+      "translation_pair_id": "f9ad78a7-0f6e-4277-aee6-aa3e2b0d90f3",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "891875a1-fb60-4698-9c49-44a2f20c3790",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "04438b6f-f273-4d71-9e23-4ba2eaf90dce",
+              "draft_id": "69fab1b2-ece5-4553-9b01-9339a5d0e475",
+              "draft_revision_id": "29ec5d1b-cf61-4a13-ac91-aaee6b40f4ab",
+              "parent_run_id": "073b3a48-8ebc-4dda-b0bf-bcb75c971971",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "Clarify minimum deliverables and risks with both requesters, then assign work and checkpoints accordingly."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Tell Finance the report must wait until after the proposal is submitted."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Direct everyone to the noon report because it is earlier, even if proposal quality drops."
+                    },
+                    {
+                      "key": "D",
+                      "text": "Handle both tasks personally so no time is lost coordinating others."
+                    }
+                  ],
+                  "rationale": "A best addresses priority, impact, stakeholders, and trade-offs. It quickly tests what is truly fixed versus flexible, then uses delegation and checkpoints to protect both outcomes. The trade-off is brief coordination time upfront, which reduces the larger risk of missing a critical requirement on either deliverable.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "deadline_triage",
+                    "work_allocation",
+                    "requirement_clarification"
+                  ],
+                  "assumptions": [
+                    "The supervisor has authority to assign the analysts and contact both requesters immediately."
+                  ],
+                  "explanation": "When two credible deadlines collide, the strongest first move is to clarify consequences and minimum acceptable outputs with both stakeholders, then allocate resources deliberately. That approach avoids guessing based only on clock time or hierarchy and prevents the supervisor from becoming the bottleneck.",
+                  "prompt_text": "You lead two analysts. At 10 a.m., Finance asks for a noon report needed for an executive review. At the same time, your manager reminds you a client proposal is due by 3 p.m. and still needs final checks. Both matter, and both groups are waiting for direction. What is the most effective first action?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "prioritization",
+                    "judgment",
+                    "stakeholder_management",
+                    "delegation"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "A",
+                  "difficulty_rationale": "Medium difficulty because each option addresses real pressure points, and the best response is not simply 'do the earlier task.' The item tests whether the supervisor balances urgency, impact, and team leverage instead of making a single-factor choice.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "Plausible because the proposal is important, but it assumes Finance can absorb delay without validating risk or alternatives.",
+                      "choice_key": "B"
+                    },
+                    {
+                      "rationale": "Plausible because noon is sooner, but it over-focuses on urgency and underweights downstream quality and relationship impact.",
+                      "choice_key": "C"
+                    },
+                    {
+                      "rationale": "Plausible because it seems decisive, but it bypasses delegation and usually reduces throughput when two tasks can be split.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: A. Derivation: (1) The problem involves two legitimate deadlines with different stakeholders and unknown flexibility. (2) The best first action must therefore establish the minimum required output and consequences for each task before resources are assigned. (3) It should also enable parallel progress through delegation. A uniquely does this by clarifying requirements with both requesters and setting assignments/checkpoints. B fails because it deprioritizes Finance without confirming impact. C fails because it uses urgency alone and may unnecessarily damage the proposal. D fails because doing both personally ignores available team capacity and increases bottleneck risk.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 situational_judgment medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "situational_judgment"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a realistic supervisor scenario with legitimate competing demands.",
+                    "Distractors must be plausible workplace mistakes, not reckless or absurd behavior.",
+                    "The rationale must explain the priority, impact, stakeholder, and trade-off.",
+                    "Use no more than two assumptions and no more than 105 words.",
+                    "This single draft may use one of these scenario seeds: quality incident, deadline conflict, stakeholder communication, customer escalation.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "0d7264c3ba72cf4614aecedecbccf1f3488ec139465c4bc6ac5e63fda4ed3ee0",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 691
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "situational_judgment"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "29ec5d1b-cf61-4a13-ac91-aaee6b40f4ab",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "8faab020a229be735290294cc9683af4da75ce60d34304a2ced701bde91663e8",
+              "dedupe_sha256": "8faab020a229be735290294cc9683af4da75ce60d34304a2ced701bde91663e8",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:55:46.803798+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "891875a1-fb60-4698-9c49-44a2f20c3790",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0026133"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "69fab1b2-ece5-4553-9b01-9339a5d0e475",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 situational_judgment medium",
+              "competency_tags": [
+                "prioritization",
+                "judgment",
+                "stakeholder_management",
+                "delegation"
+              ],
+              "skill_tags": [
+                "deadline_triage",
+                "work_allocation",
+                "requirement_clarification"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "You lead two analysts. At 10 a.m., Finance asks for a noon report needed for an executive review. At the same time, your manager reminds you a client proposal is due by 3 p.m. and still needs final checks. Both matter, and both groups are waiting for direction. What is the most effective first action?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "Clarify minimum deliverables and risks with both requesters, then assign work and checkpoints accordingly."
+                },
+                {
+                  "key": "B",
+                  "text": "Tell Finance the report must wait until after the proposal is submitted."
+                },
+                {
+                  "key": "C",
+                  "text": "Direct everyone to the noon report because it is earlier, even if proposal quality drops."
+                },
+                {
+                  "key": "D",
+                  "text": "Handle both tasks personally so no time is lost coordinating others."
+                }
+              ],
+              "proposed_answer_key": "A",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "A best addresses priority, impact, stakeholders, and trade-offs. It quickly tests what is truly fixed versus flexible, then uses delegation and checkpoints to protect both outcomes. The trade-off is brief coordination time upfront, which reduces the larger risk of missing a critical requirement on either deliverable.",
+              "explanation": "When two credible deadlines collide, the strongest first move is to clarify consequences and minimum acceptable outputs with both stakeholders, then allocate resources deliberately. That approach avoids guessing based only on clock time or hierarchy and prevents the supervisor from becoming the bottleneck.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_situational_judgment_medium_2",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:55:58.014615+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:25:37.452488+00:00",
+              "updated_at": "2026-07-18T20:55:58.014615+00:00",
+              "current_revision_id": "29ec5d1b-cf61-4a13-ac91-aaee6b40f4ab",
+              "blueprint_version_id": "04438b6f-f273-4d71-9e23-4ba2eaf90dce",
+              "source_run_id": "073b3a48-8ebc-4dda-b0bf-bcb75c971971"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "bilingual_package_incomplete",
+              "message": "Partial bilingual packages cannot move to human review as complete.",
+              "evidence": {
+                "required_locales": [
+                  "en",
+                  "ar"
+                ],
+                "complete_targets": [],
+                "missing_locales": [
+                  "en"
+                ],
+                "partial_package": true,
+                "complete": false
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "bilingual_package_incomplete",
+            "message": "Partial bilingual packages cannot move to human review as complete.",
+            "evidence": {
+              "required_locales": [
+                "en",
+                "ar"
+              ],
+              "complete_targets": [],
+              "missing_locales": [
+                "en"
+              ],
+              "partial_package": true,
+              "complete": false
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "order": 5,
+      "en_draft_id": "156da4d9-7dca-4464-836c-d0032601eefb",
+      "ar_draft_id": "a7044ad6-9f8a-45d7-b4b6-1f76b5212b73",
+      "translation_pair_id": "525440a9-e2b8-40fd-8e5f-c293321f2a54",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "d97e03e5-ab06-4854-9047-01c4ae1501ec",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "7580cbed-a52f-4038-9b98-f1a10ba7d362",
+              "draft_id": "156da4d9-7dca-4464-836c-d0032601eefb",
+              "draft_revision_id": "955235d5-8f87-4fe8-8e05-9dfa2f0c0bb8",
+              "parent_run_id": "79419b6d-d579-4f61-8c20-735a2a49ca38",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "Spend the next hour building the slides yourself, then handle compliance before lunch."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Complete and submit the compliance task now, then give a teammate an outline to gather slide data while you finish the slides."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Tell your manager the steering summary will need to wait until tomorrow so you can focus only on compliance."
+                    },
+                    {
+                      "key": "D",
+                      "text": "Ask a team member to submit the compliance task while you start the slides."
+                    }
+                  ],
+                  "rationale": "The best priority is the time-bound compliance task because it has a hard deadline and immediate operational risk. Finishing it now takes little time and prevents avoidable access loss for two employees. After that, you can still support the manager by delegating data gathering and completing the slides before 3:00 p.m. This balances risk, stakeholder needs, and efficient use of help.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "sequencing work",
+                    "deadline management",
+                    "impact assessment"
+                  ],
+                  "assumptions": [],
+                  "explanation": "A strong prioritization choice addresses the highest near-term risk first, especially when that task is quick and non-delegable. It also preserves progress on the manager’s request by using available team support rather than treating the tasks as mutually exclusive.",
+                  "prompt_text": "It is 10:30 a.m. You supervise a small team. Your manager asks for a two-slide summary by 3:00 p.m. for a 4:00 p.m. steering meeting. You also have a mandatory compliance submission due at noon today; if it is not submitted, two team members automatically lose system access tomorrow. The compliance form takes about 20 minutes and requires your approval. One experienced team member can gather the data for the slides if you provide a brief outline. What is the best next action?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "prioritization",
+                    "stakeholder judgment",
+                    "risk management",
+                    "delegation"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "B",
+                  "difficulty_rationale": "Medium difficulty because both tasks are legitimate and time-bound. The best answer depends on weighing hard consequences, non-delegable work, and the ability to use team support rather than reacting to the most visible request.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "This responds to the manager’s visible request but delays a quick, non-delegable compliance task with a harder consequence if missed.",
+                      "choice_key": "A"
+                    },
+                    {
+                      "rationale": "This protects compliance but overreacts by abandoning a manager need that can still be met through sequencing and delegation.",
+                      "choice_key": "C"
+                    },
+                    {
+                      "rationale": "This treats the compliance task as delegable even though the approval must come from you, so it does not reliably remove the risk.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: B. Step 1: The compliance submission is due sooner than the slides and missing it causes a defined operational consequence: two employees lose system access. Step 2: The compliance task takes only about 20 minutes and requires the supervisor’s approval, so it should be cleared immediately. Step 3: The slide request can still be met because data gathering is delegable and the deadline is later. Therefore B best reduces the hardest risk while preserving the second commitment. A is inferior because it delays the higher-risk, non-delegable task. C is inferior because it drops a legitimate manager request even though both tasks can still be completed. D is invalid because the compliance submission requires your approval, so delegation does not solve the core task.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 prioritization medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "prioritization"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a realistic role-relevant prioritization decision with urgency-impact trade-offs.",
+                    "All distractors must be plausible partial-prioritization mistakes.",
+                    "Avoid a generically virtuous or obviously good answer.",
+                    "The rationale must explain priority, impact, stakeholders, and trade-offs.",
+                    "Use no more than two assumptions and no more than 105 words.",
+                    "This single draft may use one of these scenario seeds: manager request versus compliance task, team blocker versus individual deliverable, multiple stakeholder deadlines, urgent client request versus high-impact work, service outage versus planned deadline.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "26c4b78f5efa4ab4aa58f9926e5889b4d0e004807db07b4f642c44ed57d59828",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 782
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "prioritization"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "955235d5-8f87-4fe8-8e05-9dfa2f0c0bb8",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "1fbb38bf58c880d355e045103d3dab8dc6ef869a7210fed7cb0c6ea02c54883c",
+              "dedupe_sha256": "1fbb38bf58c880d355e045103d3dab8dc6ef869a7210fed7cb0c6ea02c54883c",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:55:58.064238+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "d97e03e5-ab06-4854-9047-01c4ae1501ec",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0028923"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "156da4d9-7dca-4464-836c-d0032601eefb",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 prioritization medium",
+              "competency_tags": [
+                "prioritization",
+                "stakeholder judgment",
+                "risk management",
+                "delegation"
+              ],
+              "skill_tags": [
+                "sequencing work",
+                "deadline management",
+                "impact assessment"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "It is 10:30 a.m. You supervise a small team. Your manager asks for a two-slide summary by 3:00 p.m. for a 4:00 p.m. steering meeting. You also have a mandatory compliance submission due at noon today; if it is not submitted, two team members automatically lose system access tomorrow. The compliance form takes about 20 minutes and requires your approval. One experienced team member can gather the data for the slides if you provide a brief outline. What is the best next action?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "Spend the next hour building the slides yourself, then handle compliance before lunch."
+                },
+                {
+                  "key": "B",
+                  "text": "Complete and submit the compliance task now, then give a teammate an outline to gather slide data while you finish the slides."
+                },
+                {
+                  "key": "C",
+                  "text": "Tell your manager the steering summary will need to wait until tomorrow so you can focus only on compliance."
+                },
+                {
+                  "key": "D",
+                  "text": "Ask a team member to submit the compliance task while you start the slides."
+                }
+              ],
+              "proposed_answer_key": "B",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "The best priority is the time-bound compliance task because it has a hard deadline and immediate operational risk. Finishing it now takes little time and prevents avoidable access loss for two employees. After that, you can still support the manager by delegating data gathering and completing the slides before 3:00 p.m. This balances risk, stakeholder needs, and efficient use of help.",
+              "explanation": "A strong prioritization choice addresses the highest near-term risk first, especially when that task is quick and non-delegable. It also preserves progress on the manager’s request by using available team support rather than treating the tasks as mutually exclusive.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_prioritization_medium_2",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:56:12.748268+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:30:55.605134+00:00",
+              "updated_at": "2026-07-18T20:56:12.748268+00:00",
+              "current_revision_id": "955235d5-8f87-4fe8-8e05-9dfa2f0c0bb8",
+              "blueprint_version_id": "7580cbed-a52f-4038-9b98-f1a10ba7d362",
+              "source_run_id": "79419b6d-d579-4f61-8c20-735a2a49ca38"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "bilingual_package_incomplete",
+              "message": "Partial bilingual packages cannot move to human review as complete.",
+              "evidence": {
+                "required_locales": [
+                  "en",
+                  "ar"
+                ],
+                "complete_targets": [],
+                "missing_locales": [
+                  "en"
+                ],
+                "partial_package": true,
+                "complete": false
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "bilingual_package_incomplete",
+            "message": "Partial bilingual packages cannot move to human review as complete.",
+            "evidence": {
+              "required_locales": [
+                "en",
+                "ar"
+              ],
+              "complete_targets": [],
+              "missing_locales": [
+                "en"
+              ],
+              "partial_package": true,
+              "complete": false
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "order": 6,
+      "en_draft_id": "2b618a60-b5ec-4a4a-9bc4-2c48ac3e7e20",
+      "ar_draft_id": "7a2b54b8-b92a-4055-af21-d1bc1a19033f",
+      "translation_pair_id": "15724f1b-5aa9-4326-a821-291db6af80d2",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "1e4f8455-6d72-422f-8016-79cdbc64bfde",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "7580cbed-a52f-4038-9b98-f1a10ba7d362",
+              "draft_id": "2b618a60-b5ec-4a4a-9bc4-2c48ac3e7e20",
+              "draft_revision_id": "29b55319-0f91-4728-b265-5fa470534224",
+              "parent_run_id": "79419b6d-d579-4f61-8c20-735a2a49ca38",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "Finish your report before taking interruptions so your own deadline is protected."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Spend 10 minutes deciding the template so the analysts can start, then schedule focused time to complete your report."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Tell the analysts to choose any template themselves so you can protect report time."
+                    },
+                    {
+                      "key": "D",
+                      "text": "Join the analysts for the full migration setup meeting to make sure no other issues appear."
+                    }
+                  ],
+                  "rationale": "First unblock the analysts. Your 10-minute decision prevents a one-day delay to the client migration and avoids knock-on effects for three downstream teams. Your report still matters, but at 9:00 a.m. there is enough time left to complete it afterward. The best choice resolves the biggest dependency and widest impact while preserving your ability to meet your own deadline.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "unblocking work",
+                    "time allocation",
+                    "impact assessment"
+                  ],
+                  "assumptions": [],
+                  "explanation": "Good prioritization considers leverage. A short decision from you unlocks work for multiple people and prevents a broader delay, whereas your individual report can still be completed within the remaining time.",
+                  "prompt_text": "It is 9:00 a.m. Your weekly performance report is due to the operations director at 2:00 p.m. and will take about 90 minutes using data you already have. At the same time, two analysts on your team are blocked from starting a client migration because they need your decision on which data template to use. That decision will take about 10 minutes. If they are still blocked after 10:00 a.m., the migration slips by a day and affects three downstream teams. What is the best next action?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "prioritization",
+                    "dependency management",
+                    "team leadership",
+                    "judgment"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "B",
+                  "difficulty_rationale": "Medium difficulty because both responsibilities are valid. The best answer requires noticing the high leverage of a short decision and resisting both overprotection of personal work and overinvolvement in team activity.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "This focuses narrowly on personal output and misses a short action that prevents a larger team and client delay.",
+                      "choice_key": "A"
+                    },
+                    {
+                      "rationale": "This preserves your time but shifts a supervisor decision downward, creating risk of rework and poor quality.",
+                      "choice_key": "C"
+                    },
+                    {
+                      "rationale": "This recognizes the blocker but uses more time than necessary, weakening balance across priorities.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: B. Step 1: The analysts are fully blocked until you make a 10-minute decision. Step 2: If you delay beyond 10:00 a.m., a client migration slips one day and affects three downstream teams, so the impact is broad and immediate. Step 3: Your report is due at 2:00 p.m. and takes 90 minutes, leaving sufficient time after the unblock. Therefore B is the best first action because it removes a high-leverage blocker without sacrificing your own deadline. A is inferior because it protects only your task while allowing a wider team delay. C is inferior because asking them to guess risks rework on a decision they specifically need from you. D is inferior because it overcommits time; the scenario says your needed contribution is the 10-minute template decision, not full meeting ownership.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 prioritization medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "prioritization"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a realistic role-relevant prioritization decision with urgency-impact trade-offs.",
+                    "All distractors must be plausible partial-prioritization mistakes.",
+                    "Avoid a generically virtuous or obviously good answer.",
+                    "The rationale must explain priority, impact, stakeholders, and trade-offs.",
+                    "Use no more than two assumptions and no more than 105 words.",
+                    "This single draft may use one of these scenario seeds: manager request versus compliance task, team blocker versus individual deliverable, multiple stakeholder deadlines, urgent client request versus high-impact work, service outage versus planned deadline.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "cffa9096867538284fa9822d35c43c496a429499eab71afc63534b544280ebdc",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 799
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "prioritization"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "29b55319-0f91-4728-b265-5fa470534224",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "d551e9d7240587bd550a0bd18ec63c62bcc151f4136acdff4881f3d6f4a7d8a0",
+              "dedupe_sha256": "d551e9d7240587bd550a0bd18ec63c62bcc151f4136acdff4881f3d6f4a7d8a0",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:56:12.793279+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "1e4f8455-6d72-422f-8016-79cdbc64bfde",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0027147"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "2b618a60-b5ec-4a4a-9bc4-2c48ac3e7e20",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 prioritization medium",
+              "competency_tags": [
+                "prioritization",
+                "dependency management",
+                "team leadership",
+                "judgment"
+              ],
+              "skill_tags": [
+                "unblocking work",
+                "time allocation",
+                "impact assessment"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "It is 9:00 a.m. Your weekly performance report is due to the operations director at 2:00 p.m. and will take about 90 minutes using data you already have. At the same time, two analysts on your team are blocked from starting a client migration because they need your decision on which data template to use. That decision will take about 10 minutes. If they are still blocked after 10:00 a.m., the migration slips by a day and affects three downstream teams. What is the best next action?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "Finish your report before taking interruptions so your own deadline is protected."
+                },
+                {
+                  "key": "B",
+                  "text": "Spend 10 minutes deciding the template so the analysts can start, then schedule focused time to complete your report."
+                },
+                {
+                  "key": "C",
+                  "text": "Tell the analysts to choose any template themselves so you can protect report time."
+                },
+                {
+                  "key": "D",
+                  "text": "Join the analysts for the full migration setup meeting to make sure no other issues appear."
+                }
+              ],
+              "proposed_answer_key": "B",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "First unblock the analysts. Your 10-minute decision prevents a one-day delay to the client migration and avoids knock-on effects for three downstream teams. Your report still matters, but at 9:00 a.m. there is enough time left to complete it afterward. The best choice resolves the biggest dependency and widest impact while preserving your ability to meet your own deadline.",
+              "explanation": "Good prioritization considers leverage. A short decision from you unlocks work for multiple people and prevents a broader delay, whereas your individual report can still be completed within the remaining time.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_prioritization_medium_2",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:56:25.908944+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:30:55.605134+00:00",
+              "updated_at": "2026-07-18T20:56:25.908944+00:00",
+              "current_revision_id": "29b55319-0f91-4728-b265-5fa470534224",
+              "blueprint_version_id": "7580cbed-a52f-4038-9b98-f1a10ba7d362",
+              "source_run_id": "79419b6d-d579-4f61-8c20-735a2a49ca38"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "bilingual_package_incomplete",
+              "message": "Partial bilingual packages cannot move to human review as complete.",
+              "evidence": {
+                "required_locales": [
+                  "en",
+                  "ar"
+                ],
+                "complete_targets": [],
+                "missing_locales": [
+                  "en"
+                ],
+                "partial_package": true,
+                "complete": false
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "bilingual_package_incomplete",
+            "message": "Partial bilingual packages cannot move to human review as complete.",
+            "evidence": {
+              "required_locales": [
+                "en",
+                "ar"
+              ],
+              "complete_targets": [],
+              "missing_locales": [
+                "en"
+              ],
+              "partial_package": true,
+              "complete": false
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "order": 7,
+      "en_draft_id": "2728ebb7-8115-479b-8f09-a637a73e29cd",
+      "ar_draft_id": "7c7a143e-3a6b-4b0a-b91f-711d77d04880",
+      "translation_pair_id": "64ec9dc3-a1bd-4e48-8a41-0e0fba8ca4f6",
+      "steps": {
+        "secondary_enqueue": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "run": {
+              "run_id": "78f7fecd-b491-4ff1-ba6c-2b2524ec9f66",
+              "company_code": "WATHEFNI",
+              "role_key": "assessment.review_secondary",
+              "run_kind": "review_secondary",
+              "status": "queued",
+              "registry_version_id": "7ac8a02a-c203-4521-ba11-a45054a4f474",
+              "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+              "blueprint_version_id": "7580cbed-a52f-4038-9b98-f1a10ba7d362",
+              "draft_id": "2728ebb7-8115-479b-8f09-a637a73e29cd",
+              "draft_revision_id": "908ac256-d840-4859-acc3-75b2deb9c58b",
+              "parent_run_id": "79419b6d-d579-4f61-8c20-735a2a49ca38",
+              "requested_model": "gpt-5.4-mini",
+              "provider_response_model": null,
+              "schema_name": "AssessmentReviewResultV1",
+              "schema_version": "assessment_product2_v1",
+              "schema_sha256": "65d7697c5ff1fe8602a88b477cd423bee4dced6658060205a9cfaad1e174ecfa",
+              "input_json": {
+                "draft": {
+                  "locale": "en",
+                  "choices": [
+                    {
+                      "key": "A",
+                      "text": "Start the overtime forecast because finance work is the most analytical and may take longer."
+                    },
+                    {
+                      "key": "B",
+                      "text": "Finalize the shift roster because operations is usually vocal when it is late."
+                    },
+                    {
+                      "key": "C",
+                      "text": "Call the supervisor now, send HR the panel list, then move to the overtime forecast."
+                    },
+                    {
+                      "key": "D",
+                      "text": "Wait to respond until you have mapped every task in detail and can send all three stakeholders one update."
+                    }
+                  ],
+                  "rationale": "Handle the HR dependency first. A quick call resolves the only missing input before the nearest deadline and avoids a two-day interview delay that affects hiring plans. Once that is sent, finance becomes the next priority because its deadline is earlier than the roster’s. This choice balances timing, stakeholder impact, and the fact that a small action now prevents a larger downstream disruption.",
+                  "role_tags": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "skill_tags": [
+                    "deadline triage",
+                    "dependency resolution",
+                    "sequencing work"
+                  ],
+                  "assumptions": [],
+                  "explanation": "The strongest option removes the earliest critical dependency, not simply the noisiest stakeholder or the task that feels most complex. It also preserves time for the later finance and operations commitments.",
+                  "prompt_text": "It is 11:00 a.m. HR needs your final interview panel names by noon to keep candidate interviews on schedule. Finance needs your overtime forecast by 3:00 p.m. for month-end close. Operations needs next week’s shift roster by 5:00 p.m. You already have most of the finance and roster information. The HR list is missing one supervisor’s availability, and a quick call now will settle it. If HR misses noon, the interviews move back two days and planned start dates slip. What should you do first?",
+                  "safety_flags": [],
+                  "competency_tags": [
+                    "prioritization",
+                    "stakeholder management",
+                    "planning",
+                    "judgment"
+                  ],
+                  "compiled_scoring": {
+                    "type": "answer_key",
+                    "correct": 1.0,
+                    "incorrect": 0.0,
+                    "max_score": 1.0
+                  },
+                  "proposed_scoring": {
+                    "family": "answer_key",
+                    "max_points": 1.0,
+                    "choice_points": [],
+                    "correct_points": 1.0,
+                    "incorrect_points": 0.0
+                  },
+                  "proposed_answer_key": "C",
+                  "difficulty_rationale": "Medium difficulty because several stakeholders have real needs. The best answer depends on recognizing a small action with high downstream value and then reordering the remaining work by deadline.",
+                  "distractor_rationales": [
+                    {
+                      "rationale": "This values task complexity over the nearer deadline and the dependency that can be resolved quickly.",
+                      "choice_key": "A"
+                    },
+                    {
+                      "rationale": "This reacts to stakeholder pressure rather than objective deadline order and business impact.",
+                      "choice_key": "B"
+                    },
+                    {
+                      "rationale": "This favors process neatness over timely action, causing unnecessary delay on the most urgent dependency.",
+                      "choice_key": "D"
+                    }
+                  ],
+                  "answer_uniqueness_proof": "Correct key: C. Step 1: HR has the earliest deadline: noon. Step 2: The missing information can be resolved by a quick call, and failing to do so causes a defined two-day delay in interviews and start dates. Step 3: After HR is secured, finance is next because its deadline is 3:00 p.m., earlier than the roster deadline. Therefore C best sequences work by deadline, dependency, and downstream impact. A is inferior because finance is important but not the earliest dependency-driven risk. B is inferior because the roster is due latest and the choice is based on stakeholder volume, not impact. D is inferior because extra planning time delays a simple action with immediate value.",
+                  "original_content_attested": true
+                },
+                "blueprint": {
+                  "section": "Battery-1 prioritization medium",
+                  "item_type": "single_choice",
+                  "constructs": [
+                    "prioritization"
+                  ],
+                  "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+                  "choice_count": 4,
+                  "review_scope": "single_item",
+                  "role_context": [
+                    "supervisor",
+                    "team lead"
+                  ],
+                  "reading_level": "clear professional",
+                  "source_locale": "en",
+                  "scoring_family": "answer_key",
+                  "allowed_context": [
+                    "Use a realistic role-relevant prioritization decision with urgency-impact trade-offs.",
+                    "All distractors must be plausible partial-prioritization mistakes.",
+                    "Avoid a generically virtuous or obviously good answer.",
+                    "The rationale must explain priority, impact, stakeholders, and trade-offs.",
+                    "Use no more than two assumptions and no more than 105 words.",
+                    "This single draft may use one of these scenario seeds: manager request versus compliance task, team blocker versus individual deliverable, multiple stakeholder deadlines, urgent client request versus high-impact work, service outage versus planned deadline.",
+                    "Every item requires a complete human-readable answer_uniqueness_proof."
+                  ],
+                  "required_locales": [
+                    "en",
+                    "ar"
+                  ],
+                  "difficulty_target": "medium",
+                  "prohibited_content": [
+                    "candidate data",
+                    "live assessment content",
+                    "third-party assessment wording",
+                    "protected traits",
+                    "answer clues",
+                    "more than two assumptions"
+                  ],
+                  "originality_policy_version": "product2_original_v1"
+                },
+                "draft_sha256": "2e38b19c0c527f5afe8a85a2e5d22041e8dd72e31370f1096f34c84e236d20d1",
+                "proof_presence": {
+                  "present": true,
+                  "field_path": "$.draft.answer_uniqueness_proof",
+                  "character_count": 682
+                },
+                "rubric_version": "wathefni_item_review_v1",
+                "schema_version": "assessment_product2_v1",
+                "construct_focus": [
+                  "prioritization"
+                ],
+                "workflow_context": {
+                  "stage": "source_language_content_review",
+                  "instruction": "Review only this one source-language draft. Do not apply the generation batch count to an individual draft. Read $.draft.answer_uniqueness_proof directly and do not call it missing when $.proof_presence.present is true. Do not fail or request a rewrite because another required locale is not yet present; bilingual adaptation and independent equivalence review occur only after this content review passes."
+                },
+                "draft_revision_id": "908ac256-d840-4859-acc3-75b2deb9c58b",
+                "review_dimensions": [
+                  "schema_blueprint_fit",
+                  "answer_correctness",
+                  "ambiguity",
+                  "duplicate_risk",
+                  "bias_fairness",
+                  "leakage",
+                  "distractor_quality",
+                  "difficulty",
+                  "language_quality"
+                ],
+                "reviewer_role_version": "7ac8a02a-c203-4521-ba11-a45054a4f474"
+              },
+              "output_json": null,
+              "input_sha256": "3990ff21bd9c53a8f8d208863d9ec8a75f9a17fa3cfb984653bfe973a72d126a",
+              "dedupe_sha256": "3990ff21bd9c53a8f8d208863d9ec8a75f9a17fa3cfb984653bfe973a72d126a",
+              "output_sha256": null,
+              "provider_request_id": null,
+              "input_tokens": null,
+              "output_tokens": null,
+              "cached_tokens": null,
+              "estimated_cost_usd": null,
+              "pricing_snapshot": {
+                "scope": "staging_eval_only",
+                "currency": "USD",
+                "effective_at": "staging-live-eval",
+                "input_per_million": 0.3,
+                "output_per_million": 1.2
+              },
+              "latency_ms": null,
+              "attempt_count": 0,
+              "refusal_reason": null,
+              "error_code": null,
+              "error_message": null,
+              "queued_at": "2026-07-18T20:56:25.967037+00:00",
+              "started_at": null,
+              "completed_at": null,
+              "created_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "idempotent": false
+            },
+            "publish_available": false
+          }
+        },
+        "secondary_process": {
+          "run_id": "78f7fecd-b491-4ff1-ba6c-2b2524ec9f66",
+          "status": "completed",
+          "error_code": null,
+          "prompt_version_id": "d0c5a20c-d8c1-44f8-bed7-6f2c308e28b5",
+          "estimated_cost_usd": "0.0029052"
+        },
+        "ar_human_review": {
+          "status": 200,
+          "skipped": "approved",
+          "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b"
+        },
+        "en_transition": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "draft": {
+              "draft_id": "2728ebb7-8115-479b-8f09-a637a73e29cd",
+              "company_code": "WATHEFNI",
+              "battery_key": "wathefni_general_ability_workplace_judgment_v1",
+              "lifecycle_status": "human_review",
+              "section": "Battery-1 prioritization medium",
+              "competency_tags": [
+                "prioritization",
+                "stakeholder management",
+                "planning",
+                "judgment"
+              ],
+              "skill_tags": [
+                "deadline triage",
+                "dependency resolution",
+                "sequencing work"
+              ],
+              "role_tags": [
+                "supervisor",
+                "team lead"
+              ],
+              "difficulty": "medium",
+              "locale": "en",
+              "prompt_text": "It is 11:00 a.m. HR needs your final interview panel names by noon to keep candidate interviews on schedule. Finance needs your overtime forecast by 3:00 p.m. for month-end close. Operations needs next week’s shift roster by 5:00 p.m. You already have most of the finance and roster information. The HR list is missing one supervisor’s availability, and a quick call now will settle it. If HR misses noon, the interviews move back two days and planned start dates slip. What should you do first?",
+              "choices": [
+                {
+                  "key": "A",
+                  "text": "Start the overtime forecast because finance work is the most analytical and may take longer."
+                },
+                {
+                  "key": "B",
+                  "text": "Finalize the shift roster because operations is usually vocal when it is late."
+                },
+                {
+                  "key": "C",
+                  "text": "Call the supervisor now, send HR the panel list, then move to the overtime forecast."
+                },
+                {
+                  "key": "D",
+                  "text": "Wait to respond until you have mapped every task in detail and can send all three stakeholders one update."
+                }
+              ],
+              "proposed_answer_key": "C",
+              "proposed_scoring": {
+                "family": "answer_key",
+                "max_points": 1.0,
+                "choice_points": [],
+                "correct_points": 1.0,
+                "incorrect_points": 0.0
+              },
+              "rationale": "Handle the HR dependency first. A quick call resolves the only missing input before the nearest deadline and avoids a two-day interview delay that affects hiring plans. Once that is sent, finance becomes the next priority because its deadline is earlier than the roster’s. This choice balances timing, stakeholder impact, and the fact that a small action now prevents a larger downstream disruption.",
+              "explanation": "The strongest option removes the earliest critical dependency, not simply the noisiest stakeholder or the task that feels most complex. It also preserves time for the later finance and operations commitments.",
+              "bias_flags": [],
+              "duplication_flags": [],
+              "ambiguity_flags": [],
+              "leakage_flags": [],
+              "translation_flags": [],
+              "ai_model": "gpt-5.4",
+              "source_blueprint_id": "battery1_7efac687_prioritization_medium_2",
+              "human_reviewer_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+              "reviewed_at": "2026-07-18T20:56:40.246786+00:00",
+              "rejection_reason": null,
+              "created_by_user_id": "assessment_ai",
+              "created_at": "2026-07-18T19:30:55.605134+00:00",
+              "updated_at": "2026-07-18T20:56:40.246786+00:00",
+              "current_revision_id": "908ac256-d840-4859-acc3-75b2deb9c58b",
+              "blueprint_version_id": "7580cbed-a52f-4038-9b98-f1a10ba7d362",
+              "source_run_id": "79419b6d-d579-4f61-8c20-735a2a49ca38"
+            },
+            "published": false,
+            "live_bank_unchanged": true
+          }
+        },
+        "ar_transition": {
+          "status": 409,
+          "body": {
+            "detail": {
+              "error": "bilingual_package_incomplete",
+              "message": "Partial bilingual packages cannot move to human review as complete.",
+              "evidence": {
+                "required_locales": [
+                  "en",
+                  "ar"
+                ],
+                "complete_targets": [],
+                "missing_locales": [
+                  "en"
+                ],
+                "partial_package": true,
+                "complete": false
+              }
+            }
+          }
+        },
+        "ar_transition_warning": {
+          "detail": {
+            "error": "bilingual_package_incomplete",
+            "message": "Partial bilingual packages cannot move to human review as complete.",
+            "evidence": {
+              "required_locales": [
+                "en",
+                "ar"
+              ],
+              "complete_targets": [],
+              "missing_locales": [
+                "en"
+              ],
+              "partial_package": true,
+              "complete": false
+            }
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    }
+  ],
+  "boundaries": {
+    "generation_run": false,
+    "prompt_changed": false,
+    "model_changed": false,
+    "validator_changed": false,
+    "pilot_run": false,
+    "production_touched": false,
+    "live_bank_insertion": false
+  },
+  "live_counts_before": {
+    "assessment_items": 22,
+    "assessment_batteries": 1,
+    "assessment_content_versions": 1,
+    "assessment_attempts": 4,
+    "assessment_responses": 22,
+    "assessment_scores": 1,
+    "assessment_reports": 1,
+    "applications": 16,
+    "employees": 3
+  },
+  "session": {
+    "session_id": "be5a1337-a70a-4b31-a70e-ae2cad8b056b",
+    "company_code": "WATHEFNI",
+    "started_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+    "started_at": "2026-07-18T20:55:10.584686+00:00",
+    "expires_at": "2026-07-18T22:25:10.584686+00:00",
+    "ended_at": null,
+    "ended_by_user_id": null,
+    "end_reason": null,
+    "max_duration_minutes": 90,
+    "notes": "Battery-1 finish EN human_review for packages 1-7 only",
+    "idempotent": false
+  },
+  "session_end": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "ended": {
+        "ended": [
+          {
+            "session_id": "be5a1337-a70a-4b31-a70e-ae2cad8b056b",
+            "company_code": "WATHEFNI",
+            "started_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+            "started_at": "2026-07-18T20:55:10.584686+00:00",
+            "expires_at": "2026-07-18T22:25:10.584686+00:00",
+            "ended_at": "2026-07-18T20:56:40.323739+00:00",
+            "ended_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+            "end_reason": "battery1_finish7_complete",
+            "max_duration_minutes": 90,
+            "notes": "Battery-1 finish EN human_review for packages 1-7 only"
+          }
+        ],
+        "count": 1
+      },
+      "publish_available": false
+    }
+  },
+  "finished_at": "2026-07-18T20:56:40.367746+00:00",
+  "totals": {
+    "approved": 25,
+    "rewritten": 0,
+    "rejected": 0,
+    "arabic_rewrite_reapproved": 1
+  },
+  "category_totals": {
+    "verbal_reasoning": {
+      "approved": 5,
+      "rewritten": 0,
+      "rejected": 0
+    },
+    "situational_judgment": {
+      "approved": 5,
+      "rewritten": 0,
+      "rejected": 0
+    },
+    "prioritization": {
+      "approved": 5,
+      "rewritten": 0,
+      "rejected": 0
+    },
+    "numerical_reasoning": {
+      "approved": 5,
+      "rewritten": 0,
+      "rejected": 0
+    },
+    "logical_reasoning": {
+      "approved": 5,
+      "rewritten": 0,
+      "rejected": 0
+    }
+  },
+  "en_ar_review_complete": "25/25",
+  "independent_key_verification_complete": "25/25",
+  "unresolved_items": [],
+  "ready_for_pilot": true,
+  "manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "live_counts_after": {
+    "assessment_items": 22,
+    "assessment_batteries": 1,
+    "assessment_content_versions": 1,
+    "assessment_attempts": 4,
+    "assessment_responses": 22,
+    "assessment_scores": 1,
+    "assessment_reports": 1,
+    "applications": 16,
+    "employees": 3
+  },
+  "live_deltas_zero": true,
+  "review_totals_note": {
+    "approved": 25,
+    "rewritten": 1,
+    "final_package_approve": 25,
+    "final_package_rewrite_pending": 0,
+    "final_package_reject": 0,
+    "arabic_rewrite_reapproved": true
+  }
+}

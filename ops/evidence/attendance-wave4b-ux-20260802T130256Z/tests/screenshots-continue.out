@@ -1,0 +1,85 @@
+{
+  "http_rows": 12,
+  "counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  },
+  "seed_counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  },
+  "match": true,
+  "ok": true
+}
+SEED_NOTES {"attendance_status": 200, "attendance_rows": 12, "attw4b_rows": 12, "ops_status": 200, "ops_count": 1, "ops_case_count": 0, "work_date": "2026-08-02"}
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/daily-board-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/day-detail-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-queue-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-corrections-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-disputes-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/connector-health-en-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/daily-board-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/day-detail-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-queue-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-corrections-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-disputes-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/connector-health-en-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/daily-board-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/day-detail-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-queue-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-corrections-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-disputes-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/connector-health-ar-desktop.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/daily-board-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/day-detail-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-queue-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-corrections-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/ops-disputes-ar-mobile.png
+SHOT /opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/screenshots/connector-health-ar-mobile.png
+{
+  "prefix": "ATTW4BUI707C0B",
+  "company": "WATHEFNI",
+  "work_date": "2026-08-02",
+  "shots": [
+    "connector-health-ar-desktop.png",
+    "connector-health-ar-mobile.png",
+    "connector-health-en-desktop.png",
+    "connector-health-en-mobile.png",
+    "daily-board-ar-desktop.png",
+    "daily-board-ar-mobile.png",
+    "daily-board-en-desktop.png",
+    "daily-board-en-mobile.png",
+    "day-detail-ar-desktop.png",
+    "day-detail-ar-mobile.png",
+    "day-detail-en-desktop.png",
+    "day-detail-en-mobile.png",
+    "ops-corrections-ar-desktop.png",
+    "ops-corrections-ar-mobile.png",
+    "ops-corrections-en-desktop.png",
+    "ops-corrections-en-mobile.png",
+    "ops-disputes-ar-desktop.png",
+    "ops-disputes-ar-mobile.png",
+    "ops-disputes-en-desktop.png",
+    "ops-disputes-en-mobile.png",
+    "ops-queue-ar-desktop.png",
+    "ops-queue-ar-mobile.png",
+    "ops-queue-en-desktop.png",
+    "ops-queue-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false,
+  "attw4b_rows": 12,
+  "ingest_enabled": false
+}
+26
+BOARD_OK 4 TOTAL 24

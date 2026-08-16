@@ -1,0 +1,65 @@
+Caddyfile
+Caddyfile.bak-20260601T125636Z
+Caddyfile.bak-20260607T123146Z
+Caddyfile.bak-20260608T162916Z
+Caddyfile.bak-app-edge-20260805T032649Z
+Caddyfile.bak-invert-20260608T173151Z
+Caddyfile.wathefni-assessment-20260518-152446.bak
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:api.wathefni.ai {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /webhook/octopus/wathefni {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /dashboard/auth* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /dashboard/team* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /dashboard/prehire* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /dashboard/posthire* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /dashboard/setup* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle /dashboard/superadmin* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:	handle_path /dashboard* {
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:		root * /var/www/wathefni-dashboard
+/etc/caddy/Caddyfile.bak-invert-20260608T173151Z:		root * /var/www/wathefni-media
+/etc/caddy/Caddyfile:api.wathefni.ai {
+/etc/caddy/Caddyfile:	handle /webhook/octopus/wathefni {
+/etc/caddy/Caddyfile:	handle_path /dashboard/assets/* {
+/etc/caddy/Caddyfile:		root * /var/www/wathefni-dashboard/assets
+/etc/caddy/Caddyfile:	@dash_shell path /dashboard /dashboard/ /dashboard/index.html /dashboard/favicon.svg
+/etc/caddy/Caddyfile:		uri strip_prefix /dashboard
+/etc/caddy/Caddyfile:		root * /var/www/wathefni-dashboard
+/etc/caddy/Caddyfile:	# Everything else under /dashboard is an API/backend route. New routes need NO
+/etc/caddy/Caddyfile:	handle /dashboard/* {
+/etc/caddy/Caddyfile:		root * /var/www/wathefni-media
+/etc/caddy/Caddyfile.bak-20260607T123146Z:api.wathefni.ai {
+/etc/caddy/Caddyfile.bak-20260607T123146Z:	handle /webhook/octopus/wathefni {
+/etc/caddy/Caddyfile.bak-20260607T123146Z:	handle /dashboard/auth* {
+/etc/caddy/Caddyfile.bak-20260607T123146Z:	handle /dashboard/team* {
+/etc/caddy/Caddyfile.bak-20260607T123146Z:	handle /dashboard/prehire* {
+/etc/caddy/Caddyfile.bak-20260607T123146Z:	handle_path /dashboard* {
+/etc/caddy/Caddyfile.bak-20260607T123146Z:		root * /var/www/wathefni-dashboard
+/etc/caddy/Caddyfile.bak-20260607T123146Z:		root * /var/www/wathefni-media
+/etc/caddy/Caddyfile.wathefni-assessment-20260518-152446.bak:api.wathefni.ai {
+/etc/caddy/Caddyfile.wathefni-assessment-20260518-152446.bak:	handle /webhook/octopus/wathefni {
+/etc/caddy/Caddyfile.wathefni-assessment-20260518-152446.bak:	handle /dashboard/prehire* {
+/etc/caddy/Caddyfile.wathefni-assessment-20260518-152446.bak:	handle_path /dashboard* {
+/etc/caddy/Caddyfile.wathefni-assessment-20260518-152446.bak:		root * /var/www/wathefni-dashboard
+/etc/caddy/Caddyfile.wathefni-assessment-20260518-152446.bak:		root * /var/www/wathefni-media
+/etc/caddy/Caddyfile.bak-app-edge-20260805T032649Z:api.wathefni.ai {
+/etc/caddy/Caddyfile.bak-app-edge-20260805T032649Z:	handle /webhook/octopus/wathefni {
+/etc/caddy/Caddyfile.bak-app-edge-20260805T032649Z:	handle_path /dashboard/assets/* {
+/etc/caddy/Caddyfile.bak-app-edge-20260805T032649Z:		root * /var/www/wathefni-dashboard/assets
+/etc/caddy/Caddyfile.bak-app-edge-20260805T032649Z:	@dash_shell path /dashboard /dashboard/ /dashboard/index.html /dashboard/favicon.svg
+wathefni-production-clamav 7357/tcp, 127.0.0.1:3311->3310/tcp
+wathefni-staging-clamav 127.0.0.1:3310->3310/tcp, 7357/tcp
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                                    
+LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=1533881,fd=17))             
+LISTEN 0      511        127.0.0.1:18789      0.0.0.0:*    users:(("node",pid=575209,fd=25))                         
+LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=1533881,fd=15))             
+LISTEN 0      2048       127.0.0.1:8011       0.0.0.0:*    users:(("uvicorn",pid=4025525,fd=14))                     
+LISTEN 0      2048       127.0.0.1:8010       0.0.0.0:*    users:(("uvicorn",pid=803296,fd=14))                      
+LISTEN 0      4096       127.0.0.1:3311       0.0.0.0:*    users:(("docker-proxy",pid=2742054,fd=8))                 
+LISTEN 0      4096       127.0.0.1:3310       0.0.0.0:*    users:(("docker-proxy",pid=2568018,fd=8))                 
+LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1533874,fd=3),("systemd",pid=1,fd=226))
+LISTEN 0      4096       127.0.0.1:2019       0.0.0.0:*    users:(("caddy",pid=30003,fd=7))                          
+LISTEN 0      200        127.0.0.1:5432       0.0.0.0:*    users:(("postgres",pid=1533916,fd=7))                     
+LISTEN 0      200            [::1]:5432          [::]:*    users:(("postgres",pid=1533916,fd=6))                     
+LISTEN 0      4096               *:443              *:*    users:(("caddy",pid=30003,fd=9))                          
+LISTEN 0      4096               *:80               *:*    users:(("caddy",pid=30003,fd=11))                         
+LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",pid=1533874,fd=4),("systemd",pid=1,fd=228))
+LISTEN 0      511            [::1]:18789         [::]:*    users:(("node",pid=575209,fd=26))                         

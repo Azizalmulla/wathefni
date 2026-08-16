@@ -1,0 +1,3 @@
+live_app e6b670f958f18d32a572a2ae47e80f17e4e397c1b907eadea1f0e3e94cdc6222  /opt/wathefni/orchestrator/app.py
+backup_app e6b670f958f18d32a572a2ae47e80f17e4e397c1b907eadea1f0e3e94cdc6222  /opt/wathefni/backups/production-pre-attendance-wave1c-20260802T023448Z/app.py
+ROLLBACK_APP_SHA_MATCH=true

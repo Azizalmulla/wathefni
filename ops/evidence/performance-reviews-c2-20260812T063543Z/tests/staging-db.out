@@ -1,0 +1,66 @@
+    performance reviews c2 — prove
+      PASS  c2 module
+      PASS  charter stamp
+      PASS  talent not required
+      PASS  no hipo in c2
+      PASS  snapshot honesty
+      PASS  anonymity fail-closed
+      PASS  assistant out
+      PASS  EN launched
+      PASS  AR closed
+      PASS  rollback
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  blocked while entitlement off
+      PASS  enable reviews
+      PASS  threshold <2 rejected
+      PASS  cycles visible
+      PASS  talent hidden
+      PASS  custom rating scale
+      PASS  scale versioned (new id)
+      PASS  template created
+      PASS  create cycle draft
+      PASS  configure cycle
+      PASS  launch snapshots rules/population
+      PASS  status in_progress
+      PASS  snapshot has scale version
+      PASS  snapshot has population
+      PASS  snapshot has goal evidence
+      PASS  setup cannot mutate launched cycle
+      PASS  later goal edits do not rewrite cycle snapshot
+      PASS  employee self-review submit
+      PASS  manager cannot review out-of-scope
+      PASS  reviewer assignment enforcement
+      PASS  manager review submit
+      PASS  C1 goal evidence consumed on review
+      PASS  submitted immutable
+      PASS  duplicate submission idempotent
+      PASS  360 invitation/submission (1)
+      PASS  anonymity threshold fail-closed
+      PASS  no identities on fail
+      PASS  anonymity threshold pass
+      PASS  raw 360 denied without sensitive perm
+      PASS  HR raw 360 with sensitive permission
+      PASS  reviewer reassignment
+      PASS  reassignment audited
+      PASS  self/manager/360 layers separate
+      PASS  acknowledgement
+      PASS  close cycle
+      PASS  closed cycle cannot silently reopen
+      PASS  final distinct from self/manager
+      PASS  original manager rationale preserved
+      PASS  reviews without 360/goals
+      PASS  reviews without Talent (always)
+      PASS  goals work without depending on cycles
+      PASS  disable preserves history
+      PASS  historical review truth intact
+      PASS  module-off after disable
+      PASS  EN/AR contracts
+      PASS  no fake anonymity
+
+    60 passed, 0 failed
+PERFORMANCE_REVIEWS_UNIT_PASS
+PERFORMANCE_REVIEWS_FULL_PASS
+STAGING_RC=0

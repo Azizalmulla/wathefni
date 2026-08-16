@@ -1,0 +1,186 @@
+stamp=20260802T204832Z
+time_utc=2026-08-02T20:50:18Z
+active
+=== SHAs before ===
+73036b5909191b09a4e3af55d8d989ba12af7e9103f5d48961cf949019699029  /opt/wathefni/orchestrator/app.py
+ls: cannot access '/opt/wathefni/orchestrator/shifts_authority_wave1.py': No such file or directory
+shifts_authority_wave1.py absent
+=== flags before ===
+WATHEFNI_ATTENDANCE_AUTHORITY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_AUTHORITY_STORE=postgres
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_KEY_MARKERS=ATTW1C,ATTW2C,ATTW2E,ATTW2G,ATTW3,ATTW4B,W1C-SYNTH|,W2C-SYNTH|,W2E-SYNTH|,W2G-SYNTH|,W3-SYNTH|,LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_ATTENDANCE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965524,965525,965526,965527
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_ATTENDANCE_CAPTURE_OPS=on
+WATHEFNI_ATTENDANCE_CAPTURE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_STORE=postgres
+WATHEFNI_ATTENDANCE_IMPORT=off
+WATHEFNI_ATTENDANCE_OPS=on
+WATHEFNI_ATTENDANCE_OPS_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_OPS_DUAL_APPROVAL_KINDS=absence,early_leave
+WATHEFNI_ATTENDANCE_OPS_STORE=postgres
+WATHEFNI_ATTENDANCE_OPS_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525,965526,965527
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_LEAVE_POLICY_WAVE2=on
+WATHEFNI_LEAVE_REAL_DECISION_ALLOWLIST=96599338566,96588009911
+WATHEFNI_LEAVE_REAL_DECISION_GATE=on
+WATHEFNI_LEAVE_WAVE4=on
+WATHEFNI_LEAVE_WORKFLOW_WAVE3=on
+{
+  "db": "wathefni",
+  "assignment_count": 23,
+  "event_count": 28,
+  "swap_count": 0,
+  "orphans": [
+    {
+      "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+      "employee_key": "WATHEFNI-96596552203",
+      "employee_phone": "",
+      "shift_date": "2026-08-11",
+      "start_time": "09:00:00",
+      "end_time": "17:00:00",
+      "status": "scheduled",
+      "updated_at": "2026-08-01 21:09:30.635883+00",
+      "role": "",
+      "location": "",
+      "timezone": "Asia/Kuwait",
+      "fp": "d607e7771b24d90db280c91bf6ceda07"
+    },
+    {
+      "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+      "employee_key": "WATHEFNI-96552202357",
+      "employee_phone": "",
+      "shift_date": "2026-08-11",
+      "start_time": "09:00:00",
+      "end_time": "17:00:00",
+      "status": "scheduled",
+      "updated_at": "2026-08-01 21:10:18.429122+00",
+      "role": "",
+      "location": "",
+      "timezone": "Asia/Kuwait",
+      "fp": "9a1c23ec36fbffb532caa69148f2e0ef"
+    },
+    {
+      "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+      "employee_key": "WATHEFNI-96552263564",
+      "employee_phone": "",
+      "shift_date": "2026-08-11",
+      "start_time": "09:00:00",
+      "end_time": "17:00:00",
+      "status": "scheduled",
+      "updated_at": "2026-08-01 22:15:10.841444+00",
+      "role": "",
+      "location": "",
+      "timezone": "Asia/Kuwait",
+      "fp": "4e846054877beace4cc28c91bab0e597"
+    }
+  ],
+  "assignment_fps": {
+    "09e99905-0d03-4c32-ba62-d8a57ba34b1e": "37d68b3fa0a099c1cd2b0e3d25b53228",
+    "0a6e73dd-9c6d-49a0-b253-39a9922ebd70": "d607e7771b24d90db280c91bf6ceda07",
+    "13a07e6c-57f9-4053-b166-b81ec35e7eb7": "74ebe87ffdf199c51d0c34c588d78bc4",
+    "18b6da7e-e08b-4a95-b9d3-d4439411241a": "2b87815a88c787d502c96bd29eb0a845",
+    "1b1e64f9-fb35-4ac6-b02f-34109a38f1ae": "76c178414011c3f56e97ff3b19668f78",
+    "1f74e534-9a35-4a85-a0d3-5ffcdb544eb1": "45ec45228f978c851817c217e9e57ee3",
+    "3de94a86-e61c-498d-9a28-56d50d452613": "2327ff33ac32eecbdbab34cac48d3f86",
+    "4b435014-b22b-436f-b411-1240152fe669": "8381e0389a087017726e0e5679c5be00",
+    "5759604c-8cd1-4608-a385-0d77c7d6c603": "c115445f8185013aa359cdcc1e04a7cf",
+    "57cd5c44-ee11-4873-b77e-cbb1073d6f6e": "1e2a2060a73726d117aaa969dfcbe3fb",
+    "6a84a671-eb7f-43ea-870e-af859a440467": "9a1c23ec36fbffb532caa69148f2e0ef",
+    "7a03af13-03d3-4ad9-baf3-e519cc528e5c": "0b60a0e138d1f6a87593b97e772c1ead",
+    "a3dc09a7-b407-41ef-9030-91c2968b8439": "eaa02121892fefc4e186e6898fdaaf76",
+    "b85842f8-09aa-4a9d-9eda-4be14b4ac9de": "ac20053ff43103d622c13eafdf0f2f1d",
+    "bc4364a3-76c7-4ddd-858f-a112e78c0e8a": "9e8953d71ca209d278ce21d565ab8eee",
+    "c6e116e2-9981-4ebf-93f5-a1c5bf981ad5": "d1619208da466201c90d9561d35dc1da",
+    "ca7e5289-21bd-4ca6-9035-b10ff65fd854": "203bf609b8aa4050b80df7dc4b63985b",
+    "cb445860-b7c8-4184-9c37-fdbb5db4b754": "de225ae360d71ff50b5881c2b2870e91",
+    "cb617cff-7c9c-45de-8ea2-1ae053694348": "c58374cbc3a7d196ab25e9a5ca410478",
+    "da2a27fe-182c-4a84-af9e-1a1dd0ff7dce": "8995e3486ffc1560c3f9d3a4a3b88575",
+    "e3cadd8e-1790-447f-a68b-e45a04bb4075": "562b04a6591852b7ebd080dba970543c",
+    "eff09bbd-1ddc-4d3b-8f77-a15144dcfe00": "0e85b7d63aba00f9670097ea10cf62d6",
+    "f9ebecf3-8838-456a-8124-c34c3c7600ca": "4e846054877beace4cc28c91bab0e597"
+  }
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[20:50:21] backing up code, dashboard dist, dropins, table dumps
+73036b5909191b09a4e3af55d8d989ba12af7e9103f5d48961cf949019699029  app.py
+d208320a2dc0085b325a518670d0aaa3036a64514e1966f154f3444efea7323a  shift-assignments.csv
+f17c4932c596cc3e50da4dbfad196e3343a22afe2727fc1924d50d5862c27397  shift-events.csv
+63ac7d9133e8905d858124ff8b0e4da269a67ce2ca4cc7cd86d5b37df5661c54  dashboard-dist/setup-console.html
+61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66  dashboard-dist/favicon.svg
+bcaaf2cb087094fd33d7306df59b746b05c97f413fd0a285ea90724b3de60474  dashboard-dist/index.html
+e47b5eaf5e73cdf9cb5fb2ce06b253b8c7dc8b6ccb37ac6361a43c81ae15cfa8  dashboard-dist/assets/dashboardPerf-YTc1theN.js
+05082737b3ad3e6f89cb93c40e81738edbd4399f309a1cbc544d03e5a03f0189  dashboard-dist/assets/ConfirmDialog-DujmJTQ2.js
+fe7a83bf2ee29031ed6b1c69df4c77053acd166c17236cb186705a9908d30275  dashboard-dist/assets/src-DBEkwj9U.css
+b1116cd30d9087936e0d4ca50cec25409acc33fb479c42f05b8331f23d2812c5  dashboard-dist/assets/JobWorkspace-CwkZQXIl.js
+6fd3fc7d0952dc85e2d0cd4117a5b69decd1c7c612fd2dbf5c9d2b2059835f36  dashboard-dist/assets/field-yb05WhDn.js
+ed350384f790001abe931f5f3046b7d02894672b1c4f3b2c91ed4fe0ec2f5753  dashboard-dist/assets/ReportsPage-CFIMM5xP.js
+585e5455161e2afdb28696790f2d897f16b79bab0217e880db05c17a5929b1ed  dashboard-dist/assets/setupConsole-xXGvfCd-.js
+8b513cec9dde5daf69260b17481ab455c9ece92547379f40220eb0b46f4cc6bb  dashboard-dist/assets/badge-FSitur2o.js
+dca1ea4b66f4f1d9523c47d14f85db0f82070610c572f54c3de0186e952e6257  dashboard-dist/assets/NotificationsPage-4GBoA2Am.js
+54f68af9a4007976db7696db5a82ee814f0bfc1d1d6f3478a7af02887c18b4df  dashboard-dist/assets/card-DRF9lkZs.js
+74f224077356b887d80967a7baf2b02357678e77d0611bdad1e2f9ffccff5842  dashboard-dist/assets/load-more-bar-76BZ1SYf.js
+0b73b977b2f54e03135fc06727fba74318caf51c15b657ba74165605a2b3483b  dashboard-dist/assets/recruitingLifecycle-DXQht60b.js
+3450ec42e1b53fafe603476ede3c8248764ee183b6c809adf34dfe41e496dc7b  dashboard-dist/assets/InterviewsPage-UEA12EC4.js
+beacd98045ec12779401e47d2a55d6e21121b7cb867c091f82226cf3f57312d0  dashboard-dist/assets/AdminAIPage-DN1DqBIh.js
+08c9fcb14b50b64b6ddfbe42144fed8f5713a96ab5bd9e6123765dba183d821f  dashboard-dist/assets/access-CQ9GMNUQ.js
+66841894ae6f7af1388501bb9d4cccfa3c1bb1d2d1aaa340e89e849ae7dc593c  dashboard-dist/assets/lucide-ikZu0qKv.js
+36a90acdfd607a3a988cd271d365b170ce1e2b34d5b0b9c0af504827242686d0  dashboard-dist/assets/PostHire-DADs0H47.js
+e12953888c952ea8823fbded6200abfd4cfa728277e76a9610b7542036d31a47  dashboard-dist/assets/JobsPage-9b-uiHaj.js
+5f71a4f71cf87191f72d4339afa3c206254a4547482754dd7224c754bf698e40  dashboard-dist/assets/button-DlTujqIP.js
+f90b56453c692e003ae811e976c172d7f709da98cae70999b7a9de39a05c3c5b  dashboard-dist/assets/CalendarShell-CbRDcQGa.js
+80909eac2ab6a8d5909023d66dc05fcba0b4209da8f912314500442526d3a3bb  dashboard-dist/assets/useOverlayA11y-B6E0imkd.js
+e20031c7529a29b0571afe06e7df1ca1aa155a8d4e957c4f22863cacd148c245  dashboard-dist/assets/inboundIntakePresentation-B5lLioGw.js
+1b13387cb23dc39bf70e31677c21f6db5cad3377b96f286b6ee444496e5bfea7  dashboard-dist/assets/rolldown-runtime-ciTZEWaI.js
+c53e4000cb06028fe6b8b38fc2bb1ffd38711884b732855cbd595769f7397e11  dashboard-dist/assets/dashboard-DzdQAb52.js
+8135502a78a2d185cfb074281514a9bf77a4681db3bf106fa6afd05c8e37abcd  dashboard-dist/assets/react-vendor-BWtRT0Qn.js
+2f1b169ca8eb91dac5c545f29c1440c8d0ef882c337935febc4a3623dafc2c0e  dashboard-dist/assets/SettingsPage-gsEW9Z6X.js
+a77b8ad82dec8db2e3762438dc718944d9923b7882fc578e4e7215fe257b8eb9  dashboard-dist/assets/CandidateProfilePage-Z9jtAnIW.js
+9e8da872c6ac8c47ab41cbe309f4f498fa2516fb90e62eaa08021cefd30487e2  dashboard-dist/assets/AssessmentsPage-D1tlV_nI.js
+2bb8a0e421ec3917e88e0412bdecadfde82264bacc3cf213f6b3a0150d70244b  dashboard-dist/assets/fetchers-Cc6Ro-8o.js
+785597bca2e7dd97a652a20a197c077079e635a5663433448e0e1d9fd8c98a64  dashboard-dist/assets/src-Vf0oDdiU.js
+00ff5eaad2fe541f55ca0d5c5173f3f96f41574c64f0501afcc10544b940548a  dashboard-dist/assets/react-query-CEOcdruo.js
+b0c7b84620184a249cdb0a88872853496539cbbdbafe69b036837858d68a4588  dashboard-dist/assets/utils-B-Q60V4B.js
+f4111d8b0dcfc895359203a214f39657f827d2e9cb0fc0e549be052679c80992  dashboard-dist/assets/CandidatesPage-BiKq24qY.js
+d793f9623fadb1448a98b4bb9f46925136152718fff66011decd130a4c866373  dashboard-dist/assets/api-D_Sbwu10.js
+c920ee819ae06107337a02baef75f504b7bedd05530aa106ebe23a877a348191  dashboard-dist/assets/RankingPage-BivWwQYn.js
+[20:50:21] deploying modules + canary + freeze scripts
+[20:50:21] deploying dashboard dist
+/opt/wathefni/dashboard-dist/assets/PostHire-BXoMxfm_.js
+/opt/wathefni/dashboard-dist/assets/SettingsPage-BaXoDVhr.js
+/opt/wathefni/dashboard-dist/assets/api-4eghFNHt.js
+/opt/wathefni/dashboard-dist/assets/dashboard-C5_9qaoH.js
+[20:50:21] writing synthetic-only drop-in
+[20:50:21] migrate schema 1.1.0
+schema_version 1.1.0
+connected_db wathefni
+shift_assignment_wave1_cols ['break_minutes', 'ends_next_day', 'idempotency_key', 'row_version', 'site_key']
+settings {'synthetic_only': True, 'block_notice_period': False}
+SHIFTS_W1B_PROD_MIGRATE_OK
+health_ok
+=== SHAs after ===
+4b55894a7a9249bb5a86276095fd44f49d2c8c2a1ac15ff942a3202375702ee1  /opt/wathefni/orchestrator/app.py
+82262f2e0e7b6e9dc04c7a6e3305d50eef4816659a6b931bb40742d8160f0da7  /opt/wathefni/orchestrator/shifts_authority_wave1.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_SHIFTS_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_KEY_MARKERS=SHW1B,SHW1B-SYNTH|
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_ONLY=1
+WATHEFNI_SHIFTS_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965529
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1
+WAVE1 1
+COMPANIES WATHEFNI
+SYNTHETIC_ONLY 1
+MARKERS SHW1B,SHW1B-SYNTH|
+PHONES 965529
+CAPTURE_INGEST off
+version 1.1.0
+flags_ok_synthetic=true
+DEPLOY_OK stamp=20260802T204832Z backup=/opt/wathefni/backups/production-pre-shifts-wave1b-20260802T204832Z evid=/opt/wathefni/production-evidence/shifts-wave1b-prod-canary/20260802T204832Z

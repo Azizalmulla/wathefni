@@ -1,0 +1,201 @@
+{
+  "status": "PASS",
+  "gates": [
+    {
+      "id": "shadow_search",
+      "status": "PASS"
+    },
+    {
+      "id": "shadow_get_omits_cv",
+      "status": "PASS"
+    },
+    {
+      "id": "shadow_compare_no_winner",
+      "status": "PASS"
+    },
+    {
+      "id": "live_tools_off",
+      "status": "PASS"
+    },
+    {
+      "id": "live_ranking_reader_off",
+      "status": "PASS"
+    },
+    {
+      "id": "ranking_unexplained",
+      "status": "PASS",
+      "deltas": []
+    },
+    {
+      "id": "ranking_differences_classified",
+      "status": "PASS",
+      "differences": [
+        {
+          "field": "legacy_fallback",
+          "existing": true,
+          "adapter": false,
+          "class": "expected_authority_difference"
+        }
+      ]
+    },
+    {
+      "id": "held_ranking_denied",
+      "status": "PASS"
+    },
+    {
+      "id": "ranking_writes",
+      "status": "PASS"
+    },
+    {
+      "id": "audit_events",
+      "status": "PASS",
+      "count": 4
+    }
+  ],
+  "blockers": [],
+  "fails": [],
+  "parity": {
+    "ok": true,
+    "eligibility_match": true,
+    "tenant_isolation_ok": true,
+    "held_exclusion_match": true,
+    "existing_path": {
+      "score": {
+        "eligibility_bucket": "not_applicable",
+        "required_missing": [],
+        "requirement_results": [],
+        "advisory_score": 10.71,
+        "component_scores": {
+          "skills_alignment": 7.5,
+          "experience_alignment": 0.0,
+          "education_cert_alignment": 0.0
+        },
+        "missing_data": [
+          "semantic_similarity_unavailable"
+        ],
+        "evidence_coverage": 0.33,
+        "confidence": "low",
+        "ranking_result_kind": "cv_based",
+        "legacy_fallback": true
+      },
+      "uses_raw_json": true,
+      "uses_candidate_profile": true
+    },
+    "adapter_path": {
+      "eligible": true,
+      "denial_reason": null,
+      "score": {
+        "eligibility_bucket": "not_applicable",
+        "required_missing": [],
+        "requirement_results": [],
+        "advisory_score": 10.71,
+        "component_scores": {
+          "skills_alignment": 7.5,
+          "experience_alignment": 0.0,
+          "education_cert_alignment": 0.0
+        },
+        "missing_data": [
+          "semantic_similarity_unavailable",
+          "screening_incomplete"
+        ],
+        "evidence_coverage": 0.33,
+        "confidence": "low",
+        "ranking_result_kind": "cv_based",
+        "legacy_fallback": false
+      },
+      "pins": {
+        "candidate_ref": "app:e-fin",
+        "app_key": "e-fin",
+        "knowledge_version": "candidate-knowledge-phase3-v1",
+        "canonical_cv_version_id": "vf",
+        "fact_snapshot_id": "ff",
+        "fact_review_fingerprint": null,
+        "classification_run_id": null,
+        "classification_review_fingerprint": null,
+        "assessment_attempt_ids": [],
+        "interview_ids": [],
+        "criteria_version": 1,
+        "scorer_model_version": "ranking-soft-v2",
+        "evidence_digest": "evd_206c31500e48d33527cd5fa9818f6c44",
+        "retrieved_at": "2026-07-26T21:06:04Z",
+        "adapter_version": "ranking-evidence-adapter-v1"
+      },
+      "coverage": {
+        "canonical_cv": {
+          "state": "available",
+          "reason_codes": [
+            "current_ready_version"
+          ],
+          "note": null
+        },
+        "effective_facts": {
+          "state": "available",
+          "reason_codes": [
+            "current_ready_snapshot"
+          ],
+          "note": null
+        },
+        "classifications": {
+          "state": "not_recorded",
+          "reason_codes": [
+            "no_classification_runs"
+          ],
+          "note": "Missing classification is coverage, not candidate weakness."
+        },
+        "assessments": {
+          "state": "not_recorded",
+          "reason_codes": [
+            "no_assessment_attempts"
+          ],
+          "note": null
+        }
+      },
+      "unavailable_sections": [
+        {
+          "section": "classifications",
+          "state": "not_recorded",
+          "reason_codes": [
+            "no_classification_runs"
+          ],
+          "unknown_not_negative": true
+        },
+        {
+          "section": "assessments",
+          "state": "not_recorded",
+          "reason_codes": [
+            "no_assessment_attempts"
+          ],
+          "unknown_not_negative": true
+        }
+      ],
+      "stale_vs_prior": null,
+      "raw_json_present": false,
+      "profile_present": false
+    },
+    "differences": [
+      {
+        "field": "legacy_fallback",
+        "existing": true,
+        "adapter": false,
+        "class": "expected_authority_difference"
+      }
+    ],
+    "unexplained_score_differences": [],
+    "latency_ms": {
+      "existing_ms": 0.685,
+      "adapter_ms": 0.545,
+      "total_ms": 1.254
+    },
+    "side_effects": {
+      "ranking_writes": 0,
+      "lifecycle_writes": 0,
+      "communication_writes": 0,
+      "identity_writes": 0,
+      "extraction_triggers": 0,
+      "indexing_writes": 0,
+      "external_calls": 0
+    },
+    "qualification_pass": true,
+    "paths_mixed": false
+  }
+}

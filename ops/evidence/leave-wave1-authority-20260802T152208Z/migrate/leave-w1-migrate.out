@@ -1,0 +1,7 @@
+env staging
+schema_version 1.0.0
+expected_db wathefni_staging
+connected_db wathefni_staging
+tables ['leave_authority_settings', 'leave_type_catalogue']
+catalogue [{'leave_type': 'annual', 'ledger_eligible': True}, {'leave_type': 'other', 'ledger_eligible': False}, {'leave_type': 'sick', 'ledger_eligible': True}, {'leave_type': 'unpaid', 'ledger_eligible': False}]
+MIGRATE_OK leave_authority_wave1

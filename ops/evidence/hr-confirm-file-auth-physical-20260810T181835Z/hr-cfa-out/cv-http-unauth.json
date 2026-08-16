@@ -1,0 +1,4 @@
+{
+  "status": 401,
+  "body": "{\"detail\":{\"error\":\"session_expired\",\"message\":\"Access needs to be verified.\",\"channel\":\"operator_mobile\"}}"
+}

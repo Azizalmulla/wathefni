@@ -1,0 +1,9 @@
+
+ RUN  v4.1.6 /private/tmp/wf-bank-ess-clean-20260806T155845Z/apps/wathefni-dashboard
+
+
+ Test Files  4 passed (4)
+      Tests  29 passed (29)
+   Start at  19:04:08
+   Duration  1.29s (transform 328ms, setup 622ms, import 328ms, tests 298ms, environment 2.53s)
+

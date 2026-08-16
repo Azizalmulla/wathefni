@@ -1,0 +1,8 @@
+stamp=20260803T181542Z
+payment_processing=disabled
+money_authority=external
+vendor_claimed=false
+attendance_leave_shifts_packaged=false
+production_deploy=false
+prod_synthetic_gate=NO-GO
+GATE=STAGING_PAYROLL_WAVE2AD_GO

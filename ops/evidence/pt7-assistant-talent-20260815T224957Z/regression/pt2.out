@@ -1,0 +1,62 @@
+    pt2 talent models — unit prove
+      PASS  pt2 overlay stamp
+      PASS  derived ≠ designated HiPo
+      PASS  no universal talent score
+      PASS  no auto HiPo
+      PASS  AI not classification input
+      PASS  missing is not zero
+      PASS  missing is not 100
+      PASS  contradictions not reconciled
+      PASS  C5 potential unchanged
+      PASS  C6 HiPo unchanged
+      PASS  no second analytics engine
+      PASS  C5 stamp unchanged
+      PASS  C6 stamp unchanged
+      PASS  PT1 stamp unchanged
+      PASS  default derivation rules_v1
+      PASS  default missing insufficient
+      PASS  default AI narration forbidden
+      PASS  default HiPo signal requires human potential
+      PASS  default does not mint from OKR alone
+      PASS  default does not mint from performance alone
+      PASS  weighted_v1 refused without every weight
+      PASS  weighted_v1 refused without weights
+      PASS  weighted_v1 weights must sum to 1
+      PASS  weighted_v1 accepted when complete
+      PASS  rules_v1 requires rules
+      PASS  missing weighted → insufficient_evidence
+      PASS  missing weighted pct is None not 0
+      PASS  missing not treated as 0
+      PASS  missing not treated as 100
+      PASS  unmapped weighted value is insufficient not 100
+      PASS  high OKR+perf + low potential → no derived HiPo
+      PASS  human high potential can fire derived signal
+      PASS  EN derived signal
+      PASS  AR derived signal
+      PASS  EN insufficient
+      PASS  AR insufficient
+      PASS  EN designated HiPo distinct
+      PASS  AR designated HiPo distinct
+      PASS  EN published
+      PASS  AR published
+      PASS  no hipo write from evaluate
+      PASS  no potential write from evaluate
+      PASS  hipo_written CHECK false
+      PASS  potential_written CHECK false
+      PASS  published immutable trigger
+      PASS  contradictions_reconciled hardcoded false
+      PASS  HTTP models list
+      PASS  HTTP evaluate
+      PASS  HTTP why
+      PASS  HTTP classifications
+      PASS  surfaces attach derived
+      PASS  surfaces derived ≠ hipo
+      PASS  no PT mini-API
+      PASS  HR Web models tab EN
+      PASS  HR Web models tab AR
+      PASS  HR Web derived ≠ HiPo EN
+      PASS  HR Web derived ≠ HiPo AR
+      PASS  HR Web WHY label
+
+    58 passed, 0 failed
+PT2_TALENT_MODELS_WHY_UNIT_PASS

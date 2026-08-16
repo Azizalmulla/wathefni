@@ -1,0 +1,5 @@
+orch_health=200
+dashboard_shell=200
+posthire_js=200
+api_js=200
+note=api.wathefni.ai/health is Caddy 404; orchestrator health is :8010/health and /healthz

@@ -1,0 +1,17 @@
+{
+  "inbound_email": {
+    "canonical_cv": "available",
+    "effective_facts": "available",
+    "classifications": "available"
+  },
+  "whatsapp": {
+    "canonical_cv": "not_recorded",
+    "effective_facts": "available",
+    "classifications": "not_recorded"
+  },
+  "manual": {
+    "canonical_cv": "source_pipeline_incomplete",
+    "effective_facts": "not_recorded",
+    "classifications": "not_recorded"
+  }
+}

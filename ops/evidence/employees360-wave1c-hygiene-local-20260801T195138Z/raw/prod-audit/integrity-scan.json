@@ -1,0 +1,109 @@
+{
+  "total_orphans": 3,
+  "ok": false,
+  "tables": {
+    "attendance_records": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "leave_requests": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "shift_assignments": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "payroll_timesheets": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "employee_availability_requests": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "compliance_documents": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "employee_messages": {
+      "present": true,
+      "orphans": 3,
+      "samples": [
+        {
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-P0-DUP-1",
+          "n": 3
+        }
+      ],
+      "mode": "company_employee"
+    },
+    "employee_sessions": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "employee_app_invites": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "employee_status_changes": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "employee_org_assignments": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "hr_tasks": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "document_storage_operations": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee"
+    },
+    "file_registry": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "company_employee",
+      "skipped": "columns"
+    },
+    "onboarding_items": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "employee_only"
+    },
+    "employee_documents": {
+      "present": true,
+      "orphans": 0,
+      "samples": [],
+      "mode": "employee_only"
+    }
+  }
+}

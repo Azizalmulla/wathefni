@@ -1,0 +1,22 @@
+=== OTA bundle needles (Hermes stores non-ASCII as UTF-16) ===
+ios PRESENT: items are handled by HR or payroll
+ios PRESENT: Your HR team sets this up for you
+ios PRESENT: Send a new file to continue
+ios PRESENT: No versions yet
+ios PRESENT: A bank change request is already in progress
+ios PRESENT: Submitted on
+ios PRESENT: يتولى فريق الموارد البشرية إعداد هذا
+ios removed: We're preparing your file
+ios removed: will open in a secure form soon
+ios removed: Submitted on {{date}}
+android PRESENT: items are handled by HR or payroll
+android PRESENT: Your HR team sets this up for you
+android PRESENT: Send a new file to continue
+android PRESENT: No versions yet
+android PRESENT: A bank change request is already in progress
+android PRESENT: Submitted on
+android PRESENT: يتولى فريق الموارد البشرية إعداد هذا
+android removed: We're preparing your file
+android removed: will open in a secure form soon
+android removed: Submitted on {{date}}
+NEEDLES_OK

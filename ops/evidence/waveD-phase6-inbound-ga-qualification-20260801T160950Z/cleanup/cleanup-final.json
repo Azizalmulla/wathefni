@@ -1,0 +1,30 @@
+{
+  "active_intake_count": 1,
+  "mailbox_connections_total": 0,
+  "proof_intakes": [
+    {
+      "intake_id": "f93b1e8f-394a-4189-9e0a-beab8379f996",
+      "label": "wave_d6_ga_proof-08343d30-general",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "f30537d0-dccd-403a-a968-bfe16ae107e2",
+      "label": "wave_d6_ga_proof-08343d30-job",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "c41ba4e6-9d6f-48f6-8cea-6846e290e27d",
+      "label": "wave_d6_ga_proof-08343d30-gen-cont",
+      "status": "disabled"
+    },
+    {
+      "intake_id": "910c254f-9c4c-49d2-aee4-b408a05d7694",
+      "label": "wave_d6_ga_proof-08343d30-job-cont",
+      "status": "disabled"
+    }
+  ],
+  "kill_switch": false,
+  "mailbox_sync": "off",
+  "enterprise_plan": "internal",
+  "external_tenants_enabled": false
+}

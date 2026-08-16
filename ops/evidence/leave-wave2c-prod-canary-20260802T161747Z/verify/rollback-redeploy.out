@@ -1,0 +1,194 @@
+27136bf5d7b453fa925990c2011d6b0b5a871f0c6b272cca8ac28c4e00f574aa  /opt/wathefni/orchestrator/app.py
+c57cb93c83400f100a5b468fb3eac5f1e14ba1323d8400513a7b77de0bbe9049  /opt/wathefni/orchestrator/leave_policy_wave2.py
+ROLLBACK_OK
+=== flags after rollback ===
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525
+ls: cannot access '/opt/wathefni/orchestrator/leave_policy_wave2.py': No such file or directory
+WATHEFNI_LEAVE_AUTHORITY=on
+stamp=20260802T161747Z-redeploy
+time_utc=2026-08-02T16:21:53Z
+active
+=== SHAs before ===
+040e2035890a6633cd4f68517b4e0c6f42013ca0302d6ff8a617e635c8fe505d  /opt/wathefni/orchestrator/app.py
+ad906eec780669b41b9ce26f75c91b3ba0e94e70ba91282b3eae1b46fba90aa2  /opt/wathefni/orchestrator/leave_authority_wave1.py
+d981624d0f641d7e2ec64e3f619d76cde383cb4ec1e5e1c8bf349dc2d8c4a7a8  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+ls: cannot access '/opt/wathefni/orchestrator/leave_policy_wave2.py': No such file or directory
+leave_policy_wave2.py ABSENT
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_ONBOARDING_SEED=off
+=== accrual timer ===
+enabled
+active
+{
+  "db": "wathefni",
+  "leave_requests_all": 3,
+  "real_leaves": [
+    {
+      "leave_id": "51cd940f-a04b-4ad1-9a6a-43e3da59a222",
+      "employee_key": "WATHEFNI-96597727743",
+      "leave_type": "sick",
+      "status": "rejected",
+      "start_date": "2026-06-12",
+      "end_date": "2026-06-12",
+      "fp": "8f6d67e3cc4fbf5ee321af235ecbb20d"
+    },
+    {
+      "leave_id": "dbf82ecf-7ac4-451b-b41c-03de943f2161",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "annual",
+      "status": "requested",
+      "start_date": "2026-06-16",
+      "end_date": "2026-06-18",
+      "fp": "34c7cf18a4d758698bbf7cac6da70d1f"
+    },
+    {
+      "leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "sick",
+      "status": "approved",
+      "start_date": "2026-05-11",
+      "end_date": "2026-05-11",
+      "fp": "abf4cba7cb8702b2d7c067db795d0701"
+    }
+  ],
+  "leave_events": 10,
+  "leave_ledger": 28,
+  "leave_balances": 4,
+  "policies": [
+    {
+      "leave_type": "annual",
+      "enforced": false,
+      "legal_reviewed": false,
+      "eligibility_months": 6,
+      "days_per_year": "30.00"
+    },
+    {
+      "leave_type": "sick",
+      "enforced": false,
+      "legal_reviewed": false,
+      "eligibility_months": 0,
+      "days_per_year": "0.00"
+    }
+  ]
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[16:21:55] backing up orchestrator modules + leave fingerprints
+leave_policy_wave2_absent_pre=yes
+040e2035890a6633cd4f68517b4e0c6f42013ca0302d6ff8a617e635c8fe505d  app.py
+fc28283610933c56beca5bedd3329b38559e5002af47e12673b208173d27bb03  leave-requests-fingerprint.csv
+b2a592e9aa3859367c9db0f44202f1d433493ed74efe30dcac6aef3530f21cf6  leave-balances-fingerprint.csv
+ee3cd5a2f8ea1f4033bdaa48fb8d2ccf89795cdb3d316d094d478bc959e69961  leave-ledger-fingerprint.csv
+ad906eec780669b41b9ce26f75c91b3ba0e94e70ba91282b3eae1b46fba90aa2  modules/leave_authority_wave1.py
+d981624d0f641d7e2ec64e3f619d76cde383cb4ec1e5e1c8bf349dc2d8c4a7a8  modules/employee_lifecycle_wave3c.py
+[16:21:55] deploying wave2c modules from stage
+[16:21:55] writing wave2c drop-in (keeps wave1b drop-in)
+[16:21:55] migrate policy pack 2.1.0
+wave2_version 2.1.0
+pack_version 2.1.0
+MIGRATE_OK leave_policy_wave2c_prod 2.1.0
+health_ok
+=== SHAs after ===
+27136bf5d7b453fa925990c2011d6b0b5a871f0c6b272cca8ac28c4e00f574aa  /opt/wathefni/orchestrator/app.py
+c57cb93c83400f100a5b468fb3eac5f1e14ba1323d8400513a7b77de0bbe9049  /opt/wathefni/orchestrator/leave_policy_wave2.py
+ad906eec780669b41b9ce26f75c91b3ba0e94e70ba91282b3eae1b46fba90aa2  /opt/wathefni/orchestrator/leave_authority_wave1.py
+f2dfbabb717dc8a4d912619663681973b1346f2224e69b45a5fe26c912161099  /opt/wathefni/orchestrator/employee_lifecycle_wave3c.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525,965526
+WATHEFNI_LEAVE_BALANCES=on
+WATHEFNI_LEAVE_POLICY_WAVE2=on
+pack kw_private_sector_v2 2.1.0
+eligibility 6
+days 30.00
+flags_ok_wave2c=true
+enabled
+active
+DEPLOY_OK stamp=20260802T161747Z-redeploy backup=/opt/wathefni/backups/production-pre-leave-wave2c-20260802T161747Z-redeploy evid=/opt/wathefni/production-evidence/leave-wave2c-prod-canary/20260802T161747Z-redeploy
+leave wave2c prod canary tag=80753b2d phone=965526180753
+[PASS] wave2 enabled
+[PASS] pack version 2.1.0
+[PASS] enforced false
+[PASS] legal_reviewed false
+[PASS] carryover writers disabled
+[PASS] eligibility months 6
+[PASS] kuwait midnight boundary
+[PASS] pre: real leave count 3
+[PASS] pre: real fp 51cd940f
+[PASS] pre: real fp dbf82ecf
+[PASS] pre: real fp e3217e0e
+[PASS] db wathefni
+[PASS] binding 2.1.0
+[PASS] holiday year pending_review
+[PASS] annual eligibility_months 6
+[PASS] annual days_per_year 30
+[PASS] annual enforced false
+[PASS] weekend fri/sat
+[PASS] sick tiers present
+[PASS] enforced holiday fail-closed
+[PASS] national/liberation excluded
+[PASS] synthetic employee
+[PASS] eligibility can_take_from = hire+6m
+[PASS] under-6-months can_take_from future
+[PASS] over-6-months can_take_from past/today
+[PASS] accrual posted
+[PASS] annual balance exists
+[PASS] can_take_from set
+[PASS] request A ok
+[PASS] reservation A posted
+[PASS] request B created observe
+[PASS] B no double-reserve
+[PASS] cancel B observe request
+[PASS] approve A
+[PASS] consume exactly once
+[PASS] reservation converted open=0
+[PASS] attendance derived list
+[PASS] request C ok
+[PASS] reject C
+[PASS] reject released
+[PASS] request D ok
+[PASS] cancel pending D
+[PASS] cancel pending released
+[PASS] stale expire released
+[PASS] sick request ok
+[PASS] sick tiers payroll_owned
+[PASS] unpaid reservation skipped payroll boundary
+[PASS] unpaid pack payroll_boundary
+[PASS] cancel approved A
+[PASS] reversal restored balance
+[PASS] attendance reverse safe
+[PASS] request F ok for lifecycle
+[PASS] lifecycle decline applied
+[PASS] lifecycle decline released reservation
+[PASS] ledger/rollup reconcile
+[PASS] no payment keys in cancel
+[PASS] policies still unenforced
+[PASS] post-cleanup: real leave count 3
+[PASS] post-cleanup: real fp 51cd940f
+[PASS] post-cleanup: real fp dbf82ecf
+[PASS] post-cleanup: real fp e3217e0e
+[PASS] post-cleanup: real rows unchanged
+[PASS] synthetic residual 0
+{
+  "pass": 63,
+  "fail": 0,
+  "tag": "80753b2d"
+}
+post_redeploy 63 0
+enabled
+active
+ROLLBACK_REDEPLOY_OK

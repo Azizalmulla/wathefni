@@ -1,0 +1,1 @@
+export { HRDeliveryAlertsMonitorView as default } from '@hr/features/delivery-alerts/HRDeliveryAlertsMonitorView'

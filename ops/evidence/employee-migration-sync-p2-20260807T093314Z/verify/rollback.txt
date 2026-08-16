@@ -1,0 +1,1 @@
+ROLLBACK=/opt/wathefni/backups/production-pre-employee-migration-sync-p2-20260807T093314Z/ROLLBACK.sh

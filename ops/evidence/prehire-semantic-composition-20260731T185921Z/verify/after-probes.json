@@ -1,0 +1,210 @@
+[
+  {
+    "page": "overview",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 1,
+    "h1": "Good evening, Aziz"
+  },
+  {
+    "page": "jobs",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 8,
+    "h1": "Jobs"
+  },
+  {
+    "page": "jobs",
+    "locale": "en",
+    "viewport": "mobile",
+    "dir": "ltr",
+    "accentSamples": 8,
+    "h1": "Jobs"
+  },
+  {
+    "page": "candidates",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 8,
+    "h1": "Candidates"
+  },
+  {
+    "page": "candidates",
+    "locale": "en",
+    "viewport": "mobile",
+    "dir": "ltr",
+    "accentSamples": 8,
+    "h1": "Candidates"
+  },
+  {
+    "page": "interviews",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 4,
+    "h1": "Interviews"
+  },
+  {
+    "page": "calendar",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 1,
+    "h1": "Calendar"
+  },
+  {
+    "page": "calendar",
+    "locale": "en",
+    "viewport": "mobile",
+    "dir": "ltr",
+    "accentSamples": 1,
+    "h1": "Calendar"
+  },
+  {
+    "page": "assessments",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 4,
+    "h1": "Assessments"
+  },
+  {
+    "page": "ranking",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 1,
+    "h1": "Ranking"
+  },
+  {
+    "page": "reports",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 8,
+    "h1": "Reports"
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "desktop",
+    "dir": "ltr",
+    "accentSamples": 1,
+    "h1": "Wathefni Assistant"
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "mobile",
+    "dir": "ltr",
+    "accentSamples": 1,
+    "h1": "Wathefni Assistant"
+  },
+  {
+    "page": "overview",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 1,
+    "h1": "مساء الخير، Aziz"
+  },
+  {
+    "page": "jobs",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 8,
+    "h1": "الوظائف"
+  },
+  {
+    "page": "jobs",
+    "locale": "ar",
+    "viewport": "mobile",
+    "dir": "rtl",
+    "accentSamples": 8,
+    "h1": "الوظائف"
+  },
+  {
+    "page": "candidates",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 8,
+    "h1": "المرشحون"
+  },
+  {
+    "page": "candidates",
+    "locale": "ar",
+    "viewport": "mobile",
+    "dir": "rtl",
+    "accentSamples": 8,
+    "h1": "المرشحون"
+  },
+  {
+    "page": "interviews",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 4,
+    "h1": "المقابلات"
+  },
+  {
+    "page": "calendar",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 1,
+    "h1": "التقويم"
+  },
+  {
+    "page": "calendar",
+    "locale": "ar",
+    "viewport": "mobile",
+    "dir": "rtl",
+    "accentSamples": 1,
+    "h1": "التقويم"
+  },
+  {
+    "page": "assessments",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 4,
+    "h1": "التقييمات"
+  },
+  {
+    "page": "ranking",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 1,
+    "h1": "الترتيب"
+  },
+  {
+    "page": "reports",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 8,
+    "h1": "التقارير"
+  },
+  {
+    "page": "ai",
+    "locale": "ar",
+    "viewport": "desktop",
+    "dir": "rtl",
+    "accentSamples": 1,
+    "h1": "مساعد واثقني"
+  },
+  {
+    "page": "ai",
+    "locale": "ar",
+    "viewport": "mobile",
+    "dir": "rtl",
+    "accentSamples": 1,
+    "h1": "مساعد واثقني"
+  }
+]

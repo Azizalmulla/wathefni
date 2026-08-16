@@ -1,0 +1,162 @@
+[
+  {
+    "name": "wave2a enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave2a company",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic_only on",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payment disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "money authority external",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wathefni not money authority",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "vendor unclaimed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no bank files",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no native g2n",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no posts_payment",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave1 contracts unchanged flag",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave1 still enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "db is wathefni",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "real employee export refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synth contract draft",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synth contract approve",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "period create",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "clean export",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "idempotent export",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "clean import",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "import mirror_only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "idempotent import",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "reconcile clean",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unmatched handled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "malformed quarantined",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fingerprint drift blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "fingerprint drift on export",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "diff import",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "reconcile differences",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "export rollback",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "residual zero",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "final payment disabled",
+    "ok": true,
+    "detail": null
+  }
+]

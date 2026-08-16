@@ -1,0 +1,27 @@
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_AUTO_LOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+PASS  app.config.js forces defaults when unset
+PASS  app.config.js asserts flags
+PASS  .env.example exists
+PASS  .env.example has EXPO_PUBLIC_LOCAL_PIN_UNLOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_AUTO_LOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC=1
+PASS  .env has EXPO_PUBLIC_LOCAL_PIN_UNLOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_AUTO_LOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC=1
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_AUTO_LOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+PASS  publish-canary-ota.sh exists
+PASS  publish script uses --environment production
+PASS  publish script exports PIN flag
+PASS  pinPolicy has no employee-key allowlist
+PASS  biometricPolicy has no employee-key allowlist
+PASS  autoLockPolicy has no employee-key allowlist
+PASS  PIN enabled for any session key when master on
+auth-wave2 flags preflight: GREEN

@@ -1,0 +1,9 @@
+{
+  "stamp": "20260811T065819Z",
+  "counts": {
+    "API_SPINE": 1,
+    "FAIL": 1,
+    "BLOCKED": 1
+  },
+  "rows": 3
+}

@@ -1,0 +1,82 @@
+{
+  "action_type": "summarize_employee_360",
+  "success": true,
+  "status": "completed",
+  "message": "Employees 360 summary for SHW2B Synth d3ffcf98: status active. Prepared next steps are deep links only \u2014 no mutations.",
+  "grounding": {
+    "ok": true,
+    "wave1_contract": "platform_assistant_spine_wave1",
+    "summary_en": "Employees 360 summary for SHW2B Synth d3ffcf98: status active. Prepared next steps are deep links only \u2014 no mutations.",
+    "summary_ar": "\u0645\u0644\u062e\u0635 \u0627\u0644\u0645\u0648\u0638\u0641\u0648\u0646 360 \u0644\u0640 SHW2B Synth d3ffcf98: \u0627\u0644\u062d\u0627\u0644\u0629 active. \u0627\u0644\u062e\u0637\u0648\u0627\u062a \u0627\u0644\u062a\u0627\u0644\u064a\u0629 \u0631\u0648\u0627\u0628\u0637 \u0641\u0642\u0637 \u2014 \u0628\u062f\u0648\u0646 \u062a\u0639\u062f\u064a\u0644\u0627\u062a.",
+    "message": "Employees 360 summary for SHW2B Synth d3ffcf98: status active. Prepared next steps are deep links only \u2014 no mutations.",
+    "citations": [
+      {
+        "kind": "employee_record",
+        "module": "employees_360",
+        "id": "WATHEFNI-SHW2B-d3ffcf98",
+        "label_en": "SHW2B Synth d3ffcf98",
+        "label_ar": "SHW2B Synth d3ffcf98",
+        "as_of": "2026-08-03T22:44:53.429464+03:00",
+        "authority_state": "live",
+        "deep_link": {
+          "page": "employees",
+          "employee_key": "WATHEFNI-SHW2B-d3ffcf98"
+        }
+      }
+    ],
+    "data_freshness": "2026-08-03T22:44:53.429471+03:00",
+    "as_of_tz": "Asia/Kuwait",
+    "authority_state": "live",
+    "confidence": "grounded",
+    "deep_links": [
+      {
+        "page": "employees",
+        "employee_key": "WATHEFNI-SHW2B-d3ffcf98"
+      }
+    ],
+    "proposed_actions": [],
+    "payload": {
+      "employee_key": "WATHEFNI-SHW2B-d3ffcf98",
+      "status": "active",
+      "next_actions_count": 0,
+      "redacted": true,
+      "hr_mutate_enabled_ignored_by_assistant": true
+    },
+    "fallback_key": null,
+    "honesty": {
+      "contract": "platform_assistant_spine_wave1",
+      "wave1_version": "1.0.0",
+      "wathefni_only": true,
+      "hr_dashboard_only": true,
+      "manager_assistant": false,
+      "employee_assistant": false,
+      "whatsapp_widening": false,
+      "mobile_assistant": false,
+      "candidate_knowledge_wired": false,
+      "ai_embedded_in_frozen_module_uis": false,
+      "new_mutation_tools": false,
+      "mutates_records": false,
+      "payroll_money": false,
+      "attendance_ingest": false,
+      "capture_ingest_must_remain_off": true,
+      "legal_government_authority": false,
+      "default_posthire_entry": "action_inbox",
+      "may": [
+        "summarize",
+        "explain",
+        "investigate",
+        "prepare_deep_link_or_proposed_action"
+      ],
+      "must_not": [
+        "mutate_records",
+        "bypass_confirmation_permissions_sod_allowlists_freezes",
+        "payroll_money",
+        "attendance_ingest",
+        "claim_legal_or_government_authority"
+      ]
+    },
+    "mutates_records": false
+  },
+  "mutates_records": false,
+  "reply": "Employees 360 summary for SHW2B Synth d3ffcf98: status active. Prepared next steps are deep links only \u2014 no mutations."
+}

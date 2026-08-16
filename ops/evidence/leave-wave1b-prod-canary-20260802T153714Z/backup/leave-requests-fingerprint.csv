@@ -1,0 +1,4 @@
+leave_id,employee_key,leave_type,status,start_date,end_date,fp
+51cd940f-a04b-4ad1-9a6a-43e3da59a222,WATHEFNI-96597727743,sick,rejected,2026-06-12,2026-06-12,8f6d67e3cc4fbf5ee321af235ecbb20d
+dbf82ecf-7ac4-451b-b41c-03de943f2161,WATHEFNI-96566363363,annual,requested,2026-06-16,2026-06-18,34c7cf18a4d758698bbf7cac6da70d1f
+e3217e0e-466f-4f38-aa10-dab503dcb0a4,WATHEFNI-96566363363,sick,approved,2026-05-11,2026-05-11,abf4cba7cb8702b2d7c067db795d0701

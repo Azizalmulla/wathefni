@@ -1,0 +1,28 @@
+{
+  "wave": "D6A",
+  "stamp": "20260801T165754Z",
+  "verdict": "PASS",
+  "production_shas": {
+    "app.py": "661dd600f83d97f5b78cd88928f1edf1ed549c5d4700e8c601db621650863070",
+    "durable_email_ingress.py": "5807b200bd1f22e3e4d6512be485b73595b1e4b5c89915e14dc2d0177fa59a16"
+  },
+  "posture": {
+    "allowlist": "WATHEFNI",
+    "mailbox_sync": "off",
+    "external_tenants": "disabled",
+    "post_hiring": "not_started"
+  },
+  "gates": {
+    "health": "PASS",
+    "materialization_x3": "PASS",
+    "cleanup": "PASS",
+    "rollback_restore": "PASS"
+  },
+  "d6b": {
+    "topic": "cv_extraction_promotion",
+    "fixed_in_d6a": false,
+    "pending_cv_extraction_jobs_wathefni": 32
+  },
+  "evidence_local": "ops/evidence/waveD-phase6a-held-materialization-deploy-20260801T165754Z/",
+  "evidence_remote": "/opt/wathefni/production-evidence/waveD-phase6a-held/20260801T165754Z/"
+}

@@ -1,0 +1,326 @@
+=== REG C smoke-test-attendance-truth-c1.py ===
+    attendance truth c1 — unit/memory
+      PASS  truth module
+      PASS  rollback guidance
+      PASS  capture ops company gate
+      PASS  global ingest off denies
+      PASS  empty allowlist denies
+      PASS  allowlisted company ok
+      PASS  other company denied
+      PASS  entitled gate blocks other company
+      PASS  entitled in punch ok
+      PASS  entitled out punch ok
+      PASS  day projection present
+      PASS  exceptions synced
+      PASS  correction requested
+      PASS  review approve does not apply
+      PASS  case approved ready
+      PASS  projection unchanged before apply
+      PASS  apply succeeds
+      PASS  apply mutates projection (before/after)
+      PASS  projection version advanced
+      PASS  reject does not apply
+      PASS  reject status
+      PASS  payroll independence note
+      PASS  assistant mutations out of MVP
+
+    23 passed, 0 failed
+ATTENDANCE_TRUTH_UNIT_PASS
+ATTENDANCE_TRUTH_FULL_PASS
+=== REG C smoke-test-leave-enforcement-c2.py ===
+    leave enforcement c2 — prove
+      PASS  enforcement module
+      PASS  rollback guidance
+      PASS  EN/AR leave type canonicalize annual
+      PASS  EN/AR leave type canonicalize unpaid
+      PASS  EN/AR unpaid catalogue present
+      PASS  global enforcement off
+      PASS  empty allowlist denies
+      PASS  allowlisted still needs pack attestation
+      PASS  enable blocked without attestation
+      PASS  policy pack attested
+      PASS  attested but not enabled yet
+      PASS  enforcement enabled for canary
+      PASS  enforcement gate open
+      PASS  other company denied
+      PASS  sufficient annual reserve
+      PASS  insufficient annual rejected
+      PASS  direct reserve fail-closed under enforcement
+      PASS  unpaid skips balance
+      PASS  override requires reason
+      PASS  authorized override reserves
+      PASS  balance adjustment posted
+      PASS  balance top-up after override
+      PASS  cancel path reserved
+      PASS  cancel releases reservation
+      PASS  cancel restores available
+      PASS  consume from reservation
+      PASS  approved cancel reverses consumption
+      PASS  N-step policy bound
+      PASS  N-step instance started
+      PASS  self-approval denial
+      PASS  stale concurrent conflict
+      PASS  step1 approved
+      PASS  step2 completes N-step
+      PASS  delegation grant created
+      PASS  delegated subject instance
+      PASS  delegated approver succeeds
+      PASS  expired window rejected at create or marked
+      PASS  revocable grant created
+      PASS  delegation revoked
+      PASS  out-of-scope grant created
+      PASS  out-of-scope delegation denied
+      PASS  single-step fallback when WA off
+      PASS  enforcement-off observe path
+      PASS  tenant isolation on enforcement
+      PASS  manager/self decision helper still enforces
+      PASS  leave independent of attendance
+      PASS  leave independent of payroll
+      PASS  honesty flags enforced when on
+
+    48 passed, 0 failed
+LEAVE_ENFORCEMENT_UNIT_PASS
+LEAVE_ENFORCEMENT_FULL_PASS
+=== REG C smoke-test-shifts-mss-c3.py ===
+    shifts mss c3 — prove
+      PASS  mss module
+      PASS  rollback guidance
+      PASS  EN status scheduled
+      PASS  AR status scheduled
+      PASS  EN status open
+      PASS  AR status open
+      PASS  self_decision false in honesty
+      PASS  attendance not required
+      PASS  global mss off
+      PASS  empty company allowlist denies
+      PASS  empty manager allowlist denies
+      PASS  canary company entitled
+      PASS  other company denied
+      PASS  global MANAGER_ALLOWLIST still empty
+      PASS  wave6c boundary still holds
+      PASS  legacy manager_real_rollout remains False
+      PASS  C3 manager unlock recognized
+      PASS  non-allowlisted denied by real_mutation
+      PASS  C3 manager allowed by real_mutation
+      PASS  manager has real scope
+      PASS  mss manager ready
+      PASS  allowlisted without scope fails when required
+      PASS  mss manager without scope denied
+      PASS  manager rosters scoped report
+      PASS  manager cannot mutate out-of-scope
+      PASS  manager rosters second report
+      PASS  employee sees only own key
+      PASS  employee cannot see other key
+      PASS  employee own shift data scoped
+      PASS  open shift publish
+      PASS  open shift claim
+      PASS  open-shift self-approval denied
+      PASS  open-shift claim approved by manager
+      PASS  stale/duplicate open-shift decision fails safely
+      PASS  swap requested
+      PASS  manager/employee cannot approve own swap
+      PASS  requested swap reject works
+      PASS  requested swap approve works
+      PASS  stale concurrent swap decision fails safely
+      PASS  module-off is read-only
+      PASS  module-off manager mutation denied
+      PASS  empty-allowlist read-only
+      PASS  tenant isolation other company
+      PASS  leave not mutated
+      PASS  payroll money false
+      PASS  attendance authority not mutated
+      PASS  shifts independent of attendance module
+      PASS  global manager allowlist still empty after prove
+
+    48 passed, 0 failed
+SHIFTS_MSS_UNIT_PASS
+SHIFTS_MSS_FULL_PASS
+=== REG C smoke-test-payroll-authoritative-c4.py ===
+    payroll authoritative c4 — prove
+      PASS  c4 module
+      PASS  rollback guidance
+      PASS  EN finalized
+      PASS  AR finalized
+      PASS  payment disabled honesty
+      PASS  no WPS/bank
+      PASS  e360 not calculator
+      PASS  attendance not required
+      PASS  global c4 off
+      PASS  empty allowlist denies
+      PASS  canary runtime allowlisted
+      PASS  other company denied
+      PASS  not enabled until opt-in
+      PASS  authoritative finalize enabled
+      PASS  authoritative gate open
+      PASS  feed mode manual path
+      PASS  feed mode manual has provenance
+      PASS  feed mode manual calc preview authority
+      PASS  manual finalize authoritative
+      PASS  manual sealed present
+      PASS  money_authority=wathefni
+      PASS  post-finalize immutability
+      PASS  duplicate finalize idempotent
+      PASS  audit before/after present
+      PASS  period reopen forbidden after authoritative seal
+      PASS  feed mode imported path
+      PASS  feed mode imported has provenance
+      PASS  feed mode imported calc preview authority
+      PASS  feed mode attendance path
+      PASS  feed mode attendance has provenance
+      PASS  feed mode attendance calc preview authority
+      PASS  feed mode leave path
+      PASS  feed mode leave has provenance
+      PASS  feed mode leave calc preview authority
+      PASS  feed mode ot path
+      PASS  feed mode ot has provenance
+      PASS  feed mode ot calc preview authority
+      PASS  feed mode all path
+      PASS  feed mode all has provenance
+      PASS  feed mode all calc preview authority
+      PASS  all-feeds finalize ok
+      PASS  sod fixture calculated
+      PASS  approve/finalize SoD
+      PASS  stale concurrent approval conflict
+      PASS  versioned approve ok
+      PASS  tenant isolation
+      PASS  synthetic default flagged
+      PASS  non-allowlisted company cannot claim
+      PASS  disabled feeds do not break payroll
+      PASS  c4 does not import attendance_truth
+      PASS  c4 does not import leave_enforcement
+      PASS  c4 does not import shifts_mss
+      PASS  rollback entitlement off
+      PASS  gate closed after rollback
+      PASS  company payment_processing disabled
+
+    55 passed, 0 failed
+PAYROLL_AUTHORITY_UNIT_PASS
+PAYROLL_AUTHORITY_FULL_PASS
+=== REG C smoke-test-payroll-payslip-payment-c5.py ===
+    payroll payslip payment c5 — prove
+      PASS  c5 module
+      PASS  rollback guidance
+      PASS  EN released
+      PASS  AR released
+      PASS  acknowledged ≠ paid honesty
+      PASS  no fund transfer
+      PASS  attendance not required
+      PASS  global c5 off
+      PASS  empty allowlist denies
+      PASS  canary runtime allowlisted
+      PASS  other company denied
+      PASS  period created
+      PASS  assemble
+      PASS  lock
+      PASS  policy
+      PASS  calc
+      PASS  finalize run create
+      PASS  finalize approved
+      PASS  authoritative finalize
+      PASS  sealed snapshot
+      PASS  generate payslip from sealed
+      PASS  charter state generated
+      PASS  unreleased invisible to employee
+      PASS  EN/AR payslip fields
+      PASS  official PDF EN/AR renderer present
+      PASS  artifact tied to finalized payroll
+      PASS  release payslip
+      PASS  release → visible
+      PASS  notification on release
+      PASS  idempotent release
+      PASS  void path audited
+      PASS  voided not employee-visible
+      PASS  correction via new payslip after void
+      PASS  release → immediately downloadable
+      PASS  released artifact tied to finalized payroll
+      PASS  payment generation blocked while entitlement off
+      PASS  payment_processing enabled
+      PASS  payment entitlement open
+      PASS  kill switch blocks generation
+      PASS  valid payment draft when enabled
+      PASS  provenance fingerprint present
+      PASS  duplicate draft idempotent
+      PASS  stale/concurrent generate protection
+      PASS  valid generation when enabled
+      PASS  format pack not real WPS
+      PASS  duplicate/idempotent generation
+      PASS  acknowledged state
+      PASS  acknowledged is ops-only not paid
+      PASS  failed state
+      PASS  cancelled state
+      PASS  tenant isolation
+      PASS  wave1 payment_processing column still disabled (no money rails)
+      PASS  payroll SoD still enforceable
+      PASS  independent of attendance_truth
+      PASS  independent of leave_enforcement
+      PASS  independent of shifts_mss
+      PASS  disable payment processing
+      PASS  blocked after disable
+
+    58 passed, 0 failed
+PAYSLIP_PAYMENT_UNIT_PASS
+PAYSLIP_PAYMENT_FULL_PASS
+=== REG C smoke-test-payroll-settlement-ot-c6.py ===
+    payroll settlement ot c6 — prove
+      PASS  c6 module
+      PASS  rollback guidance
+      PASS  EN finalized
+      PASS  AR finalized
+      PASS  EN OT pending
+      PASS  AR OT pending
+      PASS  settlement ≠ paid honesty
+      PASS  no invented EOS/PIFSS
+      PASS  E360 not calculator
+      PASS  OT not required for payroll
+      PASS  settlement ≠ clearance
+      PASS  module-off / global off
+      PASS  empty allowlist denies
+      PASS  canary allowlisted
+      PASS  tenant isolation
+      PASS  settlement blocked while entitlement off
+      PASS  enable settlement+ot auth
+      PASS  lifecycle packet seeded
+      PASS  settlement from valid lifecycle inputs
+      PASS  status inputs_ready
+      PASS  calculate settlement
+      PASS  encashment quantity only (no money invented)
+      PASS  EOS refs without invented formulas
+      PASS  EN/AR settlement calc labels
+      PASS  SoD creator/calculator cannot approve
+      PASS  stale approval protection
+      PASS  approve settlement
+      PASS  kill switch blocks finalize
+      PASS  SoD creator cannot finalize
+      PASS  finalize seals result
+      PASS  settlement payslip/payment inputs
+      PASS  no false paid state
+      PASS  EN/AR payslip/payment input labels
+      PASS  stale/duplicate finalize idempotent
+      PASS  finalized settlement immutable
+      PASS  adjustment path after finalization
+      PASS  prior superseded
+      PASS  sealed prior not silently mutated status
+      PASS  Payroll without OT remains green
+      PASS  OT→Payroll optional feed off blocks export
+      PASS  OT create
+      PASS  OT submit → pending
+      PASS  OT self-approve fails
+      PASS  OT out-of-scope fails
+      PASS  OT stale fails safely
+      PASS  OT reject
+      PASS  OT cancel
+      PASS  OT approve
+      PASS  OT export blocked until feed enabled
+      PASS  OT→Payroll optional feed export
+      PASS  EN/AR OT payroll input labels
+      PASS  OT export idempotent
+      PASS  independent of attendance_truth
+      PASS  independent of leave_enforcement
+      PASS  independent of shifts_mss
+      PASS  disable company entitlement
+      PASS  module-off after disable
+
+    57 passed, 0 failed
+SETTLEMENT_OT_UNIT_PASS
+SETTLEMENT_OT_FULL_PASS
+REG_C_FAILS=0

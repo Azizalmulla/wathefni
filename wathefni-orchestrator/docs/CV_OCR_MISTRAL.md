@@ -49,7 +49,7 @@ Arabic alone does **not** trigger OCR.
 | Flag | Default | Meaning |
 | --- | --- | --- |
 | `WATHEFNI_CV_MISTRAL_OCR` | OFF | Enable Mistral OCR path |
-| `WATHEFNI_CV_GPT_VISION_RESCUE` | ON when OCR on | Allow GPT rescue after OCR fail |
+| `WATHEFNI_CV_GPT_VISION_RESCUE` | **retired / ignored** | CV GPT vision rescue is hard-disabled; flag cannot re-enable |
 | `MISTRAL_API_KEY` or `WATHEFNI_MISTRAL_ENV` | unset | Required for live OCR |
 
 Secrets file convention: `/root/.openclaw/secrets/mistral.env` containing `MISTRAL_API_KEY=...`.

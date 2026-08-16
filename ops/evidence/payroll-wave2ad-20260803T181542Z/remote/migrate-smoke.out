@@ -1,0 +1,136 @@
+    payroll external adapter wave2a — export/import/reconcile
+      PASS  version pinned
+      PASS  payment disabled
+      PASS  money authority external
+      PASS  wathefni not money authority
+      PASS  no posts_payment
+      PASS  no bank files
+      PASS  no native g2n
+      PASS  vendor unclaimed
+      PASS  wave1 contracts unchanged flag
+      PASS  uses input schema 1.0.0
+      PASS  uses result schema 1.0.0
+      PASS  freeze mirror only
+      PASS  freeze wave1 ddl untouched
+      PASS  malformed csv rejected
+connected_db wathefni_staging
+      PASS  wave1 draft still works
+      PASS  wave1 approve still works
+      PASS  period create
+      PASS  clean export
+      PASS  export fingerprint present
+      PASS  export money authority external
+      PASS  export payment disabled
+      PASS  export posts_payment false
+      PASS  idempotent export replay
+      PASS  clean import
+      PASS  import mirror_only
+      PASS  import external authority
+      PASS  import matched
+      PASS  idempotent import replay
+      PASS  reconcile clean
+      PASS  unmatched import accepted/partial
+      PASS  unmatched quarantined count
+      PASS  malformed quarantined
+      PASS  malformed has quarantine row
+      PASS  fingerprint change blocks import
+      PASS  changed fingerprint detected
+      PASS  new export not idempotent
+      PASS  diff import ok
+      PASS  reconcile differences flagged
+      PASS  component diffs present
+      PASS  export rollback
+      PASS  quarantine soft only
+
+    41 passed, 0 failed
+    payroll external ops wave2ac — workflow helpers
+      PASS  payment disabled
+      PASS  money authority external
+      PASS  vendor unclaimed
+      PASS  wave1 contracts unchanged
+connected_db wathefni_staging
+      PASS  contract draft
+      PASS  contract approve
+      PASS  period create
+      PASS  readiness ready
+      PASS  readiness not authoritative
+      PASS  bootstrap ok
+      PASS  bootstrap enabled
+      PASS  bootstrap payment disabled
+      PASS  bootstrap not authoritative
+      PASS  assemble has employee
+      PASS  manager empty scope blocks
+      PASS  export ok
+      PASS  list exports
+      PASS  import ok
+      PASS  import not money authority
+      PASS  duplicate upload idempotent
+      PASS  stale fingerprint blocked
+      PASS  stale fingerprint quarantined
+      PASS  malformed quarantined
+      PASS  quarantine list non-empty
+      PASS  reconcile ok
+      PASS  reconciliation stored
+      PASS  import lines present
+      PASS  replace import ok
+      PASS  replace flagged
+      PASS  replace not authoritative
+      PASS  replace money external
+      PASS  events timeline
+      PASS  replace event present
+      PASS  native mode blocks readiness
+
+    34 passed, 0 failed
+PASS  payment_processing disabled
+PASS  money_authority external
+PASS  vendor unclaimed
+PASS  no AI
+PASS  wave2a contracts unchanged flag
+PASS  operability version
+PASS  package includes contracts
+PASS  package excludes attendance live
+PASS  attendance not packaged flag
+PASS  export csv headers present
+PASS  import csv headers present
+PASS  rollback concurrency required
+PASS  rollback passes expected_row_version
+PASS  quarantine acknowledge route
+PASS  acknowledge does not admit money
+PASS  workspace has setup
+PASS  workspace has package_contents
+PASS  quarantine ack ok
+PASS  ack money unchanged
+PASS  ack not authoritative
+PASS  quarantine ack idempotent
+PASS  ack reason enforced
+
+22 passed, 0 failed
+PASS  posthire src present
+PASS  setup panel
+PASS  checklist panel
+PASS  package honesty panel
+PASS  csv help tab
+PASS  rollback sends expected_row_version
+PASS  quarantine acknowledge wired
+PASS  rtl support
+PASS  mobile flex wrap
+PASS  EN operator title
+PASS  AR operator title
+PASS  EN who pays copy
+PASS  EN input snapshot
+PASS  no primary Fingerprint jargon
+PASS  Hours review tab label
+PASS  AR hours review
+PASS  PostHire external tab hint
+PASS  PostHire hours tab
+PASS  payslip import picker
+PASS  close import picker
+PASS  no pasted import_run_id placeholder
+PASS  api quarantine acknowledge
+PASS  api rollback requires row version
+PASS  acknowledge route in app
+
+24 passed, 0 failed
+HONESTY_OK
+OPERABILITY 1.0.0
+STAGING_PAYROLL_W2AD_OK

@@ -1,0 +1,131 @@
+{
+  "stamp": "20260807T194623Z",
+  "base": "https://api.wathefni.ai",
+  "company": "WATHEFNI",
+  "employee_key": "WATHEFNI-96599338566",
+  "results": [
+    {
+      "name": "mobile softRefresh helper",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unlock dismiss soft-refreshes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "profile PTR refreshMe",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "documents renew→onboarding invalidate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "HR inboundQueue freshness",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Leave soft poll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Onboarding/Compliance/AppAccess soft poll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Org ESS Reject",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Org ESS payroll gate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "catalog_label bilingual",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "employee /app/me 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "employee /app/me re-fetch stable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "profile fields present after re-fetch",
+      "ok": true,
+      "detail": "{'employee_key': 'WATHEFNI-96599338566', 'company_code': 'WATHEFNI', 'name': 'W5C-SYNTH|Aziz Mobile QA', 'phone': '96599338566', 'email': 'aziz+mobile-qa@wathefni.internal', 'position_title': 'Mobile QA Tester', 'department': 'Internal QA', 'onboarding_status': 'completed', 'locale': 'en'}"
+    },
+    {
+      "name": "notifications EN",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "notifications AR",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "inbox title locale can differ",
+      "ok": true,
+      "detail": "en='App activation code' ar='رمز تفعيل التطبيق'"
+    },
+    {
+      "name": "employee onboarding readable-or-gated",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "employee leave readable-or-gated",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "employee documents readable-or-gated",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "employee shifts readable-or-gated",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR leave queue",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR onboarding queue",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR compliance queue",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "HR app access/invitation",
+      "ok": true,
+      "detail": "200"
+    }
+  ],
+  "pass": true,
+  "required_pass_count": 24,
+  "required_total": 24
+}

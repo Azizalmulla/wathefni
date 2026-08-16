@@ -1,0 +1,8 @@
+rollback_group cb2655a4-6451-4724-b321-0d20929aa838
+source_git cf26d59512a22a7634eb4edd28b4425ec1624405
+message Rollback Bank ESS UI OTA crash 326e2040 (fresh start)
+runtime 0.1.0
+android 019fd816-f40f-7e98-80ed-9fe7a579b61f
+ios 019fd816-f40f-7b02-b16a-19610e615074
+PREVIOUS_UPDATE_REPUBLISHED OK (cf26d59 DocVal-era canary)
+BROKEN_GROUP 326e2040-6603-4c34-a6db-1022ff8095a6 superseded

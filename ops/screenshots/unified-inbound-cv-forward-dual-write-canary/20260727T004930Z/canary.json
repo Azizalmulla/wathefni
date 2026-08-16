@@ -1,0 +1,731 @@
+{
+  "stamp": "20260727T004937Z",
+  "ok": true,
+  "tag": "forward_dual_write_canary",
+  "passed": 71,
+  "failed": 0,
+  "results": [
+    {
+      "name": "health_200_pre",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "enforce_off_live",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_on_live",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "email_path_authoritative",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "channels_not_cut_over",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production_db",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "name": "canary_job_position",
+      "ok": true,
+      "detail": "J2P2_PROD_TEST"
+    },
+    {
+      "name": "c1_email_idempotent_event",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c1_one_item",
+      "ok": true,
+      "detail": "3220ba00-56fb-5218-a661-a83a3920dafe"
+    },
+    {
+      "name": "c1_scan_extract_path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c1_person_decision",
+      "ok": true,
+      "detail": "linked"
+    },
+    {
+      "name": "c1_talent_pool_non_actionable",
+      "ok": true,
+      "detail": "ecc759c8-839c-5f69-8980-fbc8a9e75a07"
+    },
+    {
+      "name": "c1_cv_version",
+      "ok": true,
+      "detail": "e25d237f-5e45-550d-8c7d-92c0b0c3eabf"
+    },
+    {
+      "name": "c1_no_job_application",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ck_person_ref_parse",
+      "ok": true,
+      "detail": "person:98e2ebdc-fede-5c42-a11a-9c6194ec1dea"
+    },
+    {
+      "name": "ck_person_index_meta",
+      "ok": true,
+      "detail": "{\"candidate_ref\": \"person:98e2ebdc-fede-5c42-a11a-9c6194ec1dea\", \"ref_kind\": \"person\", \"searchable\": true, \"actionable\": false, \"provisional\": false, \"job_ranking_allowed\": false, \"version\": \"candidate-knowledge-person-subject-v1\"}"
+    },
+    {
+      "name": "ck_subject_ref_parse",
+      "ok": true,
+      "detail": "subject:8351d145-75f8-5098-92fe-99be24b595e8"
+    },
+    {
+      "name": "ck_subject_index_meta",
+      "ok": true,
+      "detail": "{\"candidate_ref\": \"subject:8351d145-75f8-5098-92fe-99be24b595e8\", \"ref_kind\": \"subject\", \"searchable\": true, \"actionable\": false, \"provisional\": true, \"job_ranking_allowed\": false, \"version\": \"candidate-knowledge-person-subject-v1\"}"
+    },
+    {
+      "name": "ck_held_non_actionable",
+      "ok": true,
+      "detail": "{\"readable\": true, \"contact_allowed\": false, \"lifecycle_mutation_allowed\": false, \"job_ranking_allowed\": false, \"held_state\": \"held\", \"reason_codes\": [\"searchable_non_actionable\", \"requires_verified_job_binding\"]}"
+    },
+    {
+      "name": "ck_app_compat",
+      "ok": true,
+      "detail": "app:canary"
+    },
+    {
+      "name": "c1_cv_reusable",
+      "ok": true,
+      "detail": "e25d237f-5e45-550d-8c7d-92c0b0c3eabf"
+    },
+    {
+      "name": "c1_one_cv_row",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "c2_wa_unsolicited_ok",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c2_one_item",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c2_scan_extract_path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c2_person_decision",
+      "ok": true,
+      "detail": "linked"
+    },
+    {
+      "name": "c2_talent_pool_non_actionable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c2_cv_version",
+      "ok": true,
+      "detail": "ba2f088b-a2e2-5c3f-ad0f-0f0ecc52cb51"
+    },
+    {
+      "name": "c2_visibility_held",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c3_manual_ok",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c3_one_item",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c3_scan_extract_path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c3_person_or_review",
+      "ok": true,
+      "detail": "identity_review"
+    },
+    {
+      "name": "c3_talent_pool_non_actionable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c3_cv_version",
+      "ok": true,
+      "detail": "ed869bf6-60c7-5093-9c33-0491f7364902"
+    },
+    {
+      "name": "c4_wa_job_adapter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c4_one_item",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c4_scan_extract_path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c4_person_decision",
+      "ok": true,
+      "detail": "linked"
+    },
+    {
+      "name": "c4_cv_version",
+      "ok": true,
+      "detail": "4803e737-ef12-50fb-9478-4ddc4b734f94"
+    },
+    {
+      "name": "c4_promote_ok",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c4_job_binding",
+      "ok": true,
+      "detail": "96555570003-WATHEFNI-J2P2_PROD_TEST"
+    },
+    {
+      "name": "c4_cv_binding_pinned",
+      "ok": true,
+      "detail": "4803e737-ef12-50fb-9478-4ddc4b734f94"
+    },
+    {
+      "name": "shadow_96555570003-WATHEFNI-J2P2_PROD_TEST",
+      "ok": true,
+      "detail": "allow"
+    },
+    {
+      "name": "c4_adapter_no_invent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c5_tp_seed_non_actionable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_96555570004-WATHEFNI-J2P2_PROD_TEST",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "c5_promote_ok",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c5_job_binding",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "c5_cv_binding_pinned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_96555570004-WATHEFNI-J2P2_PROD_TEST",
+      "ok": true,
+      "detail": "allow"
+    },
+    {
+      "name": "c5_tp_still_non_actionable_pool_row",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shadow_imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "shadow_imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "held_remain_unbound",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "zero_unrelated_app_mutation",
+      "ok": true,
+      "detail": "18->18"
+    },
+    {
+      "name": "zero_unrelated_candidate_mutation",
+      "ok": true,
+      "detail": "21->21"
+    },
+    {
+      "name": "canary_apps_exactly_two",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "bindings_plus_two",
+      "ok": true,
+      "detail": "11->13"
+    },
+    {
+      "name": "no_dup_person_email",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "no_dup_person_wa_unsolicited",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "no_dup_person_wa_job",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "no_dup_person_tp_promote",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "shadow_96555550132-WATHEFNI-ACCOUNTING",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "shadow_96555550133-WATHEFNI-ACCOUNTING",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "shadow_96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "shadow_96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "shadow_96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+      "ok": true,
+      "detail": "shadow_deny"
+    },
+    {
+      "name": "canary_commit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "health_200_post",
+      "ok": true,
+      "detail": "200"
+    }
+  ],
+  "cases": {
+    "email_no_job": {
+      "case": "email_no_job",
+      "receipt": {
+        "ok": true,
+        "skipped": false,
+        "envelope_version": "unified-inbound-cv-envelope-v1",
+        "event_id": "3a8f23a4-c7be-54ac-9793-7da773935436",
+        "subject_id": "8351d145-75f8-5098-92fe-99be24b595e8",
+        "item_ids": [
+          "3220ba00-56fb-5218-a661-a83a3920dafe"
+        ],
+        "document_links": 1
+      },
+      "replay_event_id": "3a8f23a4-c7be-54ac-9793-7da773935436",
+      "stages": {
+        "ok": true,
+        "skipped": false,
+        "provider_plan": {
+          "local_first": true,
+          "mistral_ocr_eligible": false,
+          "gpt_vision_rescue_eligible": false,
+          "reason_codes": [
+            "accepted_local_poppler_or_text"
+          ]
+        },
+        "runs": [
+          {
+            "ok": true,
+            "skipped": false,
+            "run_id": "370b09b6-ffe6-56f9-8b3a-15b6c3d4d31b",
+            "status": "completed",
+            "idempotency_key": "document_acceptance:WATHEFNI:3220ba00-56fb-5218-a661-a83a3920dafe:12de16a2f8d5054db775a8f1cd26dbca684d69d66c01d22d5e7a91f5506f3f37:unified-inbound-cv-processing-v1:document_acceptance:1"
+          },
+          {
+            "ok": true,
+            "skipped": false,
+            "run_id": "ebd8102f-6a1d-5095-a9ad-7d8318089e26",
+            "status": "completed",
+            "idempotency_key": "mime_content_validation:WATHEFNI:3220ba00-56fb-5218-a661-a83a3920dafe:12de16a2f8d5054db775a8f1cd26dbca684d69d66c01d22d5e7a91f5506f3f37:unified-inbound-cv-processing-v1:mime_content_validation:1"
+          },
+          {
+            "ok": true,
+            "skipped": false,
+            "run_id": "44762814-a726-5344-b941-137e39ed3a7d",
+            "status": "completed",
+            "idempotency_key": "local_extraction:WATHEFNI:3220ba00-56fb-5218-a661-a83a3920dafe:12de16a2f8d5054db775a8f1cd26dbca684d69d66c01d22d5e7a91f5506f3f37:unified-inbound-cv-processing-v1:local_extraction:1"
+          }
+        ]
+      },
+      "wave4": {
+        "ok": true,
+        "skipped": false,
+        "wave": "unified-inbound-cv-wave4-v1",
+        "person": {
+          "ok": true,
+          "skipped": false,
+          "status": "linked",
+          "outcome": "new_person",
+          "person_id": "98e2ebdc-fede-5c42-a11a-9c6194ec1dea",
+          "membership_id": "be669f27-714c-512e-bc61-e9a82c684935",
+          "merged": false,
+          "authority_version": "unified-inbound-cv-person-registry-v1"
+        },
+        "talent_pool": {
+          "ok": true,
+          "skipped": false,
+          "entry_id": "ecc759c8-839c-5f69-8980-fbc8a9e75a07",
+          "actionable": false,
+          "status": "active",
+          "authority_version": "unified-talent-pool-authority-v1"
+        },
+        "cv_version": {
+          "ok": true,
+          "skipped": false,
+          "cv_version_id": "e25d237f-5e45-550d-8c7d-92c0b0c3eabf",
+          "reader_cutover": false
+        },
+        "creates_job_application": false
+      }
+    },
+    "wa_unsolicited_no_job": {
+      "adapter": {
+        "ok": true,
+        "adapter": "whatsapp_unsolicited",
+        "receipt": {
+          "ok": true,
+          "skipped": false,
+          "envelope_version": "unified-inbound-cv-envelope-v1",
+          "channel": "whatsapp",
+          "event_id": "5a48f996-f9fb-523c-a089-d612aff8d57d",
+          "subject_id": "95a8311c-1888-52bb-9b02-aad5bf3388ad",
+          "item_ids": [
+            "5a55c073-b74e-51b9-afa3-bb17309cd3b1"
+          ],
+          "document_links": 0,
+          "hr_visible": true,
+          "actionable": false
+        },
+        "talent_pool": {
+          "hr_visible": true,
+          "actionable": false,
+          "job_ranking_allowed": false,
+          "lifecycle_mutation_allowed": false,
+          "contact_allowed": false,
+          "held_state": "unsolicited_whatsapp_intake",
+          "requires_exact_job_confirmation": true
+        },
+        "shared_processing": {
+          "ok": true,
+          "skipped": false,
+          "provider_plan": {
+            "local_first": true,
+            "mistral_ocr_eligible": false,
+            "gpt_vision_rescue_eligible": false,
+            "reason_codes": [
+              "local_only"
+            ]
+          },
+          "runs": [
+            {
+              "ok": true,
+              "skipped": false,
+              "run_id": "51461bb0-a0a1-578d-bd44-c4ea76620136",
+              "status": "completed",
+              "idempotency_key": "document_acceptance:WATHEFNI:5a55c073-b74e-51b9-afa3-bb17309cd3b1:74feb27afe22fa6677fdc1ca62eb4f870f64ecde83cf9ba2ca4552ece4fa6398:unified-inbound-cv-processing-v1:document_acceptance:1"
+            },
+            {
+              "ok": true,
+              "skipped": false,
+              "run_id": "e28cf622-d42c-5e11-b99f-046831be9485",
+              "status": "completed",
+              "idempotency_key": "mime_content_validation:WATHEFNI:5a55c073-b74e-51b9-afa3-bb17309cd3b1:74feb27afe22fa6677fdc1ca62eb4f870f64ecde83cf9ba2ca4552ece4fa6398:unified-inbound-cv-processing-v1:mime_content_validation:1"
+            },
+            {
+              "ok": true,
+              "skipped": false,
+              "run_id": "329aaae2-ee16-59f2-a9a5-26d372b70b65",
+              "status": "completed",
+              "idempotency_key": "local_extraction:WATHEFNI:5a55c073-b74e-51b9-afa3-bb17309cd3b1:74feb27afe22fa6677fdc1ca62eb4f870f64ecde83cf9ba2ca4552ece4fa6398:unified-inbound-cv-processing-v1:local_extraction:1"
+            }
+          ]
+        },
+        "wave4": {
+          "ok": true,
+          "skipped": false,
+          "wave": "unified-inbound-cv-wave4-v1",
+          "person": {
+            "ok": true,
+            "skipped": false,
+            "status": "linked",
+            "outcome": "new_person",
+            "person_id": "ff8a7fdc-108e-51ca-bd4d-b2c2cab1df0a",
+            "membership_id": "1ac943bb-a3eb-58d2-a611-bb3df334ff04",
+            "merged": false,
+            "authority_version": "unified-inbound-cv-person-registry-v1"
+          },
+          "talent_pool": {
+            "ok": true,
+            "skipped": false,
+            "entry_id": "cdea32d2-cd31-5e33-94a9-32b51a31bbb4",
+            "actionable": false,
+            "status": "active",
+            "authority_version": "unified-talent-pool-authority-v1"
+          },
+          "cv_version": {
+            "ok": true,
+            "skipped": false,
+            "cv_version_id": "ba2f088b-a2e2-5c3f-ad0f-0f0ecc52cb51",
+            "reader_cutover": false
+          },
+          "creates_job_application": false
+        },
+        "job_gate": {
+          "allowed": true,
+          "job_selected": false,
+          "human_confirmed": false,
+          "create_application": false
+        },
+        "creates_job_application": false
+      },
+      "person_id": "ff8a7fdc-108e-51ca-bd4d-b2c2cab1df0a",
+      "subject_id": "95a8311c-1888-52bb-9b02-aad5bf3388ad",
+      "cv_version_id": "ba2f088b-a2e2-5c3f-ad0f-0f0ecc52cb51",
+      "tp_entry_id": "cdea32d2-cd31-5e33-94a9-32b51a31bbb4"
+    },
+    "manual_no_job": {
+      "adapter": {
+        "ok": true,
+        "adapter": "manual_upload",
+        "receipt": {
+          "ok": true,
+          "skipped": false,
+          "envelope_version": "unified-inbound-cv-envelope-v1",
+          "channel": "manual_upload",
+          "event_id": "bb267c0a-2e1a-5a76-ad41-a070f849d991",
+          "subject_id": "13c9ba40-3fb0-5978-adf3-3941e04a1fc9",
+          "item_ids": [
+            "782a69d3-d60b-57ff-b8f6-7d8a50ba85b2"
+          ],
+          "document_links": 1,
+          "hr_visible": true,
+          "actionable": false
+        },
+        "shared_processing": {
+          "ok": true,
+          "skipped": false,
+          "provider_plan": {
+            "local_first": true,
+            "mistral_ocr_eligible": false,
+            "gpt_vision_rescue_eligible": false,
+            "reason_codes": [
+              "accepted_local_poppler_or_text"
+            ]
+          },
+          "runs": [
+            {
+              "ok": true,
+              "skipped": false,
+              "run_id": "dc60dd17-aaef-59cf-a9cb-c34288e0407e",
+              "status": "completed",
+              "idempotency_key": "document_acceptance:WATHEFNI:782a69d3-d60b-57ff-b8f6-7d8a50ba85b2:e13b6ec09449995a2d9ba010dcd41750e0e3e4ea6a449e3f394ecde4e8d22b07:unified-inbound-cv-processing-v1:document_acceptance:1"
+            },
+            {
+              "ok": true,
+              "skipped": false,
+              "run_id": "bdf56131-bdbb-563a-bc27-256db90384f3",
+              "status": "completed",
+              "idempotency_key": "mime_content_validation:WATHEFNI:782a69d3-d60b-57ff-b8f6-7d8a50ba85b2:e13b6ec09449995a2d9ba010dcd41750e0e3e4ea6a449e3f394ecde4e8d22b07:unified-inbound-cv-processing-v1:mime_content_validation:1"
+            },
+            {
+              "ok": true,
+              "skipped": false,
+              "run_id": "973af5a9-0531-5e3d-b974-8293f5525931",
+              "status": "completed",
+              "idempotency_key": "local_extraction:WATHEFNI:782a69d3-d60b-57ff-b8f6-7d8a50ba85b2:e13b6ec09449995a2d9ba010dcd41750e0e3e4ea6a449e3f394ecde4e8d22b07:unified-inbound-cv-processing-v1:local_extraction:1"
+            }
+          ]
+        },
+        "wave4": {
+          "ok": true,
+          "skipped": false,
+          "wave": "unified-inbound-cv-wave4-v1",
+          "person": {
+            "ok": true,
+            "skipped": false,
+            "status": "identity_review",
+            "reason": "ambiguous_or_insufficient_identity",
+            "match_count": 0,
+            "person_id": null,
+            "membership_id": null,
+            "merged": false
+          },
+          "talent_pool": {
+            "ok": true,
+            "skipped": false,
+            "entry_id": "e7c8f259-cdb1-5779-aa2a-89e160f99808",
+            "actionable": false,
+            "status": "identity_review",
+            "authority_version": "unified-talent-pool-authority-v1"
+          },
+          "cv_version": {
+            "ok": true,
+            "skipped": false,
+            "cv_version_id": "ed869bf6-60c7-5093-9c33-0491f7364902",
+            "reader_cutover": false
+          },
+          "creates_job_application": false
+        },
+        "held_by_default": true,
+        "creates_job_application": false
+      },
+      "person_id": null,
+      "subject_id": "13c9ba40-3fb0-5978-adf3-3941e04a1fc9",
+      "cv_version_id": "ed869bf6-60c7-5093-9c33-0491f7364902",
+      "tp_entry_id": "e7c8f259-cdb1-5779-aa2a-89e160f99808"
+    },
+    "wa_apply_code_job": {
+      "app_key": "96555570003-WATHEFNI-J2P2_PROD_TEST",
+      "person_id": "b938bbb9-b338-5c87-8408-a29a60a3830c",
+      "cv_version_id": "4803e737-ef12-50fb-9478-4ddc4b734f94",
+      "promote": {
+        "ok": true,
+        "consent_id": "2e6d4e7d-4659-4260-a68a-af8bbf8a29fa",
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "d55521b5-f2b0-5271-940a-0f42e17a0f33",
+            "verified": true
+          },
+          "cv_binding": {
+            "binding_id": "ba05bb9f-5bc3-5790-a2dd-b45667896116",
+            "cv_version_id": "4803e737-ef12-50fb-9478-4ddc4b734f94"
+          },
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      "job_binding": {
+        "position_code": "J2P2_PROD_TEST",
+        "verified": true,
+        "provenance": {
+          "bound_at": "2026-07-27T00:49:37.820717+00:00",
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      "cv_binding": {
+        "cv_version_id": "4803e737-ef12-50fb-9478-4ddc4b734f94",
+        "pinned": true
+      }
+    },
+    "tp_promote_to_job": {
+      "app_key": "96555570004-WATHEFNI-J2P2_PROD_TEST",
+      "person_id": "beb231ae-10b9-53c6-922e-59906bc12077",
+      "tp_entry_id": "a077caee-87fd-58bd-99c0-8af57835b875",
+      "cv_version_id": "3a689dec-2ecd-57e3-8ac9-2f2565471404",
+      "promote": {
+        "ok": true,
+        "consent_id": "35ace57d-1e11-42d3-a52f-951110299069",
+        "binding": {
+          "ok": true,
+          "skipped": false,
+          "job_binding": {
+            "binding_id": "537b1f12-168b-5465-a37d-12e34bb7734d",
+            "verified": true
+          },
+          "cv_binding": {
+            "binding_id": "33e2f67f-5143-5ec0-b2f5-a5fed9573157",
+            "cv_version_id": "3a689dec-2ecd-57e3-8ac9-2f2565471404"
+          },
+          "verified": true,
+          "authority_version": "unified-job-binding-authority-v1"
+        }
+      },
+      "job_binding": {
+        "position_code": "J2P2_PROD_TEST",
+        "verified": true
+      },
+      "cv_binding": {
+        "cv_version_id": "3a689dec-2ecd-57e3-8ac9-2f2565471404",
+        "pinned": true
+      }
+    }
+  },
+  "assertions": {
+    "failed_count": 0,
+    "failed_names": [],
+    "enforce_enabled": false,
+    "channel_cutover": false,
+    "canary_job_position": "J2P2_PROD_TEST",
+    "canary_phones": {
+      "email": "96555570001",
+      "wa_unsolicited": "96555570002",
+      "wa_job": "96555570003",
+      "tp_promote": "96555570004"
+    }
+  },
+  "before": {
+    "candidates": 21,
+    "applications": 18,
+    "applications_non_canary": 18,
+    "candidates_non_canary": 21,
+    "verified_bindings": 11,
+    "held_unbound": 2
+  },
+  "go_no_go_hint": "NO-GO_channel_cutover_until_owner_authorization"
+}

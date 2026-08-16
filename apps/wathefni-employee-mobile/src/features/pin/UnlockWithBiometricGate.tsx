@@ -3,11 +3,23 @@ import { AppState } from 'react-native'
 
 import { UnlockPinFlow } from './PinFlows'
 import {
-  promptBiometricUnlock,
-  shouldAttemptBiometricUnlock,
+  promptBiometricUnlock as defaultPromptBiometricUnlock,
+  shouldAttemptBiometricUnlock as defaultShouldAttemptBiometricUnlock,
+  type BiometricAvailability,
+  type BiometricPromptResult,
 } from '@/auth/biometricAuth'
 import { patchAutoLockDiagnostics } from '@/auth/autoLockDiagnostics'
 import { useI18n } from '@/i18n'
+
+type ShouldAttemptFn = () => Promise<{
+  attempt: boolean
+  preferred: boolean
+  availability: BiometricAvailability
+}>
+type PromptFn = (opts: {
+  promptMessage: string
+  cancelLabel: string
+}) => Promise<BiometricPromptResult>
 
 type UnlockWithBiometricGateProps = {
   biometricFeatureOn: boolean
@@ -16,6 +28,11 @@ type UnlockWithBiometricGateProps = {
   onUnlockPin: (pin: string) => void
   onUnlockBiometric: () => Promise<boolean>
   onForgotPin?: () => void
+  forgotTitleKey?: string
+  forgotConfirmKey?: string
+  /** Inject HR preference store without forking the settle-timer UX. */
+  shouldAttempt?: ShouldAttemptFn
+  promptUnlock?: PromptFn
 }
 
 /**
@@ -34,14 +51,22 @@ export function UnlockWithBiometricGate({
   onUnlockPin,
   onUnlockBiometric,
   onForgotPin,
+  forgotTitleKey,
+  forgotConfirmKey,
+  shouldAttempt = defaultShouldAttemptBiometricUnlock,
+  promptUnlock = defaultPromptBiometricUnlock,
 }: UnlockWithBiometricGateProps) {
   const { t } = useI18n()
   const attempted = useRef(false)
   const promptInFlight = useRef(false)
   const wasFeatureOn = useRef(false)
   const onUnlockBiometricRef = useRef(onUnlockBiometric)
+  const shouldAttemptRef = useRef(shouldAttempt)
+  const promptUnlockRef = useRef(promptUnlock)
   const tRef = useRef(t)
   onUnlockBiometricRef.current = onUnlockBiometric
+  shouldAttemptRef.current = shouldAttempt
+  promptUnlockRef.current = promptUnlock
   tRef.current = t
 
   useEffect(() => {
@@ -73,7 +98,7 @@ export function UnlockWithBiometricGate({
       promptInFlight.current = true
       void (async () => {
         try {
-          const { attempt, preferred, availability } = await shouldAttemptBiometricUnlock()
+          const { attempt, preferred, availability } = await shouldAttemptRef.current()
           if (cancelled) return
           if (!attempt) {
             // Definitive skip (preference off / not usable) — do not retry this session.
@@ -102,13 +127,15 @@ export function UnlockWithBiometricGate({
             biometricUsable: true,
             biometricPreferenceOn: true,
           })
-          const result = await promptBiometricUnlock({
+          const result = await promptUnlockRef.current({
             promptMessage: tRef.current('biometric.unlockPrompt'),
             cancelLabel: tRef.current('common.cancel'),
           })
           if (cancelled) return
           patchAutoLockDiagnostics({
-            lastBioGateReason: result.ok ? 'success' : `fallback_pin:${'reason' in result ? result.reason : 'fail'}`,
+            lastBioGateReason: result.ok
+              ? 'success'
+              : `fallback_pin:${'reason' in result ? result.reason : 'fail'}`,
           })
           if (result.ok) {
             await onUnlockBiometricRef.current()
@@ -143,6 +170,13 @@ export function UnlockWithBiometricGate({
   }, [biometricFeatureOn])
 
   return (
-    <UnlockPinFlow busy={busy} error={error} onUnlock={onUnlockPin} onForgotPin={onForgotPin} />
+    <UnlockPinFlow
+      busy={busy}
+      error={error}
+      onUnlock={onUnlockPin}
+      onForgotPin={onForgotPin}
+      forgotTitleKey={forgotTitleKey}
+      forgotConfirmKey={forgotConfirmKey}
+    />
   )
 }

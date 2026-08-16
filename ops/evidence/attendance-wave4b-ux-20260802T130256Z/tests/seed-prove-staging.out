@@ -1,0 +1,51 @@
+[PASS] normal day approved + payroll eligible
+[PASS] overnight projection present
+[PASS] multi-session day has 2+ sessions
+[PASS] paid and unpaid breaks present
+[PASS] missing check-in exception
+[PASS] missing check-out exception
+[PASS] late minutes > 0
+[PASS] early leave minutes > 0
+[PASS] absence status
+[PASS] dispute base correction requested
+[PASS] dispute base approved (single — lateness)
+[PASS] dispute base applied (approve≠apply)
+[PASS] employee dispute raised
+[PASS] locked metadata on projection
+[PASS] payroll lock denies correction
+[PASS] click exception opened
+[PASS] click exception assigned
+[PASS] correction requested
+[PASS] case status requested (not applied)
+[PASS] reject without apply
+[PASS] absence exception for dual
+[PASS] dual correction requested
+[PASS] first approval dual_pending
+[PASS] not applied after first approve
+[PASS] same approver blocked
+[PASS] second approval ready to apply
+[PASS] approve and apply remain separate
+[PASS] apply after dual approval
+[PASS] dispute resolved
+[PASS] reopen after evidence
+[PASS] stale row_version fail-closed
+[PASS] out-of-scope manager denied
+[PASS] manager self-correction denied
+[PASS] daily board seed rows >= 8
+[PASS] has approved row
+[PASS] has incomplete rows
+[PASS] has absent row
+[PASS] has locked row
+[PASS] exclusion reasons sample non-empty
+[PASS] API/UI totals exact match
+{
+  "tag": "461445D7",
+  "company": "WATHEFNI",
+  "work_date": "2026-08-02",
+  "passed": 40,
+  "failed": 0,
+  "total": 40,
+  "evid": "/opt/wathefni/staging-evidence/attendance-wave4b-ux-20260802T130256Z/clickthrough"
+}
+SEED_TAG=461445D7
+WORK_DATE=2026-08-02

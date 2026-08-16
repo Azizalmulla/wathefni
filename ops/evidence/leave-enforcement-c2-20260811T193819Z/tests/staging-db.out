@@ -1,0 +1,18 @@
+    leave enforcement c2 — prove
+      PASS  enforcement module
+      PASS  rollback guidance
+      PASS  EN/AR leave type canonicalize annual
+      PASS  EN/AR leave type canonicalize unpaid
+      PASS  EN/AR unpaid catalogue present
+      PASS  global enforcement off
+      PASS  empty allowlist denies
+      PASS  allowlisted still needs pack attestation
+      PASS  enable blocked without attestation
+      PASS  policy pack attested
+      PASS  attested but not enabled yet
+      PASS  enforcement enabled for canary
+      PASS  enforcement gate open
+      PASS  other company denied
+FAIL exception: insert or update on table "leave_ledger" violates foreign key constraint "leave_ledger_leave_id_fkey"
+DETAIL:  Key (leave_id)=(e2857ef9-2d0d-4782-8f4f-2211fa69f549) is not present in table "leave_requests".
+

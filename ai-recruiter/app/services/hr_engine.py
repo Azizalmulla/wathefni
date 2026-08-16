@@ -4,6 +4,8 @@ Handles natural language queries from HR managers via WhatsApp.
 Translates questions into database queries and returns formatted responses.
 """
 import json
+import re
+import uuid
 from datetime import datetime, timedelta
 
 from sqlalchemy import func
@@ -11,8 +13,11 @@ from sqlalchemy.orm import Session
 
 from app.models.candidate import Candidate
 from app.models.application import Application
+from app.models.employee import Employee
 from app.models.position import Position
 from app.models.company import Company
+from app.models.workflow import WorkflowRun
+from app.services.workflows import enqueue_hire_workflow, enqueue_start_onboarding_workflow
 
 import anthropic
 from app.config import get_settings
@@ -67,8 +72,12 @@ def interpret_hr_query(query: str) -> dict:
     return json.loads(response_text.strip())
 
 
-def handle_hr_query(query: str, company_id: str, db: Session) -> str:
+def handle_hr_query(query: str, company_id: str, db: Session, requested_by: str | None = None) -> str:
     """Process an HR query and return a WhatsApp-friendly response."""
+    onboarding_response = _maybe_handle_onboarding_start(query, company_id, db, requested_by)
+    if onboarding_response:
+        return onboarding_response
+
     try:
         parsed = interpret_hr_query(query)
     except Exception:
@@ -85,7 +94,11 @@ def handle_hr_query(query: str, company_id: str, db: Session) -> str:
         return _handle_detail(company_id, parsed.get("candidate_name"), db)
     elif intent == "update_status":
         return _handle_status_update(
-            company_id, parsed.get("candidate_name"), parsed.get("new_status"), db
+            company_id,
+            parsed.get("candidate_name"),
+            parsed.get("new_status"),
+            db,
+            requested_by=requested_by,
         )
     elif intent == "list_positions":
         return _handle_list_positions(company_id, db)
@@ -99,6 +112,96 @@ def handle_hr_query(query: str, company_id: str, db: Session) -> str:
         return _handle_close_position(company_id, parsed.get("position_code", parsed.get("position_title")), db)
     else:
         return "I'm not sure what you need. Try:\n• \"Show candidates for marketing role\"\n• \"How many applied this week?\"\n• \"Tell me about Ahmed\"\n• \"Shortlist Omar\""
+
+
+def _maybe_handle_onboarding_start(
+    query: str,
+    company_id: str,
+    db: Session,
+    requested_by: str | None,
+) -> str | None:
+    normalized = query.strip().lower()
+    explicit_start = "onboarding" in normalized and any(
+        phrase in normalized
+        for phrase in ("start", "begin", "send", "go ahead", "yes", "yep", "yeah", "ok", "okay")
+    )
+    short_approval = normalized in {"yes", "y", "yep", "yeah", "ok", "okay", "go ahead", "start it", "do it"}
+
+    if not explicit_start and not short_approval:
+        return None
+
+    employee = _resolve_onboarding_employee(query, company_id, db, requested_by, allow_recent=short_approval)
+    if not employee:
+        if short_approval:
+            return None
+        return "Which employee should I start onboarding for?"
+
+    enqueue_start_onboarding_workflow(
+        db,
+        employee=employee,
+        requested_by=requested_by,
+        notify_phone=requested_by,
+    )
+    db.commit()
+    return f"Starting onboarding for {employee.name or 'the employee'}."
+
+
+def _resolve_onboarding_employee(
+    query: str,
+    company_id: str,
+    db: Session,
+    requested_by: str | None,
+    *,
+    allow_recent: bool,
+) -> Employee | None:
+    name = _extract_onboarding_name(query)
+    if name:
+        employee = (
+            db.query(Employee)
+            .filter(Employee.company_id == company_id, Employee.name.ilike(f"%{name}%"))
+            .order_by(Employee.created_at.desc())
+            .first()
+        )
+        if employee:
+            return employee
+
+    if not allow_recent:
+        return None
+
+    recent_cutoff = datetime.utcnow() - timedelta(hours=12)
+    run = (
+        db.query(WorkflowRun)
+        .filter(
+            WorkflowRun.company_id == company_id,
+            WorkflowRun.workflow_type == "hire_candidate",
+            WorkflowRun.status == "completed",
+            WorkflowRun.requested_by == requested_by,
+            WorkflowRun.completed_at >= recent_cutoff,
+        )
+        .order_by(WorkflowRun.completed_at.desc())
+        .first()
+    )
+    if not run:
+        return None
+
+    application_id = (run.input or {}).get("application_id")
+    if not application_id:
+        return None
+
+    return (
+        db.query(Employee)
+        .filter(Employee.company_id == company_id, Employee.application_id == uuid.UUID(application_id))
+        .first()
+    )
+
+
+def _extract_onboarding_name(query: str) -> str | None:
+    match = re.search(r"\b(?:for|with)\s+([A-Za-z\u0600-\u06FF][\w\s\u0600-\u06FF]{1,80})", query, re.IGNORECASE)
+    if not match:
+        return None
+    name = match.group(1).strip()
+    name = re.sub(r"\b(?:now|please|pls|today|onboarding)\b", "", name, flags=re.IGNORECASE).strip()
+    return name or None
 
 
 def _handle_count(company_id: str, filters: dict, db: Session) -> str:
@@ -183,7 +286,13 @@ def _handle_detail(company_id: str, candidate_name: str, db: Session) -> str:
     return "\n".join(lines)
 
 
-def _handle_status_update(company_id: str, candidate_name: str, new_status: str, db: Session) -> str:
+def _handle_status_update(
+    company_id: str,
+    candidate_name: str,
+    new_status: str,
+    db: Session,
+    requested_by: str | None = None,
+) -> str:
     """Update a candidate's application status."""
     if not candidate_name or not new_status:
         return "Please specify: \"Shortlist [name]\" or \"Reject [name]\""
@@ -204,6 +313,19 @@ def _handle_status_update(company_id: str, candidate_name: str, new_status: str,
 
     if not application:
         return f"No application found for '{candidate_name}'."
+
+    if new_status.lower() == "hired":
+        enqueue_hire_workflow(
+            db,
+            application=application,
+            requested_by=requested_by,
+            notify_phone=requested_by,
+        )
+        db.commit()
+        return (
+            f"Hiring started for {application.candidate.name}. "
+            "I will confirm when the employee setup is done."
+        )
 
     old_status = application.status
     application.status = new_status.lower()

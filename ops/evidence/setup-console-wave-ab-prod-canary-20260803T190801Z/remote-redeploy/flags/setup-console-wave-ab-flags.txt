@@ -1,0 +1,11 @@
+SETUP_CONSOLE_ENABLED true
+SETUP_CONSOLE_V2 on
+WAVE_A 1
+WAVE_A_COMPANIES WATHEFNI
+CAPTURE_INGEST off
+enabled True
+company True
+company_external False
+honesty {'operator_only': True, 'wathefni_only': True, 'payroll_money': False, 'attendance_ingest': False, 'capture_ingest': 'off', 'setup_wave_b': False, 'ai': False, 'entitlements_cannot_bypass_gates': True}
+SCWAB_MARKER=SCWAB
+flags_ok_wave_a=true

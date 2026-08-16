@@ -1,0 +1,15 @@
+OK P1 production-safe gates
+OK schema ensure
+OK preview totals {'create': 2, 'update': 0, 'skip': 1, 'review': 2, 'conflict': 2, 'invalid': 2, 'warnings': 0, 'deactivate': 0} batch=c31c2ec3-7326-4d80-a741-ee409530e842
+OK repeated file import replay
+OK foreign tenant isolation
+OK commit + source mappings (2)
+OK no onboarding / no compliance seed on import create
+OK commit idempotent replay
+OK exception export employee-import-exceptions-c31c2ec3-7326-4d80-a741-ee409530e842.csv lines=6
+OK no auto-onboarding
+OK rollback/recovery removed=2
+OK existing employee preserved
+OK manager phone matching
+OK employee migration foundation local smoke
+OK employee migration sync P1 production-safe gate

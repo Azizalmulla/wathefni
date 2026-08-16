@@ -1,0 +1,15 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/components/candidates/HeldIntakeReviewCard.test.tsx
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  23:32:36
+   Duration  1.36s (transform 190ms, setup 146ms, import 291ms, tests 236ms, environment 585ms)
+

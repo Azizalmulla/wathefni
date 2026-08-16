@@ -1,0 +1,158 @@
+{
+  "stamp": "20260811T064151Z",
+  "suite": "bs-smoke",
+  "runtime": "browserstack",
+  "evidence": "ops/evidence/mobile-e2e-gate-bs-20260811T064151Z",
+  "host": {
+    "app_id": "ai.wathefni.employee",
+    "repo_root": "/Users/azizalmulla/Desktop/claw",
+    "maestro_ok": true,
+    "java_ok": false,
+    "simctl_ok": true,
+    "ios_runtime_ok": false,
+    "ios_booted": false,
+    "app_installed_booted": false,
+    "adb_ok": false,
+    "usb_android_device": false,
+    "disk_free_gb": "2",
+    "ui_runtime_ready": false,
+    "blockers": [
+      "java_runtime_missing_for_maestro",
+      "ios_simulator_runtime_missing",
+      "adb_missing",
+      "disk_free_lt_9gb_for_ios_runtime",
+      "no_executable_ui_target"
+    ],
+    "rule": "API PASS \u2260 MOBILE PASS \u2014 ui_runtime_ready=false means MOBILE_PASS stays 0"
+  },
+  "fixtures": {
+    "skipped": true
+  },
+  "leave_reconcile": {
+    "checks": {
+      "approve": {
+        "pass": false,
+        "expect": "approved",
+        "leave_id": "60822864-fff9-4f22-a8c3-077a90907128",
+        "status": "cancelled",
+        "decision_note": " | e2e_reset",
+        "allowed_actions": [],
+        "employee_key": "WATHEFNI-96550252254",
+        "start_date": "2026-09-01",
+        "leave_type": "annual",
+        "reason": "[wathefni_mobile_e2e_leave_fixture_v1:approve] disposable BrowserStack leave fixture \u2014 safe to decide/cleanup"
+      },
+      "reject_reason_persisted": true,
+      "reject": {
+        "pass": false,
+        "expect": "rejected",
+        "leave_id": "d42c4045-f96e-4b34-b338-c5480846d75f",
+        "status": "cancelled",
+        "decision_note": " | e2e_reset",
+        "allowed_actions": [],
+        "employee_key": "WATHEFNI-96550252254",
+        "start_date": "2026-09-08",
+        "leave_type": "annual",
+        "reason": "[wathefni_mobile_e2e_leave_fixture_v1:reject] disposable BrowserStack leave fixture \u2014 safe to decide/cleanup"
+      }
+    },
+    "ok": false,
+    "rule": "API/DB reconcile supports MOBILE_PASS but cannot replace it"
+  },
+  "browserstack": {
+    "build_id": "2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+    "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+    "MOBILE_PASS": 1
+  },
+  "counts": {
+    "MOBILE_PASS": 1,
+    "FAIL": 6,
+    "API_SPINE": 1,
+    "BLOCKED": 1
+  },
+  "MOBILE_PASS": 1,
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "UI FAIL count=4",
+  "rule": "API PASS \u2260 MOBILE PASS",
+  "selected_flows": [
+    "bs-smoke/00-launch-unsigned.yaml",
+    "bs-smoke/01-hr-login.yaml",
+    "bs-smoke/02-hr-tabs.yaml",
+    "bs-smoke/03-hr-leave-approve.yaml",
+    "bs-smoke/04-hr-leave-reject.yaml"
+  ],
+  "matrix": [
+    {
+      "id": "UI.00-launch-unsigned",
+      "flow": "bs-smoke/00-launch-unsigned",
+      "verdict": "MOBILE_PASS",
+      "detail": "BrowserStack iPhone 15 iOS 17.3 status=passed duration=28.254 dashboard=https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c5bbbf148/video#t=0,29",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c"
+    },
+    {
+      "id": "UI.01-hr-login",
+      "flow": "bs-smoke/01-hr-login",
+      "verdict": "FAIL",
+      "detail": "BrowserStack iPhone 15 iOS 17.3 status=failed duration=187.074 dashboard=https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf6530af3/video#t=43,231",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c"
+    },
+    {
+      "id": "UI.02-hr-tabs",
+      "flow": "bs-smoke/02-hr-tabs",
+      "verdict": "FAIL",
+      "detail": "BrowserStack iPhone 15 iOS 17.3 status=failed duration=194.211 dashboard=https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2c183f346a/video#t=244,439",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c"
+    },
+    {
+      "id": "UI.03-hr-leave-approve",
+      "flow": "bs-smoke/03-hr-leave-approve",
+      "verdict": "FAIL",
+      "detail": "BrowserStack iPhone 15 iOS 17.3 status=failed duration=185.5 dashboard=https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cb6f0159e/video#t=450,637",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c"
+    },
+    {
+      "id": "UI.04-hr-leave-reject",
+      "flow": "bs-smoke/04-hr-leave-reject",
+      "verdict": "FAIL",
+      "detail": "BrowserStack iPhone 15 iOS 17.3 status=failed duration=195.766 dashboard=https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60",
+      "video": "https://api.browserstack.com/app-automate/maestro/builds/2d5ce7f652ba62a83bc539becd3aa9df55cc5a60/sessions/tests/ba33d220f3628b2ecf6b9f691e40e968b9a33d2cf878cf55/video#t=663,859",
+      "session_id": "ba33d220f3628b2ecf6b9f691e40e968b9a33d2c"
+    },
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "FAIL",
+      "detail": "HR login failed \u2192 500 Internal Server Error",
+      "http": 500
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    },
+    {
+      "id": "API.leave.reconcile",
+      "flow": "reconcile-leave-decision",
+      "verdict": "FAIL",
+      "detail": "{\"approve\": \"cancelled\", \"reject_reason_persisted\": true, \"reject\": \"cancelled\"}"
+    }
+  ]
+}

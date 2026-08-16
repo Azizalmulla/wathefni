@@ -1,0 +1,9 @@
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  2 passed (2)
+      Tests  22 passed (22)
+   Start at  01:41:30
+   Duration  801ms (transform 130ms, setup 182ms, import 171ms, tests 114ms, environment 800ms)
+

@@ -1,0 +1,412 @@
+{
+  "observation_window": {
+    "deploy_at_utc": "2026-08-03T22:24:26Z",
+    "reviewed_at_utc": "2026-08-03T22:27:00Z_approx_local_20260804T0127",
+    "live_cv_pdfs_since_deploy": 0,
+    "live_cv_extraction_runs_since_deploy": 0,
+    "live_shadow_stage_rows": 0,
+    "evidence_basis": "production_enable_offline_smoke_plus_read_only_fixture_reanalysis",
+    "flag_state": "WATHEFNI_PDF_INSPECTOR_SHADOW=1 still on"
+  },
+  "eligible_observed": {
+    "live_production_cv_pdfs": 0,
+    "production_enable_smoke_pdfs": 24,
+    "reanalysis_fixture_pdfs": 24,
+    "note": "No live eligible CV PDFs processed after Wave1 deploy; observation is limited to production enable smoke (24 PDFs) and read-only fixture reanalysis."
+  },
+  "success_failopen_smoke": {
+    "successful_inspector_runs": 24,
+    "timeouts_or_errors_in_matrix": 0,
+    "injected_failopen_timeout_proven": true,
+    "injected_failopen_error_proven": true
+  },
+  "overhead_ms": {
+    "smoke_walls": [
+      9,
+      21,
+      2,
+      3,
+      2,
+      3,
+      4,
+      2,
+      6,
+      6,
+      3,
+      3,
+      3,
+      3,
+      5,
+      2,
+      1,
+      1,
+      1,
+      4,
+      4,
+      3,
+      5,
+      4
+    ],
+    "smoke_p50": 3.0,
+    "smoke_p95": 18,
+    "smoke_p99": 18.24,
+    "smoke_max": 21,
+    "reanalysis_p50": 2.0,
+    "reanalysis_p95": 11.35,
+    "reanalysis_p99": 13.77
+  },
+  "agreement": {
+    "exact_agreement_rate": 0.875,
+    "agree_count": 21,
+    "total": 24,
+    "inspector_fewer_ocr_than_poppler_count": 3,
+    "inspector_more_ocr_than_poppler_count": 0,
+    "high_risk_false_skip_count": 3
+  },
+  "detections": {
+    "inspector_no_ocr_while_poppler_ocr": 3,
+    "mojibake": 1,
+    "cid_tounicode_failures": 1
+  },
+  "breakdown_by_category": {
+    "contract": {
+      "n": 2,
+      "agree": 2,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "arabic_digital_cv": {
+      "n": 3,
+      "agree": 0,
+      "fewer": 3,
+      "more": 0,
+      "high_risk": 3
+    },
+    "bilingual_cv": {
+      "n": 2,
+      "agree": 2,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "broken_encoding": {
+      "n": 1,
+      "agree": 1,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "english_digital_cv": {
+      "n": 4,
+      "agree": 4,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "mixed_digital_scanned": {
+      "n": 2,
+      "agree": 2,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "multicolumn_cv": {
+      "n": 2,
+      "agree": 2,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "scanned_image_only_cv": {
+      "n": 3,
+      "agree": 3,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "cid_tounicode": {
+      "n": 1,
+      "agree": 1,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "identity_document": {
+      "n": 2,
+      "agree": 2,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    },
+    "table_heavy": {
+      "n": 2,
+      "agree": 2,
+      "fewer": 0,
+      "more": 0,
+      "high_risk": 0
+    }
+  },
+  "projected_mistral": {
+    "usd_per_page": 0.004,
+    "pages_total": 29,
+    "ocr_pages_poppler": 9,
+    "ocr_pages_inspector": 6,
+    "ocr_pages_expected_truth": 7,
+    "cost_poppler_usd": 0.036,
+    "cost_inspector_usd": 0.024,
+    "savings_if_inspector_vs_poppler_usd": 0.012,
+    "savings_pages_vs_poppler": 3,
+    "caveat": "Projection from curated fixtures only; no live production volume yet."
+  },
+  "disagreement_samples": {
+    "inspector_fewer": [
+      {
+        "file": "cv_ar_digital_01.pdf",
+        "category": "arabic_digital_cv",
+        "poppler_ocr": [
+          1
+        ],
+        "inspector_ocr": [],
+        "detections": {
+          "mojibake": false,
+          "cid_tounicode_failures": false,
+          "reversed_or_corrupted_arabic": false,
+          "suspicious_printable_but_meaningless": false,
+          "inspector_no_ocr_while_poppler_ocr": true,
+          "inspector_encoding_flag": false
+        },
+        "pdf_type": "text_based",
+        "high_risk_false_skip": true
+      },
+      {
+        "file": "cv_ar_digital_02.pdf",
+        "category": "arabic_digital_cv",
+        "poppler_ocr": [
+          1
+        ],
+        "inspector_ocr": [],
+        "detections": {
+          "mojibake": false,
+          "cid_tounicode_failures": false,
+          "reversed_or_corrupted_arabic": false,
+          "suspicious_printable_but_meaningless": false,
+          "inspector_no_ocr_while_poppler_ocr": true,
+          "inspector_encoding_flag": false
+        },
+        "pdf_type": "text_based",
+        "high_risk_false_skip": true
+      },
+      {
+        "file": "cv_ar_digital_03.pdf",
+        "category": "arabic_digital_cv",
+        "poppler_ocr": [
+          1
+        ],
+        "inspector_ocr": [],
+        "detections": {
+          "mojibake": false,
+          "cid_tounicode_failures": false,
+          "reversed_or_corrupted_arabic": false,
+          "suspicious_printable_but_meaningless": false,
+          "inspector_no_ocr_while_poppler_ocr": true,
+          "inspector_encoding_flag": false
+        },
+        "pdf_type": "text_based",
+        "high_risk_false_skip": true
+      }
+    ],
+    "inspector_more": [],
+    "high_risk": [
+      {
+        "file": "cv_ar_digital_01.pdf",
+        "category": "arabic_digital_cv",
+        "poppler_ocr": [
+          1
+        ],
+        "inspector_ocr": [],
+        "detections": {
+          "mojibake": false,
+          "cid_tounicode_failures": false,
+          "reversed_or_corrupted_arabic": false,
+          "suspicious_printable_but_meaningless": false,
+          "inspector_no_ocr_while_poppler_ocr": true,
+          "inspector_encoding_flag": false
+        },
+        "pdf_type": "text_based"
+      },
+      {
+        "file": "cv_ar_digital_02.pdf",
+        "category": "arabic_digital_cv",
+        "poppler_ocr": [
+          1
+        ],
+        "inspector_ocr": [],
+        "detections": {
+          "mojibake": false,
+          "cid_tounicode_failures": false,
+          "reversed_or_corrupted_arabic": false,
+          "suspicious_printable_but_meaningless": false,
+          "inspector_no_ocr_while_poppler_ocr": true,
+          "inspector_encoding_flag": false
+        },
+        "pdf_type": "text_based"
+      },
+      {
+        "file": "cv_ar_digital_03.pdf",
+        "category": "arabic_digital_cv",
+        "poppler_ocr": [
+          1
+        ],
+        "inspector_ocr": [],
+        "detections": {
+          "mojibake": false,
+          "cid_tounicode_failures": false,
+          "reversed_or_corrupted_arabic": false,
+          "suspicious_printable_but_meaningless": false,
+          "inspector_no_ocr_while_poppler_ocr": true,
+          "inspector_encoding_flag": false
+        },
+        "pdf_type": "text_based"
+      }
+    ]
+  },
+  "manual_reviews": [
+    {
+      "file": "cv_ar_digital_01.pdf",
+      "category": "arabic_digital_cv",
+      "language": "ar",
+      "pdf_nature": "digital_text",
+      "poppler_ocr": [
+        1
+      ],
+      "inspector_ocr": [],
+      "inspector_fewer": [
+        1
+      ],
+      "inspector_more": [],
+      "high_risk_false_skip": true,
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based",
+      "confidence": 1.0,
+      "has_encoding_issues": false,
+      "manual_review": "Poppler quality gate rejected Arabic digital text (needs_ocr); inspector extracted Arabic successfully and proposed no OCR. Wave0 also saw this. Not a classical false-skip of scanned content; risk is if Poppler was correct that text is unusable."
+    },
+    {
+      "file": "cv_ar_digital_02.pdf",
+      "category": "arabic_digital_cv",
+      "language": "ar",
+      "pdf_nature": "digital_text",
+      "poppler_ocr": [
+        1
+      ],
+      "inspector_ocr": [],
+      "inspector_fewer": [
+        1
+      ],
+      "inspector_more": [],
+      "high_risk_false_skip": true,
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based",
+      "confidence": 1.0,
+      "has_encoding_issues": false,
+      "manual_review": "Poppler quality gate rejected Arabic digital text (needs_ocr); inspector extracted Arabic successfully and proposed no OCR. Wave0 also saw this. Not a classical false-skip of scanned content; risk is if Poppler was correct that text is unusable."
+    },
+    {
+      "file": "cv_ar_digital_03.pdf",
+      "category": "arabic_digital_cv",
+      "language": "ar",
+      "pdf_nature": "digital_text",
+      "poppler_ocr": [
+        1
+      ],
+      "inspector_ocr": [],
+      "inspector_fewer": [
+        1
+      ],
+      "inspector_more": [],
+      "high_risk_false_skip": true,
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based",
+      "confidence": 1.0,
+      "has_encoding_issues": false,
+      "manual_review": "Poppler quality gate rejected Arabic digital text (needs_ocr); inspector extracted Arabic successfully and proposed no OCR. Wave0 also saw this. Not a classical false-skip of scanned content; risk is if Poppler was correct that text is unusable."
+    },
+    {
+      "file": "cv_broken_encoding_01.pdf",
+      "category": "broken_encoding",
+      "language": "en_broken",
+      "pdf_nature": "digital_broken_encoding",
+      "poppler_ocr": [],
+      "inspector_ocr": [],
+      "inspector_fewer": [],
+      "inspector_more": [],
+      "high_risk_false_skip": false,
+      "detections": {
+        "mojibake": true,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "pdf_type": "text_based",
+      "confidence": 1.0,
+      "has_encoding_issues": false,
+      "manual_review": "Mojibake detection fired. Poppler did NOT mark needs_ocr; inspector also proposed no OCR. Encoding flag false. Quality-gate detection catches mojibake as a signal, but does NOT elevate to OCR-page proposal or high_risk_false_skip because Poppler agreed."
+    }
+  ],
+  "broken_encoding_gate_assessment": {
+    "file": "cv_broken_encoding_01.pdf",
+    "category": "broken_encoding",
+    "language": "en_broken",
+    "pdf_nature": "digital_broken_encoding",
+    "poppler_ocr": [],
+    "inspector_ocr": [],
+    "inspector_fewer": [],
+    "inspector_more": [],
+    "high_risk_false_skip": false,
+    "detections": {
+      "mojibake": true,
+      "cid_tounicode_failures": false,
+      "reversed_or_corrupted_arabic": false,
+      "suspicious_printable_but_meaningless": false,
+      "inspector_no_ocr_while_poppler_ocr": false,
+      "inspector_encoding_flag": false
+    },
+    "pdf_type": "text_based",
+    "confidence": 1.0,
+    "has_encoding_issues": false,
+    "manual_review": "Mojibake detection fired. Poppler did NOT mark needs_ocr; inspector also proposed no OCR. Encoding flag false. Quality-gate detection catches mojibake as a signal, but does NOT elevate to OCR-page proposal or high_risk_false_skip because Poppler agreed."
+  },
+  "thresholds": {
+    "min_real_eligible_cv_pdfs": 200,
+    "live_count": 0,
+    "zero_confirmed_false_ocr_skips": "insufficient_live_evidence",
+    "broken_encoding_capture": "partial_signal_only",
+    "fail_open_success": true,
+    "p95_under_150ms": true,
+    "no_arabic_bilingual_regression": "unproven_in_live_traffic"
+  }
+}

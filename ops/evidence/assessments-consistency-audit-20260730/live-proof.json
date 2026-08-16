@@ -1,0 +1,101 @@
+{
+  "company": "WATHEFNI",
+  "visibility_policy_row": {
+    "error": "column \"prehire_visibility_policy\" does not exist\nLINE 1: SELECT company_code, COALESCE(prehire_visibility_policy, set...\n                                      ^\n"
+  },
+  "cohorts": {
+    "assessment_ready_to_send": {
+      "application_count": 2,
+      "people_count": 2,
+      "display_count": 2,
+      "unit": "applications"
+    },
+    "assessment_sent_pending": {
+      "application_count": 1,
+      "people_count": 1,
+      "display_count": 1,
+      "unit": "applications"
+    },
+    "assessment_in_progress": {
+      "application_count": 0,
+      "people_count": 0,
+      "display_count": 0,
+      "unit": "applications"
+    },
+    "assessment_expired": {
+      "application_count": 2,
+      "people_count": 2,
+      "display_count": 2,
+      "unit": "applications"
+    },
+    "assessment_resend_needed": {
+      "application_count": 2,
+      "people_count": 2,
+      "display_count": 2,
+      "unit": "applications"
+    },
+    "assessment_delivery_failed": {
+      "application_count": 0,
+      "people_count": 0,
+      "display_count": 0,
+      "unit": "applications"
+    },
+    "assessment_completed": {
+      "application_count": 1,
+      "people_count": 1,
+      "display_count": 1,
+      "unit": "people"
+    },
+    "assessment_attention": {
+      "application_count": 3,
+      "people_count": 2,
+      "display_count": 2,
+      "unit": "people"
+    }
+  },
+  "opened_list_totals": {
+    "assessment_ready_to_send": 2,
+    "assessment_sent_pending": 1,
+    "assessment_in_progress": 0,
+    "assessment_expired": 2,
+    "assessment_resend_needed": 2,
+    "assessment_delivery_failed": 0,
+    "assessment_completed": 1,
+    "assessment_attention": 3
+  },
+  "badge_eq_opened_company_wide": {
+    "assessment_ready_to_send": true,
+    "assessment_sent_pending": true,
+    "assessment_in_progress": true,
+    "assessment_expired": true,
+    "assessment_resend_needed": true,
+    "assessment_delivery_failed": true,
+    "assessment_completed": true,
+    "assessment_attention": true
+  },
+  "attempt_status_counts": {
+    "expired": 3,
+    "completed": 1,
+    "pending": 1
+  },
+  "attempts_total": 5,
+  "needs_review_count_page_local_backend": 0,
+  "report_ready_count_page_local_backend": 1,
+  "unit_divergence_live": {
+    "expired_attempts": 3,
+    "resend_cohort_apps": 2,
+    "pending_attempts": 1,
+    "sent_pending_cohort_apps": 1,
+    "note": "TING_EXCEL has pending latest + superseded expired \u2192 expired in status_counts but not resend cohort"
+  },
+  "code_contract_failures": [
+    "cohort badges company-wide; hybrid/assigned lists are assignment-scoped",
+    "In progress/Completed metrics fall back to attempt status_counts (all attempts) when cohort is 0",
+    "Needs review + Reports are page-local client filters; backend needs_review_count also page-local",
+    "Cancelled attempts counted in status_counts/total but excluded from all send cohorts",
+    "Client assessmentQueue re-filters with cv.received stricter than reviewable_predicate",
+    "Cohort units: operational applications vs completed/attention people display_count; UI prefers application_count",
+    "status_counts count every attempt; cohorts use latest attempt per eligible application"
+  ],
+  "verdict": "FAIL"
+}

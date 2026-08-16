@@ -1,0 +1,19 @@
+SHW3B staging create-path tag=DA00403D
+PASS  unsupported_actions_plural_405
+PASS  canonical_create_post_ok
+SHOT /opt/wathefni/staging-evidence/shifts-wave3b-create-20260802T225846Z/screenshots/w3b-staging-board-before.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3b-create-20260802T225846Z/screenshots/w3b-staging-after-same-day.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3b-create-20260802T225846Z/screenshots/w3b-staging-after-split.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3b-create-20260802T225846Z/screenshots/w3b-staging-after-overnight.png
+SHOT /opt/wathefni/staging-evidence/shifts-wave3b-create-20260802T225846Z/screenshots/w3b-staging-mobile-rtl.png
+PASS  browser_composer_create_posts
+PASS  list_after_create_ok
+PASS  db_scheduled_count_ge_3
+PASS  split_two_authority_rows
+PASS  overnight_ends_next_day_row
+PASS  overnight_single_authority_row
+PASS  soft_cancel_ok
+PASS  residual_zero
+
+10 passed, 0 failed
+RESULTS /opt/wathefni/staging-evidence/shifts-wave3b-create-20260802T225846Z/screenshots/w3b-staging-create-path.json

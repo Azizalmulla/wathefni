@@ -1,0 +1,95 @@
+{
+  "count": 5,
+  "jobs": [
+    {
+      "job_id": "351ed83a-3c95-468a-9093-665864129bb4",
+      "status": "dead_letter",
+      "job_type": "cv_extraction",
+      "subject_type": "candidate_document",
+      "subject_id": "fc21bc04-11e4-41b0-859a-8874d16976e4",
+      "attempts": 5,
+      "max_attempts": 5,
+      "created_at": "2026-08-03 21:33:12.829891+00:00",
+      "updated_at": "2026-08-03 21:51:22.656533+00:00",
+      "completed_at": "2026-08-03 21:51:22.660163+00:00",
+      "last_error_code": "candidate_document_missing",
+      "payload": {
+        "app_key": "imp-migw1bravo-3405dd8a1bcec79a-MIGW1BRAVO-IMPORT",
+        "source_channel": "other_ats_export",
+        "candidate_document_id": "fc21bc04-11e4-41b0-859a-8874d16976e4"
+      }
+    },
+    {
+      "job_id": "545b9b61-e730-453f-995b-b16d442a799d",
+      "status": "dead_letter",
+      "job_type": "cv_extraction",
+      "subject_type": "candidate_document",
+      "subject_id": "9280060a-d326-4ac1-8727-19f0c816c54e",
+      "attempts": 5,
+      "max_attempts": 5,
+      "created_at": "2026-08-03 21:33:12.829891+00:00",
+      "updated_at": "2026-08-03 21:50:36.236017+00:00",
+      "completed_at": "2026-08-03 21:50:36.239105+00:00",
+      "last_error_code": "candidate_document_missing",
+      "payload": {
+        "app_key": "imp-migw1bravo-6c5a2e245fb0cf81-MIGW1BRAVO-IMPORT",
+        "source_channel": "other_ats_export",
+        "candidate_document_id": "9280060a-d326-4ac1-8727-19f0c816c54e"
+      }
+    },
+    {
+      "job_id": "8ec4cdcd-8f42-4f22-9edd-dcd569eebd6e",
+      "status": "dead_letter",
+      "job_type": "cv_extraction",
+      "subject_type": "candidate_document",
+      "subject_id": "97a21040-bc5b-4d2f-b4a1-3c0a8b297972",
+      "attempts": 5,
+      "max_attempts": 5,
+      "created_at": "2026-08-03 21:33:12.829891+00:00",
+      "updated_at": "2026-08-03 21:49:48.522201+00:00",
+      "completed_at": "2026-08-03 21:49:48.526334+00:00",
+      "last_error_code": "candidate_document_missing",
+      "payload": {
+        "app_key": "imp-migw1bravo-20b3a0eb8b123354-MIGW1BRAVO-IMPORT",
+        "source_channel": "other_ats_export",
+        "candidate_document_id": "97a21040-bc5b-4d2f-b4a1-3c0a8b297972"
+      }
+    },
+    {
+      "job_id": "d0a98e1a-ff4b-4954-a889-2bbad5d8cf4a",
+      "status": "dead_letter",
+      "job_type": "cv_extraction",
+      "subject_type": "candidate_document",
+      "subject_id": "9897f9c5-8875-49a2-91bf-dd2b3c5bdd1c",
+      "attempts": 5,
+      "max_attempts": 5,
+      "created_at": "2026-08-03 21:33:12.829891+00:00",
+      "updated_at": "2026-08-03 21:52:56.393115+00:00",
+      "completed_at": "2026-08-03 21:52:56.395949+00:00",
+      "last_error_code": "candidate_document_missing",
+      "payload": {
+        "app_key": "imp-migw1bravo-922f741c707b8fed-MIGW1BRAVO-IMPORT",
+        "source_channel": "other_ats_export",
+        "candidate_document_id": "9897f9c5-8875-49a2-91bf-dd2b3c5bdd1c"
+      }
+    },
+    {
+      "job_id": "e0735a38-1601-4072-bd33-35a9d8b7d00f",
+      "status": "dead_letter",
+      "job_type": "cv_extraction",
+      "subject_type": "candidate_document",
+      "subject_id": "60724b71-d469-461a-88d2-6bef39b0561d",
+      "attempts": 5,
+      "max_attempts": 5,
+      "created_at": "2026-08-03 21:33:12.829891+00:00",
+      "updated_at": "2026-08-03 21:52:09.650003+00:00",
+      "completed_at": "2026-08-03 21:52:09.653839+00:00",
+      "last_error_code": "candidate_document_missing",
+      "payload": {
+        "app_key": "imp-migw1bravo-107d05f3528605b3-MIGW1BRAVO-IMPORT",
+        "source_channel": "other_ats_export",
+        "candidate_document_id": "60724b71-d469-461a-88d2-6bef39b0561d"
+      }
+    }
+  ]
+}

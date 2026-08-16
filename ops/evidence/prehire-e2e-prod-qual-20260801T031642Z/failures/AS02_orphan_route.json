@@ -1,0 +1,22 @@
+{
+  "id": "AS02_orphan_route",
+  "module": "assessments",
+  "title": "Orphan /dashboard/prehire/assessments/queue returns HTTP 500 instead of 404",
+  "result": "FAIL",
+  "severity": "P3",
+  "impact": "UI does not call this path (queue uses applications?overview_cohort=). Blind clients or stale bookmarks get opaque 500.",
+  "repro": {
+    "method": "GET",
+    "path": "/dashboard/prehire/assessments/queue?cohort=assessment_ready_to_send&limit=10",
+    "status": 500,
+    "body": "Internal Server Error",
+    "content_type": "text/plain"
+  },
+  "control": {
+    "ui_path": "GET /dashboard/prehire/applications?overview_cohort=assessment_ready_to_send&assessment_cohort=assessment_ready_to_send",
+    "ui_status": 200,
+    "ui_count_sample": 2
+  },
+  "recommended_fix": "Register explicit 404 for unknown assessment subroutes or remove dead router; add smoke asserting non-UI paths fail closed with 404.",
+  "ts": "2026-08-01T03:20:00Z"
+}

@@ -1,0 +1,108 @@
+{
+  "started_at": "2026-07-18T22:15:54.563413+00:00",
+  "environment": "staging",
+  "source_manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "boundaries": {
+    "production_touched": false,
+    "approved_for_use": false,
+    "other_23_items_unchanged": true,
+    "item8_content_unchanged": true,
+    "item22_content_unchanged": true
+  },
+  "session": {
+    "session_id": "fd59949f-556f-47ee-ae72-7ae474dc6224",
+    "company_code": "WATHEFNI",
+    "started_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+    "started_at": "2026-07-18T22:15:54.606060+00:00",
+    "expires_at": "2026-07-18T23:45:54.606060+00:00",
+    "ended_at": null,
+    "ended_by_user_id": null,
+    "end_reason": null,
+    "max_duration_minutes": 90,
+    "notes": "Battery-1 item #7 immutable revise + v2 battery",
+    "idempotent": false
+  },
+  "secondary_run": {
+    "run_id": "e673c54f-03cf-410b-aef3-e9f6bc97aa8f",
+    "status": "completed",
+    "estimated_cost_usd": "0.0027207"
+  },
+  "bilingual_run": {
+    "run_id": "6f463bf4-bcbc-46b7-9157-8864f05478af",
+    "status": "completed",
+    "estimated_cost_usd": "0.0015192"
+  },
+  "ar_transition": {
+    "status": 409,
+    "body": {
+      "detail": {
+        "error": "product2_automated_review_not_passed",
+        "evidence": {
+          "deterministic": {},
+          "secondary": {},
+          "secondary_run_qualified": false,
+          "current_revision_id": "5b9ac5f5-2f98-4cda-af2a-79f21719ca6d",
+          "arabic_human_review_ready": false,
+          "arabic_human_review_missing": [
+            "natural_professional_arabic",
+            "no_literal_machine_translation",
+            "gulf_kuwait_cultural_suitability",
+            "same_construct_and_difficulty",
+            "answer_key_equivalence",
+            "no_language_specific_clueing"
+          ]
+        }
+      }
+    }
+  },
+  "item7_revisions": {
+    "en_draft_id": "2728ebb7-8115-479b-8f09-a637a73e29cd",
+    "en_revision_id": "58b443fb-dfa0-47b8-a947-4721f2be3ae7",
+    "ar_draft_id": "7c7a143e-3a6b-4b0a-b91f-711d77d04880",
+    "ar_revision_id": "5b9ac5f5-2f98-4cda-af2a-79f21719ca6d",
+    "translation_pair_id": "0c2370bd-7370-4674-b133-c3dd58c7cac4",
+    "supersedes_pair_id": "64ec9dc3-a1bd-4e48-8a41-0e0fba8ca4f6",
+    "answer_key": "C"
+  },
+  "battery_v2": {
+    "en": {
+      "battery_key": "b1_gawj_v1_en_pilot_v2",
+      "assessment_version_id": "8b079f30-6c58-4753-81a7-1945d4c6424b",
+      "content_sha256": "d21f6178ba56b071c468bc58ea3101359eef302d16fa5057289a2b167d7ab2ea",
+      "content_version": 2
+    },
+    "ar": {
+      "battery_key": "b1_gawj_v1_ar_pilot_v2",
+      "assessment_version_id": "90d6ebd8-bbdb-4de2-82a3-e5c6efe764e6",
+      "content_sha256": "ec136b1c4c61b97f54056b282418ba17c2024d2c47de57b231786d2ccd4113bd",
+      "content_version": 2
+    }
+  },
+  "session_end": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "ended": {
+        "ended": [
+          {
+            "session_id": "fd59949f-556f-47ee-ae72-7ae474dc6224",
+            "company_code": "WATHEFNI",
+            "started_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+            "started_at": "2026-07-18T22:15:54.606060+00:00",
+            "expires_at": "2026-07-18T23:45:54.606060+00:00",
+            "ended_at": "2026-07-18T22:16:10.916989+00:00",
+            "ended_by_user_id": "3950b9ba-08b4-4b0c-a885-ff23fe40375b",
+            "end_reason": "battery1_item7_revise_complete",
+            "max_duration_minutes": 90,
+            "notes": "Battery-1 item #7 immutable revise + v2 battery"
+          }
+        ],
+        "count": 1
+      },
+      "publish_available": false
+    }
+  },
+  "finished_at": "2026-07-18T22:16:10.922272+00:00",
+  "manifest_sha256": "035a12a2e35c487d3588f2d3be8952cd3350f30f2b030cdf3d863c5490e39c62",
+  "approved_for_use": false
+}

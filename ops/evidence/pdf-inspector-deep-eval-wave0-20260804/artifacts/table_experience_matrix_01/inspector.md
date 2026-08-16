@@ -1,0 +1,10 @@
+# Experience Matrix — Table Heavy CV Annex
+
+Candidate: Table Annex Demo | email: table.annex@example.com
+
+|Year|Employer|Role|Domain|
+|---|---|---|---|
+|2024|Wathefni|Staff Engineer|HR Tech|
+|2022|Gulf Soft|Senior Engineer|Queues|
+|2020|ByteCo|Engineer|ETL|
+|2018|Startly|Junior Engineer|Web|

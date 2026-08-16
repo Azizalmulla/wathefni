@@ -1,0 +1,3 @@
+CIVIL ID CARD — SYNTHETIC بطاقة المدنية
+
+Name: Yousef Al-Ahmad Civil ID: 290123456789 Nationality: Kuwaiti Expiry: 2030-01-15

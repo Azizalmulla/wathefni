@@ -1,0 +1,28 @@
+    attendance truth c1 — unit/memory
+      PASS  truth module
+      PASS  rollback guidance
+      PASS  capture ops company gate
+      PASS  global ingest off denies
+      PASS  empty allowlist denies
+      PASS  allowlisted company ok
+      PASS  other company denied
+      PASS  entitled gate blocks other company
+      PASS  entitled in punch ok
+      PASS  entitled out punch ok
+      PASS  day projection present
+      PASS  exceptions synced
+      PASS  correction requested
+      PASS  review approve does not apply
+      PASS  case approved ready
+      PASS  projection unchanged before apply
+      PASS  apply succeeds
+      PASS  apply mutates projection (before/after)
+      PASS  projection version advanced
+      PASS  reject does not apply
+      PASS  reject status
+      PASS  payroll independence note
+      PASS  assistant mutations out of MVP
+
+    23 passed, 0 failed
+ATTENDANCE_TRUTH_UNIT_PASS
+ATTENDANCE_TRUTH_FULL_PASS

@@ -1,0 +1,26 @@
+PASS  posthire src present
+PASS  setup panel
+PASS  checklist panel
+PASS  package honesty panel
+PASS  csv help tab
+PASS  rollback sends expected_row_version
+PASS  quarantine acknowledge wired
+PASS  rtl support
+PASS  mobile flex wrap
+PASS  EN operator title
+PASS  AR operator title
+PASS  EN who pays copy
+PASS  EN input snapshot
+PASS  no primary Fingerprint jargon
+PASS  Hours review tab label
+PASS  AR hours review
+PASS  PostHire external tab hint
+PASS  PostHire hours tab
+PASS  payslip import picker
+PASS  close import picker
+PASS  no pasted import_run_id placeholder
+PASS  api quarantine acknowledge
+PASS  api rollback requires row version
+PASS  acknowledge route in app
+
+24 passed, 0 failed

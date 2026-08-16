@@ -1,0 +1,12 @@
+health_ok
+health=200
+1386:        "notes_version": row.get("notes_version"),
+1395:        if payload.get("notes_version") is None and row.get("notes_version") is not None:
+1396:            payload["notes_version"] = row.get("notes_version")
+1485:            "notes_version": raw_row.get("notes_version", row.get("notes_version")),
+2609:                        "destination": "/jobs",
+2624:                        "destination": "/jobs",
+2639:                        "destination": "/jobs",
+2660:                            f"/candidates?position={position_code}" if position_code else "/jobs"
+2783:        expected_updated_at: str | None = None
+3654:                expected_updated_at=str(request.expected_updated_at or "") or None,

@@ -1,0 +1,5 @@
+static:308
+/var/www/wathefni-dashboard/index.html
+/var/www/wathefni-dashboard/assets/InterviewsPage-BGTjy97J.js
+/var/www/wathefni-dashboard/assets/PostHire-CLrMzHLs.js
+/var/www/wathefni-dashboard/assets/api-DLk1lVk-.js

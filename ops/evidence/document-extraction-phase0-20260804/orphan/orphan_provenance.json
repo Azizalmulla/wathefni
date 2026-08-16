@@ -1,0 +1,45 @@
+{
+  "db": "wathefni",
+  "stamp_observed": "20260804Tapprox",
+  "active_other_ats_export": 349,
+  "by_status": {
+    "pending": 334,
+    "retrying": 15
+  },
+  "created_window_utc": [
+    "2026-08-03T21:33:10Z",
+    "2026-08-03T21:33:19Z"
+  ],
+  "migration_ack": {
+    "ack_id": "8cdd3387-8a32-4249-917d-5c4aa5c96a04",
+    "at": "2026-08-03T21:33:01Z",
+    "marker": "MIGW1B"
+  },
+  "linked": {
+    "doc_exists": 0,
+    "doc_missing": 349,
+    "app_exists": 0,
+    "app_missing": 349,
+    "valid_current_cv_count": 0
+  },
+  "attempts": {
+    "0": 334,
+    "1": 15
+  },
+  "last_errors": [
+    {
+      "code": "candidate_document_missing",
+      "c": 15
+    },
+    {
+      "code": "",
+      "c": 334
+    }
+  ],
+  "payload_has_migration_batch_id": false,
+  "app_key_prefix": "imp-wathefni-",
+  "source_channel": "other_ats_export",
+  "orphan_verdict": "ORPHANED_LEFTOVERS_FROM_FAILED_WAVE1B_LIKELY",
+  "belongs_to_valid_current_cvs": false,
+  "cleanup_executed": false
+}

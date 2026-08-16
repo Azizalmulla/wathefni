@@ -1,0 +1,46 @@
+{
+  "receipt": {
+    "result_id": "2aeb20d8-103f-4bd7-ad94-24b289fb67c9",
+    "event_id": "79137baf-e15a-43fa-81b0-b0ff59260f9a",
+    "rejection_code": "identity_mismatch",
+    "created_at": "2026-08-05T23:30:30.666564Z",
+    "item_id": "civil_id_canary_test",
+    "validated_as": "civil_id",
+    "mime": "image/jpeg",
+    "extension": ".jpg",
+    "attempted_byte_size": 246805,
+    "content_sha256": "c5b683980cdb6bce82d57ebe9c1f465a92ff87eb2053f3aa11482b9569e52930",
+    "version_id": null,
+    "note": "Blocked before store; no governed version created"
+  },
+  "verify": {
+    "detected_item": "civil_id",
+    "classification_label": "civil_id",
+    "confidence": 0.97,
+    "matches_expected_item": true,
+    "extraction_status": "extracted",
+    "reason": "Document matches expected civil_id format and content.",
+    "side": "front",
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "recognized_as_cv": false
+  },
+  "identity": {
+    "extracted_name": "ABDULAZIZ H R ALMULLA",
+    "extracted_name_ar": "عبد العزيز حمد راشد الملا",
+    "document_number": "302082900873",
+    "employee_name_compared": "W5C-SYNTH|Aziz Mobile QA",
+    "identity_check": {
+      "status": "mismatch",
+      "match": false,
+      "overlap_tokens": [],
+      "token_score": 0.0,
+      "sequence_score": 0.368
+    }
+  },
+  "final": {
+    "decision": "block",
+    "reason": "identity_mismatch",
+    "message_en": "The name on this ID doesn't match your employee record. Please upload your own Civil ID or passport, or contact HR."
+  }
+}

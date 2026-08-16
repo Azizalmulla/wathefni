@@ -1,0 +1,38 @@
+auth wave2 phase2 biometric unit
+  PASS  EN/AR biometric key parity
+  PASS  required biometric EN keys
+  PASS  master flag EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+  PASS  requires PIN master
+  PASS  canary Aziz key
+  PASS  canary Talal key
+  PASS  preference SecureStore key
+  PASS  stores enrolled level
+  PASS  WHEN_UNLOCKED
+  PASS  uses expo-local-authentication
+  PASS  disableDeviceFallback to keep PIN canonical
+  PASS  clears preference when enrollment drops
+  PASS  hardware+enrolled usable gate
+  PASS  authenticate supports strong
+  PASS  needsBiometricOptIn status
+  PASS  unlockWithBiometric API
+  PASS  finishBiometricOptIn API
+  PASS  setBiometricUnlockEnabled API
+  PASS  clears biometric on logout/OTP wipe
+  PASS  no idle/background re-lock (Phase 3)
+  PASS  biometric never hits backend routes
+  PASS  PIN still unlock path
+  PASS  AuthGate biometric opt-in
+  PASS  AuthGate biometric unlock gate
+  PASS  PIN fallback still present
+  PASS  NSFaceIDUsageDescription
+  PASS  expo-local-authentication plugin
+  PASS  Android USE_BIOMETRIC
+  PASS  Android USE_FINGERPRINT
+  PASS  production PIN flag
+  PASS  production biometric flag
+  PASS  expo-local-authentication dependency
+  PASS  settings biometric toggle
+  PASS  Wave 1 frozen contract still present
+  PASS  mobile tsc --noEmit
+
+35 passed, 0 failed

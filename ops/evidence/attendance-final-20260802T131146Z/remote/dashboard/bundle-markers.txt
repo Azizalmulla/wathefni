@@ -1,0 +1,6 @@
+chunk=/var/www/wathefni-dashboard/assets/PostHire-D8YjEnpm.js
+FOUND Attendance operations
+FOUND عمليات الحضور
+FOUND Connector health
+FOUND Day detail
+FOUND Approved — ready to apply

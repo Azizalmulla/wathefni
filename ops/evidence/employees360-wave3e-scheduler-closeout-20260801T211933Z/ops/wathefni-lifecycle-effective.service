@@ -1,0 +1,30 @@
+[Unit]
+Description=Wathefni Employees 360 Wave 3E lifecycle effective scheduler (production synthetic-only)
+After=network-online.target postgresql.service wathefni-orchestrator.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=WATHEFNI_ENV=production
+Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
+Environment=WATHEFNI_EXPECTED_DATABASE_PORT=5432
+Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni
+Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-production-isolation-v1
+Environment=HOME=/root
+Environment=WATHEFNI_EMPLOYEE_AUTHORITY_V2=on
+Environment=WATHEFNI_EMPLOYEE_AUTHORITY_V2_COMPANIES=WATHEFNI
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+Environment=WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+Environment=WATHEFNI_LIFECYCLE_COUNSEL_GATE=on
+# Optional one-shot failure inject for retry drills (file is deleted after use):
+# Environment=WATHEFNI_LIFECYCLE_SCHEDULER_FAIL_ONCE_FILE=/tmp/wathefni-lifecycle-fail-once
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python lifecycle-effective-worker.py
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

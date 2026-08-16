@@ -1,0 +1,132 @@
+{
+    "ok": true,
+    "company_code": "WATHEFNI",
+    "connections": [
+        {
+            "connection_id": "922cf130-db2e-4b2c-a16c-8630d8d99de7",
+            "company_code": "WATHEFNI",
+            "provider_key": "google",
+            "mode": "company",
+            "status": "disconnected",
+            "account_email": "azizalmulla16@gmail.com",
+            "external_calendar_id": "primary",
+            "display_name": "C6B evidence Google OAuth",
+            "sync_event_types": [
+                "meeting",
+                "interview",
+                "personal_block",
+                "hold",
+                "out_of_office",
+                "deadline",
+                "other"
+            ],
+            "sync_include_candidate_name": false,
+            "with_meet_default": true,
+            "platform_integration_id": "fb79863d-1fa6-47a4-aae6-47523b23eab5",
+            "last_sync_at": "2026-07-29T16:58:28.613677+00:00",
+            "last_error": "platform_integration_disconnected",
+            "health": {
+                "ok": true,
+                "last_outbox_id": "95fe38c9-4274-49ba-9d59-298512386802"
+            },
+            "has_credentials": true,
+            "disconnected_at": "2026-07-29T16:58:29.309892+00:00",
+            "created_at": "2026-07-29T16:58:25.089821+00:00",
+            "updated_at": "2026-07-29T16:58:29.309892+00:00"
+        },
+        {
+            "connection_id": "3cbb21de-f316-4610-a10e-f709dcb7c8a5",
+            "company_code": "WATHEFNI",
+            "provider_key": "google",
+            "mode": "legacy_operator",
+            "status": "disconnected",
+            "account_email": "azizalmulla16@gmail.com",
+            "external_calendar_id": "primary",
+            "display_name": "Legacy operator Google",
+            "sync_event_types": [
+                "meeting",
+                "interview",
+                "personal_block",
+                "hold",
+                "out_of_office",
+                "deadline",
+                "other"
+            ],
+            "sync_include_candidate_name": false,
+            "with_meet_default": true,
+            "platform_integration_id": null,
+            "last_sync_at": "2026-07-29T16:58:28.930387+00:00",
+            "last_error": null,
+            "health": {
+                "ok": true,
+                "last_outbox_id": "2e92a376-442e-4540-a00a-072ff96d0cbc"
+            },
+            "has_credentials": true,
+            "disconnected_at": "2026-07-29T17:02:33.109146+00:00",
+            "created_at": "2026-07-29T16:58:25.117850+00:00",
+            "updated_at": "2026-07-29T17:02:33.109146+00:00"
+        },
+        {
+            "connection_id": "75bd4899-e781-43ab-9e29-f7884632583c",
+            "company_code": "WATHEFNI",
+            "provider_key": "google",
+            "mode": "company",
+            "status": "disconnected",
+            "account_email": "azizalmulla16@gmail.com",
+            "external_calendar_id": "primary",
+            "display_name": "C6B evidence Google OAuth",
+            "sync_event_types": [
+                "meeting",
+                "interview",
+                "personal_block",
+                "hold",
+                "out_of_office",
+                "deadline",
+                "other"
+            ],
+            "sync_include_candidate_name": false,
+            "with_meet_default": true,
+            "platform_integration_id": "33639468-b1eb-40c1-8f89-94dd196936dd",
+            "last_sync_at": "2026-07-29T17:05:35.481320+00:00",
+            "last_error": "platform_integration_disconnected",
+            "health": {
+                "ok": true,
+                "last_outbox_id": "9f35b9d1-e3f2-4994-bffd-3706ba32a755"
+            },
+            "has_credentials": true,
+            "disconnected_at": "2026-07-29T17:05:35.789950+00:00",
+            "created_at": "2026-07-29T17:02:33.157385+00:00",
+            "updated_at": "2026-07-29T17:05:35.789950+00:00"
+        },
+        {
+            "connection_id": "a4cdd806-17f5-4262-befd-598ede7af6ab",
+            "company_code": "WATHEFNI",
+            "provider_key": "google",
+            "mode": "company",
+            "status": "disconnected",
+            "account_email": "azizalmulla16@gmail.com",
+            "external_calendar_id": "primary",
+            "display_name": "C6B evidence Google OAuth reconnect",
+            "sync_event_types": [
+                "meeting",
+                "interview",
+                "personal_block",
+                "hold",
+                "out_of_office",
+                "deadline",
+                "other"
+            ],
+            "sync_include_candidate_name": false,
+            "with_meet_default": true,
+            "platform_integration_id": "a3b5630e-2ec2-4247-90b4-1ecff1613949",
+            "last_sync_at": null,
+            "last_error": "platform_integration_disconnected",
+            "health": {},
+            "has_credentials": true,
+            "disconnected_at": "2026-07-29T17:05:35.939951+00:00",
+            "created_at": "2026-07-29T17:05:35.804242+00:00",
+            "updated_at": "2026-07-29T17:05:35.939951+00:00"
+        }
+    ],
+    "count": 4
+}

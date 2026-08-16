@@ -1,0 +1,137 @@
+{
+  "failures": 0,
+  "gates": [
+    {
+      "blocker": false,
+      "category": "authorization",
+      "detail": "backend_current, permission, actor/tenant mismatch, and cross-tenant non-leak proven",
+      "gate_id": "auth_matrix",
+      "metrics": {
+        "cases": [
+          {
+            "case": "empty_permissions",
+            "code": "permission_denied"
+          },
+          {
+            "case": "missing_prehire",
+            "code": "permission_denied"
+          },
+          {
+            "case": "actor_mismatch",
+            "code": "permission_subject_mismatch"
+          },
+          {
+            "case": "tenant_subject_mismatch",
+            "code": "permission_subject_mismatch"
+          },
+          {
+            "case": "not_backend_current",
+            "code": "backend_current_permission_required"
+          }
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "blocker": false,
+      "category": "audit",
+      "detail": "restricted/deletion denied correctly; audit failure blocks model-facing evidence",
+      "gate_id": "audit_fail_closed",
+      "metrics": {
+        "deletion_code": "candidate_restricted",
+        "restriction_readable": true
+      },
+      "status": "PASS"
+    },
+    {
+      "blocker": false,
+      "category": "identity",
+      "detail": "No surname merge; exact app refs only; surrogate separate from real phone",
+      "gate_id": "identity_mariam_surrogate",
+      "metrics": {
+        "manual_key": "imp-manual-001",
+        "mariam_key": "96550000001",
+        "real_key": "96550009999"
+      },
+      "status": "PASS"
+    },
+    {
+      "blocker": false,
+      "category": "canonical_knowledge",
+      "detail": "Current version selected; WhatsApp/manual gaps disclosed; conflict fail-closed",
+      "gate_id": "canonical_channels",
+      "metrics": {
+        "conflict": "conflict",
+        "email_version": "v-new",
+        "manual_cv": "not_recorded",
+        "whatsapp_cv": "not_recorded"
+      },
+      "status": "PASS"
+    },
+    {
+      "blocker": false,
+      "category": "retrieval_tools_ranking",
+      "detail": "Search/tools/ranking qualified; 50k full run estimated not executed",
+      "gate_id": "search_tools_ranking_scale",
+      "metrics": {
+        "audit_events": 15,
+        "compare_no_winner": true,
+        "degraded_mode": "retrieval_degraded",
+        "held_ranking_denied": "held_or_job_ranking_ineligible",
+        "ranking_unexplained": 0,
+        "scale": {
+          "1000": {
+            "chunks": 3017,
+            "index_ms": 1213.1,
+            "needle_found": true,
+            "retrieval_mode": "hybrid",
+            "search_p50_ms": 15.58,
+            "search_p95_ms": 15.97,
+            "total": 103
+          },
+          "10000": {
+            "chunks": 33016,
+            "index_ms": 168859.01,
+            "needle_found": true,
+            "retrieval_mode": "hybrid",
+            "search_p50_ms": 170.98,
+            "search_p95_ms": 182.66,
+            "total": 104
+          },
+          "50000_estimate": {
+            "estimated_index_ms": 844295.05,
+            "executed_full_50k": false,
+            "reason": "capacity_estimate_from_10k_not_full_reindex"
+          }
+        },
+        "tool_search_mode": "hybrid",
+        "voyage_real_calls": 0
+      },
+      "status": "ACCEPTED_LIMITATION"
+    },
+    {
+      "blocker": false,
+      "category": "zero_mutation",
+      "detail": "Invalidated chunks immediately unsearchable; no production/lifecycle mutation",
+      "gate_id": "invalidation_zero_mutation",
+      "metrics": {
+        "before_current": 2,
+        "invalidated": 2
+      },
+      "status": "PASS"
+    },
+    {
+      "blocker": false,
+      "category": "voyage",
+      "detail": "Real Voyage not authorized/credentialed in this environment; mock provider used",
+      "gate_id": "voyage_real",
+      "metrics": {
+        "api_key_present": false,
+        "voyage_enabled": false
+      },
+      "status": "ACCEPTED_LIMITATION"
+    }
+  ],
+  "ok": true,
+  "tests_run": 7
+}

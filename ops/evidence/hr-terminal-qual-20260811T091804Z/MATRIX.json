@@ -1,0 +1,868 @@
+{
+  "stamp": "20260811T091804Z",
+  "evidence": "ops/evidence/hr-terminal-qual-20260811T091804Z",
+  "counts": {
+    "PASS": 89,
+    "SKIP": 5
+  },
+  "ship": "SHIP-TERMINAL",
+  "ship_reason": "FAIL=0 PASS=89 SKIP=5 \u2014 terminal API/contract only; PHYSICAL_ONLY remains for device UI",
+  "physical_only": [
+    "Real-device tap hit-testing / XCTest clickable (BrowserStack Maestro)",
+    "Face ID / Touch ID biometric unlock and opt-in sheet",
+    "Keyboard occlusion, scroll physics, sheet gesture dismiss",
+    "RTL visual mirroring and Back chevron direction on device",
+    "Native PDF/image previewer rendering (HTTP file gate is terminal-proven)",
+    "Push notification banner \u2192 deep link cold start on physical device",
+    "Offline/cache visual empty/error chrome timing"
+  ],
+  "rows": [
+    {
+      "surface": "Static/routes",
+      "cta_or_link": "app/hr/** route tree",
+      "api_or_action": "expo file-based routes",
+      "expected": "registered HR screens",
+      "actual": "28 routes",
+      "verdict": "PASS",
+      "detail": "/hr, /hr/assistant, /hr/attendance, /hr/attendance/{attendanceId}, /hr/candidates, /hr/candidates/{appKey}, /hr/change-pin, /hr/delivery-alerts, /hr/documents, /hr/documents/{employeeKey}/{documentType}, /hr/employees, /hr/employees/{employeeKey}, /hr/hiring, /hr/inbox, /hr/interviews, /hr/interviews/{interviewId}, /hr/jobs, /hr/leave/{id}, /hr/more, /hr/onboarding, /hr/onboarding/{employeeKey}, /hr/people, /hr/settings, /hr/shift-swaps/{swapId}, /hr/shifts, /hr/sign-in, /hr/tasks, /hr/tasks/{taskId}"
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/leave/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/candidates/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/onboarding/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/employees/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/shift-swaps/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/interviews/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/tasks/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/documents/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/attendance/",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/destinationAvailable",
+      "cta_or_link": "/assistant",
+      "api_or_action": "capabilities.destinationAvailable",
+      "expected": "gated",
+      "actual": "present",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=leave",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=attendance",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=shifts",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=onboarding",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=candidates",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=interviews",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=tasks",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=documents",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/assistantDeepLinks",
+      "cta_or_link": "page=jobs",
+      "api_or_action": "mapAssistantNavigation",
+      "expected": "mapped or web-only refused",
+      "actual": "mapped",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Static/handlers",
+      "cta_or_link": "request('/dashboard/mobile/\u2026') crawl",
+      "api_or_action": "32 unique API paths",
+      "expected": ">=15 mobile endpoints referenced",
+      "actual": "32",
+      "verdict": "PASS",
+      "detail": "/dashboard/mobile/attendance${qs; /dashboard/mobile/attendance/${segment; /dashboard/mobile/auth/login; /dashboard/mobile/auth/logout; /dashboard/mobile/auth/logout-all; /dashboard/mobile/auth/refresh; /dashboard/mobile/candidates${qs; /dashboard/mobile/candidates/${encodeURIComponent; /dashboard/mobile/delivery-alerts; /dashboard/mobile/documents/${segment; /dashboard/mobile/documents/files/demo-cert; /dashboard/mobile/documents/files/demo-civil; /dashboard/mobile/documents/files/demo-civil?disposition=attachment; /dashboard/mobile/documents/files/demo-ob; /dashboard/mobile/documents/files/demo-pass; /dashboard/mobile/documents/files/demo-res; /dashboard/mobile/documents?${params.toString; /dashboard/mobile/employees${qs; /dashboard/mobile/employees/${segment; /dashboard/mobile/interviews; /dashboard/mobile/interviews/${segment; /dashboard/mobile/leave/${encodeURIComponent; /dashboard/mobile/me; /dashboard/mobile/onboarding; /dashboard/mobile/onboarding/${segment"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/leave/abc",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/candidates/x",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/candidates",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/candidates",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/hiring",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/jobs",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/hiring",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/interviews/i1",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/interviews",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/interviews",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/hiring",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/employees/e1",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/people",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/employees",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/tasks/t1",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/tasks",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/tasks",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/onboarding/e1",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/onboarding",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/onboarding",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/documents/e1/civil_id",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/documents",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/documents",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/attendance/a1",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/attendance",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/attendance",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/shift-swaps/s1",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/shifts",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/shifts",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/delivery-alerts",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/assistant",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/settings",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/more",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/safe-back",
+      "cta_or_link": "cold-start parent of /hr/change-pin",
+      "api_or_action": "hrCanonicalParent",
+      "expected": "/hr/settings",
+      "actual": "implemented",
+      "verdict": "PASS",
+      "detail": "static source contract"
+    },
+    {
+      "surface": "Static/i18n",
+      "cta_or_link": "458 HR-related t() keys",
+      "api_or_action": "app i18n \u222a hr/i18n EN+AR",
+      "expected": "all referenced keys present EN+AR",
+      "actual": "missing_en=0 missing_ar=0",
+      "verdict": "PASS",
+      "detail": "en: | ar:"
+    },
+    {
+      "surface": "Auth",
+      "cta_or_link": "Work email Sign in",
+      "api_or_action": "POST /dashboard/mobile/auth/login",
+      "expected": "access_token + me",
+      "actual": "ok",
+      "verdict": "PASS",
+      "detail": "company=WATHEFNI modules=0"
+    },
+    {
+      "surface": "Auth",
+      "cta_or_link": "Session /me",
+      "api_or_action": "GET /dashboard/mobile/me",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,principal,permission_authority,account_state,company_state,workspaces,scope,mfa"
+    },
+    {
+      "surface": "Home",
+      "cta_or_link": "Home priorities",
+      "api_or_action": "GET /dashboard/mobile/priorities",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,generated_at,ranking_policy,sections"
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Leave requested list",
+      "api_or_action": "GET /dashboard/mobile/leave?status=requested&limit=10",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,total,offset,limit,has_more,status items=4 total=4"
+    },
+    {
+      "surface": "People",
+      "cta_or_link": "Employee search",
+      "api_or_action": "GET /dashboard/mobile/employees?limit=10",
+      "expected": "200 or honest capability denial",
+      "actual": "HTTP 403 keys=detail",
+      "verdict": "PASS",
+      "detail": "capability/RBAC deny-closed"
+    },
+    {
+      "surface": "People",
+      "cta_or_link": "Employee profile (Talal canary)",
+      "api_or_action": "GET /dashboard/mobile/employees/WATHEFNI-96550252254",
+      "expected": "200 or honest capability denial",
+      "actual": "HTTP 403 keys=detail",
+      "verdict": "PASS",
+      "detail": "capability/RBAC deny-closed"
+    },
+    {
+      "surface": "Shifts",
+      "cta_or_link": "Today shifts",
+      "api_or_action": "GET /dashboard/mobile/shifts?date=2026-08-11",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,date,items,total,limit,offset,has_more,shifts items=100 total=112"
+    },
+    {
+      "surface": "Delivery Alerts",
+      "cta_or_link": "Open Delivery Alerts",
+      "api_or_action": "GET /dashboard/mobile/delivery-alerts",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,total,limit,offset,has_more,exclude_linked_tasks items=30 total=58"
+    },
+    {
+      "surface": "Assistant",
+      "cta_or_link": "Assistant capabilities",
+      "api_or_action": "GET /dashboard/mobile/assistant/capabilities?locale=en",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,company_code,catalog,empty_state,surface,unsupported_messaging"
+    },
+    {
+      "surface": "Assistant",
+      "cta_or_link": "Assistant capabilities AR",
+      "api_or_action": "GET /dashboard/mobile/assistant/capabilities?locale=ar",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,company_code,catalog,empty_state,surface,unsupported_messaging"
+    },
+    {
+      "surface": "Hiring",
+      "cta_or_link": "Jobs / positions",
+      "api_or_action": "GET /dashboard/mobile/positions?status=open&limit=10",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=company_code,positions,total_count,limit,offset,has_more,status_filter,summary"
+    },
+    {
+      "surface": "Hiring",
+      "cta_or_link": "Unscoped candidates list",
+      "api_or_action": "GET /candidates (no position)",
+      "expected": "honest requires_position / ranking_unavailable (not fake empty success)",
+      "actual": "HTTP 200 keys=ok,items,total,filters,ai_advisory,ranking_unavailable,ranking_error,requires_position items=0 total=0",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Hiring",
+      "cta_or_link": "Candidates for position OCCTST_044035",
+      "api_or_action": "GET /dashboard/mobile/candidates?position=OCCTST_044035&limit=10",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,total,filters,ai_advisory,ranking_unavailable,ranking_error,requires_position items=0 total=0"
+    },
+    {
+      "surface": "Interviews",
+      "cta_or_link": "Interviews list",
+      "api_or_action": "GET /dashboard/mobile/interviews",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,total,limit,offset,has_more,status_counts,feedback_counts items=4 total=4"
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Open approve fixture",
+      "api_or_action": "GET /dashboard/mobile/leave/cc02fb2d-6730-4bfd-87b2-9d5c07dc0de7",
+      "expected": "status=requested + approve/reject actions",
+      "actual": "HTTP 200 status=requested actions=['read', 'approve', 'reject']",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Open reject fixture",
+      "api_or_action": "GET /dashboard/mobile/leave/2920d5b4-fae5-490d-a98d-4dbd4136b503",
+      "expected": "status=requested + approve/reject actions",
+      "actual": "HTTP 200 status=requested actions=['read', 'approve', 'reject']",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Reject without reason",
+      "api_or_action": "POST \u2026/decision confirm=false reason=''",
+      "expected": "422 rejection_reason_required",
+      "actual": "HTTP 422 error=rejection_reason_required",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Approve \u2192 confirmation sheet",
+      "api_or_action": "POST \u2026/decision confirm=false action=approve",
+      "expected": "confirmation material",
+      "actual": "HTTP 200 has_conf=True",
+      "verdict": "PASS",
+      "detail": "keys=ok,status,confirmation,result"
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Confirm Approve",
+      "api_or_action": "POST \u2026/decision confirm=true",
+      "expected": "completed / approved",
+      "actual": "HTTP 200 ok=True status=completed err=completed",
+      "verdict": "PASS",
+      "detail": "keys=ok,status,confirmation,result"
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Double-submit / stale confirm",
+      "api_or_action": "POST \u2026/decision confirm=true (replay)",
+      "expected": "not a second successful mutation (4xx or idempotent completed)",
+      "actual": "HTTP 200 body=keys=ok,status,confirmation,result",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Post-approve detail refresh",
+      "api_or_action": "GET /dashboard/mobile/leave/cc02fb2d-6730-4bfd-87b2-9d5c07dc0de7",
+      "expected": "status=approved, allowed_actions=[]",
+      "actual": "HTTP 200 status=approved actions=[]",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Reject \u2192 confirmation sheet",
+      "api_or_action": "POST \u2026/decision confirm=false action=reject",
+      "expected": "confirmation material",
+      "actual": "HTTP 200 has_conf=True",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Confirm Reject",
+      "api_or_action": "POST \u2026/decision confirm=true",
+      "expected": "completed / rejected",
+      "actual": "HTTP 200 keys=ok,status,confirmation,result",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Post-reject detail + reason persistence",
+      "api_or_action": "GET /dashboard/mobile/leave/2920d5b4-fae5-490d-a98d-4dbd4136b503",
+      "expected": "status=rejected + decision_note set",
+      "actual": "status=rejected note_len=33",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Home/Inbox",
+      "cta_or_link": "Priorities after leave decisions",
+      "api_or_action": "GET /dashboard/mobile/priorities",
+      "expected": "decided leave IDs absent from destinations",
+      "actual": "HTTP 200 lingering=0",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Attendance",
+      "cta_or_link": "Open Attendance exceptions queue",
+      "api_or_action": "GET /dashboard/mobile/attendance?status=exceptions&limit=5",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,start_date,end_date,is_today,status,total,limit items=0 total=0"
+    },
+    {
+      "surface": "Attendance",
+      "cta_or_link": "Mutation prepare",
+      "api_or_action": "no unresolved exceptions",
+      "expected": "skip without inventing fixtures",
+      "actual": "empty queue",
+      "verdict": "SKIP",
+      "detail": ""
+    },
+    {
+      "surface": "Shifts",
+      "cta_or_link": "Open shift-swap queue",
+      "api_or_action": "GET /dashboard/mobile/shift-swaps?status=requested&limit=5",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,total,status items=0 total=0"
+    },
+    {
+      "surface": "Shifts",
+      "cta_or_link": "Swap mutation",
+      "api_or_action": "no requested swaps",
+      "expected": "skip",
+      "actual": "empty",
+      "verdict": "SKIP",
+      "detail": ""
+    },
+    {
+      "surface": "HR Tasks",
+      "cta_or_link": "Open Tasks",
+      "api_or_action": "GET /dashboard/mobile/tasks?status=open&limit=5",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,open_count,total,offset,limit,status items=5 total=48"
+    },
+    {
+      "surface": "HR Tasks",
+      "cta_or_link": "Open task detail",
+      "api_or_action": "GET /dashboard/mobile/tasks/2d51a053-fa7e-4eed-bacd-dc14e1b842ec",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,task"
+    },
+    {
+      "surface": "HR Tasks",
+      "cta_or_link": "Mark done",
+      "api_or_action": "POST /tasks/{id}/resolve",
+      "expected": "not executed \u2014 no disposable task fixture yet",
+      "actual": "SKIPPED_NO_DISPOSABLE_FIXTURE",
+      "verdict": "SKIP",
+      "detail": "Would mutate live open task; fixture provisioner TBD"
+    },
+    {
+      "surface": "Onboarding",
+      "cta_or_link": "Open Onboarding",
+      "api_or_action": "GET /dashboard/mobile/onboarding?limit=5",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,completed_count,total,total_count,limit,offset,has_more items=1 total=1"
+    },
+    {
+      "surface": "Onboarding",
+      "cta_or_link": "Open employee onboarding",
+      "api_or_action": "GET /dashboard/mobile/onboarding/WATHEFNI-96597727743",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,onboarding"
+    },
+    {
+      "surface": "Onboarding",
+      "cta_or_link": "Accept/Waive",
+      "api_or_action": "POST /onboarding/{key}/review",
+      "expected": "not confirmed without disposable item",
+      "actual": "SKIPPED_NO_DISPOSABLE_FIXTURE",
+      "verdict": "SKIP",
+      "detail": ""
+    },
+    {
+      "surface": "Documents",
+      "cta_or_link": "Open Documents needs_review",
+      "api_or_action": "GET /dashboard/mobile/documents?status=needs_review&limit=5",
+      "expected": "HTTP [200]",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "keys=ok,items,summary,total,offset,limit,has_more,status items=5 total=10"
+    },
+    {
+      "surface": "Documents",
+      "cta_or_link": "Mark reviewed",
+      "api_or_action": "POST /documents/.../review",
+      "expected": "not confirmed without disposable item",
+      "actual": "SKIPPED_NO_DISPOSABLE_FIXTURE",
+      "verdict": "SKIP",
+      "detail": ""
+    },
+    {
+      "surface": "Documents/Files",
+      "cta_or_link": "Unauthenticated GET /dashboard/mobile/documents/files/4d91ab7c-e9e4-4b67-8ebc-637032424e70",
+      "api_or_action": "auth gate",
+      "expected": "401/403",
+      "actual": "HTTP 401",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Documents/Files",
+      "cta_or_link": "Authenticated GET /dashboard/mobile/documents/files/4d91ab7c-e9e4-4b67-8ebc-637032424e70",
+      "api_or_action": "file bytes / JSON error",
+      "expected": "200 file or honest 404",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "\ufffd\ufffd\ufffd\ufffd\u0000\u0010JFIF\u0000\u0001\u0001\u0000\u0000\u0001\u0000\u0001\u0000\u0000\ufffd\ufffd\u0000C\u0000\u0006\u0004\u0005\u0006\u0005\u0004\u0006\u0006\u0005\u0006\u0007\u0007\u0006\b\n\u0010\n\n\t\t\n\u0014\u000e\u000f\f\u0010\u0017\u0014\u0018\u0018\u0017\u0014\u0016\u0016\u001a\u001d%\u001f\u001a\u001b#\u001c\u0016\u0016 , #&')*)\u0019\u001f-0-(0%()(\ufffd\ufffd\u0000C\u0001\u0007\u0007\u0007\n\b\n\u0013\n\n\u0013(\u001a\u0016\u001a((((((((((((((((((((((((((((((((((((((((((((((((((\ufffd\ufffd"
+    },
+    {
+      "surface": "Documents/Files",
+      "cta_or_link": "Unauthenticated GET /dashboard/mobile/documents/files/4d91ab7c-e9e4-4b67-8ebc-637032424e70?disposition=attachment",
+      "api_or_action": "auth gate",
+      "expected": "401/403",
+      "actual": "HTTP 401",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Documents/Files",
+      "cta_or_link": "Authenticated GET /dashboard/mobile/documents/files/4d91ab7c-e9e4-4b67-8ebc-637032424e70?disposition=attachment",
+      "api_or_action": "file bytes / JSON error",
+      "expected": "200 file or honest 404",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "\ufffd\ufffd\ufffd\ufffd\u0000\u0010JFIF\u0000\u0001\u0001\u0000\u0000\u0001\u0000\u0001\u0000\u0000\ufffd\ufffd\u0000C\u0000\u0006\u0004\u0005\u0006\u0005\u0004\u0006\u0006\u0005\u0006\u0007\u0007\u0006\b\n\u0010\n\n\t\t\n\u0014\u000e\u000f\f\u0010\u0017\u0014\u0018\u0018\u0017\u0014\u0016\u0016\u001a\u001d%\u001f\u001a\u001b#\u001c\u0016\u0016 , #&')*)\u0019\u001f-0-(0%()(\ufffd\ufffd\u0000C\u0001\u0007\u0007\u0007\n\b\n\u0013\n\n\u0013(\u001a\u0016\u001a((((((((((((((((((((((((((((((((((((((((((((((((((\ufffd\ufffd"
+    },
+    {
+      "surface": "Documents/Files",
+      "cta_or_link": "Unauthenticated GET /dashboard/mobile/documents/files/8572a0f2-ceaf-4991-aa8f-7f673095105a",
+      "api_or_action": "auth gate",
+      "expected": "401/403",
+      "actual": "HTTP 401",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Documents/Files",
+      "cta_or_link": "Authenticated GET /dashboard/mobile/documents/files/8572a0f2-ceaf-4991-aa8f-7f673095105a",
+      "api_or_action": "file bytes / JSON error",
+      "expected": "200 file or honest 404",
+      "actual": "HTTP 200",
+      "verdict": "PASS",
+      "detail": "%PDF-1.1\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n\n% docs-visual-fixture:20260809T040453Z:personal_photo-current.pdf\n"
+    },
+    {
+      "surface": "RBAC/Tenant",
+      "cta_or_link": "Foreign/unknown leave detail",
+      "api_or_action": "GET /leave/00000000-0000-0000-0000-000000000099",
+      "expected": "404/403 not 200 with foreign payload",
+      "actual": "HTTP 404",
+      "verdict": "PASS",
+      "detail": "keys=detail"
+    },
+    {
+      "surface": "RBAC/Tenant",
+      "cta_or_link": "Bogus confirm",
+      "api_or_action": "POST /leave/{fake}/decision confirm=true",
+      "expected": "4xx fail closed",
+      "actual": "HTTP 404",
+      "verdict": "PASS",
+      "detail": "keys=detail"
+    },
+    {
+      "surface": "Assistant",
+      "cta_or_link": "Capabilities payload",
+      "api_or_action": "GET /assistant/capabilities",
+      "expected": "200 with tools/pages",
+      "actual": "HTTP 200 keys=ok,company_code,catalog,empty_state,surface,unsupported_messaging",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Assistant",
+      "cta_or_link": "Refuse web-only page=assessments",
+      "api_or_action": "WEB_ONLY_PAGES",
+      "expected": "not linked on mobile",
+      "actual": "listed",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Assistant",
+      "cta_or_link": "Refuse web-only page=reports",
+      "api_or_action": "WEB_ONLY_PAGES",
+      "expected": "not linked on mobile",
+      "actual": "listed",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Assistant",
+      "cta_or_link": "Refuse web-only page=calendar",
+      "api_or_action": "WEB_ONLY_PAGES",
+      "expected": "not linked on mobile",
+      "actual": "listed",
+      "verdict": "PASS",
+      "detail": ""
+    },
+    {
+      "surface": "Leave",
+      "cta_or_link": "Fixture cleanup",
+      "api_or_action": "cancel remaining MARKER requested leaves",
+      "expected": "cleanup ok",
+      "actual": "ok",
+      "verdict": "PASS",
+      "detail": ""
+    }
+  ],
+  "rule": "Terminal PASS \u2260 MOBILE_PASS. Device UI remains PHYSICAL_ONLY / BrowserStack."
+}

@@ -1,0 +1,30 @@
+    requisitions surfaces — wiring + freeze preservation
+      PASS  http register present
+      PASS  queue_payload
+      PASS  detail_payload
+      PASS  explain_status
+      PASS  list_requisitions surface-only
+      PASS  frozen SM draft→pending
+      PASS  frozen SM pending→approved
+      PASS  frozen SM filled terminal
+      PASS  frozen SM mentions SoD
+      PASS  app registers requisitions_http
+      PASS  requisitions RBAC perms
+      PASS  hr mobile capability requisitions_review
+      PASS  HR Web workspace
+      PASS  web RTL via dir
+      PASS  web decision framing
+      PASS  web SoD note
+      PASS  HR mobile queue
+      PASS  HR mobile detail
+      PASS  no employee ESS requisitions
+      PASS  assistant deep link
+      PASS  EN i18n hrRequisitions
+      PASS  AR i18n hrRequisitions
+      PASS  backend freeze intact
+      PASS  nav.requisitions surface
+      PASS  nav.probation surface present
+      PASS  nav.preboarding surface present
+
+    26 passed, 0 failed
+REQUISITIONS_SURFACES_UNIT_FULL_PASS

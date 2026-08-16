@@ -1,0 +1,103 @@
+{
+  "calendar_sync_connections": [
+    {
+      "company_code": "WATHEFNI",
+      "provider_key": "google",
+      "status": "disconnected",
+      "account_email": "azizalmulla16@gmail.com",
+      "updated_at": "2026-07-29 16:58:29.309892+00:00"
+    },
+    {
+      "company_code": "WATHEFNI",
+      "provider_key": "google",
+      "status": "disconnected",
+      "account_email": "azizalmulla16@gmail.com",
+      "updated_at": "2026-07-29 17:05:35.789950+00:00"
+    },
+    {
+      "company_code": "WATHEFNI",
+      "provider_key": "google",
+      "status": "disconnected",
+      "account_email": "azizalmulla16@gmail.com",
+      "updated_at": "2026-07-29 17:05:35.939951+00:00"
+    },
+    {
+      "company_code": "WATHEFNI",
+      "provider_key": "google",
+      "status": "disconnected",
+      "account_email": "azizalmulla16@gmail.com",
+      "updated_at": "2026-07-29 17:02:33.109146+00:00"
+    }
+  ],
+  "raw_connection_keys": [
+    [
+      "connection_id",
+      "company_code",
+      "provider_key",
+      "mode",
+      "owner_user_id",
+      "status",
+      "credentials_ref",
+      "account_email",
+      "external_calendar_id",
+      "display_name",
+      "sync_event_types",
+      "sync_include_candidate_name",
+      "with_meet_default",
+      "last_sync_at",
+      "last_error",
+      "health",
+      "metadata",
+      "created_at",
+      "updated_at",
+      "disconnected_at",
+      "platform_integration_id"
+    ],
+    [
+      "connection_id",
+      "company_code",
+      "provider_key",
+      "mode",
+      "owner_user_id",
+      "status",
+      "credentials_ref",
+      "account_email",
+      "external_calendar_id",
+      "display_name",
+      "sync_event_types",
+      "sync_include_candidate_name",
+      "with_meet_default",
+      "last_sync_at",
+      "last_error",
+      "health",
+      "metadata",
+      "created_at",
+      "updated_at",
+      "disconnected_at",
+      "platform_integration_id"
+    ]
+  ],
+  "service_email_related_env_keys": [
+    "WATHEFNI_INBOUND_EMAIL",
+    "WATHEFNI_M365_CERT_BUNDLE_PATH",
+    "WATHEFNI_M365_CERT_PUBLIC_PATH",
+    "WATHEFNI_M365_CLIENT_ID",
+    "WATHEFNI_M365_MAIL_AU_ID",
+    "WATHEFNI_M365_MAIL_CERT_BUNDLE_PATH",
+    "WATHEFNI_M365_MAIL_CERT_PUBLIC_PATH",
+    "WATHEFNI_M365_MAIL_CLIENT_ID",
+    "WATHEFNI_M365_MAIL_DENIED_UPN",
+    "WATHEFNI_M365_MAIL_EVIDENCE_UPN",
+    "WATHEFNI_M365_MAIL_EVIDENCE_USER_ID",
+    "WATHEFNI_M365_MAIL_TENANT_ID",
+    "WATHEFNI_M365_REDIRECT_URI",
+    "WATHEFNI_M365_TENANT_ID",
+    "WATHEFNI_POSTMARK_INBOUND_SECRET",
+    "WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION",
+    "WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_MAX_ATTEMPTS",
+    "WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_RECIPIENT",
+    "WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_STARTED_AT",
+    "WATHEFNI_TALENT_POOL_AUTO_EMAIL_CLASSIFICATION_TENANTS",
+    "WATHEFNI_UNIFIED_INTAKE_AUTHORITY_EMAIL"
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "stamp": "20260730T043927Z",
+  "code": "OCCTST_044035",
+  "passed": 11,
+  "failed": 0,
+  "pass": true,
+  "results": [
+    {
+      "ok": true,
+      "label": "auth + summary",
+      "detail": "200"
+    },
+    {
+      "ok": true,
+      "label": "create draft",
+      "detail": "st=200 code=OCCTST_044035 err="
+    },
+    {
+      "ok": true,
+      "label": "publish/open succeeds with OCC",
+      "detail": "st=200 status=open detail="
+    },
+    {
+      "ok": true,
+      "label": "pause succeeds",
+      "detail": "st=200 status=paused detail="
+    },
+    {
+      "ok": true,
+      "label": "resume succeeds",
+      "detail": "st=200 status=open detail="
+    },
+    {
+      "ok": true,
+      "label": "close succeeds",
+      "detail": "st=200 status=closed detail="
+    },
+    {
+      "ok": true,
+      "label": "reopen succeeds",
+      "detail": "st=200 status=open detail="
+    },
+    {
+      "ok": true,
+      "label": "stale version returns 409 conflict",
+      "detail": "st=409 err=stale_job_version detail={'ok': False, 'error': 'stale_job_version', 'message': 'This was updated by another user. Review the latest version before saving.', 'message_ar': '\u062a\u0645 \u062a\u062d\u062f\u064a\u062b \u0647\u0630\u0627 \u0627\u0644\u0633\u062c\u0644 \u0628\u0648\u0627\u0633\u0637\u0629 \u0645\u0633\u062a\u062e\u062f\u0645 \u0622\u062e\u0631. \u0631\u0627\u062c\u0639 \u0623\u062d\u062f\u062b \u0646\u0633\u062e\u0629 \u0642\u0628\u0644 \u0627\u0644\u062d\u0641\u0638.', 'conflict': True, 'current_version': 6, 'expected_version': 105, 'current_updated_at': '2026-07-30T04:40:36.281441+00:00', 'expected_updated_at': None, 'last_changed_by': {'user_id': '88b17ca9-aff4-4721-a553-c1b5514ef95f', 'name': None, 'email': None"
+    },
+    {
+      "ok": true,
+      "label": "malformed payload returns validation 422",
+      "detail": "st=422 detail_type=list jobs_error=False"
+    },
+    {
+      "ok": true,
+      "label": "missing OCC token returns intended 422",
+      "detail": "st=422 err=missing_expected_version"
+    },
+    {
+      "ok": true,
+      "label": "cleanup closed synthetic job",
+      "detail": "OCCTST_044035"
+    }
+  ]
+}

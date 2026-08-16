@@ -1,0 +1,29 @@
+action-inbox-wave1 smoke tests passed
+PASS  frozen module doc intact PAYROLL_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ANALYTICS_WAVE1_ATTENTION_FREEZE.md
+PASS  frozen module doc intact COMPLIANCE_WAVE1_FINDINGS_FREEZE.md
+
+47 passed, 0 failed
+
+34 passed, 0 failed
+
+36 passed, 0 failed
+
+57 passed, 0 failed
+
+54 passed, 0 failed
+
+22 passed, 0 failed
+
+34 passed, 0 failed
+
+96 passed, 0 failed
+SOFT_KILL_DENY_OK
+NAV_SOFT_KILL_OK
+AUTHORIZED_TALAL_ONLY_OK {'total': 6}
+UNAUTHORIZED_VIEWER_DENY_OK
+CLEAR_ALLOWLIST_SOFT_KILL_OK
+WAVE1_KILL_SWITCH_OK
+{"phase0": "ok", "real_canary_enabled": false}
+UI_INBOX_COPY_OK
+STAGING_ACTION_INBOX_PHASE0_OK

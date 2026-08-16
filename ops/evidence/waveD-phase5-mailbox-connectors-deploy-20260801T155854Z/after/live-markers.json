@@ -1,0 +1,6 @@
+{
+  "connector": true,
+  "connector_ar": true,
+  "forwarding_default": true,
+  "no_ops": true
+}

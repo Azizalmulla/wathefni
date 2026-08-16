@@ -1,0 +1,4 @@
+api_health=404
+dashboard_shell=200
+posthire_js=200
+api_js=200

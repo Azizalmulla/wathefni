@@ -1,0 +1,66 @@
+[PASS] wave1 enabled
+[PASS] synthetic_only enforced
+[PASS] company allowlisted
+[PASS] read_only
+[PASS] composes_only
+[PASS] no mutations
+[PASS] no AI
+[PASS] hiring reports separate
+[PASS] alerts own notifications
+[PASS] no compliance wave2
+[PASS] no analytics wave2
+[PASS] no payroll money
+[PASS] no attendance ingest
+[PASS] no shifts manager expand
+[PASS] analytics freeze no compliance metrics
+[PASS] compliance freeze no legal claims
+[PASS] cross-source item count
+[PASS] e360 compliance deduped
+[PASS] high severity first
+[PASS] all three streams present
+[PASS] owner label EN
+[PASS] owner label AR
+[PASS] deadline present
+[PASS] deadline label EN
+[PASS] escalation label EN
+[PASS] escalation label AR
+[PASS] evidence label EN
+[PASS] authority label EN
+[PASS] authority label AR
+[PASS] deep link compliance
+[PASS] what AR present
+[PASS] never gov verified
+[PASS] analytics deep link leave
+[PASS] e360 deep link onboarding
+[PASS] clears on resolve
+[PASS] dedupe in clear proof
+[PASS] after clear remaining 1
+[PASS] as_of present
+[PASS] timezone Kuwait
+[PASS] freshness stale_after
+[PASS] definitions EN/AR
+[PASS] honesty mutates false
+[PASS] production db
+[PASS] live contract
+[PASS] live as_of
+[PASS] live timezone Kuwait
+[PASS] live items list
+[PASS] live honesty no mutate
+[PASS] live synthetic_only
+[PASS] payload viewer_phone
+[PASS] payload actor_role
+[PASS] e360 manager_scope
+[PASS] route uses dashboard_context
+[PASS] manager scope probe returns
+[PASS] manager probe has items list
+[PASS] manager scope isolation
+[PASS] UI Action Inbox EN/AR
+[PASS] UI SoA EN/AR
+[PASS] UI honesty hiring reports
+[PASS] UI owner/deadline labels
+[PASS] UI responsive mobile
+[PASS] canary ack deleted
+[PASS] residual 0
+[PASS] synthetic marker detection
+[PASS] real subject not synthetic
+{"pass": 65, "fail": 0, "tag": "7621a513", "residual": 0}

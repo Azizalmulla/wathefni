@@ -1,0 +1,94 @@
+employee payslips p0 canary tag=58ba02a3
+[PASS] sql release migration
+[PASS] release_payslip_to_employee
+[PASS] employee list gate
+[PASS] period never implies visibility
+[PASS] employee /app/payslips route
+[PASS] HR release route
+[PASS] payslips feature implemented
+[PASS] wave3 gate on detail
+[PASS] mobile ScrollView
+[PASS] mobile deep link param
+[PASS] mobile hasFeature gate
+[PASS] i18n EN payslips
+[PASS] i18n AR payslips
+[PASS] no invented payment date UI
+[PASS] HR release UI
+[PASS] HR EN/AR release copy
+[PASS] payslip_ready catalog AR
+[PASS] notif deep link payslips
+[PASS] wave3 enabled
+[PASS] synthetic only
+[PASS] emp A synthetic
+[PASS] emp B synthetic
+[PASS] official pdf feature gated
+[PASS] official pdf requires external seal
+[PASS] native preview never official pdf
+[PASS] release gate documented
+[PASS] feature payslips on with payroll
+[PASS] feature payslips off without payroll
+[PASS] catalog label EN
+[PASS] catalog label AR
+[PASS] contract draft
+[PASS] contract approve
+[PASS] period
+[PASS] preview
+[PASS] generate payslip
+[PASS] starts not_released
+[PASS] employee_facing not_released
+[PASS] employee cannot view draft
+[PASS] draft invisible in employee list
+[PASS] unreleased stays invisible regardless of period lifecycle
+[PASS] http list before release
+[PASS] http draft absent
+[PASS] http HR release
+[PASS] release ok
+[PASS] facing released
+[PASS] http release idempotent
+[PASS] duplicate release idempotent
+[PASS] http list after release
+[PASS] http released visible
+[PASS] released visible to owner
+[PASS] http official_document false
+[PASS] http list AR
+[PASS] http detail owner
+[PASS] summary ok
+[PASS] http detail no payment_date
+[PASS] no payment_date
+[PASS] official_document false
+[PASS] no approval workflow leak
+[PASS] summary AR honesty
+[PASS] http peer detail 404
+[PASS] peer detail denied
+[PASS] peer list empty for A slip
+[PASS] http download owner
+[PASS] http download header honesty
+[PASS] http peer download 404
+[PASS] http notifications EN
+[PASS] http notifications AR
+[PASS] notify title EN
+[PASS] notify deep_link
+[PASS] notify title AR
+[PASS] http /app/me
+[PASS] me.features.payslips enabled
+[PASS] replace ok
+[PASS] prior status replaced
+[PASS] prior not employee-visible
+[PASS] replacement starts not_released
+[PASS] old id invisible after replace
+[PASS] new id invisible until re-release
+[PASS] re-release replacement
+[PASS] history retained after replace
+[PASS] unrelease ok
+[PASS] unreleased invisible
+[PASS] revoke ok
+[PASS] revoked facing
+[PASS] revoked invisible
+[PASS] http revoked detail 404
+[PASS] cleanup residual
+{
+  "verdict": "PASS",
+  "pass": 87,
+  "fail": 0,
+  "evidence": "/opt/wathefni/ops/evidence/employee-payslips-p0-20260807T220134Z"
+}

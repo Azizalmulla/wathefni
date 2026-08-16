@@ -1,7 +1,11 @@
 # Wathefni HR Mobile
 
-Separate Expo SDK 57 application for authorized company operators. It is not an
-Employee App workspace and cannot call employee or legacy recruiter APIs.
+> **SHIP RETIRED as a public app.** See `SHIP_RETIRED.md`.
+> HR now ships inside the public Wathefni binary (`apps/wathefni-employee-mobile`)
+> under `/hr/*` with a separate operator principal.
+
+Separate Expo SDK 57 **source package** for authorized company operators (legacy).
+It is not an Employee App workspace and cannot call employee or legacy recruiter APIs.
 
 ## Boundaries
 

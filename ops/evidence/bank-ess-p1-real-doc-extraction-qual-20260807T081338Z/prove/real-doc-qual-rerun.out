@@ -1,0 +1,27 @@
+[PASS] seed_request :: {"code": 200}
+[PASS] seed_payroll_effective_present :: {"fp": "5425959aa0fc0391"}
+[PASS] upload_ok :: {"evidence_id": "da230cfe-a09e-40c7-80bd-fe20b1c3c6be"}
+[PASS] extraction_non_authoritative :: {"authoritative": false}
+[PASS] rich_extraction_not_fail_open :: {"status": "extracted", "proposed_keys": ["account_holder", "account_number", "bank_name", "branch", "iban", "swift"], "fallback": false}
+[PASS] bank_name_extracted :: {"bank_name": "Gulf Bank"}
+[PASS] account_holder_extracted :: {"holder_masked": "M*** A*** H*** R*** A***"}
+[PASS] kw_iban_extracted :: {"iban_masked": "KW35\u20269548", "len": 30}
+[PASS] kw_iban_validation :: {"ok": true, "error": null, "iban_masked": "KW35\u20269548"}
+[PASS] extraction_confidence_present :: {"confidence": 0.98}
+[PASS] extraction_status_useful :: {"status": "extracted", "warnings": [], "uncertain": false}
+[PASS] optional_account_number_present :: {"account_number": "****9548"}
+[PASS] optional_branch_present :: {"branch": "Al Fanar Mall"}
+[PASS] optional_swift_present :: {"swift": "GULBKWKW"}
+[SKIP] optional_currency_present
+[PASS] employee_confirm_correct_submit :: {"code": 200, "state": "pending_hr", "request_id": "8e07e1b1-4bca-416d-96ad-eacb13fbce8a", "error": ""}
+[PASS] payroll_effective_unchanged_until_apply :: {"seed_fp": "5425959aa0fc0391", "mid_fp": "5425959aa0fc0391"}
+[PASS] ocr_submit_did_not_write_verified :: {"verified_for_request": 0}
+[PASS] evidence_private_owner_ok
+[PASS] evidence_private_other_denied
+[PASS] evidence_no_storage_ref_leaked
+[PASS] hr_current_vs_proposed :: {"changed_fields": ["account_holder", "account_number", "bank_name", "branch", "iban", "swift"], "has_current": true}
+[PASS] hr_sees_evidence_and_extraction :: {"status": "extracted", "confidence": 0.98, "warnings": []}
+[FAIL] hr_view_masked_by_default :: {"leaked": true}
+[PASS] aziz_effective_unchanged :: {"before": "0f349ce848ab5e4b", "after": "0f349ce848ab5e4b"}
+SUMMARY {"PASS": 23, "FAIL": 1, "SKIP": 1, "verdict": "FAIL"}
+EXTRACTION_MASKED {"status": "extracted", "confidence": 0.98, "uncertain": false, "needs_manual_fallback": false, "authoritative": false, "warnings": [], "unreadable_reason": null, "field_confidence": {"iban": 1.0, "account_number": 1.0, "bank_name": 1.0, "account_holder": 0.95, "branch": 1.0, "swift": 1.0}, "proposed_masked": {"bank_name": "Gulf Bank", "account_holder": "M*** A*** H*** R*** A***", "iban": "KW35\u20269548", "account_number": "****9548", "branch": "Al Fanar Mall", "swift": "GULBKWKW", "currency": null}, "evidence_id": "da230cfe-a09e-40c7-80bd-fe20b1c3c6be"}

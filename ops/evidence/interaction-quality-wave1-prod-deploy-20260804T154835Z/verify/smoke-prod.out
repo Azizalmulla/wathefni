@@ -1,0 +1,11 @@
+PASS confirm_marker
+PASS shell_busy_marker
+PASS activity_refreshing
+PASS working_copy
+PASS no_always_refreshing_banner_only
+PASS activity_timeline
+PASS settings_ia
+PASS alerts_preserved
+IQ_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+INTERACTION_QUALITY_WAVE1_SMOKE_OK

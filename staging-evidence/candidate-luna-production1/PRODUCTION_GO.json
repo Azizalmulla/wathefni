@@ -1,0 +1,31 @@
+{
+  "environment": "production",
+  "promoted_at": "2026-07-19T21:36:15+00:00",
+  "commit": "a15fe3c72b0d401d73317049b4de9fccf457e594",
+  "model": "gpt-5.6-luna",
+  "prompt_version": "candidate_intent_prompt_v1",
+  "schema_version": "candidate_intent_v1",
+  "confidence_gate": 0.8,
+  "scope": "candidate WhatsApp NL semantic router + provider message-id octopus forwarding",
+  "files_shipped": [
+    "app.py",
+    "candidate_messages.py",
+    "candidate_semantic_router.py",
+    "assessment_ai_* and other CODE_FILES required by Luna app.py",
+    "octopus-channel.ts"
+  ],
+  "predeploy_snapshot": "/opt/wathefni/backups/predeploy-luna-full-20260719T213519Z",
+  "checks": {
+    "py_compile": true,
+    "provider_config": true,
+    "live_classify_status_ok": true,
+    "orchestrator_health_200": true,
+    "openclaw_gateway_active": true
+  },
+  "production_recommendation": "GO \u2014 Luna live for all candidate WhatsApp NL after deterministic paths",
+  "notes": [
+    "Did not run full ops/deploy.sh production (dashboard rebuild avoided; Luna-focused CODE_FILES sync).",
+    "Assessment authoring remains off.",
+    "Public candidate links remain https://api.wathefni.ai"
+  ]
+}

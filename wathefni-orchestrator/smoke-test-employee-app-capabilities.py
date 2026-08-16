@@ -83,8 +83,16 @@ def main() -> None:
     check("compliance enables documents", compliance["features"]["documents"]["enabled"])
     check("unfinished compliance actions stay disabled", compliance["features"]["compliance_actions"]["reason"] == "feature_not_available")
 
+    # Payroll Wave 3 shipped released-payslip employee reads, so payroll now projects
+    # a real surface. Visibility inside it is still released-only server-side.
     payroll = build({"employee_app", "payroll"}, push_available=False)
-    check("future payslips stay disabled", payroll["features"]["payslips"]["reason"] == "feature_not_available")
+    check("payroll entitlement enables payslips", payroll["features"]["payslips"]["enabled"])
+    check("payslips expose view and download", {"view", "download"} <= set(payroll["features"]["payslips"]["actions"]))
+    check("payroll entitlement does not enable documents", not payroll["features"]["documents"]["enabled"])
+    check(
+        "payslips stay disabled without the payroll module",
+        leave_only["features"]["payslips"]["reason"] == "module_disabled",
+    )
 
     push = build({"employee_app"}, push_available=True)
     check("push action follows backend channel availability", "manage_push" in push["features"]["settings"]["actions"])

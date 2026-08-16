@@ -1,0 +1,31 @@
+{
+  "stamp": "20260810T201549Z",
+  "api_base": "https://api.wathefni.ai",
+  "counts": {
+    "API_SPINE": 1,
+    "BLOCKED": 2
+  },
+  "mobile_pass": 0,
+  "note": "This script never emits MOBILE_PASS. UI driver must open the app.",
+  "rows": [
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_HR_EMAIL + MOBILE_E2E_HR_PASSWORD to run HR API spine"
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    }
+  ]
+}

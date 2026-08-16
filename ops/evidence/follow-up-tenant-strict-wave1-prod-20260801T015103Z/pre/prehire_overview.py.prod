@@ -1,0 +1,1532 @@
+"""Canonical Pre-Hiring Overview authority.
+
+Single source of truth for:
+  - action_counts (ready_for_review, assessment_pending, follow_up_needed)
+  - next_action priority (deterministic, no model authority)
+  - company-wide person-first work queue
+  - role pressure / prioritize-by-role / role next steps
+
+Wave 1 (database truth / entity units):
+  Overview display counts for "candidates" are distinct confirmed people,
+  matching Candidates list identity (grounded email, else non-surrogate phone,
+  else singleton app_key). Application counts are published alongside.
+  Role cards never present overlapping signal sums as a candidate count.
+  Top priorities and Role next steps are backend-authoritative.
+
+Wave 2 (destination parity / durable navigation):
+  Every Overview cohort publishes a stable cohort_key (and destination filters
+  the Candidates / Interviews / Ranking URL can restore). Interview scheduling
+  debt opens the exact applications cohort, not a dropped Interviews filter.
+  Role priority / role next-step primary destinations open the active role
+  people cohort (ranking remains ranking_destination only).
+
+Overview, Reports headlines, mobile priorities (pre-hire section), and Admin
+Assistant read tools must call these helpers — never recalculate in the client
+or the model.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any, Callable
+
+import assessment_cohorts as _assessment_cohorts
+
+READY_FOR_REVIEW_STATUSES = ("screening_complete", "review_pending", "ready_for_review")
+ASSESSMENT_ELIGIBLE_STATUSES = (
+    "screening_complete",
+    "review_pending",
+    "ready_for_review",
+    "shortlisted",
+)
+# Assigned-only: empty/unassigned status must NOT create queue/SLA/pending work.
+ASSESSMENT_ASSIGNED_OPEN_STATUSES = ("pending", "in_progress")
+ASSESSMENT_ASSIGNED_ATTENTION_STATUSES = ("pending", "in_progress", "expired")
+ASSESSMENT_PENDING_STATUSES = ASSESSMENT_ASSIGNED_ATTENTION_STATUSES
+
+DEFAULT_SLA_HOURS = {
+    "follow_up_hours": 24,
+    "ready_for_review_hours": 48,
+    "assessment_pending_hours": 72,
+    "interview_scheduling_hours": 72,
+}
+
+# Deterministic action keys (stable API contract).
+ACTION_FOLLOW_UP = "follow_up_failed_delivery"
+ACTION_READY_FOR_REVIEW = "ready_for_review"
+ACTION_ASSESSMENT_PENDING = "send_pending_assessments"
+ACTION_INTERVIEW_SCHEDULING = "interview_scheduling_debt"
+ACTION_ROLE_PRIORITY = "prioritize_role"
+
+COHORT_FOLLOW_UP = "follow_up_needed"
+COHORT_READY_FOR_REVIEW = "ready_for_review"
+COHORT_ASSESSMENT_PENDING = "assessment_pending"
+COHORT_INTERVIEW_SCHEDULING = "interview_scheduling_debt"
+COHORT_ROLE_ACTIVE = "role_active"
+
+INTERVIEW_SCHEDULING_DEBT_STATUSES = (
+    "shortlisted",
+    "ready_for_review",
+    "screening_complete",
+    "review_pending",
+)
+
+UNIT_PEOPLE = "people"
+UNIT_APPLICATIONS = "applications"
+UNIT_ACTIONS = "actions"
+UNIT_JOBS = "jobs"
+
+
+def reviewable_predicate(alias: str = "a") -> str:
+    return (
+        f"COALESCE({alias}.data_source, {alias}.raw_json->>'data_source', 'production')='production' "
+        f"AND ({alias}.cv_received IS TRUE OR jsonb_typeof({alias}.raw_json->'cv') = 'object')"
+    )
+
+
+def ready_for_review_predicate(alias: str = "a") -> str:
+    statuses = ", ".join(f"'{s}'" for s in READY_FOR_REVIEW_STATUSES)
+    return f"{alias}.status IN ({statuses})"
+
+
+def assessment_pending_predicate(
+    alias: str = "a",
+    assessment_status_expr: str | None = None,
+    assessment_delivery_status_expr: str | None = None,
+) -> str:
+    """Legacy attention aggregate — Wave 3 authority is assessment_cohorts.
+
+    Kept for role-pressure / Reports backward compatibility. Never label this
+    aggregate as "Send pending assessments". Prefer specific cohort predicates.
+    """
+    return _assessment_cohorts.cohort_predicate(
+        _assessment_cohorts.COHORT_ATTENTION,
+        alias,
+        status_expr=assessment_status_expr,
+        delivery_expr=assessment_delivery_status_expr,
+    )
+
+
+def follow_up_needed_exists(alias: str = "a") -> str:
+    """Exact same EXISTS used by Candidates follow_up=needed."""
+    return f"""
+        EXISTS (
+          SELECT 1
+          FROM outbound_delivery_events ode
+          WHERE ode.subject_key={alias}.app_key
+            AND COALESCE(ode.status, '') NOT IN ('sent','recovered')
+            AND ode.recovered_at IS NULL
+            AND (ode.status='failed' OR ode.last_error IS NOT NULL)
+        )
+    """
+
+
+def interview_scheduling_debt_statuses_sql() -> str:
+    return ", ".join(f"'{s}'" for s in INTERVIEW_SCHEDULING_DEBT_STATUSES)
+
+
+def interview_scheduling_debt_predicate(
+    alias: str = "a",
+    *,
+    interview_status_expr: str | None = None,
+) -> str:
+    """Exact same debt cohort used by Overview interview scheduling pressure."""
+    statuses = interview_scheduling_debt_statuses_sql()
+    interview_expr = interview_status_expr or "latest_interview.interview_status"
+    return f"{alias}.status IN ({statuses}) AND {interview_expr} IS NULL"
+
+
+def role_active_predicate(alias: str = "a") -> str:
+    """Active applications counted by role people_count / display_count.
+
+    Exact same predicate as jobs.active_pipeline (excludes hired, rejected,
+    withdrawn, and archived). Jobs View-candidates uses this cohort.
+    """
+    from jobs_queue_contract import active_pipeline_predicate
+
+    return active_pipeline_predicate(alias)
+
+
+def latest_assessment_lateral(alias: str = "a") -> str:
+    return f"""
+        LEFT JOIN LATERAL (
+          SELECT aa.status AS assessment_status,
+                 aa.updated_at AS assessment_updated_at,
+                 aa.created_at AS assessment_created_at,
+                 aa.delivery_status AS assessment_delivery_status,
+                 aa.expires_at AS assessment_expires_at
+          FROM assessment_attempts aa
+          WHERE aa.company_code={alias}.company_code AND aa.app_key={alias}.app_key
+          ORDER BY aa.updated_at DESC, aa.created_at DESC
+          LIMIT 1
+        ) la ON TRUE
+    """
+
+
+def candidates_join(alias: str = "a", candidate_alias: str = "c") -> str:
+    return f"LEFT JOIN candidates {candidate_alias} ON {candidate_alias}.phone={alias}.phone"
+
+
+def person_identity_sql(alias: str = "a", candidate_alias: str = "c") -> str:
+    """Confirmed person key matching Candidates list aggregation.
+
+    Prefer grounded email, else non-surrogate phone digits (>=8), else singleton app_key.
+    Percent signs are doubled for safe psycopg2 parameter interpolation.
+    """
+    email_expr = (
+        f"lower(trim(BOTH FROM COALESCE("
+        f"NULLIF({candidate_alias}.email, ''), "
+        f"NULLIF({alias}.raw_json->>'candidate_email', ''), "
+        f"NULLIF({alias}.raw_json->>'email', ''), "
+        f"NULLIF({alias}.raw_json->'candidate'->>'email', ''), "
+        f"'')))"
+    )
+    phone_raw = (
+        f"COALESCE("
+        f"CASE WHEN {alias}.phone IS NOT NULL AND {alias}.phone !~* '^imp-' THEN {alias}.phone END, "
+        f"NULLIF({alias}.raw_json->>'candidate_phone', ''), "
+        f"NULLIF({alias}.raw_json->'candidate'->>'phone', ''), "
+        f"'')"
+    )
+    phone_digits = f"regexp_replace({phone_raw}, '[^0-9]', '', 'g')"
+    return (
+        f"CASE "
+        f"WHEN {email_expr} LIKE '%%@%%' AND {email_expr} !~* '^imp-' "
+        f"THEN 'email:' || {email_expr} "
+        f"WHEN length({phone_digits}) >= 8 "
+        f"THEN 'phone:' || {phone_digits} "
+        f"ELSE 'singleton:' || {alias}.app_key "
+        f"END"
+    )
+
+
+def resolve_sla_hours(settings: dict[str, Any] | None) -> dict[str, int]:
+    blob = settings if isinstance(settings, dict) else {}
+    overview = blob.get("prehire_overview_sla") if isinstance(blob.get("prehire_overview_sla"), dict) else {}
+    out = dict(DEFAULT_SLA_HOURS)
+    for key, default in DEFAULT_SLA_HOURS.items():
+        raw = overview.get(key, blob.get(key))
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            value = default
+        out[key] = max(1, min(value, 24 * 30))
+    return out
+
+
+def _age_hours(value: Any, *, now: datetime | None = None) -> float:
+    if value is None:
+        return 0.0
+    moment = value
+    if isinstance(value, str):
+        try:
+            moment = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return 0.0
+    if not isinstance(moment, datetime):
+        return 0.0
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    ref = now or datetime.now(timezone.utc)
+    return max(0.0, (ref - moment.astimezone(timezone.utc)).total_seconds() / 3600.0)
+
+
+def _metric_block(*, key: str, people: int, applications: int) -> dict[str, Any]:
+    return {
+        "key": key,
+        "unit": UNIT_PEOPLE,
+        "people": int(people),
+        "applications": int(applications),
+        "display": int(people),
+    }
+
+
+def compute_action_counts(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    assessments_enabled: bool = True,
+    visibility_sql: str | None = None,
+    visibility_params: list[Any] | None = None,
+) -> dict[str, Any]:
+    """Overview / Reports headline counts.
+
+    When visibility_sql is set, assessment cohort badges share detail scope with
+    opened Assessment queues.
+    """
+    reviewable = reviewable_predicate("a")
+    person_key = person_identity_sql("a", "c")
+    join_c = candidates_join("a", "c")
+    vis_sql = str(visibility_sql or "").strip()
+    vis_params = list(visibility_params or [])
+    vis_clause = f" AND ({vis_sql})" if vis_sql else ""
+
+    def _empty_assess() -> dict[str, Any]:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"""
+                    SELECT
+                      COUNT(*) FILTER (WHERE {ready_for_review_predicate("a")}) AS ready_apps,
+                      COUNT(DISTINCT CASE WHEN {ready_for_review_predicate("a")} THEN {person_key} END) AS ready_people,
+                      COUNT(*) FILTER (WHERE {follow_up_needed_exists("a")}) AS follow_apps,
+                      COUNT(DISTINCT CASE WHEN {follow_up_needed_exists("a")} THEN {person_key} END) AS follow_people
+                    FROM applications a
+                    {join_c}
+                    WHERE a.company_code=%s
+                      AND {reviewable}
+                      {vis_clause}
+                    """,
+                    (company, *vis_params),
+                )
+                row = cur.fetchone() or {}
+        ready_people = int(row.get("ready_people") or 0)
+        ready_apps = int(row.get("ready_apps") or 0)
+        follow_people = int(row.get("follow_people") or 0)
+        follow_apps = int(row.get("follow_apps") or 0)
+        return {
+            "ready_for_review": ready_people,
+            "follow_up_needed": follow_people,
+            "ready_for_review_people": ready_people,
+            "ready_for_review_applications": ready_apps,
+            "follow_up_needed_people": follow_people,
+            "follow_up_needed_applications": follow_apps,
+            "units": {
+                "ready_for_review": UNIT_PEOPLE,
+                "follow_up_needed": UNIT_PEOPLE,
+            },
+            "metrics": [
+                _metric_block(key="ready_for_review", people=ready_people, applications=ready_apps),
+                _metric_block(key="follow_up_needed", people=follow_people, applications=follow_apps),
+            ],
+        }
+
+    if not assessments_enabled:
+        return _empty_assess()
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT
+                  COUNT(*) FILTER (WHERE {ready_for_review_predicate("a")}) AS ready_apps,
+                  COUNT(DISTINCT CASE WHEN {ready_for_review_predicate("a")} THEN {person_key} END) AS ready_people,
+                  COUNT(*) FILTER (WHERE {assessment_pending_predicate("a")}) AS assess_apps,
+                  COUNT(DISTINCT CASE WHEN {assessment_pending_predicate("a")} THEN {person_key} END) AS assess_people,
+                  COUNT(*) FILTER (WHERE {follow_up_needed_exists("a")}) AS follow_apps,
+                  COUNT(DISTINCT CASE WHEN {follow_up_needed_exists("a")} THEN {person_key} END) AS follow_people
+                FROM applications a
+                {join_c}
+                {latest_assessment_lateral("a")}
+                WHERE a.company_code=%s
+                  AND {reviewable}
+                  {vis_clause}
+                """,
+                (company, *vis_params),
+            )
+            row = cur.fetchone() or {}
+
+    ready_people = int(row.get("ready_people") or 0)
+    ready_apps = int(row.get("ready_apps") or 0)
+    assess_people = int(row.get("assess_people") or 0)
+    assess_apps = int(row.get("assess_apps") or 0)
+    follow_people = int(row.get("follow_people") or 0)
+    follow_apps = int(row.get("follow_apps") or 0)
+
+    cohorts_payload = _assessment_cohorts.compute_assessment_cohorts(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=True,
+        visibility_sql=vis_sql or None,
+        visibility_params=vis_params or None,
+    )
+    cohorts = cohorts_payload.get("cohorts") if isinstance(cohorts_payload.get("cohorts"), dict) else {}
+    primary = cohorts_payload.get("primary") if isinstance(cohorts_payload.get("primary"), dict) else None
+
+    out = {
+        "ready_for_review": ready_people,
+        # Legacy aggregate = attention (not a "send" CTA). Prefer assessment_cohorts.
+        "assessment_pending": assess_people,
+        "follow_up_needed": follow_people,
+        "ready_for_review_people": ready_people,
+        "ready_for_review_applications": ready_apps,
+        "assessment_pending_people": assess_people,
+        "assessment_pending_applications": assess_apps,
+        "follow_up_needed_people": follow_people,
+        "follow_up_needed_applications": follow_apps,
+        "assessment_cohorts": cohorts_payload,
+        "assessment_ready_to_send": int((cohorts.get(_assessment_cohorts.COHORT_READY_TO_SEND) or {}).get("people_count") or 0),
+        "assessment_ready_to_send_applications": int(
+            (cohorts.get(_assessment_cohorts.COHORT_READY_TO_SEND) or {}).get("application_count") or 0
+        ),
+        "assessment_resend_needed": int((cohorts.get(_assessment_cohorts.COHORT_RESEND_NEEDED) or {}).get("people_count") or 0),
+        "assessment_resend_needed_applications": int(
+            (cohorts.get(_assessment_cohorts.COHORT_RESEND_NEEDED) or {}).get("application_count") or 0
+        ),
+        "assessment_delivery_failed": int(
+            (cohorts.get(_assessment_cohorts.COHORT_DELIVERY_FAILED) or {}).get("people_count") or 0
+        ),
+        "assessment_delivery_failed_applications": int(
+            (cohorts.get(_assessment_cohorts.COHORT_DELIVERY_FAILED) or {}).get("application_count") or 0
+        ),
+        "assessment_in_progress": int((cohorts.get(_assessment_cohorts.COHORT_IN_PROGRESS) or {}).get("people_count") or 0),
+        "assessment_in_progress_applications": int(
+            (cohorts.get(_assessment_cohorts.COHORT_IN_PROGRESS) or {}).get("application_count") or 0
+        ),
+        "assessment_sent_pending": int((cohorts.get(_assessment_cohorts.COHORT_SENT_PENDING) or {}).get("people_count") or 0),
+        "assessment_sent_pending_applications": int(
+            (cohorts.get(_assessment_cohorts.COHORT_SENT_PENDING) or {}).get("application_count") or 0
+        ),
+        "assessment_completed": int((cohorts.get(_assessment_cohorts.COHORT_COMPLETED) or {}).get("people_count") or 0),
+        "assessment_completed_applications": int(
+            (cohorts.get(_assessment_cohorts.COHORT_COMPLETED) or {}).get("application_count") or 0
+        ),
+        "assessment_primary": primary,
+        "units": {
+            "ready_for_review": UNIT_PEOPLE,
+            "assessment_pending": UNIT_PEOPLE,
+            "follow_up_needed": UNIT_PEOPLE,
+            "assessment_ready_to_send": UNIT_PEOPLE,
+            "assessment_resend_needed": UNIT_PEOPLE,
+            "assessment_delivery_failed": UNIT_PEOPLE,
+            "assessment_in_progress": UNIT_PEOPLE,
+        },
+        "metrics": [
+            _metric_block(key="ready_for_review", people=ready_people, applications=ready_apps),
+            _metric_block(key="assessment_pending", people=assess_people, applications=assess_apps),
+            _metric_block(key="follow_up_needed", people=follow_people, applications=follow_apps),
+        ],
+    }
+    return out
+
+
+def _destination_candidates(*, cohort_key: str | None = None, **filters: Any) -> dict[str, Any]:
+    clean = {k: v for k, v in filters.items() if v not in (None, "", [])}
+    if cohort_key:
+        clean.setdefault("overview_cohort", cohort_key)
+        clean.setdefault("cohort_key", cohort_key)
+    out: dict[str, Any] = {"page": "candidates", "filters": clean}
+    if cohort_key:
+        out["cohort_key"] = cohort_key
+    return out
+
+
+def _destination_ranking(position_code: str | None = None) -> dict[str, Any]:
+    filters: dict[str, Any] = {}
+    cohort_key = None
+    if position_code:
+        filters["position_code"] = position_code
+        cohort_key = f"ranking:{position_code}"
+        filters["cohort_key"] = cohort_key
+    out: dict[str, Any] = {"page": "ranking", "filters": filters}
+    if cohort_key:
+        out["cohort_key"] = cohort_key
+    return out
+
+
+def _destination_interview_scheduling_debt(**extra: Any) -> dict[str, Any]:
+    """Interview debt is applications without interviews — Candidates cohort, not Interviews tabs."""
+    return _destination_candidates(
+        cohort_key=COHORT_INTERVIEW_SCHEDULING,
+        overview_cohort=COHORT_INTERVIEW_SCHEDULING,
+        interview_status="none",
+        **extra,
+    )
+
+
+def _destination_role_active(position_code: str | None, **extra: Any) -> dict[str, Any]:
+    code = str(position_code or "").strip()
+    cohort_key = f"{COHORT_ROLE_ACTIVE}:{code}" if code else COHORT_ROLE_ACTIVE
+    return _destination_candidates(
+        cohort_key=cohort_key,
+        overview_cohort=COHORT_ROLE_ACTIVE,
+        position=code or None,
+        **extra,
+    )
+
+
+def _role_pressure_rows(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    assessments_enabled: bool = True,
+) -> list[dict[str, Any]]:
+    """All roles with active applications, scored by pressure, with distinct people/apps."""
+    reviewable = reviewable_predicate("a")
+    person_key = person_identity_sql("a", "c")
+    join_c = candidates_join("a", "c")
+    assess_filter = assessment_pending_predicate("a") if assessments_enabled else "FALSE"
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT
+                  COALESCE(NULLIF(a.position_code, ''), '') AS position_code,
+                  COALESCE(NULLIF(MAX(a.position_title), ''), NULLIF(MAX(a.position_code), ''), 'Unassigned role') AS position_title,
+                  COUNT(*) FILTER (WHERE {ready_for_review_predicate("a")}) AS ready_applications,
+                  COUNT(DISTINCT CASE WHEN {ready_for_review_predicate("a")} THEN {person_key} END) AS ready_people,
+                  COUNT(*) FILTER (WHERE {follow_up_needed_exists("a")}) AS follow_up_applications,
+                  COUNT(DISTINCT CASE WHEN {follow_up_needed_exists("a")} THEN {person_key} END) AS follow_up_people,
+                  COUNT(*) FILTER (WHERE {assess_filter}) AS assessment_pending_applications,
+                  COUNT(DISTINCT CASE WHEN {assess_filter} THEN {person_key} END) AS assessment_pending_people,
+                  COUNT(*) FILTER (
+                    WHERE {role_active_predicate("a")}
+                  ) AS active_applications,
+                  COUNT(DISTINCT CASE
+                    WHEN {role_active_predicate("a")} THEN {person_key}
+                  END) AS active_people,
+                  MAX(EXTRACT(EPOCH FROM (NOW() - COALESCE(a.updated_at, a.ingested_at))) / 3600.0) FILTER (
+                    WHERE {ready_for_review_predicate("a")}
+                  ) AS oldest_ready_hours
+                FROM applications a
+                {join_c}
+                {latest_assessment_lateral("a")}
+                WHERE a.company_code=%s
+                  AND {reviewable}
+                  AND COALESCE(NULLIF(a.position_code, ''), '') <> ''
+                GROUP BY COALESCE(NULLIF(a.position_code, ''), '')
+                """,
+                (company,),
+            )
+            rows = [dict(r) for r in cur.fetchall()]
+
+    scored: list[dict[str, Any]] = []
+    for row in rows:
+        ready_apps = int(row.get("ready_applications") or 0)
+        follow_apps = int(row.get("follow_up_applications") or 0)
+        pending_apps = int(row.get("assessment_pending_applications") or 0) if assessments_enabled else 0
+        ready_people = int(row.get("ready_people") or 0)
+        follow_people = int(row.get("follow_up_people") or 0)
+        pending_people = int(row.get("assessment_pending_people") or 0) if assessments_enabled else 0
+        active_apps = int(row.get("active_applications") or 0)
+        active_people = int(row.get("active_people") or 0)
+        oldest_hours = float(row.get("oldest_ready_hours") or 0.0)
+        low_supply = 1 if 0 < active_apps <= 2 else 0
+        score = (
+            follow_apps * 40.0
+            + ready_apps * 25.0
+            + pending_apps * 15.0
+            + min(oldest_hours, 168.0) * 0.2
+            + low_supply * 10.0
+        )
+        reasons: list[str] = []
+        if follow_people:
+            reasons.append(
+                f"{follow_people} candidate{'s' if follow_people != 1 else ''} need follow-up"
+                + (f" ({follow_apps} applications)" if follow_apps != follow_people else "")
+            )
+        if ready_people:
+            reasons.append(
+                f"{ready_people} ready for review"
+                + (f" ({ready_apps} applications)" if ready_apps != ready_people else "")
+            )
+        if pending_people:
+            reasons.append(
+                f"{pending_people} with assessment attention"
+                + (f" ({pending_apps} applications)" if pending_apps != pending_people else "")
+            )
+        if oldest_hours >= 48 and ready_people:
+            reasons.append(f"oldest ready ~{int(oldest_hours)}h")
+        if low_supply and active_apps:
+            reasons.append("low candidate supply")
+        if not reasons and active_apps:
+            reasons.append(f"{active_people} active candidate{'s' if active_people != 1 else ''}")
+        scored.append(
+            {
+                "position_code": row["position_code"],
+                "position_title": row["position_title"],
+                "unit": UNIT_PEOPLE,
+                "people_count": active_people,
+                "application_count": active_apps,
+                "active_count": active_apps,
+                "active_people": active_people,
+                "display_count": active_people,
+                # Signal application counters (never summed for display_count).
+                "ready_count": ready_apps,
+                "follow_up_count": follow_apps,
+                "assessment_pending_count": pending_apps,
+                "signals": {
+                    "follow_up": {"unit": UNIT_APPLICATIONS, "applications": follow_apps, "people": follow_people},
+                    "ready_for_review": {"unit": UNIT_APPLICATIONS, "applications": ready_apps, "people": ready_people},
+                    "assessment_pending": {
+                        "unit": UNIT_APPLICATIONS,
+                        "applications": pending_apps,
+                        "people": pending_people,
+                    },
+                },
+                "oldest_ready_hours": round(oldest_hours, 1),
+                "pressure_score": round(score, 2),
+                "priority": int(min(99, max(0, round(score)))),
+                "reason": "; ".join(reasons) if reasons else "No urgent signals",
+                "destination": _destination_role_active(row["position_code"]),
+                "ranking_destination": _destination_ranking(row["position_code"]),
+            }
+        )
+    scored.sort(key=lambda item: (-float(item["pressure_score"]), str(item["position_code"])))
+    return scored
+
+
+def compute_role_priority(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    assessments_enabled: bool = True,
+) -> dict[str, Any] | None:
+    """Pick the single role that most needs attention from canonical signals."""
+    rows = _role_pressure_rows(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+    )
+    active = [row for row in rows if int(row.get("active_count") or 0) > 0]
+    if not active:
+        return None
+    winner = active[0]
+    if float(winner.get("pressure_score") or 0) <= 0:
+        return None
+    return winner
+
+
+def compute_role_next_steps(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    assessments_enabled: bool = True,
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    """Pressure-ordered roles for Overview Role next steps.
+
+    Urgent roles first. Quiet 0-active roles never outrank urgent ones.
+    """
+    rows = _role_pressure_rows(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+    )
+    urgent = [row for row in rows if float(row.get("pressure_score") or 0) > 0 and int(row.get("active_count") or 0) > 0]
+    other_active = [
+        row
+        for row in rows
+        if int(row.get("active_count") or 0) > 0 and float(row.get("pressure_score") or 0) <= 0
+    ]
+    ordered = urgent + other_active
+    limit = max(1, min(int(limit or 5), 25))
+    out: list[dict[str, Any]] = []
+    for row in ordered[:limit]:
+        signals = row.get("signals") if isinstance(row.get("signals"), dict) else {}
+        follow = int((signals.get("follow_up") or {}).get("people") or 0)
+        ready = int((signals.get("ready_for_review") or {}).get("people") or 0)
+        pending = int((signals.get("assessment_pending") or {}).get("people") or 0)
+        if follow:
+            next_step = "follow_up"
+            next_step_label = row["reason"]
+        elif ready:
+            next_step = "ready_for_review"
+            next_step_label = row["reason"]
+        elif pending:
+            next_step = "assessment_pending"
+            next_step_label = row["reason"]
+        elif int(row.get("active_count") or 0) > 0:
+            next_step = "review_pipeline"
+            next_step_label = row["reason"] or "Open the candidate list for this role."
+        else:
+            next_step = "none"
+            next_step_label = "No active candidates."
+        out.append(
+            {
+                **row,
+                "unit": UNIT_JOBS,
+                "entity": UNIT_JOBS,
+                "next_step": next_step,
+                "next_step_label": next_step_label,
+                "authority_source": "prehire_overview.role_next_steps",
+            }
+        )
+    return out
+
+
+def compute_next_action(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    assessments_enabled: bool = True,
+    interviews_enabled: bool = True,
+    settings: dict[str, Any] | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Deterministic priority winner for Overview hero."""
+    sla = resolve_sla_hours(settings)
+    counts = compute_action_counts(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+    )
+    reviewable = reviewable_predicate("a")
+    person_key = person_identity_sql("a", "c")
+    join_c = candidates_join("a", "c")
+    now = now or datetime.now(timezone.utc)
+
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT
+                  MIN(ode.created_at) AS oldest_follow_up_at,
+                  COUNT(DISTINCT a.app_key) AS follow_apps
+                FROM applications a
+                JOIN outbound_delivery_events ode ON ode.subject_key=a.app_key
+                WHERE a.company_code=%s
+                  AND {reviewable}
+                  AND {follow_up_needed_exists("a")}
+                  AND COALESCE(ode.status, '') NOT IN ('sent','recovered')
+                  AND ode.recovered_at IS NULL
+                  AND (ode.status='failed' OR ode.last_error IS NOT NULL)
+                """,
+                (company,),
+            )
+            follow_meta = dict(cur.fetchone() or {})
+
+            cur.execute(
+                f"""
+                SELECT MIN(COALESCE(a.updated_at, a.ingested_at)) AS oldest_ready_at
+                FROM applications a
+                WHERE a.company_code=%s
+                  AND {reviewable}
+                  AND {ready_for_review_predicate("a")}
+                """,
+                (company,),
+            )
+            ready_meta = dict(cur.fetchone() or {})
+
+            assessment_meta: dict[str, Any] = {}
+            if assessments_enabled and int(counts.get("assessment_pending_applications") or counts.get("assessment_pending") or 0):
+                cur.execute(
+                    f"""
+                    SELECT MIN(COALESCE(la.assessment_created_at, a.updated_at, a.ingested_at)) AS oldest_assessment_wait_at
+                    FROM applications a
+                    {latest_assessment_lateral("a")}
+                    WHERE a.company_code=%s
+                      AND {reviewable}
+                      AND {assessment_pending_predicate("a")}
+                    """,
+                    (company,),
+                )
+                assessment_meta = dict(cur.fetchone() or {})
+
+            interview_people = 0
+            interview_apps = 0
+            oldest_interview_at = None
+            if interviews_enabled:
+                cur.execute(
+                    f"""
+                    SELECT
+                      COUNT(DISTINCT a.app_key) AS debt_apps,
+                      COUNT(DISTINCT {person_key}) AS debt_people,
+                      MIN(COALESCE(a.updated_at, a.ingested_at)) AS oldest_at
+                    FROM applications a
+                    {join_c}
+                    LEFT JOIN LATERAL (
+                      SELECT ci.status AS interview_status
+                      FROM candidate_interviews ci
+                      WHERE ci.company_code=a.company_code AND ci.app_key=a.app_key
+                      ORDER BY ci.scheduled_start DESC NULLS LAST, ci.updated_at DESC
+                      LIMIT 1
+                    ) li ON TRUE
+                    WHERE a.company_code=%s
+                      AND {reviewable}
+                      AND a.status IN ({interview_scheduling_debt_statuses_sql()})
+                      AND li.interview_status IS NULL
+                    """,
+                    (company,),
+                )
+                interview_row = dict(cur.fetchone() or {})
+                interview_apps = int(interview_row.get("debt_apps") or 0)
+                interview_people = int(interview_row.get("debt_people") or 0)
+                oldest_interview_at = interview_row.get("oldest_at")
+
+    candidates: list[dict[str, Any]] = []
+
+    follow_people = int(counts.get("follow_up_needed_people") or counts.get("follow_up_needed") or 0)
+    follow_apps = int(counts.get("follow_up_needed_applications") or follow_meta.get("follow_apps") or 0)
+    if follow_people:
+        age = _age_hours(follow_meta.get("oldest_follow_up_at"), now=now)
+        over_sla = age >= sla["follow_up_hours"]
+        priority = 70 + min(25, follow_people * 4) + (10 if over_sla else 0) + min(10, int(age // 24))
+        candidates.append(
+            {
+                "action": ACTION_FOLLOW_UP,
+                "priority": int(min(99, priority)),
+                "unit": UNIT_PEOPLE,
+                "reason": (
+                    f"{follow_people} candidate{'s' if follow_people != 1 else ''} could not be reached"
+                    + (f" ({follow_apps} applications)" if follow_apps != follow_people else "")
+                    + (f"; oldest is {max(1, int(age // 24))} day{'s' if age >= 48 else ''}" if age >= 24 else "")
+                ),
+                "total_matching": follow_people,
+                "people_count": follow_people,
+                "application_count": follow_apps,
+                "destination": _destination_candidates(cohort_key=COHORT_FOLLOW_UP, follow_up="needed"),
+                "authority_source": "prehire_overview.follow_up_needed",
+            }
+        )
+
+    ready_people = int(counts.get("ready_for_review_people") or counts.get("ready_for_review") or 0)
+    ready_apps = int(counts.get("ready_for_review_applications") or ready_people)
+    if ready_people:
+        age = _age_hours(ready_meta.get("oldest_ready_at"), now=now)
+        over_sla = age >= sla["ready_for_review_hours"]
+        priority = 55 + min(20, ready_people * 3) + (12 if over_sla else 0) + min(8, int(age // 24))
+        candidates.append(
+            {
+                "action": ACTION_READY_FOR_REVIEW,
+                "priority": int(min(99, priority)),
+                "unit": UNIT_PEOPLE,
+                "reason": (
+                    f"{ready_people} candidate{'s' if ready_people != 1 else ''} ready for an HR decision"
+                    + (f" ({ready_apps} applications)" if ready_apps != ready_people else "")
+                    + (f"; oldest waiting ~{int(age)}h" if over_sla else "")
+                ),
+                "total_matching": ready_people,
+                "people_count": ready_people,
+                "application_count": ready_apps,
+                "destination": _destination_candidates(
+                    cohort_key=COHORT_READY_FOR_REVIEW,
+                    review_status="ready",
+                    sort="ready_for_review",
+                ),
+                "authority_source": "prehire_overview.ready_for_review",
+            }
+        )
+
+    assess_people = int(counts.get("assessment_pending_people") or counts.get("assessment_pending") or 0)
+    assess_apps = int(counts.get("assessment_pending_applications") or assess_people)
+    if assessments_enabled:
+        cohorts_payload = counts.get("assessment_cohorts")
+        if not isinstance(cohorts_payload, dict):
+            cohorts_payload = _assessment_cohorts.compute_assessment_cohorts(
+                company=company,
+                db_connect=db_connect,
+                assessments_enabled=True,
+            )
+        assessment_candidate = _assessment_cohorts.next_action_candidate_from_cohorts(cohorts_payload)
+        if assessment_candidate:
+            candidates.append(assessment_candidate)
+        elif assess_people:
+            # Fallback: attention without a primary split (should be rare).
+            age = _age_hours(assessment_meta.get("oldest_assessment_wait_at"), now=now)
+            over_sla = age >= sla["assessment_pending_hours"]
+            priority = 45 + min(18, assess_people * 3) + (10 if over_sla else 0)
+            candidates.append(
+                {
+                    "action": ACTION_ASSESSMENT_PENDING,
+                    "priority": int(min(99, priority)),
+                    "unit": UNIT_PEOPLE,
+                    "reason": (
+                        f"{assess_people} candidate{'s' if assess_people != 1 else ''} need assessment attention"
+                        + (f" ({assess_apps} applications)" if assess_apps != assess_people else "")
+                    ),
+                    "total_matching": assess_people,
+                    "people_count": assess_people,
+                    "application_count": assess_apps,
+                    "destination": _assessment_cohorts.destination_assessments(
+                        _assessment_cohorts.COHORT_ATTENTION
+                    ),
+                    "authority_source": "prehire_overview.assessment_attention",
+                    "cohort_key": _assessment_cohorts.COHORT_ATTENTION,
+                }
+            )
+
+    if interviews_enabled and interview_people:
+        age = _age_hours(oldest_interview_at, now=now)
+        over_sla = age >= sla["interview_scheduling_hours"]
+        priority = 40 + min(15, interview_people * 2) + (10 if over_sla else 0)
+        candidates.append(
+            {
+                "action": ACTION_INTERVIEW_SCHEDULING,
+                "priority": int(min(99, priority)),
+                "unit": UNIT_PEOPLE,
+                "reason": (
+                    f"{interview_people} candidate{'s' if interview_people != 1 else ''} still need interview scheduling"
+                    + (f" ({interview_apps} applications)" if interview_apps != interview_people else "")
+                ),
+                "total_matching": interview_people,
+                "people_count": interview_people,
+                "application_count": interview_apps,
+                "destination": _destination_interview_scheduling_debt(),
+                "authority_source": "prehire_overview.interview_scheduling_debt",
+            }
+        )
+
+    role = compute_role_priority(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+    )
+    if role and int(role.get("priority") or 0) >= 50:
+        candidates.append(
+            {
+                "action": ACTION_ROLE_PRIORITY,
+                "priority": int(role["priority"]),
+                "unit": UNIT_PEOPLE,
+                "reason": f"{role['position_title']}: {role['reason']}",
+                "total_matching": int(role.get("people_count") or role.get("display_count") or 0),
+                "people_count": int(role.get("people_count") or 0),
+                "application_count": int(role.get("application_count") or 0),
+                "destination": role.get("destination") or _destination_role_active(role.get("position_code")),
+                "ranking_destination": role.get("ranking_destination") or _destination_ranking(role.get("position_code")),
+                "authority_source": "prehire_overview.role_priority",
+                "role": {
+                    "position_code": role["position_code"],
+                    "position_title": role["position_title"],
+                },
+            }
+        )
+
+    order = {
+        ACTION_FOLLOW_UP: 0,
+        ACTION_READY_FOR_REVIEW: 1,
+        _assessment_cohorts.ACTION_DELIVERY_FAILED: 2,
+        _assessment_cohorts.ACTION_RESEND: 3,
+        _assessment_cohorts.ACTION_READY_TO_SEND: 4,
+        ACTION_ASSESSMENT_PENDING: 5,
+        _assessment_cohorts.ACTION_SENT_PENDING: 6,
+        _assessment_cohorts.ACTION_IN_PROGRESS: 7,
+        ACTION_INTERVIEW_SCHEDULING: 8,
+        ACTION_ROLE_PRIORITY: 9,
+    }
+    if not candidates:
+        return {
+            "action": "none",
+            "priority": 0,
+            "unit": UNIT_PEOPLE,
+            "reason": "No urgent hiring actions right now.",
+            "total_matching": 0,
+            "people_count": 0,
+            "application_count": 0,
+            "destination": {"page": "overview", "filters": {}},
+            "authority_source": "prehire_overview.next_action",
+            "label": "suggested_next_action",
+            "sla_hours": sla,
+            "as_of": now.astimezone(timezone.utc).isoformat(),
+        }
+
+    candidates.sort(
+        key=lambda item: (
+            -int(item["priority"]),
+            order.get(str(item["action"]), 99),
+            -int(item.get("total_matching") or 0),
+            str(item["action"]),
+        )
+    )
+    winner = dict(candidates[0])
+    winner["label"] = "suggested_next_action"
+    winner["sla_hours"] = sla
+    winner["as_of"] = now.astimezone(timezone.utc).isoformat()
+    winner["alternatives"] = [
+        {
+            "action": c["action"],
+            "priority": c["priority"],
+            "total_matching": c["total_matching"],
+            "unit": c.get("unit"),
+            "people_count": c.get("people_count"),
+            "application_count": c.get("application_count"),
+        }
+        for c in candidates[1:4]
+    ]
+    return winner
+
+
+def _action_rank(action_type: str) -> int:
+    order = {
+        ACTION_FOLLOW_UP: 0,
+        ACTION_READY_FOR_REVIEW: 1,
+        _assessment_cohorts.ACTION_DELIVERY_FAILED: 2,
+        _assessment_cohorts.ACTION_RESEND: 3,
+        _assessment_cohorts.ACTION_READY_TO_SEND: 4,
+        ACTION_ASSESSMENT_PENDING: 5,
+        ACTION_INTERVIEW_SCHEDULING: 6,
+    }
+    return order.get(action_type, 99)
+
+
+def _group_work_queue_by_person(action_items: list[dict[str, Any]], *, now: datetime) -> list[dict[str, Any]]:
+    """Collapse action×application rows into one person row with nested actions/apps."""
+    groups: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    for item in action_items:
+        person_key = str(item.get("person_key") or f"singleton:{item.get('app_key') or ''}")
+        if person_key not in groups:
+            groups[person_key] = {
+                "person_key": person_key,
+                "unit": UNIT_PEOPLE,
+                "candidate_name": item.get("candidate_name"),
+                "priority": int(item.get("priority") or 0),
+                "age_hours": float(item.get("age_hours") or 0.0),
+                "actions": [],
+                "applications": {},
+                "as_of": now.astimezone(timezone.utc).isoformat(),
+                "authority_source": "prehire_overview.work_queue",
+            }
+            order.append(person_key)
+        group = groups[person_key]
+        if int(item.get("priority") or 0) > int(group["priority"]):
+            group["priority"] = int(item["priority"])
+        if float(item.get("age_hours") or 0.0) > float(group["age_hours"]):
+            group["age_hours"] = float(item["age_hours"])
+        if item.get("candidate_name") and not group.get("candidate_name"):
+            group["candidate_name"] = item.get("candidate_name")
+        group["actions"].append(
+            {
+                "action_type": item["action_type"],
+                "app_key": item.get("app_key"),
+                "position_code": item.get("position_code"),
+                "position_title": item.get("position_title"),
+                "status": item.get("status"),
+                "reason": item.get("reason"),
+                "priority": item.get("priority"),
+                "age_hours": item.get("age_hours"),
+                "destination": item.get("destination"),
+                "authority_source": item.get("authority_source"),
+            }
+        )
+        app_key = str(item.get("app_key") or "")
+        if app_key and app_key not in group["applications"]:
+            group["applications"][app_key] = {
+                "app_key": app_key,
+                "position_code": item.get("position_code"),
+                "position_title": item.get("position_title"),
+                "status": item.get("status"),
+            }
+
+    people: list[dict[str, Any]] = []
+    for person_key in order:
+        group = groups[person_key]
+        actions = sorted(
+            group["actions"],
+            key=lambda a: (-int(a.get("priority") or 0), _action_rank(str(a.get("action_type") or "")), str(a.get("app_key") or "")),
+        )
+        apps = list(group["applications"].values())
+        primary = actions[0] if actions else {}
+        primary_app = next((a for a in apps if a.get("app_key") == primary.get("app_key")), apps[0] if apps else {})
+        job_titles = []
+        for app in apps:
+            title = str(app.get("position_title") or app.get("position_code") or "").strip()
+            if title and title not in job_titles:
+                job_titles.append(title)
+        people.append(
+            {
+                "unit": UNIT_PEOPLE,
+                "person_key": person_key,
+                "candidate_name": group.get("candidate_name"),
+                "app_key": primary.get("app_key") or (primary_app.get("app_key") if primary_app else None),
+                "action_type": primary.get("action_type") or ACTION_READY_FOR_REVIEW,
+                "position_code": primary_app.get("position_code") if primary_app else primary.get("position_code"),
+                "position_title": primary_app.get("position_title") if primary_app else primary.get("position_title"),
+                "status": primary_app.get("status") if primary_app else None,
+                "stage": primary_app.get("status") if primary_app else None,
+                "job_label": " · ".join(job_titles[:3]) if job_titles else (primary.get("position_title") or ""),
+                "reason": primary.get("reason") or "Needs HR attention",
+                "priority": int(min(99, max(1, int(group["priority"])))),
+                "age_hours": round(float(group["age_hours"] or 0.0), 1),
+                "action_count": len(actions),
+                "application_count": len(apps),
+                "actions": actions,
+                "applications": apps,
+                "destination": primary.get("destination")
+                or _destination_candidates(
+                    q=str(primary.get("app_key") or ""),
+                    action=str(primary.get("action_type") or ""),
+                    cohort_key=str(primary.get("action_type") or "work_queue"),
+                ),
+                "authority_source": "prehire_overview.work_queue",
+                "as_of": group["as_of"],
+            }
+        )
+
+    people.sort(
+        key=lambda item: (
+            -int(item["priority"]),
+            _action_rank(str(item.get("action_type") or "")),
+            str(item.get("candidate_name") or ""),
+            str(item.get("person_key") or ""),
+        )
+    )
+    return people
+
+
+def compute_work_queue(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    assessments_enabled: bool = True,
+    interviews_enabled: bool = True,
+    settings: dict[str, Any] | None = None,
+    limit: int = 25,
+    cursor: str | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Company-wide person-first work queue with cursor pagination.
+
+    Cursor format: "{priority:03d}:{person_key}" descending walk.
+    """
+    sla = resolve_sla_hours(settings)
+    now = now or datetime.now(timezone.utc)
+    reviewable = reviewable_predicate("a")
+    person_key = person_identity_sql("a", "c")
+    join_c = candidates_join("a", "c")
+    limit = max(1, min(int(limit or 25), 100))
+
+    action_items: list[dict[str, Any]] = []
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT
+                  a.app_key,
+                  a.status,
+                  {person_key} AS person_key,
+                  COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.phone) AS candidate_name,
+                  COALESCE(NULLIF(a.position_title, ''), a.position_code) AS position_title,
+                  a.position_code,
+                  MIN(ode.created_at) AS event_at,
+                  MAX(EXTRACT(EPOCH FROM (NOW() - ode.created_at)) / 3600.0) AS age_hours
+                FROM applications a
+                {join_c}
+                JOIN outbound_delivery_events ode ON ode.subject_key=a.app_key
+                WHERE a.company_code=%s
+                  AND {reviewable}
+                  AND {follow_up_needed_exists("a")}
+                  AND COALESCE(ode.status, '') NOT IN ('sent','recovered')
+                  AND ode.recovered_at IS NULL
+                  AND (ode.status='failed' OR ode.last_error IS NOT NULL)
+                GROUP BY a.app_key, a.status, person_key, candidate_name, position_title, a.position_code
+                """,
+                (company,),
+            )
+            for row in cur.fetchall():
+                age = float(row.get("age_hours") or 0.0)
+                priority = 70 + min(20, int(age // 12)) + (10 if age >= sla["follow_up_hours"] else 0)
+                action_items.append(
+                    _queue_action_row(
+                        action_type=ACTION_FOLLOW_UP,
+                        app_key=row["app_key"],
+                        person_key=row.get("person_key"),
+                        candidate_name=row.get("candidate_name"),
+                        position_code=row.get("position_code"),
+                        position_title=row.get("position_title"),
+                        status=row.get("status"),
+                        reason="Failed candidate delivery needs HR follow-up",
+                        priority=priority,
+                        age_hours=age,
+                        destination=_destination_candidates(
+                            cohort_key=COHORT_FOLLOW_UP,
+                            follow_up="needed",
+                            q=row["app_key"],
+                            action=ACTION_FOLLOW_UP,
+                        ),
+                        authority_source="prehire_overview.follow_up_needed",
+                        as_of=now,
+                    )
+                )
+
+            cur.execute(
+                f"""
+                SELECT
+                  a.app_key,
+                  a.status,
+                  {person_key} AS person_key,
+                  COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.phone) AS candidate_name,
+                  COALESCE(NULLIF(a.position_title, ''), a.position_code) AS position_title,
+                  a.position_code,
+                  COALESCE(a.updated_at, a.ingested_at) AS event_at,
+                  EXTRACT(EPOCH FROM (NOW() - COALESCE(a.updated_at, a.ingested_at))) / 3600.0 AS age_hours
+                FROM applications a
+                {join_c}
+                WHERE a.company_code=%s
+                  AND {reviewable}
+                  AND {ready_for_review_predicate("a")}
+                """,
+                (company,),
+            )
+            for row in cur.fetchall():
+                age = float(row.get("age_hours") or 0.0)
+                priority = 55 + min(15, int(age // 12)) + (10 if age >= sla["ready_for_review_hours"] else 0)
+                action_items.append(
+                    _queue_action_row(
+                        action_type=ACTION_READY_FOR_REVIEW,
+                        app_key=row["app_key"],
+                        person_key=row.get("person_key"),
+                        candidate_name=row.get("candidate_name"),
+                        position_code=row.get("position_code"),
+                        position_title=row.get("position_title"),
+                        status=row.get("status"),
+                        reason="Candidate is ready for an HR decision",
+                        priority=priority,
+                        age_hours=age,
+                        destination=_destination_candidates(
+                            cohort_key=COHORT_READY_FOR_REVIEW,
+                            review_status="ready",
+                            sort="ready_for_review",
+                            q=row["app_key"],
+                            action=ACTION_READY_FOR_REVIEW,
+                        ),
+                        authority_source="prehire_overview.ready_for_review",
+                        as_of=now,
+                    )
+                )
+
+            if assessments_enabled:
+                attention_pred = _assessment_cohorts.cohort_predicate(_assessment_cohorts.COHORT_ATTENTION, "a")
+                ready_pred = _assessment_cohorts.cohort_predicate(_assessment_cohorts.COHORT_READY_TO_SEND, "a")
+                cur.execute(
+                    f"""
+                    SELECT
+                      a.app_key,
+                      a.status,
+                      {person_key} AS person_key,
+                      COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.phone) AS candidate_name,
+                      COALESCE(NULLIF(a.position_title, ''), a.position_code) AS position_title,
+                      a.position_code,
+                      COALESCE(la.assessment_status, a.raw_json->'assessment'->>'status', '') AS assessment_status,
+                      COALESCE(la.assessment_delivery_status, a.raw_json->'assessment'->>'delivery_status', '') AS assessment_delivery_status,
+                      COALESCE(a.updated_at, a.ingested_at) AS event_at,
+                      EXTRACT(EPOCH FROM (NOW() - COALESCE(a.updated_at, a.ingested_at))) / 3600.0 AS age_hours
+                    FROM applications a
+                    {join_c}
+                    {latest_assessment_lateral("a")}
+                    WHERE a.company_code=%s
+                      AND {reviewable}
+                      AND (({attention_pred}) OR ({ready_pred}))
+                    """,
+                    (company,),
+                )
+                for row in cur.fetchall():
+                    age = float(row.get("age_hours") or 0.0)
+                    cohort = _assessment_cohorts.classify_attempt_state(
+                        assessment_status=row.get("assessment_status"),
+                        delivery_status=row.get("assessment_delivery_status"),
+                        application_status=row.get("status"),
+                    ) or _assessment_cohorts.COHORT_ATTENTION
+                    if cohort == _assessment_cohorts.COHORT_EXPIRED:
+                        cohort = _assessment_cohorts.COHORT_RESEND_NEEDED
+                    action_type = {
+                        _assessment_cohorts.COHORT_READY_TO_SEND: _assessment_cohorts.ACTION_READY_TO_SEND,
+                        _assessment_cohorts.COHORT_RESEND_NEEDED: _assessment_cohorts.ACTION_RESEND,
+                        _assessment_cohorts.COHORT_DELIVERY_FAILED: _assessment_cohorts.ACTION_DELIVERY_FAILED,
+                        _assessment_cohorts.COHORT_IN_PROGRESS: _assessment_cohorts.ACTION_IN_PROGRESS,
+                        _assessment_cohorts.COHORT_SENT_PENDING: _assessment_cohorts.ACTION_SENT_PENDING,
+                    }.get(cohort, ACTION_ASSESSMENT_PENDING)
+                    reason = {
+                        _assessment_cohorts.COHORT_READY_TO_SEND: "Ready for first assessment send",
+                        _assessment_cohorts.COHORT_RESEND_NEEDED: "Expired assessment needs resend",
+                        _assessment_cohorts.COHORT_DELIVERY_FAILED: "Assessment delivery failed",
+                        _assessment_cohorts.COHORT_IN_PROGRESS: "Assessment in progress",
+                        _assessment_cohorts.COHORT_SENT_PENDING: "Assessment sent and waiting",
+                    }.get(cohort, "Assessment needs HR attention")
+                    base_priority = {
+                        _assessment_cohorts.COHORT_DELIVERY_FAILED: 58,
+                        _assessment_cohorts.COHORT_RESEND_NEEDED: 52,
+                        _assessment_cohorts.COHORT_READY_TO_SEND: 48,
+                        _assessment_cohorts.COHORT_SENT_PENDING: 35,
+                        _assessment_cohorts.COHORT_IN_PROGRESS: 30,
+                    }.get(cohort, 45)
+                    priority = base_priority + min(12, int(age // 18)) + (8 if age >= sla["assessment_pending_hours"] else 0)
+                    dest = _assessment_cohorts.destination_assessments(
+                        cohort,
+                        q=row["app_key"],
+                        action=action_type,
+                    )
+                    action_items.append(
+                        _queue_action_row(
+                            action_type=action_type,
+                            app_key=row["app_key"],
+                            person_key=row.get("person_key"),
+                            candidate_name=row.get("candidate_name"),
+                            position_code=row.get("position_code"),
+                            position_title=row.get("position_title"),
+                            status=row.get("status"),
+                            reason=reason,
+                            priority=priority,
+                            age_hours=age,
+                            destination=dest,
+                            authority_source=f"assessment_cohorts.{cohort}",
+                            as_of=now,
+                        )
+                    )
+
+            if interviews_enabled:
+                cur.execute(
+                    f"""
+                    SELECT
+                      a.app_key,
+                      a.status,
+                      {person_key} AS person_key,
+                      COALESCE(NULLIF(c.name, ''), a.raw_json->>'candidate_name', a.phone) AS candidate_name,
+                      COALESCE(NULLIF(a.position_title, ''), a.position_code) AS position_title,
+                      a.position_code,
+                      COALESCE(a.updated_at, a.ingested_at) AS event_at,
+                      EXTRACT(EPOCH FROM (NOW() - COALESCE(a.updated_at, a.ingested_at))) / 3600.0 AS age_hours
+                    FROM applications a
+                    {join_c}
+                    LEFT JOIN LATERAL (
+                      SELECT ci.status AS interview_status
+                      FROM candidate_interviews ci
+                      WHERE ci.company_code=a.company_code AND ci.app_key=a.app_key
+                      ORDER BY ci.scheduled_start DESC NULLS LAST, ci.updated_at DESC
+                      LIMIT 1
+                    ) li ON TRUE
+                    WHERE a.company_code=%s
+                      AND {reviewable}
+                      AND a.status IN ({interview_scheduling_debt_statuses_sql()})
+                      AND li.interview_status IS NULL
+                    """,
+                    (company,),
+                )
+                for row in cur.fetchall():
+                    age = float(row.get("age_hours") or 0.0)
+                    priority = 40 + min(10, int(age // 24))
+                    action_items.append(
+                        _queue_action_row(
+                            action_type=ACTION_INTERVIEW_SCHEDULING,
+                            app_key=row["app_key"],
+                            person_key=row.get("person_key"),
+                            candidate_name=row.get("candidate_name"),
+                            position_code=row.get("position_code"),
+                            position_title=row.get("position_title"),
+                            status=row.get("status"),
+                            reason="Interview scheduling still needed",
+                            priority=priority,
+                            age_hours=age,
+                            destination=_destination_interview_scheduling_debt(
+                                q=row["app_key"],
+                                action=ACTION_INTERVIEW_SCHEDULING,
+                            ),
+                            authority_source="prehire_overview.interview_scheduling_debt",
+                            as_of=now,
+                        )
+                    )
+
+    # Deduplicate action×app before person rollup.
+    best: dict[tuple[str, str], dict[str, Any]] = {}
+    for item in action_items:
+        key = (str(item["action_type"]), str(item.get("app_key") or ""))
+        prev = best.get(key)
+        if prev is None or int(item["priority"]) > int(prev["priority"]):
+            best[key] = item
+
+    ordered_people = _group_work_queue_by_person(list(best.values()), now=now)
+
+    start = 0
+    if cursor:
+        for idx, item in enumerate(ordered_people):
+            token = _person_cursor_token(item)
+            if token == cursor:
+                start = idx + 1
+                break
+
+    page = ordered_people[start : start + limit]
+    next_cursor = _person_cursor_token(page[-1]) if start + limit < len(ordered_people) and page else None
+    return {
+        "company_code": company,
+        "ok": True,
+        "as_of": now.astimezone(timezone.utc).isoformat(),
+        "authority_source": "prehire_overview.work_queue",
+        "unit": UNIT_PEOPLE,
+        "total": len(ordered_people),
+        "action_total": len(best),
+        "limit": limit,
+        "cursor": cursor,
+        "next_cursor": next_cursor,
+        "has_more": bool(next_cursor),
+        "items": page,
+        "sla_hours": sla,
+    }
+
+
+def _person_cursor_token(item: dict[str, Any]) -> str:
+    return f"{int(item['priority']):03d}:{item.get('person_key') or item.get('app_key') or ''}"
+
+
+def _queue_action_row(
+    *,
+    action_type: str,
+    app_key: str | None,
+    person_key: str | None,
+    candidate_name: str | None,
+    position_code: str | None,
+    position_title: str | None,
+    status: str | None,
+    reason: str,
+    priority: int,
+    age_hours: float,
+    destination: dict[str, Any],
+    authority_source: str,
+    as_of: datetime,
+) -> dict[str, Any]:
+    return {
+        "action_type": action_type,
+        "app_key": app_key,
+        "person_key": person_key,
+        "candidate_name": candidate_name,
+        "position_code": position_code,
+        "position_title": position_title,
+        "status": status,
+        "reason": reason,
+        "priority": int(min(99, max(1, priority))),
+        "age_hours": round(float(age_hours or 0.0), 1),
+        "destination": destination,
+        "authority_source": authority_source,
+        "as_of": as_of.astimezone(timezone.utc).isoformat(),
+    }
+
+
+# Backward-compatible alias used by older call sites / tests.
+def _queue_item(**kwargs: Any) -> dict[str, Any]:
+    kwargs.setdefault("person_key", None)
+    kwargs.setdefault("status", None)
+    return _queue_action_row(**kwargs)
+
+
+def _cursor_token(item: dict[str, Any]) -> str:
+    if item.get("person_key"):
+        return _person_cursor_token(item)
+    return f"{int(item['priority']):03d}:{item.get('action_type')}:{item.get('app_key') or item.get('position_code') or ''}"
+
+
+def build_overview_authority(
+    *,
+    company: str,
+    db_connect: Callable[[], Any],
+    get_company_settings: Callable[[str], dict[str, Any]],
+    assessments_enabled: bool = True,
+    interviews_enabled: bool = True,
+    visibility_sql: str | None = None,
+    visibility_params: list[Any] | None = None,
+) -> dict[str, Any]:
+    settings = get_company_settings(company) or {}
+    counts = compute_action_counts(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+        visibility_sql=visibility_sql,
+        visibility_params=visibility_params,
+    )
+    next_action = compute_next_action(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+        interviews_enabled=interviews_enabled,
+        settings=settings,
+    )
+    role = compute_role_priority(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+    )
+    role_next_steps = compute_role_next_steps(
+        company=company,
+        db_connect=db_connect,
+        assessments_enabled=assessments_enabled,
+        limit=5,
+    )
+    return {
+        "action_counts": counts,
+        "next_action": next_action,
+        "role_priority": role,
+        "role_next_steps": role_next_steps,
+        "assessment_cohorts": counts.get("assessment_cohorts")
+        if isinstance(counts.get("assessment_cohorts"), dict)
+        else (
+            _assessment_cohorts.compute_assessment_cohorts(
+                company=company,
+                db_connect=db_connect,
+                assessments_enabled=assessments_enabled,
+                visibility_sql=visibility_sql,
+                visibility_params=visibility_params,
+            )
+            if assessments_enabled
+            else None
+        ),
+        "definitions": {
+            "ready_for_review": {
+                "entity": UNIT_PEOPLE,
+                "unit": UNIT_PEOPLE,
+                "also_publishes": UNIT_APPLICATIONS,
+                "statuses": list(READY_FOR_REVIEW_STATUSES),
+                "cohort_key": COHORT_READY_FOR_REVIEW,
+                "destination_filters": {
+                    "overview_cohort": COHORT_READY_FOR_REVIEW,
+                    "review_status": "ready",
+                    "sort": "ready_for_review",
+                    "cohort_key": COHORT_READY_FOR_REVIEW,
+                },
+                "identity": "confirmed_person_same_as_candidates_list",
+            },
+            **(
+                {
+                    "assessment_attention": {
+                        "entity": UNIT_PEOPLE,
+                        "unit": UNIT_PEOPLE,
+                        "also_publishes": UNIT_APPLICATIONS,
+                        "cohort_key": _assessment_cohorts.COHORT_ATTENTION,
+                        "note": "Legacy aggregate assessment_pending; never label as Send pending",
+                        "destination_page": "assessments",
+                    },
+                    "assessment_cohorts": _assessment_cohorts.cohort_definitions(),
+                }
+                if assessments_enabled
+                else {}
+            ),
+            "follow_up_needed": {
+                "entity": UNIT_PEOPLE,
+                "unit": UNIT_PEOPLE,
+                "also_publishes": UNIT_APPLICATIONS,
+                "matches": "Candidates follow_up=needed, distinct confirmed people",
+                "cohort_key": COHORT_FOLLOW_UP,
+                "destination_filters": {
+                    "overview_cohort": COHORT_FOLLOW_UP,
+                    "follow_up": "needed",
+                    "cohort_key": COHORT_FOLLOW_UP,
+                },
+                "identity": "confirmed_person_same_as_candidates_list",
+            },
+            "interview_scheduling_debt": {
+                "entity": UNIT_PEOPLE,
+                "unit": UNIT_PEOPLE,
+                "also_publishes": UNIT_APPLICATIONS,
+                "statuses": list(INTERVIEW_SCHEDULING_DEBT_STATUSES),
+                "cohort_key": COHORT_INTERVIEW_SCHEDULING,
+                "destination_filters": {
+                    "overview_cohort": COHORT_INTERVIEW_SCHEDULING,
+                    "interview_status": "none",
+                    "cohort_key": COHORT_INTERVIEW_SCHEDULING,
+                },
+                "page": "candidates",
+                "note": "Exact debt is applications without interviews; not Interviews needs_scheduling tab",
+            },
+            "role_priority": {
+                "entity": UNIT_JOBS,
+                "display_unit": UNIT_PEOPLE,
+                "display_field": "people_count",
+                "signals_unit": UNIT_APPLICATIONS,
+                "cohort_key_prefix": f"{COHORT_ROLE_ACTIVE}:",
+                "destination_filters": {"overview_cohort": COHORT_ROLE_ACTIVE, "position": "<position_code>"},
+                "ranking_destination": "ranking_destination only — Check ranking CTA",
+                "note": "display_count is distinct active people for the role; signals stay separate",
+            },
+            "work_queue": {
+                "entity": UNIT_PEOPLE,
+                "unit": UNIT_PEOPLE,
+                "nested": [UNIT_ACTIONS, UNIT_APPLICATIONS],
+                "destination": "opens primary action app_key with action + cohort filters in URL",
+            },
+            "role_next_steps": {
+                "entity": UNIT_JOBS,
+                "ordered_by": "pressure_score",
+                "excludes_quiet_above_urgent": True,
+                "destination": "same role_active candidates cohort as role card",
+            },
+        },
+        "as_of": datetime.now(timezone.utc).isoformat(),
+        "authority_source": "prehire_overview",
+    }

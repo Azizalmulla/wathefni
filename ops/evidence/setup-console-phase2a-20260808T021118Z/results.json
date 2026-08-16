@@ -1,0 +1,118 @@
+{
+  "pass": 19,
+  "fail": 1,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "attendance_ux_maps_to_runtime",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend:/dashboard/superadmin/setup/companies/{company_code}/pay",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend:company_payroll_setup_owned_by_setup_console",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "backend:SetupPayrollSetupPatch",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_source_skipped",
+      "detail": null
+    },
+    {
+      "status": "FAIL",
+      "name": "posthire_policy_editor_retired_dist",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "components_source_skipped",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:payroll_mode",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:attendance_payroll_mode",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:approval_sod_chain",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "schema_required:mode_a_entitlement_opt_in",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_get_payroll_setup",
+      "detail": {
+        "mode": "native",
+        "readiness": "ready_preview"
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_human_readiness_labels",
+      "detail": "ready_preview"
+    },
+    {
+      "status": "PASS",
+      "name": "live_wathefni_owned_readonly",
+      "detail": "KW_PUBLIC_BASELINE_v1.0.0"
+    },
+    {
+      "status": "PASS",
+      "name": "live_sme_informational_apply",
+      "detail": {
+        "actions": [
+          "set_payroll_mode",
+          "set_attendance_payroll_mode",
+          "create_approved_company_policy",
+          "upsert_finalize_policy",
+          "update_setup_extras",
+          "set_entitlement"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "live_attendance_driven_apply",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_enterprise_sod",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_external_mode",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_restore_native_attempted",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_tenant_missing_company_404",
+      "detail": null
+    }
+  ]
+}

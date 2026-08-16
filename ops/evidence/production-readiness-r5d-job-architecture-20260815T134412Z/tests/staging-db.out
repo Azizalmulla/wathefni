@@ -1,0 +1,87 @@
+    PRODUCTION READINESS R5D — job architecture surface (staging DB)
+    tenant: R5DA71FF7
+      PASS  enable tenant B
+      PASS  sync JA entitlement
+      PASS  JA not a SKU
+      PASS  salary bands out
+      PASS  JA catalog enableable
+      PASS  JA not in module catalog
+      PASS  A family
+      PASS  A function
+      PASS  A grade
+      PASS  A level
+      PASS  A profile
+      PASS  A profile not recruiting job
+      PASS  A senior profile
+      PASS  A retrieve families
+      PASS  A retrieve profiles
+      PASS  B unique title mapped
+      PASS  B raw preserved flag
+      PASS  B no fuzzy AI
+      PASS  B match unique
+      PASS  B raw title unchanged
+      PASS  B unique grade mapped
+      PASS  B raw grade unchanged
+      PASS  B assignment added
+      PASS  B assignment is architecture only
+      PASS  C twin profiles
+      PASS  C no automatic canonical
+      PASS  C explicit ambiguous
+      PASS  C raw still Engineer
+      PASS  C unmatched explicit
+      PASS  C human resolve
+      PASS  C resolve raw preserved
+      PASS  D promotion edge
+      PASS  D promotion not eligibility
+      PASS  D promotion not auto eligible
+      PASS  D lateral edge
+      PASS  D lateral not eligibility
+      PASS  D lateral not auto eligible
+      PASS  D specialist edge
+      PASS  D specialist not eligibility
+      PASS  D specialist not auto eligible
+      PASS  D manager edge
+      PASS  D manager not eligibility
+      PASS  D manager not auto eligible
+      PASS  D eligibility score forbidden
+      PASS  E talent critical role
+      PASS  E optional talent ref
+      PASS  E JA did not acquire hipo
+      PASS  E talent still optional
+      PASS  F recruiting ref
+      PASS  F recruiting ref edit
+      PASS  F profile name unchanged
+      PASS  F profile version unchanged by requisition edit
+      PASS  G rename ok
+      PASS  G stable id preserved
+      PASS  G version bumped
+      PASS  G historical raw title reconstructable
+      PASS  G history events exist
+      PASS  G assignment still points at stable id
+      PASS  workspace enabled
+      PASS  workspace no career score
+      PASS  error is not empty pattern
+      PASS  unmapped count explicit
+      PASS  disable retains history flag
+      PASS  disabled mappings unavailable not fake empty
+      PASS  disabled does not invent zero unmapped
+      PASS  writes blocked when disabled
+      PASS  raw title retained after disable
+      PASS  disabled workspace unavailable
+      PASS  disabled counts are not fake zeros
+      PASS  JA HTTP routes registered
+      PASS  unauthenticated dashboard not public
+      PASS  HR workspace HTTP
+      PASS  workspace has no career score
+      PASS  HR lists families
+      PASS  tenant isolation HTTP 200
+      PASS  tenant B does not see tenant A families
+      PASS  manager cannot author
+      PASS  HR without manage denied write
+      PASS  HR without mapping denied migrate
+      PASS  hard delete forbidden
+      PASS  hard delete names refuse
+
+    81 passed, 0 failed
+R5D_JOB_ARCHITECTURE_SURFACE_DB_PASS
+STAGING_RC=0

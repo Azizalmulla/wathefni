@@ -1,0 +1,270 @@
+"""Setup Console — Wave 6 HCM Expansion company policies.
+
+One coherent Wave 6 Setup area with module-specific cards.
+Env flags remain kill-switches / allowlists only.
+C1: job_architecture (platform capability)
+C2: learning (commercial module)
+"""
+from __future__ import annotations
+
+from typing import Any
+
+import job_architecture_c1 as ja
+import learning_development_c2 as ld
+
+PHASE = "setup_console_wave6"
+CONTRACT_VERSION = "wave6_hcm_expansion_policies_v2"
+PASS_STAMP = "WAVE6_HCM_EXPANSION_CHARTER: APPROVED"
+
+WAVE6_MODULE_KEYS = ("job_architecture", "learning")
+
+DEFAULTS: dict[str, dict[str, Any]] = {
+    "job_architecture": {
+        "enabled": False,
+        "migration_mode": "non_destructive",
+        "allow_optional_talent_ref": True,
+        "allow_optional_recruiting_ref": True,
+        "commercial_sku": False,
+        "platform_capability": True,
+    },
+    "learning": {
+        "enabled": False,
+        "employee_requests_enabled": True,
+        "manager_assign_enabled": True,
+        "expiry_warning_days": 30,
+        "evidence_required_for_completion": True,
+        "ja_applicability_enabled": False,
+        "development_fulfillment_enabled": True,
+        "commercial_sku": True,
+    },
+}
+
+STATUS_LABELS = {
+    "job_architecture": {"en": "Job Architecture", "ar": "هيكل الوظائف"},
+    "learning": {"en": "Learning & Development", "ar": "التعلم والتطوير"},
+    "wave6_area": {"en": "HCM Expansion (Wave 6)", "ar": "توسعة إدارة رأس المال البشري (الموجة 6)"},
+}
+
+ENV_FLAG_BY_MODULE = {
+    "job_architecture": ("WATHEFNI_JOB_ARCHITECTURE_C1", "WATHEFNI_JOB_ARCHITECTURE_COMPANIES"),
+    "learning": ("WATHEFNI_LEARNING_C2", "WATHEFNI_LEARNING_COMPANIES"),
+}
+
+
+def _company(code: str) -> str:
+    return str(code or "").upper()
+
+
+def status_label(module_key: str, *, lang: str = "en") -> str:
+    pack = STATUS_LABELS.get(module_key) or {"en": module_key, "ar": module_key}
+    return str(pack.get("ar" if lang.lower().startswith("ar") else "en"))
+
+
+def honesty_payload() -> dict[str, Any]:
+    return {
+        "phase": PHASE,
+        "contract_version": CONTRACT_VERSION,
+        "pass_stamp": PASS_STAMP,
+        "setup_owns_wave6_policies": True,
+        "env_only_ownership": False,
+        "env_flags_are_kill_switches_only": True,
+        "one_coherent_area_module_cards": True,
+        "no_mega_form": True,
+        "no_duplicate_settings_stores": True,
+        "assistant_mutations_in_wave6": False,
+        "full_pass_not_broad_rollout": True,
+        "job_architecture_not_customer_sku": True,
+        "learning_does_not_duplicate_c3": True,
+        **{k: v for k, v in ja.honesty_payload().items() if k in {
+            "salary_bands_out_of_c1",
+            "no_fuzzy_ai_migration",
+            "career_edges_are_not_eligibility",
+            "recruiting_job_is_not_ja_profile",
+            "org_position_is_not_reusable_job_profile",
+            "talent_critical_role_is_not_ja_catalog",
+        }},
+        **{k: v for k, v in ld.honesty_payload().items() if k in {
+            "does_not_duplicate_c3_development",
+            "completion_does_not_silently_close_development_action",
+            "works_performance_talent_off",
+            "ja_optional",
+        }},
+    }
+
+
+def get_all_wave6_policies(cur: Any, company_code: str) -> dict[str, Any]:
+    company = _company(company_code)
+    ja.ensure_job_architecture_c1_schema(cur)
+    ld.ensure_learning_development_c2_schema(cur)
+    modules: dict[str, Any] = {}
+    for key in WAVE6_MODULE_KEYS:
+        modules[key] = get_wave6_module_policy(cur, company, key)
+    return {
+        "phase": PHASE,
+        "contract_version": CONTRACT_VERSION,
+        "modules": modules,
+        "honesty": honesty_payload(),
+        "future_hard_contracts": ja.future_hard_contracts(),
+        "surface_composition": {
+            "job_architecture": ja.surface_composition_rules(),
+            "learning": ld.surface_composition_rules(),
+        },
+    }
+
+
+def get_wave6_module_policy(cur: Any, company_code: str, module_key: str) -> dict[str, Any]:
+    company = _company(company_code)
+    key = str(module_key or "").strip().lower()
+    if key not in WAVE6_MODULE_KEYS:
+        return {"ok": False, "error": "unknown_wave6_module", "module_key": key}
+    defaults = dict(DEFAULTS[key])
+    if key == "job_architecture":
+        ja.ensure_job_architecture_c1_schema(cur)
+        cur.execute("SELECT * FROM ja_company_settings WHERE company_code=%s", (company,))
+        row = cur.fetchone()
+        settings = dict(row) if row else {}
+        policy = {
+            **defaults,
+            "enabled": bool(settings.get("enabled")),
+            "migration_mode": settings.get("migration_mode") or "non_destructive",
+            "allow_optional_talent_ref": bool(settings.get("allow_optional_talent_ref", True)),
+            "allow_optional_recruiting_ref": bool(settings.get("allow_optional_recruiting_ref", True)),
+        }
+        return {
+            "ok": True,
+            "module_key": key,
+            "label_en": status_label(key, lang="en"),
+            "label_ar": status_label(key, lang="ar"),
+            "policy": policy,
+            "runtime_gate": ja.runtime_gate_for_company(company),
+            "platform_capability": True,
+            "commercial_sku": False,
+            "honesty": ja.honesty_payload(company_code=company),
+        }
+    if key == "learning":
+        ld.ensure_learning_development_c2_schema(cur)
+        cur.execute("SELECT * FROM ld_company_settings WHERE company_code=%s", (company,))
+        row = cur.fetchone()
+        settings = dict(row) if row else {}
+        policy = {
+            **defaults,
+            "enabled": bool(settings.get("enabled")),
+            "employee_requests_enabled": bool(settings.get("employee_requests_enabled", True)),
+            "manager_assign_enabled": bool(settings.get("manager_assign_enabled", True)),
+            "expiry_warning_days": int(settings.get("expiry_warning_days") or 30),
+            "evidence_required_for_completion": bool(settings.get("evidence_required_for_completion", True)),
+            "ja_applicability_enabled": bool(settings.get("ja_applicability_enabled", False)),
+            "development_fulfillment_enabled": bool(settings.get("development_fulfillment_enabled", True)),
+        }
+        return {
+            "ok": True,
+            "module_key": key,
+            "label_en": status_label(key, lang="en"),
+            "label_ar": status_label(key, lang="ar"),
+            "policy": policy,
+            "runtime_gate": ld.runtime_gate_for_company(company),
+            "platform_capability": False,
+            "commercial_sku": True,
+            "honesty": ld.honesty_payload(company_code=company),
+        }
+    return {"ok": False, "error": "unhandled_module", "module_key": key}
+
+
+def patch_wave6_module_policy(
+    cur: Any,
+    *,
+    company_code: str,
+    module_key: str,
+    actor_phone: str,
+    reason: str,
+    payload: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not str(reason or "").strip():
+        return {"ok": False, "error": "audit_reason_required"}
+    company = _company(company_code)
+    key = str(module_key or "").strip().lower()
+    if key not in WAVE6_MODULE_KEYS:
+        return {"ok": False, "error": "unknown_wave6_module", "module_key": key}
+    body = dict(payload or {})
+    if key == "job_architecture":
+        enabled = body.get("enabled")
+        if enabled is True or str(enabled).lower() in {"1", "true", "yes", "on"}:
+            result = ja.enable_company_job_architecture(
+                cur, company_code=company, actor_phone=actor_phone, reason=reason
+            )
+        elif enabled is False or str(enabled).lower() in {"0", "false", "no", "off"}:
+            result = ja.disable_company_job_architecture(
+                cur, company_code=company, actor_phone=actor_phone, reason=reason
+            )
+        else:
+            ja.ensure_job_architecture_c1_schema(cur)
+            cur.execute(
+                """
+                INSERT INTO ja_company_settings (company_code, enabled, updated_by_phone, updated_at)
+                VALUES (%s,false,%s,now())
+                ON CONFLICT (company_code) DO UPDATE SET
+                  allow_optional_talent_ref=COALESCE(%s, ja_company_settings.allow_optional_talent_ref),
+                  allow_optional_recruiting_ref=COALESCE(%s, ja_company_settings.allow_optional_recruiting_ref),
+                  updated_by_phone=%s, updated_at=now()
+                RETURNING *
+                """,
+                (
+                    company,
+                    "".join(ch for ch in str(actor_phone or "") if ch.isdigit()),
+                    body.get("allow_optional_talent_ref"),
+                    body.get("allow_optional_recruiting_ref"),
+                    "".join(ch for ch in str(actor_phone or "") if ch.isdigit()),
+                ),
+            )
+            result = {"ok": True, "settings": dict(cur.fetchone())}
+        return {
+            "ok": bool(result.get("ok")),
+            "module_key": key,
+            "result": result,
+            "policy": get_wave6_module_policy(cur, company, key),
+        }
+    if key == "learning":
+        enabled = body.get("enabled")
+        policy_kwargs = {
+            k: body[k]
+            for k in (
+                "employee_requests_enabled",
+                "manager_assign_enabled",
+                "expiry_warning_days",
+                "evidence_required_for_completion",
+                "ja_applicability_enabled",
+                "development_fulfillment_enabled",
+            )
+            if k in body
+        }
+        if enabled is True or str(enabled).lower() in {"1", "true", "yes", "on"}:
+            result = ld.enable_company_learning(
+                cur,
+                company_code=company,
+                actor_phone=actor_phone,
+                reason=reason,
+                **policy_kwargs,
+            )
+        elif enabled is False or str(enabled).lower() in {"0", "false", "no", "off"}:
+            result = ld.disable_company_learning(
+                cur, company_code=company, actor_phone=actor_phone, reason=reason
+            )
+        else:
+            if not ld.module_enabled_for_company(cur, company):
+                result = {"ok": False, "error": "learning_disabled_for_company"}
+            else:
+                # Keep enabled; patch policy knobs only.
+                result = ld.enable_company_learning(
+                    cur,
+                    company_code=company,
+                    actor_phone=actor_phone,
+                    reason=reason,
+                    **policy_kwargs,
+                )
+        return {
+            "ok": bool(result.get("ok")),
+            "module_key": key,
+            "result": result,
+            "policy": get_wave6_module_policy(cur, company, key),
+        }
+    return {"ok": False, "error": "unhandled_module"}

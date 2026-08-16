@@ -1,0 +1,9 @@
+wave_a_version 1.0.0
+contract launch_readiness_authority_v1
+honesty_ok {'operator_only': True, 'wathefni_only': True, 'payroll_money': False, 'attendance_ingest': False, 'capture_ingest': 'off', 'setup_wave_b': False, 'ai': False}
+connected_db wathefni
+overall_state live_controlled
+blockers 5
+ACK_PRODUCTION_SETUP_WAVE_AB=YES
+residual_rows=0
+MIGRATE_OK

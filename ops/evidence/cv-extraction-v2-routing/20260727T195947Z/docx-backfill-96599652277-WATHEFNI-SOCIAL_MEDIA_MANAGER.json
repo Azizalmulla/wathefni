@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "company_code": "WATHEFNI",
+  "processed": 1,
+  "before_v2_current": 12,
+  "after_v2_current": 12,
+  "before_fact_snapshots": 12,
+  "after_fact_snapshots": 12,
+  "no_duplicate_fact_snapshots": true,
+  "publish_to_profile": true,
+  "results": [
+    {
+      "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "status": "extracted",
+      "ok": true,
+      "path": "wathefni_internal_fallback",
+      "extraction_id": "b5695af7-8027-4515-a851-4f7987f426cf",
+      "validation_status": "ready",
+      "stats": {
+        "employment": 2,
+        "volunteer_work": 0,
+        "education": 1,
+        "skills": 9,
+        "languages": 1,
+        "projects": 0,
+        "publications": 0,
+        "certifications": 0,
+        "training_courses": 0,
+        "memberships_activities": 0,
+        "awards_honors": 0,
+        "unmodeled_sections": 0
+      },
+      "cost_usd": 0.0,
+      "error": null
+    }
+  ],
+  "total_estimated_cost_usd": 0.0
+}

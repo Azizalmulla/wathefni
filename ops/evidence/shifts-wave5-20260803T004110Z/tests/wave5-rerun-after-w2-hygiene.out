@@ -1,0 +1,64 @@
+PASS  version 5.0.0
+PASS  wave5 enabled
+PASS  company WATHEFNI
+PASS  honesty publishing true
+PASS  honesty open_shifts true
+PASS  honesty draft_publish true
+PASS  honesty coverage_rules true
+PASS  honesty payroll false
+PASS  honesty leave false
+PASS  honesty attendance false
+PASS  honesty rotations false
+PASS  honesty pam_export false
+PASS  w4 honesty publishing false
+PASS  w3 honesty templates false
+PASS  shw5 synthetic key
+PASS  real phone not synth
+PASS  permission_matrix self_approval false
+PASS  no leave_balances mutation SQL
+PASS  no payroll money calc
+PASS  PERIOD_STATES complete
+PASS  VERSION_STATES complete
+PASS  day template
+PASS  overnight template
+PASS  weekly recurrence
+PASS  create period
+PASS  generate_draft ok
+PASS  draft_rows > 0
+PASS  l0_written false
+PASS  L0 unchanged after draft
+PASS  transition in_review
+PASS  transition approved
+PASS  review_diff ok
+PASS  coverage warn rule
+PASS  understaffed warning
+PASS  warn blocks_publish false
+PASS  coverage block rule
+PASS  block blocks_publish true
+PASS  publish blocked by coverage
+PASS  overnight coverage rule
+PASS  unresolved open shift
+PASS  coverage unresolved_open_shift
+PASS  publish ok
+PASS  published L0 with schedule metadata
+PASS  republish idempotent
+PASS  test lock acquired
+PASS  concurrent publish lock held
+PASS  create_draft_from_published
+PASS  publish second version
+PASS  rollback_to_version
+PASS  skipped_locked field present
+PASS  overnight open shift
+PASS  claim by A
+PASS  self-approval denied
+PASS  claim by B
+PASS  approve A wins
+PASS  second approve B rejected
+PASS  open shift for direct assign
+PASS  direct assign open shift
+PASS  gate_conflict without ack
+PASS  optional require_publish period
+PASS  manual L0 with optional period
+PASS  cleanup residual_total
+
+62 passed, 0 failed

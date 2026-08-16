@@ -1,0 +1,2 @@
+45:SCHEMA_VERSION = "employees360-wave3d-public-law-policy-v1"
+45:SCHEMA_VERSION = "employees360-wave3f-public-law-closure-v1"

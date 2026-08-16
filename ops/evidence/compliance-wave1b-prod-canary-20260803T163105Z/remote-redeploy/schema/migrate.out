@@ -1,0 +1,7 @@
+wave1_version 1.0.0
+contract compliance_findings_wave1
+honesty_ok {'document_compliance_only': True, 'government_verified': False, 'synthetic_only': True, 'ai': False, 'legal_compliance_claims': False}
+connected_db wathefni
+ack_id 3
+ACK_PRODUCTION_COMPLIANCE_W1B=YES
+MIGRATE_OK

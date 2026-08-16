@@ -1,0 +1,97 @@
+{
+  "chunk_size_benchmark": {
+    "chunker_version": "ck-chunker-v1",
+    "configs": [
+      {
+        "target_tokens": 800,
+        "overlap_tokens": 100,
+        "chunk_count": 7,
+        "avg_chars": 4992.9,
+        "sections": [
+          "certifications",
+          "employment"
+        ]
+      },
+      {
+        "target_tokens": 1000,
+        "overlap_tokens": 100,
+        "chunk_count": 5,
+        "avg_chars": 6646.0,
+        "sections": [
+          "certifications",
+          "employment"
+        ]
+      },
+      {
+        "target_tokens": 1200,
+        "overlap_tokens": 100,
+        "chunk_count": 5,
+        "avg_chars": 6646.0,
+        "sections": [
+          "certifications",
+          "employment"
+        ]
+      }
+    ]
+  },
+  "long_cv_chars": 30653,
+  "long_cv_tail_present": true,
+  "arabic_english": {
+    "ar_langs": [
+      "ar"
+    ],
+    "en_langs": [
+      "en"
+    ],
+    "bi_langs": [
+      "ar_en",
+      "en"
+    ]
+  },
+  "synthetic_pool": {
+    "candidates": 1500,
+    "index_ms": 1624.62,
+    "search_ms": 16.13,
+    "chunk_count": 3001,
+    "total_hits": 101,
+    "top_refs": [
+      "app:syn-0429",
+      "app:syn-0900",
+      "app:syn-0647",
+      "app:syn-0172",
+      "app:syn-0700"
+    ],
+    "retrieval_mode": "hybrid",
+    "voyage_calls": {
+      "document": 1500,
+      "query": 1
+    },
+    "estimated_voyage_cost_usd": 0.0,
+    "note": "mock embeddings only; no real Voyage calls"
+  },
+  "pagination": {
+    "page1_count": 20,
+    "page2_count": 20,
+    "overlap": 0,
+    "has_next": true
+  },
+  "invalidation": {
+    "invalidated": 2,
+    "latency_ms": 1.03,
+    "needle_still_visible": false
+  },
+  "incomplete_index": {
+    "retrieval_mode": "index_not_ready",
+    "total": 0
+  },
+  "lexical_fallback": {
+    "retrieval_mode": "retrieval_degraded",
+    "hit": true,
+    "disclosed_error": true
+  },
+  "index_size": {
+    "chunks": 3001,
+    "jobs": 1500,
+    "access_events": 4
+  }
+}

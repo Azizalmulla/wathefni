@@ -1,0 +1,310 @@
+{
+  "pass_count": 60,
+  "fail_count": 0,
+  "results": [
+    {
+      "name": "taxonomy versioned",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "taxonomy bilingual sample",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "software classified",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "software has evidence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "software no ocr",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "software no workers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hr classified",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "hr has evidence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hr no ocr",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hr no workers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "finance classified",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "finance has evidence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "finance no ocr",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "finance no workers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "engineering classified",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "engineering has evidence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "engineering no ocr",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "engineering no workers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sales classified",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "sales has evidence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sales no ocr",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sales no workers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "multidisciplinary multi-label",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "multidisciplinary functions/roles present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "career_change keeps engineering evidence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "career_change also labels software",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "low-info unclassified",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "low-info empty suggestions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "arabic not empty or refused cleanly",
+      "pass": true,
+      "detail": "classified_multi"
+    },
+    {
+      "name": "arabic evidence attached",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "english not empty or refused cleanly",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "english evidence attached",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bilingual not empty or refused cleanly",
+      "pass": true,
+      "detail": "classified"
+    },
+    {
+      "name": "bilingual evidence attached",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "skills from raw text when facts empty",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "conflicting versions produce different labels",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hr confirmed present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hr rejected excluded from ai",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rejected retained in history set",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "taxonomy version changes cache key",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "classifier version changes cache key",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reclassify idempotent same key",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tenant namespace enforced",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tenant extension usable",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "classification failure keeps search",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "failed classify has no active suggestions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tenant A enabled",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tenant B disabled",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "compact chip format",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "medium does not chip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no hiring score",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no role profile score",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no job assignment",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "workers flag off by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "master off by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "decoupled from unified candidates",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "search includes CV text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "search includes AI classification separately",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "search does not invent blended label",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "zero residue local (no DB writes in matrix)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "verdict": "GO_LOCAL",
+  "workers_enabled": false,
+  "deployed": false,
+  "ocr_triggered": false
+}

@@ -1,0 +1,65 @@
+    hr intelligence registry c1 — prove
+      PASS  c1 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  internal namespace
+      PASS  registry authority
+      PASS  no duplicate commercial
+      PASS  assistant out
+      PASS  no universal score
+      PASS  min cohort 5
+      PASS  cohort upward only
+      PASS  fte blocked honesty
+      PASS  pending_start out
+      PASS  EN published
+      PASS  AR published
+      PASS  rollback
+      PASS  notice in until LWD
+      PASS  leave in
+      PASS  contingent not mixed
+      PASS  fte not publishable
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  min_cohort floor 5
+      PASS  enable company
+      PASS  demographics default off
+      PASS  raise to same ok
+      PASS  seed defs
+      PASS  fte blocked status
+      PASS  fte not company-publishable
+      PASS  universal score rejected
+      PASS  publish intelligence.spine.fact_count
+      PASS  publish intelligence.spine.demo_rate
+      PASS  versioned definition
+      PASS  prior version 1
+      PASS  company on v2
+      PASS  ingest 0
+      PASS  ingest 1
+      PASS  ingest 2
+      PASS  evaluate count
+      PASS  drill population
+      PASS  pins definition version
+      PASS  same export authority
+      PASS  correction
+      PASS  count after correction still 3
+      PASS  zero denom not_applicable
+      PASS  small cohort suppressed
+      PASS  rate ok at cohort 5
+      PASS  upward cohort ok
+      PASS  downward cohort forbidden
+      PASS  headcount unpublished unavailable
+      PASS  evaluation history retained
+      PASS  assistant refuses invent
+      PASS  assistant refuses universal score
+      PASS  assistant resolves published
+      PASS  other company gate denied without allowlist
+      PASS  evals survive disable
+      PASS  definitions survive
+      PASS  writes blocked when disabled
+      PASS  global off after prove
+
+    60 passed, 0 failed
+HR_INTELLIGENCE_REGISTRY_FULL_PASS
+STAGING_RC=0

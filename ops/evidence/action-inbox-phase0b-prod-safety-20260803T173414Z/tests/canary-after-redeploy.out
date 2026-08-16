@@ -1,0 +1,44 @@
+[PASS] wave1 enabled
+[PASS] company allowlisted
+[PASS] phase0 viewer fail-closed flag
+[PASS] phase0 subject fail-closed flag
+[PASS] exclude payroll default/on
+[PASS] no AI
+[PASS] no mutations
+[PASS] analytics freeze intact
+[PASS] compliance freeze intact
+[PASS] viewer allowlist empty (live env)
+[PASS] subject allowlist empty (live env)
+[PASS] real canary not enabled
+[PASS] nav hidden for Aziz when empty
+[PASS] API denial empty allowlist
+[PASS] temp probe Talal-only subjects
+[PASS] temp probe no payroll rows
+[PASS] approved boundary
+[PASS] temp live payload ok
+[PASS] temp live Talal-only
+[PASS] temp live no payroll
+[PASS] temp live Talal-only
+[PASS] temp live no payroll
+[PASS] temp live Talal-only
+[PASS] temp live no payroll
+[PASS] temp live Talal-only
+[PASS] temp live no payroll
+[PASS] temp live Talal-only
+[PASS] temp live no payroll
+[PASS] temp live Talal-only
+[PASS] temp live no payroll
+[PASS] fouad denied during temp probe
+[PASS] soft-kill viewers empty after clear
+[PASS] soft-kill subjects empty after clear
+[PASS] soft-kill API denial after clear
+[PASS] WAVE1=0 kill switch
+[PASS] gate viewer denied code
+[PASS] gate disabled code
+[PASS] bootstrap action_inbox nav
+[PASS] UI Action Inbox EN/AR present
+[PASS] production db
+[PASS] canary ack deleted
+[PASS] residual 0
+[PASS] final real canary disabled
+{"pass": 43, "fail": 0, "tag": "5f82ea37", "residual": 0, "allowlists_populated": false}

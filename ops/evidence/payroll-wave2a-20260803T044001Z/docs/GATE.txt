@@ -1,0 +1,10 @@
+# Payroll Wave 2A staging qualify
+stamp=20260803T044001Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave2a-20260803T044001Z
+payment_processing=disabled
+money_authority=external
+vendor_claimed=false
+wave1_contracts_unchanged=true
+production_deploy=false
+GATE=STAGING_PAYROLL_WAVE2A_EXTERNAL_ADAPTER_GO
+PROD_SYNTHETIC=NO_GO

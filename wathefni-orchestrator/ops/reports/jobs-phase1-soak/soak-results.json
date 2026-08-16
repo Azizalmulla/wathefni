@@ -1,0 +1,184 @@
+{
+  "artifact": "0c0ac7a45b9c516368650cb434e145b8acd5f771f09e422e6ae615281763e0a1",
+  "production_apply_number_intended": "96599338566",
+  "results": [
+    {
+      "ok": true,
+      "label": "create draft",
+      "detail": "SOAK_MRTSNGW5 v1"
+    },
+    {
+      "ok": true,
+      "label": "duplicate position code \u2192 409",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "stale edit \u2192 409",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "edit draft keeps draft",
+      "detail": "vacancies=3 remaining=3"
+    },
+    {
+      "ok": true,
+      "label": "publish draft\u2192open",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "APPLY/wa.me uses 96599338566",
+      "detail": "https://wa.me/96599338566?text=APPLY-WATHEFNI-SOAK_MRTSNGW5"
+    },
+    {
+      "ok": true,
+      "label": "pause",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "resume",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "close",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "reopen",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "edit open job without status change",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "EN inventory screenshot",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Lifecycle metrics without duplicate Open roles",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Create job primary + Assistant secondary",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "EN laptop screenshot",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Save draft and Publish are separate actions",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Bilingual fields present and labeled",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Salary visibility control present",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Vacancy field on form",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Ownership fields collapsed under optional section",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Drawer shows APPLY code",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Pause and Close both visible and distinct",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Drawer dismiss labeled Done (not Cancel)",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Drawer shows vacancy info",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "HR salary visible in drawer",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "AR/RTL dir applied",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "Arabic inventory labels present",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "AR Save draft / Publish distinct",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "AR bilingual field labels",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "cleanup closed soak job",
+      "detail": ""
+    }
+  ],
+  "passed": 30,
+  "failed": 0,
+  "screenshots": [
+    "jobs-drawer-en.png",
+    "jobs-form-create-ar.png",
+    "jobs-form-create-en.png",
+    "jobs-inventory-ar-desktop.png",
+    "jobs-inventory-en-desktop.png",
+    "jobs-inventory-en-laptop.png",
+    "jobs-search-en.png"
+  ],
+  "dashboard_tests": {
+    "files": 10,
+    "passed": 47,
+    "failed": 0
+  },
+  "staging_smoke": "ALL STAGING SMOKE CHECKS PASSED",
+  "production_touched": false,
+  "ux_fixes_applied": [
+    "removed duplicate Open roles metric",
+    "drawer Done label",
+    "ownership optional collapse",
+    "localized Jobs shell title/subtitle",
+    "removed duplicate page subtitle",
+    "sticky form actions",
+    "localized status badges",
+    "clearer pause/close confirm bodies"
+  ]
+}

@@ -1,0 +1,13 @@
+
+> wathefni-dashboard@0.0.0 test
+> vitest run --run src/posthire/analyticsAttentionWave1.test.ts
+
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  18:51:47
+   Duration  804ms (transform 22ms, setup 134ms, import 9ms, tests 2ms, environment 565ms)
+

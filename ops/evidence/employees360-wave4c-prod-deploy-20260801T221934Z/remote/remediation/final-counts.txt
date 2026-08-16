@@ -1,0 +1,6 @@
+     policy_pack_status     | count 
+----------------------------+-------
+ quarantined_synthetic_test |     8
+ remediation                |     4
+(2 rows)
+

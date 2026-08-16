@@ -1,0 +1,26 @@
+{
+  "deleted": [
+    "WATHEFNI-96552295759",
+    "WATHEFNI-96552289913"
+  ],
+  "synthetic_hub_leftover": 0,
+  "real": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "employment_status": "active"
+    }
+  ],
+  "all_real_active": true
+}

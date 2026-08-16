@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "swap": {
+    "swap_id": "a2226f83-b648-40e4-8bd3-cb8397b4c485",
+    "requester": {
+      "employee_key": "WATHEFNI-SHW2-d3ffcf98",
+      "name": "SHW2 Synth d3ffcf98",
+      "department": null
+    },
+    "target": {
+      "employee_key": "WATHEFNI-SHW2B-d3ffcf98",
+      "name": "SHW2B Synth d3ffcf98",
+      "department": null
+    },
+    "requester_shift_id": "13b8fe1c-7021-4cbf-9fb3-ac6bdba7505d",
+    "target_shift_id": "0325f7f0-0de4-43b0-a207-b445dce46989",
+    "shift_date": "2026-08-29",
+    "status": "requested",
+    "reason": "hr-cfa2-20260810T183036Z disposable",
+    "decision_note": null,
+    "requested_at": "2026-08-10T18:30:39.308789+00:00",
+    "decided_at": null,
+    "updated_at": "2026-08-10T18:30:39.308792+00:00",
+    "allowed_actions": [
+      "approve",
+      "reject"
+    ],
+    "destination": "/shift-swaps/a2226f83-b648-40e4-8bd3-cb8397b4c485",
+    "requester_shift": {
+      "shift_id": "13b8fe1c-7021-4cbf-9fb3-ac6bdba7505d",
+      "employee": {
+        "employee_key": "WATHEFNI-SHW2-d3ffcf98",
+        "name": "SHW2 Synth d3ffcf98",
+        "department": null
+      },
+      "shift_date": "2026-08-29",
+      "start_time": "09:00:00",
+      "end_time": "12:00:00",
+      "timezone": "Asia/Kuwait",
+      "role": "general",
+      "location": null,
+      "status": "scheduled",
+      "updated_at": "2026-08-03T03:38:24.986635+00:00",
+      "allowed_actions": [
+        "read"
+      ],
+      "destination": "/shifts"
+    },
+    "target_shift": {
+      "shift_id": "0325f7f0-0de4-43b0-a207-b445dce46989",
+      "employee": {
+        "employee_key": "WATHEFNI-SHW2B-d3ffcf98",
+        "name": "SHW2B Synth d3ffcf98",
+        "department": null
+      },
+      "shift_date": "2026-08-29",
+      "start_time": "13:00:00",
+      "end_time": "16:00:00",
+      "timezone": "Asia/Kuwait",
+      "role": "general",
+      "location": null,
+      "status": "scheduled",
+      "updated_at": "2026-08-03T03:38:25.011739+00:00",
+      "allowed_actions": [
+        "read"
+      ],
+      "destination": "/shifts"
+    }
+  }
+}

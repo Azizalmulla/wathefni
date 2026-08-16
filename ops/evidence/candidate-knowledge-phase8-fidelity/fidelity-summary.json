@@ -1,0 +1,614 @@
+{
+  "generated_at": "2026-07-26T21:28:51Z",
+  "status": "PASS",
+  "production_dark_go": true,
+  "production_deploy": false,
+  "production_canary": false,
+  "worker_backfill": {
+    "status": "PASS",
+    "tenant": "SYN_CK_P8F",
+    "jobs_enqueued": 3000,
+    "poison_jobs": 60,
+    "concurrency": 4,
+    "embeddings_mode": "mock_for_worker_backfill",
+    "enqueue": {
+      "enqueued": 3000,
+      "enqueue_seconds": 65.02
+    },
+    "phase1": {
+      "elapsed_s": 171.25,
+      "completed": 1148,
+      "throughput_jobs_per_s": 6.704,
+      "lag_p50_s": 139.998,
+      "lag_p95_s": 206.796,
+      "rss_mb_peak": 32.64,
+      "cpu_pct_peak": 37.7,
+      "final_counts": {
+        "pending": 1827,
+        "claimed": 1,
+        "completed": 1148,
+        "failed": 24,
+        "dead_letter": 24,
+        "chunks_current": 4596,
+        "dead_letter_jobs": 24
+      }
+    },
+    "phase1_samples": [
+      {
+        "t": 0.04,
+        "completed": 251,
+        "pending": 2742,
+        "failed": 6,
+        "claimed": 1,
+        "chunks": 1008,
+        "lag_s": 63.142,
+        "rss_mb": 32.39,
+        "cpu_pct": 37.7
+      },
+      {
+        "t": 8.6,
+        "completed": 294,
+        "pending": 2699,
+        "failed": 6,
+        "claimed": 1,
+        "chunks": 1176,
+        "lag_s": 70.979,
+        "rss_mb": 32.51,
+        "cpu_pct": 30.3
+      },
+      {
+        "t": 16.97,
+        "completed": 340,
+        "pending": 2652,
+        "failed": 7,
+        "claimed": 1,
+        "chunks": 1362,
+        "lag_s": 78.549,
+        "rss_mb": 32.53,
+        "cpu_pct": 31.9
+      },
+      {
+        "t": 25.41,
+        "completed": 389,
+        "pending": 2602,
+        "failed": 8,
+        "claimed": 1,
+        "chunks": 1560,
+        "lag_s": 85.844,
+        "rss_mb": 32.53,
+        "cpu_pct": 32.1
+      },
+      {
+        "t": 33.88,
+        "completed": 429,
+        "pending": 2561,
+        "failed": 9,
+        "claimed": 1,
+        "chunks": 1718,
+        "lag_s": 93.112,
+        "rss_mb": 32.56,
+        "cpu_pct": 31.8
+      },
+      {
+        "t": 42.39,
+        "completed": 469,
+        "pending": 2520,
+        "failed": 10,
+        "claimed": 1,
+        "chunks": 1878,
+        "lag_s": 100.757,
+        "rss_mb": 32.57,
+        "cpu_pct": 32.1
+      },
+      {
+        "t": 50.83,
+        "completed": 512,
+        "pending": 2476,
+        "failed": 11,
+        "claimed": 1,
+        "chunks": 2050,
+        "lag_s": 108.277,
+        "rss_mb": 32.57,
+        "cpu_pct": 32.3
+      },
+      {
+        "t": 59.22,
+        "completed": 558,
+        "pending": 2429,
+        "failed": 12,
+        "claimed": 1,
+        "chunks": 2236,
+        "lag_s": 115.808,
+        "rss_mb": 32.58,
+        "cpu_pct": 32.5
+      },
+      {
+        "t": 67.62,
+        "completed": 609,
+        "pending": 2377,
+        "failed": 13,
+        "claimed": 1,
+        "chunks": 2440,
+        "lag_s": 123.053,
+        "rss_mb": 32.59,
+        "cpu_pct": 32.6
+      },
+      {
+        "t": 76.14,
+        "completed": 654,
+        "pending": 2331,
+        "failed": 14,
+        "claimed": 1,
+        "chunks": 2620,
+        "lag_s": 130.57,
+        "rss_mb": 32.61,
+        "cpu_pct": 32.4
+      },
+      {
+        "t": 84.57,
+        "completed": 702,
+        "pending": 2282,
+        "failed": 15,
+        "claimed": 1,
+        "chunks": 2811,
+        "lag_s": 138.09,
+        "rss_mb": 32.62,
+        "cpu_pct": 32.4
+      },
+      {
+        "t": 93.07,
+        "completed": 743,
+        "pending": 2240,
+        "failed": 16,
+        "claimed": 1,
+        "chunks": 2976,
+        "lag_s": 145.861,
+        "rss_mb": 32.62,
+        "cpu_pct": 32.3
+      },
+      {
+        "t": 101.52,
+        "completed": 783,
+        "pending": 2200,
+        "failed": 16,
+        "claimed": 1,
+        "chunks": 3134,
+        "lag_s": 153.674,
+        "rss_mb": 32.62,
+        "cpu_pct": 32.2
+      },
+      {
+        "t": 109.92,
+        "completed": 823,
+        "pending": 2159,
+        "failed": 17,
+        "claimed": 1,
+        "chunks": 3296,
+        "lag_s": 161.352,
+        "rss_mb": 32.62,
+        "cpu_pct": 32.4
+      },
+      {
+        "t": 118.33,
+        "completed": 867,
+        "pending": 2114,
+        "failed": 18,
+        "claimed": 1,
+        "chunks": 3469,
+        "lag_s": 169.07,
+        "rss_mb": 32.63,
+        "cpu_pct": 32.4
+      },
+      {
+        "t": 126.77,
+        "completed": 918,
+        "pending": 2063,
+        "failed": 19,
+        "claimed": 0,
+        "chunks": 3672,
+        "lag_s": 176.569,
+        "rss_mb": 32.63,
+        "cpu_pct": 32.5
+      },
+      {
+        "t": 135.2,
+        "completed": 966,
+        "pending": 2013,
+        "failed": 20,
+        "claimed": 1,
+        "chunks": 3864,
+        "lag_s": 184.148,
+        "rss_mb": 32.63,
+        "cpu_pct": 32.5
+      },
+      {
+        "t": 143.62,
+        "completed": 1018,
+        "pending": 1961,
+        "failed": 21,
+        "claimed": 0,
+        "chunks": 4072,
+        "lag_s": 191.513,
+        "rss_mb": 32.63,
+        "cpu_pct": 32.6
+      },
+      {
+        "t": 152.08,
+        "completed": 1062,
+        "pending": 1915,
+        "failed": 22,
+        "claimed": 1,
+        "chunks": 4248,
+        "lag_s": 198.912,
+        "rss_mb": 32.63,
+        "cpu_pct": 32.6
+      },
+      {
+        "t": 160.59,
+        "completed": 1098,
+        "pending": 1879,
+        "failed": 23,
+        "claimed": 0,
+        "chunks": 4392,
+        "lag_s": 206.796,
+        "rss_mb": 32.63,
+        "cpu_pct": 32.6
+      },
+      {
+        "t": 169.1,
+        "completed": 1137,
+        "pending": 1839,
+        "failed": 24,
+        "claimed": 0,
+        "chunks": 4548,
+        "lag_s": 214.532,
+        "rss_mb": 32.64,
+        "cpu_pct": 32.6
+      }
+    ],
+    "phase2": {
+      "elapsed_s": 348.84,
+      "completed": 2940,
+      "throughput_jobs_per_s": 8.428,
+      "lag_p50_s": 383.106,
+      "lag_p95_s": 517.549,
+      "rss_mb_peak": 32.65,
+      "cpu_pct_peak": 36.6,
+      "final_counts": {
+        "pending": 0,
+        "claimed": 0,
+        "completed": 2940,
+        "failed": 60,
+        "dead_letter": 60,
+        "chunks_current": 11760,
+        "dead_letter_jobs": 60
+      }
+    },
+    "final_counts": {
+      "pending": 0,
+      "claimed": 0,
+      "completed": 2940,
+      "failed": 60,
+      "dead_letter": 60,
+      "chunks_current": 11760,
+      "dead_letter_jobs": 60
+    },
+    "voyage_estimate_if_enabled": {
+      "document_calls": 8820,
+      "approx_tokens": 352800,
+      "approx_cost_usd": 0.0423,
+      "note": "Estimate only; worker ran with WATHEFNI_CK_VOYAGE_ENABLED=0"
+    },
+    "throughput_jobs_per_s_effective": 5.653,
+    "lag_p95_s": 517.549,
+    "rss_mb_peak": 32.65,
+    "cpu_pct_peak": 37.7,
+    "projections": {
+      "wathefni_1k_minutes": 2.95,
+      "wathefni_5k_minutes": 14.74,
+      "wathefni_20k_hours": 0.98
+    },
+    "gates": [
+      {
+        "id": "worker_active_start",
+        "status": "PASS"
+      },
+      {
+        "id": "progress_to_40pct",
+        "status": "PASS",
+        "completed": 1148
+      },
+      {
+        "id": "pause_stops_progress",
+        "status": "PASS"
+      },
+      {
+        "id": "resume_active",
+        "status": "PASS"
+      },
+      {
+        "id": "restart_continues",
+        "status": "PASS",
+        "before": 1192,
+        "after": 2940
+      },
+      {
+        "id": "dead_letter_poison",
+        "status": "PASS",
+        "dead_letter_jobs": 60,
+        "poison_enqueued": 60
+      },
+      {
+        "id": "indexer_not_sql_bypass",
+        "status": "PASS",
+        "distinct_indexed_apps": 2940,
+        "expected_approx": 2940
+      },
+      {
+        "id": "live_tools_off",
+        "status": "PASS"
+      },
+      {
+        "id": "live_ranking_off",
+        "status": "PASS"
+      },
+      {
+        "id": "health",
+        "status": "PASS",
+        "health": {
+          "http_code": 200,
+          "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"staging\",\"database_environment\":\"staging\",\"database_environment_ma"
+        }
+      }
+    ],
+    "blockers": [],
+    "fails": []
+  },
+  "voyage_bench": {
+    "status": "PASS",
+    "model": "voyage-4-large",
+    "query_model": "voyage-4-large",
+    "dimensions": 1024,
+    "document_calls": 120,
+    "query_calls": 156,
+    "docs": 120,
+    "queries": 156,
+    "recall_at_10": 0.9359,
+    "recall_by_lang": {
+      "en": 0.9891,
+      "ar": 0.9167,
+      "bi": 0.825
+    },
+    "hard_negative_fp_count": 0,
+    "hard_negative_fp_rate": 0.0,
+    "doc_latency_ms": {
+      "p50": 397.77,
+      "p95": 704.09
+    },
+    "query_latency_ms": {
+      "p50": 245.65,
+      "p95": 274.36
+    },
+    "estimated_tokens": 20546,
+    "estimated_cost_usd": 0.00247,
+    "pii_violations": [],
+    "gates": [
+      {
+        "id": "query_count",
+        "status": "PASS",
+        "n": 156
+      },
+      {
+        "id": "doc_count",
+        "status": "PASS",
+        "n": 120
+      },
+      {
+        "id": "recall_at_10_overall",
+        "status": "PASS",
+        "value": 0.9359
+      },
+      {
+        "id": "recall_en",
+        "status": "PASS",
+        "value": 0.9891
+      },
+      {
+        "id": "recall_ar",
+        "status": "PASS",
+        "value": 0.9167
+      },
+      {
+        "id": "recall_bi",
+        "status": "PASS",
+        "value": 0.825
+      },
+      {
+        "id": "hard_neg_fp_rate",
+        "status": "PASS",
+        "value": 0.0
+      },
+      {
+        "id": "pii_violations",
+        "status": "PASS",
+        "count": 0
+      },
+      {
+        "id": "query_p95_ms",
+        "status": "PASS",
+        "value": 274.36
+      }
+    ],
+    "blockers": [],
+    "fails": [],
+    "sample_results": [
+      {
+        "query": "finance valuation experience in the Gulf",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-en-fin-13",
+          "voy-en-fin-11",
+          "voy-en-fin-14",
+          "voy-en-fin-10",
+          "voy-en-fin-6"
+        ]
+      },
+      {
+        "query": "DCF modeling IFRS Kuwait portfolio",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-en-fin-9",
+          "voy-en-fin-12",
+          "voy-en-fin-13",
+          "voy-en-fin-10",
+          "voy-en-fin-0"
+        ]
+      },
+      {
+        "query": "investment committee financial analyst GCC",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-en-fin-12",
+          "voy-en-fin-11",
+          "voy-en-fin-1",
+          "voy-en-fin-13",
+          "voy-en-fin-6"
+        ]
+      },
+      {
+        "query": "payroll specialist Kuwait labor law",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-en-hr-9",
+          "voy-en-hr-4",
+          "voy-en-hr-6",
+          "voy-en-hr-12",
+          "voy-en-hr-8"
+        ]
+      },
+      {
+        "query": "HR business partner onboarding employee relations",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-en-hr-1",
+          "voy-en-hr-0",
+          "voy-en-hr-2",
+          "voy-en-hr-4",
+          "voy-en-hr-3"
+        ]
+      },
+      {
+        "query": "HRIS payroll compliance Kuwait",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-en-hr-9",
+          "voy-en-hr-8",
+          "voy-en-hr-7",
+          "voy-en-hr-6",
+          "voy-en-hr-5"
+        ]
+      },
+      {
+        "query": "Kubernetes Go microservices platform",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-neg-tech-0",
+          "voy-neg-tech-6",
+          "voy-neg-tech-9",
+          "voy-neg-tech-4",
+          "voy-neg-tech-2"
+        ]
+      },
+      {
+        "query": "\u062e\u0628\u0631\u0629 \u0627\u0644\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0645\u0627\u0644\u064a \u0641\u064a \u0627\u0644\u062e\u0644\u064a\u062c",
+        "lang": "ar",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-ar-fin-1",
+          "voy-ar-fin-0",
+          "voy-ar-fin-11",
+          "voy-ar-fin-8",
+          "voy-ar-fin-10"
+        ]
+      },
+      {
+        "query": "\u0627\u0644\u0646\u0645\u0630\u062c\u0629 \u0627\u0644\u0645\u0627\u0644\u064a\u0629 \u0648\u0627\u0644\u0645\u0639\u0627\u064a\u064a\u0631 \u0627\u0644\u062f\u0648\u0644\u064a\u0629",
+        "lang": "ar",
+        "hit": false,
+        "neg_top3": false,
+        "top": [
+          "voy-en-fin-9",
+          "voy-en-fin-8",
+          "voy-en-fin-7",
+          "voy-en-fin-6",
+          "voy-en-fin-5"
+        ]
+      },
+      {
+        "query": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0648\u0642\u0627\u0646\u0648\u0646 \u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u0643\u0648\u064a\u062a\u064a",
+        "lang": "ar",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-ar-hr-3",
+          "voy-ar-hr-1",
+          "voy-ar-hr-2",
+          "voy-ar-hr-9",
+          "voy-ar-hr-8"
+        ]
+      },
+      {
+        "query": "\u0623\u062e\u0635\u0627\u0626\u064a \u0645\u0648\u0627\u0631\u062f \u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u062a\u0648\u0638\u064a\u0641",
+        "lang": "ar",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-ar-hr-3",
+          "voy-ar-hr-2",
+          "voy-ar-hr-4",
+          "voy-ar-hr-7",
+          "voy-ar-hr-6"
+        ]
+      },
+      {
+        "query": "UNIQUE_LONG_TAIL_MARKER_0_ORACLE certification",
+        "lang": "en",
+        "hit": true,
+        "neg_top3": false,
+        "top": [
+          "voy-long-0",
+          "voy-long-9",
+          "voy-long-1",
+          "voy-long-8",
+          "voy-long-2"
+        ]
+      }
+    ]
+  },
+  "health_end": {
+    "http_code": 200,
+    "body_prefix": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"staging\",\"database_environment\":\"staging\",\"database_environment_ma"
+  },
+  "flags_final": {
+    "WATHEFNI_CANDIDATE_KNOWLEDGE_TOOLS": "off",
+    "WATHEFNI_CANDIDATE_KNOWLEDGE_RANKING_READER": "off",
+    "WATHEFNI_CK_SHADOW_TOOLS_ENABLED": "0",
+    "WATHEFNI_CK_VOYAGE_ENABLED": "1",
+    "WATHEFNI_CK_SEMANTIC_SEARCH": "1"
+  }
+}

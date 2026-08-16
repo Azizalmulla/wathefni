@@ -1,0 +1,14 @@
+{
+  "pages_with_tables_1idx": [],
+  "pages_with_columns_1idx": [],
+  "pages_needing_ocr_1idx": [],
+  "is_complex": false,
+  "pages": [
+    {
+      "page_0idx": 0,
+      "needs_ocr": false,
+      "markdown": "# EMPLOYMENT CONTRACT\n\nEmployer: Wathefni Technologies W.L.L. Employee: Samir Haddad Civil ID: 289010101234 Role: Staff Software Engineer Start Date: 2026-09-01 Basic Salary: KWD 1,250\n\nClause 1. The Employee shall perform duties assigned by the Employer in accordance with Kuwait Labor Law No. 6 of 2010 and company policy. Clause 2. Working hours are 8 hours per day, Sunday to Thursday, excluding official holidays. Clause 3. Either party may terminate this contract according to statutory notice requirements.\n",
+      "markdown_len": 514
+    }
+  ]
+}

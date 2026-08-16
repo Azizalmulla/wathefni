@@ -1,0 +1,33 @@
+{
+  "timers": {
+    "wathefni-shifts-reminder-drain.timer": {
+      "is-enabled": "disabled",
+      "is-active": "inactive"
+    },
+    "wathefni-shifts-lifecycle-recon.timer": {
+      "is-enabled": "disabled",
+      "is-active": "inactive"
+    },
+    "wathefni-shifts-leave-recon.timer": {
+      "is-enabled": "disabled",
+      "is-active": "inactive"
+    }
+  },
+  "services": {
+    "wathefni-shifts-reminder-drain.service": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "wathefni-shifts-lifecycle-recon.service": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "wathefni-shifts-leave-recon.service": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  }
+}

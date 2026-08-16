@@ -1,0 +1,88 @@
+SYSTEMD_FLAGS {"WATHEFNI_ONBOARDING_SEED": "off", "WATHEFNI_ONBOARDING_HR_MUTATE": "true", "WATHEFNI_DOC_UPLOAD": "unset", "WATHEFNI_EMPLOYEE_APP": "off"}
+=== freeze regression ===
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-employees360-freeze-regression.py", line 175, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-employees360-freeze-regression.py", line 132, in main
+    check("ess real allowlist empty by default in test", w5.ess_real_allowlist() == set())
+                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'employee_selfservice_wave5' has no attribute 'ess_real_allowlist'
+FAIL  ess synthetic-only error retained :: None
+FAIL  ess bank not allowlisted error :: None
+PASS  ess plaintext bank forbidden
+PASS  ess self_approval_forbidden
+PASS  ess own_data_only
+=== wave1 smoke (with staging postgres env) ===
+WATHEFNI_WORKSPACE=***redacted***
+WATHEFNI_POSTGRES_ENV=***redacted***
+WATHEFNI_ENV=***redacted***
+WATHEFNI_EXPECTED_DATABASE_HOST=***redacted***
+WATHEFNI_EXPECTED_DATABASE_PORT=***redacted***
+WATHEFNI_EXPECTED_DATABASE_NAME=***redacted***
+WATHEFNI_DATABASE_ENVIRONMENT_MARKER=***redacted***
+WATHEFNI_DASHBOARD_DIST=***redacted***
+WATHEFNI_DELIVERY_MODE=***redacted***
+WATHEFNI_APPLY_WHATSAPP_NUMBER=***redacted***
+WATHEFNI_FILE_POSITIONS_ENABLED=***redacted***
+WATHEFNI_TOOLCALL_ORCHESTRATOR_ENABLED=***redacted***
+WATHEFNI_ONBOARDING_HR_MUTATE=***redacted***
+WATHEFNI_DB_POOL_MAX=***redacted***
+WATHEFNI_MISTRAL_ENV=***redacted***
+WATHEFNI_CV_MISTRAL_OCR=***redacted***
+WATHEFNI_CV_GPT_VISION_RESCUE=***redacted***
+WATHEFNI_CANONICAL_LIFECYCLE=***redacted***
+WATHEFNI_STAGE_B_ENABLED=***redacted***
+WATHEFNI_STAGE_B_CANARY_ONLY=***redacted***
+WATHEFNI_STAGE_B_STAMP_DRY_RUN=***redacted***
+WATHEFNI_ASSESSMENT_AUTHORING=***redacted***
+WATHEFNI_ASSISTANT_HR_READS=***redacted***
+WATHEFNI_TOOL_AGENT_MODEL=***redacted***
+WATHEFNI_ASSISTANT_RANKING_MODE=***redacted***
+WATHEFNI_LEGACY_REGEX_INFERENCE_ENABLED=***redacted***
+WATHEFNI_EMPLOYEE_NEXT_ACTIONS=***redacted***
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3=***redacted***
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=***redacted***
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=***redacted***
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H=***redacted***
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H_COMPANIES=***redacted***
+WATHEFNI_LEAVE_BALANCES=***redacted***
+WATHEFNI_OUTBOUND_LAYER=***redacted***
+WATHEFNI_OUTBOUND_FLOWS=***redacted***
+WATHEFNI_OUTBOUND_TEMPLATES=***redacted***
+WATHEFNI_PREHIRE_VIA_REGISTRY=***redacted***
+WATHEFNI_EMBEDDING_PROVIDER=***redacted***
+WATHEFNI_EMBEDDING_MODEL=***redacted***
+WATHEFNI_EMBEDDING_DIMENSIONS=***redacted***
+=== Onboarding Wave 1 — read authority smoke ===
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-onboarding-wave1-read-authority.py", line 266, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-onboarding-wave1-read-authority.py", line 243, in main
+    offline_checks()
+  File "/opt/wathefni/staging/orchestrator/smoke-test-onboarding-wave1-read-authority.py", line 41, in offline_checks
+    import app
+  File "/opt/wathefni/staging/orchestrator/app.py", line 39, in <module>
+    import puremagic
+ModuleNotFoundError: No module named 'puremagic'
+=== migration assessment (live staging WATHEFNI if present) ===
+Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/ops/onboarding-wave1-legacy-migration-assessment.py", line 282, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/ops/onboarding-wave1-legacy-migration-assessment.py", line 254, in main
+    template = _template_map()
+               ^^^^^^^^^^^^^^^
+  File "/opt/wathefni/staging/orchestrator/ops/onboarding-wave1-legacy-migration-assessment.py", line 43, in _template_map
+    import app
+  File "/opt/wathefni/staging/orchestrator/app.py", line 39, in <module>
+    import puremagic
+ModuleNotFoundError: No module named 'puremagic'
+=== static proofs ===
+NO_CANDIDATES_READ_IN_LOADER True
+HAS_LOAD_ONBOARDING_ITEMS True
+HAS_BANK_FORBIDDEN True
+REMINDER_FAIL_CLOSED True
+PROD_ACTIVE active
+STAGING_ACTIVE active

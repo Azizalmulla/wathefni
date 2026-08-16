@@ -1,0 +1,20 @@
+# Payroll Wave 5 staging qualify
+stamp=20260803T143036Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave5-20260803T143036Z
+payment_processing=disabled
+remittance=false
+statutory_filing=false
+automatic_legal_compliance_claim=false
+pifss_worksheets=true
+pifss_remittance=false
+eos_worksheets=true
+eos_auto_payable=false
+bank_files=false
+wps=false
+ashal=false
+ai_calculations=false
+native_results_authoritative=false
+external_payroll_authority=external
+production_deploy=false
+prod_synthetic_gate=NO-GO (staging-only wave; requires Wave 5-B prod synthetic path)
+GATE=STAGING_PAYROLL_WAVE5_PIFSS_EOS_GO

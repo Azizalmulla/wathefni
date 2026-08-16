@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
+import { reportClientError } from '@/lib/reportClientError'
 import { colors, font, radius, spacing } from '@/theme'
 
 type Props = {
@@ -27,6 +28,7 @@ export class AppErrorBoundary extends Component<Props, State> {
       error?.stack || '',
       info?.componentStack || '',
     )
+    reportClientError(error)
   }
 
   render() {

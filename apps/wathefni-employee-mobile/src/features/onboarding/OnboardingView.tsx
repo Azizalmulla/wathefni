@@ -16,9 +16,18 @@ import {
   type PastelTone,
 } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
-import { ListRow, SectionHeader } from '@/components/lists'
-import { formatDate, formatNumber, statusTone } from '@/lib/format'
-import { colors, font, layout, radius, spacing } from '@/theme'
+import { PageBackButton, SectionHeader } from '@/components/lists'
+import { formatDate, formatNumber } from '@/lib/format'
+import {
+  colors,
+  font,
+  layout,
+  radius,
+  scheduleComposition,
+  shadows,
+  spacing,
+  typeScaling,
+} from '@/theme'
 import type { OnboardingItem, OnboardingResponse } from '@/api/types'
 import {
   completionNextActionMessage,
@@ -27,6 +36,7 @@ import {
   projectOnboardingLifecycle,
   type OnboardingLifecycleProjection,
 } from '@/features/onboarding/lifecycleProjection'
+import { OnboardingLifeMark } from '@/features/onboarding/onboardingLifeMarks'
 
 type OnboardingViewProps = {
   data: OnboardingResponse
@@ -59,6 +69,9 @@ export type VersionRow = {
   created_at?: string | null
 }
 
+/** Soft powder blue — progress / review / calm company work. Not PastelCard pink. */
+const SOFT_BLUE = scheduleComposition.planned.fill
+
 export function OnboardingView({
   data,
   canUploadDocuments,
@@ -86,17 +99,13 @@ export function OnboardingView({
       <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
         <View style={styles.content}>
           <View style={styles.nav}>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('common.back')} onPress={onBack} style={styles.backButton}>
-              <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
-            </Pressable>
+            <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
             <Wordmark compact align="center" />
             <View style={styles.navSpacer} />
           </View>
           <Text style={[styles.taskTitle, readingEdgeAlign(isRTL)]}>
             {t('onboarding.contractErrorTitle')}
           </Text>
-          {/* The contract version and machine reason still reach telemetry via
-              projectOnboardingLifecycle; they are not put in front of the employee. */}
           <Text style={[styles.stateMessage, readingEdgeAlign(isRTL)]}>
             {t('onboarding.contractErrorMessage')}
           </Text>
@@ -106,24 +115,27 @@ export function OnboardingView({
     )
   }
 
-  return <LifecycleChecklistView projection={projection} {...{
-    uploadingId,
-    canUploadDocuments,
-    uploadProgress,
-    failedUploadId,
-    openingId,
-    versionsByItem,
-    versionsLoadingId,
-    refreshing,
-    onRefresh,
-    onUpload,
-    onPreview,
-    onViewVersions,
-    onCancelUpload,
-    onRetryUpload,
-    onOpenBank,
-    onBack,
-  }} />
+  return (
+    <LifecycleChecklistView
+      projection={projection}
+      uploadingId={uploadingId}
+      canUploadDocuments={canUploadDocuments}
+      uploadProgress={uploadProgress}
+      failedUploadId={failedUploadId}
+      openingId={openingId}
+      versionsByItem={versionsByItem}
+      versionsLoadingId={versionsLoadingId}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      onUpload={onUpload}
+      onPreview={onPreview}
+      onViewVersions={onViewVersions}
+      onCancelUpload={onCancelUpload}
+      onRetryUpload={onRetryUpload}
+      onOpenBank={onOpenBank}
+      onBack={onBack}
+    />
+  )
 }
 
 function LifecycleChecklistView({
@@ -164,9 +176,6 @@ function LifecycleChecklistView({
     locale,
     t,
   )
-  // The chip below states the completion state in words with a semantic colour.
-  // The card itself keeps the joining flow's ambient identity so a pastel fill is
-  // never the thing that tells the employee whether they are blocked.
   const completionChipTone =
     completionState === 'completed'
       ? 'success'
@@ -180,9 +189,7 @@ function LifecycleChecklistView({
     <PageScreen>
       <PageScrollView refreshing={refreshing} onRefresh={onRefresh}>
         <View style={styles.nav}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('common.back')} onPress={onBack} style={styles.backButton}>
-            <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={19} color={colors.ink} />
-          </Pressable>
+          <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
           <Wordmark compact align="center" />
           <View style={styles.navSpacer} />
         </View>
@@ -193,15 +200,10 @@ function LifecycleChecklistView({
         </FadeIn>
 
         {/*
-          One progress hierarchy.
-
-          There used to be two stacked cards: the canonical completion state with
-          its own chip and next-action sentence, and immediately below it a second
-          card restating the same journey as a fraction, a percentage bubble and a
-          bar. Both are true and both come from the same authority, so they belong
-          in one place — state, count, bar, next action, in that order.
+          One progress hierarchy — soft blue card so pink stays reserved for
+          needs-correction, not journey chrome.
         */}
-        <PastelCard tone="lilac" style={styles.progressCard}>
+        <SoftBlueCard style={styles.progressCard}>
           <View style={styles.progressHead}>
             <View style={styles.progressCopy}>
               <Text style={[styles.progressLabel, align]}>{t('onboarding.progressLabel')}</Text>
@@ -218,98 +220,82 @@ function LifecycleChecklistView({
           </View>
           <MotionProgressBar value={progress} />
           {completionMessage ? (
-            <Text style={[styles.taskDescription, align]}>{completionMessage}</Text>
+            <Text style={[styles.nextAction, align]}>{completionMessage}</Text>
           ) : null}
-        </PastelCard>
+        </SoftBlueCard>
 
         {!hasAny || (!yourActions.length && !beingReviewed.length && !handledByOthers.length && completed.length) ? (
           yourActions.length || beingReviewed.length || handledByOthers.length ? null : <CompletedChecklist />
         ) : null}
 
         {yourActions.length ? (
-          <Section title={t('onboarding.yourActions')} align={align}>
-            {yourActions.map((item, index) => (
-              <ChecklistCard
-                key={itemKey(item, index)}
-                item={item}
-                tone="lilac"
-                canUpload={canUpload}
-                uploading={uploadingId === item.item_id || Boolean(item.item_id && uploadingId?.startsWith(`${item.item_id}:`))}
-                uploadingId={uploadingId}
-                uploadProgress={
-                  uploadingId === item.item_id || (item.item_id && uploadingId?.startsWith(`${item.item_id}:`))
-                    ? uploadProgress
-                    : 0
-                }
-                uploadFailed={failedUploadId === item.item_id || Boolean(item.item_id && failedUploadId?.startsWith(`${item.item_id}:`))}
-                failedUploadId={failedUploadId}
-                opening={openingId === item.item_id}
-                versions={item.item_id ? versionsByItem[item.item_id] : undefined}
-                versionsLoading={Boolean(item.item_id && versionsLoadingId === item.item_id)}
-                onUpload={onUpload}
-                onPreview={onPreview}
-                onViewVersions={onViewVersions}
-                onOpenBank={onOpenBank}
-                onCancelUpload={onCancelUpload}
-                onRetryUpload={onRetryUpload}
-              />
-            ))}
-          </Section>
-        ) : null}
-
-        {beingReviewed.length ? (
-          <Section title={t('onboarding.beingReviewed')} align={align}>
-            {beingReviewed.map((item, index) => (
-              <ChecklistCard
-                key={itemKey(item, index)}
-                item={item}
-                tone="cream"
-                canUpload={canUpload}
-                uploading={false}
-                uploadingId={null}
-                uploadProgress={0}
-                uploadFailed={false}
-                failedUploadId={null}
-                opening={openingId === item.item_id}
-                versions={item.item_id ? versionsByItem[item.item_id] : undefined}
-                versionsLoading={Boolean(item.item_id && versionsLoadingId === item.item_id)}
-                onUpload={onUpload}
-                onPreview={onPreview}
-                onViewVersions={onViewVersions}
-                onOpenBank={onOpenBank}
-              />
-            ))}
-          </Section>
-        ) : null}
-
-        {/*
-          Work the employee does not own still has to be legible. A bare count
-          ("3 items are handled by your team") told them something was outstanding
-          without telling them what, so they could not tell whether HR was waiting
-          on them. These are named, marked as HR's, and carry no action — which is
-          the point.
-        */}
-        {handledByOthers.length ? (
-          <View style={styles.list}>
-            <SectionHeader title={t('onboarding.handledByOthers')} count={handledByOthers.length} />
-            <Text style={[styles.taskDescription, align]}>{t('onboarding.handledByOthersNote')}</Text>
-            {handledByOthers.map((item, index) => (
-              <ListRow
-                key={itemKey(item, index)}
-                title={onboardingItemLabel(item, t)}
-                trailing={
-                  <StatusChip label={onboardingStatusLabel(item.status, t)} tone={statusTone(item.status)} />
-                }
-                accessibilityLabel={`${onboardingItemLabel(item, t)}. ${t('onboarding.handledByOthers')}`}
-              />
-            ))}
+          <View style={styles.section}>
+            <SectionHeader title={t('onboarding.yourActions')} />
+            <View style={styles.cardStack}>
+              {yourActions.map((item, index) => (
+                <ActionItemCard
+                  key={itemKey(item, index)}
+                  item={item}
+                  canUpload={canUpload}
+                  uploading={uploadingId === item.item_id || Boolean(item.item_id && uploadingId?.startsWith(`${item.item_id}:`))}
+                  uploadingId={uploadingId}
+                  uploadProgress={
+                    uploadingId === item.item_id || (item.item_id && uploadingId?.startsWith(`${item.item_id}:`))
+                      ? uploadProgress
+                      : 0
+                  }
+                  uploadFailed={failedUploadId === item.item_id || Boolean(item.item_id && failedUploadId?.startsWith(`${item.item_id}:`))}
+                  failedUploadId={failedUploadId}
+                  opening={openingId === item.item_id}
+                  versions={item.item_id ? versionsByItem[item.item_id] : undefined}
+                  versionsLoading={Boolean(item.item_id && versionsLoadingId === item.item_id)}
+                  onUpload={onUpload}
+                  onPreview={onPreview}
+                  onViewVersions={onViewVersions}
+                  onOpenBank={onOpenBank}
+                  onCancelUpload={onCancelUpload}
+                  onRetryUpload={onRetryUpload}
+                />
+              ))}
+            </View>
           </View>
         ) : null}
 
-        {/* Finished work is a record, not a task list: compact rows, closed. */}
-        {completed.length ? (
-          <CompletedSection items={completed} />
+        {beingReviewed.length ? (
+          <View style={styles.section}>
+            <SectionHeader title={t('onboarding.beingReviewed')} />
+            <View style={styles.cardStack}>
+              {beingReviewed.map((item, index) => (
+                <QuietItemCard
+                  key={itemKey(item, index)}
+                  item={item}
+                  opening={openingId === item.item_id}
+                  onPreview={onPreview}
+                  density="review"
+                />
+              ))}
+            </View>
+          </View>
         ) : null}
+
+        {handledByOthers.length ? (
+          <View style={styles.section}>
+            <SectionHeader title={t('onboarding.handledByOthers')} count={handledByOthers.length} />
+            <Text style={[styles.handledNote, align]}>{t('onboarding.handledByOthersNote')}</Text>
+            <View style={styles.cardStack}>
+              {handledByOthers.map((item, index) => (
+                <QuietItemCard
+                  key={itemKey(item, index)}
+                  item={item}
+                  density="handled"
+                  accessibilityLabel={`${onboardingItemLabel(item, t)}. ${t('onboarding.handledByOthers')}`}
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
+
+        {completed.length ? <CompletedSection items={completed} /> : null}
 
         <View style={styles.securityRow}>
           <Ionicons name="shield-checkmark-outline" size={16} color={colors.success} />
@@ -324,7 +310,7 @@ function CompletedSection({ items }: { items: OnboardingItem[] }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   return (
-    <View style={styles.list}>
+    <View style={styles.section}>
       <SectionHeader
         title={t('onboarding.completedSection')}
         count={items.length}
@@ -332,41 +318,23 @@ function CompletedSection({ items }: { items: OnboardingItem[] }) {
         expanded={open}
         onToggle={() => setOpen((value) => !value)}
       />
-      {open
-        ? items.map((item, index) => (
-            <ListRow
-              key={itemKey(item, index)}
-              title={onboardingItemLabel(item, t)}
-              trailing={
-                <StatusChip label={onboardingStatusLabel(item.status, t)} tone={statusTone(item.status)} />
-              }
-            />
-          ))
-        : null}
+      {open ? (
+        <View style={styles.cardStack}>
+          {items.map((item, index) => (
+            <QuietItemCard key={itemKey(item, index)} item={item} density="completed" />
+          ))}
+        </View>
+      ) : null}
     </View>
   )
 }
 
-function Section({
-  title,
-  align,
-  children,
-}: {
-  title: string
-  align: { textAlign: 'left' | 'right' }
-  children: ReactNode
-}) {
-  return (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, align]}>{title}</Text>
-      {children}
-    </View>
-  )
-}
-
-function ChecklistCard({
+/**
+ * Your-action card — warm yellow for ordinary work, pink only for
+ * needs-correction / replacement. Primary CTA strong; Preview/History quiet.
+ */
+function ActionItemCard({
   item,
-  tone,
   canUpload,
   uploading,
   uploadingId,
@@ -384,7 +352,6 @@ function ChecklistCard({
   onOpenBank,
 }: {
   item: OnboardingItem
-  tone: PastelTone
   canUpload: boolean
   uploading: boolean
   uploadingId?: string | null
@@ -425,8 +392,6 @@ function ChecklistCard({
     isDocument &&
     Boolean(item.item_id) &&
     (actions.has('upload') || actions.has('replace') || actions.has('resubmit'))
-  // Respect the API action list when it is present: offering Preview or History
-  // for a file the backend will not serve is a dead end.
   const allowPreview = Boolean(item.file_id) && (actions.size ? actions.has('preview') : true)
   const allowVersions =
     Boolean(onViewVersions) && Boolean(item.file_id) && (actions.size ? actions.has('view_versions') : true)
@@ -435,13 +400,9 @@ function ChecklistCard({
   const normalizedStatus = (item.status || 'pending').toLowerCase()
   const awaitingReview = ['submitted', 'processing', 'received'].includes(normalizedStatus)
   const isAccepted = normalizedStatus === 'accepted' || normalizedStatus === 'waived'
-  // Backend open_bank action is the sole CTA gate — same eligibility as /app/bank.
-  const canOpenBank =
-    isBank && Boolean(onOpenBank) && !isAccepted && actions.has('open_bank')
+  const canOpenBank = isBank && Boolean(onOpenBank) && !isAccepted && actions.has('open_bank')
   const needsReplacement = ['replacement_required', 'rejected'].includes(normalizedStatus)
-  // One line per item, and never a restatement of the status chip. Every review
-  // status shares the same sentence: "processing" used to claim we were still
-  // preparing the file while the chip already said HR was reviewing it.
+  const cardTone: PastelTone = needsReplacement ? 'pink' : 'butter'
   const guidance = dualParts
     ? t('onboarding.civilId.bothRequired')
     : needsReplacement
@@ -458,7 +419,6 @@ function ChecklistCard({
               ? t('onboarding.uploadGuidance')
               : t('onboarding.uploadUnavailable')
   const dueLabel = item.due_date ? t('onboarding.dueDate', { date: formatDate(item.due_date, locale) }) : null
-  // Resubmit/replace/upload only when API actions say so (no legacy fallback).
   const primaryAction = allowUpload
     ? actions.has('resubmit')
       ? 'resubmit'
@@ -473,134 +433,138 @@ function ChecklistCard({
   const failedFront = failedUploadId === `${item.item_id}:front`
   const failedBack = failedUploadId === `${item.item_id}:back`
 
-  const cardBody = (
+  const body = (
     <>
-      <View style={styles.taskTop}>
-        <View style={styles.flex}>
-          <View style={styles.requirementRow}>
-            <View style={[styles.requirementPill, item.required === false && styles.optionalPill]}>
-              <Text style={[styles.requirementText, item.required === false && styles.optionalText]}>
-                {item.required === false ? t('onboarding.optional') : t('onboarding.required')}
-              </Text>
-            </View>
-            <StatusChip label={onboardingStatusLabel(item.status, t)} tone={statusTone(item.status)} />
-          </View>
-          <Text style={[styles.taskTitle, align]}>{title}</Text>
-          <Text style={[styles.taskDescription, align]}>{description}</Text>
-          {dueLabel ? <Text style={[styles.dueDate, align]}>{dueLabel}</Text> : null}
-          {needsReplacement && item.rejection_reason ? (
-            <Text style={[styles.rejectionReason, align]}>{item.rejection_reason}</Text>
-          ) : (
-            <Text
-              style={[
-                styles.guidance,
-                awaitingReview && styles.guidanceReview,
-                needsReplacement && styles.guidanceReject,
-                align,
-              ]}
-            >
-              {guidance}
-            </Text>
-          )}
-          {dualParts ? (
-            <View style={styles.dualParts}>
-              {(['front', 'back'] as const).map((side) => {
-                const slot = item.civil_id_parts?.[side]
-                const present = Boolean(slot?.present || slot?.file_id)
-                const canSideUpload =
-                  canUpload &&
-                  (actions.has(`upload_${side}`) || actions.has(`replace_${side}`))
-                const canSidePreview = present && (actions.size ? actions.has(`preview_${side}`) : true)
-                const sideUploading = side === 'front' ? uploadingFront : uploadingBack
-                const sideFailed = side === 'front' ? failedFront : failedBack
-                return (
-                  <View key={side} style={styles.partSlot}>
-                    <Text style={[styles.partTitle, align]}>
-                      {side === 'front' ? t('onboarding.civilId.front') : t('onboarding.civilId.back')}
-                    </Text>
-                    <Text style={[styles.partHint, align]}>
-                      {present
-                        ? side === 'front'
-                          ? t('onboarding.civilId.frontDone')
-                          : t('onboarding.civilId.backDone')
-                        : side === 'front'
-                          ? t('onboarding.civilId.frontHint')
-                          : t('onboarding.civilId.backHint')}
-                    </Text>
-                    {sideUploading ? (
-                      <View style={styles.transfer}>
-                        <MotionProgressBar value={uploadProgress} />
-                      </View>
-                    ) : (
-                      <View style={styles.actionRow}>
-                        {canSidePreview && onPreview ? (
-                          <PremiumButton
-                            label={
-                              opening
-                                ? t('common.loading')
-                                : side === 'front'
-                                  ? t('onboarding.civilId.previewFront')
-                                  : t('onboarding.civilId.previewBack')
-                            }
-                            onPress={() => onPreview(item, side)}
-                            disabled={Boolean(opening)}
-                          />
-                        ) : null}
-                        {canSideUpload ? (
-                          <PremiumButton
-                            label={
-                              sideFailed
-                                ? t('common.retry')
-                                : present
-                                  ? side === 'front'
-                                    ? t('onboarding.civilId.replaceFront')
-                                    : t('onboarding.civilId.replaceBack')
-                                  : side === 'front'
-                                    ? t('onboarding.civilId.uploadFront')
-                                    : t('onboarding.civilId.uploadBack')
-                            }
-                            onPress={() =>
-                              sideFailed && onRetryUpload
-                                ? onRetryUpload(item, side)
-                                : onUpload(item, side)
-                            }
-                          />
-                        ) : null}
-                      </View>
-                    )}
-                  </View>
-                )
-              })}
-            </View>
-          ) : null}
-          {versionsLoading ? (
-            <Text style={[styles.versionMeta, align]}>{t('common.loading')}</Text>
-          ) : versions?.length ? (
-            <View style={styles.versionList}>
-              <Text style={[styles.versionTitle, align]}>{t('onboarding.versionHistory')}</Text>
-              {versions.slice(0, 6).map((v) => (
-                <Text key={String(v.version_id || v.version_no)} style={[styles.versionMeta, align]}>
-                  {t('onboarding.versionLine', {
-                    no: formatNumber(Number(v.version_no || 0), locale, 0),
-                    status: versionReviewLabel(v.review_status, t),
-                  })}
-                </Text>
-              ))}
-            </View>
-          ) : versions ? (
-            // Loaded and empty: say so rather than silently removing the control.
-            <Text style={[styles.versionMeta, align]}>{t('onboarding.versionEmpty')}</Text>
-          ) : null}
-        </View>
-        <View style={styles.taskArt}>
-          <Ionicons name={photo ? 'person' : 'document-text-outline'} size={38} color={colors.ink} />
-          {primaryAction || dualParts ? (
-            <View style={styles.plusBadge}>
-              <Ionicons name="add" size={16} color={colors.surface} />
-            </View>
-          ) : null}
-        </View>
+      <View style={styles.titleRow}>
+        <Text
+          maxFontSizeMultiplier={typeScaling.body}
+          numberOfLines={2}
+          style={[styles.actionTitle, styles.flex, align]}
+        >
+          {title}
+        </Text>
+        <OnboardingLifeMark
+          label={onboardingStatusLabel(item.status, t)}
+          status={item.status}
+          emphasis={needsReplacement ? 'strong' : 'quiet'}
+        />
       </View>
+      <View style={styles.metaRow}>
+        <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.metaRequired, align]}>
+          {item.required === false ? t('onboarding.optional') : t('onboarding.required')}
+        </Text>
+        {dueLabel ? (
+          <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.meta, align]}>
+            {dueLabel}
+          </Text>
+        ) : null}
+      </View>
+      {description ? (
+        <Text maxFontSizeMultiplier={typeScaling.chip} numberOfLines={2} style={[styles.meta, align]}>
+          {description}
+        </Text>
+      ) : null}
+      {needsReplacement && item.rejection_reason ? (
+        <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.rejectionReason, align]}>
+          {item.rejection_reason}
+        </Text>
+      ) : (
+        <Text
+          maxFontSizeMultiplier={typeScaling.chip}
+          style={[
+            styles.guidance,
+            awaitingReview && styles.guidanceReview,
+            needsReplacement && styles.guidanceReject,
+            align,
+          ]}
+        >
+          {guidance}
+        </Text>
+      )}
+      {dualParts ? (
+        <View style={styles.dualParts}>
+          {(['front', 'back'] as const).map((side) => {
+            const slot = item.civil_id_parts?.[side]
+            const present = Boolean(slot?.present || slot?.file_id)
+            const canSideUpload =
+              canUpload && (actions.has(`upload_${side}`) || actions.has(`replace_${side}`))
+            const canSidePreview = present && (actions.size ? actions.has(`preview_${side}`) : true)
+            const sideUploading = side === 'front' ? uploadingFront : uploadingBack
+            const sideFailed = side === 'front' ? failedFront : failedBack
+            return (
+              <View key={side} style={styles.partSlot}>
+                <Text style={[styles.partTitle, align]}>
+                  {side === 'front' ? t('onboarding.civilId.front') : t('onboarding.civilId.back')}
+                </Text>
+                <Text style={[styles.partHint, align]}>
+                  {present
+                    ? side === 'front'
+                      ? t('onboarding.civilId.frontDone')
+                      : t('onboarding.civilId.backDone')
+                    : side === 'front'
+                      ? t('onboarding.civilId.frontHint')
+                      : t('onboarding.civilId.backHint')}
+                </Text>
+                {sideUploading ? (
+                  <View style={styles.transfer}>
+                    <MotionProgressBar value={uploadProgress} />
+                  </View>
+                ) : (
+                  <View style={styles.actionCluster}>
+                    {canSidePreview && onPreview ? (
+                      <QuietTextAction
+                        label={
+                          opening
+                            ? t('common.loading')
+                            : side === 'front'
+                              ? t('onboarding.civilId.previewFront')
+                              : t('onboarding.civilId.previewBack')
+                        }
+                        onPress={() => onPreview(item, side)}
+                      />
+                    ) : null}
+                    {canSideUpload ? (
+                      <PremiumButton
+                        label={
+                          sideFailed
+                            ? t('common.retry')
+                            : present
+                              ? side === 'front'
+                                ? t('onboarding.civilId.replaceFront')
+                                : t('onboarding.civilId.replaceBack')
+                              : side === 'front'
+                                ? t('onboarding.civilId.uploadFront')
+                                : t('onboarding.civilId.uploadBack')
+                        }
+                        onPress={() =>
+                          sideFailed && onRetryUpload ? onRetryUpload(item, side) : onUpload(item, side)
+                        }
+                      />
+                    ) : null}
+                  </View>
+                )}
+              </View>
+            )
+          })}
+        </View>
+      ) : null}
+      {versionsLoading ? (
+        <Text style={[styles.versionMeta, align]}>{t('common.loading')}</Text>
+      ) : versions?.length ? (
+        <View style={styles.versionList}>
+          <Text style={[styles.versionTitle, align]}>{t('onboarding.versionHistory')}</Text>
+          {versions.slice(0, 6).map((v) => (
+            <Text key={String(v.version_id || v.version_no)} style={[styles.versionMeta, align]}>
+              {t('onboarding.versionLine', {
+                no: formatNumber(Number(v.version_no || 0), locale, 0),
+                status: versionReviewLabel(v.review_status, t),
+              })}
+            </Text>
+          ))}
+        </View>
+      ) : versions ? (
+        <Text style={[styles.versionMeta, align]}>{t('onboarding.versionEmpty')}</Text>
+      ) : null}
       {!dualParts && uploading ? (
         <View style={styles.transfer}>
           <View style={styles.transferHead}>
@@ -617,23 +581,22 @@ function ChecklistCard({
           ) : null}
         </View>
       ) : !dualParts ? (
-        <View style={styles.actionRow}>
-          {canOpenBank ? (
-            <PremiumButton label={t('onboarding.openBankForm')} onPress={() => onOpenBank?.()} showDirection />
-          ) : null}
+        <View style={styles.actionCluster}>
           {allowPreview && onPreview ? (
-            <PremiumButton
+            <QuietTextAction
               label={opening ? t('common.loading') : t('onboarding.preview')}
               onPress={() => onPreview(item)}
-              disabled={Boolean(opening)}
             />
           ) : null}
           {allowVersions && !versions?.length ? (
-            <PremiumButton
+            <QuietTextAction
               label={versionsLoading ? t('common.loading') : t('onboarding.versionHistory')}
               onPress={() => onViewVersions?.(item)}
               disabled={Boolean(versionsLoading)}
             />
+          ) : null}
+          {canOpenBank ? (
+            <PremiumButton label={t('onboarding.openBankForm')} onPress={() => onOpenBank?.()} showDirection />
           ) : null}
           {primaryAction ? (
             <PremiumButton
@@ -653,8 +616,8 @@ function ChecklistCard({
           ) : null}
         </View>
       ) : allowVersions && !versions?.length ? (
-        <View style={styles.actionRow}>
-          <PremiumButton
+        <View style={styles.actionCluster}>
+          <QuietTextAction
             label={versionsLoading ? t('common.loading') : t('onboarding.versionHistory')}
             onPress={() => onViewVersions?.(item)}
             disabled={Boolean(versionsLoading)}
@@ -664,24 +627,147 @@ function ChecklistCard({
     </>
   )
 
-  if (allowPreview && onPreview && !primaryAction && !uploading) {
+  const shell = (child: ReactNode) => (
+    <PastelCard tone={cardTone} style={styles.taskCard}>
+      {child}
+    </PastelCard>
+  )
+
+  if (allowPreview && onPreview && !primaryAction && !uploading && !dualParts && !canOpenBank) {
     return (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('onboarding.preview')}
         onPress={() => onPreview(item)}
+        style={({ pressed }) => (pressed ? styles.pressed : null)}
       >
-        <PastelCard tone={tone} style={styles.taskCard}>
-          {cardBody}
-        </PastelCard>
+        {shell(body)}
       </Pressable>
     )
   }
 
+  return shell(body)
+}
+
+/** Quieter cards: soft blue (review/handled) or cream+green mark (completed). */
+function QuietItemCard({
+  item,
+  opening,
+  onPreview,
+  density,
+  accessibilityLabel,
+}: {
+  item: OnboardingItem
+  opening?: boolean
+  onPreview?: (item: OnboardingItem, part?: 'front' | 'back') => void
+  density: 'review' | 'handled' | 'completed'
+  accessibilityLabel?: string
+}) {
+  const { t, isRTL } = useI18n()
+  const align = readingEdgeAlign(isRTL)
+  const title = onboardingItemLabel(item, t)
+  const status = onboardingStatusLabel(item.status, t)
+  const actions = new Set(item.actions || [])
+  const allowPreview =
+    density === 'review' && Boolean(item.file_id) && (actions.size ? actions.has('preview') : true) && Boolean(onPreview)
+  const titleStyle =
+    density === 'completed' ? styles.completedTitle : density === 'handled' ? styles.handledTitle : styles.reviewTitle
+
+  const body = (
+    <View style={styles.quietCardBody}>
+      <View style={styles.titleRow}>
+        <Text
+          maxFontSizeMultiplier={typeScaling.body}
+          numberOfLines={2}
+          style={[titleStyle, styles.flex, align]}
+        >
+          {title}
+        </Text>
+        <OnboardingLifeMark label={status} status={item.status} emphasis="quiet" />
+        {allowPreview ? <Ionicons name="chevron-forward" size={16} color={colors.navMuted} /> : null}
+      </View>
+      {density === 'review' && opening ? (
+        <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.meta, align]}>
+          {t('common.loading')}
+        </Text>
+      ) : null}
+    </View>
+  )
+
+  const card =
+    density === 'completed' ? (
+      <View accessibilityLabel={accessibilityLabel || `${title}. ${status}`}>
+        <PastelCard tone="cream" style={styles.quietCard}>
+          {body}
+        </PastelCard>
+      </View>
+    ) : (
+      <SoftBlueCard
+        style={density === 'handled' ? styles.quietCardHandled : styles.quietCard}
+        accessibilityLabel={accessibilityLabel || `${title}. ${status}`}
+      >
+        {body}
+      </SoftBlueCard>
+    )
+
+  if (allowPreview && onPreview) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${title}. ${t('onboarding.preview')}`}
+        onPress={() => onPreview(item)}
+        style={({ pressed }) => (pressed ? styles.pressed : null)}
+      >
+        {card}
+      </Pressable>
+    )
+  }
+  return card
+}
+
+/** Soft powder-blue surface matching PastelCard geometry (progress / review / handled). */
+function SoftBlueCard({
+  children,
+  style,
+  accessibilityLabel,
+}: {
+  children: ReactNode
+  style?: object
+  accessibilityLabel?: string
+}) {
   return (
-    <PastelCard tone={tone} style={styles.taskCard}>
-      {cardBody}
-    </PastelCard>
+    <View
+      accessibilityLabel={accessibilityLabel}
+      style={[styles.softBlueCard, style, { backgroundColor: SOFT_BLUE }]}
+    >
+      {children}
+    </View>
+  )
+}
+
+/** Inline secondary control — never a second giant black button. */
+function QuietTextAction({
+  label,
+  onPress,
+  disabled = false,
+}: {
+  label: string
+  onPress: () => void
+  disabled?: boolean
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.textAction, pressed && styles.pressed, disabled && styles.textActionDisabled]}
+    >
+      <Text maxFontSizeMultiplier={typeScaling.body} style={styles.textActionLabel}>
+        {label}
+      </Text>
+    </Pressable>
   )
 }
 
@@ -689,33 +775,50 @@ function CompletedChecklist() {
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
   return (
-    <PastelCard tone="pink" style={styles.completeCard}>
+    <PastelCard tone="olive" style={styles.completeCard}>
       <EditorialHeading size="medium">{t('onboarding.completeTitle')}</EditorialHeading>
-      <Text style={[styles.taskDescription, align]}>{t('onboarding.completeMessage')}</Text>
+      <Text style={[styles.meta, align]}>{t('onboarding.completeMessage')}</Text>
     </PastelCard>
   )
 }
 
-export function OnboardingLoadingView() {
+export function OnboardingLoadingView({ onBack }: { onBack?: () => void }) {
+  const { t } = useI18n()
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.content}>
-        <Wordmark compact align="center" />
+        {onBack ? (
+          <View style={styles.pushedNav}>
+            <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
+            <Wordmark compact align="center" />
+            <View style={styles.navSpacer} />
+          </View>
+        ) : (
+          <Wordmark compact align="center" />
+        )}
         <ContentSkeleton />
       </View>
     </SafeAreaView>
   )
 }
 
-export function OnboardingErrorView({ onRetry }: { onRetry: () => void }) {
+export function OnboardingErrorView({ onRetry, onBack }: { onRetry: () => void; onBack?: () => void }) {
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} edges={['top']}>
       <View style={[styles.content, styles.errorWrap]}>
+        {onBack ? (
+          <View style={styles.pushedNav}>
+            <PageBackButton onPress={onBack} accessibilityLabel={t('common.back')} />
+            <Wordmark compact align="center" />
+            <View style={styles.navSpacer} />
+          </View>
+        ) : null}
         <Text style={[styles.taskTitle, align]}>{t('common.error')}</Text>
         <Text style={[styles.stateMessage, align]}>{t('error.generic')}</Text>
         <PremiumButton label={t('common.retry')} onPress={onRetry} />
+        {onBack ? <PremiumButton label={t('common.back')} onPress={onBack} tone="secondary" /> : null}
       </View>
     </SafeAreaView>
   )
@@ -766,7 +869,6 @@ function versionReviewLabel(status: string | null | undefined, t: (key: string) 
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  screen: { flex: 1 },
   content: {
     paddingHorizontal: layout.pageMargin,
     paddingTop: layout.pageTop,
@@ -774,70 +876,86 @@ const styles = StyleSheet.create({
     gap: layout.sectionGap,
   },
   nav: { minHeight: layout.touchTarget, flexDirection: 'row', alignItems: 'center' },
-  backButton: {
-    width: layout.touchTarget,
-    height: layout.touchTarget,
+  pushedNav: {
+    minHeight: layout.touchTarget,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   navSpacer: { width: 44 },
   hero: { gap: spacing.sm },
-  subtitle: { color: colors.subtle, fontSize: font.body, lineHeight: 22 },
+  subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20 },
   progressCard: { gap: spacing.md },
   progressHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
-  list: { gap: spacing.sm },
   progressCopy: { flex: 1, gap: 4 },
   progressLabel: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700' },
   progressValue: { color: colors.text, fontSize: font.body, fontWeight: '700' },
-  section: { gap: spacing.md },
-  sectionTitle: { color: colors.text, fontSize: font.small, fontWeight: '800', letterSpacing: 0.2 },
-  taskCard: { gap: spacing.md },
-  taskTop: { flexDirection: 'row', gap: spacing.md },
-  flex: { flex: 1 },
-  requirementRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: 8, flexWrap: 'wrap' },
-  requirementPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radius.pill,
-    backgroundColor: colors.ink,
+  nextAction: { color: colors.subtle, fontSize: font.small, lineHeight: 18 },
+  section: { gap: spacing.sm },
+  cardStack: { gap: spacing.md },
+  taskCard: { gap: spacing.sm },
+  softBlueCard: {
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    overflow: 'hidden',
+    ...shadows.card,
   },
-  optionalPill: { backgroundColor: colors.border },
-  requirementText: { color: colors.surface, fontSize: font.tiny, fontWeight: '700' },
-  optionalText: { color: colors.text },
+  quietCard: { paddingVertical: spacing.md },
+  quietCardHandled: { paddingVertical: spacing.md, opacity: 0.92 },
+  quietCardBody: { gap: 2 },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: 2 },
+  actionTitle: { color: colors.ink, fontSize: font.body, fontWeight: '800', lineHeight: 20 },
+  reviewTitle: { color: colors.ink, fontSize: font.body, fontWeight: '700', lineHeight: 19 },
+  handledTitle: { color: colors.subtle, fontSize: font.small, fontWeight: '700', lineHeight: 18 },
+  completedTitle: { color: colors.subtle, fontSize: font.small, fontWeight: '600', lineHeight: 18 },
+  meta: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
+  metaRequired: { color: colors.ink, fontSize: font.tiny, lineHeight: 16, fontWeight: '700' },
+  handledNote: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16, marginBottom: 2 },
+  flex: { flex: 1 },
   taskTitle: { color: colors.ink, fontSize: font.h3, fontWeight: '700', marginBottom: 4 },
-  taskDescription: { color: colors.subtle, fontSize: font.small, lineHeight: 18 },
-  dueDate: { color: colors.text, fontSize: font.tiny, marginTop: 6, fontWeight: '600' },
+  completeCard: { gap: spacing.sm },
   rejectionReason: {
-    marginTop: 8,
+    marginTop: 4,
     color: colors.danger,
-    fontSize: font.small,
-    lineHeight: 18,
+    fontSize: font.tiny,
+    lineHeight: 16,
     fontWeight: '600',
   },
-  guidance: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16, marginTop: 8 },
+  guidance: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16, marginTop: 2 },
   guidanceReview: { color: colors.text },
   guidanceReject: { color: colors.danger },
-  versionList: { marginTop: 10, gap: 4 },
+  versionList: { marginTop: 8, gap: 4 },
   versionTitle: { color: colors.text, fontSize: font.tiny, fontWeight: '700' },
   versionMeta: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
-  taskArt: { width: 56, alignItems: 'center', justifyContent: 'center' },
-  plusBadge: {
-    position: 'absolute',
-    right: -2,
-    bottom: 4,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  transfer: { gap: spacing.sm },
+  transfer: { gap: spacing.sm, marginTop: spacing.sm },
   transferHead: { flexDirection: 'row', justifyContent: 'space-between' },
   transferText: { color: colors.text, fontSize: font.tiny, fontWeight: '700' },
   cancelTransfer: { minHeight: 40, alignItems: 'center', justifyContent: 'center' },
   cancelTransferText: { color: colors.text, fontWeight: '700', textDecorationLine: 'underline' },
-  actionRow: { gap: spacing.sm },
+  actionCluster: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  textAction: {
+    minHeight: layout.touchTarget,
+    justifyContent: 'center',
+    paddingVertical: spacing.xs,
+  },
+  textActionDisabled: { opacity: 0.45 },
+  textActionLabel: {
+    color: colors.ink,
+    fontSize: font.small,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
   dualParts: { gap: spacing.sm, marginTop: spacing.sm },
   partSlot: {
     gap: spacing.xs,
@@ -847,25 +965,9 @@ const styles = StyleSheet.create({
   },
   partTitle: { color: colors.ink, fontSize: font.small, fontWeight: '700' },
   partHint: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
-  reviewedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  reviewedIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.surfaceMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reviewedTitle: { color: colors.text, fontSize: font.body, fontWeight: '700' },
-  reviewedStatus: { color: colors.subtle, fontSize: font.tiny, marginTop: 2 },
-  completeCard: { gap: spacing.sm },
   securityRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
   securityText: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
   errorWrap: { flex: 1, justifyContent: 'center', gap: spacing.md },
   stateMessage: { color: colors.subtle, fontSize: font.body, lineHeight: 22 },
+  pressed: { opacity: 0.85 },
 })

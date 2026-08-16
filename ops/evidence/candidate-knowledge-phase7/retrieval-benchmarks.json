@@ -1,0 +1,25 @@
+{
+  "1000": {
+    "chunks": 3017,
+    "index_ms": 1213.1,
+    "needle_found": true,
+    "retrieval_mode": "hybrid",
+    "search_p50_ms": 15.58,
+    "search_p95_ms": 15.97,
+    "total": 103
+  },
+  "10000": {
+    "chunks": 33016,
+    "index_ms": 168859.01,
+    "needle_found": true,
+    "retrieval_mode": "hybrid",
+    "search_p50_ms": 170.98,
+    "search_p95_ms": 182.66,
+    "total": 104
+  },
+  "50000_estimate": {
+    "estimated_index_ms": 844295.05,
+    "executed_full_50k": false,
+    "reason": "capacity_estimate_from_10k_not_full_reindex"
+  }
+}

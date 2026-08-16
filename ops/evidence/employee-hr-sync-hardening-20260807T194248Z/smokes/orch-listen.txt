@@ -1,0 +1,56 @@
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                                    
+LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=1533881,fd=17))             
+LISTEN 0      511        127.0.0.1:18789      0.0.0.0:*    users:(("node",pid=575209,fd=25))                         
+LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=1533881,fd=15))             
+LISTEN 0      2048       127.0.0.1:8011       0.0.0.0:*    users:(("uvicorn",pid=4025525,fd=14))                     
+LISTEN 0      2048       127.0.0.1:8010       0.0.0.0:*    users:(("uvicorn",pid=1874681,fd=14))                     
+LISTEN 0      4096       127.0.0.1:3311       0.0.0.0:*    users:(("docker-proxy",pid=2742054,fd=8))                 
+LISTEN 0      4096       127.0.0.1:3310       0.0.0.0:*    users:(("docker-proxy",pid=2568018,fd=8))                 
+LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1533874,fd=3),("systemd",pid=1,fd=275))
+LISTEN 0      4096       127.0.0.1:2019       0.0.0.0:*    users:(("caddy",pid=30003,fd=7))                          
+LISTEN 0      200        127.0.0.1:5432       0.0.0.0:*    users:(("postgres",pid=1533916,fd=7))                     
+LISTEN 0      200            [::1]:5432          [::]:*    users:(("postgres",pid=1533916,fd=6))                     
+LISTEN 0      4096               *:443              *:*    users:(("caddy",pid=30003,fd=9))                          
+LISTEN 0      4096               *:80               *:*    users:(("caddy",pid=30003,fd=11))                         
+LISTEN 0      4096            [::]:22            [::]:*    users:(("sshd",pid=1533874,fd=4),("systemd",pid=1,fd=276))
+LISTEN 0      511            [::1]:18789         [::]:*    users:(("node",pid=575209,fd=26))                         
+# /etc/systemd/system/wathefni-orchestrator.service
+[Unit]
+Description=Wathefni HR LangGraph Orchestrator
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/wathefni/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8010
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/20-assessment-authoring-off.conf
+[Service]
+Environment=WATHEFNI_ASSESSMENT_AUTHORING=false
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/assistant-hr-reads.conf
+[Service]
+Environment=WATHEFNI_ASSISTANT_HR_READS=on
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/assistant-remediation.conf
+# Pre-Hiring Assistant A0–A3 production pins (safe conversational surface).
+# Do NOT set WATHEFNI_DELIVERY_MODE here — Candidate WhatsApp Luna / outbound remain separate.
+[Service]
+Environment=WATHEFNI_TOOL_AGENT_MODEL=gpt-5.6-terra
+Environment=WATHEFNI_ASSISTANT_RANKING_MODE=replay_only
+Environment=WATHEFNI_LEGACY_REGEX_INFERENCE_ENABLED=0
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/bank-ess-ocr-p1.conf
+[Service]
+Environment=WATHEFNI_BANK_ESS_OCR_V1=on
+Environment=WATHEFNI_BANK_ESS_OCR_V1_COMPANIES=WATHEFNI
+
+# /etc/systemd/system/wathefni-orchestrator.service.d/candidate-knowledge.conf
+[Service]

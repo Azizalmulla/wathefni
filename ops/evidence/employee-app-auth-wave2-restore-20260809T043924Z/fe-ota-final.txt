@@ -1,0 +1,107 @@
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_AUTO_LOCK
+PASS  app.config.js defaults EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+PASS  app.config.js forces defaults when unset
+PASS  app.config.js asserts flags
+PASS  .env.example exists
+PASS  .env.example has EXPO_PUBLIC_LOCAL_PIN_UNLOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_AUTO_LOCK=1
+PASS  .env.example has EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC=1
+PASS  .env has EXPO_PUBLIC_LOCAL_PIN_UNLOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_AUTO_LOCK=1
+PASS  .env has EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC=1
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_AUTO_LOCK
+PASS  eas.json production.env EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC
+PASS  publish-canary-ota.sh exists
+PASS  publish script uses --environment production
+PASS  publish script exports PIN flag
+PASS  pinPolicy has no employee-key allowlist
+PASS  biometricPolicy has no employee-key allowlist
+PASS  autoLockPolicy has no employee-key allowlist
+PASS  PIN enabled for any session key when master on
+auth-wave2 flags preflight: GREEN
+Environment variables with visibility "Plain text" and "Sensitive" loaded from the "production" environment on EAS: EXPO_PUBLIC_API_BASE_URL, EXPO_PUBLIC_LOCAL_AUTO_LOCK, EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC, EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK, EXPO_PUBLIC_LOCAL_PIN_UNLOCK, EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED.
+
+- Exporting...
+[expo-cli] Starting Metro Bundler
+[expo-cli] 
+[expo-cli] warning: Bundler cache is empty, rebuilding (this may take a minute)
+[expo-cli] transform[stderr]: (node:485) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] 
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] 
+[expo-cli] transform[stderr]: (node:486) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] 
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:488) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:489) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:504) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] 
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:496) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:502) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] transform[stderr]: (node:495) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[expo-cli] transform[stderr]: (Use `node --trace-warnings ...` to show where the warning was created)
+[expo-cli] iOS Bundled 10533ms node_modules/expo-router/entry.js (1368 modules)
+[expo-cli] Android Bundled 12857ms node_modules/expo-router/entry.js (1387 modules)
+[expo-cli] Creating asset map
+[expo-cli] Preparing additional debugging files
+[expo-cli] 
+[expo-cli] Exporting 18 assets:
+[expo-cli] node_modules/@expo-google-fonts/newsreader/600SemiBold/Newsreader_600SemiBold.ttf (118 kB)
+[expo-cli] node_modules/@expo-google-fonts/noto-kufi-arabic/600SemiBold/NotoKufiArabic_600SemiBold.ttf (181 kB)
+[expo-cli] node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (443 kB)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon-mask.png (913 B)
+[expo-cli] node_modules/@react-navigation/elements/src/assets/back-icon.png (10 variations | 338 B)
+[expo-cli] node_modules/expo-router/assets/error.png (516 B)
+[expo-cli] node_modules/expo-router/assets/file.png (158 B)
+[expo-cli] node_modules/expo-router/assets/forward.png (250 B)
+[expo-cli] node_modules/expo-router/assets/pkg.png (429 B)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for ios:
+[expo-cli] _expo/static/js/ios/entry-f9399637e60873fbdc65dc411050c30e.hbc (2 MB)
+[expo-cli] _expo/static/js/ios/entry-f9399637e60873fbdc65dc411050c30e.hbc.map (7.36 MB)
+[expo-cli] 
+[expo-cli] Exporting 2 bundles for android:
+[expo-cli] _expo/static/js/android/entry-669dd87a99b6b009af538f7e24bc0b7e.hbc (2.01 MB)
+[expo-cli] _expo/static/js/android/entry-669dd87a99b6b009af538f7e24bc0b7e.hbc.map (7.38 MB)
+[expo-cli] Exporting 3 files:
+[expo-cli] assetmap.json (7.06 kB)
+[expo-cli] debug.html (390 B)
+[expo-cli] metadata.json (1.88 kB)
+[expo-cli] 
+[expo-cli] App exported to: dist
+✔ Exported bundle(s)
+- Uploading...
+- Uploading assetmap.json (0 / 6.9 KB)
+✔ Uploaded assetmap.json 
+✔ Uploaded 2 app bundles
+✔ Uploading assets skipped - no new assets found
+ℹ 14 iOS assets, 14 Android assets (maximum: 2000 total per update). Learn more about asset limits: https://expo.fyi/eas-update-asset-limits
+- Publishing...
+✔ Published!
+Branch             canary
+Runtime version    0.1.0
+Platform           android, ios
+Update group ID    f226bdf5-d48e-49ef-b172-7c3672a0723e
+Android update ID  019fe4d5-cabd-7324-955e-113190a3509a
+iOS update ID      019fe4d5-cabd-78bd-a29b-743366406df5
+Message            Auth Wave 2 restore: default-on masters + universal unlock; verified effective:on markers
+Commit             2fa16534c8846887472dabbd10cc164a6c788f3f*
+EAS Dashboard      https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/f226bdf5-d48e-49ef-b172-7c3672a0723e
+
+PASS  dist iOS bundle exists
+PASS  bundle contains pin-unlock-effective:on
+PASS  bundle contains bio-unlock-effective:on
+PASS  bundle contains al-lock-effective:on
+PASS  pin effective-on present (Auth Wave 2 live)
+auth-wave2 flags dist: GREEN

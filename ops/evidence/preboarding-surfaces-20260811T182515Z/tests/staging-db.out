@@ -1,0 +1,18 @@
+    preboarding surfaces — DB queue/detail/employee/manager
+      PASS  create for surface
+      PASS  queue ok
+      PASS  queue has assignment
+      PASS  queue marks joining
+      PASS  manager sees assigned
+      PASS  other manager empty
+      PASS  detail ok
+      PASS  detail items
+      PASS  detail events
+      PASS  assistant explain
+      PASS  employee payload
+      PASS  employee only owns employee items
+      PASS  module-off queue denied
+
+13 passed, 0 failed
+PREBOARDING_SURFACES_DB_FULL_PASS
+STAGING_DB_RC=0

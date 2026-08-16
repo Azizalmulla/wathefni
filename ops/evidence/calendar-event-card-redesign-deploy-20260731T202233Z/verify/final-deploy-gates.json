@@ -1,0 +1,22 @@
+{
+  "verdict": "PASS",
+  "stamp": "20260731T202233Z",
+  "dashboard_chunk": "dashboard-Bznlhxsn.js",
+  "dashboard_sha256": "d610dfeb0f08bd07b04f0ba4b6d37f457a37df7878eb01c006bc38d2189f8697",
+  "calendar_shell_chunk": "CalendarShell-DunoP2L4.js",
+  "calendar_shell_sha256": "0de0e2233755ba5857f7e575de391daf8220eda70f9a159ecbfe4aff4e089866",
+  "health": 200,
+  "dashboard": 200,
+  "cross_day_plus1d": true,
+  "short_medium_long": true,
+  "overlap_lanes": true,
+  "teams_join": true,
+  "drawer_on_card_click": true,
+  "en_ar_rtl": true,
+  "mobile": true,
+  "scope_switcher": true,
+  "overview_mine_only": true,
+  "vitest": "13/13",
+  "rollback_ok": true,
+  "bad_data_flagged_not_mutated": "c3c3d8e7-dc0c-4fbd-9d57-8c91d1cc053b"
+}

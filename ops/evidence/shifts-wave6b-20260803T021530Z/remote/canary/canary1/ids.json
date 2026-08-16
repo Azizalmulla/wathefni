@@ -1,0 +1,45 @@
+{
+  "period_id": "9f0aba8c-1fbc-45fd-825f-5fca2a4e8c65",
+  "version_ids": [
+    "a2f5c4fa-5615-4c5c-9559-5f5717d0e694",
+    "69fea738-b45e-4d6f-877c-668664e44866"
+  ],
+  "shift_ids": [
+    "fafebe13-43ac-4e28-810d-77e64e43dcf6",
+    "e7f928de-6f0b-4401-8ab3-c8eedbb757f3",
+    "363db131-fd77-49e5-a29b-5fe1e3657927",
+    "d36ac86f-e4a3-4d9b-9b97-c26eda3bd12c",
+    "5c24e322-a97f-4080-ae17-62ae13e746e5",
+    "694eeab3-9c44-4b5e-b6f7-07cd3ad31af1",
+    "6a18e6d7-c334-4d11-846d-48775449e969",
+    "6de9a6d4-a042-46ff-abdf-136bf10ff419",
+    "df11d83c-e487-4cf3-8fa7-3f84dee25cad",
+    "4b908f92-a092-4f23-9f19-d767ff496692",
+    "cf0af2ed-4294-4cea-8ae4-73faea07faa5",
+    "600b5f1e-eb07-44f6-aff0-551fc73080c5",
+    "024edfeb-be95-4505-877e-b3a74a99ade8",
+    "941566d7-7169-4833-8cd0-79bcb43cf510",
+    "80558507-570e-4a9b-8207-a681100945f8",
+    "044fb828-d98d-403d-81e8-b143a86f1989"
+  ],
+  "employees": [
+    "WATHEFNI-SHW6B-A9E144AD",
+    "WATHEFNI-SHW6B-B-A9E144AD"
+  ],
+  "day_template": "493be86b-0698-4f7f-9d7f-70dec7dcba40",
+  "night_template": "ad0ab62f-1935-4b53-900d-37ad4840bcfb",
+  "patterns": {
+    "four_on_four_off": "9caec747-c450-4f77-aa76-4302d9a7573e",
+    "panama_223": "022b8b2d-a2c7-47a1-9b8f-d0f50cf09bc1",
+    "six_on_one_off": "b48594f7-4448-4cd3-8f49-27a82f044644",
+    "alternating_day_night": "e09ed552-b90f-4c66-837d-3a70e0ea1873",
+    "hitch_n_n": "327f0dbe-503d-4f03-9af5-a15371d08869",
+    "custom_sequence": "fa84d2c8-d600-4857-a06d-56057c3275f5"
+  },
+  "events": {
+    "key": "f7372f99-c817-4260-b00f-a89573734853",
+    "keyb": "5dc43763-eef9-4415-add3-02acfa4a29d1",
+    "retry": "41a3bee8-117f-4f57-9290-30977ef42e15",
+    "terminal": "d2122cff-a946-4368-b423-e770946437db"
+  }
+}

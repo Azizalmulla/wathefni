@@ -1,0 +1,50 @@
+{
+  "overall": "PASS",
+  "gates": [
+    {
+      "gate": "create_teams_interview",
+      "result": "PASS"
+    },
+    {
+      "gate": "valid_teams_joinUrl",
+      "result": "PASS"
+    },
+    {
+      "gate": "calendar_event_and_attendee_invites",
+      "result": "PASS"
+    },
+    {
+      "gate": "reschedule_same_meeting",
+      "result": "PASS"
+    },
+    {
+      "gate": "cancel_removes_meeting",
+      "result": "PASS"
+    },
+    {
+      "gate": "approved_microsoft_sender_can_send",
+      "result": "PASS"
+    },
+    {
+      "gate": "outside_scope_sender_denied",
+      "result": "PASS"
+    },
+    {
+      "gate": "wathefni_postmark_default_sender",
+      "result": "PASS"
+    },
+    {
+      "gate": "permissions_tenant_isolation_fail_closed",
+      "result": "PASS"
+    },
+    {
+      "gate": "assistant_capability_readiness",
+      "result": "PASS",
+      "note": "Teams fail-closed without MS connection; email catalog under-reports Postmark"
+    },
+    {
+      "gate": "cleanup",
+      "result": "PASS"
+    }
+  ]
+}

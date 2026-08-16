@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_multicolumn_01",
+  "category": "multicolumn_cv",
+  "language": "en",
+  "layout": "two_column",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Omar Nasser",
+    "omar.nasser@example.com",
+    "LEFT COLUMN",
+    "RIGHT COLUMN",
+    "Experience",
+    "Education"
+  ],
+  "expected_fields": {
+    "full_name": "Omar Nasser",
+    "email": "omar.nasser@example.com",
+    "phone": "+96550001122"
+  },
+  "notes": "Two-column layout with a vertical divider; reading-order stress.",
+  "sha256": "d8659d41472940b1cd3dd4265eb942f5a29df529cb312f9659a55d97fdd1f9c5",
+  "bytes": 32364
+}

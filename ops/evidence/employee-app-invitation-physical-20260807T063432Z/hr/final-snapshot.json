@@ -1,0 +1,68 @@
+{
+  "snapshot": {
+    "invitation_status": "activated",
+    "channel": "email",
+    "app_access_active": true,
+    "actions": {
+      "resend": false,
+      "reinvite": true,
+      "revoke_access": true,
+      "show_code_exception": false
+    },
+    "sent_at": "2026-08-07 06:36:38.092450+00:00"
+  },
+  "status_counts": [
+    {
+      "status": "redeemed",
+      "n": 30
+    },
+    {
+      "status": "superseded",
+      "n": 22
+    }
+  ],
+  "recent": [
+    {
+      "invite_id": "672780b3-c403-4870-8efd-d9e7dd3ad01c",
+      "status": "redeemed",
+      "delivery_status": "delivered",
+      "delivery_channel": "email",
+      "created_at": "2026-08-07 06:36:37.690410+00:00"
+    },
+    {
+      "invite_id": "59043c83-e19b-4710-b741-d4ed32d7a9cd",
+      "status": "superseded",
+      "delivery_status": null,
+      "delivery_channel": null,
+      "created_at": "2026-08-07 06:36:37.664190+00:00"
+    },
+    {
+      "invite_id": "9ffc593b-4736-4311-a205-9213a09e48bc",
+      "status": "superseded",
+      "delivery_status": "needs_attention",
+      "delivery_channel": null,
+      "created_at": "2026-08-07 06:36:37.144146+00:00"
+    },
+    {
+      "invite_id": "e7c56c4f-60ff-4f8d-bbd7-4e0f1bc8a2b3",
+      "status": "superseded",
+      "delivery_status": "delivered",
+      "delivery_channel": "email",
+      "created_at": "2026-08-07 06:36:36.540903+00:00"
+    },
+    {
+      "invite_id": "ffe58998-ad60-4e9b-8fd4-4ede82df4878",
+      "status": "redeemed",
+      "delivery_status": "delivered",
+      "delivery_channel": "email",
+      "created_at": "2026-08-07 06:35:11.983557+00:00"
+    },
+    {
+      "invite_id": "3c1957ed-4909-4203-8823-db3306915728",
+      "status": "superseded",
+      "delivery_status": "delivered",
+      "delivery_channel": "email",
+      "created_at": "2026-08-07 06:34:42.873443+00:00"
+    }
+  ]
+}

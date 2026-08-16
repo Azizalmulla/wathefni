@@ -1,0 +1,2 @@
+.venv/bin/python: can't open file '/opt/wathefni/orchestrator/smoke-test-employee-migration-sync-foundation.py': [Errno 2] No such file or directory
+P1_EXIT=0

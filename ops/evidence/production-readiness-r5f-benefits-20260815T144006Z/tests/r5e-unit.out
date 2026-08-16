@@ -1,0 +1,84 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5E — learning surface (unit)
+      PASS  learning customer enableable
+      PASS  learning customer visible
+      PASS  performance still enableable
+      PASS  talent still enableable
+      PASS  JA still enableable
+      PASS  benefits now enableable after R5F
+      PASS  learning is catalog SKU
+      PASS  JA is not a catalog SKU
+      PASS  learning domain_authority_ready
+      PASS  learning http_ready
+      PASS  learning hr_web_ready
+      PASS  learning employee_surface_ready
+      PASS  learning manager_surface_ready
+      PASS  learning mobile not required
+      PASS  fail-closed skips Learning namespaces
+      PASS  fail-closed skips Benefits namespaces
+      PASS  assignment ≠ enrollment
+      PASS  enrollment ≠ completion
+      PASS  attendance ≠ completion
+      PASS  completion ≠ certification
+      PASS  no competency auto-verify
+      PASS  overdue ≠ failure
+      PASS  performance optional
+      PASS  talent optional
+      PASS  JA optional
+      PASS  no learning talent score
+      PASS  no auto hipo
+      PASS  C3 remains canonical
+      PASS  no silent C3 close
+      PASS  no duplicate skills authority
+      PASS  Setup remounts Learning
+      PASS  Setup still remounts JA
+      PASS  Setup still remounts Talent
+      PASS  Setup still remounts Performance
+      PASS  Setup remounts Benefits after R5F
+      PASS  Setup still omits Comp Planning
+      PASS  PostHire mounts Learning workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace names assignment boundary
+      PASS  workspace overdue not fail
+      PASS  Page includes learning
+      PASS  nav.learning registered
+      PASS  nav.learning has module key
+      PASS  learning is a canonical posthire SKU
+      PASS  app registers Learning HTTP
+      PASS  learning.read permission exists
+      PASS  learning.manage permission exists
+      PASS  learning.assign permission exists
+      PASS  learning.approve permission exists
+      PASS  employee feature learning
+      PASS  notification flow learning
+      PASS  HTTP mentions /dashboard/learning
+      PASS  HTTP mentions /app/learning
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /catalog
+      PASS  HTTP mentions /assignments
+      PASS  HTTP mentions /requests
+      PASS  HTTP mentions /sessions
+      PASS  HTTP mentions /completions
+      PASS  HTTP mentions /certificates
+      PASS  HTTP mentions /mandatory
+      PASS  HTTP mentions /development-links
+      PASS  HTTP mentions /programs
+      PASS  HTTP mentions /history
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP uses employee_app_context
+      PASS  HTTP refuses employee mandatory self-complete
+      PASS  employee composition has learning
+      PASS  employee hub exists
+      PASS  employee catalog exists
+      PASS  employee certificates exist
+      PASS  no HR mobile learning admin
+      PASS  employee EN copy
+      PASS  employee AR copy
+      PASS  fail-closed no longer steals Learning
+      PASS  fail-closed no longer steals Benefits
+
+    78 passed, 0 failed
+R5E_LEARNING_SURFACE_UNIT_PASS

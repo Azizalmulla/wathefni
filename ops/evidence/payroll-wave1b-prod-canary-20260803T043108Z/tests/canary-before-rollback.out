@@ -1,0 +1,43 @@
+payroll wave1b prod synthetic canary tag=92090e6a
+[PASS] wave1 enabled
+[PASS] wave1 company
+[PASS] synthetic_only on
+[PASS] payment_processing disabled
+[PASS] money_authority false
+[PASS] no g2n
+[PASS] art70=6
+[PASS] sod pair warns
+[PASS] operator has approve
+[PASS] operator lacks export
+[PASS] db is wathefni
+[PASS] smoke rows exist (2)
+[PASS] smoke quarantined
+[PASS] smoke not hard-deleted
+[PASS] real employee contract refused
+[PASS] mode native
+[PASS] mode external
+[PASS] mode parallel_shadow
+[PASS] settings payment disabled
+[PASS] contract draft
+[PASS] creator self-approve denied
+[PASS] contract approve
+[PASS] overlap denied
+[PASS] contract replace
+[PASS] offer seeds draft only
+[PASS] period open
+[PASS] period lock
+[PASS] period close
+[PASS] period reopen
+[PASS] source mix forbidden
+[PASS] input export stub
+[PASS] result import bans posts_payment
+[PASS] smoke still quarantined mid-run
+[PASS] cleanup residual zero
+[PASS] smoke still present after cleanup
+[PASS] smoke still quarantined after cleanup
+[PASS] final payment disabled
+{
+  "passed": 37,
+  "failed": 0,
+  "evid": "/opt/wathefni/production-evidence/payroll-wave1b-prod-canary/20260803T043108Z/canary/before-rollback"
+}

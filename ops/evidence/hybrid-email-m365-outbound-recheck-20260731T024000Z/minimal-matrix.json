@@ -1,0 +1,27 @@
+PASS approved_send {"http": 202, "status": "accepted_by_provider"}
+PASS outside_scope_denied {"http": 403, "error": "microsoft_http_403"}
+PASS restored_wathefni {}
+PASS only_evidence_was_toggled {"branded_remaining": 0}
+{
+  "marker": "recheck-ad276b1f9f",
+  "proofs": {
+    "approved_send": {
+      "ok": true,
+      "http": 202,
+      "status": "accepted_by_provider"
+    },
+    "outside_scope_denied": {
+      "ok": true,
+      "http": 403,
+      "error": "microsoft_http_403"
+    },
+    "restored_wathefni": {
+      "ok": true
+    },
+    "only_evidence_was_toggled": {
+      "ok": true,
+      "branded_remaining": 0
+    }
+  }
+}
+MINIMAL_MATRIX_PASS

@@ -1,0 +1,81 @@
+{
+  "cleanup": {
+    "cancelled_count": 28,
+    "remaining_open_after_cancel": 1,
+    "cancel_reason": "synthetic_wave_d6a_prod_proof_leftover",
+    "scope": "D6A synthetic wave_d6a_prod_proof / d6a-prod-* only",
+    "job_ids": [
+      "37649f0b-ee72-4645-a333-2e3ac4796fcd",
+      "9e3bc7f4-d08f-4069-9ddc-118b69759a66",
+      "a32cc82b-4bd1-495e-ac1e-b4d6f52c9a8a",
+      "6cb38acf-cbf8-4d4c-970d-e09556fcc466",
+      "3467e0dc-9cc2-4f62-985c-b1d720eb14cb",
+      "5c24dff8-8ae2-4ac1-9aea-a66922555d78",
+      "3ebc257c-b956-40db-a90d-94181ec60a3b",
+      "f346e0e9-85f7-43b3-979a-82a8c1b9b29f",
+      "78a3d715-5687-45f6-89d7-53bd332ca5d9",
+      "d3348041-86fb-4abd-aab8-37b8be025dd9",
+      "2d0b2f06-0b62-4e13-aba4-ef24d05e64dd",
+      "6b480100-b189-4118-98de-558f48c317fc",
+      "8be85ef8-ac90-4c6e-84d2-f4f7e2df24a9",
+      "6523537f-787e-414c-a5fb-f06e01ef678f",
+      "ea36408a-e3a8-4220-8e88-df74565c8caa",
+      "b635ab5d-873e-42a3-9bba-737874fadd9c",
+      "0acbcd23-fb1e-4c57-a0ff-f38df0409263",
+      "280629f7-c8d1-4fdb-9fd0-4b94ab68be50",
+      "999035bc-0347-49e5-b43f-9658d5f98a75",
+      "d711a681-ead6-47ea-8f71-51afd6d15558",
+      "ef1d5133-26f6-4a23-a767-8ff35d67ba87",
+      "3329f916-d87f-4d6b-a572-026cabded1b3",
+      "8eb130a0-6a6f-4bc0-b3ab-25dae7b89f14",
+      "5e05953f-68b4-4fdc-b511-60f05ba5b4ad",
+      "b3265c10-8e49-4329-a590-33ebcaf7cbf3",
+      "74fd514c-2ce5-4fc7-a8d2-47aca39b3687",
+      "a28a6321-1d00-49c9-9d15-fe01a5cdfcd5",
+      "92ec547e-2120-4b2c-bb6c-68415f4342cc"
+    ]
+  },
+  "local_matrix": {
+    "passed": true,
+    "rich_path": {
+      "ok": true,
+      "held_timing": {
+        "intake_validation": 1,
+        "file_safety_scan": 1,
+        "cv_identity_resolution": 1,
+        "accepted_intake_preparation": 1,
+        "held_intake_materialization": 0
+      },
+      "extraction_processed": 1,
+      "job_result_status": "ok",
+      "authorization_mode": "accepted_identity_binding",
+      "promoted_email": "d6b.rich.94b1aec6@example.com",
+      "doc_count": 1
+    },
+    "conflict_path": {
+      "ok": true,
+      "authorization_mode": "held_identity_review_scan_clean",
+      "extraction_status": "ok",
+      "processed": 1
+    },
+    "opaque_path": {
+      "ok": true,
+      "held_warning": true,
+      "extraction": {
+        "ok": true,
+        "error": "low_quality_text",
+        "method": "pdftotext",
+        "status": "extraction_soft_failed",
+        "app_key": "imp-d6bbravo-4d2698c7b69d13fe-D6BBRAVO-IMPORT",
+        "terminal": true,
+        "document_id": "cb261c07-8304-4488-bc9d-6419c528f800",
+        "authorization_mode": "held_identity_review_scan_clean"
+      }
+    },
+    "idempotent_extraction": {
+      "ok": true,
+      "second_processed": 0
+    },
+    "no_indefinite_pending": true
+  }
+}

@@ -1,0 +1,31 @@
+---
+description: Employee mobile continuous waves — no per-feature build waits; batch for live review
+alwaysApply: true
+---
+
+# Employee mobile — continuous wave process
+
+Applies to `apps/wathefni-employee-mobile` and its `/app/*` backend. Do **not** stop after every small feature for a native build + owner manual review.
+
+## Cadence
+
+- Implement **multiple related features** in one major wave.
+- Qualify continuously: local/dev-client/simulator, seeded QA employees (Aziz/Talal canary), automated API + mobile E2E/contract tests.
+- Fix regressions immediately inside the wave.
+- Prefer **OTA** (`expo-updates`) when JS-only; create a **new native build only** when native code, permissions, or native deps require it.
+- Keep one rolling canary branch + update `ops/EMPLOYEE_MOBILE_CANARY_QUALIFICATION_LOG.md`.
+- Deploy/smoke/stamp/rollback-ready **internally** without waiting for the owner after each small change.
+
+## Owner review only when
+
+1. A complete **major wave** is polished and ready for live device review, **or**
+2. A product decision genuinely needs owner judgment, **or**
+3. Before **broad** production rollout (beyond Aziz/Talal canary).
+
+Do **not** ping for install/reinstall after every micro-fix.
+
+## Every change still must pass
+
+EN+AR · LTR+RTL · permissions + tenant isolation · loading/error/empty · refresh/restart/deep links · offline/cache where relevant · existing-feature regressions · mobile↔backend contract tests.
+
+Do not reduce quality or skip production qualification. Process doc + wave plan: `ops/EMPLOYEE_MOBILE_CONTINUOUS_WAVE_PROCESS.md`.

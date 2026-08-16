@@ -1,0 +1,6 @@
+sniff application/pdf
+data_url_prefix data:application/pdf;base64
+status extracted ok None err None
+fields {'bank_name': 'Gulf Bank', 'account_holder': 'M*** A*** H*** R*** A***', 'iban': 'KW35…9548', 'account_number': '****9548', 'branch': 'Al Fanar Mall', 'swift': 'GULBKWKW', 'currency': 'KWD'}
+confidence 1.0
+warnings []

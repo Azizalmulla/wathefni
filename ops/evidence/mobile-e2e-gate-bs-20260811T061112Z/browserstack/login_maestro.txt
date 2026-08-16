@@ -1,0 +1,335 @@
+06:12:51.627 [ INFO] MAESTRO.logSystemInfo: ---- System Info ----
+06:12:51.631 [ INFO] MAESTRO.logSystemInfo: Maestro Version: 1.39.10
+06:12:51.638 [ INFO] MAESTRO.logSystemInfo: CI: Undefined
+06:12:51.638 [ INFO] MAESTRO.logSystemInfo: OS Name: Mac OS X
+06:12:51.638 [ INFO] MAESTRO.logSystemInfo: OS Version: 11.0
+06:12:51.639 [ INFO] MAESTRO.logSystemInfo: Architecture: x86_64
+06:12:51.639 [ INFO] MAESTRO.logSystemInfo: Java Version: 16
+06:12:51.821 [ INFO] MAESTRO.logSystemInfo: Xcode Version: 15.4
+06:12:51.826 [ INFO] MAESTRO.logSystemInfo: Flutter Version: Undefined
+06:12:51.829 [ INFO] MAESTRO.logSystemInfo: Flutter Channel: Undefined
+06:12:51.829 [ INFO] MAESTRO.logSystemInfo: ---------------------
+06:12:52.749 [DEBUG] io.micrometer.common.util.internal.logging.InternalLoggerFactory.newDefaultFactory: Using SLF4J as the default logging framework
+06:12:53.954 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device 00008120-00141DA61A92201E using port 11105
+06:12:55.125 [TRACE] ios.xctest.XCTestRealIOSDevice.open: Opening a connection
+06:12:55.193 [ INFO] maestro.Maestro.invoke: Getting device info
+06:12:55.287 [ INFO] maestro.Maestro.invoke: Got device info: DeviceInfo(platform=IOS, widthPixels=1179, heightPixels=2556, widthGrid=393, heightGrid=852)
+06:12:55.428 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Define variables RUNNING
+06:12:55.453 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Define variables COMPLETED
+06:12:55.453 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration RUNNING
+06:12:55.453 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration COMPLETED
+06:12:55.454 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Run _ota-to-unsigned.yaml RUNNING
+06:12:55.454 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration RUNNING
+06:12:55.454 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration COMPLETED
+06:12:55.455 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Launch app "ai.wathefni.employee" with clear state RUNNING
+06:12:55.455 [ INFO] maestro.Maestro.clearAppState: Clearing app state ai.wathefni.employee
+06:12:55.456 [ WARN] ios.devicectl.DevicectlIOSDevice.clearAppState: Clear App state is not supported for real iOS devices
+06:12:55.456 [ INFO] maestro.Maestro.launchApp: Launching app ai.wathefni.employee
+06:12:58.332 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Launch app "ai.wathefni.employee" with clear state COMPLETED
+06:12:58.332 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "WATHEFNI" is visible RUNNING
+06:12:58.500 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:12:59.166 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:12:59.184 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "WATHEFNI" is visible COMPLETED
+06:12:59.185 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Wait for animation to end RUNNING
+06:12:59.185 [ INFO] maestro.Maestro.waitForAnimationToEnd: Waiting for animation to end with timeout 50000
+06:12:59.187 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+06:12:59.187 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+06:12:59.500 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+06:12:59.501 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+06:13:00.671 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+06:13:00.671 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+06:13:00.867 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+06:13:00.867 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+06:13:01.390 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Wait for animation to end COMPLETED
+06:13:01.390 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Stop ai.wathefni.employee RUNNING
+06:13:01.390 [ INFO] maestro.Maestro.stopApp: Stopping app ai.wathefni.employee
+06:13:02.471 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Stop ai.wathefni.employee COMPLETED
+06:13:02.472 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Launch app "ai.wathefni.employee" RUNNING
+06:13:02.472 [ INFO] maestro.Maestro.launchApp: Launching app ai.wathefni.employee
+06:13:04.131 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Launch app "ai.wathefni.employee" COMPLETED
+06:13:04.131 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.methodSwitch is visible RUNNING
+06:13:04.314 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:04.941 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:04.947 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.methodSwitch is visible COMPLETED
+06:13:04.947 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.method.phone is visible RUNNING
+06:13:05.039 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:05.663 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:05.667 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.method.phone is visible COMPLETED
+06:13:05.667 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.method.workEmail is visible RUNNING
+06:13:05.776 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:06.391 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:06.394 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.method.workEmail is visible COMPLETED
+06:13:06.395 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Run _ota-to-unsigned.yaml COMPLETED
+06:13:06.395 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.method.workEmail RUNNING
+06:13:06.499 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:07.118 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:07.120 [ INFO] maestro.Maestro.tap-BUbHBYE: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Work email, title=, value=, text=, hintText=, resource-id=e2e.auth.method.workEmail, bounds=[200,71][365,111], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=200, y=71, width=165, height=40))
+06:13:07.121 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:07.313 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:07.313 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:07.314 [ INFO] maestro.Maestro.tap-BUbHBYE: Refreshed element
+06:13:07.315 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Tapping at (282, 91) using screenshot based logic for wait
+06:13:07.750 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:07.941 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:07.941 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:07.941 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Something has changed in the UI judging by view hierarchy. Proceed.
+06:13:07.941 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.method.workEmail COMPLETED
+06:13:07.941 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.hr.company is visible RUNNING
+06:13:08.046 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:08.774 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:08.775 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that id: e2e.auth.hr.company is visible COMPLETED
+06:13:08.776 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.company RUNNING
+06:13:08.902 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:09.507 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:09.508 [ INFO] maestro.Maestro.tap-BUbHBYE: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Company code, title=, value=, text=, hintText=, resource-id=e2e.auth.hr.company, bounds=[25,335][368,381], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=25, y=335, width=343, height=46))
+06:13:09.508 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:09.754 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:09.754 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:09.755 [ INFO] maestro.Maestro.tap-BUbHBYE: Refreshed element
+06:13:09.755 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Tapping at (196, 358) using screenshot based logic for wait
+06:13:10.157 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:10.342 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = false
+06:13:10.342 [ INFO] ios.IOSDevice.invoke: screen static = false
+06:13:10.515 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = false
+06:13:10.516 [ INFO] ios.IOSDevice.invoke: screen static = false
+06:13:10.722 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = false
+06:13:10.722 [ INFO] ios.IOSDevice.invoke: screen static = false
+06:13:10.931 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:10.931 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:10.931 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Something has changed in the UI judging by view hierarchy. Proceed.
+06:13:10.932 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.company COMPLETED
+06:13:10.932 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Input text ${MAESTRO_HR_COMPANY} RUNNING
+06:13:10.936 [ INFO] maestro.Maestro.inputText: Inputting text: WATHEFNI
+06:13:12.705 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:12.957 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:12.958 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:12.958 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Input text ${MAESTRO_HR_COMPANY} COMPLETED
+06:13:12.958 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.email RUNNING
+06:13:13.062 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:13.725 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:13.727 [ INFO] maestro.Maestro.tap-BUbHBYE: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Work email, title=, value=, text=, hintText=, resource-id=e2e.auth.hr.email, bounds=[25,415][368,461], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=25, y=415, width=343, height=46))
+06:13:13.727 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:13.886 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:13.886 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:13.887 [ INFO] maestro.Maestro.tap-BUbHBYE: Refreshed element
+06:13:13.888 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Tapping at (196, 438) using screenshot based logic for wait
+06:13:14.328 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:14.520 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:14.520 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:14.520 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Something has changed in the UI judging by view hierarchy. Proceed.
+06:13:14.521 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.email COMPLETED
+06:13:14.521 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Input text ${MAESTRO_HR_EMAIL} RUNNING
+06:13:14.523 [ INFO] maestro.Maestro.inputText: Inputting text: e2e-hr+mobile@wathefni.internal
+06:13:17.133 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:17.348 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:17.349 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:17.349 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Input text ${MAESTRO_HR_EMAIL} COMPLETED
+06:13:17.349 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.password RUNNING
+06:13:17.438 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:18.100 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:18.101 [ INFO] maestro.Maestro.tap-BUbHBYE: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Password, title=, value=, text=, hintText=, resource-id=e2e.auth.hr.password, bounds=[25,495][368,541], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=25, y=495, width=343, height=46))
+06:13:18.102 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:18.248 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:18.248 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:18.249 [ INFO] maestro.Maestro.tap-BUbHBYE: Refreshed element
+06:13:18.250 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Tapping at (196, 518) using screenshot based logic for wait
+06:13:18.697 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:18.862 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:18.862 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:18.862 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Something has changed in the UI judging by view hierarchy. Proceed.
+06:13:18.862 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.password COMPLETED
+06:13:18.862 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Input text ${MAESTRO_HR_PASSWORD} RUNNING
+06:13:18.865 [ INFO] maestro.Maestro.inputText: Inputting text: ***REDACTED***
+06:13:21.256 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:21.485 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:21.486 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:21.486 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Input text ${MAESTRO_HR_PASSWORD} COMPLETED
+06:13:21.486 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.signIn RUNNING
+06:13:21.590 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:22.270 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:22.272 [ INFO] maestro.Maestro.tap-BUbHBYE: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Sign in, title=, value=, text=, hintText=, resource-id=e2e.auth.hr.signIn, bounds=[24,554][369,602], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=24, y=554, width=345, height=48))
+06:13:22.272 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:22.401 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:22.401 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:22.402 [ INFO] maestro.Maestro.tap-BUbHBYE: Refreshed element
+06:13:22.402 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Tapping at (196, 578) using screenshot based logic for wait
+06:13:22.864 [ INFO] ios.IOSDevice.invoke-F9mIFpk: Waiting for animation to end with timeout 3000
+06:13:23.050 [ INFO] ios.xctest.XCTestRealIOSDevice.invoke: Screen diff request finished with isScreenStatic = true
+06:13:23.050 [ INFO] ios.IOSDevice.invoke: screen static = true
+06:13:23.050 [ INFO] maestro.Maestro.screenshotBasedTap-hbl3e4M: Something has changed in the UI judging by view hierarchy. Proceed.
+06:13:23.050 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Tap on id: e2e.auth.hr.signIn COMPLETED
+06:13:23.051 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Run _hr-pin-setup.yaml RUNNING
+06:13:23.051 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration RUNNING
+06:13:23.051 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Apply configuration COMPLETED
+06:13:23.051 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Create a PIN" is visible RUNNING
+06:13:23.163 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:23.838 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:23.888 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:24.553 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:24.642 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:25.303 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:25.490 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:26.110 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:26.200 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:26.869 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:26.928 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:27.602 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:27.662 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:28.321 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:28.398 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:29.019 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:29.136 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:29.788 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:29.848 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:30.515 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:30.587 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:31.260 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:31.429 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:32.088 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:32.135 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:32.816 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:32.871 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:33.396 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:33.508 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:34.175 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:34.350 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:35.216 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:35.382 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:36.039 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:36.101 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:36.768 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:36.836 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:37.515 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:37.574 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:38.241 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:38.309 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:38.974 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:39.038 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:39.706 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:39.768 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:40.431 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:40.489 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:41.162 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:41.222 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:41.893 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:42.062 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:42.715 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:42.778 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:43.423 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:43.511 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:44.070 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:44.137 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:44.771 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:44.862 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:45.536 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:45.596 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:46.222 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:46.337 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:47.076 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:47.157 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:47.936 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:48.206 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:48.864 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:48.930 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:49.605 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:49.778 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:50.436 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:50.499 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:51.167 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:51.236 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:51.896 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:51.967 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:52.646 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:52.813 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:53.587 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:53.753 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:54.423 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:54.593 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:55.250 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:55.417 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:56.070 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:56.130 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:56.800 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:56.862 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:57.527 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:57.594 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:58.254 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:58.327 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:58.997 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:59.061 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:13:59.726 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:13:59.794 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:00.460 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:00.521 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:01.192 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:01.357 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:02.026 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:02.192 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:02.835 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:02.911 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:03.578 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:03.643 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:04.302 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:04.367 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:05.040 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:05.102 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:05.768 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:05.831 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:06.495 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:06.564 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:07.239 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:07.302 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:07.976 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:08.037 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:08.715 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:08.879 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:09.532 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:09.600 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:10.278 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:10.443 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:11.106 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:11.166 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:11.827 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:11.890 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:12.554 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:12.616 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:13.285 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:13.351 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:14.021 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:14.195 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:14.832 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:14.903 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:15.570 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:15.633 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:16.407 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:16.581 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:17.226 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:17.297 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:17.972 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:18.031 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:18.680 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:18.771 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:19.319 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:19.381 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:20.059 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:20.122 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:20.784 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:20.850 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:21.502 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:21.583 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:22.255 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:22.419 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:22.947 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:23.042 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:23.692 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:23.768 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:24.398 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:24.503 [ INFO] ios.IOSDevice.viewHierarchy: Requesting view hierarchy of the screen
+06:14:25.171 [ INFO] ios.IOSDevice.viewHierarchy: Depth of the screen is 24
+06:14:25.172 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Assert that "Create a PIN" is visible FAILED
+06:14:25.174 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+06:14:25.174 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+06:14:25.277 [ INFO] maestro.cli.runner.TestSuiteInteractor.invoke: Run _hr-pin-setup.yaml FAILED
+06:14:26.741 [ INFO] xcuitest.installer.LocalRealDeviceXCTestInstaller.close: [Start] Cleaning up the ui test runner files
+06:14:26.741 [ INFO] xcuitest.installer.LocalRealDeviceXCTestInstaller.close: [Done] Cleaning up the ui test runner files
+06:14:26.741 [ INFO] ios.devicectl.DevicectlIOSDevice.close: Nothing to be done

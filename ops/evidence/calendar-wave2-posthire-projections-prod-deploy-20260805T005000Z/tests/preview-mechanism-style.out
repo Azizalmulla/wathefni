@@ -1,0 +1,15 @@
+PASS  employee_start off by default
+PASS  onboarding_deadline off by default
+PASS  approved_leave off by default
+PASS  compliance_expiry off by default
+PASS  company_events off by default
+PASS  employee_start on for WATHEFNI
+PASS  employee_start denied for ACME
+PASS  calproj id detect
+PASS  preview id not projection
+PASS  permission allow
+PASS  permission deny
+PASS  leave approved only
+PASS  onboarding terminal excluded
+PASS  holiday rejected excluded
+CALENDAR_POSTHIRE_PROJECTIONS_SMOKE_OK

@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_en_digital_02",
+  "category": "english_digital_cv",
+  "language": "en",
+  "layout": "single_column",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "James Carter",
+    "james.carter@example.com",
+    "+96555223344",
+    "EXPERIENCE",
+    "SKILLS"
+  ],
+  "expected_fields": {
+    "full_name": "James Carter",
+    "email": "james.carter@example.com",
+    "phone": "+96555223344",
+    "title": "HR Operations Analyst"
+  },
+  "notes": "Structurally valid digital English CV with embedded TrueType text.",
+  "sha256": "a9aaeadd843e0d09a6667e3d8f1dfad77c2e2b2dee372343bdc405190abfab52",
+  "bytes": 32307
+}

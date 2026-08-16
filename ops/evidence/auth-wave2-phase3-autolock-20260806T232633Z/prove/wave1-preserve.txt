@@ -1,0 +1,2 @@
+wave1_contract=present
+bank_onboarding_contract=present

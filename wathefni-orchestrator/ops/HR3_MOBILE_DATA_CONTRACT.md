@@ -11,8 +11,13 @@ Employee App tokens, browser sessions, and shared legacy authority are rejected
 before these handlers run.
 
 Navigation and action visibility must come only from
-`GET /dashboard/mobile/me`. HR-task resolution is intentionally absent because
-`hr_tasks.actions` advertises only `read`.
+`GET /dashboard/mobile/me`. HR-task **Mark done** is advertised as
+`hr_tasks.actions` including `resolve` when the actor holds
+`users.manage` or any post-hire `.manage` grant (same manage gate as web).
+Mobile resolve enforces the same manager scope as the open queue
+(including hiding `employee_key IS NULL` company-wide tasks from restricted
+managers) before calling canonical `resolve_hr_task` and web handoff side
+effects. Dismiss / assign remain web-first.
 
 Onboarding `review` (including onboarding-backed document review) is advertised
 only while the existing `WATHEFNI_ONBOARDING_HR_MUTATE` dark-launch boundary is
@@ -24,6 +29,9 @@ the compliance module and `compliance.manage`.
 - `GET /dashboard/mobile/tasks`
   - `items[]`: `task_id`, `task_type`, `source`, `title`, `detail`, safe employee
     identity, `status`, `priority`, timestamps, `allowed_actions`, `destination`.
+  - Mobile product default is `status=open` (history stays web-first).
+- `GET /dashboard/mobile/tasks/{task_id}`
+  - One company/scope-bound task DTO (same manager visibility as the open queue).
 - `GET /dashboard/mobile/onboarding`
   - Paged safe employee cards and checklist counts.
 - `GET /dashboard/mobile/onboarding/{employee_key}`
@@ -58,6 +66,15 @@ mobile allowlists rather than returning browser-heavy payloads.
 
 ## Writes
 
+- `POST /dashboard/mobile/tasks/{task_id}/resolve`
+  - Body: `status` (`done` only on mobile), `expected_status` (`open`).
+  - Reuses canonical `resolve_hr_task` + web `candidate_handoff` resume side
+    effects and `record_admin_audit`. Not a mobile-only completion workflow.
+  - Requires `hr_tasks` feature action `resolve` and the same manage gate as
+    web (`users.manage` or any post-hire `.manage`).
+  - Loads the task under the open-queue manager scope before mutate (including
+    hiding company-wide `employee_key IS NULL` rows from restricted managers).
+  - Stale when current status ≠ `expected_status`.
 - `POST /dashboard/mobile/onboarding/{employee_key}/review`
   - Body: `item_id`, `outcome` (`received|waived`), optional `note`,
     `idempotency_key`, and confirmation fields.

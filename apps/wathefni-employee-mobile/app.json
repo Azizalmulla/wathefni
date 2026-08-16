@@ -3,7 +3,7 @@
     "name": "Wathefni",
     "slug": "aziz",
     "scheme": "wathefni",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
@@ -27,18 +27,22 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "ai.wathefni.employee",
+      "associatedDomains": [
+        "applinks:api.wathefni.ai"
+      ],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSFaceIDUsageDescription": "Wathefni can unlock with Face ID on this device. Your PIN still works anytime.",
         "NSCameraUsageDescription": "Wathefni uses the camera only when you choose to capture a document to upload to HR.",
         "NSPhotoLibraryUsageDescription": "Wathefni accesses your photos only when you choose to attach a document to upload to HR."
-      }
+      },
+      "icon": "./assets/WathefniAppIcon.icon"
     },
     "android": {
       "package": "ai.wathefni.employee",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F8F2E8"
+        "backgroundColor": "#FEF0D6"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -47,6 +51,20 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "api.wathefni.ai",
+              "pathPrefix": "/l"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
       ]
     },
     "plugins": [
@@ -63,7 +81,11 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#1C1B19"
+          "color": "#1C1B19",
+          "sounds": [
+            "./assets/sounds/push/wathefni_default.wav"
+          ],
+          "defaultChannel": "wathefni_default_v2"
         }
       ],
       [
@@ -76,6 +98,9 @@
       "expo-font",
       "expo-updates"
     ],
+    "locales": {
+      "ar": "./locales/ar.json"
+    },
     "extra": {
       "router": {
         "origin": false
@@ -84,6 +109,7 @@
         "projectId": "e381fb7c-bf1b-4ff6-b9ac-6c2d904f67e8"
       }
     },
-    "owner": "abdulazizalmullas-team"
+    "owner": "abdulazizalmullas-team",
+    "newArchEnabled": false
   }
 }

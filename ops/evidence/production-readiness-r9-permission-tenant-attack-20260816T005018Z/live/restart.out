@@ -1,0 +1,4 @@
+staging_health=200
+staging_ready=200
+ready_status ready
+LIVE_OK

@@ -1,0 +1,101 @@
+{
+  "marker": "wave_d6b_prod_proof",
+  "passed": true,
+  "app_keys": [
+    "imp-wathefni-9d43569059fd811b-WATHEFNI-IMPORT",
+    "imp-wathefni-36ff84a9b0a28ad2-WATHEFNI-IMPORT",
+    "imp-wathefni-5ae70ca8aa80885b-WATHEFNI-IMPORT",
+    "imp-wathefni-a80f29c3600e10e1-WATHEFNI-IMPORT"
+  ],
+  "posture": {
+    "INBOUND_ALLOWED": "WATHEFNI",
+    "MAILBOX_SYNC": "off",
+    "INBOUND_EMAIL": "on"
+  },
+  "intake_address": "d6b-9f4f7ee1@inbound.wathefni.ai",
+  "tenant_isolation": {
+    "ok": true,
+    "receipt": {
+      "status": null,
+      "reason": null,
+      "ignored": "unknown_recipient",
+      "inbound_id": "edc18bba-0ff8-5957-8eee-69487cc61b8a"
+    }
+  },
+  "rich_pdf": {
+    "ok": true,
+    "held_timing_ms": {
+      "intake_validation": 720,
+      "file_safety_scan": 250,
+      "cv_identity_resolution": 193,
+      "accepted_intake_preparation": 228,
+      "held_intake_materialization": 9
+    },
+    "held_processed": {
+      "intake_validation": 1,
+      "file_safety_scan": 1,
+      "cv_identity_resolution": 1,
+      "accepted_intake_preparation": 1,
+      "held_intake_materialization": 0
+    },
+    "extraction_ms": 16374,
+    "authorization_mode": "accepted_identity_binding",
+    "promoted_email": "d6b.rich.5d57486e@example.com",
+    "elapsed_ms": 18144
+  },
+  "idempotent": {
+    "ok": true,
+    "second_processed": 0
+  },
+  "rich_docx": {
+    "ok": true,
+    "held_processed": {
+      "intake_validation": 1,
+      "file_safety_scan": 1,
+      "cv_identity_resolution": 1,
+      "accepted_intake_preparation": 1,
+      "held_intake_materialization": 0
+    },
+    "extraction_ms": 5483,
+    "authorization_mode": "accepted_identity_binding",
+    "extraction_status": "ok",
+    "error": null,
+    "elapsed_ms": 6515,
+    "full_success": true
+  },
+  "conflict": {
+    "ok": true,
+    "authorization_mode": "held_identity_review_scan_clean",
+    "extraction_status": "ok",
+    "d6a_held_warned": true,
+    "processed": 1
+  },
+  "opaque": {
+    "ok": true,
+    "held_warning": true,
+    "extraction": {
+      "status": "extraction_soft_failed",
+      "error": "low_quality_text",
+      "authorization_mode": "held_identity_review_scan_clean",
+      "attempts": 1
+    },
+    "d6a_held_preserved": true
+  },
+  "no_indefinite_pending": true,
+  "explicit_admit_unchanged": {
+    "ok": true,
+    "statuses": {
+      "needs_role": 4
+    }
+  },
+  "quarantine_clean_path": {
+    "ok": true,
+    "rich_safety": "clean",
+    "docx_safety": "clean",
+    "conflict_safety": "clean",
+    "opaque_safety": "clean"
+  },
+  "cleanup": {
+    "archived_apps": 4
+  }
+}

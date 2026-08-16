@@ -1,0 +1,81 @@
+{
+  "inset": {
+    "assess": {
+      "status": "clean",
+      "reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 5316.082,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 0,
+        "crop_signal": "none"
+      }
+    },
+    "decision": "allow",
+    "reason": null
+  },
+  "frame_fill": {
+    "assess": {
+      "status": "clean",
+      "reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 3310.837,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 4,
+        "crop_signal": "weak"
+      }
+    },
+    "decision": "allow",
+    "reason": null
+  },
+  "edge": {
+    "assess": {
+      "status": "clean",
+      "reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 5232.609,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 2,
+        "crop_signal": "weak"
+      }
+    },
+    "decision": "allow",
+    "reason": null
+  },
+  "cutoff_supported": {
+    "decision": "block",
+    "reason": "document_not_fully_visible",
+    "capture_quality": {
+      "status": "clean",
+      "reason": null,
+      "signal_reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 3310.837,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 4,
+        "crop_signal": "weak"
+      },
+      "engine": "pil_numpy_v1"
+    }
+  },
+  "missing_side": {
+    "decision": "block",
+    "reason": "missing_side"
+  },
+  "rejection_detail_has_capture_quality": true
+}

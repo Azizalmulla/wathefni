@@ -1,0 +1,380 @@
+[
+  {
+    "file": "cv_ar_digital_01.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "too_few_words",
+        "chars": 508,
+        "words": 5,
+        "arabic_ratio": 0.057,
+        "text_preview": "‫ﻧﻮﺭﺓ ﺍﻟﻌﺘﻴﺒﻲ‬\n                              ‫ﻣﻬﻨﺪﺳﺔ ﺑﺮﻣﺠﻴﺎﺕ‬\n                     ‫‪Email: noura.otaibi@example.com‬‬\n                               ‫‪Phone: +96551112233‬‬\n\n\n    "
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "markdown_len": 241,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": false,
+      "false_skip_candidates_1idx": [
+        1
+      ],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": true,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "too_few_words": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_ar_digital_02.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "too_few_words",
+        "chars": 535,
+        "words": 5,
+        "arabic_ratio": 0.061,
+        "text_preview": "‫ﻓﻬﺪ ﺍﻟﺸﻤﺮﻱ‬\n                                    ‫ﺃﺧﺼﺎﺋﻲ ﺍﻣﺘﺜﺎﻝ‬\n                       ‫‪Email: fahad.shamri@example.com‬‬\n                                  ‫‪Phone: +96557778899‬"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "markdown_len": 231,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": false,
+      "false_skip_candidates_1idx": [
+        1
+      ],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": true,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "too_few_words": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_ar_digital_03.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "too_few_words",
+        "chars": 520,
+        "words": 5,
+        "arabic_ratio": 0.056,
+        "text_preview": "‫ﻣﺮﻳﻢ ﺍﻟﺼﺒﺎﺡ‬\n                              ‫ﻣﺤﻠﻠﺔ ﻣﻮﺍﺭﺩ ﺑﺸﺮﻳﺔ‬\n                     ‫‪Email: mariam.sabah@example.com‬‬\n                                 ‫‪Phone: +96553334455‬‬\n\n\n"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "markdown_len": 244,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": false,
+      "false_skip_candidates_1idx": [
+        1
+      ],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": true,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "too_few_words": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": true,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_broken_encoding_01.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 172,
+        "words": 17,
+        "arabic_ratio": 0.0,
+        "text_preview": "Broken Encoding CV - Proxy\nEmail: broken.encoding@example.com\nPhone: +96556667788\nName mojibake: Ù■Ù■Ø±Ø©\nGarbled Arabic proxy: ÃÑÃÓÇä ãÔÝÑ\nEXPERIENCE: encoding stress case"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "markdown_len": 169,
+    "mojibake_hits": 4,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": true,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_scanned_en_01.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "needs_ocr",
+        "reason": "image_only_page",
+        "chars": 0,
+        "words": 0,
+        "arabic_ratio": 0.0,
+        "text_preview": ""
+      }
+    ],
+    "inspector_type": "scanned",
+    "inspector_ocr": [
+      1
+    ],
+    "encoding_flag": false,
+    "markdown_len": 0,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        1
+      ],
+      "inspector_pages_needing_ocr_1idx": [
+        1
+      ],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "image_only_page": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_mixed_01.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 119,
+        "words": 16,
+        "arabic_ratio": 0.0,
+        "text_preview": "Mixed Digital Scan\nEmail: mixed01@example.com\nDIGITAL PAGE — readable native text\nSkills: Python, Postgres, OCR routing"
+      },
+      {
+        "page": 2,
+        "disposition": "needs_ocr",
+        "reason": "image_only_page",
+        "chars": 0,
+        "words": 0,
+        "arabic_ratio": 0.0,
+        "text_preview": ""
+      }
+    ],
+    "inspector_type": "mixed",
+    "inspector_ocr": [
+      2
+    ],
+    "encoding_flag": false,
+    "markdown_len": 120,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [
+        2
+      ],
+      "inspector_pages_needing_ocr_1idx": [
+        2
+      ],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1,
+          "image_only_page": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_multicolumn_01.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 359,
+        "words": 32,
+        "arabic_ratio": 0.0,
+        "text_preview": "Omar Nasser\nomar.nasser@example.com | +96550001122\n\n\n\nLEFT COLUMN — Experience                 RIGHT COLUMN — Education\nSenior Engineer 2020-2026                BSc Computer Engine"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "markdown_len": 310,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  },
+  {
+    "file": "cv_bilingual_01.pdf",
+    "poppler_pages": [
+      {
+        "page": 1,
+        "disposition": "accepted_local",
+        "reason": "accepted_local",
+        "chars": 736,
+        "words": 24,
+        "arabic_ratio": 0.066,
+        "text_preview": "Abdullah Al-Rashid\nProduct Manager / ‫جتنم ريدم‬\nEmail: abdullah.rashid@example.com\nPhone: +96551234567\nEXPERIENCE\n2022-2026 Cross-border HR SaaS — roadmap and delivery.\nSKILLS\nRoa"
+      }
+    ],
+    "inspector_type": "text_based",
+    "inspector_ocr": [],
+    "encoding_flag": false,
+    "markdown_len": 364,
+    "mojibake_hits": 0,
+    "comparison": {
+      "poppler_pages_needing_ocr_1idx": [],
+      "inspector_pages_needing_ocr_1idx": [],
+      "agreement": true,
+      "false_skip_candidates_1idx": [],
+      "unnecessary_ocr_candidates_1idx": [],
+      "high_risk_false_skip_candidate": false,
+      "poppler_quality_gates": {
+        "reason_counts": {
+          "accepted_local": 1
+        },
+        "quality_gate_failed_pages": []
+      },
+      "detections": {
+        "mojibake": false,
+        "cid_tounicode_failures": false,
+        "reversed_or_corrupted_arabic": false,
+        "suspicious_printable_but_meaningless": false,
+        "inspector_no_ocr_while_poppler_ocr": false,
+        "inspector_encoding_flag": false
+      },
+      "influences_ocr_routing": false,
+      "authoritative_router": "poppler_assess_pdf_pages"
+    }
+  }
+]

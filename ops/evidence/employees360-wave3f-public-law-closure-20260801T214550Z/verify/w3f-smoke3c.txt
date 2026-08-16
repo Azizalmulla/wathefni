@@ -1,0 +1,58 @@
+PASS  actors distinct
+PASS  wave3f schema
+PASS  counsel gate optional by default
+PASS  assert_counsel_gate no-op when off
+PASS  public-law checklist recordable
+PASS  policy kuwait tz
+PASS  policy warn first
+PASS  policy notice hints hidden
+PASS  policy reinstate disabled
+PASS  policy kuwait only
+PASS  policy retain docs
+PASS  policy no auto shifts
+PASS  policy upsert wave3f
+PASS  create employee
+PASS  synthetic gate recognizes canary
+PASS  real employee blocked by synthetic gate
+PASS  impact ack required
+PASS  create future term with ack
+PASS  ack hash stored
+PASS  approve future term
+PASS  notice period
+PASS  hub still active
+PASS  access revoke scheduled
+PASS  session active before revoke
+PASS  cancel scheduled
+PASS  same employment after cancel
+PASS  active after cancel
+PASS  scheduler failure recorded
+PASS  scheduler succeeds
+PASS  terminated via scheduler
+PASS  scheduler retry idempotent
+PASS  session revoked after revoke time
+PASS  settlement packet handed off
+PASS  settlement has no amounts
+PASS  settlement has inputs only disclaimer
+PASS  downstream request
+PASS  downstream executed
+PASS  shift cancelled_lifecycle
+PASS  shift reverse restored
+PASS  reinstate blocked by default
+PASS  reinstate committed when enabled
+PASS  same employment after reinstate
+PASS  reinstate does not silent-restore session
+PASS  non-kuwait excluded
+PASS  last working day required
+PASS  missing classification fails closed
+PASS  exceptional escalation required
+PASS  rehire same key
+PASS  rehire same employee_key value
+PASS  rehire new employment
+PASS  rehire new assignment
+PASS  rehire same person
+PASS  prior employment immutable terminated
+PASS  wave3 enabled
+PASS  wave2 authority present
+PASS  rollback ok
+
+56 passed, 0 failed

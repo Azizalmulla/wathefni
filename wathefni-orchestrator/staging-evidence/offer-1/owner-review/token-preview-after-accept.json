@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "offer_id": "736d577a-8604-40a9-9ac1-fb354c3c3377",
+  "status": "accepted",
+  "position_title": "Owner Review Role",
+  "company_code": "WATHEFNI",
+  "candidate_name_snapshot": "Faisal Almulla",
+  "base_salary": "730.000",
+  "currency": "KWD",
+  "proposed_start_date": null,
+  "expires_at": "2026-08-01 00:49:08.431169+00:00",
+  "offer_version": 3,
+  "already_used": true,
+  "used_decision": "accepted",
+  "document_sha256": "ed71366132115649fd29a8612098e4db750f0ddda96aa9bdc2099498b07c5f8f",
+  "can_respond": false
+}

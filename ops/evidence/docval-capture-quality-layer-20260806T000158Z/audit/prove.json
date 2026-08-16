@@ -1,0 +1,221 @@
+{
+  "assessments": {
+    "prior_blurry_canary_allowed": {
+      "exists": true,
+      "status": "reject",
+      "reason": "too_blurry",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1583,
+        "height": 994,
+        "short_side": 994,
+        "long_side": 1583,
+        "laplacian_var": 3.366,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 3
+      }
+    },
+    "stored_civil_id_file": {
+      "exists": true,
+      "status": "clean",
+      "reason": null,
+      "signal_reason": null,
+      "metrics": {
+        "width": 945,
+        "height": 2048,
+        "short_side": 945,
+        "long_side": 2048,
+        "laplacian_var": 604.305,
+        "glare_frac": 0.1563,
+        "crop_hot_sides": 1
+      }
+    },
+    "oreo_lifestyle": {
+      "exists": true,
+      "status": "reject",
+      "reason": "document_not_fully_visible",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1152,
+        "height": 2048,
+        "short_side": 1152,
+        "long_side": 2048,
+        "laplacian_var": 50.819,
+        "glare_frac": 0.0104,
+        "crop_hot_sides": 4
+      }
+    }
+  },
+  "gate_proofs": {
+    "clear": {
+      "assess": {
+        "status": "clean",
+        "reason": null,
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 5314.809,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "allow",
+      "reason": null,
+      "capture_quality": {
+        "status": "clean",
+        "reason": null,
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 5314.809,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "mild_blur": {
+      "assess": {
+        "status": "borderline",
+        "reason": "capture_quality_borderline",
+        "signal_reason": "too_blurry",
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 10.428,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "allow_uncertain",
+      "reason": "capture_quality_borderline",
+      "capture_quality": {
+        "status": "borderline",
+        "reason": "capture_quality_borderline",
+        "signal_reason": "too_blurry",
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 10.428,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "severe_blur": {
+      "assess": {
+        "status": "reject",
+        "reason": "too_blurry",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.302,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "block",
+      "reason": "too_blurry",
+      "capture_quality": {
+        "status": "reject",
+        "reason": "too_blurry",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.302,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "glare": {
+      "assess": {
+        "status": "reject",
+        "reason": "glare_or_shadow",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.0,
+          "glare_frac": 1.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "block",
+      "reason": "glare_or_shadow",
+      "capture_quality": {
+        "status": "reject",
+        "reason": "glare_or_shadow",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.0,
+          "glare_frac": 1.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "crop": {
+      "assess": {
+        "status": "reject",
+        "reason": "document_not_fully_visible",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 3310.837,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 4
+        }
+      },
+      "decision": "block",
+      "reason": "document_not_fully_visible",
+      "capture_quality": {
+        "status": "reject",
+        "reason": "document_not_fully_visible",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 3310.837,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 4
+        },
+        "engine": "pil_numpy_v1"
+      }
+    }
+  },
+  "flags": {
+    "soft": "on",
+    "hard": "off",
+    "allowlist": "WATHEFNI-96599338566,WATHEFNI-96550252254"
+  }
+}

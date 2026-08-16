@@ -1,0 +1,8 @@
+path=/root/.openclaw/secrets/wathefni-ess-bank.production.env
+mode=600
+owner=root:root
+key_names= ['WATHEFNI_ESS_BANK_SECRET_KEY', 'WATHEFNI_ESS_BANK_SECRET_KEY_PREVIOUS']
+WATHEFNI_ESS_BANK_SECRET_KEY: present=True length=44 fingerprint8=8d180c0c
+WATHEFNI_ESS_BANK_SECRET_KEY_PREVIOUS: present=True length=44 fingerprint8=1e09fabb
+key_material_not_echoed=true
+evidence_secret_scan_clean=true

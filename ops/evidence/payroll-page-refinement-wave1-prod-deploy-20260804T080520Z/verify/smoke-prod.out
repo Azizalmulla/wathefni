@@ -1,0 +1,34 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-vCLI3hKo.js
+BACKUP=/opt/wathefni/backups/production-pre-payroll-page-refinement-wave1-20260804T080520Z
+PASS data-payroll-surfaces
+PASS data-payroll-queue
+PASS data-payroll-records-panels
+PASS data-payroll-honesty-toggle
+PASS data-payroll-hours-export
+PASS expected_row_version
+PASS payroll-tab-external-run
+STATIC_GATES_OK
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+PASS posthire_bundle_present — PostHire-vCLI3hKo.js
+PASS surfaces_marker
+PASS queue_marker
+PASS records_panels
+PASS run_default_tab
+PASS hours_tab
+PASS records_tab
+PASS payslips_tab
+PASS close_tab
+PASS statutory_tab
+PASS honesty_toggle
+PASS hours_export_soft
+PASS external_workspace
+PASS money_honesty_copy
+PASS mutation_row_version
+PASS arabic_surface
+PASS shifts_still_present
+PASS leave_still_present
+PASS attendance_still_present
+PAYROLL_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+PAYROLL_WAVE1_SMOKE_OK
+DEPLOY_OK

@@ -1,0 +1,20 @@
+PASS  status dry-run
+PASS  dry-run leaves null
+PASS  status applied
+PASS  status now active
+PASS  status idempotent replay
+PASS  refuse guess
+PASS  orphan dry-run
+PASS  dry-run keeps live messages
+PASS  orphan quarantined
+PASS  live messages removed
+PASS  quarantine archive has 3
+PASS  integrity no longer lists smoke orphan key
+PASS  orphan restore
+PASS  messages restored to live
+PASS  status rollback
+PASS  status restored to null
+PASS  map mints person for real employee
+PASS  map skips orphan person
+
+18 passed, 0 failed

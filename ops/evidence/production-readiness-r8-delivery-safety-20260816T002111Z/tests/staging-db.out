@@ -1,0 +1,25 @@
+{"ts":"2026-08-16T00:21:49.636718+00:00","event":"client_or_server_error","contract":"r8-delivery-safety-v1","severity":"error","event_id":"94c93183-c795-499d-a656-fc9fb9cd2684","surface":"hr_web","message":"r8-db-3ab4e792 password=super-secret-token-value [redacted-phone] [redacted-email]","detail":{"password":"[redacted]","token":"[redacted]","note":"mail [redacted-email] phone [redacted-phone]"}}
+    PRODUCTION READINESS R8 — delivery safety DB contracts
+      PASS  runtime path does not apply schema
+      PASS  drift detector is ok after apply
+      PASS  version 1 is in history
+      PASS  no pending forward migrations
+      PASS  required relations exist
+      PASS  error event persist attempted
+      PASS  stored message redacts email
+      PASS  stored message redacts phone
+      PASS  stored detail redacts password
+      FAIL  raw secret never stored in message
+      PASS  raw secret never stored in detail json
+      PASS  error event row exists
+      FAIL  DB message has no raw secret
+      PASS  DB message has no raw email
+      PASS  DB detail has no raw secret
+      PASS  failed-job visibility returns a total
+      PASS  delivery snapshot migrations ok
+      PASS  delivery snapshot includes failed_jobs
+      PASS  rollback procedure remains restore-from-backup
+
+    R8_DELIVERY_SAFETY_DB_PASS
+    17 passed, 2 failed
+

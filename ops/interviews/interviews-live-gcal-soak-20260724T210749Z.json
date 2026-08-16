@@ -1,0 +1,317 @@
+{
+  "started_at": "2026-07-24T21:07:43.178419+00:00",
+  "marker": "interviews-live-gcal-soak-v1",
+  "company": "INTVGCAL",
+  "artifact_sha_expected": "4ffa87f435b613cc3ac1ed7cdf3c17fe3b9ec77c267cddf8ed596ccd90739a3a",
+  "account": "azizalmulla16@gmail.com",
+  "gates": [
+    {
+      "gate": "artifact_sha_matches_staging_green",
+      "result": "PASS",
+      "detail": "4ffa87f435b613cc3ac1ed7cdf3c17fe3b9ec77c267cddf8ed596ccd90739a3a"
+    },
+    {
+      "gate": "oauth_calendar_list_ok",
+      "result": "PASS",
+      "detail": "ok"
+    },
+    {
+      "gate": "google_calendar_configured",
+      "result": "PASS",
+      "detail": "azizalmulla16@gmail.com"
+    },
+    {
+      "gate": "create_wathefni_scheduled",
+      "result": "PASS",
+      "detail": {
+        "ok": true,
+        "interview_id": "d2b6d619-ca39-47ef-87e0-ce37138528ec",
+        "status": "scheduled",
+        "provider_sync_status": "synced",
+        "provider_sync_error": null,
+        "calendar_event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+        "meet_link": "https://meet.google.com/iri-utew-gny",
+        "provider_sync": {
+          "ok": true,
+          "error": null,
+          "status": "synced",
+          "interview_valid": true
+        }
+      }
+    },
+    {
+      "gate": "create_provider_synced",
+      "result": "PASS",
+      "detail": "sync=synced event=uidhi2fn8u6mftbpvfd65b40g4 err=None"
+    },
+    {
+      "gate": "create_one_google_event_exists",
+      "result": "PASS",
+      "detail": "uidhi2fn8u6mftbpvfd65b40g4"
+    },
+    {
+      "gate": "create_attendees_candidate_and_panel",
+      "result": "PASS",
+      "detail": [
+        "cand.gcal.soak@intv.invalid",
+        "panel.gcal.soak@intv.invalid"
+      ]
+    },
+    {
+      "gate": "create_meet_link_present",
+      "result": "PASS",
+      "detail": "https://meet.google.com/iri-utew-gny"
+    },
+    {
+      "gate": "wathefni_canonical_after_create",
+      "result": "PASS",
+      "detail": {
+        "status": "scheduled",
+        "provider_key": "google"
+      }
+    },
+    {
+      "gate": "reschedule_same_event_id",
+      "result": "FAIL",
+      "detail": {
+        "ok": true,
+        "status": "scheduled",
+        "provider_sync_status": "failed",
+        "provider_sync_error": "calendar_update_failed",
+        "old_event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+        "new_event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+        "scheduled_start": "2026-07-28T09:00:00+00:00",
+        "provider_sync": {
+          "ok": false,
+          "error": "calendar_update_failed",
+          "status": "failed",
+          "interview_valid": true
+        }
+      }
+    },
+    {
+      "gate": "reschedule_wathefni_still_canonical",
+      "result": "PASS",
+      "detail": "scheduled"
+    },
+    {
+      "gate": "reschedule_google_event_updated_in_place",
+      "result": "FAIL",
+      "detail": {
+        "event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+        "start": "2026-07-28T10:00:00+03:00",
+        "prev": "2026-07-28T10:00:00+03:00"
+      }
+    },
+    {
+      "gate": "no_duplicate_active_events_after_reschedule",
+      "result": "PASS",
+      "detail": [
+        {
+          "id": "uidhi2fn8u6mftbpvfd65b40g4",
+          "status": "confirmed",
+          "start": {
+            "dateTime": "2026-07-28T10:00:00+03:00",
+            "timeZone": "UTC"
+          },
+          "summary": "Wathefni interview with GCal Soak Candidate"
+        }
+      ]
+    },
+    {
+      "gate": "cancel_wathefni_cancelled_history_preserved",
+      "result": "PASS",
+      "detail": {
+        "ok": true,
+        "status": "cancelled",
+        "provider_sync_status": "failed",
+        "provider_sync_error": "unexpected argument primary",
+        "provider_sync": {
+          "ok": false,
+          "error": "calendar_cancel_failed",
+          "status": "failed"
+        },
+        "calendar_event_id": "uidhi2fn8u6mftbpvfd65b40g4"
+      }
+    },
+    {
+      "gate": "cancel_provider_synced",
+      "result": "FAIL",
+      "detail": "failed"
+    },
+    {
+      "gate": "cancel_removes_or_cancels_google_event",
+      "result": "FAIL",
+      "detail": {
+        "ok": true,
+        "id": "uidhi2fn8u6mftbpvfd65b40g4",
+        "status": "confirmed",
+        "stderr": ""
+      }
+    },
+    {
+      "gate": "no_stale_active_meet_or_event_after_cancel",
+      "result": "FAIL",
+      "detail": [
+        {
+          "id": "uidhi2fn8u6mftbpvfd65b40g4",
+          "status": "confirmed",
+          "summary": "Wathefni interview with GCal Soak Candidate"
+        }
+      ]
+    },
+    {
+      "gate": "cleanup_zero_db_residue",
+      "result": "PASS",
+      "detail": {
+        "interviews": 0,
+        "assignments": 0,
+        "ops": 0,
+        "applications": 0,
+        "companies": 0,
+        "candidates": 0
+      }
+    },
+    {
+      "gate": "cleanup_zero_google_residue",
+      "result": "PASS",
+      "detail": []
+    }
+  ],
+  "google_events": [
+    "uidhi2fn8u6mftbpvfd65b40g4",
+    "uidhi2fn8u6mftbpvfd65b40g4"
+  ],
+  "residuals": {},
+  "create": {
+    "ok": true,
+    "interview_id": "d2b6d619-ca39-47ef-87e0-ce37138528ec",
+    "status": "scheduled",
+    "provider_sync_status": "synced",
+    "provider_sync_error": null,
+    "calendar_event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+    "meet_link": "https://meet.google.com/iri-utew-gny",
+    "provider_sync": {
+      "ok": true,
+      "error": null,
+      "status": "synced",
+      "interview_valid": true
+    }
+  },
+  "create_google_event": {
+    "id": "uidhi2fn8u6mftbpvfd65b40g4",
+    "status": "confirmed",
+    "attendees": [
+      {
+        "email": "panel.gcal.soak@intv.invalid",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "cand.gcal.soak@intv.invalid",
+        "responseStatus": "needsAction"
+      }
+    ],
+    "hangoutLink": "https://meet.google.com/iri-utew-gny",
+    "start": {
+      "dateTime": "2026-07-28T10:00:00+03:00",
+      "timeZone": "UTC"
+    },
+    "end": {
+      "dateTime": "2026-07-28T10:30:00+03:00",
+      "timeZone": "UTC"
+    },
+    "summary": "Wathefni interview with GCal Soak Candidate"
+  },
+  "reschedule": {
+    "ok": true,
+    "status": "scheduled",
+    "provider_sync_status": "failed",
+    "provider_sync_error": "calendar_update_failed",
+    "old_event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+    "new_event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+    "scheduled_start": "2026-07-28T09:00:00+00:00",
+    "provider_sync": {
+      "ok": false,
+      "error": "calendar_update_failed",
+      "status": "failed",
+      "interview_valid": true
+    }
+  },
+  "reschedule_google_event": {
+    "id": "uidhi2fn8u6mftbpvfd65b40g4",
+    "status": "confirmed",
+    "start": {
+      "dateTime": "2026-07-28T10:00:00+03:00",
+      "timeZone": "UTC"
+    },
+    "end": {
+      "dateTime": "2026-07-28T10:30:00+03:00",
+      "timeZone": "UTC"
+    },
+    "hangoutLink": "https://meet.google.com/iri-utew-gny"
+  },
+  "nearby_soak_events_after_reschedule": [
+    {
+      "id": "uidhi2fn8u6mftbpvfd65b40g4",
+      "status": "confirmed",
+      "start": {
+        "dateTime": "2026-07-28T10:00:00+03:00",
+        "timeZone": "UTC"
+      },
+      "summary": "Wathefni interview with GCal Soak Candidate"
+    }
+  ],
+  "cancel": {
+    "ok": true,
+    "status": "cancelled",
+    "provider_sync_status": "failed",
+    "provider_sync_error": "unexpected argument primary",
+    "provider_sync": {
+      "ok": false,
+      "error": "calendar_cancel_failed",
+      "status": "failed"
+    },
+    "calendar_event_id": "uidhi2fn8u6mftbpvfd65b40g4"
+  },
+  "cancel_google_event": {
+    "ok": true,
+    "id": "uidhi2fn8u6mftbpvfd65b40g4",
+    "status": "confirmed",
+    "stderr": ""
+  },
+  "nearby_active_after_cancel": [
+    {
+      "id": "uidhi2fn8u6mftbpvfd65b40g4",
+      "status": "confirmed",
+      "summary": "Wathefni interview with GCal Soak Candidate"
+    }
+  ],
+  "cleanup": {
+    "deleted_google_events": [
+      {
+        "event_id": "uidhi2fn8u6mftbpvfd65b40g4",
+        "ok": false,
+        "raw": {
+          "ok": false,
+          "stderr": "unexpected argument primary\n"
+        }
+      }
+    ]
+  },
+  "residue": {
+    "interviews": 0,
+    "assignments": 0,
+    "ops": 0,
+    "applications": 0,
+    "companies": 0,
+    "candidates": 0
+  },
+  "final_google_active": [],
+  "finished_at": "2026-07-24T21:07:49.019449+00:00",
+  "summary": {
+    "passed": 14,
+    "failed": 5,
+    "total": 19
+  },
+  "verdict": "FAIL_PRODUCT"
+}

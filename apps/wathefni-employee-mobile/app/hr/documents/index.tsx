@@ -1,0 +1,1 @@
+export { HRDocumentReviewsQueueView as default } from '@hr/features/documents/HRDocumentReviewsQueueView'

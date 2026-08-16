@@ -1,0 +1,13 @@
+Wave 3F Arabic visual verification (official PDF → PNG; OCR discarded)
+
+PASS Arts 2–6   arabic-page-02.png
+PASS Arts 28–33 arabic-page-07.png
+PASS Arts 41–44 arabic-page-09.png
+PASS Arts 44–50 arabic-page-10.png
+PASS Arts 51–55 arabic-page-11.png
+PASS Arts 68–72 arabic-page-14.png
+PASS Arts 73–79 arabic-page-15.png
+PASS Arts 80–86 arabic-page-16.png
+PASS Art 144    arabic-page-25.png
+
+Primary PDF SHA256: 20eac58834489098d86271cfc6df9926adfe3fcc9607c47531247e6a56d3f326

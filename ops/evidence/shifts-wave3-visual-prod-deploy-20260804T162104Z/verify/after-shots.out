@@ -1,0 +1,22 @@
+SHOT /tmp/shifts-w3-after/after-schedule-desktop-en.png
+requests_skip desktop-en Locator.click: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator("button[data-surface=\"requests\"]").first
+
+SHOT /tmp/shifts-w3-after/after-schedule-mobile-en.png
+requests_skip mobile-en Locator.click: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator("button[data-surface=\"requests\"]").first
+
+SHOT /tmp/shifts-w3-after/after-schedule-desktop-ar.png
+requests_skip desktop-ar Locator.click: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator("button[data-surface=\"requests\"]").first
+
+SHOT /tmp/shifts-w3-after/after-schedule-mobile-ar.png
+requests_skip mobile-ar Locator.click: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator("button[data-surface=\"requests\"]").first
+
+SHOTS_DIR /tmp/shifts-w3-after
+SHIFTS_WAVE3_SHOTS_OK

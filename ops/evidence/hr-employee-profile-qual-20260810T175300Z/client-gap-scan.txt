@@ -1,0 +1,69 @@
+=== EmployeeDetailRoute ===
+export function EmployeeDetailRoute() {
+  const { employeeKey = '' } = useLocalSearchParams<{ employeeKey: string }>()
+  const shell = useShell()
+  const onBack = useHrSafeBack()
+  const permitted = routeAvailable(shell.me, 'employees')
+  const query = useQuery({
+    queryKey: ['employee', employeeKey],
+    queryFn: ({ signal }) => mobileApi.employeeDetail(shell.request, employeeKey, signal),
+    enabled: permitted && Boolean(employeeKey),
+  })
+  const item = query.data?.item
+  return (
+    <OperationalDetailView
+      company={shell.company}
+      eyebrow={shell.t('employees.detailEyebrow')}
+      title={item?.employee.name || shell.t('employees.detailTitle')}
+      status={item?.employee.employment_status}
+      state={!permitted ? 'permission' : resourceState({ loading: query.isLoading, error: query.error, stale: query.data?.stale })}
+      facts={[
+        { label: shell.t('common.position'), value: item?.employee.position_title },
+        { label: shell.t('common.department'), value: item?.employee.department },
+        { label: shell.t('common.email'), value: item?.email },
+        { label: shell.t('common.phone'), value: item?.phone },
+        { label: shell.t('employees.manager'), value: item?.manager_name },
+        { label: shell.t('common.startDate'), value: item?.started_on ? formatDate(item.started_on, shell.locale) : null },
+      ]}
+      onRetry={() => void query.refetch()}
+      onLocale={shell.toggleLocale}
+      onBack={onBack}
+    />
+  )
+}
+
+=== quick profile DTO ===
+def mobile_employee_quick_profile(
+    app_mod: Any,
+    context: dict[str, Any],
+    employee_key: str,
+) -> dict[str, Any]:
+    _require_mobile_feature_action(
+        app_mod, context, "hr", "employee_quick_profile", "read"
+    )
+    app_mod.require_workspace_permission(context, "employees.read")
+    profile = app_mod.dashboard_employee_profile(context, employee_key)
+    card = profile.get("employee") if isinstance(profile.get("employee"), dict) else {}
+    key = str(card.get("employee_key") or employee_key)
+    return {
+        "ok": True,
+        "employee": {
+            "employee_key": key,
+            "employee": {
+                "employee_key": key,
+                "name": card.get("name") or "Employee",
+                "position_title": card.get("position_title"),
+                "department": card.get("department"),
+                "employment_status": card.get("employment_status"),
+            },
+            "email": card.get("email"),
+            "phone": card.get("phone"),
+            "started_on": _iso(card.get("start_date")),
+            "allowed_actions": ["read"],
+        },
+    }
+
+=== manager_name in client ===
+apps/wathefni-employee-mobile/src/hr/api/types.ts:347:  manager_name?: string | null
+apps/wathefni-employee-mobile/src/hr/api/normalize.ts:381:    manager_name: optionalText(input.manager_name) || optionalText(nested.manager_name),
+apps/wathefni-employee-mobile/src/hr/features/operations/routes.tsx:136:        { label: shell.t('employees.manager'), value: item?.manager_name },

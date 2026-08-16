@@ -1,0 +1,76 @@
+=== employee_onboarding_items (local) ===
+def employee_onboarding_items(employee_key: str) -> list[dict[str, Any]]:
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT item_id, label, item_type, required, document_type, status, value,
+                       storage_provider, storage_status, storage_url, drive_url,
+                       reminder_count, last_reminded_at, escalated_at, updated_at
+                FROM onboarding_items
+                WHERE employee_key=%s
+                ORDER BY required DESC, created_at ASC
+                """,
+                (employee_key,),
+            )
+            recruiters = []
+            for source_user in cur.fetchall():
+                user = dict(source_user)
+                if "candidates.read" not in dashboard_effective_permissions_for_user(user, cur=cur):
+                    continue
+                recruiters.append(json_safe(user))
+            return recruiters
+
+
+def is_item_complete(item: dict[str, Any]) -> bool:
+    return str(item.get("status") or "").lower() in {"received", "complete", "completed", "verified"}
+
+
+def item_display_label(item: dict[str, Any] | str) -> str:
+    if isinstance(item, dict):
+        key = str(item.get("document_type") or item.get("item_id") or "")
+        label = str(item.get("label") or "").strip()
+        return label or DOCUMENT_LABELS.get(key, key.replace("_", " ") if key else "item")
+    return DOCUMENT_LABELS.get(str(item), str(item).replace("_", " "))
+
+
+def employee_onboarding_summary(employee: dict[str, Any]) -> dict[str, Any]:
+    items = employee_onboarding_items(str(employee.get("employee_key") or ""))
+    required = [item for item in items if item.get("required") is True]
+    received = [item for item in required if is_item_complete(item)]
+    pending = [item for item in required if not is_item_complete(item)]
+    return {
+        "employee_key": employee.get("employee_key"),
+        "name": employee.get("name"),
+=== flags ===
+def onboarding_hr_mutate_enabled() -> bool:
+    """Dark-launch gate for HR-driven onboarding mutations from the dashboard
+    (start/restart onboarding, mark/waive a checklist item). Defaults OFF so the
+    new controls stay hidden and inert in production until explicitly enabled."""
+    return (os.environ.get("WATHEFNI_ONBOARDING_HR_MUTATE") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def cv_mistral_ocr_enabled() -> bool:
+    """CV OCR via pinned Mistral mistral-ocr-4-0. Default OFF until staging proof
+    and owner-approved privacy/retention config. Does not send production CVs."""
+    return _cv_extraction.mistral_ocr_enabled()
+
+
+def cv_gpt_vision_rescue_enabled() -> bool:
+    """Bounded GPT vision rescue only after Mistral OCR quality failure."""
+    return _cv_extraction.gpt_vision_rescue_enabled()
+
+
+def doc_upload_enabled() -> bool:
+    """Dark-launch gate for HR-driven document uploads from the dashboard (attach
+    or replace an employee's onboarding document). Defaults OFF so the upload
+    controls stay hidden and the endpoint inert in production until enabled."""
+    return (os.environ.get("WATHEFNI_DOC_UPLOAD") or "").strip().lower() in _OUTBOUND_ON_VALUES
+
+
+def onboarding_seed_enabled() -> bool:
+    """Dark-launch gate for seeding onboarding checklist items from a template
+    (on start-onboarding, opt-in roster create/import, hire top-up, and the
+    backfill route). Defaults OFF so no checklist rows are ever created in
+    production until explicitly enabled."""
+    return (os.environ.get("WATHEFNI_ONBOARDING_SEED") or "").strip().lower() in _OUTBOUND_ON_VALUES

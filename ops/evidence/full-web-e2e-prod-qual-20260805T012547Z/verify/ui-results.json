@@ -1,0 +1,1672 @@
+{
+  "stamp": "20260805T012547Z",
+  "total": 87,
+  "pass": 87,
+  "fail": 0,
+  "skip": 0,
+  "results": [
+    {
+      "id": "UI_en-desktop_overview",
+      "module": "overview",
+      "title": "UI en-desktop overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "Good evening, Aziz",
+        "active": "Overview",
+        "dir": "ltr",
+        "bodyLen": 1606,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-overview.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_jobs",
+      "module": "jobs",
+      "title": "UI en-desktop jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "Jobs",
+        "active": "Jobs",
+        "dir": "ltr",
+        "bodyLen": 1064,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-jobs.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_candidates",
+      "module": "candidates",
+      "title": "UI en-desktop candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "Candidates",
+        "active": "Candidates",
+        "dir": "ltr",
+        "bodyLen": 2543,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-candidates.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_interviews",
+      "module": "interviews",
+      "title": "UI en-desktop interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "Interviews",
+        "active": "Interviews",
+        "dir": "ltr",
+        "bodyLen": 739,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-interviews.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_assessments",
+      "module": "assessments",
+      "title": "UI en-desktop assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "Assessments",
+        "active": "Assessments",
+        "dir": "ltr",
+        "bodyLen": 1520,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-assessments.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_ranking",
+      "module": "ranking",
+      "title": "UI en-desktop ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "Ranking",
+        "active": "Ranking",
+        "dir": "ltr",
+        "bodyLen": 781,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-ranking.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_calendar",
+      "module": "calendar",
+      "title": "UI en-desktop calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "Calendar",
+        "active": "Calendar",
+        "dir": "ltr",
+        "bodyLen": 2287,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-calendar.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_employees",
+      "module": "employees",
+      "title": "UI en-desktop employees",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "employees",
+        "urlPage": "employees",
+        "title": "Employees",
+        "active": "Employees",
+        "dir": "ltr",
+        "bodyLen": 5784,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-employees.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_workforce",
+      "module": "organization",
+      "title": "UI en-desktop workforce",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "workforce",
+        "urlPage": "workforce",
+        "title": "Organization",
+        "active": "Organization",
+        "dir": "ltr",
+        "bodyLen": 1027,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-workforce.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_inbox",
+      "module": "needs_attention",
+      "title": "UI en-desktop inbox",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "inbox",
+        "urlPage": "inbox",
+        "title": "Needs Attention",
+        "active": "Needs Attention",
+        "dir": "ltr",
+        "bodyLen": 647,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-inbox.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_onboarding",
+      "module": "onboarding",
+      "title": "UI en-desktop onboarding",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "onboarding",
+        "urlPage": "onboarding",
+        "title": "Onboarding",
+        "active": "Onboarding",
+        "dir": "ltr",
+        "bodyLen": 906,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-onboarding.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_attendance",
+      "module": "attendance",
+      "title": "UI en-desktop attendance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "attendance",
+        "urlPage": "attendance",
+        "title": "Attendance",
+        "active": "Attendance",
+        "dir": "ltr",
+        "bodyLen": 1252,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-attendance.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_leave",
+      "module": "leave",
+      "title": "UI en-desktop leave",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "leave",
+        "urlPage": "leave",
+        "title": "Leave",
+        "active": "Leave",
+        "dir": "ltr",
+        "bodyLen": 1094,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-leave.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_shifts",
+      "module": "shifts",
+      "title": "UI en-desktop shifts",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "shifts",
+        "urlPage": "shifts",
+        "title": "Shifts",
+        "active": "Shifts",
+        "dir": "ltr",
+        "bodyLen": 772,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-shifts.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_payroll",
+      "module": "payroll",
+      "title": "UI en-desktop payroll",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "payroll",
+        "urlPage": "payroll",
+        "title": "Payroll",
+        "active": "Payroll",
+        "dir": "ltr",
+        "bodyLen": 1758,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-payroll.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_analytics",
+      "module": "analytics",
+      "title": "UI en-desktop analytics",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "analytics",
+        "urlPage": "analytics",
+        "title": "Analytics",
+        "active": "Analytics",
+        "dir": "ltr",
+        "bodyLen": 704,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-analytics.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_compliance",
+      "module": "compliance",
+      "title": "UI en-desktop compliance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "compliance",
+        "urlPage": "compliance",
+        "title": "Compliance",
+        "active": "Compliance",
+        "dir": "ltr",
+        "bodyLen": 722,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-compliance.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_notifications",
+      "module": "alerts_delivery",
+      "title": "UI en-desktop notifications",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "notifications",
+        "urlPage": "notifications",
+        "title": "Alerts & Delivery",
+        "active": "Alerts & Delivery",
+        "dir": "ltr",
+        "bodyLen": 1042,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-notifications.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_activity",
+      "module": "activity",
+      "title": "UI en-desktop activity",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "activity",
+        "urlPage": "activity",
+        "title": "Activity",
+        "active": "Activity",
+        "dir": "ltr",
+        "bodyLen": 6897,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-desktop/en-desktop-activity.png"
+      }
+    },
+    {
+      "id": "UI_en-desktop_settings",
+      "module": "settings",
+      "title": "UI en-desktop settings",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "urlPage": "settings",
+        "title": "Settings",
+        "bodyLen": 856,
+        "loginWall": false,
+        "shell": true,
+        "hasSettings": true,
+        "note": "reprobed_after_loginWall_false_positive_fix"
+      }
+    },
+    {
+      "id": "UI_deeplink_employee",
+      "module": "cross",
+      "title": "Deep link ?page=employees&employee=WATHEFNI-96550252254",
+      "result": "PASS",
+      "detail": {
+        "url": "https://api.wathefni.ai/dashboard/?page=employees&employee=WATHEFNI-96550252254",
+        "urlPage": "employees",
+        "bodySample": "Wathefni\nHR WORKSPACE\nPRE-HIRING\nOverview\nWathefni Assistant\nJobs\nCandidates\nInterviews\nCalendar\nAssessments\nRanking\nReports\nPOST-HIRE\nEmployees\nOrganization\nNeeds Attention\nOnboarding\nAttendance\nLeave\nShifts\nPayroll\nAnalytics\nCompliance\nWO"
+      }
+    },
+    {
+      "id": "UI_deeplink_calendar",
+      "module": "cross",
+      "title": "Deep link ?page=calendar",
+      "result": "PASS",
+      "detail": {
+        "url": "https://api.wathefni.ai/dashboard/?page=calendar",
+        "urlPage": "calendar",
+        "bodySample": "Wathefni\nHR WORKSPACE\nPRE-HIRING\nOverview\nWathefni Assistant\nJobs\nCandidates\nInterviews\nCalendar\nAssessments\nRanking\nReports\nPOST-HIRE\nEmployees\nOrganization\nNeeds Attention\nOnboarding\nAttendance\nLeave\nShifts\nPayroll\nAnalytics\nCompliance\nWO"
+      }
+    },
+    {
+      "id": "UI_deeplink_onboarding",
+      "module": "cross",
+      "title": "Deep link ?page=onboarding",
+      "result": "PASS",
+      "detail": {
+        "url": "https://api.wathefni.ai/dashboard/?page=onboarding",
+        "urlPage": "onboarding",
+        "bodySample": "Wathefni\nHR WORKSPACE\nPRE-HIRING\nOverview\nWathefni Assistant\nJobs\nCandidates\nInterviews\nCalendar\nAssessments\nRanking\nReports\nPOST-HIRE\nEmployees\nOrganization\nNeeds Attention\nOnboarding\nAttendance\nLeave\nShifts\nPayroll\nAnalytics\nCompliance\nWO"
+      }
+    },
+    {
+      "id": "UI_en-desktop_back_forward",
+      "module": "cross",
+      "title": "Back/forward employees\u2194calendar",
+      "result": "PASS",
+      "detail": {
+        "back": "https://api.wathefni.ai/dashboard/?page=employees",
+        "fwd": "https://api.wathefni.ai/dashboard/?page=calendar"
+      }
+    },
+    {
+      "id": "UI_overlay_scroll_lock_add_employee",
+      "module": "employees",
+      "title": "Add employee overlay scroll lock",
+      "result": "PASS",
+      "detail": {
+        "locked": true,
+        "dialog": 1
+      }
+    },
+    {
+      "id": "UI_ar-desktop_overview",
+      "module": "overview",
+      "title": "UI ar-desktop overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "\u0645\u0633\u0627\u0621 \u0627\u0644\u062e\u064a\u0631\u060c Aziz",
+        "active": "\u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629",
+        "dir": "rtl",
+        "bodyLen": 1535,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-overview.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_jobs",
+      "module": "jobs",
+      "title": "UI ar-desktop jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "\u0627\u0644\u0648\u0638\u0627\u0626\u0641",
+        "active": "\u0627\u0644\u0648\u0638\u0627\u0626\u0641",
+        "dir": "rtl",
+        "bodyLen": 1073,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-jobs.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_candidates",
+      "module": "candidates",
+      "title": "UI ar-desktop candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "\u0627\u0644\u0645\u0631\u0634\u062d\u0648\u0646",
+        "active": "\u0627\u0644\u0645\u0631\u0634\u062d\u0648\u0646",
+        "dir": "rtl",
+        "bodyLen": 2502,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-candidates.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_interviews",
+      "module": "interviews",
+      "title": "UI ar-desktop interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "\u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0627\u062a",
+        "active": "\u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 684,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-interviews.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_assessments",
+      "module": "assessments",
+      "title": "UI ar-desktop assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645\u0627\u062a",
+        "active": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 1478,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-assessments.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_ranking",
+      "module": "ranking",
+      "title": "UI ar-desktop ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "\u0627\u0644\u062a\u0631\u062a\u064a\u0628",
+        "active": "\u0627\u0644\u062a\u0631\u062a\u064a\u0628",
+        "dir": "rtl",
+        "bodyLen": 757,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-ranking.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_calendar",
+      "module": "calendar",
+      "title": "UI ar-desktop calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "\u0627\u0644\u062a\u0642\u0648\u064a\u0645",
+        "active": "\u0627\u0644\u062a\u0642\u0648\u064a\u0645",
+        "dir": "rtl",
+        "bodyLen": 2378,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-calendar.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_employees",
+      "module": "employees",
+      "title": "UI ar-desktop employees",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "employees",
+        "urlPage": "employees",
+        "title": "\u0627\u0644\u0645\u0648\u0638\u0641\u0648\u0646",
+        "active": "\u0627\u0644\u0645\u0648\u0638\u0641\u0648\u0646",
+        "dir": "rtl",
+        "bodyLen": 5510,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-employees.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_workforce",
+      "module": "organization",
+      "title": "UI ar-desktop workforce",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "workforce",
+        "urlPage": "workforce",
+        "title": "\u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062a\u0646\u0638\u064a\u0645\u064a",
+        "active": "\u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062a\u0646\u0638\u064a\u0645\u064a",
+        "dir": "rtl",
+        "bodyLen": 897,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-workforce.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_inbox",
+      "module": "needs_attention",
+      "title": "UI ar-desktop inbox",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "inbox",
+        "urlPage": "inbox",
+        "title": "\u064a\u062d\u062a\u0627\u062c \u0645\u062a\u0627\u0628\u0639\u0629",
+        "active": "\u064a\u062d\u062a\u0627\u062c \u0645\u062a\u0627\u0628\u0639\u0629",
+        "dir": "rtl",
+        "bodyLen": 628,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-inbox.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_onboarding",
+      "module": "onboarding",
+      "title": "UI ar-desktop onboarding",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "onboarding",
+        "urlPage": "onboarding",
+        "title": "\u0627\u0644\u062a\u0647\u064a\u0626\u0629",
+        "active": "\u0627\u0644\u062a\u0647\u064a\u0626\u0629",
+        "dir": "rtl",
+        "bodyLen": 855,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-onboarding.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_attendance",
+      "module": "attendance",
+      "title": "UI ar-desktop attendance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "attendance",
+        "urlPage": "attendance",
+        "title": "\u0627\u0644\u062d\u0636\u0648\u0631",
+        "active": "\u0627\u0644\u062d\u0636\u0648\u0631",
+        "dir": "rtl",
+        "bodyLen": 1107,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-attendance.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_leave",
+      "module": "leave",
+      "title": "UI ar-desktop leave",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "leave",
+        "urlPage": "leave",
+        "title": "\u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a",
+        "active": "\u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 1008,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-leave.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_shifts",
+      "module": "shifts",
+      "title": "UI ar-desktop shifts",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "shifts",
+        "urlPage": "shifts",
+        "title": "\u0627\u0644\u0648\u0631\u062f\u064a\u0627\u062a",
+        "active": "\u0627\u0644\u0648\u0631\u062f\u064a\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 722,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-shifts.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_payroll",
+      "module": "payroll",
+      "title": "UI ar-desktop payroll",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "payroll",
+        "urlPage": "payroll",
+        "title": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "active": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "dir": "rtl",
+        "bodyLen": 1641,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-payroll.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_analytics",
+      "module": "analytics",
+      "title": "UI ar-desktop analytics",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "analytics",
+        "urlPage": "analytics",
+        "title": "\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a",
+        "active": "\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 687,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-analytics.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_compliance",
+      "module": "compliance",
+      "title": "UI ar-desktop compliance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "compliance",
+        "urlPage": "compliance",
+        "title": "\u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644",
+        "active": "\u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644",
+        "dir": "rtl",
+        "bodyLen": 682,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-compliance.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_notifications",
+      "module": "alerts_delivery",
+      "title": "UI ar-desktop notifications",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "notifications",
+        "urlPage": "notifications",
+        "title": "\u0627\u0644\u062a\u0646\u0628\u064a\u0647\u0627\u062a \u0648\u0627\u0644\u062a\u0633\u0644\u064a\u0645",
+        "active": "\u0627\u0644\u062a\u0646\u0628\u064a\u0647\u0627\u062a \u0648\u0627\u0644\u062a\u0633\u0644\u064a\u0645",
+        "dir": "rtl",
+        "bodyLen": 958,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-notifications.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_activity",
+      "module": "activity",
+      "title": "UI ar-desktop activity",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "activity",
+        "urlPage": "activity",
+        "title": "\u0627\u0644\u0646\u0634\u0627\u0637",
+        "active": "\u0627\u0644\u0646\u0634\u0627\u0637",
+        "dir": "rtl",
+        "bodyLen": 6803,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-activity.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_settings",
+      "module": "settings",
+      "title": "UI ar-desktop settings",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "settings",
+        "urlPage": "settings",
+        "title": "\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a",
+        "active": "\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 760,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-desktop/ar-desktop-settings.png"
+      }
+    },
+    {
+      "id": "UI_ar-desktop_rtl",
+      "module": "cross",
+      "title": "RTL active (ar-desktop)",
+      "result": "PASS",
+      "detail": {
+        "rtl": true
+      }
+    },
+    {
+      "id": "UI_en-mobile_overview",
+      "module": "overview",
+      "title": "UI en-mobile overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "Good evening, Aziz",
+        "active": "Overview",
+        "dir": "ltr",
+        "bodyLen": 1419,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-overview.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_jobs",
+      "module": "jobs",
+      "title": "UI en-mobile jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "Jobs",
+        "active": "Jobs",
+        "dir": "ltr",
+        "bodyLen": 959,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-jobs.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_candidates",
+      "module": "candidates",
+      "title": "UI en-mobile candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "Candidates",
+        "active": "Candidates",
+        "dir": "ltr",
+        "bodyLen": 2356,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-candidates.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_interviews",
+      "module": "interviews",
+      "title": "UI en-mobile interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "Interviews",
+        "active": "Interviews",
+        "dir": "ltr",
+        "bodyLen": 552,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-interviews.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_assessments",
+      "module": "assessments",
+      "title": "UI en-mobile assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "Assessments",
+        "active": "Assessments",
+        "dir": "ltr",
+        "bodyLen": 1333,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-assessments.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_ranking",
+      "module": "ranking",
+      "title": "UI en-mobile ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "Ranking",
+        "active": "Ranking",
+        "dir": "ltr",
+        "bodyLen": 594,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-ranking.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_calendar",
+      "module": "calendar",
+      "title": "UI en-mobile calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "Calendar",
+        "active": "Calendar",
+        "dir": "ltr",
+        "bodyLen": 390,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-calendar.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_employees",
+      "module": "employees",
+      "title": "UI en-mobile employees",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "employees",
+        "urlPage": "employees",
+        "title": "Employees",
+        "active": "Employees",
+        "dir": "ltr",
+        "bodyLen": 4958,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-employees.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_workforce",
+      "module": "organization",
+      "title": "UI en-mobile workforce",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "workforce",
+        "urlPage": "workforce",
+        "title": "Organization",
+        "active": "Organization",
+        "dir": "ltr",
+        "bodyLen": 815,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-workforce.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_inbox",
+      "module": "needs_attention",
+      "title": "UI en-mobile inbox",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "inbox",
+        "urlPage": "inbox",
+        "title": "Needs Attention",
+        "active": "Needs Attention",
+        "dir": "ltr",
+        "bodyLen": 476,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-inbox.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_onboarding",
+      "module": "onboarding",
+      "title": "UI en-mobile onboarding",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "onboarding",
+        "urlPage": "onboarding",
+        "title": "Onboarding",
+        "active": "Onboarding",
+        "dir": "ltr",
+        "bodyLen": 730,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-onboarding.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_attendance",
+      "module": "attendance",
+      "title": "UI en-mobile attendance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "attendance",
+        "urlPage": "attendance",
+        "title": "Attendance",
+        "active": "Attendance",
+        "dir": "ltr",
+        "bodyLen": 1076,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-attendance.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_leave",
+      "module": "leave",
+      "title": "UI en-mobile leave",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "leave",
+        "urlPage": "leave",
+        "title": "Leave",
+        "active": "Leave",
+        "dir": "ltr",
+        "bodyLen": 913,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-leave.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_shifts",
+      "module": "shifts",
+      "title": "UI en-mobile shifts",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "shifts",
+        "urlPage": "shifts",
+        "title": "Shifts",
+        "active": "Shifts",
+        "dir": "ltr",
+        "bodyLen": 466,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-shifts.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_payroll",
+      "module": "payroll",
+      "title": "UI en-mobile payroll",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "payroll",
+        "urlPage": "payroll",
+        "title": "Payroll",
+        "active": "Payroll",
+        "dir": "ltr",
+        "bodyLen": 1579,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-payroll.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_analytics",
+      "module": "analytics",
+      "title": "UI en-mobile analytics",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "analytics",
+        "urlPage": "analytics",
+        "title": "Analytics",
+        "active": "Analytics",
+        "dir": "ltr",
+        "bodyLen": 527,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-analytics.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_compliance",
+      "module": "compliance",
+      "title": "UI en-mobile compliance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "compliance",
+        "urlPage": "compliance",
+        "title": "Compliance",
+        "active": "Compliance",
+        "dir": "ltr",
+        "bodyLen": 546,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-compliance.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_notifications",
+      "module": "alerts_delivery",
+      "title": "UI en-mobile notifications",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "notifications",
+        "urlPage": "notifications",
+        "title": "Alerts & Delivery",
+        "active": "Alerts & Delivery",
+        "dir": "ltr",
+        "bodyLen": 272,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-notifications.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_activity",
+      "module": "activity",
+      "title": "UI en-mobile activity",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "activity",
+        "urlPage": "activity",
+        "title": "Activity",
+        "active": "Activity",
+        "dir": "ltr",
+        "bodyLen": 247,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/en-mobile/en-mobile-activity.png"
+      }
+    },
+    {
+      "id": "UI_en-mobile_settings",
+      "module": "settings",
+      "title": "UI en-mobile settings",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "urlPage": "settings",
+        "title": "Settings",
+        "bodyLen": 146,
+        "loginWall": false,
+        "shell": true,
+        "hasSettings": true,
+        "note": "reprobed_after_loginWall_false_positive_fix"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_overview",
+      "module": "overview",
+      "title": "UI ar-mobile overview",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "overview",
+        "urlPage": "overview",
+        "title": "\u0645\u0633\u0627\u0621 \u0627\u0644\u062e\u064a\u0631\u060c Aziz",
+        "active": "\u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629",
+        "dir": "rtl",
+        "bodyLen": 1335,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-overview.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_jobs",
+      "module": "jobs",
+      "title": "UI ar-mobile jobs",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "jobs",
+        "urlPage": "jobs",
+        "title": "\u0627\u0644\u0648\u0638\u0627\u0626\u0641",
+        "active": "\u0627\u0644\u0648\u0638\u0627\u0626\u0641",
+        "dir": "rtl",
+        "bodyLen": 886,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-jobs.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_candidates",
+      "module": "candidates",
+      "title": "UI ar-mobile candidates",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "candidates",
+        "urlPage": "candidates",
+        "title": "\u0627\u0644\u0645\u0631\u0634\u062d\u0648\u0646",
+        "active": "\u0627\u0644\u0645\u0631\u0634\u062d\u0648\u0646",
+        "dir": "rtl",
+        "bodyLen": 2302,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-candidates.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_interviews",
+      "module": "interviews",
+      "title": "UI ar-mobile interviews",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "interviews",
+        "urlPage": "interviews",
+        "title": "\u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0627\u062a",
+        "active": "\u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 484,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-interviews.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_assessments",
+      "module": "assessments",
+      "title": "UI ar-mobile assessments",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "assessments",
+        "urlPage": "assessments",
+        "title": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645\u0627\u062a",
+        "active": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 1278,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-assessments.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_ranking",
+      "module": "ranking",
+      "title": "UI ar-mobile ranking",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "ranking",
+        "urlPage": "ranking",
+        "title": "\u0627\u0644\u062a\u0631\u062a\u064a\u0628",
+        "active": "\u0627\u0644\u062a\u0631\u062a\u064a\u0628",
+        "dir": "rtl",
+        "bodyLen": 557,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-ranking.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_calendar",
+      "module": "calendar",
+      "title": "UI ar-mobile calendar",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "calendar",
+        "urlPage": "calendar",
+        "title": "\u0627\u0644\u062a\u0642\u0648\u064a\u0645",
+        "active": "\u0627\u0644\u062a\u0642\u0648\u064a\u0645",
+        "dir": "rtl",
+        "bodyLen": 342,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-calendar.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_employees",
+      "module": "employees",
+      "title": "UI ar-mobile employees",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "employees",
+        "urlPage": "employees",
+        "title": "\u0627\u0644\u0645\u0648\u0638\u0641\u0648\u0646",
+        "active": "\u0627\u0644\u0645\u0648\u0638\u0641\u0648\u0646",
+        "dir": "rtl",
+        "bodyLen": 4680,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-employees.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_workforce",
+      "module": "organization",
+      "title": "UI ar-mobile workforce",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "workforce",
+        "urlPage": "workforce",
+        "title": "\u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062a\u0646\u0638\u064a\u0645\u064a",
+        "active": "\u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062a\u0646\u0638\u064a\u0645\u064a",
+        "dir": "rtl",
+        "bodyLen": 672,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-workforce.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_inbox",
+      "module": "needs_attention",
+      "title": "UI ar-mobile inbox",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "inbox",
+        "urlPage": "inbox",
+        "title": "\u064a\u062d\u062a\u0627\u062c \u0645\u062a\u0627\u0628\u0639\u0629",
+        "active": "\u064a\u062d\u062a\u0627\u062c \u0645\u062a\u0627\u0628\u0639\u0629",
+        "dir": "rtl",
+        "bodyLen": 441,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-inbox.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_onboarding",
+      "module": "onboarding",
+      "title": "UI ar-mobile onboarding",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "onboarding",
+        "urlPage": "onboarding",
+        "title": "\u0627\u0644\u062a\u0647\u064a\u0626\u0629",
+        "active": "\u0627\u0644\u062a\u0647\u064a\u0626\u0629",
+        "dir": "rtl",
+        "bodyLen": 663,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-onboarding.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_attendance",
+      "module": "attendance",
+      "title": "UI ar-mobile attendance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "attendance",
+        "urlPage": "attendance",
+        "title": "\u0627\u0644\u062d\u0636\u0648\u0631",
+        "active": "\u0627\u0644\u062d\u0636\u0648\u0631",
+        "dir": "rtl",
+        "bodyLen": 914,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-attendance.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_leave",
+      "module": "leave",
+      "title": "UI ar-mobile leave",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "leave",
+        "urlPage": "leave",
+        "title": "\u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a",
+        "active": "\u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 817,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-leave.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_shifts",
+      "module": "shifts",
+      "title": "UI ar-mobile shifts",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "shifts",
+        "urlPage": "shifts",
+        "title": "\u0627\u0644\u0648\u0631\u062f\u064a\u0627\u062a",
+        "active": "\u0627\u0644\u0648\u0631\u062f\u064a\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 444,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-shifts.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_payroll",
+      "module": "payroll",
+      "title": "UI ar-mobile payroll",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "payroll",
+        "urlPage": "payroll",
+        "title": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "active": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "dir": "rtl",
+        "bodyLen": 1449,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-payroll.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_analytics",
+      "module": "analytics",
+      "title": "UI ar-mobile analytics",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "analytics",
+        "urlPage": "analytics",
+        "title": "\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a",
+        "active": "\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 497,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-analytics.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_compliance",
+      "module": "compliance",
+      "title": "UI ar-mobile compliance",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "compliance",
+        "urlPage": "compliance",
+        "title": "\u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644",
+        "active": "\u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644",
+        "dir": "rtl",
+        "bodyLen": 491,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-compliance.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_notifications",
+      "module": "alerts_delivery",
+      "title": "UI ar-mobile notifications",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "notifications",
+        "urlPage": "notifications",
+        "title": "\u0627\u0644\u062a\u0646\u0628\u064a\u0647\u0627\u062a \u0648\u0627\u0644\u062a\u0633\u0644\u064a\u0645",
+        "active": "\u0627\u0644\u062a\u0646\u0628\u064a\u0647\u0627\u062a \u0648\u0627\u0644\u062a\u0633\u0644\u064a\u0645",
+        "dir": "rtl",
+        "bodyLen": 777,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-notifications.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_activity",
+      "module": "activity",
+      "title": "UI ar-mobile activity",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "activity",
+        "urlPage": "activity",
+        "title": "\u0627\u0644\u0646\u0634\u0627\u0637",
+        "active": "\u0627\u0644\u0646\u0634\u0627\u0637",
+        "dir": "rtl",
+        "bodyLen": 6610,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-activity.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_settings",
+      "module": "settings",
+      "title": "UI ar-mobile settings",
+      "result": "PASS",
+      "severity": null,
+      "detail": {
+        "id": "settings",
+        "urlPage": "settings",
+        "title": "\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a",
+        "active": "\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a",
+        "dir": "rtl",
+        "bodyLen": 580,
+        "fatal": false,
+        "loginWall": false,
+        "shell": true,
+        "hasContent": true,
+        "shot": "/Users/azizalmulla/Desktop/claw/ops/evidence/full-web-e2e-prod-qual-20260805T012547Z/screenshots/ar-mobile/ar-mobile-settings.png"
+      }
+    },
+    {
+      "id": "UI_ar-mobile_rtl",
+      "module": "cross",
+      "title": "RTL active (ar-mobile)",
+      "result": "PASS",
+      "detail": {
+        "rtl": true
+      }
+    }
+  ]
+}

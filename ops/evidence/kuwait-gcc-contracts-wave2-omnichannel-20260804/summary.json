@@ -1,0 +1,1295 @@
+{
+  "stamp": "20260804",
+  "created_at": "2026-08-04T04:21:48.773260+00:00",
+  "route_matrix": {
+    "identity": {
+      "document_class": "identity",
+      "file_types": [
+        "jpg",
+        "jpeg",
+        "png",
+        "pdf",
+        "tif",
+        "tiff",
+        "webp"
+      ],
+      "reading_route": "shared_envelope_intake",
+      "fallback_reading": "needs_review",
+      "structuring": "identity_document_extraction_mistral",
+      "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+      "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired."
+    },
+    "contract": {
+      "document_class": "contract",
+      "file_types": [
+        "pdf",
+        "jpg",
+        "jpeg",
+        "png",
+        "tif",
+        "tiff",
+        "docx"
+      ],
+      "reading_route": "shared_hybrid_or_native_docx",
+      "fallback_reading": "needs_review",
+      "structuring": "kuwait_gcc_document_intelligence",
+      "ocr_policy": "mistral_when_needed_images_full_docx_native_selective",
+      "gpt_auto_ocr_fallback": false,
+      "authority_in_this_wave": "shared_contract_compliance_processor_hr_confirmation_required",
+      "notes": "Shared omnichannel processor; identity classes still delegate to identity_document_extraction."
+    },
+    "ok": true
+  },
+  "taxonomy": {
+    "canonical_map": {
+      "residency": "residence",
+      "residency_iqama": "residence",
+      "residence": "residence",
+      "medical_check": "medical",
+      "medical_fitness": "medical",
+      "medical": "medical",
+      "education_certificate": "education_cert",
+      "education": "education_cert",
+      "edu_cert": "education_cert",
+      "education_cert": "education_cert",
+      "employment_agreement": "employment_contract",
+      "contract": "employment_contract",
+      "employment_contract": "employment_contract",
+      "contract_amendment": "contract_amendment",
+      "amendment": "contract_amendment"
+    },
+    "preserved_aliases": [
+      "amendment",
+      "contract",
+      "edu_cert",
+      "education",
+      "education_certificate",
+      "employment_agreement",
+      "medical_check",
+      "medical_fitness",
+      "residency",
+      "residency_iqama"
+    ],
+    "ok": true
+  },
+  "circuit_needs_review_ok": true,
+  "channel_rows": [
+    {
+      "channel": "whatsapp_onboarding",
+      "id": "contract_bilingual_digital_01",
+      "class": "employment_contract",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "whatsapp_onboarding",
+      "id": "education_cert_bilingual_01",
+      "class": "education_cert",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "ess_onboarding",
+      "id": "contract_bilingual_digital_01",
+      "class": "employment_contract",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "ess_onboarding",
+      "id": "education_cert_bilingual_01",
+      "class": "education_cert",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "hr_document_hub",
+      "id": "contract_bilingual_digital_01",
+      "class": "employment_contract",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "hr_document_hub",
+      "id": "education_cert_bilingual_01",
+      "class": "education_cert",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "ess_renew",
+      "id": "contract_bilingual_digital_01",
+      "class": "employment_contract",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "ess_renew",
+      "id": "education_cert_bilingual_01",
+      "class": "education_cert",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "compliance_backfill",
+      "id": "contract_bilingual_digital_01",
+      "class": "employment_contract",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    },
+    {
+      "channel": "compliance_backfill",
+      "id": "education_cert_bilingual_01",
+      "class": "education_cert",
+      "status": "extracted",
+      "provider": "mistral",
+      "delegated_to": null,
+      "ok": true,
+      "gpt_used": true
+    }
+  ],
+  "identity_delegate_rows": [
+    {
+      "id": "identity_ref_civil_id_front_bilingual_01",
+      "class": "civil_id",
+      "canonical": "civil_id",
+      "delegated_to": "identity_document_extraction",
+      "ok": true
+    },
+    {
+      "id": "identity_ref_passport_en_01",
+      "class": "passport",
+      "canonical": "passport",
+      "delegated_to": "identity_document_extraction",
+      "ok": true
+    },
+    {
+      "id": "identity_ref_residency_bilingual_01",
+      "class": "residence",
+      "canonical": "residence",
+      "delegated_to": "identity_document_extraction",
+      "ok": true
+    },
+    {
+      "id": "identity_ref_work_permit_en_01",
+      "class": "work_permit",
+      "canonical": "work_permit",
+      "delegated_to": "identity_document_extraction",
+      "ok": true
+    },
+    {
+      "id": "identity_ref_medical_en_01",
+      "class": "medical",
+      "canonical": "medical",
+      "delegated_to": "identity_document_extraction",
+      "ok": true
+    }
+  ],
+  "wrong_category_rows": [
+    {
+      "id": "wrong_category_passport_as_contract_01",
+      "ok": true,
+      "verify": {
+        "matches_expected_item": false,
+        "detected_item": "unknown",
+        "confidence": 0.0,
+        "reason": "low_confidence",
+        "provider": "mistral",
+        "model": "mistral-ocr-4-0",
+        "gpt_used": false,
+        "channel": "hr_document_hub",
+        "extraction_status": "low_confidence",
+        "fields": {
+          "document_type": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "country_code": {
+            "value": "KW",
+            "confidence": 0.4,
+            "provenance": {
+              "source": "jurisdiction_profile",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "jurisdiction": {
+            "value": "kuwait_private_sector",
+            "confidence": 0.4,
+            "provenance": {
+              "source": "jurisdiction_profile",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issuing_authority": {
+            "value": "EMPLOYER",
+            "confidence": 0.4,
+            "provenance": {
+              "source": "jurisdiction_profile",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "document_number": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employee_name_ar": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employee_name_en": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_legal_name_ar": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_legal_name_en": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "job_title": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "contract_type": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "contract_start_date": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "contract_end_date": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "probation_period": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "salary_amount": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "salary_currency": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "allowances": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "work_location": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "working_hours": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "weekly_rest_days": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "annual_leave_entitlement": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "notice_period": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "renewal_terms": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "termination_clauses": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "signatories": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employee_signature_status": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_signature_status": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "issue_date": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "expiry_date": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "renewal_required": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "full_name": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employer_or_sponsor": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "employee_or_holder": {
+            "value": null,
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          },
+          "clause_evidence": {
+            "value": [],
+            "confidence": 0.0,
+            "provenance": {
+              "source": "mistral_document_ai",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "authoritative": false,
+              "hr_confirmed": false
+            }
+          }
+        },
+        "document_type": "employment_contract",
+        "canonical_document_type": "employment_contract",
+        "authoritative": false,
+        "hr_confirmation_required": true
+      }
+    }
+  ],
+  "email_rows": [
+    {
+      "case": "unmatched_employee",
+      "ok": true,
+      "row": {
+        "match_status": "employee_key_not_found",
+        "review_status": "pending_review",
+        "auto_attached": false,
+        "gpt_used": false
+      }
+    },
+    {
+      "case": "duplicate_suppressed",
+      "ok": true,
+      "row": {
+        "ok": true,
+        "duplicate": true,
+        "intake_id": "4aab4b3b-eb8e-4cac-a8de-2dc95ab0fe59",
+        "match_status": "employee_key_not_found",
+        "review_status": "pending_review",
+        "gpt_used": false
+      }
+    },
+    {
+      "case": "first_intake",
+      "ok": true,
+      "row": {
+        "ok": true,
+        "intake_id": "4aab4b3b-eb8e-4cac-a8de-2dc95ab0fe59",
+        "company_code": "WATHEFNI",
+        "employee_key": null,
+        "document_type": "employment_contract",
+        "match_status": "employee_key_not_found",
+        "review_status": "pending_review",
+        "auto_attached": false,
+        "extraction": {
+          "document_type": "employment_contract",
+          "document_number": null,
+          "issued_date": null,
+          "expiry_date": null,
+          "full_name": "AHMAD ABDULLAH ALKANDARI",
+          "nationality": null,
+          "date_of_birth": null,
+          "confidence": 1.0,
+          "extraction_status": "extracted",
+          "provider": "mistral",
+          "model": "mistral-ocr-4-0",
+          "gpt_used": false,
+          "authoritative": false,
+          "hr_confirmation_required": true,
+          "country_code": "KW",
+          "issuing_authority": "EMPLOYER",
+          "jurisdiction": "kuwait_private_sector",
+          "employer_or_sponsor": "WATHEFNI TRADING COMPANY W.L.L.",
+          "renewal_required": null,
+          "fields": {
+            "document_type": {
+              "value": "employment_contract",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "country_code": {
+              "value": "KW",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "jurisdiction": {
+              "value": "kuwait_private_sector",
+              "confidence": 0.4,
+              "provenance": {
+                "source": "jurisdiction_profile",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "issuing_authority": {
+              "value": "EMPLOYER",
+              "confidence": 0.4,
+              "provenance": {
+                "source": "jurisdiction_profile",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "document_number": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employee_name_ar": {
+              "value": "أحمد عبدالله الكندري",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employee_name_en": {
+              "value": "AHMAD ABDULLAH ALKANDARI",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employer_legal_name_ar": {
+              "value": "شركة الوثني للتجارة ذ.م.م",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employer_legal_name_en": {
+              "value": "WATHEFNI TRADING COMPANY W.L.L.",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "job_title": {
+              "value": "HR Specialist",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "contract_type": {
+              "value": "unlimited",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "contract_start_date": {
+              "value": "2024-01-15",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "contract_end_date": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "probation_period": {
+              "value": "100 days",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "salary_amount": {
+              "value": 850,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "salary_currency": {
+              "value": "KWD",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "allowances": {
+              "value": "Transport 50 KWD",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "work_location": {
+              "value": "Kuwait City",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "working_hours": {
+              "value": "8 hours/day",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "weekly_rest_days": {
+              "value": "Friday",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "annual_leave_entitlement": {
+              "value": "30 days",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "notice_period": {
+              "value": "30 days",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "renewal_terms": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "termination_clauses": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "signatories": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employee_signature_status": {
+              "value": null,
+              "confidence": 0.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employer_signature_status": {
+              "value": null,
+              "confidence": 0.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "issue_date": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "expiry_date": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "renewal_required": {
+              "value": null,
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "full_name": {
+              "value": "AHMAD ABDULLAH ALKANDARI",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employer_or_sponsor": {
+              "value": "WATHEFNI TRADING COMPANY W.L.L.",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "employee_or_holder": {
+              "value": "AHMAD ABDULLAH ALKANDARI",
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            },
+            "clause_evidence": {
+              "value": [],
+              "confidence": 1.0,
+              "provenance": {
+                "source": "mistral_document_ai",
+                "extractor": "kuwait_gcc_mistral_document_ai",
+                "contract": "kuwait-gcc-document-intelligence-v1",
+                "authoritative": false,
+                "hr_confirmed": false
+              }
+            }
+          },
+          "validation": {
+            "ok": true,
+            "issues": [],
+            "has_issue_date": true,
+            "has_expiry_date": false
+          },
+          "envelope": {
+            "contract": "document_envelope@1",
+            "foundation_id": "wathefni_document_processing_foundation_wave1",
+            "foundation_version": "1.0.0",
+            "company_code": "WATHEFNI",
+            "subject_type": "employee_compliance",
+            "subject_key": "e3606e99b37f949c",
+            "file_id": null,
+            "content_sha256": "e3606e99b37f949ce12f0d88d15d49a0afa4ab9feda23ccfe2d31d8fc5e30d39",
+            "source_channel": "email_inbound",
+            "migration_batch_id": null,
+            "document_class": "contract",
+            "file_type": "png",
+            "authority_label": "needs_hr_confirmation",
+            "route_policy": {
+              "reading_route": "shared_hybrid_or_native_docx",
+              "structuring": "kuwait_gcc_document_intelligence",
+              "ocr_policy": "mistral_when_needed_images_full_docx_native_selective",
+              "gpt_auto_ocr_fallback": false
+            },
+            "processing": {
+              "status": "extracted",
+              "extractor": "kuwait_gcc_mistral_document_ai",
+              "contract": "kuwait-gcc-document-intelligence-v1",
+              "expected_type": "employment_contract",
+              "gpt_auto_fallback": false,
+              "cv_v2_forbidden": true,
+              "country_code": "KW",
+              "validation": {
+                "ok": true,
+                "issues": [],
+                "has_issue_date": true,
+                "has_expiry_date": false
+              },
+              "confidence": 1.0
+            },
+            "text_ref": null,
+            "structured_ref": null,
+            "retention_class": "compliance_document",
+            "error": null,
+            "created_at": "2026-08-04T04:21:40.289901+00:00",
+            "cloud_portability": {
+              "domain_contract_cloud_agnostic": true,
+              "aws_specific_deps": false,
+              "gcp_specific_deps": false,
+              "worker_shape": "container_ready_async"
+            }
+          },
+          "content_sha256": "e3606e99b37f949ce12f0d88d15d49a0afa4ab9feda23ccfe2d31d8fc5e30d39",
+          "channel": "email_inbound",
+          "duplicate_keys": {
+            "content_sha256": "e3606e99b37f949ce12f0d88d15d49a0afa4ab9feda23ccfe2d31d8fc5e30d39",
+            "identifier_key": "WATHEFNI:employment_contract:"
+          },
+          "cost_usd": 0.004,
+          "latency_ms": 4182,
+          "issued_date_parsed": null,
+          "expiry_date_parsed": null,
+          "canonical_document_type": "employment_contract"
+        },
+        "media_path": "/opt/wathefni/staging/workspace/employee-doc-email/e3606e99b37f949c_contract.png",
+        "gpt_used": false,
+        "duplicate": false
+      }
+    }
+  ],
+  "reminder_gate": {
+    "unconfirmed": {
+      "status": "pending_hr_review",
+      "severity": "info",
+      "days_until_expiry": null,
+      "warning_days": 30,
+      "reminder_eligible": false
+    },
+    "confirmed_warn": {
+      "status": "expiring_soon",
+      "severity": "warning",
+      "days_until_expiry": 0,
+      "warning_days": 60,
+      "reminder_eligible": true
+    },
+    "ok": true
+  },
+  "authority": {
+    "wathefni_enabled": true,
+    "isoid_disabled": true,
+    "kill_switch": true,
+    "status": {
+      "mode": "on",
+      "enabled": true,
+      "kill_switch": false,
+      "gpt_fallback": false,
+      "cv_v2": false
+    }
+  },
+  "gaps_closed": 12,
+  "gaps": [
+    {
+      "id": "hub_skips_extraction",
+      "channel": "hr_document_hub",
+      "wave2_status": "closed",
+      "fix": "shared_channel_extraction via extract_compliance_document_metadata"
+    },
+    {
+      "id": "ess_renew_skips_extraction",
+      "channel": "ess_renew",
+      "wave2_status": "closed",
+      "fix": "shared_channel_extraction"
+    },
+    {
+      "id": "ess_onboarding_skips_extraction",
+      "channel": "ess_onboarding",
+      "wave2_status": "closed",
+      "fix": "shared_channel_extraction"
+    },
+    {
+      "id": "whatsapp_identity_only_extract",
+      "channel": "whatsapp_onboarding",
+      "wave2_status": "closed",
+      "fix": "education_cert + employment_contract structured via shared path"
+    },
+    {
+      "id": "backfill_identity_only",
+      "channel": "compliance_backfill",
+      "wave2_status": "closed",
+      "fix": "allowlist includes education_cert, employment_contract, residence, contract_amendment"
+    },
+    {
+      "id": "residence_alias_split",
+      "channel": "all",
+      "wave2_status": "closed",
+      "fix": "canonical residence with preserved aliases residency/residency_iqama"
+    },
+    {
+      "id": "medical_vs_medical_check",
+      "channel": "onboarding_template",
+      "wave2_status": "closed",
+      "fix": "canonical medical; medical_check/medical_fitness preserved as aliases"
+    },
+    {
+      "id": "education_cert_obsolete_checklist",
+      "channel": "whatsapp_onboarding",
+      "wave2_status": "closed_compat",
+      "fix": "canonical education_cert; checklist obsolescence unchanged non-destructively"
+    },
+    {
+      "id": "route_matrix_stale_identity_label",
+      "channel": "foundation",
+      "wave2_status": "closed",
+      "fix": "ROUTE_MATRIX labels updated to Mistral identity + kuwait_gcc shared processor"
+    },
+    {
+      "id": "contract_processor_label_only",
+      "channel": "foundation",
+      "wave2_status": "closed",
+      "fix": "structuring=kuwait_gcc_document_intelligence live"
+    },
+    {
+      "id": "email_employee_doc_intake_missing",
+      "channel": "email_inbound",
+      "wave2_status": "closed",
+      "fix": "email_intake.process_email_attachment uses shared processor + durable review queue"
+    },
+    {
+      "id": "ocr_expiry_drove_reminders",
+      "channel": "compliance_scan",
+      "wave2_status": "closed",
+      "fix": "dual_write keeps OCR dates in proposal; reminders require renewal_status=reviewed"
+    }
+  ],
+  "gpt_calls": 0,
+  "runtime": {
+    "kuwait_gcc": {
+      "mistral_calls": 15,
+      "identity_delegate_calls": 5,
+      "gpt_calls": 0,
+      "needs_review": 1,
+      "classify_calls": 0,
+      "verify_calls": 3,
+      "extract_calls": 18,
+      "last_provider": "mistral"
+    },
+    "identity": {
+      "mistral_calls": 5,
+      "gpt_identity_calls": 0,
+      "needs_review": 0,
+      "classify_calls": 0,
+      "verify_calls": 0,
+      "extract_calls": 5,
+      "last_provider": "mistral",
+      "cache_hits": 0
+    }
+  },
+  "sibling_freezes": {
+    "cv_unchanged": true,
+    "identity_schemas_unchanged": true,
+    "payroll_unchanged": true,
+    "migration_unchanged": true,
+    "ranking_ck_unchanged": true,
+    "document_envelope_contract_unchanged": true
+  },
+  "storage_generated_mirror_guidance": {
+    "storage_only": [
+      "blood_test",
+      "blood_type",
+      "fingerprint_notice",
+      "lease",
+      "lease_contract",
+      "offer_letter",
+      "personal_photo",
+      "police_certificate",
+      "police_clearance"
+    ],
+    "generated_only": [
+      "generated_offer",
+      "payroll_mirror",
+      "payslip",
+      "pifss_worksheet"
+    ],
+    "external_authority_mirrors": [
+      "authorised_signatory_name",
+      "commercial_licence_text",
+      "pam_employer_file_no",
+      "pifss_payroll_worksheet"
+    ]
+  },
+  "gates": {
+    "STAGING_OMNICHANNEL_GO": "GO",
+    "PRODUCTION_AUTHORITY_GO": "PENDING",
+    "FREEZE_GO": "PENDING",
+    "reasons": {
+      "circuit_ok": true,
+      "route_ok": true,
+      "taxonomy_ok": true,
+      "channel_ok": true,
+      "identity_ok": true,
+      "wrong_ok": true,
+      "email_ok": true,
+      "reminder_ok": true,
+      "gpt_free": true,
+      "isolation_ok": true,
+      "kill_ok": true
+    }
+  }
+}

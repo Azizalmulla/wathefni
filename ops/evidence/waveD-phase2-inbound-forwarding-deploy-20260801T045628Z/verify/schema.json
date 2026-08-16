@@ -1,0 +1,23 @@
+{
+  "indexes": [
+    {
+      "indexname": "idx_intake_addresses_company",
+      "indexdef": "CREATE INDEX idx_intake_addresses_company ON public.intake_addresses USING btree (company_code, status)"
+    },
+    {
+      "indexname": "idx_intake_addresses_local_active",
+      "indexdef": "CREATE UNIQUE INDEX idx_intake_addresses_local_active ON public.intake_addresses USING btree (lower(local_part), lower(COALESCE(domain, ''::text))) WHERE (status = 'active'::text)"
+    },
+    {
+      "indexname": "intake_addresses_pkey",
+      "indexdef": "CREATE UNIQUE INDEX intake_addresses_pkey ON public.intake_addresses USING btree (intake_id)"
+    }
+  ],
+  "active_addresses": 1,
+  "inbound_enabled": true,
+  "mailbox_sync": false,
+  "allowlist_env": "WATHEFNI",
+  "allowlisted_WATHEFNI": true,
+  "allowlisted_ACMECORP": false,
+  "allowlisted_INBOUNDTEST": true
+}

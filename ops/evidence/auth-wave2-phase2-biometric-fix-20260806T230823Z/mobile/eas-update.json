@@ -1,0 +1,6 @@
+{
+  "group": "aec3862c-70b5-47d3-9a2e-d7f07eade52b",
+  "message": "Auth Wave 2 Phase 2 fix: Face ID offer gating + recovery opt-in",
+  "env": {"EXPO_PUBLIC_LOCAL_PIN_UNLOCK":"1","EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK":"1"},
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/aec3862c-70b5-47d3-9a2e-d7f07eade52b"
+}

@@ -14,13 +14,21 @@ import { HOME_ROUTE, INBOX_ROUTE, openableHref } from '@/composition/employeeApp
 export const FLOW_DEFAULT_PATHS: Record<string, string> = {
   payroll: '/payslips',
   leave: '/(tabs)/leave',
+  leave_decision: '/(tabs)/leave',
   shift: '/(tabs)/schedule',
   shifts: '/(tabs)/schedule',
   attendance: '/(tabs)/schedule',
   onboarding: '/onboarding',
+  preboarding: '/preboarding',
+  probation: '/probation',
   compliance: '/documents',
   documents: '/documents',
   bank: '/bank',
+  performance: '/performance',
+  talent: '/talent',
+  learning: '/learning',
+  benefits: '/benefits',
+  engagement: '/engagement',
 }
 
 const INBOX_PATH = INBOX_ROUTE

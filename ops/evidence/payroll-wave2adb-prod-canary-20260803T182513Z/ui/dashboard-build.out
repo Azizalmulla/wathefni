@@ -1,0 +1,72 @@
+
+> wathefni-dashboard@0.0.0 build
+> tsc -b && vite build
+
+src/posthire/CloseExportWorkspace.tsx(125,25): error TS2339: Property 'body' does not exist on type 'DashboardApiError'.
+src/posthire/CloseExportWorkspace.tsx(141,9): error TS2322: Type '{ title: string; detail: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(149,27): error TS2322: Type '{ title: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(282,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(466,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(495,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/PayslipWorkspace.tsx(132,27): error TS2322: Type '{ title: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/PayslipWorkspace.tsx(299,40): error TS2322: Type '{ title: string; description: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'description' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(113,25): error TS2339: Property 'body' does not exist on type 'DashboardApiError'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(125,27): error TS2322: Type '{ title: string; detail: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(127,36): error TS2322: Type '{ title: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(248,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(273,40): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+npm run build failed (tsc); falling back to vite build
+vite v8.0.12 building client environment for production...
+[2Ktransforming...✓ 1907 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/setup-console.html                              1.63 kB │ gzip:  0.54 kB
+dist/index.html                                      2.01 kB │ gzip:  0.58 kB
+dist/assets/src-DQ9osVlk.css                       124.55 kB │ gzip: 19.15 kB
+dist/assets/rolldown-runtime-ciTZEWaI.js             0.56 kB │ gzip:  0.36 kB
+dist/assets/src-Cnwxo_YY.js                          0.69 kB │ gzip:  0.39 kB
+dist/assets/load-more-bar-fdzeWKeE.js                0.75 kB │ gzip:  0.50 kB
+dist/assets/access-C4CF0MqA.js                       1.06 kB │ gzip:  0.45 kB
+dist/assets/card-DHXoE2hI.js                         1.14 kB │ gzip:  0.55 kB
+dist/assets/badge-M40jyo1M.js                        1.20 kB │ gzip:  0.53 kB
+dist/assets/button-C4Nnai91.js                       1.27 kB │ gzip:  0.69 kB
+dist/assets/field-DaVBS50z.js                        1.32 kB │ gzip:  0.44 kB
+dist/assets/useOverlayA11y-F43xtvOA.js               1.42 kB │ gzip:  0.64 kB
+dist/assets/dashboardPerf-YTc1theN.js                1.70 kB │ gzip:  0.75 kB
+dist/assets/ConfirmDialog-DCV93-cV.js                3.14 kB │ gzip:  1.48 kB
+dist/assets/fetchers-kJ3rv01h.js                     3.55 kB │ gzip:  1.23 kB
+dist/assets/inboundIntakePresentation-B5lLioGw.js    3.59 kB │ gzip:  1.55 kB
+dist/assets/NotificationsPage-BMovtC7j.js            7.43 kB │ gzip:  2.42 kB
+dist/assets/RankingPage-CyIobFa7.js                  9.77 kB │ gzip:  3.34 kB
+dist/assets/JobWorkspace-Ds3kszpp.js                12.49 kB │ gzip:  3.90 kB
+dist/assets/ReportsPage-DQDYImUb.js                 13.42 kB │ gzip:  4.09 kB
+dist/assets/AdminAIPage-zQbX5Bu_.js                 17.64 kB │ gzip:  5.75 kB
+dist/assets/react-query-B73zYn28.js                 25.39 kB │ gzip:  8.37 kB
+dist/assets/utils-B-Q60V4B.js                       28.17 kB │ gzip:  9.13 kB
+dist/assets/lucide-DYqI548X.js                      28.62 kB │ gzip:  9.93 kB
+dist/assets/CandidatesPage-DPw3GC6y.js              30.84 kB │ gzip:  9.23 kB
+dist/assets/InterviewsPage-DlfQQq63.js              33.14 kB │ gzip:  8.41 kB
+dist/assets/CalendarShell-Bfq-SQnD.js               38.20 kB │ gzip: 11.03 kB
+dist/assets/JobsPage-2u7mA3n-.js                    39.07 kB │ gzip: 12.99 kB
+dist/assets/CandidateProfilePage-BvscziE1.js        45.11 kB │ gzip: 12.58 kB
+dist/assets/api-sYOc6kIY.js                         46.40 kB │ gzip:  8.95 kB
+dist/assets/SettingsPage-DzxVJ6GK.js                51.45 kB │ gzip: 13.93 kB
+dist/assets/recruitingLifecycle-DXQht60b.js         52.22 kB │ gzip: 13.72 kB
+dist/assets/AssessmentsPage-DsSsNrJo.js             57.67 kB │ gzip: 15.39 kB
+dist/assets/setupConsole-D8HTJkHT.js                62.92 kB │ gzip: 15.73 kB
+dist/assets/react-vendor-qwDKl6RG.js               181.78 kB │ gzip: 57.18 kB
+dist/assets/dashboard-CIR523RM.js                  229.87 kB │ gzip: 67.51 kB
+dist/assets/PostHire-NH5szhTc.js                   397.42 kB │ gzip: 95.17 kB
+
+✓ built in 245ms

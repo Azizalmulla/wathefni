@@ -1,0 +1,8 @@
+ANALYTICS_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('ANW1', 'ANW1-SYNTH|')
+prefixes ('965540',)
+honesty {'read_only': True, 'money_authority': False, 'synthetic_only': True, 'ai': False, 'compliance_metrics': False, 'payroll_cost_analytics': False}
+flags_ok_synthetic=true

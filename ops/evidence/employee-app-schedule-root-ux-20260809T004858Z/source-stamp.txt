@@ -1,0 +1,6 @@
+stamp=20260809T004858Z
+branch=authority-cutover
+commit=2fa16534c8846887472dabbd10cc164a6c788f3f
+dirty_schedule=2
+ota_group=8db2b731-8c39-40dc-beb0-9c92bba0addd
+rollback_prior=2c8c6f8f-9638-4099-8676-7f046bf56934

@@ -1,0 +1,346 @@
+[
+  {
+    "name": "wave4 version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave4 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "wave3 enabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "real decision gate on",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "allowlist has HR1",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "allowlist has HR2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "allowlist size >= 2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "enforced=false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "legal_reviewed=false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "non-allowlisted real denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic bypasses allowlist",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid handoff no money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "am vs pm no overlap",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "db is wathefni",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: frozen leave count 2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: frozen fp 51cd940f",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preflight: frozen fp e3217e0e",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eligibility rows 4",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eligibility all found",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eligibility enforced false",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "holiday status present",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "holiday fail-closed when not approved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employee app require allowlist",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "employee app Talal-only or empty-fail-closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "real approve non-allowlisted denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "real self-approval denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dual initiate stale",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dual same actor denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "dual confirm expire",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-dual-control: frozen leave count 2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-dual-control: frozen fp 51cd940f",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-dual-control: frozen fp e3217e0e",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synthetic employee",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "accrual posted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "annual half-day request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "enrich next_action decide",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "enrich non-binding",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "synth self-approval denied",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "stale concurrency exercised",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "HR approve half-day",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attendance derived or noted",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "hourly request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sick request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "needs-info",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "resubmit",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "attachment upload",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sensitive attachment masked for stranger",
+    "ok": false,
+    "detail": {
+      "ok": true,
+      "leave_id": "b9e5d46c-2233-433b-a72e-6501b7c95f7f",
+      "attachments": [
+        {
+          "attachment_id": "d421990b-8ee7-4b6b-92e8-456539c5d330",
+          "company_code": "WATHEFNI",
+          "leave_id": "b9e5d46c-2233-433b-a72e-6501b7c95f7f",
+          "version": 1,
+          "filename": "medical.pdf",
+          "content_type": "application/pdf",
+          "storage_ref": "wave4/66197b34/medical.pdf",
+          "sha256": null,
+          "category": "medical",
+          "sensitive": true,
+          "status": "active",
+          "replaces_attachment_id": null,
+          "uploaded_by_phone": "965527266197",
+          "rejected_by_phone": null,
+          "rejected_reason": null,
+          "provenance": {
+            "actor": "965527266197",
+            "source": "wave3_upload"
+          },
+          "created_at": "2026-08-02T17:16:27.768405+00:00",
+          "updated_at": "2026-08-02T17:16:27.768405+00:00"
+        }
+      ],
+      "sensitive_access": true
+    }
+  },
+  {
+    "name": "mask helper redacts",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "withdraw",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid request",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid no reservation money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid approve",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "unpaid payroll handoff no money",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "cancel future approved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "overlap or conflict surfaced",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "kill switch disables wave4",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "kill switch restored",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: frozen leave count 2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: frozen fp 51cd940f",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "post-cleanup: frozen fp e3217e0e",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "residual synthetic employees 0",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "balances count unchanged vs preflight",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ledger count unchanged vs preflight",
+    "ok": true,
+    "detail": null
+  }
+]

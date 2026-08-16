@@ -1,0 +1,15 @@
+schema_version employees360-wave5b-selfservice-v1
+employee_ess_audit_journal
+employee_ess_bank_profiles
+employee_ess_document_versions
+employee_ess_identity_bindings
+employee_ess_letter_orders
+employee_ess_overlay_conflicts
+employee_ess_personal_profiles
+employee_ess_request_events
+employee_ess_requests
+employee_ess_schema_meta
+employee_ess_sensitive_access_log
+bank_encryption_available True
+bank_key_fingerprint8 8d180c0c
+bank_key_length 44

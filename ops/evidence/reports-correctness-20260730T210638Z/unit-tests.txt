@@ -1,0 +1,10 @@
+test_assessment_labels_never_raw (test_reports_metrics_contract.ReportsMetricsContractTests.test_assessment_labels_never_raw) ... ok
+test_interview_alias_normalization (test_reports_metrics_contract.ReportsMetricsContractTests.test_interview_alias_normalization) ... ok
+test_stage_ar_labels (test_reports_metrics_contract.ReportsMetricsContractTests.test_stage_ar_labels) ... ok
+test_stage_buckets_drop_held_and_merge_legacy_offer (test_reports_metrics_contract.ReportsMetricsContractTests.test_stage_buckets_drop_held_and_merge_legacy_offer) ... ok
+test_talent_pool_record_state_omitted (test_reports_metrics_contract.ReportsMetricsContractTests.test_talent_pool_record_state_omitted) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK

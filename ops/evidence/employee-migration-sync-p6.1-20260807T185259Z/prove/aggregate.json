@@ -1,0 +1,12 @@
+{
+  "stamp": "20260807T185259Z",
+  "ok": true,
+  "checks": {
+    "live_api_refresh_sources": true,
+    "bundle_fingerprint": true,
+    "source_contract": true,
+    "p6_regression": true,
+    "p1_regression": true,
+    "p5_2_regression": true
+  }
+}

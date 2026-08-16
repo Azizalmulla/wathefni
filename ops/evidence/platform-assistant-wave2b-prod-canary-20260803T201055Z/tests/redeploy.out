@@ -1,0 +1,70 @@
+stamp=20260803T201055Z-redeploy
+time_utc=2026-08-03T20:12:12Z
+active
+=== SHAs before ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+a644681eb02527904f53f9dc23a67bee33bef72340f07aea03882133b0264ddd  /opt/wathefni/orchestrator/action_registry.py
+2144878c3bd1c5f75b1ee5cc560883937cc9239997810072eb9345a0be46dafe  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+ls: cannot access '/opt/wathefni/orchestrator/platform_assistant_wave2_safe_ops_reads.py': No such file or directory
+-rw-r--r-- 1 root root 41500 Aug  3 19:44 /opt/wathefni/orchestrator/platform_assistant_spine_wave1.py
+=== flags before ===
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+[20:12:12] backing up modules + dropins
+e07f551535f7bb5edf4137e15b4b6cb7f381ab8fe8d44fe0439ea3c7052ca29f  modules/assistant_capability_catalog.py
+a644681eb02527904f53f9dc23a67bee33bef72340f07aea03882133b0264ddd  modules/action_registry.py
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  modules/app.py
+2144878c3bd1c5f75b1ee5cc560883937cc9239997810072eb9345a0be46dafe  modules/tool_call_orchestrator.py
+6f096fa6c75b76894c59e808cccc3c86e35756cb8202b025062bb9ab577b0e22  modules/platform_assistant_spine_wave1.py
+eec8fb531faf1e449ca114996d4088522958c774e99ca50fc0b973883cb36f79  modules/setup_console_wave_a_launch_readiness.py
+[20:12:12] deploying platform assistant wave2 modules
+[20:12:12] writing Wave 2-B production drop-in (mutations off; ingest off; WATHEFNI only)
+[20:12:12] migrate ACK
+wave1_version 1.0.0
+wave2_version 1.0.0
+contract platform_assistant_wave2_safe_ops_reads
+honesty_ok {'wathefni_only': True, 'hr_dashboard_only': True, 'mutations': False, 'payroll': False, 'shifts': False, 'attendance_ingest': False, 'capture_ingest': 'off', 'attendance_records_basis': 'existing_records_only', 'whatsapp_widening': False, 'wave2_scope': ['leave_queue_reads', 'attendance_exception_reads']}
+connected_db wathefni
+ack_event_id 862f3848-146e-42fe-a114-db6926bfbd09
+ACK_PRODUCTION_PLATFORM_ASSISTANT_W2B=YES
+residual_policy=canary_tagged_cleaned_ack_retained
+MIGRATE_OK
+health_ok
+active
+=== SHAs after ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+eb92691a45690eead8b7bb519fdace95b2ad3c9ce0cb4f07d329cac2fd8d3af7  /opt/wathefni/orchestrator/action_registry.py
+2144878c3bd1c5f75b1ee5cc560883937cc9239997810072eb9345a0be46dafe  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+031b41c3f7a6803154b9e58122250bfc1f3888a824194c1446c0ecbdec0e845e  /opt/wathefni/orchestrator/platform_assistant_spine_wave1.py
+7093874b7815d843749a59a714dc2f3bfbb7bf8432dacefcfd345f21bdaba33c  /opt/wathefni/orchestrator/platform_assistant_wave2_safe_ops_reads.py
+=== flags after ===
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE2_COMPANIES=WATHEFNI
+WAVE1 1
+WAVE2 1
+COMPANIES_W1 WATHEFNI
+COMPANIES_W2 WATHEFNI
+KILL 0
+MUTATIONS 0
+CAPTURE_INGEST off
+wave1_enabled True
+wave2_enabled True
+company True
+company_external False
+mutations_allowed False
+kill_engaged False
+honesty {'wathefni_only': True, 'hr_dashboard_only': True, 'mutations': False, 'payroll': False, 'shifts': False, 'attendance_ingest': False, 'capture_ingest': 'off', 'attendance_records_basis': 'existing_records_only', 'whatsapp_widening': False}
+PAW2B_MARKER=PAW2B
+flags_ok_wave2b=true
+DEPLOY_OK stamp=20260803T201055Z-redeploy backup=/opt/wathefni/backups/production-pre-platform-assistant-wave2b-20260803T201055Z-redeploy evid=/opt/wathefni/production-evidence/platform-assistant-wave2b-prod-canary/20260803T201055Z-redeploy

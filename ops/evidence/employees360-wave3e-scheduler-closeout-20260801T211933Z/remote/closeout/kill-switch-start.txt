@@ -1,0 +1,5 @@
+{
+  "stdout": "rc=1\n",
+  "stderr": "Job for wathefni-lifecycle-effective.service failed because the control process exited with error code.\nSee \"systemctl status wathefni-lifecycle-effective.service\" and \"journalctl -xeu wathefni-lifecycle-effective.service\" for details.\n",
+  "rc": 0
+}

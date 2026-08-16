@@ -1,0 +1,79 @@
+PASS  production db
+PASS  store mode postgres
+PASS  capture ops on
+PASS  capture ingest off
+PASS  import off
+PASS  authority synthetic only
+PASS  CAPTURE_STORE env postgres
+PASS  42 attendance rows pre
+PASS  42 demo_seed rows pre
+PASS  four reals present pre
+PASS  register site
+PASS  cross-tenant device denied
+PASS  register device
+PASS  register connector sealed
+PASS  activate
+PASS  rotate sealed
+PASS  stale rotate fail-closed
+PASS  no plaintext secrets in DB
+PASS  credential rows Fernet-only
+PASS  health degraded
+PASS  checkpoint save
+PASS  checkpoint duplicate exactly-once
+PASS  checkpoint advance
+PASS  unknown mapping queued
+PASS  checkpoint survives restart
+PASS  unknown mapping remains queued after restart
+PASS  health survives restart
+PASS  health recover
+PASS  health event history retained
+PASS  cross-tenant approve denied
+PASS  manager self-action denied
+PASS  manager scope denied
+PASS  concurrent approve: exactly one success
+PASS  concurrent approve: other fail-closed
+PASS  reject ok
+PASS  reject idempotent
+PASS  approve+replay reaches authority
+PASS  authority punch exactly once
+PASS  replay idempotent duplicate
+PASS  authority punch still exactly once
+PASS  reconcile capture↔authority
+PASS  audit events immutable
+PASS  ops overview store_mode postgres
+PASS  freeze skipped
+PASS  42 attendance rows post
+PASS  four reals present post
+PASS  marker sites cleaned
+PASS  evidence leak scan
+{
+  "pass": 48,
+  "fail": 0,
+  "db": "wathefni",
+  "marker": "ATTW2G-5721b374"
+}
+SEED 200 True
+BEFORE postgres {'sites': 1, 'connectors': 1, 'open_remediation': 4, 'payroll_excluded': 5, 'by_kind': {'duplicate_conflict': 1, 'ambiguous_punch_order': 1, 'missing_check_out': 1, 'unknown_employee': 1}, 'online': 1, 'offline': 0, 'degraded': 0}
+AFTER postgres {'sites': 1, 'connectors': 1, 'open_remediation': 4, 'payroll_excluded': 5, 'by_kind': {'duplicate_conflict': 1, 'ambiguous_punch_order': 1, 'missing_check_out': 1, 'unknown_employee': 1}, 'online': 1, 'offline': 0, 'degraded': 0}
+RESTART_HTTP_PROOF_OK
+OVERVIEW 200 {'store_mode': 'postgres', 'ok': True}
+SEED 200 {'ok': True, 'detail': None}
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-en-desktop.png
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-en-mobile.png
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-ar-desktop.png
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-ar-mobile.png
+{
+  "prefix": "ATTW2GUI886D85",
+  "company": "WATHEFNI",
+  "store_mode": "postgres",
+  "shots": [
+    "capture-ops-ar-desktop.png",
+    "capture-ops-ar-mobile.png",
+    "capture-ops-en-desktop.png",
+    "capture-ops-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false,
+  "ingest_enabled": false,
+  "environment": "production"
+}

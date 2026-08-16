@@ -1,0 +1,11 @@
+PASS rollback artifacts present on VPS :: {"backend_app": true, "backend_contract": true, "dashboard": true, "reconcile_api": true}
+PASS rollback artifacts non-empty / usable :: {"backend_app": true, "backend_contract": true, "dashboard": true, "reconcile_api": true}
+PASS Aziz synthetic effective bank cleared :: {"before": false, "after": null, "item": {"status": "pending", "rejection_reason": null}, "already_clear": true}
+PASS Aziz bank_details is open for real submission :: {"status": "pending", "rejection_reason": null}
+PASS Talal /app/bank returns 403 :: {"http": 403, "detail": {"detail": {"error": "bank_ess_not_allowlisted", "message": "Bank self-service is not enabled for your account yet."}}}
+PASS Talal has no open_bank action :: {"open_bank": false, "bank_feature": {"enabled": false, "reason": "bank_ess_not_allowlisted", "dependency_mode": "bank_ess", "module_keys": [], "actions": [], "eligibility": {"eligible": false, "reason": "bank_ess_not_allowlisted", "contract_version": "bank_ess_v1"}}}
+PASS Talal 403 is eligibility denial (not a crash) :: {"error": "bank_ess_not_allowlisted"}
+PASS cohort inventory has real employees beyond canary :: {"count": 13, "keys": ["WATHEFNI-96599411617", "WATHEFNI-96550010005", "WATHEFNI-96550010002", "WATHEFNI-96588721142", "WATHEFNI-96566363363", "WATHEFNI-96550010010", "WATHEFNI-96550010003", "WATHEFNI-96550010001", "WATHEFNI-96550010006", "WATHEFNI-96550010009", "WATHEFNI-96599338566", "WATHEFNI-96550010004", "WATHEFNI-96597727743"]}
+PASS Aziz /app/bank still reachable after cleanup :: {"http": 200}
+PREFLIGHT_OK
+wrote /tmp/broad-preflight.json

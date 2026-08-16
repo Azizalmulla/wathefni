@@ -1,0 +1,544 @@
+{
+  "checks": [
+    {
+      "label": "WATHEFNI-96597727743 is active",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "label": "WATHEFNI-96550252254 is active",
+      "ok": true,
+      "detail": "active"
+    },
+    {
+      "label": "other status unchanged WATHEFNI-96566363363",
+      "ok": true,
+      "detail": {
+        "before": "active",
+        "after": "active"
+      }
+    },
+    {
+      "label": "other status unchanged WATHEFNI-96599411617",
+      "ok": true,
+      "detail": {
+        "before": "active",
+        "after": "active"
+      }
+    },
+    {
+      "label": "target was null before apply window or active after restore",
+      "ok": true,
+      "detail": {
+        "before": null,
+        "after": "active"
+      }
+    },
+    {
+      "label": "target was null before apply window or active after restore",
+      "ok": true,
+      "detail": {
+        "before": null,
+        "after": "active"
+      }
+    },
+    {
+      "label": "orphan live count 0",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "label": "quarantine has 3 active",
+      "ok": true,
+      "detail": 3
+    },
+    {
+      "label": "integrity total orphans 0",
+      "ok": true,
+      "detail": {
+        "total_orphans": 0,
+        "ok": true,
+        "employee_messages": {
+          "present": true,
+          "orphans": 0,
+          "samples": [],
+          "mode": "company_employee"
+        }
+      }
+    },
+    {
+      "label": "integrity ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "journal applied entries present",
+      "ok": true,
+      "detail": [
+        {
+          "id": "4e3c08f1-75fc-47be-8e0f-e00fd022101e",
+          "action": "set_employment_status",
+          "key": "wave1c-null-status:WATHEFNI-96597727743:active"
+        },
+        {
+          "id": "5228deb9-25ae-4ac0-821f-5d21f56caee2",
+          "action": "set_employment_status",
+          "key": "wave1c-null-status:WATHEFNI-96550252254:active"
+        },
+        {
+          "id": "84c5c7cc-ac1f-44dc-a51d-d08002fe01b8",
+          "action": "quarantine_employee_messages",
+          "key": "wave1c-quarantine:WATHEFNI-P0-DUP-1"
+        }
+      ]
+    },
+    {
+      "label": "journal before/after wave1c-null-status:WATHEFNI-96597727743:active",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "journal before/after wave1c-null-status:WATHEFNI-96550252254:active",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "journal before/after wave1c-quarantine:WATHEFNI-P0-DUP-1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no Wave2 persons table",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "snapshot": {
+    "stamp": "2026-08-01T20:03:20.717462+00:00",
+    "employees": [
+      {
+        "employee_key": "WATHEFNI-96550252254",
+        "employment_status": "active",
+        "updated_at": "2026-08-01 20:03:20.703316+00:00"
+      },
+      {
+        "employee_key": "WATHEFNI-96566363363",
+        "employment_status": "active",
+        "updated_at": "2026-07-12 15:46:31.905837+00:00"
+      },
+      {
+        "employee_key": "WATHEFNI-96597727743",
+        "employment_status": "active",
+        "updated_at": "2026-08-01 20:03:20.680449+00:00"
+      },
+      {
+        "employee_key": "WATHEFNI-96599411617",
+        "employment_status": "active",
+        "updated_at": "2026-07-13 19:22:41.486318+00:00"
+      }
+    ],
+    "status_by_key": {
+      "WATHEFNI-96550252254": "active",
+      "WATHEFNI-96566363363": "active",
+      "WATHEFNI-96597727743": "active",
+      "WATHEFNI-96599411617": "active"
+    },
+    "target_null_statuses": {
+      "WATHEFNI-96597727743": "active",
+      "WATHEFNI-96550252254": "active"
+    },
+    "other_statuses": {
+      "WATHEFNI-96566363363": "active",
+      "WATHEFNI-96599411617": "active"
+    },
+    "orphan_live_count": 0,
+    "orphan_live": [],
+    "quarantine_count_active": 3,
+    "quarantine": [
+      {
+        "quarantine_id": "6e818844-550f-49e8-934a-14b92c62cc46",
+        "message_id": "9131f0be-0330-4527-856d-6d254e494faa",
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "quarantine_reason": "wave1c prod apply: quarantine synthetic orphan WATHEFNI-P0-DUP-1; no employee row; no valid refs; 3 harness residue messages",
+        "restored_at": null,
+        "quarantined_at": "2026-08-01 20:03:20.704824+00:00"
+      },
+      {
+        "quarantine_id": "c65f790b-6da5-4731-a3f7-65256511ad88",
+        "message_id": "593f8836-3a12-43d4-aec2-17c79b9416b6",
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "quarantine_reason": "wave1c prod apply: quarantine synthetic orphan WATHEFNI-P0-DUP-1; no employee row; no valid refs; 3 harness residue messages",
+        "restored_at": null,
+        "quarantined_at": "2026-08-01 20:03:20.704824+00:00"
+      },
+      {
+        "quarantine_id": "d679ba01-8ff2-4506-b97e-6eea3a76bce8",
+        "message_id": "35be03eb-bae6-4cc5-9153-e9e4291f064e",
+        "employee_key": "WATHEFNI-P0-DUP-1",
+        "quarantine_reason": "wave1c prod apply: quarantine synthetic orphan WATHEFNI-P0-DUP-1; no employee row; no valid refs; 3 harness residue messages",
+        "restored_at": null,
+        "quarantined_at": "2026-08-01 20:03:20.704824+00:00"
+      }
+    ],
+    "journal": [
+      {
+        "remediation_id": "4e3c08f1-75fc-47be-8e0f-e00fd022101e",
+        "action": "set_employment_status",
+        "target_key": "WATHEFNI-96597727743",
+        "status": "applied",
+        "dry_run": false,
+        "idempotency_key": "wave1c-null-status:WATHEFNI-96597727743:active",
+        "reason": "wave1c prod apply: evidence-gated null\u2192active; employment_status IS NULL; application.status=hired; hire-linked app_key=96597727743-WATHEFNI-MARKETING_SPECIALIST; onboarding_status='in_progress'; attendance_records=14; shift_assignments=7; leave_requests=1; employee_messages=12; no left markers found",
+        "before_json": {
+          "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+          "updated_at": "2026-08-01T20:03:20.635509+00:00",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96597727743",
+          "employment_status": null,
+          "onboarding_status": "in_progress"
+        },
+        "after_json": {
+          "updated_at": "2026-08-01T20:03:20.680449+00:00",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96597727743",
+          "employment_status": "active"
+        },
+        "evidence": {
+          "reasons": [
+            "employment_status IS NULL",
+            "application.status=hired",
+            "hire-linked app_key=96597727743-WATHEFNI-MARKETING_SPECIALIST",
+            "onboarding_status='in_progress'",
+            "attendance_records=14",
+            "shift_assignments=7",
+            "leave_requests=1",
+            "employee_messages=12",
+            "no left markers found"
+          ],
+          "decision": {
+            "reasons": [
+              "employment_status IS NULL",
+              "application.status=hired",
+              "hire-linked app_key=96597727743-WATHEFNI-MARKETING_SPECIALIST",
+              "onboarding_status='in_progress'",
+              "attendance_records=14",
+              "shift_assignments=7",
+              "leave_requests=1",
+              "employee_messages=12",
+              "no left markers found"
+            ],
+            "confidence": "high",
+            "classification": "null_should_be_active",
+            "proposed_status": "active"
+          },
+          "caller_evidence": {
+            "employee": {
+              "name": "mohammad alqattan",
+              "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+              "employee_key": "WATHEFNI-96597727743",
+              "employment_status": null,
+              "onboarding_status": "in_progress"
+            },
+            "applications": [
+              {
+                "status": "hired",
+                "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+                "company_code": "WATHEFNI"
+              }
+            ],
+            "leave_requests": {
+              "count": 1
+            },
+            "onboarding_items": {
+              "count": 6
+            },
+            "employee_messages": {
+              "count": 12
+            },
+            "shift_assignments": {
+              "count": 7
+            },
+            "attendance_records": {
+              "count": 14
+            },
+            "compliance_documents": {
+              "count": 5
+            },
+            "employee_status_changes": {
+              "count": 0
+            }
+          }
+        },
+        "created_at": "2026-08-01 20:03:20.679252+00:00",
+        "rolled_back_at": null
+      },
+      {
+        "remediation_id": "5228deb9-25ae-4ac0-821f-5d21f56caee2",
+        "action": "set_employment_status",
+        "target_key": "WATHEFNI-96550252254",
+        "status": "applied",
+        "dry_run": false,
+        "idempotency_key": "wave1c-null-status:WATHEFNI-96550252254:active",
+        "reason": "wave1c prod apply: evidence-gated null\u2192active; employment_status IS NULL; application.status=hired; hire-linked app_key=96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER; onboarding_status='in_progress'; attendance_records=14; shift_assignments=5; employee_messages=11; no left markers found",
+        "before_json": {
+          "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "updated_at": "2026-08-01T20:03:20.641583+00:00",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "employment_status": null,
+          "onboarding_status": "in_progress"
+        },
+        "after_json": {
+          "updated_at": "2026-08-01T20:03:20.703316+00:00",
+          "company_code": "WATHEFNI",
+          "employee_key": "WATHEFNI-96550252254",
+          "employment_status": "active"
+        },
+        "evidence": {
+          "reasons": [
+            "employment_status IS NULL",
+            "application.status=hired",
+            "hire-linked app_key=96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+            "onboarding_status='in_progress'",
+            "attendance_records=14",
+            "shift_assignments=5",
+            "employee_messages=11",
+            "no left markers found"
+          ],
+          "decision": {
+            "reasons": [
+              "employment_status IS NULL",
+              "application.status=hired",
+              "hire-linked app_key=96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+              "onboarding_status='in_progress'",
+              "attendance_records=14",
+              "shift_assignments=5",
+              "employee_messages=11",
+              "no left markers found"
+            ],
+            "confidence": "high",
+            "classification": "null_should_be_active",
+            "proposed_status": "active"
+          },
+          "caller_evidence": {
+            "employee": {
+              "name": "Talal Fadhli",
+              "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+              "employee_key": "WATHEFNI-96550252254",
+              "employment_status": null,
+              "onboarding_status": "in_progress"
+            },
+            "applications": [
+              {
+                "status": "hired",
+                "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+                "company_code": "WATHEFNI"
+              }
+            ],
+            "leave_requests": {
+              "count": 0
+            },
+            "onboarding_items": {
+              "count": 6
+            },
+            "employee_messages": {
+              "count": 11
+            },
+            "shift_assignments": {
+              "count": 5
+            },
+            "attendance_records": {
+              "count": 14
+            },
+            "compliance_documents": {
+              "count": 5
+            },
+            "employee_status_changes": {
+              "count": 0
+            }
+          }
+        },
+        "created_at": "2026-08-01 20:03:20.702219+00:00",
+        "rolled_back_at": null
+      },
+      {
+        "remediation_id": "84c5c7cc-ac1f-44dc-a51d-d08002fe01b8",
+        "action": "quarantine_employee_messages",
+        "target_key": "WATHEFNI-P0-DUP-1",
+        "status": "applied",
+        "dry_run": false,
+        "idempotency_key": "wave1c-quarantine:WATHEFNI-P0-DUP-1",
+        "reason": "wave1c prod apply: quarantine synthetic orphan WATHEFNI-P0-DUP-1; no employee row; no valid refs; 3 harness residue messages",
+        "before_json": {
+          "messages": [
+            {
+              "flow": "shift",
+              "locale": "en",
+              "status": "failed",
+              "attempts": 1,
+              "metadata": {},
+              "variables": {
+                "location": "",
+                "shift_date": "Wednesday, 19 August 2026",
+                "shift_time": "10:00",
+                "company_name": "Wathefni",
+                "employee_name": "Authority P0 Twin"
+              },
+              "account_id": "WATHEFNI",
+              "created_at": "2026-07-20T02:26:04.682894+00:00",
+              "dedupe_key": "auto:shift:shift_assigned:WATHEFNI-P0-DUP-1:112fca140ce1:2974190",
+              "hr_task_id": null,
+              "last_error": "session:missing_candidate_conversation_id; template:template_disabled; email:no_employee_email",
+              "message_id": "9131f0be-0330-4527-856d-6d254e494faa",
+              "updated_at": "2026-07-20T02:26:04.698069+00:00",
+              "attempt_log": [
+                {
+                  "at": "2026-07-20T02:26:04.697961+00:00",
+                  "status": "failed",
+                  "attempt": 1,
+                  "channel": null,
+                  "reasons": [
+                    "session:missing_candidate_conversation_id",
+                    "template:template_disabled",
+                    "email:no_employee_email"
+                  ]
+                }
+              ],
+              "criticality": "standard",
+              "sensitivity": "preview",
+              "body_preview": "You have been scheduled for:\n- Wednesday, 19 August 2026: 10:00-12:00",
+              "channel_used": null,
+              "company_code": "WATHEFNI",
+              "delivered_at": null,
+              "employee_key": "WATHEFNI-P0-DUP-1",
+              "max_attempts": 6,
+              "target_email": null,
+              "target_phone": "96500001001",
+              "template_key": "shift_assigned",
+              "body_encrypted": null,
+              "next_attempt_at": null,
+              "body_key_version": null,
+              "created_by_phone": null
+            },
+            {
+              "flow": "shift",
+              "locale": "en",
+              "status": "delivered_whatsapp",
+              "attempts": 1,
+              "metadata": {},
+              "variables": {
+                "location": "",
+                "shift_date": "Wednesday, 19 August 2026",
+                "shift_time": "10:00",
+                "company_name": "Wathefni",
+                "employee_name": "Authority P0 Twin"
+              },
+              "account_id": "WATHEFNI",
+              "created_at": "2026-07-20T03:57:01.857205+00:00",
+              "dedupe_key": "auto:shift:shift_assigned:WATHEFNI-P0-DUP-1:112fca140ce1:2974199",
+              "hr_task_id": null,
+              "last_error": null,
+              "message_id": "593f8836-3a12-43d4-aec2-17c79b9416b6",
+              "updated_at": "2026-07-20T03:57:01.879741+00:00",
+              "attempt_log": [
+                {
+                  "at": "2026-07-20T03:57:01.879476+00:00",
+                  "status": "delivered_whatsapp",
+                  "attempt": 1,
+                  "channel": "whatsapp_session",
+                  "reasons": []
+                }
+              ],
+              "criticality": "standard",
+              "sensitivity": "preview",
+              "body_preview": "You have been scheduled for:\n- Wednesday, 19 August 2026: 10:00-12:00",
+              "channel_used": "whatsapp_session",
+              "company_code": "WATHEFNI",
+              "delivered_at": "2026-07-20T03:57:01.879741+00:00",
+              "employee_key": "WATHEFNI-P0-DUP-1",
+              "max_attempts": 6,
+              "target_email": null,
+              "target_phone": "96500001001",
+              "template_key": "shift_assigned",
+              "body_encrypted": null,
+              "next_attempt_at": null,
+              "body_key_version": null,
+              "created_by_phone": null
+            },
+            {
+              "flow": "leave_decision",
+              "locale": "en",
+              "status": "delivered_whatsapp",
+              "attempts": 1,
+              "metadata": {},
+              "variables": {
+                "end_date": "2026-09-08",
+                "start_date": "2026-09-08",
+                "company_name": "Wathefni",
+                "employee_name": "Authority P0 Twin"
+              },
+              "account_id": null,
+              "created_at": "2026-07-20T03:57:02.025021+00:00",
+              "dedupe_key": "leave_decision:817997e2-7220-4c0c-8727-0b38a0139030:approved",
+              "hr_task_id": null,
+              "last_error": null,
+              "message_id": "35be03eb-bae6-4cc5-9153-e9e4291f064e",
+              "updated_at": "2026-07-20T03:57:02.029648+00:00",
+              "attempt_log": [
+                {
+                  "at": "2026-07-20T03:57:02.029544+00:00",
+                  "status": "delivered_whatsapp",
+                  "attempt": 1,
+                  "channel": "whatsapp_session",
+                  "reasons": []
+                }
+              ],
+              "criticality": "critical",
+              "sensitivity": "preview",
+              "body_preview": "Your leave request for 2026-09-08 has been approved.",
+              "channel_used": "whatsapp_session",
+              "company_code": "WATHEFNI",
+              "delivered_at": "2026-07-20T03:57:02.029648+00:00",
+              "employee_key": "WATHEFNI-P0-DUP-1",
+              "max_attempts": 6,
+              "target_email": null,
+              "target_phone": "96500001001",
+              "template_key": "leave_request_approved",
+              "body_encrypted": null,
+              "next_attempt_at": null,
+              "body_key_version": null,
+              "created_by_phone": null
+            }
+          ]
+        },
+        "after_json": {
+          "quarantined": 3
+        },
+        "evidence": {
+          "message_ids": [
+            "9131f0be-0330-4527-856d-6d254e494faa",
+            "593f8836-3a12-43d4-aec2-17c79b9416b6",
+            "35be03eb-bae6-4cc5-9153-e9e4291f064e"
+          ],
+          "message_count": 3,
+          "synthetic_key": true,
+          "employee_row_present": false
+        },
+        "created_at": "2026-08-01 20:03:20.704824+00:00",
+        "rolled_back_at": null
+      }
+    ],
+    "integrity": {
+      "total_orphans": 0,
+      "ok": true,
+      "employee_messages": {
+        "present": true,
+        "orphans": 0,
+        "samples": [],
+        "mode": "company_employee"
+      }
+    }
+  },
+  "pass": 15,
+  "fail": 0
+}

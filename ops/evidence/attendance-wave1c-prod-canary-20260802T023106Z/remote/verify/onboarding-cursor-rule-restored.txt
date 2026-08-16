@@ -1,0 +1,1 @@
+-rw-r--r-- 1 root root 2679 Aug  2 02:37 /opt/wathefni/.cursor/rules/onboarding-freeze.mdc

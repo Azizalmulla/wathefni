@@ -1,0 +1,59 @@
+{
+  "prove_after_apply_fail": 0,
+  "prove_after_restore_fail": 0,
+  "health": 200,
+  "verdict": "PASS",
+  "journal_ids_applied": [
+    "4e3c08f1-75fc-47be-8e0f-e00fd022101e",
+    "5228deb9-25ae-4ac0-821f-5d21f56caee2",
+    "84c5c7cc-ac1f-44dc-a51d-d08002fe01b8"
+  ],
+  "journal": [
+    {
+      "remediation_id": "4e3c08f1-75fc-47be-8e0f-e00fd022101e",
+      "action": "set_employment_status",
+      "target_key": "WATHEFNI-96597727743",
+      "idempotency_key": "wave1c-null-status:WATHEFNI-96597727743:active",
+      "status": "applied"
+    },
+    {
+      "remediation_id": "5228deb9-25ae-4ac0-821f-5d21f56caee2",
+      "action": "set_employment_status",
+      "target_key": "WATHEFNI-96550252254",
+      "idempotency_key": "wave1c-null-status:WATHEFNI-96550252254:active",
+      "status": "applied"
+    },
+    {
+      "remediation_id": "84c5c7cc-ac1f-44dc-a51d-d08002fe01b8",
+      "action": "quarantine_employee_messages",
+      "target_key": "WATHEFNI-P0-DUP-1",
+      "idempotency_key": "wave1c-quarantine:WATHEFNI-P0-DUP-1",
+      "status": "applied"
+    }
+  ],
+  "before_counts": {
+    "target_statuses": {
+      "WATHEFNI-96597727743": null,
+      "WATHEFNI-96550252254": null
+    },
+    "other_statuses": {
+      "WATHEFNI-96566363363": "active",
+      "WATHEFNI-96599411617": "active"
+    },
+    "orphan_live": 3,
+    "integrity_total_orphans": 3
+  },
+  "after_counts": {
+    "target_statuses": {
+      "WATHEFNI-96597727743": "active",
+      "WATHEFNI-96550252254": "active"
+    },
+    "other_statuses": {
+      "WATHEFNI-96566363363": "active",
+      "WATHEFNI-96599411617": "active"
+    },
+    "orphan_live": 0,
+    "quarantine_active": 3,
+    "integrity_total_orphans": 0
+  }
+}

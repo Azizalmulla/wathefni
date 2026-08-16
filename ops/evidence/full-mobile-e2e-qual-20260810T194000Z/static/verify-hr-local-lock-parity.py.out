@@ -1,0 +1,28 @@
+PASS HR PIN keys namespaced
+PASS no employee pin keys in HR store
+PASS HR bio keys namespaced
+PASS HR autolock key namespaced
+PASS HR pepper distinct
+PASS principal = company:user_id
+PASS session stores still separate
+PASS HR statuses include lock/setup/bio
+PASS sealed session model
+PASS create/unlock/change PIN
+PASS biometric opt-in + settings toggle
+PASS recovery is operator re-auth
+PASS recovery not employee OTP
+PASS login endpoint operator
+PASS HRLocalUnlockShell in layout
+PASS AccessGate lock UI
+PASS change-pin route registered
+PASS overlay uses HR verifyPin
+PASS bio cancel→PIN injectors
+PASS forgot copy override
+PASS Employee shell only in EmployeeShell
+PASS HR shell not in EmployeeShell
+PASS Settings device security section
+PASS Settings wires bio + autolock + change pin
+PASS EN+AR keys
+PASS HR forgot mentions email/password
+PASS no device screen-lock phase 6
+hr-local-lock-parity: GREEN

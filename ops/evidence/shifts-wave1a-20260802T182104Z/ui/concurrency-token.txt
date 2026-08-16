@@ -1,0 +1,5 @@
+DASHBOARD_DIST_HAS_expected_updated_at=yes
+apps/wathefni-dashboard/dist/assets/dashboard-C5_9qaoH.js
+apps/wathefni-dashboard/dist/assets/api-4eghFNHt.js
+apps/wathefni-dashboard/dist/assets/PostHire-BXoMxfm_.js
+apps/wathefni-dashboard/dist/assets/SettingsPage-BaXoDVhr.js

@@ -1,0 +1,24 @@
+PASS uses PageScreen/PageScrollView
+PASS uses Wordmark (not Wathefni HR)
+PASS uses EditorialHeading + FadeIn
+PASS uses AmbientCard + AmbientIconTile
+PASS uses ListRow + StatusChip
+PASS quiet row icons not ambient tiles
+PASS progress via StatusChip tones
+PASS chip semantics yellow/blue/pink/green
+PASS in progress is blue not neutral
+PASS green hero locked
+PASS no clinical StatusChip parade
+PASS uses statusLabel (no raw enums in UI)
+PASS ambient color roles present
+PASS not_started humanized
+PASS ar not_started
+PASS hrHome keys EN+AR
+PASS tab labels EN+AR
+PASS tabs use employee useI18n + tabFeedback
+PASS no module grid
+PASS overflow to Inbox
+PASS no locale clutter on Home
+PASS pull refresh not tied to isFetching
+PASS initial load separate from pull spinner
+hr-home-parity: GREEN

@@ -1,0 +1,12 @@
+PASS
+
+Employees 360 Wave 2 — canonical authority (local/staging)
+Stamp: 20260801T201120Z
+Evidence: ops/evidence/employees360-wave2-authority-local-20260801T201120Z/
+
+Tests: unit 19/19 PASS; staging smoke 27/27 PASS
+Production: NOT deployed / NOT backfilled
+
+Person / Employment / Assignment shadow authority with employee_key compatibility,
+approved-map deterministic IDs, contact aliases, employee_number, migration journal,
+scoped rollback + restore-new.

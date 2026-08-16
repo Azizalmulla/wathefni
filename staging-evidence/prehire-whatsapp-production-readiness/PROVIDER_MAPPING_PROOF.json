@@ -1,0 +1,71 @@
+{
+  "changed_payload_duplicate": true,
+  "changed_payload_identity_match": false,
+  "concurrent_claims": [
+    {
+      "claimed": true,
+      "dedupe_available": true,
+      "identity": {
+        "account_id": "internal-readiness",
+        "conversation_id": "900001",
+        "payload_sha256": "1b263fb56741c5c17a8027be043e66a70ed2780e37a6ebdbb461429c73a8314a",
+        "provider": "readiness-proof",
+        "provider_message_id": "readiness-6d9ad941e2724d34ac65f6999f40e03e",
+        "sender_phone": "96550000000"
+      },
+      "inbound_id": "f4e102ae-53c7-4b62-922b-6e440b2efcf2"
+    },
+    {
+      "claimed": false,
+      "dedupe_available": true,
+      "duplicate": true,
+      "existing": {
+        "conversation_id": "900001",
+        "error": null,
+        "inbound_id": "f4e102ae-53c7-4b62-922b-6e440b2efcf2",
+        "payload_sha256": "1b263fb56741c5c17a8027be043e66a70ed2780e37a6ebdbb461429c73a8314a",
+        "response_json": null,
+        "sender_phone": "96550000000",
+        "status": "processing"
+      },
+      "identity": {
+        "account_id": "internal-readiness",
+        "conversation_id": "900001",
+        "payload_sha256": "1b263fb56741c5c17a8027be043e66a70ed2780e37a6ebdbb461429c73a8314a",
+        "provider": "readiness-proof",
+        "provider_message_id": "readiness-6d9ad941e2724d34ac65f6999f40e03e",
+        "sender_phone": "96550000000"
+      },
+      "identity_match": true
+    }
+  ],
+  "concurrent_single_claim": true,
+  "deployed_forwarded_metadata_keys": [
+    "latest_user_language",
+    "provider_payload",
+    "source"
+  ],
+  "extracted_at_channel": "wamid.HBgLREADINESS0001",
+  "generated_fallback_used": false,
+  "mapping_ok": false,
+  "missing_id_dedupe_available": false,
+  "mode": "staging_db_synthetic_no_delivery",
+  "orchestrator_id_from_corrected_shape": "wamid.HBgLREADINESS0001",
+  "orchestrator_id_from_deployed_shape": null,
+  "production_shaped_payload": {
+    "conversation_id": "900001",
+    "messages": [
+      {
+        "from": "96550000000",
+        "id": "wamid.HBgLREADINESS0001",
+        "text": {
+          "body": "status?"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "provider_field": "messages[0].id",
+  "row_count_after_cleanup": 0,
+  "row_count_before_cleanup": 1
+}

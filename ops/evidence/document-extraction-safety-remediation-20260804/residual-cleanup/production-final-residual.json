@@ -1,0 +1,15 @@
+{
+  "iso_companies": 0,
+  "iso_applications": 0,
+  "migration_batches": 0,
+  "committed_migration_rows": 0,
+  "other_ats_export_queue_by_status_retained": {
+    "cancelled": 349,
+    "dead_letter": 10
+  },
+  "other_ats_export_queue_active": 0,
+  "queue_jobs_linked_to_current_docs_or_apps": 0,
+  "terminal_jobs_retained_not_deleted": 359,
+  "active_residual_total": 0,
+  "verification": "PASS"
+}

@@ -1,0 +1,23 @@
+    probation wave1 — SM + template + flags
+      PASS  schema version
+      PASS  sql pack exists
+      PASS  active→under_review
+      PASS  under_review→confirmed
+      PASS  under_review→extended
+      PASS  under_review→failed
+      PASS  confirmed terminal
+      PASS  failed terminal
+      PASS  milestone pending→completed
+      PASS  milestone pending→overdue
+      PASS  milestone completed terminal
+      PASS  30/60/90 keys
+      PASS  offsets 30/60/90
+      PASS  runtime off default
+      PASS  allowlist present
+      PASS  app ensure_probation_schema hook
+      PASS  hire bridge soft probation hook
+      PASS  rollback guidance
+      PASS  no UI claim
+
+    19 passed, 0 failed
+PROBATION_WAVE1_UNIT_FULL_PASS

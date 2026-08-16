@@ -1,0 +1,100 @@
+    PRODUCTION READINESS R5J — workforce planning surface (staging DB)
+    tenant: R5JFB29CB
+      PASS  workforce planning enableable
+      PASS  JA hard blocks enable
+      PASS  enable JA+WFP A
+      PASS  enable JA+WFP B
+      PASS  A workspace ready
+      PASS  I recruiting off
+      PASS  I comp off
+      PASS  I talent off
+      PASS  I payroll off
+      PASS  I performance off
+      PASS  A JA profile
+      PASS  A actual workforce exists
+      PASS  D non-KWD rejected
+      PASS  A create plan
+      PASS  A freeze baseline from actual
+      PASS  A not second SoT
+      PASS  A baseline hc = actual at freeze
+      PASS  A later actual changed
+      PASS  A baseline unchanged after actual change
+      PASS  A baseline rows still 2
+      PASS  A baseline immutable once frozen
+      PASS  B base scenario
+      PASS  B growth scenario
+      PASS  C assumption versioned
+      PASS  C no silent Wave 5 forecast
+      PASS  B/C new headcount explicit
+      PASS  C replacement explicit
+      PASS  C reduction explicit
+      PASS  B growth did not mutate base demand
+      PASS  B base did not mutate growth demand
+      PASS  B actual still 3
+      PASS  C projection reproducible
+      PASS  C planned hc = 4
+      PASS  C no AI black box
+      PASS  C same inputs same result
+      PASS  D planned cost labeled
+      PASS  D currency KWD
+      PASS  D not payroll
+      PASS  gap definition driven
+      PASS  compare compatible
+      PASS  manager empty scope zero rows
+      PASS  E submit
+      PASS  E approve
+      PASS  E actual unchanged
+      PASS  E actual still 3 after approve
+      PASS  E approved scenario immutable
+      PASS  F recruiting OFF handoff
+      PASS  F works recruiting off
+      PASS  F no employment mutate
+      PASS  F no auto post/hire
+      PASS  F/G handoff idempotent
+      PASS  H actual vs plan uses canonical actual
+      PASS  H actual is 3 not baseline 2
+      PASS  H planned is governed 4
+      PASS  Wave 5 planned demand fact
+      PASS  Wave 5 planned hc fact
+      PASS  no actual-plane planning contamination
+      PASS  history reconstructable
+      PASS  G recruiting ON handoff
+      PASS  G draft only or fail-closed
+      PASS  G no job posted
+      PASS  G no hire
+      PASS  G retry does not duplicate
+      PASS  G exactly one linked requisition row
+      PASS  G linked requisition is draft
+      PASS  assistant mutation forbidden
+      PASS  assistant no AI forecast
+      PASS  Workforce Planning HTTP routes registered
+      PASS  no Employee App Workforce Planning namespace
+      PASS  no HR Mobile Workforce Planning namespace
+      PASS  unauthenticated workspace not public
+      PASS  HR without Workforce Planning permission 403
+      PASS  403 is not empty-plans / not 0 planned hires
+      PASS  manager admin workspace 403
+      PASS  manager workspace route allowed
+      PASS  manager empty scope is not company-wide
+      PASS  manager empty scope is zero demand
+      PASS  HR workspace HTTP
+      PASS  HR lists plans
+      PASS  export without workforce_planning.export is 403
+      PASS  export with workforce_planning.export
+      PASS  planner-only cannot approve
+      PASS  non-KWD create is 422
+      PASS  non-KWD names no FX
+      PASS  tenant isolation blocks foreign plan
+      PASS  disable ok
+      PASS  disable does not delete requisitions
+      PASS  disable suppresses new notifications
+      PASS  disable hides workspace
+      PASS  historical plan preserved
+      PASS  history still reconstructable after disable
+      PASS  handoffs retained after disable
+      PASS  JA off → WFP unavailable
+      PASS  JA off does not guess plans
+
+    94 passed, 0 failed
+R5J_WORKFORCE_PLANNING_SURFACE_DB_PASS
+STAGING_RC=0

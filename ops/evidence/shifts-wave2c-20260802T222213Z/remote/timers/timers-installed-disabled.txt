@@ -1,0 +1,11 @@
+stamp=20260802T222232Z
+installed=1
+=== wathefni-shifts-reminder-drain.timer ===
+disabled
+inactive
+=== wathefni-shifts-lifecycle-recon.timer ===
+disabled
+inactive
+=== wathefni-shifts-leave-recon.timer ===
+disabled
+inactive

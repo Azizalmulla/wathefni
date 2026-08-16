@@ -1,0 +1,7 @@
+{
+  "local_go": true,
+  "phase8_planning_go": true,
+  "production_go": false,
+  "role_profiles": false,
+  "staging_go": true
+}

@@ -1,0 +1,93 @@
+{
+  "reschedule": {
+    "status": 200,
+    "body": {
+      "ok": false,
+      "status": "failed",
+      "message": "I need the employee before I can reschedule onboarding.",
+      "confirmation": null,
+      "result": {
+        "ok": false,
+        "error": "employee_not_found",
+        "safe_user_message": "I need the employee before I can reschedule onboarding.",
+        "action_type": "reschedule_onboarding",
+        "success": false,
+        "status": "failed",
+        "message": "I need the employee before I can reschedule onboarding.",
+        "employee": null,
+        "employee_notification": null,
+        "hr_notification": null,
+        "attendance": null,
+        "shift": null,
+        "created": null,
+        "cancelled": null,
+        "conflicts": null,
+        "swap": null,
+        "timesheet": null,
+        "timesheets": null,
+        "policy": null,
+        "export": null,
+        "summaries": null,
+        "analytics": null
+      }
+    }
+  }
+}
+{
+  "mark_attempt": {
+    "status": 200,
+    "body": {
+      "ok": false,
+      "status": "needs_confirmation",
+      "message": "Update the onboarding checklist item?",
+      "confirmation": {
+        "text": "Update the onboarding checklist item?",
+        "action_type": "onboarding_mark_item",
+        "args": {},
+        "action_hash": "020e20375befa60e39a946d8343094550b7df2c9c5957e4bd8826c60752b3761"
+      },
+      "result": null
+    },
+    "before": {
+      "status": "processing",
+      "row_version": 1,
+      "required": false
+    }
+  }
+}
+{
+  "mark_confirmed": {
+    "status": 200,
+    "body": {
+      "ok": false,
+      "status": "failed",
+      "message": "I need the employee before I can update a checklist item.",
+      "confirmation": null,
+      "result": {
+        "ok": false,
+        "error": "employee_not_found",
+        "safe_user_message": "I need the employee before I can update a checklist item.",
+        "action_type": "onboarding_mark_item",
+        "success": false,
+        "status": "failed",
+        "message": "I need the employee before I can update a checklist item.",
+        "employee": null,
+        "employee_notification": null,
+        "hr_notification": null,
+        "attendance": null,
+        "shift": null,
+        "created": null,
+        "cancelled": null,
+        "conflicts": null,
+        "swap": null,
+        "timesheet": null,
+        "timesheets": null,
+        "policy": null,
+        "export": null,
+        "summaries": null,
+        "analytics": null
+      }
+    }
+  }
+}
+{"restored": "processing"}

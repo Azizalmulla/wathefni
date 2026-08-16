@@ -1,0 +1,27 @@
+    pt4 talent map — unit prove
+      PASS  stamp
+      PASS  not a 9-box product
+      PASS  9-box is one lens
+      PASS  unknown stays unknown
+      PASS  no middle forcing
+      PASS  same facts across lenses
+      PASS  PT3 unchanged
+      PASS  C6 project_nine_box exists
+      PASS  missing axis is unknown
+      PASS  not forced middle
+      PASS  lens switch keeps potential
+      PASS  lens switch keeps hipo false
+      PASS  unknown lens rejected
+      PASS  EN lens
+      PASS  AR lens
+      PASS  HTTP map
+      PASS  HTTP map why
+      PASS  HR Web map EN
+      PASS  HR Web map AR
+      PASS  HR Web lens EN
+      PASS  HR Web unknown EN
+      PASS  HR Web unknown AR
+      PASS  HR Web RTL dir
+
+    23 passed, 0 failed
+PT4_DYNAMIC_TALENT_MAP_UNIT_PASS

@@ -1,0 +1,8 @@
+{
+  "languages_exercised": [
+    "en",
+    "ar_tokens_in_seed_text"
+  ],
+  "note": "Deterministic mock embeddings; bilingual lexical tokens exercised in finance/HR seed CVs",
+  "real_arabic_voyage_quality": "not_measured_no_credentials"
+}

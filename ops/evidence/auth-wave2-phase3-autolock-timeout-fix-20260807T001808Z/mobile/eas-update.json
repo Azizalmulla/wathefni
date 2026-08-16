@@ -1,0 +1,21 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "6cffdfd1-a7d9-4b1e-9d9e-5bb731fc2e5f",
+  "androidUpdateId": "019fd996-069b-7600-a7ae-fa42eb6bc79b",
+  "iosUpdateId": "019fd996-069b-758d-bf64-24db5c2afb96",
+  "message": "Auth Wave 2 Phase 3 auto-lock timeout fix + diagnostics",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/6cffdfd1-a7d9-4b1e-9d9e-5bb731fc2e5f",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+    "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1"
+  },
+  "priorGroupForRollback": "fda08e77-f7a1-464c-8596-00cc4e4c6461",
+  "fixes": [
+    "stable mount-once AppState listener via refs",
+    "background setTimeout seal in addition to resume seal",
+    "synchronous resume seal (no await before timeout decision)",
+    "diagnostic logs: away/resume timestamps, elapsed, timeout, enabled, updateId, decision"
+  ]
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interviews UI refine evidence</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif; background: #f8f2e6; color: #23211d; }
+    .page { padding: 24px; }
+    .card { border: 1px solid #e8dfd0; background: #fffaf0cc; border-radius: 1.35rem; padding: 20px; box-shadow: 0 12px 36px rgba(35,33,29,.06); }
+    h1 { margin: 0; font-size: 1.35rem; }
+    .sub { margin: 6px 0 16px; color: #6f675c; font-size: .9rem; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .pill { border-radius: 999px; padding: 6px 14px; font-size: .875rem; color: #6f675c; }
+    .pill.active { background: #23211d; color: #fff; font-weight: 600; }
+    .pill.more { border: 1px solid #e8dfd0; background: #ffffff8c; }
+    .row { display: flex; gap: 8px; margin-top: 14px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    input { flex: 1; height: 40px; border-radius: 999px; border: 1px solid #e8dfd0; background: #fff; padding: 0 14px; }
+    .filters { border-radius: 999px; border: 1px solid #e8dfd0; padding: 8px 14px; color: #6f675c; background: #ffffff8c; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: .875rem; }
+    th { text-align: start; color: #6f675c; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 10px 8px; border-bottom: 1px solid #e8dfd0; }
+    th.ar { text-transform: none; letter-spacing: 0; font-size: 12px; }
+    td { padding: 12px 8px; border-bottom: 1px solid #e8dfd0cc; }
+    .drawer-wrap { display: flex; margin-top: 20px; min-height: 420px; background: rgba(35,33,29,.35); border-radius: 1rem; overflow: hidden; }
+    .drawer { margin-inline-start: auto; width: min(100%, 420px); background: #fffaf0; border-inline-start: 1px solid #e8dfd0; padding: 20px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .name { font-size: 1.2rem; font-weight: 650; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .badge { border-radius: 999px; border: 1px solid #d6d3d1; background: #f8fafc; padding: 4px 10px; font-size: 11px; font-weight: 600; }
+    .meta { color: #6f675c; font-size: .875rem; margin-top: 6px; }
+    .stage { color: #8a8276; font-size: 12px; margin-top: 4px; }
+    .state { margin-top: 14px; font-size: 15px; line-height: 1.7; color: #4a453c; }
+    .work { margin-top: 14px; border: 1px solid #e8dfd0; background: #f8f2e6b3; border-radius: 1rem; padding: 14px; color: #6f675c; font-size: .875rem; }
+    details { margin-top: 10px; border: 1px solid #e8dfd0; background: #f8f2e6b3; border-radius: 1rem; padding: 12px; }
+    summary { font-weight: 600; cursor: pointer; }
+    .scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div id="root" class="page"></div>
+  <script>
+    const variants = {
+      en: {
+        dir: 'ltr',
+        title: 'Interview queue',
+        desc: 'Interview status is shown separately from the candidate’s application stage.',
+        tabs: ['Upcoming 2', 'Needs feedback 1', 'Video 5', 'Completed 1', 'All 10'],
+        more: 'More',
+        search: 'Search candidate or email',
+        filters: 'Filters',
+        headers: ['Candidate', 'Job', 'Interview', 'Interviewer', 'Feedback', 'Next human action'],
+        arHeaders: false,
+        name: 'Waiting Candidate',
+        status: 'Opened',
+        meta: 'Operations Lead · Recorded video',
+        stage: 'Application stage: Interview',
+        sentence: 'Waiting for the candidate to submit a video answer.',
+        work: 'No video answers have been submitted yet.',
+        details: ['Invite details', 'Timeline', 'Status details'],
+      },
+      ar: {
+        dir: 'rtl',
+        title: 'قائمة المقابلات',
+        desc: 'تُعرض حالة المقابلة بشكل منفصل عن مرحلة طلب المرشح.',
+        tabs: ['القادمة 2', 'تحتاج ملاحظات 1', 'فيديو 5', 'مكتملة 1', 'الكل 10'],
+        more: 'المزيد',
+        search: 'ابحث عن مرشح أو بريد',
+        filters: 'تصفية',
+        headers: ['المرشح', 'الوظيفة', 'المقابلة', 'المقابِل', 'التقييم', 'الإجراء البشري التالي'],
+        arHeaders: true,
+        name: 'مرشح بانتظار',
+        status: 'مفتوحة',
+        meta: 'قائد العمليات · فيديو مسجّل',
+        stage: 'مرحلة الطلب: مقابلة',
+        sentence: 'بانتظار تقديم المرشح لإجابة فيديو.',
+        work: 'لم تُقدَّم إجابات فيديو بعد.',
+        details: ['تفاصيل الدعوة', 'الجدول الزمني', 'تفاصيل الحالة'],
+      },
+    }
+    const locale = new URLSearchParams(location.search).get('locale') || 'en'
+    const v = variants[locale]
+    document.documentElement.lang = locale
+    document.documentElement.dir = v.dir
+    document.getElementById('root').innerHTML = `
+      <div class="card">
+        <h1>${v.title}</h1>
+        <div class="sub">${v.desc}</div>
+        <div class="tabs">
+          ${v.tabs.map((t,i)=>`<span class="pill ${i===0?'active':''}">${t}</span>`).join('')}
+          <span class="pill more">${v.more}</span>
+        </div>
+        <div class="row">
+          <input value="" placeholder="${v.search}" />
+          <span class="filters">${v.filters}</span>
+        </div>
+        <div class="scroll">
+          <table style="min-width:900px">
+            <thead><tr>${v.headers.map(h=>`<th class="${v.arHeaders?'ar':''}">${h}</th>`).join('')}</tr></thead>
+            <tbody><tr>
+              <td><strong>${v.name}</strong><div class="stage">wait@example.com</div></td>
+              <td>Operations</td><td>${v.status}</td><td>—</td><td>Pending</td><td>Open</td>
+            </tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer-wrap">
+        <aside class="drawer">
+          <div class="name">${v.name} <span class="badge">${v.status}</span></div>
+          <div class="meta">${v.meta}</div>
+          <div class="stage">${v.stage}</div>
+          <div class="state">${v.sentence}</div>
+          <div class="work">${v.work}</div>
+          ${v.details.map(d=>`<details><summary>${d}</summary><div class="stage">…</div></details>`).join('')}
+        </aside>
+      </div>`
+  </script>
+</body>
+</html>

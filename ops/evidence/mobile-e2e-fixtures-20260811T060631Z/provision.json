@@ -1,0 +1,45 @@
+{
+  "provision": {
+    "ok": true,
+    "mode": "provision",
+    "company": "WATHEFNI",
+    "subject_employee_key": "WATHEFNI-96550252254",
+    "approve_leave_id": "60822864-fff9-4f22-a8c3-077a90907128",
+    "reject_leave_id": "d42c4045-f96e-4b34-b338-c5480846d75f",
+    "approve_start": "2026-09-01",
+    "reject_start": "2026-09-08",
+    "marker": "wathefni_mobile_e2e_leave_fixture_v1"
+  },
+  "fixture_env": "/Users/azizalmulla/.config/wathefni/e2e-fixtures.env",
+  "api_verify": {
+    "approve": {
+      "ok": true,
+      "leave_id": "60822864-fff9-4f22-a8c3-077a90907128",
+      "status": "requested",
+      "allowed_actions": [
+        "read",
+        "approve",
+        "reject"
+      ],
+      "employee_key": "WATHEFNI-96550252254",
+      "start_date": "2026-09-01",
+      "expect_status": "requested",
+      "channel": "operator_mobile"
+    },
+    "reject": {
+      "ok": true,
+      "leave_id": "d42c4045-f96e-4b34-b338-c5480846d75f",
+      "status": "requested",
+      "allowed_actions": [
+        "read",
+        "approve",
+        "reject"
+      ],
+      "employee_key": "WATHEFNI-96550252254",
+      "start_date": "2026-09-08",
+      "expect_status": "requested",
+      "channel": "operator_mobile"
+    }
+  },
+  "credentials_source": "~/.config/wathefni/e2e.env (not printed)"
+}

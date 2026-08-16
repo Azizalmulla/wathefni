@@ -1,0 +1,20 @@
+total 21760
+drwxr-xr-x 3 root     root        4096 Aug  1 17:49 production-pre-waveD-phase6b-cv-extraction-20260801T174712Z
+drwxr-xr-x 3 root     root        4096 Aug  1 16:59 production-pre-waveD-phase6a-held-20260801T165754Z
+drwxr-xr-x 6 root     root        4096 Aug  1 16:00 production-pre-waveD-phase5-mailbox-20260801T155854Z
+drwxr-xr-x 4 root     root        4096 Aug  1 15:23 production-pre-waveD-phase4-alias-admit-20260801T152150Z
+drwxr-xr-x 5 root     root        4096 Aug  1 13:28 production-pre-waveD-phase3-enterprise-20260801T132649Z
+drwxr-xr-x 6 root     root        4096 Aug  1 04:59 production-pre-waveD-phase2-inbound-20260801T045628Z
+drwxr-xr-x 7 root     root        4096 Aug  1 04:23 production-pre-waveC-entitlement-20260801T042210Z
+drwxr-xr-x 2 root     root        4096 Aug  1 03:31 production-pre-assessments-queue-tombstone-20260801T033029Z
+drwxr-xr-x 4 root     root        4096 Aug  1 03:03 production-pre-workspace-smoothness-20260801T030232Z
+drwxr-xr-x 4 root     root        4096 Aug  1 02:37 production-pre-candidates-filter-ux-wave4-20260801T023636Z
+drwx------ 2 root     root        4096 Aug  1 02:30 offsite
+drwx------ 9 root     root        4096 Aug  1 02:30 daily
+drwxr-xr-x 4 root     root        4096 Aug  1 02:20 production-pre-candidates-url-wave3-20260801T021935Z
+drwxr-xr-x 4 root     root        4096 Aug  1 02:03 production-pre-overview-work-queue-wave2-20260801T020208Z
+drwxr-xr-x 2 root     root        4096 Aug  1 01:53 production-pre-follow-up-tenant-strict-wave1-20260801T015103Z
+drwxr-xr-x 4 root     root        4096 Jul 31 20:23 production-pre-calendar-event-card-redesign-20260731T202233Z
+drwxr-xr-x 4 root     root        4096 Jul 31 19:52 production-pre-calendar-scope-labels-20260731T194941Z
+drwxr-xr-x 3 root     root        4096 Jul 31 19:37 production-pre-assessment-configuration-ops-20260731T193752Z
+drwxr-xr-x 3 root     root        4096 Jul 31 19:25 production-pre-candidates-quiet-20260731T192545Z

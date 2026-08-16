@@ -1,0 +1,26 @@
+[
+  {
+    "id": "019fd80f-3cc8-75bd-8b6e-d7cfed86c919",
+    "createdAt": "2026-08-06T17:11:45.096Z",
+    "group": "326e2040-6603-4c34-a6db-1022ff8095a6",
+    "branch": "canary",
+    "message": "Bank ESS + onboarding completion UI 20260806T170025Z (release 6547a25)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd80f-3cc8-75bd-8b6e-d7cfed86c919",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "f5632bdb417b15a4a5eea404024c917df37d2e93"
+  },
+  {
+    "id": "019fd80f-3cc8-7905-8863-2c4cefed9e4b",
+    "createdAt": "2026-08-06T17:11:45.096Z",
+    "group": "326e2040-6603-4c34-a6db-1022ff8095a6",
+    "branch": "canary",
+    "message": "Bank ESS + onboarding completion UI 20260806T170025Z (release 6547a25)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd80f-3cc8-7905-8863-2c4cefed9e4b",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "f5632bdb417b15a4a5eea404024c917df37d2e93"
+  }
+]

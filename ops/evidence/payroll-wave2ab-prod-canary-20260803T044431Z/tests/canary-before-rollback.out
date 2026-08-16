@@ -1,0 +1,38 @@
+payroll wave2ab prod synthetic canary tag=e1dc9522
+[PASS] wave2a enabled
+[PASS] wave2a company
+[PASS] synthetic_only on
+[PASS] payment disabled
+[PASS] money authority external
+[PASS] wathefni not money authority
+[PASS] vendor unclaimed
+[PASS] no bank files
+[PASS] no native g2n
+[PASS] no posts_payment
+[PASS] wave1 contracts unchanged flag
+[PASS] wave1 still enabled
+[PASS] db is wathefni
+[PASS] real employee export refused
+[PASS] synth contract draft
+[PASS] synth contract approve
+[PASS] period create
+[PASS] clean export
+[PASS] idempotent export
+[PASS] clean import
+[PASS] import mirror_only
+[PASS] idempotent import
+[PASS] reconcile clean
+[PASS] unmatched handled
+[PASS] malformed quarantined
+[PASS] fingerprint drift blocked
+[PASS] fingerprint drift on export
+[PASS] diff import
+[PASS] reconcile differences
+[PASS] export rollback
+[PASS] residual zero
+[PASS] final payment disabled
+{
+  "passed": 32,
+  "failed": 0,
+  "evid": "/opt/wathefni/production-evidence/payroll-wave2ab-prod-canary/20260803T044431Z/canary/before-rollback"
+}

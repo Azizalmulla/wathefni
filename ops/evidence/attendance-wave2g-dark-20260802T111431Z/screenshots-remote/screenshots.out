@@ -1,0 +1,21 @@
+OVERVIEW 200 {'store_mode': 'postgres', 'ok': True}
+SEED 200 {'ok': True, 'detail': None}
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-en-desktop.png
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-en-mobile.png
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-ar-desktop.png
+SHOT /opt/wathefni/production-evidence/attendance-wave2g-dark/20260802T111431Z/ui/capture-ops-ar-mobile.png
+{
+  "prefix": "ATTW2GUI886D85",
+  "company": "WATHEFNI",
+  "store_mode": "postgres",
+  "shots": [
+    "capture-ops-ar-desktop.png",
+    "capture-ops-ar-mobile.png",
+    "capture-ops-en-desktop.png",
+    "capture-ops-en-mobile.png"
+  ],
+  "authenticated": true,
+  "fixture_screenshots": false,
+  "ingest_enabled": false,
+  "environment": "production"
+}

@@ -1,0 +1,21 @@
+{
+  "tag": "a3fbb756",
+  "employee_key": "WATHEFNI-PYW1-W2ACB-a3fbb756",
+  "phones": {
+    "creator": "965540337560",
+    "approver": "965540437560"
+  },
+  "export_run_ids": [
+    "68113214-04c5-4ae0-9cd5-37eeac366c17"
+  ],
+  "import_run_ids": [
+    "722433ef-ccc0-4e12-a2c5-aca76c19f966",
+    "2b6b81ce-4e50-4666-9bc5-b0c94a2a419b"
+  ],
+  "period_ids": [
+    "0c70f986-23b3-4d1c-af69-5799ded50a8f"
+  ],
+  "contract_ids": [
+    "095add47-4b3a-4cf9-8eb2-3a1af3cd1020"
+  ]
+}

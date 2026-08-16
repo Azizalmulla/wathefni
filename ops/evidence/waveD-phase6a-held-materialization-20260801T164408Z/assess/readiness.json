@@ -1,0 +1,21 @@
+{
+  "wave": "D6A",
+  "stamp": "20260801T164408Z",
+  "local_verdict": "PASS",
+  "production_readiness": "ready_for_wathefni_only_deploy_then_re_gate",
+  "external_tenants": "NO-GO_until_prod_re_gate",
+  "post_hiring": "not_started",
+  "root_cause": "cv_identity_resolution completed without Held materialization when extraction/OCR failed quality; secondary email-keyed surrogate collision on conflict Held apps",
+  "fix": [
+    "held_intake_materialization job",
+    "soft_contact_from_cv_bytes",
+    "checksum-scoped held-review surrogate",
+    "no silent completion invariant"
+  ],
+  "tests": {
+    "smoke": "smoke-test-inbound-held-materialization-d6a.py",
+    "matrix_runs": 3,
+    "all_passed": true
+  },
+  "evidence": "ops/evidence/waveD-phase6a-held-materialization-20260801T164408Z/"
+}

@@ -1,0 +1,11 @@
+Wave 4 synthetic production use:                 GO
+Org and assignment production authority:         GO
+Migration and bulk operations:                   GO
+Controlled real-employee readiness:              NO-GO
+
+NO-GO reason: SYNTHETIC_ONLY=on (required) + four real employments remain in jurisdiction remediation with null classification (intentionally unclassified).
+
+Canary: 67/67 PASS
+Scheduler: shared wathefni-lifecycle-effective.timer (kill switch WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_DUE)
+Remediation final: 4 real / 8 quarantined_synthetic_test / 0 preserved historical leftovers
+Stamp: 20260801T221934Z

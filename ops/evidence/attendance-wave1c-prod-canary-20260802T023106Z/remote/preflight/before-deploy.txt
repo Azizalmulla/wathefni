@@ -1,0 +1,12 @@
+stamp=20260802T023448Z
+time_utc=2026-08-02T02:35:04Z
+active
+=== SHAs before ===
+e6b670f958f18d32a572a2ae47e80f17e4e397c1b907eadea1f0e3e94cdc6222  /opt/wathefni/orchestrator/app.py
+8565761d1238fe2699fb7e5e02cb8b7d9422b3aa090f117e6fe5383907d1461f  /opt/wathefni/orchestrator/attendance_import.py
+ls: cannot access '/opt/wathefni/orchestrator/attendance_authority*.py': No such file or directory
+=== flags before ===
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_ONBOARDING_SEED=off

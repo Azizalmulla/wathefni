@@ -1,0 +1,10 @@
+=== SHAs after ===
+75916c53008690fc4b5bd4f877bb8e8d5e500cce30dae97a3c51a68fbd5f5367  /opt/wathefni/orchestrator/app.py
+eec8fb531faf1e449ca114996d4088522958c774e99ca50fc0b973883cb36f79  /opt/wathefni/orchestrator/setup_console_wave_a_launch_readiness.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_SETUP_CONSOLE_ENABLED=true
+WATHEFNI_SETUP_CONSOLE_V2=on
+WATHEFNI_SETUP_CONSOLE_WAVE_A=1
+WATHEFNI_SETUP_CONSOLE_WAVE_A_COMPANIES=WATHEFNI

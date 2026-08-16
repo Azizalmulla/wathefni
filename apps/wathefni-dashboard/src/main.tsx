@@ -1,8 +1,14 @@
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Component, type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ConfirmProvider } from '@/components/ConfirmDialog'
+import { dashboardQueryClient } from '@/lib/query/client'
+import { installDashboardPerfGlobals } from '@/lib/perf/dashboardPerf'
+import { reportClientError } from '@/lib/reportClientError'
+
+installDashboardPerfGlobals()
 
 // A single thrown render error must never blank the whole dashboard. This catches
 // it and shows a calm recovery message instead of an empty page.
@@ -15,6 +21,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
 
   componentDidCatch(error: unknown) {
     console.error('Dashboard render error:', error)
+    reportClientError(error, 'hr_web')
   }
 
   render() {
@@ -63,9 +70,11 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppErrorBoundary>
-      <ConfirmProvider>
-        <App />
-      </ConfirmProvider>
+      <QueryClientProvider client={dashboardQueryClient}>
+        <ConfirmProvider>
+          <App />
+        </ConfirmProvider>
+      </QueryClientProvider>
     </AppErrorBoundary>
   </StrictMode>,
 )

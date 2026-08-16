@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_ar_digital_03",
+  "category": "arabic_digital_cv",
+  "language": "ar",
+  "layout": "single_column_rtl",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "مريم الصباح",
+    "mariam.sabah@example.com",
+    "+96553334455",
+    "الخبرة العملية",
+    "المهارات"
+  ],
+  "expected_fields": {
+    "full_name": "مريم الصباح",
+    "email": "mariam.sabah@example.com",
+    "phone": "+96553334455",
+    "title": "محللة موارد بشرية"
+  },
+  "notes": "Structurally valid Arabic CV with embedded Noto Kufi TrueType (shaped+bidi).",
+  "sha256": "3aa809d79501ddcbea7fbfa84a78be9aab83ad0f2f1ed5ba5c3c660f9d81b2a8",
+  "bytes": 45248
+}

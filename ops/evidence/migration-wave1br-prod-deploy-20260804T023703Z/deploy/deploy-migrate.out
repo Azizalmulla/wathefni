@@ -1,0 +1,8 @@
+=== INSTALL MODULES ===
+5c07583b553fabb16430900f6d9f7011e165d57d9f5bd3ca5c16c2003ab0999e  /opt/wathefni/orchestrator/schema_contract.py
+1ee4db61474e965e8d97004e327043b8f17c234da74631d0ee6c81071e454c0d  /opt/wathefni/orchestrator/app.py
+f0c5cd2fc4551447183b47189a92c32417f5316c75fd51d0292a386bdd20b554  /opt/wathefni/orchestrator/inbound_cv_intake.py
+826cedda87f847ce83d7a3e89295b4caaf14878dfbc64ce72b106b96ae742db2  /opt/wathefni/orchestrator/inbound_cv_processing.py
+371063986b5577ad4a0dfed28e049c62e781f980335cb37816be7aca569c13d6  /opt/wathefni/orchestrator/durable_email_ingress.py
+4a243518c7434a183d3bc323655d8df38c1fcc62396332b912e0725e1ed4f136  /opt/wathefni/orchestrator/migration_wave1_cv_foundation.py
+ad6c99a2d3a546bae87e8b2b689e5dac7c2c261bc2757578e3c9e84e9b07aeac  /opt/wathefni/orchestrator/inbound_cv_adapters.py

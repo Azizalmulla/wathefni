@@ -1,0 +1,25 @@
+{
+  "coverage": {
+    "canonical_cv": "not_recorded",
+    "effective_facts": "not_recorded",
+    "classifications": "not_recorded",
+    "applications": "available",
+    "screening_evidence": "available",
+    "assessments": "available",
+    "interviews": "available",
+    "ranking_evaluations": "available",
+    "identity_state": "available",
+    "notes": "partial"
+  },
+  "identity_state": "open_review",
+  "application_buckets": [
+    "live",
+    "held"
+  ],
+  "screening_sources": [
+    "candidate_reply",
+    "cv_prefill"
+  ],
+  "writes": 0,
+  "external": 0
+}

@@ -1,0 +1,5 @@
+health_ok_after=7
+active
+health=200
+routes ['/dashboard/mobile/assistant/capabilities', '/dashboard/mobile/assistant/chat', '/dashboard/mobile/assistant/chat/stream']
+assistant_routes_ok

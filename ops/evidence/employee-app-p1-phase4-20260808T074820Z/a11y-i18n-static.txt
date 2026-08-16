@@ -1,0 +1,23 @@
+PASS  EN/AR key parity
+PASS  surface keys present: home
+PASS  surface keys present: schedule
+PASS  surface keys present: leave
+PASS  surface keys present: documents
+PASS  surface keys present: payslips
+PASS  surface keys present: profile
+PASS  surface keys present: notifications
+PASS  surface keys present: settings
+PASS  surface keys present: onboarding
+PASS  surface keys present: bank
+PASS  surface keys present: feature.unavailable
+PASS  surface keys present: pin
+PASS  surface keys present: biometric
+PASS  reduced-motion handling exists
+PASS  accessibilityLabel used across app surfaces
+PASS  44pt touch targets declared in styles
+PASS  ErrorState retry is labeled and 44pt+
+PASS  FeatureUnavailable secondary action is Pressable 44pt+
+PASS  Editorial headings default to header role
+PASS  Inbox preserves server title/body (no client fake-translate of HR text)
+---
+PASS a11y+i18n static scan (21 checks) — not a physical QA pass

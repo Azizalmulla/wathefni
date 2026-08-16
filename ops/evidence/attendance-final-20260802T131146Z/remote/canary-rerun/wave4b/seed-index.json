@@ -1,0 +1,129 @@
+{
+  "tag": "98AA2996",
+  "company": "WATHEFNI",
+  "work_date": "2026-08-02",
+  "employees": {
+    "NORMAL": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-NORMAL",
+      "shift_id": "581d1a9a-f97f-56ed-9bed-493a2a3bfff8",
+      "state": "approved"
+    },
+    "OVERNIGHT": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-OVERNIGHT",
+      "worked_minutes": 475
+    },
+    "MULTI": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-MULTI",
+      "sessions": 2,
+      "paid_break_minutes": 15,
+      "unpaid_break_minutes": 30,
+      "worked_minutes": 390
+    },
+    "ABSENT": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-ABSENT",
+      "status": "absent"
+    },
+    "DUAL": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-DUAL",
+      "status": "absent"
+    },
+    "DISPUTE": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-DISPUTE",
+      "dispute_id": "f55170bc-a0ce-47bd-828e-a4858eb8adee"
+    },
+    "LOCKED": {
+      "key": "W3-SYNTH|ATTW4B-98AA2996-LOCKED",
+      "payroll_locked": true
+    }
+  },
+  "counts": {
+    "approved": 1,
+    "incomplete": 4,
+    "absent": 1,
+    "disputed": 1,
+    "locked": 1,
+    "needs_review": 2,
+    "captured": 2
+  },
+  "compat_rows": 12,
+  "exclusion_sample": [
+    {
+      "employee_key": "W3-SYNTH|ATTW4B-98AA2996-ABSENT",
+      "exception_state": "none",
+      "approval_status": "unapproved",
+      "payroll_eligible": false,
+      "payroll_locked": null,
+      "late_minutes": 0,
+      "early_leave_minutes": 0,
+      "worked_minutes": 0,
+      "sessions": 0,
+      "breaks": 0
+    },
+    {
+      "employee_key": "W3-SYNTH|ATTW4B-98AA2996-CLICK",
+      "exception_state": "missing_check_in",
+      "approval_status": "rejected",
+      "payroll_eligible": false,
+      "payroll_locked": null,
+      "late_minutes": 0,
+      "early_leave_minutes": 0,
+      "worked_minutes": 0,
+      "sessions": 0,
+      "breaks": 0
+    },
+    {
+      "employee_key": "W3-SYNTH|ATTW4B-98AA2996-CLICK",
+      "exception_state": "missing_check_out",
+      "approval_status": "unapproved",
+      "payroll_eligible": false,
+      "payroll_locked": null,
+      "late_minutes": 0,
+      "early_leave_minutes": 0,
+      "worked_minutes": 0,
+      "sessions": 1,
+      "breaks": 0
+    },
+    {
+      "employee_key": "W3-SYNTH|ATTW4B-98AA2996-DISPUTE",
+      "exception_state": "ambiguous_punches",
+      "approval_status": "disputed",
+      "payroll_eligible": false,
+      "payroll_locked": null,
+      "late_minutes": 0,
+      "early_leave_minutes": 0,
+      "worked_minutes": 460,
+      "sessions": 2,
+      "breaks": 0
+    },
+    {
+      "employee_key": "W3-SYNTH|ATTW4B-98AA2996-DUAL",
+      "exception_state": "none",
+      "approval_status": "unapproved",
+      "payroll_eligible": false,
+      "payroll_locked": null,
+      "late_minutes": 0,
+      "early_leave_minutes": 0,
+      "worked_minutes": 480,
+      "sessions": 1,
+      "breaks": 0
+    },
+    {
+      "employee_key": "W3-SYNTH|ATTW4B-98AA2996-LATE",
+      "exception_state": "none",
+      "approval_status": "unapproved",
+      "payroll_eligible": false,
+      "payroll_locked": null,
+      "late_minutes": 45,
+      "early_leave_minutes": 30,
+      "worked_minutes": 405,
+      "sessions": 1,
+      "breaks": 0
+    }
+  ],
+  "click": {
+    "reject_case": "bd96cc07-f387-4885-b599-96e1ab617835",
+    "dual_case": "be4570bb-b8fa-4062-8e6e-57171b77278d",
+    "dispute_id": "f55170bc-a0ce-47bd-828e-a4858eb8adee",
+    "reopened_exception": "c9046455-17ef-4e6c-b84e-e01ccb6fd075"
+  }
+}

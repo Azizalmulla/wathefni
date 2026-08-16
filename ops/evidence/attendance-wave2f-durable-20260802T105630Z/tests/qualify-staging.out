@@ -1,0 +1,63 @@
+APP_ALREADY_HAS_WAVE2F_SCHEMA
+env staging
+expected_db wathefni_staging
+connected_db wathefni_staging
+tables ['attendance_capture_audit_events', 'attendance_capture_checkpoints', 'attendance_capture_connectors', 'attendance_capture_credentials', 'attendance_capture_devices', 'attendance_capture_health', 'attendance_capture_health_events', 'attendance_capture_idempotency', 'attendance_capture_mappings', 'attendance_capture_quarantine', 'attendance_capture_remediation', 'attendance_capture_replay_ledger', 'attendance_capture_sites']
+triggers ['trg_att_cap_audit_immutable', 'trg_att_cap_replay_immutable']
+MIGRATE_OK
+authority_model=durable_postgres_capture_ops_wave2f_v1
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"staging","database_environment":"staging","database_environment_marker":"65aede205f95","database_logical_name":"15cab0f44aae","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}Traceback (most recent call last):
+  File "/opt/wathefni/staging/orchestrator/smoke-test-attendance-capture-wave2f.py", line 562, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/staging/orchestrator/smoke-test-attendance-capture-wave2f.py", line 530, in main
+    store2.cleanup_synthetic(marker)
+  File "/opt/wathefni/staging/orchestrator/attendance_capture_postgres.py", line 1523, in cleanup_synthetic
+    cur.execute("DELETE FROM attendance_capture_connectors WHERE connector_id LIKE %s OR connector_version LIKE %s", (f"%{marker}%", f"%{marker}%"))
+  File "/opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages/psycopg2/extras.py", line 236, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.ForeignKeyViolation: update or delete on table "attendance_capture_connectors" violates foreign key constraint "attendance_capture_credentials_connector_id_fkey" on table "attendance_capture_credentials"
+DETAIL:  Key (connector_id)=(conn-attw2f-85b73e4021) is still referenced from table "attendance_capture_credentials".
+
+PASS  not production db
+PASS  db matches expected
+PASS  wave2f schema ensure
+PASS  store mode postgres
+PASS  register site
+PASS  cross-tenant device denied
+PASS  register device
+PASS  register connector
+PASS  activate connector
+PASS  rotate credentials sealed
+PASS  rotate stale_row_version fail-closed
+PASS  no plaintext secrets in DB
+PASS  credential rows Fernet-only (no raw password)
+PASS  health upsert degraded
+FAIL  checkpoint save :: {'ok': True, 'duplicate': True, 'checkpoint': 'cp-ATTW2F-c0e41fa6-1', 'row_version': 1}
+PASS  checkpoint duplicate exactly-once
+PASS  checkpoint advance
+PASS  unknown mapping queued
+PASS  enqueue idempotent
+PASS  checkpoint survives restart
+PASS  unknown mapping remains queued after restart
+PASS  health survives restart
+PASS  health recover
+PASS  health event history retained
+PASS  cross-tenant approve denied
+PASS  manager self-action denied
+PASS  manager scope denied
+PASS  concurrent approve: exactly one success
+PASS  concurrent approve: other fail-closed stale
+PASS  item approved after concurrency
+PASS  reject ok
+PASS  reject idempotent when already rejected
+PASS  approve+replay reaches authority
+PASS  authority punch exactly once after first replay
+PASS  replay idempotent duplicate
+PASS  authority punch still exactly once after duplicate replay
+PASS  reconcile capture↔authority ok
+PASS  audit events immutable
+PASS  ops store mode
+PASS  ops overview store_mode postgres
+PASS  freeze skipped

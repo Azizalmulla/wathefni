@@ -1,0 +1,13 @@
+    payroll authoritative c4 — prove
+      PASS  c4 module
+      PASS  rollback guidance
+      PASS  EN finalized
+      PASS  AR finalized
+      PASS  payment disabled honesty
+      PASS  no WPS/bank
+      PASS  e360 not calculator
+      PASS  attendance not required
+      PASS  global c4 off
+      PASS  empty allowlist denies
+      PASS  canary runtime allowlisted
+      PASS  other company denied

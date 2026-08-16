@@ -1,0 +1,2 @@
+9066753bb2c5c6940b3a9074859b8f5258c15ec9d1431ba783dee6f2ae08c4b4  assets/icon.png
+fe24059b9f6af637f89a1c926bd18afac12a1db68f856ca6c984e719ac54ee94  assets/sounds/push/wathefni_default.wav

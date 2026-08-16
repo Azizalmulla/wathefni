@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "out": "/opt/wathefni/production-evidence/unified-inbound-cv-forward-dual-write-canary/20260727T004930Z",
+  "assertions": {
+    "failed_count": 0,
+    "failed_names": [],
+    "enforce_enabled": false,
+    "channel_cutover": false,
+    "canary_job_position": "J2P2_PROD_TEST",
+    "canary_phones": {
+      "email": "96555570001",
+      "wa_unsolicited": "96555570002",
+      "wa_job": "96555570003",
+      "tp_promote": "96555570004"
+    }
+  }
+}

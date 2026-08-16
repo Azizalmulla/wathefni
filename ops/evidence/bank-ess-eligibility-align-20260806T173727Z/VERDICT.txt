@@ -1,0 +1,6 @@
+deployed
+
+Backend live eligibility alignment PASS (disabled Aziz + enabled synthetic).
+Canary OTA tip 388e8cf5-1d6b-4140-9c84-bfff55504928 published (runtime 0.1.0).
+Physical iPhone walk pending (no USB device on agent host).
+Phase 2 / Auth Wave 2: not started.

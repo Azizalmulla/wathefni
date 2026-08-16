@@ -1,0 +1,45 @@
+{
+  "schema": "candidate-profile-facts-v2",
+  "languages": [
+    "Arabic (Native)",
+    "English (Fluent)"
+  ],
+  "employment": [
+    "Software Development Intern · Gulf Digital Solutions · 2025-06 – 2025-09",
+    "Student Research Assistant · Gulf University for Science and Technology · 2024-10",
+    "Freelance Web Developer · 2024-01",
+    "IT Support Assistant · GUST Technology Club · 2023-09 – 2024-05"
+  ],
+  "skills_n": 27,
+  "publications": [
+    "Evaluating retrieval strategies for bilingual university support assistants · Undergraduate research report, Gulf University for Science and Technology · 2026",
+    "Data preprocessing effects on supervised classification performance · Student Research Symposium poster · 2025",
+    "Cloud-based workflow optimization for public service applications · Capstone project · 2026",
+    "Arabic-English semantic retrieval for customer support systems · Technical report · 2026"
+  ],
+  "training_courses": [
+    "Deep Learning Specialization · Coursera | DeepLearning.AI · 2026-09",
+    "IBM AI Engineering Professional Certificate · Coursera | IBM · 2026-10",
+    "Cybersecurity Fundamentals · Coursera | Google · 2026-10",
+    "Cloud Computing & AI Summer Bootcamp · University of Dubai · 2025-07",
+    "Cloud Computing & AI Summer Bootcamp · University of Dubai · 2025-08"
+  ],
+  "memberships_activities": [
+    "Technology Club · Gulf University for Science and Technology · Member",
+    "Computer Science Society · Gulf University for Science and Technology · Member",
+    "GUST Technology Club · GUST Technology Club · IT Support Assistant",
+    "Robotics Club · Kuwait National English School · Member",
+    "Football Team · Kuwait National English School · Member",
+    "Model United Nations · Kuwait National English School · Member"
+  ],
+  "awards_honors": [
+    "Technical Excellence Recognition · Kuwait Smart Services Challenge · 2026-02",
+    "2nd Place · AWS Cloud Innovation Hackathon · 2024-12",
+    "Graduated with Honors · Kuwait National English School · 2022-05"
+  ],
+  "volunteer_work": [],
+  "education": [
+    "Bachelor in Computer Science Candidate · Gulf University for Science and Technology (GUST) · Kuwait · 2022-09 – 2026-05 · GPA: 3.72/4.0 · Member of the Technology Club and Computer Science Society",
+    "High School Diploma · Kuwait National English School · Kuwait · 2018-09 – 2022-05 · Graduated with Honors; Activities: Robotics Club, Football Team, Model United Nations"
+  ]
+}

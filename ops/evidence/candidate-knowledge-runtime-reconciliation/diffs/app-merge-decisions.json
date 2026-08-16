@@ -1,0 +1,105 @@
+{
+  "strategy": "production_base_plus_local_only_symbols",
+  "production_sha_before_merge": "b4a9a4b032abee27e75ec6b4fc382b0797889a935af4d6529af29bf6574a7dd5",
+  "local_sha": "d7a9f7ec25f85a272076102366ad7ce4f6aaa6e3e67b81047c37f1bc7e32192c",
+  "reconciled_sha": "f2a3a8292b2d046e6a97989f6e86859b87d392664a8c7dc31ad35257db5b6a42",
+  "local_only_symbols_grafted": [
+    {
+      "name": "_unified_candidate_profile_payload",
+      "start": 46974,
+      "end": 47091,
+      "lines": 118
+    },
+    {
+      "name": "dashboard_prehire_application_fact_review",
+      "start": 47105,
+      "end": 47172,
+      "lines": 68
+    },
+    {
+      "name": "dashboard_prehire_application_facts",
+      "start": 47099,
+      "end": 47102,
+      "lines": 4
+    },
+    {
+      "name": "dashboard_prehire_application_profile",
+      "start": 47094,
+      "end": 47096,
+      "lines": 3
+    },
+    {
+      "name": "dashboard_prehire_delete_saved_view",
+      "start": 47221,
+      "end": 47236,
+      "lines": 16
+    },
+    {
+      "name": "dashboard_prehire_intake_attention",
+      "start": 47253,
+      "end": 47269,
+      "lines": 17
+    },
+    {
+      "name": "dashboard_prehire_intake_operations",
+      "start": 47239,
+      "end": 47250,
+      "lines": 12
+    },
+    {
+      "name": "dashboard_prehire_save_view",
+      "start": 47191,
+      "end": 47218,
+      "lines": 28
+    },
+    {
+      "name": "dashboard_prehire_saved_views",
+      "start": 47175,
+      "end": 47188,
+      "lines": 14
+    },
+    {
+      "name": "internal_intake_job_replay",
+      "start": 51266,
+      "end": 51283,
+      "lines": 18
+    },
+    {
+      "name": "internal_intake_operations",
+      "start": 51232,
+      "end": 51246,
+      "lines": 15
+    },
+    {
+      "name": "internal_intake_quarantine_download",
+      "start": 51345,
+      "end": 51397,
+      "lines": 53
+    },
+    {
+      "name": "internal_intake_quarantine_sweep",
+      "start": 51286,
+      "end": 51297,
+      "lines": 12
+    },
+    {
+      "name": "internal_intake_signed_download",
+      "start": 51300,
+      "end": 51342,
+      "lines": 43
+    },
+    {
+      "name": "internal_intake_worker_run",
+      "start": 51249,
+      "end": 51263,
+      "lines": 15
+    }
+  ],
+  "shared_symbol_authority": "production",
+  "shared_changed_count_local_vs_prod": 75,
+  "notes": [
+    "Shared function bodies follow production (runtime authority).",
+    "Local-only dashboard/intake symbols grafted additively.",
+    "Staging internal_intake_readiness not present in local preimage; not grafted."
+  ]
+}

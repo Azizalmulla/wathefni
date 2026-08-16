@@ -1,0 +1,33 @@
+    request = active_request(cur, company_code=company, employee_key=employee_key)
+    has_bank_of_record = bool(verified or effective)
+    if not request and has_bank_of_record:
+        # Only surface a later failed/withdrawn/rejected change attempt — never an
+        # older walkthrough terminal request that predates the current bank of record.
+        cutoff = (verified or {}).get("verified_at") or (effective or {}).get("created_at")
+        states = ", ".join("'" + s + "'" for s in ("rejected", "withdrawn", "failed"))
+        if cutoff is not None:
+            cur.execute(
+                f"""
+                SELECT * FROM employee_ess_requests
+                WHERE company_code=%s AND employee_key=%s
+                  AND request_type='bank_detail_change' AND state IN ({states})
+                  AND coalesce(updated_at, created_at) > %s
+                ORDER BY updated_at DESC NULLS LAST, created_at DESC
+                LIMIT 1
+                """,
+                (company, employee_key, cutoff),
+            )
+        else:
+            cur.execute(
+                f"""
+                SELECT * FROM employee_ess_requests
+                WHERE company_code=%s AND employee_key=%s
+                  AND request_type='bank_detail_change' AND state IN ({states})
+                ORDER BY updated_at DESC NULLS LAST, created_at DESC
+                LIMIT 1
+                """,
+                (company, employee_key),
+            )
+        row = cur.fetchone()
+        request = dict(row) if row else None
+

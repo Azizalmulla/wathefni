@@ -1,0 +1,212 @@
+{
+  "semantic_documents_columns": [
+    {
+      "column_name": "semantic_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "entity_type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "entity_key",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "company_code",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "app_key",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "position_code",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "title",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "content",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "content_hash",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "provider",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "model",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "dimensions",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "embedding",
+      "data_type": "USER-DEFINED",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "metadata",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'{}'::jsonb"
+    },
+    {
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    }
+  ],
+  "semantic_documents_constraints": [
+    {
+      "conname": "semantic_documents_pkey",
+      "def": "PRIMARY KEY (semantic_id)"
+    },
+    {
+      "conname": "semantic_documents_app_key_fkey",
+      "def": "FOREIGN KEY (app_key) REFERENCES applications(app_key) ON DELETE CASCADE"
+    }
+  ],
+  "semantic_documents_indexes": [
+    {
+      "indexname": "semantic_documents_pkey",
+      "indexdef": "CREATE UNIQUE INDEX semantic_documents_pkey ON public.semantic_documents USING btree (semantic_id)"
+    },
+    {
+      "indexname": "idx_semantic_documents_company_position",
+      "indexdef": "CREATE INDEX idx_semantic_documents_company_position ON public.semantic_documents USING btree (company_code, position_code)"
+    },
+    {
+      "indexname": "idx_semantic_documents_embedding_hnsw",
+      "indexdef": "CREATE INDEX idx_semantic_documents_embedding_hnsw ON public.semantic_documents USING hnsw (embedding vector_cosine_ops)"
+    },
+    {
+      "indexname": "idx_semantic_documents_entity",
+      "indexdef": "CREATE INDEX idx_semantic_documents_entity ON public.semantic_documents USING btree (entity_type, entity_key)"
+    },
+    {
+      "indexname": "idx_semantic_documents_phone",
+      "indexdef": "CREATE INDEX idx_semantic_documents_phone ON public.semantic_documents USING btree (phone)"
+    }
+  ],
+  "applications_key_cols": [
+    {
+      "column_name": "app_key",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "phone",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "company_code",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "position_code",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "column_name": "position_title",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "column_name": "status",
+      "is_nullable": "YES",
+      "column_default": null
+    }
+  ],
+  "applications_pk_uq": [
+    {
+      "conname": "applications_pkey",
+      "contype": "p",
+      "def": "PRIMARY KEY (app_key)"
+    }
+  ],
+  "semantic_documents_samples": [
+    {
+      "semantic_id": "application:96588221006-ASSTUX-ASSTUX_ACCOUNTANT:cv",
+      "entity_type": "application",
+      "entity_key": "96588221006-ASSTUX-ASSTUX_ACCOUNTANT",
+      "company_code": "ASSTUX",
+      "content_hash": "1fab8fea375557df406ab5751aa59d041e309fc847b41d7593bf48c25e5b217b",
+      "provider": "voyage",
+      "model": "voyage-4-large",
+      "dimensions": 1024,
+      "has_metadata": true
+    },
+    {
+      "semantic_id": "application:96588221001-ASSTUX-ASSTUX_ACCOUNTANT:cv",
+      "entity_type": "application",
+      "entity_key": "96588221001-ASSTUX-ASSTUX_ACCOUNTANT",
+      "company_code": "ASSTUX",
+      "content_hash": "507ecea7755717d8dd551ea4311ecfc42a9d8f41107f584051e0e618f8a4d870",
+      "provider": "voyage",
+      "model": "voyage-4-large",
+      "dimensions": 1024,
+      "has_metadata": true
+    },
+    {
+      "semantic_id": "application:96588221007-ASSTUX-ASSTUX_ACCOUNTANT:cv",
+      "entity_type": "application",
+      "entity_key": "96588221007-ASSTUX-ASSTUX_ACCOUNTANT",
+      "company_code": "ASSTUX",
+      "content_hash": "d6ff46b773ee164e0144781e1bf05598561390032eeb9caf561b21bd827efe7b",
+      "provider": "voyage",
+      "model": "voyage-4-large",
+      "dimensions": 1024,
+      "has_metadata": true
+    }
+  ]
+}

@@ -1,0 +1,604 @@
+{
+  "tag": "38301248",
+  "passed": 92,
+  "failed": 0,
+  "ids": {
+    "tag": "38301248",
+    "employee_key": "WATHEFNI-PYW1-PYW4-W4B-38301248",
+    "phones": {
+      "creator": "965541138301",
+      "approver": "965541238301",
+      "closer": "965541338301",
+      "exporter": "965541438301",
+      "exporter2": "965541538301"
+    },
+    "close_run_ids": [
+      "fa152724-f006-4f1a-b167-467c5dd55fb4",
+      "00fb79d7-1df2-4e2b-9ad6-ed370a10ceed"
+    ],
+    "journal_draft_ids": [
+      "e9ca6f62-deff-4ddd-a252-f23548c033ad"
+    ],
+    "bank_export_ids": [
+      "dac9a34b-e41c-483d-b938-71b1f78ac1e3"
+    ],
+    "finance_export_ids": [
+      "103fa924-94b2-46b6-af95-ba3a96f2df88",
+      "5341cdaa-0047-4271-acd6-4d210709a1a6"
+    ],
+    "preview_run_ids": [
+      "eccb4746-c47b-4c76-8845-4ac52d1c68fc"
+    ],
+    "import_run_ids": [
+      "f3568471-3584-4f0e-8f24-fad7d681545d"
+    ],
+    "export_run_ids": [
+      "44a3a58d-02e4-494c-9f44-21fb304dbdce"
+    ],
+    "period_ids": [
+      "456e863a-0b09-4e93-8662-db6d926e6026"
+    ],
+    "contract_ids": [
+      "e22a0922-7d26-4da7-80ea-9717cd1d33b9"
+    ],
+    "prior_mode": "external",
+    "period": {
+      "start": "2040-09-01",
+      "end": "2040-09-30"
+    },
+    "cleanup": {
+      "deleted": {
+        "finance_exports": 2,
+        "journal_lines": 3,
+        "journal_drafts": 1,
+        "bank_drafts": 1,
+        "dual_control": 1,
+        "close_events": 11,
+        "close_runs": 2,
+        "mappings": 3,
+        "preview_lines": 2,
+        "preview_employees": 1,
+        "preview_events": 1,
+        "preview_runs": 1,
+        "import_lines": 2,
+        "import_recons": 0,
+        "imports": 1,
+        "adapter_exports": 1,
+        "contract_events": 2,
+        "contract_components": 2,
+        "contracts": 1,
+        "period_events": 1,
+        "periods": 1
+      },
+      "residual_total": 0
+    }
+  },
+  "results": [
+    {
+      "name": "wave4 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no posts payment",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal drafts",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no erp journals",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank contract only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no bank files",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no bank connection",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no wps",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no ashal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no pifss",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no eos",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native non-auth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "immutable invariant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dual reopen invariant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod invariant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2a enabled synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2b enabled synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "markers include PYW4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "markers include PYW1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "markers include W4B",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emp synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "phones synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux en title",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux ar title",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux mobile",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux rtl",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period year >= 2032",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "settings payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create close run",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled on run",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod blocked before submit or bad status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "submit review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self approve forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod approve+export blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod close+export blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self close forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "closed status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "snapshot immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "snapshot fingerprint",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "immutable probe",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reclose blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invalid mapping fail closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping BASIC",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping TRANSPORT",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping NET_PAYABLE",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal balanced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal no erp",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank contract ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank no real format",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank no connection",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank no wps",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod closer\u2260exporter",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod export+approve blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon unmatched",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "drift detected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank export recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export self approve forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recon matched",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export history",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen initiate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen same actor denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen confirmed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopened status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external import",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external close create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external authority retained",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restore prior mode",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "honesty": {
+    "payroll_wave4_version": "1.0.0",
+    "journal_draft_schema": "payroll_journal_draft@1.0.0",
+    "bank_export_contract_schema": "payroll_bank_export_contract@1.0.0",
+    "payment_processing": "disabled",
+    "posts_payment": false,
+    "close_export_foundation": true,
+    "journal_drafts": true,
+    "journals": false,
+    "bank_export_contract": true,
+    "bank_files": false,
+    "bank_connection": false,
+    "wps": false,
+    "ashal": false,
+    "pifss": false,
+    "eos": false,
+    "ai_calculations": false,
+    "native_results_authoritative": false,
+    "external_payroll_authority": "external",
+    "wave1_contracts_unchanged": true,
+    "wave2a_flows_unchanged": true,
+    "wave2b_flows_unchanged": true,
+    "wave3_flows_unchanged": true,
+    "synthetic_only": true
+  },
+  "cleanup": {
+    "deleted": {
+      "finance_exports": 2,
+      "journal_lines": 3,
+      "journal_drafts": 1,
+      "bank_drafts": 1,
+      "dual_control": 1,
+      "close_events": 11,
+      "close_runs": 2,
+      "mappings": 3,
+      "preview_lines": 2,
+      "preview_employees": 1,
+      "preview_events": 1,
+      "preview_runs": 1,
+      "import_lines": 2,
+      "import_recons": 0,
+      "imports": 1,
+      "adapter_exports": 1,
+      "contract_events": 2,
+      "contract_components": 2,
+      "contracts": 1,
+      "period_events": 1,
+      "periods": 1
+    },
+    "residual_total": 0
+  },
+  "wave": "4-B",
+  "payment_processing": "disabled",
+  "posts_payment": false,
+  "journal_drafts": true,
+  "journals": false,
+  "bank_export_contract": true,
+  "bank_files": false,
+  "bank_connection": false,
+  "wps": false,
+  "ashal": false,
+  "pifss": false,
+  "eos": false,
+  "ai_calculations": false,
+  "native_results_authoritative": false,
+  "external_payroll_authority": "external"
+}

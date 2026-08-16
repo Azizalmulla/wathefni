@@ -1,0 +1,402 @@
+{
+  "marker": "waveC-local-mutation-requal-v1",
+  "started_at": "20260801T035752Z",
+  "environment": {
+    "env": "test",
+    "database": "wathefni_local_boundary",
+    "delivery_mode": "dry_run",
+    "binding": {
+      "application_environment": "test",
+      "database_environment": "test",
+      "database_environment_marker": "cb317868f25b",
+      "database_logical_name": "cfb68af4bec9",
+      "database_host": "aaf075b7b4bf",
+      "match": true
+    }
+  },
+  "tenants": [
+    {
+      "code": "WCAVLO",
+      "combo": "asm_ON__live_ON__video_ON__offers_ON",
+      "assessments": true,
+      "live": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "WCALXO",
+      "combo": "asm_ON__live_ON__video_OFF__offers_ON",
+      "assessments": true,
+      "live": true,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "WCAXVO",
+      "combo": "asm_ON__live_OFF__video_ON__offers_ON",
+      "assessments": true,
+      "live": false,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "WCAXXO",
+      "combo": "asm_ON__live_OFF__video_OFF__offers_ON",
+      "assessments": true,
+      "live": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "WCXVLO",
+      "combo": "asm_OFF__live_ON__video_ON__offers_ON",
+      "assessments": false,
+      "live": true,
+      "video": true,
+      "offers": true
+    },
+    {
+      "code": "WCXXXO",
+      "combo": "asm_OFF__live_OFF__video_OFF__offers_ON",
+      "assessments": false,
+      "live": false,
+      "video": false,
+      "offers": true
+    },
+    {
+      "code": "WCNOOF",
+      "combo": "all_optional_OFF",
+      "assessments": false,
+      "live": false,
+      "video": false,
+      "offers": false
+    },
+    {
+      "code": "WCPEER",
+      "combo": "peer_isolation_and_history",
+      "assessments": true,
+      "live": true,
+      "video": true,
+      "offers": true
+    }
+  ],
+  "gates": [
+    {
+      "gate": "catalog_has_assessments_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "prehire=['assessments', 'calendar', 'employment_offers', 'interviews', 'pre_hiring', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_offers_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "keys=['analytics', 'assessments', 'attendance', 'calendar', 'compliance', 'employee_app', 'employment_offers', 'interviews', 'leave', 'onboarding', 'payroll', 'pre_hiring', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_live_interviews_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": "interview-related=['interviews', 'video_interviews']"
+    },
+    {
+      "gate": "catalog_has_video_interviews_module",
+      "scope": "contract",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "live_and_video_interview_modules_are_independent",
+      "scope": "contract",
+      "ok": true,
+      "detail": "live.depends_on=('pre_hiring',) video.depends_on=('pre_hiring',)"
+    },
+    {
+      "gate": "toolcall_gated_covers_optional_interview_and_assessment_modules",
+      "scope": "contract",
+      "ok": true,
+      "detail": "TOOLCALL_GATED_MODULES=['analytics', 'assessments', 'attendance', 'compliance', 'interviews', 'leave', 'onboarding', 'payroll', 'shifts', 'video_interviews']"
+    },
+    {
+      "gate": "employment_offers_has_no_assistant_mutation_surface",
+      "scope": "contract",
+      "ok": true,
+      "detail": "offers are dashboard/API entitled; Assistant must not expose offer mutation tools (checked per-tenant)"
+    },
+    {
+      "gate": "unconditional_interviews_or_True_removed",
+      "scope": "contract",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "ranking_default_policy_assessment_and_interview_unused",
+      "scope": "contract",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "job_created_draft",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "draft"
+    },
+    {
+      "gate": "job_updated_with_version_token",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"vacancies\": 3, \"version\": 2, \"summary\": \"Own logistics data pipelines. Updated for Wave C.\"}"
+    },
+    {
+      "gate": "job_published_open_with_apply_identity",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"open\", \"apply_code\": \"APPLY-WCAVLO-WC_ROLE\", \"link\": \"https://wa.me/96500000000?text=APPLY-WCAVLO-WC_ROLE\"}"
+    },
+    {
+      "gate": "published_job_accepts_applications",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "open"
+    },
+    {
+      "gate": "canonical_cv_lifecycle_to_ready_for_review",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "awaiting_cv -> cv_processing -> ready_for_review"
+    },
+    {
+      "gate": "lifecycle_events_recorded",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "events=10"
+    },
+    {
+      "gate": "cv_ranking_functional_before_optional_modules",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"items\": 5, \"run_id\": \"5f068ccf-8aad-4c2e-a430-9b7696086c22\"}"
+    },
+    {
+      "gate": "ranking_does_not_mutate_lifecycle",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"before\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}, \"after\": {\"main\": \"ready_for_review\", \"bare\": \"ready_for_review\", \"reject\": \"ready_for_review\", \"withdraw\": \"ready_for_review\", \"ardoc\": \"ready_for_review\"}}"
+    },
+    {
+      "gate": "ranking_has_no_assessment_or_interview_evidence_by_default",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"skills_alignment\": 15.0, \"experience_alignment\": 0.0, \"education_cert_alignment\": 5.0}"
+    },
+    {
+      "gate": "ranking_run_declares_no_lifecycle_mutations",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"provenance\": {\"company_code\": \"WCAVLO\", \"position_code\": \"WC_ROLE\", \"job_version\": 3, \"criteria_version\": null, \"ranking_basis\": {\"version\": \"ranking-role-profile-v1\", \"source\": \"job_requirements\", \"label\": \"Published job requirements\", \"advisory\": true, \"criteria_count\": 5, \"profile_hash\": \"4adddd6307782c32d0762a28256b9ff652b0db3bddb106e588bc036a8d8026b7\"}, \"pool_app_keys\": [\"WCAVLO-WC-withdraw\", \"WCAVLO-WC-reject\", \"WCAVLO-WC-main\", \"WCAVLO-WC-bare\", \"WCAVLO-WC-ardoc\"], \"scoring_config_versi"
+    },
+    {
+      "gate": "canonical_shortlist_main",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"WCAVLO-WC-main\", \"phone\": \"+965886987660\", \"company_code\": \"WCAVLO\", \"position_code\": \"WC_ROLE\", \"apply_code\": null, \"position_title\": \"WC Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_bare",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"WCAVLO-WC-bare\", \"phone\": \"+965886994394\", \"company_code\": \"WCAVLO\", \"position_code\": \"WC_ROLE\", \"apply_code\": null, \"position_title\": \"WC Operations Engineer\", \"company_name\": null, \"status\": \"shor"
+    },
+    {
+      "gate": "canonical_shortlist_ardoc",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ok\": true, \"from_stage\": \"ready_for_review\", \"to_stage\": \"shortlisted\", \"application\": {\"app_key\": \"WCAVLO-WC-ardoc\", \"phone\": \"+965886938357\", \"company_code\": \"WCAVLO\", \"position_code\": \"WC_ROLE\", \"apply_code\": null, \"position_title\": \"WC Operations Engineer\", \"company_name\": null, \"status\": \"sho"
+    },
+    {
+      "gate": "module_state_assessments_matches_intent",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "assessment_optional_send_available",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '5ffe11d6-8b14-4add-b46d-bd6595010ca5', 'company_code': 'WCAVLO', 'app_key': 'WCAVLO-WC-main', 'phone': '965886987660', 'candidate_name': None, 'position_code': 'WC_ROLE', 'position_title': 'WC Operations Engineer', 'battery_key': 'wathefni_ability_v1', 'status"
+    },
+    {
+      "gate": "assessment_send_ok",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '965886987660', 'name': None, 'email': None, 'position_title': 'WC Operations Engineer'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error"
+    },
+    {
+      "gate": "assessment_send_not_claimed_delivered",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "assessment_cancel_ok",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"attempt_id\": \"5ffe11d6-8b14-4add-b46d-bd6595010ca5\", \"company_code\": \"WCAVLO\", \"app_key\": \"WCAVLO-WC-main\", \"phone\": \"965886987660\", \"candidate_name\": null, \"position_code\": \"WC_ROLE\", \"position_title\": \"WC Operations Engineer\", \"battery_key\": \"wathefni_ability_v1\", \"status\": \"cancelled\", \"current"
+    },
+    {
+      "gate": "assessment_retry_after_cancel_ok",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"create\": true, \"send\": true, \"attempt_id\": \"54bbb5df-5a5e-4ae6-8da3-f0e81ec70689\", \"prev_cancelled\": \"5ffe11d6-8b14-4add-b46d-bd6595010ca5\"}"
+    },
+    {
+      "gate": "unassigned_candidate_has_no_attempt",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "overview_assessment_pending_assigned_only",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"ready_for_review\": 2, \"assessment_pending\": 1, \"follow_up_needed\": 0, \"ready_for_review_people\": 2, \"ready_for_review_applications\": 2, \"assessment_pending_people\": 1, \"assessment_pending_applications\": 1, \"follow_up_needed_people\": 0, \"follow_up_needed_applications\": 0, \"assessment_cohorts\": {\"enabled\": true, \"as_of\": \"2026-08-01T03:57:53.271123+00:00\", \"authority_source\": \"assessment_cohorts\", \"scope\": \"company\", \"cohorts\": {\"assessment_ready_to_send\": {\"key\": \"assessment_ready_to_send\", \"unit\": \"applications\", \"people_count\": 4, \"application_count\": 4, \"people\": 4, \"applications\": 4, \"display_count\": 4, \"primary_action\": \"send_assessment\", \"destination\": {\"page\": \"assessments\", \"filters\": {\"assessment_cohort\": \"assessment_ready_to_send\", \"overview_cohort\": \"assessment_ready_to_send\", \"cohort_key\": \"assessment_ready_to_send\", \"tab\": \"send\"}, \"cohort_key\": \"assessment_ready_to_send\"}, \"candidates_destination\": {\"page\": \"candidates\", \"filters\": {\"assessment_cohort\": \"assessment_ready_to_send\", \"overview_cohort\": \"assessment_ready_to_send\", \"cohort_key\": \"assessment_ready_to_send\", \"assessment_status\": \"none\"}, \"cohort_key\": \"assessment_ready_to_send\"}, \"authority_source\": \"assessment_cohorts\"}, \"assessment_sent_pending\": {\"key\": \"assessment_sent_pending\", \"unit\": \"applications\", \"people_count\": 1, \"application_count\": 1, \"people\": 1, \"applications\": 1, \"display_count\": 1, \"pr"
+    },
+    {
+      "gate": "module_state_live_interviews_matches_intent",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "module_state_video_interviews_matches_intent",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True actual=True"
+    },
+    {
+      "gate": "live_interview_schedulable_when_on",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"}"
+    },
+    {
+      "gate": "live_interview_reschedule_same_id",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"same_id\": true, \"status\": \"scheduled\"}"
+    },
+    {
+      "gate": "live_interview_cancel_ok",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"cancelled\", \"ok\": true}"
+    },
+    {
+      "gate": "google_calendar_disconnected_still_works_when_live_on",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"status\": \"scheduled\", \"provider_sync_status\": \"not_configured\"} provider_status=not_configured"
+    },
+    {
+      "gate": "google_calendar_connected_path_works_when_live_on",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "not_configured"
+    },
+    {
+      "gate": "async_video_interview_works_when_on",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "aed6116f-b745-4356-ac14-da5eed5eb1bb"
+    },
+    {
+      "gate": "interview_queue_items_when_live_on",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "observation": true,
+      "detail": "[\"Candidate is ready for an HR decision\", \"Candidate is ready for an HR decision\", \"Ready for first assessment send\"]"
+    },
+    {
+      "gate": "assistant_assessments_chip_present_when_on",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "pages=['assessments']"
+    },
+    {
+      "gate": "module_state_offers_matches_intent",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "expected=True"
+    },
+    {
+      "gate": "offer_draft_created",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "4ed7ee79-b606-437b-b871-6bf20faaa9ab"
+    },
+    {
+      "gate": "offer_approved_two_person",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{'offer_id': '4ed7ee79-b606-437b-b871-6bf20faaa9ab', 'app_key': 'WCAVLO-WC-main', 'company_code': 'WCAVLO', 'status': 'approved', 'status_label': 'Approved', 'current_version': 1, 'accepted_version': "
+    },
+    {
+      "gate": "offer_sent",
+      "scope": "WCAVLO[asm_ON__live_ON__video_ON__offers_ON]",
+      "ok": true,
+      "detail": "{\"offer_id\": \"4ed7ee79-b606-437b-b871-6bf20faaa9ab\", \"app_key\": \"WCAVLO-WC-main\", \"company_code\": \"WCAVLO\", \"status\": \"sent\", \"status_label\": \"Sent\", \"current_version\": 1, \"accepted_version\": null, \"position_code\": \"WC_ROLE\", \"position_title\": \"WC Operations Engineer\", \"department\": null, \"currency\""
+    },
+    {
+      "gate": "matrix_uncaught_exception",
+      "scope": "global",
+      "ok": false,
+      "detail": "TypeError: send_offer() got an unexpected keyword argument 'resend'\nTraceback (most recent call last):\n  File \"/Users/azizalmulla/Desktop/claw/ops/waveC-local/waveC-local-mutation-requal-matrix.py\", line 1313, in main\n    resent = osvc.send_offer(\n        app,\n    ...<6 lines>...\n        resend=True,\n    )\nTypeError: send_offer() got an unexpected keyword argument 'resend'\n"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "scope": "cleanup",
+      "ok": true,
+      "detail": "{}"
+    }
+  ],
+  "findings": {},
+  "cleanup": {
+    "removed_files": 1,
+    "cleanup_errors": []
+  },
+  "residue_after_cleanup": {
+    "companies": 0,
+    "company_modules": 0,
+    "positions": 0,
+    "applications": 0,
+    "lifecycle_events": 0,
+    "confirmations": 0,
+    "ranking_runs": 0,
+    "ranking_items": 0,
+    "cv_evidence": 0,
+    "cv_facts": 0,
+    "semantic_docs": 0,
+    "files": 0,
+    "assessment_attempts": 0,
+    "assessment_invitations": 0,
+    "interviews": 0,
+    "interview_events": 0,
+    "offers": 0,
+    "offer_events": 0,
+    "offer_tokens": 0,
+    "offer_deliveries": 0,
+    "offer_send_ops": 0,
+    "hire_operations": 0,
+    "hire_override_audits": 0,
+    "employees": 0,
+    "compliance_documents": 0,
+    "employee_documents": 0,
+    "interview_schedule_ops": 0,
+    "onboarding_items": 0,
+    "report_export_audits": 0,
+    "candidates": 0
+  },
+  "finished_at": "20260801T035753Z",
+  "passed": 45,
+  "failed": 1
+}

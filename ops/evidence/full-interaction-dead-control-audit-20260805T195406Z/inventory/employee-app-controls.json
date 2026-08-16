@@ -1,0 +1,231 @@
+[
+  {
+    "app": "employee_mobile",
+    "screen": "activation/session",
+    "role": "employee",
+    "control": "Automatic session refresh",
+    "expected_behavior": "Rotate access+refresh tokens, keep same employee, return calm auth errors.",
+    "actual_result": "status=200; rotated=True",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:65975",
+    "evidence": null
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "home",
+    "role": "employee",
+    "control": "Load employee identity and capability gates",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66002",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "profile",
+    "role": "employee",
+    "control": "Open profile",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66018",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "onboarding",
+    "role": "employee",
+    "control": "Open onboarding",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66038",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "leave",
+    "role": "employee",
+    "control": "Open leave",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66154",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "shifts",
+    "role": "employee",
+    "control": "Open today's shifts",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66187",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "shifts",
+    "role": "employee",
+    "control": "Open upcoming shifts",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66209",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "attendance",
+    "role": "employee",
+    "control": "Open attendance",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66233",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "documents",
+    "role": "employee",
+    "control": "Open documents",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66261",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "notifications",
+    "role": "employee",
+    "control": "Open notifications",
+    "expected_behavior": "Return self-scoped data, or a calm explained feature-disabled state.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66578",
+    "evidence": {
+      "status": 200
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "home",
+    "role": "employee",
+    "control": "Self-scope identity",
+    "expected_behavior": "The employee can only see their own canonical employee key.",
+    "actual_result": "employee_key=WATHEFNI-96550252254",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66002",
+    "evidence": null
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "onboarding",
+    "role": "employee",
+    "control": "Open item history",
+    "expected_behavior": "Open version history for a self-scoped onboarding item.",
+    "actual_result": "status=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66101",
+    "evidence": null
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "notifications",
+    "role": "employee",
+    "control": "Mark notification read",
+    "expected_behavior": "Persist read receipt; update state; repeated taps are idempotent.",
+    "actual_result": "first=200; repeat=200; persisted=True",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66618",
+    "evidence": {
+      "first": {
+        "ok": true
+      },
+      "repeat": {
+        "ok": true
+      }
+    }
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "leave",
+    "role": "employee",
+    "control": "Cancel stale/nonexistent request",
+    "expected_behavior": "Do not mutate; return calm copy and allow refresh.",
+    "actual_result": "status=404; calm=True",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:66687",
+    "evidence": null
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "settings",
+    "role": "employee",
+    "control": "Push preference register/unregister",
+    "expected_behavior": "Register only when capability allows; unregister is reversible and idempotent.",
+    "actual_result": "register=403; unregister=200; repeat=200",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:67297",
+    "evidence": null
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "activation/session",
+    "role": "employee",
+    "control": "Expired/invalid session",
+    "expected_behavior": "Fail closed with calm sign-in copy; no raw error code.",
+    "actual_result": "status=401; calm=True",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:employee_app_context",
+    "evidence": null
+  },
+  {
+    "app": "employee_mobile",
+    "screen": "settings",
+    "role": "employee",
+    "control": "Sign out",
+    "expected_behavior": "Revoke server session; clear local state; repeated taps safe.",
+    "actual_result": "first=200; repeat=200; revoked_probe=401",
+    "status": "pass",
+    "severity": null,
+    "exact_fix_location": "wathefni-orchestrator/app.py:65993",
+    "evidence": null
+  }
+]

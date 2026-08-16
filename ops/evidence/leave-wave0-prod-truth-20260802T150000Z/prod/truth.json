@@ -1,0 +1,272 @@
+{
+  "stamp": "leave-wave0-prod-truth",
+  "flags": {
+    "WATHEFNI_LEAVE_BALANCES": "on",
+    "leave_balances_enabled": true,
+    "OUTBOUND_FLOWS": "leave_decision,onboarding,compliance,shift"
+  },
+  "company_has_leave": true,
+  "db": "wathefni",
+  "tables": [
+    "leave_balances",
+    "leave_events",
+    "leave_ledger",
+    "leave_policies",
+    "leave_policy_presets",
+    "leave_requests",
+    "public_holidays"
+  ],
+  "counts": {
+    "leave_balances": 4,
+    "leave_balances_by_company": [
+      {
+        "company": "WATHEFNI",
+        "n": 4
+      }
+    ],
+    "leave_events": 10,
+    "leave_events_by_company": [
+      {
+        "company": "WATHEFNI",
+        "n": 10
+      }
+    ],
+    "leave_ledger": 28,
+    "leave_ledger_by_company": [
+      {
+        "company": "WATHEFNI",
+        "n": 28
+      }
+    ],
+    "leave_policies": 2,
+    "leave_policies_by_company": [
+      {
+        "company": "WATHEFNI",
+        "n": 2
+      }
+    ],
+    "leave_policy_presets": 2,
+    "leave_requests": 3,
+    "leave_requests_by_company": [
+      {
+        "company": "WATHEFNI",
+        "n": 3
+      }
+    ],
+    "public_holidays": 0,
+    "public_holidays_by_company": []
+  },
+  "requests_mix": [
+    {
+      "company": "WATHEFNI",
+      "status": "approved",
+      "leave_type": "sick",
+      "n": 1
+    },
+    {
+      "company": "WATHEFNI",
+      "status": "rejected",
+      "leave_type": "sick",
+      "n": 1
+    },
+    {
+      "company": "WATHEFNI",
+      "status": "requested",
+      "leave_type": "annual",
+      "n": 1
+    }
+  ],
+  "request_health": {
+    "requested": 1,
+    "approved": 1,
+    "rejected": 1,
+    "cancelled": 0,
+    "other_status": 0,
+    "approved_open_or_future": 0,
+    "approved_in_progress": 0,
+    "requested_past_start": 1,
+    "inverted_dates": 0,
+    "leave_types_used": 2,
+    "companies": 1,
+    "min_start": "2026-05-11",
+    "max_end": "2026-06-18"
+  },
+  "overlapping_approved_pairs": 0,
+  "duplicate_active_windows": 0,
+  "balance_stats": [
+    {
+      "company_code": "WATHEFNI",
+      "leave_type": "annual",
+      "period_year": 2026,
+      "n": 4,
+      "negative_balance": 0,
+      "min_balance": 17.5,
+      "avg_balance": 17.5,
+      "max_balance": 17.5,
+      "sum_accrued": 70.0,
+      "sum_consumed": 0.0
+    }
+  ],
+  "ledger_by_kind": [
+    {
+      "company": "WATHEFNI",
+      "entry_kind": "accrual",
+      "leave_type": "annual",
+      "n": 28,
+      "days": 70.0
+    }
+  ],
+  "policies": [
+    {
+      "company_code": "WATHEFNI",
+      "leave_type": "annual",
+      "version": 1,
+      "days_per_year": 30.0,
+      "accrual_method": "monthly_accrual",
+      "eligibility_months": 6,
+      "weekend_days": [
+        "fri",
+        "sat"
+      ],
+      "exclude_public_holidays": true,
+      "allow_negative": false,
+      "enforced": false,
+      "legal_reviewed": false,
+      "effective_from": "2026-06-09",
+      "preset_key": "kuwait_private_2010"
+    },
+    {
+      "company_code": "WATHEFNI",
+      "leave_type": "sick",
+      "version": 1,
+      "days_per_year": 0.0,
+      "accrual_method": "none",
+      "eligibility_months": 0,
+      "weekend_days": [
+        "fri",
+        "sat"
+      ],
+      "exclude_public_holidays": true,
+      "allow_negative": false,
+      "enforced": false,
+      "legal_reviewed": false,
+      "effective_from": "2026-06-09",
+      "preset_key": "kuwait_private_2010"
+    }
+  ],
+  "policy_enforcement": {
+    "enforced": 0,
+    "legal_reviewed": 0,
+    "total": 2
+  },
+  "presets": [
+    {
+      "preset_key": "kuwait_private_2010",
+      "leave_type": "annual",
+      "days_per_year": 30.0,
+      "legal_reviewed": false,
+      "notes": "Kuwait Law 6/2010 default: 30 paid working days/year, monthly accrual. Configurable preset \u2014 requires legal review before enforcement."
+    },
+    {
+      "preset_key": "kuwait_private_2010",
+      "leave_type": "sick",
+      "days_per_year": 0.0,
+      "legal_reviewed": false,
+      "notes": "Kuwait Law 6/2010 graduated sick leave. Tier structure supported; exact bands/rates empty pending legal review. Not enforced."
+    }
+  ],
+  "holidays": [],
+  "events_by_type": [
+    {
+      "event_type": "approved",
+      "n": 5
+    },
+    {
+      "event_type": "cancelled",
+      "n": 3
+    },
+    {
+      "event_type": "requested",
+      "n": 1
+    },
+    {
+      "event_type": "rejected",
+      "n": 1
+    }
+  ],
+  "self_approved_count": 0,
+  "attendance_leave_linked": 0,
+  "carryover_entries": 0,
+  "feature_usage": {
+    "partial_meta": 0,
+    "unpaidish": 0,
+    "with_reason": 3,
+    "with_attachment_meta": 0,
+    "other_types": 0
+  },
+  "orphan_leave_no_employee": 0,
+  "wathefni_employees": 4,
+  "wathefni_employees_with_balances": 4,
+  "recent_wathefni": [
+    {
+      "leave_id": "dbf82ecf-7ac4-451b-b41c-03de943f2161",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "annual",
+      "status": "requested",
+      "start_date": "2026-06-16",
+      "end_date": "2026-06-18",
+      "requested_by_phone": null,
+      "decided_by_phone": null,
+      "reason": "Family trip",
+      "created_at": "2026-06-09 23:09:43.663432+00"
+    },
+    {
+      "leave_id": "51cd940f-a04b-4ad1-9a6a-43e3da59a222",
+      "employee_key": "WATHEFNI-96597727743",
+      "leave_type": "sick",
+      "status": "rejected",
+      "start_date": "2026-06-12",
+      "end_date": "2026-06-12",
+      "requested_by_phone": null,
+      "decided_by_phone": "96599338566",
+      "reason": "Medical appointment",
+      "created_at": "2026-06-09 23:09:43.663432+00"
+    },
+    {
+      "leave_id": "e3217e0e-466f-4f38-aa10-dab503dcb0a4",
+      "employee_key": "WATHEFNI-96566363363",
+      "leave_type": "sick",
+      "status": "approved",
+      "start_date": "2026-05-11",
+      "end_date": "2026-05-11",
+      "requested_by_phone": "96599338566",
+      "decided_by_phone": "96599338566",
+      "reason": "Fouad needs sick leave tomorrow",
+      "created_at": "2026-05-10 21:47:06.790517+00"
+    }
+  ],
+  "employee_lifecycle_cols": [
+    "compliance_status",
+    "employment_status",
+    "hire_date",
+    "onboarding_status"
+  ],
+  "emp_status_col": "employment_status",
+  "leave_by_emp_status": [
+    {
+      "emp_status": "active",
+      "leave_status": "approved",
+      "n": 1
+    },
+    {
+      "emp_status": "active",
+      "leave_status": "rejected",
+      "n": 1
+    },
+    {
+      "emp_status": "active",
+      "leave_status": "requested",
+      "n": 1
+    }
+  ]
+}

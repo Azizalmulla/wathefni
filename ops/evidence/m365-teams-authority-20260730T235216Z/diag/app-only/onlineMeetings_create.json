@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "status": 403,
+  "error": "{\"error\":{\"code\":\"Forbidden\",\"message\":\"Missing required permissions\",\"innerError\":{\"date\":\"2026-07-30T23:39:52\",\"request-id\":\"8ab4d165-bacf-4e2e-b7e5-7206f70f32f0\",\"client-request-id\":\"8ab4d165-bacf-4e2e-b7e5-7206f70f32f0\"}}}"
+}

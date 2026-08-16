@@ -1,0 +1,47 @@
+PASS  not production db
+PASS  db matches expected
+PASS  wave2f schema ensure
+PASS  store mode postgres
+PASS  register site
+PASS  cross-tenant device denied
+PASS  register device
+PASS  register connector
+PASS  activate connector
+PASS  rotate credentials sealed
+PASS  rotate stale_row_version fail-closed
+PASS  no plaintext secrets in DB
+PASS  credential rows Fernet-only (no raw password)
+PASS  health upsert degraded
+PASS  checkpoint save (health-synced or first write)
+PASS  checkpoint duplicate exactly-once
+PASS  checkpoint advance
+PASS  unknown mapping queued
+PASS  enqueue idempotent
+PASS  checkpoint survives restart
+PASS  unknown mapping remains queued after restart
+PASS  health survives restart
+PASS  health recover
+PASS  health event history retained
+PASS  cross-tenant approve denied
+PASS  manager self-action denied
+PASS  manager scope denied
+PASS  concurrent approve: exactly one success
+PASS  concurrent approve: other fail-closed stale
+PASS  item approved after concurrency
+PASS  reject ok
+PASS  reject idempotent when already rejected
+PASS  approve+replay reaches authority
+PASS  authority punch exactly once after first replay
+PASS  replay idempotent duplicate
+PASS  authority punch still exactly once after duplicate replay
+PASS  reconcile capture↔authority ok
+PASS  audit events immutable
+PASS  ops store mode
+PASS  ops overview store_mode postgres
+PASS  freeze skipped
+{
+  "pass": 41,
+  "fail": 0,
+  "db": "wathefni_staging",
+  "marker": "ATTW2F-5276eff3"
+}

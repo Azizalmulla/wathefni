@@ -1,0 +1,25 @@
+{
+  "fixture_id": "cv_en_digital_03",
+  "category": "english_digital_cv",
+  "language": "en",
+  "layout": "single_column",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Layla Hassan",
+    "layla.hassan@example.com",
+    "+96560011223",
+    "EXPERIENCE",
+    "SKILLS"
+  ],
+  "expected_fields": {
+    "full_name": "Layla Hassan",
+    "email": "layla.hassan@example.com",
+    "phone": "+96560011223",
+    "title": "Data Engineer"
+  },
+  "notes": "Structurally valid digital English CV with embedded TrueType text.",
+  "sha256": "2ab0a11179b98ec9e85c511c78c591393c88b3da58df15d37d1a985bd628bcb7",
+  "bytes": 32297
+}

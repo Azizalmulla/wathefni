@@ -1,0 +1,241 @@
+{
+  "stamp": "20260807T081338Z",
+  "run_at": "2026-08-07T08:26:32.898855+00:00",
+  "fixture": {
+    "filename": "1786090542147.pdf",
+    "sha256": "3fdcda9ff90e5b995ff51eaa7adcd2e3d75f2c9fa0789cf47d567ebaf3f8b1b4",
+    "bytes": 553403
+  },
+  "checks": [
+    {
+      "case": "seed_request",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "case": "seed_payroll_effective_present",
+      "verdict": "PASS",
+      "detail": {
+        "fp": "5425959aa0fc0391"
+      }
+    },
+    {
+      "case": "upload_ok",
+      "verdict": "PASS",
+      "detail": {
+        "evidence_id": "3a1ce25e-f0a1-4b5e-b403-a0d73c0916a6"
+      }
+    },
+    {
+      "case": "extraction_non_authoritative",
+      "verdict": "PASS",
+      "detail": {
+        "authoritative": false
+      }
+    },
+    {
+      "case": "rich_extraction_not_fail_open",
+      "verdict": "PASS",
+      "detail": {
+        "status": "extracted",
+        "proposed_keys": [
+          "account_holder",
+          "account_number",
+          "bank_name",
+          "branch",
+          "iban",
+          "swift"
+        ],
+        "fallback": false
+      }
+    },
+    {
+      "case": "bank_name_extracted",
+      "verdict": "PASS",
+      "detail": {
+        "bank_name": "Gulf Bank"
+      }
+    },
+    {
+      "case": "account_holder_extracted",
+      "verdict": "PASS",
+      "detail": {
+        "holder_masked": "M*** A*** H*** R*** A***"
+      }
+    },
+    {
+      "case": "kw_iban_extracted",
+      "verdict": "PASS",
+      "detail": {
+        "iban_masked": "KW35\u20269548",
+        "len": 30
+      }
+    },
+    {
+      "case": "kw_iban_validation",
+      "verdict": "PASS",
+      "detail": {
+        "ok": true,
+        "error": null,
+        "iban_masked": "KW35\u20269548"
+      }
+    },
+    {
+      "case": "extraction_confidence_present",
+      "verdict": "PASS",
+      "detail": {
+        "confidence": 1.0
+      }
+    },
+    {
+      "case": "extraction_status_useful",
+      "verdict": "PASS",
+      "detail": {
+        "status": "extracted",
+        "warnings": [],
+        "uncertain": false
+      }
+    },
+    {
+      "case": "optional_account_number_present",
+      "verdict": "PASS",
+      "detail": {
+        "account_number": "****9548"
+      }
+    },
+    {
+      "case": "optional_branch_present",
+      "verdict": "PASS",
+      "detail": {
+        "branch": "Al Fanar Mall"
+      }
+    },
+    {
+      "case": "optional_swift_present",
+      "verdict": "PASS",
+      "detail": {
+        "swift": "GULBKWKW"
+      }
+    },
+    {
+      "case": "optional_currency_present",
+      "verdict": "SKIP",
+      "detail": "not extracted"
+    },
+    {
+      "case": "employee_confirm_correct_submit",
+      "verdict": "PASS",
+      "detail": {
+        "code": 200,
+        "state": "pending_hr",
+        "request_id": "e7df2964-e061-457f-9d7f-7b64d5e1557a",
+        "error": ""
+      }
+    },
+    {
+      "case": "payroll_effective_unchanged_until_apply",
+      "verdict": "PASS",
+      "detail": {
+        "seed_fp": "5425959aa0fc0391",
+        "mid_fp": "5425959aa0fc0391"
+      }
+    },
+    {
+      "case": "ocr_submit_did_not_write_verified",
+      "verdict": "PASS",
+      "detail": {
+        "verified_for_request": 0
+      }
+    },
+    {
+      "case": "evidence_private_owner_ok",
+      "verdict": "PASS",
+      "detail": null
+    },
+    {
+      "case": "evidence_private_other_denied",
+      "verdict": "PASS",
+      "detail": null
+    },
+    {
+      "case": "evidence_no_storage_ref_leaked",
+      "verdict": "PASS",
+      "detail": null
+    },
+    {
+      "case": "hr_current_vs_proposed",
+      "verdict": "PASS",
+      "detail": {
+        "changed_fields": [
+          "account_holder",
+          "account_number",
+          "bank_name",
+          "branch",
+          "iban",
+          "swift"
+        ],
+        "has_current": true
+      }
+    },
+    {
+      "case": "hr_sees_evidence_and_extraction",
+      "verdict": "PASS",
+      "detail": {
+        "status": "extracted",
+        "confidence": 1.0,
+        "warnings": [],
+        "proposed_iban": "KW35GULB0000000000000096259548"
+      }
+    },
+    {
+      "case": "hr_view_masked_by_default",
+      "verdict": "FAIL",
+      "detail": {
+        "leaked": true
+      }
+    },
+    {
+      "case": "aziz_effective_unchanged",
+      "verdict": "PASS",
+      "detail": {
+        "before": "0f349ce848ab5e4b",
+        "after": "0f349ce848ab5e4b"
+      }
+    }
+  ],
+  "extraction": {
+    "status": "extracted",
+    "confidence": 1.0,
+    "uncertain": false,
+    "needs_manual_fallback": false,
+    "authoritative": false,
+    "warnings": [],
+    "field_confidence": {
+      "iban": 1.0,
+      "account_number": 1.0,
+      "bank_name": 1.0,
+      "account_holder": 1.0,
+      "branch": 1.0,
+      "swift": 1.0
+    },
+    "proposed_masked": {
+      "bank_name": "Gulf Bank",
+      "account_holder": "M*** A*** H*** R*** A***",
+      "iban": "KW35\u20269548",
+      "account_number": "****9548",
+      "branch": "Al Fanar Mall",
+      "swift": "GULBKWKW",
+      "currency": null
+    },
+    "evidence_id": "3a1ce25e-f0a1-4b5e-b403-a0d73c0916a6"
+  },
+  "errors": [],
+  "summary": {
+    "PASS": 23,
+    "FAIL": 1,
+    "SKIP": 1,
+    "verdict": "FAIL"
+  }
+}

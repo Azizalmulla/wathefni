@@ -1,0 +1,23 @@
+DEPLOYED_DASHBOARD=/var/www/wathefni-dashboard
+BACKUP=/opt/wathefni/backups/production-pre-onboarding-page-refinement-wave1-20260804T063521Z
+-rw-r--r-- 1 501 staff 2016 Aug  4 06:34 /var/www/wathefni-dashboard/index.html
+
+/var/www/wathefni-dashboard/assets/:
+total 1652
+drwxr-xr-x 2 501 staff   4096 Aug  4 06:34 .
+drwxr-xr-x 3 501 staff   4096 Aug  4 06:34 ..
+-rw-r--r-- 1 501 staff  17640 Aug  4 06:34 AdminAIPage-Bc1Xht-O.js
+-rw-r--r-- 1 501 staff  57671 Aug  4 06:34 AssessmentsPage-CQyBcNip.js
+-rw-r--r-- 1 501 staff  38200 Aug  4 06:34 CalendarShell-CuitaGPG.js
+-rw-r--r-- 1 501 staff  45116 Aug  4 06:34 CandidateProfilePage-DoMcSLKP.js
+-rw-r--r-- 1 501 staff  30843 Aug  4 06:34 CandidatesPage-CIhlJ99H.js
+-rw-r--r-- 1 501 staff   3146 Aug  4 06:34 ConfirmDialog-DNAN4-Qw.js
+-rw-r--r-- 1 501 staff  33141 Aug  4 06:34 InterviewsPage-D2tG9Ca7.js
+-rw-r--r-- 1 501 staff  12498 Aug  4 06:34 JobWorkspace-DXAWVybE.js
+-rw-r--r-- 1 501 staff  39076 Aug  4 06:34 JobsPage-BwSflw3j.js
+-rw-r--r-- 1 501 staff   7395 Aug  4 06:34 NotificationsPage-DyKdpEuG.js
+-rw-r--r-- 1 501 staff 426348 Aug  4 06:34 PostHire-CfUd3LYy.js
+-rw-r--r-- 1 501 staff   9771 Aug  4 06:34 RankingPage-DARpZR6q.js
+-rw-r--r-- 1 501 staff  13423 Aug  4 06:34 ReportsPage-CpWcxGcb.js
+-rw-r--r-- 1 501 staff  51450 Aug  4 06:34 SettingsPage-Bji4-9ES.js
+BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-CfUd3LYy.js

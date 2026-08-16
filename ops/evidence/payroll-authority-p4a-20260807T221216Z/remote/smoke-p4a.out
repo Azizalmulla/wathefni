@@ -1,0 +1,72 @@
+[PASS] p4a version
+[PASS] preview only
+[PASS] no invented rates
+[PASS] no legal claim
+[PASS] mode a locked
+[PASS] native pdf locked
+[PASS] payment disabled
+[PASS] remittance not payment
+[PASS] eos not auto payable
+[PASS] no speculative gcc
+[PASS] invariant no invented
+[PASS] invariant pifss distinct
+[PASS] invariant eos settlement
+[PASS] boundary A exists
+[PASS] boundary D remittance
+[PASS] p4b inputs listed
+[PASS] p1 preserved
+[PASS] p2 preserved
+[PASS] p3 preserved
+[PASS] legal approve refused
+[PASS] draft package
+[PASS] invented rate refused
+[PASS] awaiting legal validation
+[PASS] architecture package
+[PASS] architecture never legal_claim
+[PASS] ot v1 fixture
+[PASS] ot v2 fixture
+[PASS] effective-date selects v1
+[PASS] effective-date selects v2
+[PASS] missing legal approved fails closed
+[PASS] p3 legal rate still none
+[PASS] family rest_day_work
+[PASS] family public_holiday_work
+[PASS] family sick_leave_fractions
+[PASS] family eos_indemnity
+[PASS] family pifss
+[PASS] ot not collapsible to B
+[PASS] pifss rule resolved
+[PASS] pifss employee_deduction
+[PASS] pifss employer_contribution
+[PASS] pifss remittance_obligation
+[PASS] pifss EE is A
+[PASS] pifss ER is B
+[PASS] pifss remit is D
+[PASS] supersede ot v2
+[PASS] superseded not selected
+[PASS] ot v3 after supersede
+[PASS] eval ok
+[PASS] eval has ot
+[PASS] eval has rest
+[PASS] eval has ph
+[PASS] eval has sick
+[PASS] eval has pifss
+[PASS] eval has A
+[PASS] eval has B
+[PASS] eval has D
+[PASS] eval never legal_claim
+[PASS] ot/rest/ph remain separate
+[PASS] legal eval blocked
+[PASS] sick engine lines
+[PASS] sick provenance rule
+[PASS] eos settlement created
+[PASS] eos output class C
+[PASS] eos not auto pay
+[PASS] eos preview authority
+[PASS] eos never legal_claim
+[PASS] eos has rule provenance
+[PASS] eos provisional architecture amount
+[PASS] eos legal path blocked/awaiting
+[PASS] workspace ok
+[PASS] workspace p4b inputs
+PASS=71 FAIL=0 EVID=/opt/wathefni/ops/evidence/payroll-authority-p4a-20260807T221324Z

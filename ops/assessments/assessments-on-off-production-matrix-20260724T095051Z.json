@@ -1,0 +1,238 @@
+{
+  "marker": "assessments-on-off-production-matrix-v1",
+  "started_at": "20260724T095050Z",
+  "companies": {
+    "on": "ASSESONP",
+    "off": "ASSESSOFFP"
+  },
+  "gates": [
+    {
+      "gate": "assessments_toolcall_gated",
+      "ok": true,
+      "detail": "TOOLCALL_GATED_MODULES=['analytics', 'assessments', 'attendance', 'compliance', 'leave', 'onboarding', 'payroll', 'shifts']"
+    },
+    {
+      "gate": "default_ranking_assessment_unused",
+      "ok": true,
+      "detail": "{'cv': 'required', 'screening': 'optional', 'assessment': 'unused', 'semantic': 'optional', 'interview': 'unused'}"
+    },
+    {
+      "gate": "soft_weight_assessment_unchanged",
+      "ok": true,
+      "detail": "15.0"
+    },
+    {
+      "gate": "delivery_label_sent_not_confirmed_delivery",
+      "ok": true,
+      "detail": "label='Send accepted'"
+    },
+    {
+      "gate": "delivery_label_send_accepted_not_confirmed_delivery",
+      "ok": true,
+      "detail": "label='Send accepted'"
+    },
+    {
+      "gate": "legacy_whatsapp_sent_path_documented",
+      "ok": true,
+      "detail": "reminder/status path still writes delivery_status='sent' (legacy residual)"
+    },
+    {
+      "gate": "on_create_attempt",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'd9fc98a1-1f57-4fcf-a917-7afef06ecf75', 'company_code': 'ASSESONP', 'app_key': 'assessments-on-off-production-matrix-v1-assesonp-assigned', 'phone': '96588551002', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery"
+    },
+    {
+      "gate": "on_send_ok_or_dry_run",
+      "ok": true,
+      "detail": "{'ok': True, 'send': {'ok': True, 'kind': 'assessment', 'candidate': {'phone': '96588551002', 'name': None, 'email': None, 'position_title': 'Assess Role'}, 'policy': {'primary': 'email', 'send_both': True, 'fallbacks': ['whatsapp']}, 'attempts': [{'channel': 'email', 'ok': False, 'error': 'missing_candidate_email', 'result': {'ok': False, 'error': 'missing_candidate_email', 'candidate': {'phone':"
+    },
+    {
+      "gate": "on_send_delivery_truthful",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "on_send_not_presented_as_delivered",
+      "ok": true,
+      "detail": "delivery_status=intentionally_skipped"
+    },
+    {
+      "gate": "on_terminal_send_blocked",
+      "ok": true,
+      "detail": "{'ok': False, 'error': 'terminal_application', 'status': 'hired', 'safe_user_message': 'Cannot send an assessment for an application that is already hired.'}"
+    },
+    {
+      "gate": "on_unassigned_not_forced_into_pending_definition",
+      "ok": true,
+      "detail": "{'ready_for_review': 3, 'assessment_pending': 1, 'follow_up_needed': 0}"
+    },
+    {
+      "gate": "on_unassigned_has_no_attempt",
+      "ok": true,
+      "detail": "n=0"
+    },
+    {
+      "gate": "on_link_open_needs_begin",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'd9fc98a1-1f57-4fcf-a917-7afef06ecf75', 'status': 'pending', 'candidate_name': None, 'position_title': 'Assess Role', 'current_item_index': 0, 'total_items': 22, 'percent_complete': 0.0, 'progress_version': 0, 'expires_at': '2026-07-31T09:50:50.856917+00:00', 'locale': 'en'}, 'locale': 'en', 'dir': 'ltr', 'needs_begin': True, 'item': None, 'completed': False}"
+    },
+    {
+      "gate": "on_begin_starts_once",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'd9fc98a1-1f57-4fcf-a917-7afef06ecf75', 'status': 'in_progress', 'candidate_name': None, 'position_title': 'Assess Role', 'current_item_index': 0, 'total_items': 22, 'percent_complete': 0.0, 'progress_version': 1, 'expires_at': '2026-07-31T09:50:50.856917+00:00', 'locale': 'en'}, 'locale': 'en', 'dir': 'ltr', 'needs_begin': False, 'item': {'item_id': 'ability"
+    },
+    {
+      "gate": "on_begin_idempotent",
+      "ok": true,
+      "detail": "first={'attempt_id': 'd9fc98a1-1f57-4fcf-a917-7afef06ecf75', 'status': 'in_progress', 'candidate_name': None, 'position_title': 'Assess Role', 'current_item_index': 0, 'total_items': 22, 'percent_complete': 0.0, 'progress_version': 1, 'expires_at': '2026-07-31T09:50:50.856917+00:00', 'locale': 'en'} second={'attempt_id': 'd9fc98a1-1f57-4fcf-a917-7afef06ecf75', 'status': 'in_progress', 'candidate_name': None, 'position_title': 'Assess Role', 'current_item_index': 0, 'total_items': 22, 'percent_complete': 0.0, 'progress_version': 1, 'expires_at': '2026-07-31T09:50:50.856917+00:00', 'locale': 'en'}"
+    },
+    {
+      "gate": "on_arabic_create_attempt",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '11aeac1f-bafa-4ab1-afab-87fb1e1787ad', 'company_code': 'ASSESONP', 'app_key': 'assessments-on-off-production-matrix-v1-assesonp-arabic', 'phone': '96588551004', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery_k"
+    },
+    {
+      "gate": "on_arabic_locale_dir",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '11aeac1f-bafa-4ab1-afab-87fb1e1787ad', 'status': 'pending', 'candidate_name': None, 'position_title': 'Assess Role', 'current_item_index': 0, 'total_items': 22, 'percent_complete': 0.0, 'progress_version': 0, 'expires_at': '2026-07-31T09:50:50.952234+00:00', 'locale': 'ar'}, 'locale': 'ar', 'dir': 'rtl', 'needs_begin': True, 'item': None, 'completed': False}"
+    },
+    {
+      "gate": "on_public_html_has_begin_and_locales",
+      "ok": true,
+      "detail": "begin/en/ar/rtl markers"
+    },
+    {
+      "gate": "on_default_policy_no_assessment_contribution",
+      "ok": true,
+      "detail": "{'assessment_mode': 'unused', 'ranking_result_kind': 'cv_based', 'component_scores': {'semantic_alignment': 7.5}}"
+    },
+    {
+      "gate": "invitation_recovery_residual_no_worker",
+      "ok": true,
+      "detail": "invitation_id=9921de8b-7ed0-42c0-8df4-7de79345668c; recover_syms=[]"
+    },
+    {
+      "gate": "off_seed_create_attempt",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': '03b658a1-5c92-4f09-9256-b2a44eb790cd', 'company_code': 'ASSESSOFFP', 'app_key': 'assessments-on-off-production-matrix-v1-assessoffp-hist', 'phone': '96588552001', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery"
+    },
+    {
+      "gate": "off_history_seeded",
+      "ok": true,
+      "detail": "{'attempts': 1, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 27}"
+    },
+    {
+      "gate": "off_open_attempt_seed",
+      "ok": true,
+      "detail": "{'ok': True, 'attempt': {'attempt_id': 'd1fb40f9-34b1-4489-9953-abdf30b61118', 'company_code': 'ASSESSOFFP', 'app_key': 'assessments-on-off-production-matrix-v1-assessoffp-open', 'phone': '96588552002', 'candidate_name': None, 'position_code': 'ASSESS_ROLE', 'position_title': 'Assess Role', 'battery"
+    },
+    {
+      "gate": "off_module_disabled",
+      "ok": true,
+      "detail": "modules=['pre_hiring']"
+    },
+    {
+      "gate": "off_history_preserved",
+      "ok": true,
+      "detail": "before={'attempts': 1, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 27} before_open={'attempts': 2, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 29} after={'attempts': 2, 'responses': 22, 'scores': 1, 'reports': 1, 'events': 29}"
+    },
+    {
+      "gate": "off_public_state_blocked",
+      "ok": true,
+      "detail": "{'error': 'module_disabled', 'message': 'This link is no longer available. Please contact the hiring team if you need a new link.'}"
+    },
+    {
+      "gate": "off_public_cancel_blocked",
+      "ok": true,
+      "detail": "module_disabled_precheck"
+    },
+    {
+      "gate": "off_public_shell_neutral",
+      "ok": true,
+      "detail": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>Link unavailable</title>\n  <style>\n    body { margi"
+    },
+    {
+      "gate": "off_overview_omits_or_zeros_pending",
+      "ok": true,
+      "detail": "{'ready_for_review': 2, 'follow_up_needed': 0}"
+    },
+    {
+      "gate": "off_reports_omits_assessment_metrics",
+      "ok": true,
+      "detail": "{'assessments_enabled': False, 'summary_keys': ['applications', 'cv_received', 'cvs_received', 'followup_delivery_events', 'followups', 'followups_needed', 'hires', 'interviews', 'offers', 'ready_for_review', 'shortlisted']}"
+    },
+    {
+      "gate": "off_assessments_export_blocked",
+      "ok": true,
+      "detail": "export_headers assessments"
+    },
+    {
+      "gate": "off_ranking_forces_unused",
+      "ok": true,
+      "detail": "{'assessment_mode': 'unused', 'ranking_result_kind': 'cv_based', 'component_scores': {'semantic_alignment': 9.0}}"
+    },
+    {
+      "gate": "off_mobile_omits_assessments_key",
+      "ok": true,
+      "detail": "['ai_scoring_configuration', 'bulk_import', 'candidate_communication_status', 'candidate_cv', 'candidate_evidence', 'candidate_hire', 'candidate_identity', 'candidate_ownership', 'candidate_rankings', 'candidate_reject', 'candidate_shortlist', 'candidate_summary', 'candidate_timeline', 'employment_offers', 'interview_notes', 'interview_reschedule', 'interview_status', 'job_pipeline_configuration',"
+    },
+    {
+      "gate": "off_payload_word_scan_zero_assessment",
+      "ok": true,
+      "detail": "hits=[]"
+    },
+    {
+      "gate": "off_assistant_hides_assessment_tools",
+      "ok": true,
+      "detail": "off_tools_with_assessment=[]; on_has=['send_assessment']"
+    },
+    {
+      "gate": "on_assistant_can_discover_assessment_tools",
+      "ok": true,
+      "detail": "on_assessment_tools=['send_assessment']"
+    },
+    {
+      "gate": "cross_tenant_token_blocked",
+      "ok": true,
+      "detail": "off token vs on attempt"
+    },
+    {
+      "gate": "cleanup_zero_residue",
+      "ok": true,
+      "detail": "{'attempts': 0, 'invitations': 0, 'applications': 0, 'modules': 0, 'companies': 0}"
+    }
+  ],
+  "residuals": {
+    "legacy_whatsapp_sent_writer": {
+      "present": true,
+      "classification": "documented_residual",
+      "rule": "never treat sent as confirmed delivery"
+    },
+    "hr_send_wrote_legacy_sent": {
+      "observed": false
+    },
+    "expiry_sweep": {
+      "classification": "documented_residual",
+      "note": "durable expiry enforced on access; background sweep not claimed in this promote"
+    },
+    "application_assessment_projection": {
+      "classification": "documented_residual",
+      "note": "application assessment projection fields remain non-authoritative vs attempt rows"
+    },
+    "invitation_recovery": {
+      "classification": "documented_residual",
+      "pending_invitation_created": true,
+      "recover_worker_symbols": []
+    }
+  },
+  "residue_after_cleanup": {
+    "attempts": 0,
+    "invitations": 0,
+    "applications": 0,
+    "modules": 0,
+    "companies": 0
+  },
+  "finished_at": "20260724T095051Z",
+  "passed": 39,
+  "failed": 0
+}

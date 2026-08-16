@@ -1,0 +1,36 @@
+=== app.py Wave1 marker lines ===
+14731: INTEGRITY_SCAN_SPECS: tuple[dict[str, Any], ...] = tuple(
+14752:             for spec in INTEGRITY_SCAN_SPECS:
+33687: def employee_phone_alias_list(phone: str | None) -> list[str]:
+33697: def find_employee_by_phone_aliases(
+45037:     "employee_mutation_denied": "Employees", "employee_identity_collision": "Employees",
+45038:     "orphan_document_accessed": "Documents",
+61407:                 "employee_mutation_denied",
+61413:                     "reason": "manager_scope_or_orphan",
+61423:             "orphan_document_accessed",
+63746:             alias_hit = find_employee_by_phone_aliases(phone_digits, company_code=company, cur=cur)
+63755:                     "identity_collision": collision,
+63786:                     "identity_collision": False,
+63965: def employee_status_canary_companies() -> set[str]:
+63987: def employee_status_canary_allowed(company_code: str | None) -> bool:
+64001: def require_employee_mutation_scope(
+64018:         "employee_mutation_denied",
+64061:         if result.get("identity_collision"):
+64064:                 "employee_identity_collision",
+64137:             "employee_identity_collision",
+64483:             "employee_mutation_denied",
+
+=== hire_operations.py canonicalization ===
+206:         phone = legacy.canonical_employee_phone(hired.get("phone"))
+209:         aliases = sorted(legacy.phone_identity_candidates(phone))
+210:         alias_keys = [f"{company}-{alias}" for alias in aliases]
+211:         cur.execute("SELECT * FROM candidates WHERE phone=%s LIMIT 1", (phone,))
+215:             cur.execute("SELECT * FROM candidates WHERE phone = ANY(%s) LIMIT 1", (aliases,))
+225:               OR phone = ANY(%s)
+230:             (company, hired["app_key"], alias_keys, aliases, hired["app_key"]),
+252:                     phone=%s,
+
+=== dashboard updateEmployee expected_updated_at ===
+1514: export function updateEmployee(
+1524:     expected_updated_at: string
+PostHire.tsx:699:         expected_updated_at: String(employee.updated_at || ''),

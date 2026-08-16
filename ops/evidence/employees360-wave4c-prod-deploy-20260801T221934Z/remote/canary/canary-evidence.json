@@ -1,0 +1,577 @@
+{
+  "checks": [
+    {
+      "label": "schema wave4b",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "org_v4 enabled WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lifecycle synthetic-only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit legal_employer",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit branch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit department",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit team",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit location",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit position",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unit cost_center",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "current transfer ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "prior slice closed by transfer",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "future transfer applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "as-of today not future slice",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "as-of future is transfer",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "future manager applied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager as-of future day",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "today manager not yet switched",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "activate due ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "wave2 manager equals as-of after activate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "overlapping assignment fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dry-run valid=3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "dry-run duplicate enters review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "duplicate not auto-committed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "interrupt after 1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "resume +1 no dup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "resume finishes remaining",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "3 committed imports",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "shared import dept created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "audit journal entries",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "rollback ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ghost check empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no hub ghost 54791103",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no authority ghost 54791103",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no history ghost 54791103",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no hub ghost 54791104",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no authority ghost 54791104",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no history ghost 54791104",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no hub ghost 54791105",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no authority ghost 54791105",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "no history ghost 54791105",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "shared org unit retained after migration rollback",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bulk success",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bulk idempotent same key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bulk partial not silent success",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bulk failed state",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bulk applied one",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "retry still fails for bogus",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "retry no duplicate bulk slice",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bulk reverse",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "export as-of",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "reconcile runs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "export has as-of history for A",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "export person_id matches wave2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cross-tenant denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "out-of-scope denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "kill switch env off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "activate due first pass",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "activate due idempotent second pass",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unattended-style activate synced wave2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "activate journal idempotent (1 key)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "shared worker exit 0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 50252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 66363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 97727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 99411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "units": {
+      "legal_employer": "26c3d95b-4934-4ce4-8b9d-c101801ea9a4",
+      "branch": "26e80d4f-1a6f-42d0-93ad-3f1ffec83b4c",
+      "department": "2981c7c0-5b1c-42cc-9f5c-e8cba0d2016d",
+      "team": "31259a72-37de-4835-9676-af74120a4945",
+      "location": "3e720a0c-b8d4-47df-b760-c6c60c701500",
+      "position": "c9edb627-7898-4428-bfc4-c49a2afee7b5",
+      "cost_center": "7fb62315-5720-4138-af9f-937cc0353432"
+    },
+    "employees": {
+      "a": "WATHEFNI-96554791100",
+      "b": "WATHEFNI-96554791101",
+      "c": "WATHEFNI-96554791102",
+      "sched": "WATHEFNI-96554791109"
+    },
+    "migration_batch_id": "b02c13e4-1d4c-458c-bf49-90b753c90a73",
+    "migration_keys": [
+      "WATHEFNI-96554791103",
+      "WATHEFNI-96554791104",
+      "WATHEFNI-96554791105"
+    ],
+    "shared_imp_dept": {
+      "org_unit_id": "aafc43e3-d378-4f5d-a0d5-ab5546a250af",
+      "unit_key": "impdept-cf05e93c",
+      "name": "ImpDept-cf05e93c"
+    }
+  },
+  "scheduler": {
+    "shared_timer": "wathefni-lifecycle-effective.timer",
+    "kill_switch": "WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_DUE",
+    "activate_1": {
+      "ok": true,
+      "as_of": "2026-08-01",
+      "synced": [
+        {
+          "employee_key": "WATHEFNI-96554791100",
+          "history_id": "4c7d59d6-3536-4290-a808-71af0ce48728"
+        },
+        {
+          "employee_key": "WATHEFNI-96554791109",
+          "history_id": "25455188-7171-4237-ba6c-63389c7c3c3c"
+        }
+      ],
+      "due_requests": {
+        "ok": true,
+        "executed": [],
+        "count": 0
+      }
+    },
+    "activate_2": {
+      "ok": true,
+      "as_of": "2026-08-01",
+      "synced": [
+        {
+          "employee_key": "WATHEFNI-96554791100",
+          "history_id": "4c7d59d6-3536-4290-a808-71af0ce48728"
+        },
+        {
+          "employee_key": "WATHEFNI-96554791109",
+          "history_id": "25455188-7171-4237-ba6c-63389c7c3c3c"
+        }
+      ],
+      "due_requests": {
+        "ok": true,
+        "executed": [],
+        "count": 0
+      }
+    },
+    "journal_count": 1,
+    "employee_key": "WATHEFNI-96554791109"
+  },
+  "remediation": {},
+  "reals": {
+    "before": {
+      "WATHEFNI-96550252254": {
+        "hub": {
+          "employee_key": "WATHEFNI-96550252254",
+          "name": "Talal Fadhli",
+          "phone": "96550252254"
+        },
+        "employment": {
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      },
+      "WATHEFNI-96566363363": {
+        "hub": {
+          "employee_key": "WATHEFNI-96566363363",
+          "name": "Fouad Burhamad",
+          "phone": "96566363363"
+        },
+        "employment": {
+          "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      },
+      "WATHEFNI-96597727743": {
+        "hub": {
+          "employee_key": "WATHEFNI-96597727743",
+          "name": "mohammad alqattan",
+          "phone": "96597727743"
+        },
+        "employment": {
+          "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      },
+      "WATHEFNI-96599411617": {
+        "hub": {
+          "employee_key": "WATHEFNI-96599411617",
+          "name": "Brian Saleh",
+          "phone": "96599411617"
+        },
+        "employment": {
+          "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      }
+    },
+    "after": {
+      "WATHEFNI-96550252254": {
+        "hub": {
+          "employee_key": "WATHEFNI-96550252254",
+          "name": "Talal Fadhli",
+          "phone": "96550252254"
+        },
+        "employment": {
+          "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      },
+      "WATHEFNI-96566363363": {
+        "hub": {
+          "employee_key": "WATHEFNI-96566363363",
+          "name": "Fouad Burhamad",
+          "phone": "96566363363"
+        },
+        "employment": {
+          "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      },
+      "WATHEFNI-96597727743": {
+        "hub": {
+          "employee_key": "WATHEFNI-96597727743",
+          "name": "mohammad alqattan",
+          "phone": "96597727743"
+        },
+        "employment": {
+          "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      },
+      "WATHEFNI-96599411617": {
+        "hub": {
+          "employee_key": "WATHEFNI-96599411617",
+          "name": "Brian Saleh",
+          "phone": "96599411617"
+        },
+        "employment": {
+          "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": null,
+          "worker_category": null
+        },
+        "org_history_count": 0
+      }
+    }
+  },
+  "reconciliation": {
+    "hard_issue_count": 1,
+    "info_issue_count": 4,
+    "export_row_count": 7,
+    "row_a": {
+      "employee_key": "WATHEFNI-96554791100",
+      "name": "W4C-SYNTH|A cf05e93c",
+      "phone": "96554791100",
+      "employment_status": null,
+      "person_id": "879d163e-993f-55c8-93ef-5c5d4e648cf0",
+      "employment_id": "0c501e20-54b8-5fa2-91c8-c33281854ecb",
+      "assignment_id": "38c46c35-646c-5998-b90d-87cff569faf5",
+      "wave2_department": "Dept-cf05e93c",
+      "wave2_location": "Loc-cf05e93c",
+      "wave2_manager": "WATHEFNI-96554791102",
+      "as_of_history_id": "4c7d59d6-3536-4290-a808-71af0ce48728",
+      "department_unit_id": "2981c7c0-5b1c-42cc-9f5c-e8cba0d2016d",
+      "location_unit_id": "3e720a0c-b8d4-47df-b760-c6c60c701500",
+      "org_manager": "WATHEFNI-96554791101",
+      "org_effective_from": "2026-08-01",
+      "org_effective_to": "2026-08-07",
+      "org_change_type": "transfer",
+      "org_position_title": null
+    }
+  },
+  "summary": {
+    "pass": 67,
+    "fail": 0,
+    "tag": "cf05e93c",
+    "phone_prefix": "965547"
+  }
+}

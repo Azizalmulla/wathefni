@@ -1,0 +1,3 @@
+86e97c3575ee6855f971e493f7c9d036eb2d573d8a239b2784bbeda4bf286e35  /var/www/wathefni-dashboard/assets/SettingsPage-BmkZSLcI.js
+a58d36a1cbe863ce3bae6898834cce62cf490be5f53ffc6de9a7908184727dce  /var/www/wathefni-dashboard/assets/CandidatesPage-DdQeeRHL.js
+42626b8a38b0bad897a0642060da04d53340bef4d1f4efccad205391c4a9fd01  /var/www/wathefni-dashboard/index.html

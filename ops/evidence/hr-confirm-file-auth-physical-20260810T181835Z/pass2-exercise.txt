@@ -1,0 +1,9 @@
+ROW	PASS	Attendance restore	restored bd743aa2-bc85-4d66-b21f-60a27e7ff0c6
+ROW	FAIL	Shift swap approve/reject confirm	swap=a2226f83-b648-40e4-8bd3-cb8397b4c485; created=True; confirm=failed; after=requested
+ROW	PASS	Onboarding Accept/Waive confirm	key=WATHEFNI-9655237101; item=passport; outcome=waived; confirm=completed; queue_empty=True | BLOCKER: mobile_onboarding_list returns 0 while fixture has being_reviewed beyond first in_progress page
+ROW	PASS	Onboarding file preview	path=/dashboard/mobile/documents/files/786b0c82-d5e3-4cb1-832d-8fc4c2ff6d37; has_file=True
+ROW	FAIL	Onboarding queue discoverability	mobile list only scans first ~90 in_progress; actionable W2B-SYNTH fixture at offset~102
+ROW	FAIL	Document Mark reviewed confirm	DB has needs_review=1 but mobile queue empty; sample=WATHEFNI-96550010001/work_permit; payload_filter bug or scope
+ROW	PASS	Document file preview/download	path=/dashboard/mobile/documents/files/ddf26fa5-c676-4894-a2cf-fa2da2bbc51c
+ROW	PASS	Authenticated file byte fetch	cv=200/40044; onboarding_file=200/121; access=yes
+TAG hr-cfa2-20260810T183036Z

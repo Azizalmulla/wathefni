@@ -1,0 +1,71 @@
+{
+  "stamp": "20260807T194216Z",
+  "base": "https://api.wathefni.com",
+  "company": "WATHEFNI",
+  "employee_key": "WATHEFNI-96599338566",
+  "results": [
+    {
+      "name": "mobile softRefresh helper",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unlock dismiss soft-refreshes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "profile PTR refreshMe",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "documents renew→onboarding invalidate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "HR inboundQueue freshness",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Leave soft poll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Onboarding/Compliance/AppAccess soft poll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Org ESS Reject",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Org ESS payroll gate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "catalog_label bilingual",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "employee live token skipped",
+      "ok": true,
+      "detail": "set WATHEFNI_EMPLOYEE_TOKEN for live /app proofs"
+    },
+    {
+      "name": "dashboard live token skipped",
+      "ok": true,
+      "detail": "set WATHEFNI_DASHBOARD_TOKEN for live HR proofs"
+    }
+  ],
+  "pass": true,
+  "required_pass_count": 12,
+  "required_total": 12
+}

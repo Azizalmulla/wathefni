@@ -1,0 +1,31 @@
+---
+description: Freeze HR mobile Attendance UX after exception-first v1; treat backend contract gaps as architecture debt
+globs: apps/wathefni-employee-mobile/src/hr/features/attendance/**,apps/wathefni-employee-mobile/app/hr/attendance/**,wathefni-orchestrator/operator_mobile_data.py
+alwaysApply: false
+---
+
+# HR mobile Attendance UX — freeze
+
+HR mobile Attendance exception-first v1 is **accepted and frozen** for this workflow pass.
+Do **not** expand, redesign, or broaden Attendance while auditing/implementing Shifts → Onboarding → Documents → Tasks.
+
+Canonical debt list: `ops/HR_MOBILE_ATTENDANCE_CONTRACT_DEBT.md`
+
+## Frozen product shape
+
+- Exception-first queue only (never normal present as exceptions)
+- Tabs: **Today** + **Unresolved**
+- Ops kinds vocabulary; honest **Request correction → pending review**
+- Web-first: full day board, bulk, import, capture, payroll board, heavy Ops governance UI
+
+## Allowed without owner change-control
+
+- Bugfixes restoring freeze invariants / tenant isolation
+- Docs / canary log / contract-debt notes
+- Shared Home/Inbox count alignment that does not change Attendance UX
+
+## Not allowed in this pass
+
+- New Attendance surfaces, tabs, bulk tools, or Ops board recreation on mobile
+- Inventing parallel exception logic to paper over listed contract gaps
+- Expanding mobile beyond `correct_attendance_record` into dual/apply without an explicit architecture wave

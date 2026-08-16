@@ -40,7 +40,7 @@ class AuthorityApp:
 
     @staticmethod
     def company_has_module(_company: str, module: str) -> bool:
-        return module == "pre_hiring"
+        return module in {"pre_hiring", "interviews", "assessments"}
 
     @staticmethod
     def context_permissions(context: dict[str, Any], role_key: str | None = None) -> set[str]:

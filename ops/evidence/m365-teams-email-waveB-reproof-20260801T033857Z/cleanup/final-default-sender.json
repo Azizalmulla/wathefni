@@ -1,0 +1,9 @@
+{
+  "resolved_mode": "wathefni",
+  "provider": "postmark",
+  "branded_non_wathefni": [],
+  "wathefni_settings": {
+    "company_code": "WATHEFNI",
+    "outbound_mode": "wathefni"
+  }
+}

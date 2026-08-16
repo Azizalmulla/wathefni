@@ -1,0 +1,131 @@
+{
+  "api_delay_ms": 900,
+  "delayed_gets": 14,
+  "pending_seen": 2,
+  "soft_keep_blank": 0,
+  "race_ok": true,
+  "pending_frames": [
+    {
+      "blocks": 47,
+      "empty": 0,
+      "pending": "true",
+      "committed_week": "2",
+      "target_week": "9",
+      "committed_anchor": "2026-08-18",
+      "label": "Aug 16, 2026 \u2013 Aug 22, 2026",
+      "soft_keep": 1,
+      "updating": 1,
+      "board_h": 1259.5
+    },
+    {
+      "blocks": 7,
+      "empty": 0,
+      "pending": "true",
+      "committed_week": "4",
+      "target_week": "3",
+      "committed_anchor": "2026-09-01",
+      "label": "Aug 30, 2026 \u2013 Sep 5, 2026",
+      "soft_keep": 1,
+      "updating": 1,
+      "board_h": 308.5
+    }
+  ],
+  "events": [
+    {
+      "phase": "A-start",
+      "blocks": 47,
+      "empty": 0,
+      "pending": "false",
+      "committed_week": "2",
+      "target_week": "2",
+      "committed_anchor": "2026-08-18",
+      "label": "Aug 16, 2026 \u2013 Aug 22, 2026",
+      "soft_keep": 1,
+      "updating": 0,
+      "board_h": 1259.5
+    },
+    {
+      "phase": "A-refresh-mid",
+      "blocks": 47,
+      "empty": 0,
+      "pending": "false",
+      "committed_week": "2",
+      "target_week": "2",
+      "committed_anchor": "2026-08-18",
+      "label": "Aug 16, 2026 \u2013 Aug 22, 2026",
+      "soft_keep": 1,
+      "updating": 1,
+      "board_h": 1259.5
+    },
+    {
+      "phase": "B-pending-after-burst",
+      "blocks": 47,
+      "empty": 0,
+      "pending": "true",
+      "committed_week": "2",
+      "target_week": "9",
+      "committed_anchor": "2026-08-18",
+      "label": "Aug 16, 2026 \u2013 Aug 22, 2026",
+      "soft_keep": 1,
+      "updating": 1,
+      "board_h": 1259.5,
+      "delayed_gets": 8
+    },
+    {
+      "phase": "B-settled",
+      "blocks": 0,
+      "empty": 1,
+      "pending": "false",
+      "committed_week": "9",
+      "target_week": "9",
+      "committed_anchor": "2026-10-06",
+      "label": "Oct 4, 2026 \u2013 Oct 10, 2026",
+      "soft_keep": 1,
+      "updating": 0,
+      "board_h": 214.5,
+      "delayed_gets": 9
+    },
+    {
+      "phase": "C-pending-prev-burst",
+      "blocks": 7,
+      "empty": 0,
+      "pending": "false",
+      "committed_week": "4",
+      "target_week": "4",
+      "committed_anchor": "2026-09-01",
+      "label": "Aug 30, 2026 \u2013 Sep 5, 2026",
+      "soft_keep": 1,
+      "updating": 0,
+      "board_h": 308.5
+    },
+    {
+      "phase": "C-pending-prev-single",
+      "blocks": 7,
+      "empty": 0,
+      "pending": "true",
+      "committed_week": "4",
+      "target_week": "3",
+      "committed_anchor": "2026-09-01",
+      "label": "Aug 30, 2026 \u2013 Sep 5, 2026",
+      "soft_keep": 1,
+      "updating": 1,
+      "board_h": 308.5
+    },
+    {
+      "phase": "C-end",
+      "blocks": 6,
+      "empty": 0,
+      "pending": "false",
+      "committed_week": "3",
+      "target_week": "3",
+      "committed_anchor": "2026-08-25",
+      "label": "Aug 23, 2026 \u2013 Aug 29, 2026",
+      "soft_keep": 1,
+      "updating": 0,
+      "board_h": 586.5,
+      "delayed_gets": 14
+    }
+  ],
+  "soft_keep_ok": true
+}
+NAV_SOFT_KEEP_OK

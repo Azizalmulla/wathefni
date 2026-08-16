@@ -1,0 +1,18 @@
+    hire-ready bridge — DB E2E prove
+      PASS  dry-run ok before writers
+      PASS  writers company canary only
+      PASS  j1 offer bridge ok
+      FAIL  j1 employee_key :: HRB21A85025-9655218502
+      PASS  j1 provisional ok
+      PASS  j1 preboard created
+      FAIL  j1 hub pending_start :: {}
+      FAIL  j1 hub joining date :: {}
+      PASS  j2 provisional
+      PASS  j2 preboard without recruiting
+      PASS  j3 set joining ok
+      PASS  j3 one canonical date hub+preboard
+      PASS  j4 blocked≠ready
+      PASS  j4 cosmetic ready forbidden
+      PASS  j4/5 readiness derived ready
+FAIL exception: InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+

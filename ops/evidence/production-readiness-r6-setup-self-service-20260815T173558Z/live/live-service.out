@@ -1,0 +1,9 @@
+staging_health=200
+      PASS  live WFP still enableable
+      PASS  live Comp still enableable
+      PASS  live JA still enableable
+      PASS  live unreleased empty
+      PASS  live health
+      PASS  live company Setup not public
+      PASS  live operator Setup not public
+    LIVE_SERVICE 7 passed, 0 failed

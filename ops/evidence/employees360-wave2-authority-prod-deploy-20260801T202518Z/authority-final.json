@@ -1,0 +1,72 @@
+{
+  "schema_version": "employees360-wave2-authority-v1",
+  "maps": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+      "mapping_status": "active",
+      "employee_number": "EMP-0003",
+      "primary_phone": "96550252254",
+      "primary_email": "talalabdalla89@gmail.com",
+      "employment_status": "active",
+      "legacy_employee_key": "WATHEFNI-96550252254"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+      "mapping_status": "active",
+      "employee_number": "EMP-0001",
+      "primary_phone": "96566363363",
+      "primary_email": "fb-urhama@gmail.com",
+      "employment_status": "active",
+      "legacy_employee_key": "WATHEFNI-96566363363"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+      "mapping_status": "active",
+      "employee_number": "EMP-0002",
+      "primary_phone": "96597727743",
+      "primary_email": null,
+      "employment_status": "active",
+      "legacy_employee_key": "WATHEFNI-96597727743"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+      "mapping_status": "active",
+      "employee_number": "EMP-0004",
+      "primary_phone": "96599411617",
+      "primary_email": "briansaleh92@gmail.com",
+      "employment_status": "active",
+      "legacy_employee_key": "WATHEFNI-96599411617"
+    }
+  ],
+  "counts": {
+    "persons": 4,
+    "employments": 4,
+    "assignments": 4
+  },
+  "duplicates": {
+    "persons": [],
+    "employments": [],
+    "assignments": []
+  },
+  "journal": [
+    {
+      "journal_id": "54c41793-e6c0-4125-ac0e-52057716b07b",
+      "action": "backfill_authority",
+      "idempotency_key": "wave2-backfill:WATHEFNI:approved-map-v1",
+      "status": "applied",
+      "created_at": "2026-08-01 20:28:14.226791+00:00"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+staging_health=200
+    P0-2 public link signing
+      PASS  /ready reports public link capabilities available
+      PASS  /ready exposes no secret
+      PASS  link forged with the removed dev constant is refused
+    P0-4 internal worker endpoint from loopback
+      PASS  no token from 127.0.0.1
+      PASS  wrong worker token
+      PASS  shared platform token is not worker authority
+      PASS  dedicated worker token accepted
+    P0-5 internal principals and tenant scope
+      PASS  unknown internal token
+      PASS  platform token cannot do an unscoped read
+      PASS  platform token with an explicit company
+      PASS  tenant token reading another tenant
+      PASS  tenant token reading itself
+      PASS  destructive sweep with only the internal token
+      PASS  break-glass disabled by default in a real deployment
+    P0-3 / P1-22 throttling on the deployed process
+      PASS  dashboard login brute force trips the limiter
+      PASS  calendar guest-token throttle trips
+    LIVE_SERVICE 16 passed, 0 failed

@@ -1,0 +1,23 @@
+    pt6 trajectory — unit prove
+      PASS  stamp
+      PASS  no label without policy
+      PASS  closed periods only
+      PASS  insufficient history unlabeled
+      PASS  does not overwrite performance
+      PASS  no second analytics engine
+      PASS  no flight-risk score
+      PASS  holder dep no employment mutate
+      PASS  Wave 5 registry stamp unchanged
+      PASS  handler registered talent_capability_coverage
+      PASS  handler registered talent_single_person_capability
+      PASS  handler registered talent_skill_direction
+      PASS  handler registered talent_underutilized_capability
+      PASS  handler registered talent_holder_dependency
+      PASS  EN accelerating
+      PASS  AR accelerating
+      PASS  no UPDATE employees
+      PASS  HTTP trajectory policy
+      PASS  HTTP holder dependency
+
+    19 passed, 0 failed
+PT6_TRAJECTORY_CAPABILITY_INTELLIGENCE_UNIT_PASS

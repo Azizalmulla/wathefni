@@ -1,0 +1,309 @@
+health_ok
+WATHEFNI_ONBOARDING_DOC_VALIDATION_SOFT=on
+WATHEFNI_ONBOARDING_DOC_VALIDATION_HARD=off
+WATHEFNI_ONBOARDING_DOC_VALIDATION_COMPANIES=WATHEFNI
+WATHEFNI_ONBOARDING_DOC_VALIDATION_EMPLOYEE_ALLOWLIST=WATHEFNI-96599338566,WATHEFNI-96550252254
+PASS clear status clean
+PASS blur rejects or borderline
+PASS blur reason too_blurry
+PASS glare rejects
+PASS glare reason
+PASS crop reject or borderline
+PASS tiny rejects
+PASS tiny reason resolution
+PASS mild blur borderline
+PASS mild blur HR reason
+PASS clear gate allows
+PASS clear capture clean
+PASS severe blur blocks before/without needing mistral mismatch
+PASS severe blur reason too_blurry
+OK onboarding capture quality smoke
+PASS glare blocks
+PASS glare reason
+PASS missing back blocks
+PASS missing_side reason
+PASS missing_side EN
+PASS clear civil_id allow
+PASS clear civil_id not blocked
+PASS low-conf credible blocks
+PASS low-conf not uncertain
+PASS low-conf retake reason
+PASS oreo-style blocks
+PASS oreo-style not_a_document
+PASS oreo-style not uncertain
+PASS alias helper matches EN
+PASS alias not applied to other employees
+PASS canary alias allows clear ID
+PASS canary alias not blocked
+PASS validator unavailable blocks
+PASS validator_unavailable reason
+OK onboarding doc validation parity local smoke
+{
+  "assessments": {
+    "prior_blurry_canary_allowed": {
+      "exists": true,
+      "status": "reject",
+      "reason": "too_blurry",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1583,
+        "height": 994,
+        "short_side": 994,
+        "long_side": 1583,
+        "laplacian_var": 3.366,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 3
+      }
+    },
+    "stored_civil_id_file": {
+      "exists": true,
+      "status": "clean",
+      "reason": null,
+      "signal_reason": null,
+      "metrics": {
+        "width": 945,
+        "height": 2048,
+        "short_side": 945,
+        "long_side": 2048,
+        "laplacian_var": 604.305,
+        "glare_frac": 0.1563,
+        "crop_hot_sides": 1
+      }
+    },
+    "oreo_lifestyle": {
+      "exists": true,
+      "status": "reject",
+      "reason": "document_not_fully_visible",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1152,
+        "height": 2048,
+        "short_side": 1152,
+        "long_side": 2048,
+        "laplacian_var": 50.819,
+        "glare_frac": 0.0104,
+        "crop_hot_sides": 4
+      }
+    }
+  },
+  "gate_proofs": {
+    "clear": {
+      "assess": {
+        "status": "clean",
+        "reason": null,
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 5314.809,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "allow",
+      "reason": null,
+      "capture_quality": {
+        "status": "clean",
+        "reason": null,
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 5314.809,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "mild_blur": {
+      "assess": {
+        "status": "borderline",
+        "reason": "capture_quality_borderline",
+        "signal_reason": "too_blurry",
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 10.428,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "allow_uncertain",
+      "reason": "capture_quality_borderline",
+      "capture_quality": {
+        "status": "borderline",
+        "reason": "capture_quality_borderline",
+        "signal_reason": "too_blurry",
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 10.428,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "severe_blur": {
+      "assess": {
+        "status": "reject",
+        "reason": "too_blurry",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.302,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "block",
+      "reason": "too_blurry",
+      "capture_quality": {
+        "status": "reject",
+        "reason": "too_blurry",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.302,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "glare": {
+      "assess": {
+        "status": "reject",
+        "reason": "glare_or_shadow",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.0,
+          "glare_frac": 1.0,
+          "crop_hot_sides": 0
+        }
+      },
+      "decision": "block",
+      "reason": "glare_or_shadow",
+      "capture_quality": {
+        "status": "reject",
+        "reason": "glare_or_shadow",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 0.0,
+          "glare_frac": 1.0,
+          "crop_hot_sides": 0
+        },
+        "engine": "pil_numpy_v1"
+      }
+    },
+    "crop": {
+      "assess": {
+        "status": "reject",
+        "reason": "document_not_fully_visible",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 3310.837,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 4
+        }
+      },
+      "decision": "block",
+      "reason": "document_not_fully_visible",
+      "capture_quality": {
+        "status": "reject",
+        "reason": "document_not_fully_visible",
+        "signal_reason": null,
+        "metrics": {
+          "width": 1000,
+          "height": 640,
+          "short_side": 640,
+          "long_side": 1000,
+          "laplacian_var": 3310.837,
+          "glare_frac": 0.0,
+          "crop_hot_sides": 4
+        },
+        "engine": "pil_numpy_v1"
+      }
+    }
+  },
+  "flags": {
+    "soft": "on",
+    "hard": "off",
+    "allowlist": "WATHEFNI-96599338566,WATHEFNI-96550252254"
+  }
+}
+PROVE_OK
+{
+  "action": "reset",
+  "canary": {
+    "status": "pending",
+    "document_type": "civil_id_canary_test",
+    "required": false
+  },
+  "civil_id_untouched": "accepted"
+}
+{
+  "verify": {
+    "canary_present": true,
+    "canary_status": "pending",
+    "canary_document_type": "civil_id_canary_test",
+    "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+    "visible_in_employee_app": true,
+    "group": "your_actions",
+    "actions": [
+      "upload"
+    ],
+    "upload_enabled": true,
+    "required_canary": false,
+    "real_civil_id_status": "accepted",
+    "real_civil_id_required": true,
+    "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "required_item_count_excluding_canary": 4
+  }
+}
+READY_FOR_APP_TEST civil_id_canary_test
+{
+  "canary_present": true,
+  "canary_status": "pending",
+  "canary_document_type": "civil_id_canary_test",
+  "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+  "visible_in_employee_app": true,
+  "group": "your_actions",
+  "actions": [
+    "upload"
+  ],
+  "upload_enabled": true,
+  "required_canary": false,
+  "real_civil_id_status": "accepted",
+  "real_civil_id_required": true,
+  "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "required_item_count_excluding_canary": 4
+}
+VERIFY PASS

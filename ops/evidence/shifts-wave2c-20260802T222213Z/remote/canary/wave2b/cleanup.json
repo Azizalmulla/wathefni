@@ -1,0 +1,80 @@
+{
+  "contract_version": "1.0.0",
+  "dry_run": false,
+  "markers": [
+    "SHW2B",
+    "SHW2B-SYNTH|"
+  ],
+  "phone_prefixes": [
+    "965530"
+  ],
+  "tag": "2bc43de3",
+  "deleted_shift_ids": [
+    "48a07121-8813-411b-b64c-411bbb990c9c",
+    "ed6b7534-7f59-4f72-ada5-98aebf70781a",
+    "a0c2f855-602d-4fce-8dbd-5a4e57ca8165",
+    "7fed4878-046c-4f9a-91d7-2bf52f2b52c0",
+    "794ac73b-bc6b-4afd-8323-c5e74da824c1",
+    "5680fe8e-2ca2-4ce3-85d6-2bef987882f3",
+    "ea840a49-48ad-4c99-bfd3-43dae257f483",
+    "876d207b-e6e3-40ae-8beb-3ac6859604c5",
+    "50909148-0b66-4634-891f-dda4d43ac180",
+    "eba244a4-5c1a-4d32-a142-4c17bbb1db44",
+    "2fe51a6e-cfde-4f6d-895f-874a0bcb5dc1",
+    "f4d5173f-7de4-4541-b149-d706a369d16c",
+    "5e953c88-8d52-4fb1-b506-9fa0df66d300",
+    "b00bdd05-98fd-4c90-b0e7-f139be037d73",
+    "b3926738-71d8-43b9-99fe-cefe7ec65cf0",
+    "eab44f83-e4c5-4bd1-82b4-5f8472b1bb80",
+    "6ea02cc7-5460-40f8-9298-3b49ea22a98a",
+    "fadafa7b-1fb4-44ab-9a2a-f519a1f08b58"
+  ],
+  "deleted": {
+    "shift_reminder_queue": 22,
+    "shift_reconciliation_flags": 3,
+    "shift_assignment_versions": 28,
+    "shift_lifecycle_flags": 0,
+    "shift_orphan_quarantine": 0,
+    "shift_swap_events": 10,
+    "shift_swap_requests": 5,
+    "shift_events": 28,
+    "employee_availability_requests": 2,
+    "shift_assignments": 18,
+    "leave_requests": 2,
+    "shift_seasonal_policies": 3,
+    "employees": 4
+  },
+  "deletion_order": [
+    "shift_reminder_queue",
+    "shift_reconciliation_flags",
+    "shift_assignment_versions",
+    "shift_lifecycle_flags",
+    "shift_orphan_quarantine",
+    "shift_swap_events",
+    "shift_swap_requests",
+    "shift_events",
+    "employee_availability_requests",
+    "shift_assignments",
+    "leave_requests",
+    "shift_seasonal_policies",
+    "employees"
+  ],
+  "residual": {
+    "assignments": 0,
+    "versions": 0,
+    "reminders": 0,
+    "reconciliation_flags": 0,
+    "lifecycle_flags": 0,
+    "swaps": 0,
+    "availability": 0,
+    "leave": 0,
+    "seasonal_policies": 0,
+    "employees": 0,
+    "total": 0
+  },
+  "residual_total": 0,
+  "total": 0,
+  "residual_assignments": 0,
+  "residual_swaps": 0,
+  "residual_employees": 0
+}

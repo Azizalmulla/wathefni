@@ -1,0 +1,77 @@
+{
+  "inventory": [
+    {
+      "position_code": "IT_MAINTENANCE",
+      "found": true,
+      "application_count": 1,
+      "active_count_badge": 0,
+      "serialized_status": "open",
+      "db_status": "open"
+    },
+    {
+      "position_code": "MARKETING_SPECIALIST",
+      "found": true,
+      "application_count": 1,
+      "active_count_badge": 0,
+      "serialized_status": "open",
+      "db_status": "open"
+    },
+    {
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "found": true,
+      "application_count": 2,
+      "active_count_badge": 1,
+      "serialized_status": "closed",
+      "db_status": "closed"
+    }
+  ],
+  "candidates": [
+    {
+      "position_code": "IT_MAINTENANCE",
+      "role_active_opened_count": 0,
+      "badge_active_count": 0,
+      "match": true,
+      "expected": 0,
+      "pass": true
+    },
+    {
+      "position_code": "MARKETING_SPECIALIST",
+      "role_active_opened_count": 0,
+      "badge_active_count": 0,
+      "match": true,
+      "expected": 0,
+      "pass": true
+    },
+    {
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "role_active_opened_count": 1,
+      "badge_active_count": 1,
+      "match": true,
+      "expected": 1,
+      "pass": true
+    }
+  ],
+  "aliases": {
+    "published": {
+      "got": "open",
+      "want": "open",
+      "pass": true
+    },
+    "active": {
+      "got": "open",
+      "want": "open",
+      "pass": true
+    },
+    "inactive": {
+      "got": "closed",
+      "want": "closed",
+      "pass": true
+    }
+  },
+  "filter_alias": {
+    "open_count": 9,
+    "published_filter_count": 9,
+    "pass": true
+  },
+  "verdict": "PASS"
+}

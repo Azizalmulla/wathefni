@@ -1,0 +1,56 @@
+payroll wave2acb prod synthetic canary tag=463e460f
+[PASS] wave2a enabled
+[PASS] wave2a company
+[PASS] synthetic_only on
+[PASS] payment disabled
+[PASS] money authority external
+[PASS] wathefni not money authority
+[PASS] vendor unclaimed
+[PASS] no bank files
+[PASS] no native g2n
+[PASS] wave1 contracts unchanged
+[PASS] wave1 still enabled
+[PASS] route external workspace
+[PASS] route readiness
+[PASS] route exports
+[PASS] route quarantine
+[PASS] route events
+[PASS] helper _payroll_w2a_require
+[PASS] helper scope keys
+[PASS] db is wathefni
+[PASS] real employee export refused
+[PASS] synth contract draft
+[PASS] synth contract approve
+[PASS] period create
+[PASS] readiness ready
+[PASS] readiness not authoritative
+[PASS] bootstrap ok
+[PASS] bootstrap not authoritative
+[PASS] bootstrap payment disabled
+[PASS] manager empty scope blocks export assembly
+[PASS] assemble has synth employee
+[PASS] export ok
+[PASS] history list exports
+[PASS] upload import ok
+[PASS] import money external
+[PASS] duplicate upload idempotent
+[PASS] fingerprint drift blocked
+[PASS] fingerprint drift quarantined
+[PASS] malformed quarantined
+[PASS] quarantine queue non-empty
+[PASS] reconcile ok
+[PASS] reconciliation stored
+[PASS] employee-level lines
+[PASS] replace import ok
+[PASS] replace flagged
+[PASS] replace not authoritative
+[PASS] replace money external
+[PASS] audit history events
+[PASS] replace event in history
+[PASS] native mode blocks readiness
+[PASS] residual synthetic zero
+{
+  "passed": 50,
+  "failed": 0,
+  "residual": 0
+}

@@ -1,6 +1,5 @@
 import { useContext, type ReactNode } from 'react'
 import {
-  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -16,16 +15,17 @@ import { colors, layout } from '@/theme'
 /**
  * Bottom clearance for a scrolling page.
  *
- * Inside the tab navigator this is the tab bar's own measured height, which
- * already includes the home-indicator inset. On a screen pushed above the tabs
- * there is no tab bar, but the home indicator still has to be cleared. Either
- * way no screen carries a hand-tuned number, which is what previously left the
- * last element on Home, Schedule and Profile sitting under the tab bar.
+ * Tab scenes are already laid out *above* the tab bar by React Navigation.
+ * Adding the measured tab-bar height again created a large empty cream zone
+ * under the last row — scroll felt unbounded on dense screens and tight on
+ * screens that overwrote padding. Pushed stack screens (Inbox, Settings, …)
+ * have no tab bar, so they still need the home-indicator inset.
  */
 export function useScrollBottomPadding(extra: number = layout.scrollBottom): number {
   const insets = useSafeAreaInsets()
   const tabBarHeight = useContext(BottomTabBarHeightContext)
-  return (tabBarHeight ?? insets.bottom) + extra
+  const insideTabs = typeof tabBarHeight === 'number' && tabBarHeight > 0
+  return insideTabs ? extra : insets.bottom + extra
 }
 
 /** Page frame: cream ground plus the top safe area. Bottom is owned by the scroller. */
@@ -57,12 +57,20 @@ export function PageScrollView({
   onRefresh,
   gap = layout.sectionGap,
   contentStyle,
+  keyboardInsets = false,
 }: {
   children: ReactNode
   refreshing?: boolean
   onRefresh?: () => void
   gap?: number
   contentStyle?: StyleProp<ViewStyle>
+  /**
+   * Opt-in keyboard avoidance. Off by default: enabling it on every page
+   * left a stale bottom inset after dismiss (phantom scroll into empty cream).
+   * Forms with TextInputs (Bank, leave request) pass true. Android is included
+   * so submit actions stay reachable (R7 PH-2/PH-3).
+   */
+  keyboardInsets?: boolean
 }) {
   const paddingBottom = useScrollBottomPadding()
   return (
@@ -77,12 +85,13 @@ export function PageScrollView({
         },
         contentStyle,
       ]}
+      // Safe area is owned by PageScreen (top) + useScrollBottomPadding (bottom).
+      // Leaving iOS on "automatic" double-counted the home indicator on pushed screens.
+      contentInsetAdjustmentBehavior="never"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
-      // Keeps the focused field above the keyboard on the leave-request form
-      // without any screen having to manage keyboard offsets itself.
-      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+      automaticallyAdjustKeyboardInsets={keyboardInsets}
       refreshControl={
         onRefresh ? (
           <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} tintColor={colors.ink} />

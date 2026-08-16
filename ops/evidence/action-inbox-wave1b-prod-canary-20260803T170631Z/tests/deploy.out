@@ -1,0 +1,62 @@
+stamp=20260803T170631Z
+time_utc=2026-08-03T17:08:12Z
+active
+=== SHAs before ===
+1da1a2b8e530670df7b1e853f4ece46876ed3f37197c68829faecee6ae27ed60  /opt/wathefni/orchestrator/app.py
+ls: cannot access '/opt/wathefni/orchestrator/action_inbox_wave1.py': No such file or directory
+action_inbox_wave1.py absent
+=== flags before ===
+WATHEFNI_ANALYTICS_WAVE1=1
+WATHEFNI_ANALYTICS_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_KEY_MARKERS=ANW1,ANW1-SYNTH|
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_ANALYTICS_WAVE1_SYNTHETIC_PHONE_PREFIXES=965540
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_COMPLIANCE_WAVE1=1
+WATHEFNI_COMPLIANCE_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_COMPLIANCE_WAVE1_SYNTHETIC_KEY_MARKERS=CFW1,CFW1-SYNTH|
+WATHEFNI_COMPLIANCE_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_COMPLIANCE_WAVE1_SYNTHETIC_PHONE_PREFIXES=965541
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[17:08:12] backing up modules + dropins + dashboard
+45187b44253bdad1ed543defb2eb1a424dbaa23c18787c5b07208f55c28f4a6e  modules/compliance_findings_wave1.py
+1da1a2b8e530670df7b1e853f4ece46876ed3f37197c68829faecee6ae27ed60  modules/app.py
+1a5b9d10915cb2c33a1822b0d4ab7d7b8fcb485db65a7eb4f24851c81e09b056  modules/analytics_attention_wave1.py
+[17:08:13] deploying action-inbox wave1 modules
+[17:08:13] deploying dashboard dist
+[17:08:13] writing synthetic-only drop-in
+[17:08:13] migrate ACK schema
+wave1_version 1.0.0
+contract action_inbox_wave1
+honesty_ok {'read_only': True, 'mutates_records': False, 'synthetic_only': True, 'ai': False, 'hiring_reports_separate': True}
+connected_db wathefni
+ack_id 1
+ACK_PRODUCTION_ACTION_INBOX_W1B=YES
+MIGRATE_OK
+health_ok
+active
+=== SHAs after ===
+0e414d0707f2a8144012c7b093d4cbed9f71d77a40d8a55dae4b3c83748fbf18  /opt/wathefni/orchestrator/app.py
+837735b2265629a0581d19f824c3123748462ff23f00ecd0a10ae700c34e7631  /opt/wathefni/orchestrator/action_inbox_wave1.py
+=== flags after ===
+WATHEFNI_ACTION_INBOX_WAVE1=1
+WATHEFNI_ACTION_INBOX_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_ACTION_INBOX_WAVE1_SYNTHETIC_KEY_MARKERS=AIW1,AIW1-SYNTH|
+WATHEFNI_ACTION_INBOX_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_ACTION_INBOX_WAVE1_SYNTHETIC_PHONE_PREFIXES=965542
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+ACTION_INBOX_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('AIW1', 'AIW1-SYNTH|')
+prefixes ('965542',)
+honesty {'read_only': True, 'mutates_records': False, 'ai': False, 'hiring_reports_separate': True, 'alerts_delivery_owns_notifications': True, 'compliance_wave2': False, 'analytics_wave2': False, 'payroll_money': False, 'attendance_ingest': False, 'shifts_manager_expansion': False, 'synthetic_only': True}
+flags_ok_synthetic=true
+UI_INBOX_COPY_OK
+UI_SOA_COPY_OK
+UI_HONESTY_COPY_OK
+UI_RESPONSIVE_OK
+DEPLOY_OK stamp=20260803T170631Z backup=/opt/wathefni/backups/production-pre-action-inbox-wave1b-20260803T170631Z evid=/opt/wathefni/production-evidence/action-inbox-wave1b-prod-canary/20260803T170631Z

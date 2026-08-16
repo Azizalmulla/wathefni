@@ -1,0 +1,66 @@
+{
+  "build_id": "b48b55b4640337bad1775cb785439129016f4b0d",
+  "status": "skipped",
+  "passed_sessions": 0,
+  "failed_sessions": 0,
+  "error_sessions": 0,
+  "sessions": [
+    {
+      "device": "iPhone 15",
+      "os_version": "17.5",
+      "session_id": "db00bbd49ea1556614b89e2f6302341e72d35e59",
+      "status": "skipped",
+      "duration": 26,
+      "testcases": {
+        "count": 0,
+        "status": {
+          "passed": 0,
+          "failed": 0,
+          "skipped": 0,
+          "timedout": 0,
+          "error": 0,
+          "running": 0,
+          "queued": 0
+        }
+      }
+    }
+  ],
+  "dashboard_url": "https://app-automate.browserstack.com/dashboard/v2/builds/b48b55b4640337bad1775cb785439129016f4b0d",
+  "app_details": {
+    "url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "bundle_id": "ai.wathefni.employee",
+    "version": "0.3.0",
+    "name": "wathefni-employee-0.3.0-23.ipa",
+    "custom_id": "wathefni-employee-canary-0.3.0-23"
+  },
+  "input_capabilities": {
+    "devices": [
+      "iPhone 15-17.0"
+    ],
+    "customBuildName": "wathefni-1786426346",
+    "project": "WathefniMobileE2E",
+    "debugscreenshots": true,
+    "video": true,
+    "deviceLogs": true,
+    "networkLogs": true,
+    "app": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+    "testSuite": "bs://d5fd26f9a6ad5ccd1c333df3abec904dd7be31b8",
+    "execute": [
+      "bs-smoke/00-launch-unsigned.yaml"
+    ]
+  },
+  "poll_timeout": false,
+  "raw_status": "skipped",
+  "execute": [
+    "bs-smoke/00-launch-unsigned.yaml"
+  ],
+  "app_url": "bs://41149d60ef1f119af901722322179a92ed2c0b67",
+  "test_suite_url": "bs://d5fd26f9a6ad5ccd1c333df3abec904dd7be31b8",
+  "evidence": "ops/evidence/mobile-e2e-bs-20260811T053221Z",
+  "MOBILE_PASS": 0,
+  "ui_runtime": "browserstack_real_device",
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "passed=0 failed=0 error=0 status=skipped",
+  "rule": "API PASS \u2260 MOBILE PASS \u2014 BrowserStack real-device execution required"
+}

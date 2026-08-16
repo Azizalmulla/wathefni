@@ -1,0 +1,47 @@
+{
+  "tag": "c6c99dfa",
+  "employee_key": "WATHEFNI-PYW1-PYW3-W3B-c6c99dfa",
+  "phones": {
+    "creator": "965541769900",
+    "approver": "965541869900"
+  },
+  "payslip_ids": [
+    "ee65213e-65a5-4a42-9d8b-7469f58fa0e7",
+    "ac222e75-7954-4640-8dcc-8051419daa85",
+    "9943e596-09c2-4b8b-b36b-988af885bde8"
+  ],
+  "preview_run_ids": [
+    "16fe5c5e-a245-4406-85ac-47339eef52e4"
+  ],
+  "import_run_ids": [
+    "38c78ae7-ba33-4bbb-b24f-d98ada056656"
+  ],
+  "export_run_ids": [
+    "cbf5d692-4bc2-4b43-a1a3-fcf8d08b985e"
+  ],
+  "period_ids": [
+    "3fca5cd5-258b-4c6d-aae6-061864cfafbe"
+  ],
+  "contract_ids": [
+    "a5f54471-3018-4d1d-a912-46f27f3f117c"
+  ],
+  "prior_mode": "external",
+  "period": {
+    "start": "2030-10-01",
+    "end": "2030-10-31"
+  },
+  "cleanup": {
+    "deleted": {
+      "payslip_lines": 6,
+      "payslip_events": 5,
+      "payslips": 3,
+      "orphan_events": 0,
+      "preview_runs": 1,
+      "imports": 1,
+      "exports": 1,
+      "contracts": 1,
+      "periods": 1
+    },
+    "residual_total": 0
+  }
+}

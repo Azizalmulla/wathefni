@@ -1,0 +1,458 @@
+[
+  {
+    "page": "jobs",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Jobs",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "rounded-[1.1rem] bg-wf-accent-priority px-3 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-review px-3 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-paused-soft px-3 py-3 text-start text-wf-accent-paused-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-follow-soft px-3 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "jobs",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Jobs",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "rounded-[1.1rem] bg-wf-accent-priority px-3 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-review px-3 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-paused-soft px-3 py-3 text-start text-wf-accent-paused-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-follow-soft px-3 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "candidates",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Candidates",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "candidates",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Candidates",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "interviews",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Interviews",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "rounded-[1.2rem] bg-wf-accent-follow px-3.5 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-review px-3.5 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-priority px-3.5 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "interviews",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Interviews",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "rounded-[1.2rem] bg-wf-accent-follow px-3.5 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-review px-3.5 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-priority px-3.5 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "assessments",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Assessments",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "p-6 rounded-[var(--radius-wf-panel)] border border-transparent bg-wf-accent-assess-soft text-wf-accent-assess-ink shadow-[0_10px_28px_rgba(7"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "assessments",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Assessments",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "p-6 rounded-[var(--radius-wf-panel)] border border-transparent bg-wf-accent-assess-soft text-wf-accent-assess-ink shadow-[0_10px_28px_rgba(7"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ranking",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Ranking",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ranking",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Ranking",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "reports",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Reports",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "reports",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Reports",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-priority",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-follow",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-review",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-review",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-assess",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-follow"
+    ],
+    "blackPills": 15,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Wathefni Assistant",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ai",
+    "locale": "en",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "ltr",
+    "h1": "Wathefni Assistant",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "jobs",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "الوظائف",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "rounded-[1.1rem] bg-wf-accent-priority px-3 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-review px-3 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-paused-soft px-3 py-3 text-start text-wf-accent-paused-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-follow-soft px-3 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "jobs",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "الوظائف",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "rounded-[1.1rem] bg-wf-accent-priority px-3 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-review px-3 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-paused-soft px-3 py-3 text-start text-wf-accent-paused-ink transition hover:brightness-[0.98]",
+      "rounded-[1.1rem] bg-wf-accent-follow-soft px-3 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "candidates",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "المرشحون",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "candidates",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "المرشحون",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": true
+  },
+  {
+    "page": "interviews",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "المقابلات",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "rounded-[1.2rem] bg-wf-accent-follow px-3.5 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-review px-3.5 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-priority px-3.5 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "interviews",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "المقابلات",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "rounded-[1.2rem] bg-wf-accent-follow px-3.5 py-3 text-start text-wf-accent-follow-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-review px-3.5 py-3 text-start text-wf-accent-review-ink transition hover:brightness-[0.98]",
+      "rounded-[1.2rem] bg-wf-accent-priority px-3.5 py-3 text-start text-wf-accent-priority-ink transition hover:brightness-[0.98]"
+    ],
+    "blackPills": 1,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "assessments",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "التقييمات",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "assessments",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "التقييمات",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]",
+      "p-6 rounded-[var(--radius-wf-panel)] border border-transparent bg-wf-accent-assess-soft text-wf-accent-assess-ink shadow-[0_10px_28px_rgba(7"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ranking",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "الترتيب",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ranking",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "الترتيب",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "reports",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "التقارير",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-priority",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-follow",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-review",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-review",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-assess",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-follow"
+    ],
+    "blackPills": 15,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "reports",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "التقارير",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-priority",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-follow",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-review",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-review",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-assess",
+      "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-wf-accent-follow"
+    ],
+    "blackPills": 15,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ai",
+    "locale": "ar",
+    "viewport": "desktop",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "مساعد واثقني",
+    "accentSamples": [
+      "flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out bg-white/12 font-semibold text-whi"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  },
+  {
+    "page": "ai",
+    "locale": "ar",
+    "viewport": "mobile",
+    "mode": "before",
+    "dir": "rtl",
+    "h1": "مساعد واثقني",
+    "accentSamples": [
+      "flex max-w-[46%] shrink-0 items-center gap-2 rounded-2xl bg-white/14 px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 befor"
+    ],
+    "blackPills": 0,
+    "bodyHasSoftPriority": false
+  }
+]

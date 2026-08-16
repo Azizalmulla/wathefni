@@ -1,0 +1,30 @@
+{
+  "approve": {
+    "ok": true,
+    "leave_id": "085ae4fa-359b-40c2-8bb5-4628cb8e47ad",
+    "status": "requested",
+    "allowed_actions": [
+      "read",
+      "approve",
+      "reject"
+    ],
+    "employee_key": "WATHEFNI-96550252254",
+    "start_date": "2026-09-01",
+    "expect_status": "requested",
+    "channel": "operator_mobile"
+  },
+  "reject": {
+    "ok": true,
+    "leave_id": "a822ddc5-537d-4ff5-b8a4-9ea2a5a5e5ac",
+    "status": "requested",
+    "allowed_actions": [
+      "read",
+      "approve",
+      "reject"
+    ],
+    "employee_key": "WATHEFNI-96550252254",
+    "start_date": "2026-09-08",
+    "expect_status": "requested",
+    "channel": "operator_mobile"
+  }
+}

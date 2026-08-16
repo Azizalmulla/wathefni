@@ -1,0 +1,6 @@
+PASS
+
+Employees 360 Wave 3H — jurisdiction policy-pack architecture
+Only KW_PRIVATE_SECTOR verified; reserved packs fail closed
+Staging: 31 + 42 + 22 unit; 57 + 51 smoke PASS
+Prod not deployed; no additional countries implemented

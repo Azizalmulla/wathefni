@@ -1,0 +1,9 @@
+PASS pin uses safe insets
+PASS flex breath spacers
+PASS no heavy card shadow
+PASS dots intentional size
+PASS forgot secondary
+PASS overlay no double SafeArea
+PASS bio same composition
+PASS no auth logic imports changed in pin
+0 failed

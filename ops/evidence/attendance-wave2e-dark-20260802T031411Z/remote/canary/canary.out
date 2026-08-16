@@ -1,0 +1,34 @@
+PASS  capture ops enabled
+PASS  capture ingest off
+PASS  import off
+PASS  authority synthetic only
+PASS  site registered
+PASS  wrong-tenant device denied
+PASS  device registered
+PASS  wrong-tenant claim denied
+PASS  connector registered secrets redacted
+PASS  connector activated
+PASS  rotate ok
+PASS  reconnect after rotate
+PASS  cross-tenant connector denied
+PASS  revoke ok
+PASS  reconnect after revoke denied
+PASS  unknown remediation
+PASS  enqueue idempotent
+PASS  approve cross-tenant denied
+PASS  manager self-action denied
+PASS  approve mapping without ingest replay
+PASS  ingest remains off so no authority punch from dark approve
+PASS  missing/ambiguous enqueued
+PASS  missing/ambiguous payroll excluded
+PASS  offline health
+PASS  lag alert
+PASS  health recovery
+PASS  reject idempotent
+PASS  overview lists connectors
+PASS  attendance demo rows untouched
+PASS  evidence leak scan pass
+{
+  "pass": 30,
+  "fail": 0
+}

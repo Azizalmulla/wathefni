@@ -1,0 +1,70 @@
+{
+  "contract_version": "1.0.0",
+  "dry_run": false,
+  "markers": [
+    "SHW1B",
+    "SHW1B-SYNTH|"
+  ],
+  "phone_prefixes": [
+    "965529"
+  ],
+  "tag": "c7457cd4",
+  "deleted_shift_ids": [
+    "394baf3b-ea10-458f-a9c9-e3b530f96562",
+    "50057fff-d8fd-4c29-94f8-ebb55e3f802c",
+    "1bc1bcd7-7c9e-4692-8eaf-770b216cbae8",
+    "eea0397f-c82a-4aa8-a5db-786fa6799e1c",
+    "a679c9c0-ee50-4387-ba50-df26e702fb64",
+    "12b9ec0e-b893-4976-885d-21468805d569",
+    "3b099fc2-bee3-4dc7-800b-6a38cf88226f",
+    "cd0cc086-040f-4da8-8347-7a17eff1eb8d"
+  ],
+  "deleted": {
+    "shift_reminder_queue": 0,
+    "shift_reconciliation_flags": 0,
+    "shift_assignment_versions": 0,
+    "shift_lifecycle_flags": 0,
+    "shift_orphan_quarantine": 0,
+    "shift_swap_events": 4,
+    "shift_swap_requests": 2,
+    "shift_events": 12,
+    "employee_availability_requests": 0,
+    "shift_assignments": 8,
+    "leave_requests": 1,
+    "shift_seasonal_policies": 0,
+    "employees": 3
+  },
+  "deletion_order": [
+    "shift_reminder_queue",
+    "shift_reconciliation_flags",
+    "shift_assignment_versions",
+    "shift_lifecycle_flags",
+    "shift_orphan_quarantine",
+    "shift_swap_events",
+    "shift_swap_requests",
+    "shift_events",
+    "employee_availability_requests",
+    "shift_assignments",
+    "leave_requests",
+    "shift_seasonal_policies",
+    "employees"
+  ],
+  "residual": {
+    "assignments": 0,
+    "versions": 0,
+    "reminders": 0,
+    "reconciliation_flags": 0,
+    "lifecycle_flags": 0,
+    "swaps": 0,
+    "availability": 0,
+    "leave": 0,
+    "seasonal_policies": 0,
+    "employees": 0,
+    "total": 0
+  },
+  "residual_total": 0,
+  "total": 0,
+  "residual_assignments": 0,
+  "residual_swaps": 0,
+  "residual_employees": 0
+}

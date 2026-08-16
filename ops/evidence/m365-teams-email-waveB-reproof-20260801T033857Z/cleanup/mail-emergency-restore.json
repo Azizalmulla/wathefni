@@ -1,0 +1,45 @@
+{
+  "restored": {
+    "company_code": "WATHEFNI",
+    "outbound_mode": "wathefni",
+    "display_name": "Wathefni Evidence",
+    "from_address": null,
+    "reply_to": "hr@wathefni.ai",
+    "company_name_en": null,
+    "company_name_ar": null,
+    "logo_url": null,
+    "outbound_mailbox_id": "e51803f4-c385-440f-a285-0f3088639be1",
+    "interview_email_when_calendar_sent": false,
+    "allow_wathefni_emergency_fallback": false,
+    "public_forward_address": null,
+    "updated_at": "2026-08-01 03:41:28.477787+00:00",
+    "updated_by_user_id": "waveB-emergency-restore"
+  },
+  "resolved": {
+    "mode": "wathefni",
+    "selected_mode": "wathefni",
+    "from_address": "hr@wathefni.ai",
+    "reply_to": "hr@wathefni.ai",
+    "display_name": "Wathefni Evidence",
+    "provider": "postmark",
+    "mailbox_id": null,
+    "activatable": true,
+    "block_reason": null,
+    "purpose": "after_restore",
+    "branding": {
+      "company_name_en": null,
+      "company_name_ar": null,
+      "logo_url": null
+    },
+    "emergency_fallback_used": false,
+    "intended_mode": null,
+    "intended_from": null,
+    "user_status": null,
+    "hr_notice": null
+  },
+  "branded_non_wathefni": [],
+  "wathefni_row": {
+    "company_code": "WATHEFNI",
+    "outbound_mode": "wathefni"
+  }
+}

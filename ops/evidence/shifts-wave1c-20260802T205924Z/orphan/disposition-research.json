@@ -1,0 +1,212 @@
+{
+  "db": "wathefni",
+  "orphans": [
+    {
+      "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+      "shift": {
+        "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+        "employee_key": "WATHEFNI-96596552203",
+        "employee_phone": "None",
+        "employee_name": "None",
+        "shift_date": "2026-08-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "cancelled",
+        "updated_at": "2026-08-02 20:50:39.909078+00:00"
+      },
+      "exact_employee_match": null,
+      "phone_like_hits": [],
+      "key_like_hits": [],
+      "quarantine": {
+        "quarantine_id": "838dcf75-df78-4e75-bb9f-92f223ec6728",
+        "status": "quarantined",
+        "reason": "orphan_employee_key",
+        "quarantined_at": "2026-08-02 20:50:39.909078+00",
+        "snapshot_keys": [
+          "role",
+          "notes",
+          "status",
+          "end_time",
+          "location",
+          "metadata",
+          "shift_id",
+          "site_key",
+          "team_key",
+          "timezone",
+          "branch_key",
+          "created_at",
+          "shift_date",
+          "start_time",
+          "updated_at",
+          "row_version",
+          "source_text",
+          "company_code",
+          "employee_key",
+          "position_key",
+          "break_minutes",
+          "employee_name",
+          "ends_next_day",
+          "employee_phone",
+          "idempotency_key",
+          "created_by_phone",
+          "reminder_sent_at"
+        ],
+        "snapshot_compact": {
+          "shift_id": "0a6e73dd-9c6d-49a0-b253-39a9922ebd70",
+          "employee_key": "WATHEFNI-96596552203",
+          "employee_phone": null,
+          "employee_name": null,
+          "shift_date": "2026-08-11",
+          "start_time": "09:00:00",
+          "end_time": "17:00:00",
+          "status": "scheduled"
+        }
+      },
+      "events": [
+        {
+          "event_type": "orphan_quarantined",
+          "created_at": "2026-08-02 20:50:39.909078+00"
+        }
+      ],
+      "digits_from_key": "96596552203"
+    },
+    {
+      "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+      "shift": {
+        "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+        "employee_key": "WATHEFNI-96552202357",
+        "employee_phone": "None",
+        "employee_name": "None",
+        "shift_date": "2026-08-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "cancelled",
+        "updated_at": "2026-08-02 20:50:39.909078+00:00"
+      },
+      "exact_employee_match": null,
+      "phone_like_hits": [],
+      "key_like_hits": [],
+      "quarantine": {
+        "quarantine_id": "ebdee5cd-2e73-4152-ac08-7f2e04e73828",
+        "status": "quarantined",
+        "reason": "orphan_employee_key",
+        "quarantined_at": "2026-08-02 20:50:39.909078+00",
+        "snapshot_keys": [
+          "role",
+          "notes",
+          "status",
+          "end_time",
+          "location",
+          "metadata",
+          "shift_id",
+          "site_key",
+          "team_key",
+          "timezone",
+          "branch_key",
+          "created_at",
+          "shift_date",
+          "start_time",
+          "updated_at",
+          "row_version",
+          "source_text",
+          "company_code",
+          "employee_key",
+          "position_key",
+          "break_minutes",
+          "employee_name",
+          "ends_next_day",
+          "employee_phone",
+          "idempotency_key",
+          "created_by_phone",
+          "reminder_sent_at"
+        ],
+        "snapshot_compact": {
+          "shift_id": "6a84a671-eb7f-43ea-870e-af859a440467",
+          "employee_key": "WATHEFNI-96552202357",
+          "employee_phone": null,
+          "employee_name": null,
+          "shift_date": "2026-08-11",
+          "start_time": "09:00:00",
+          "end_time": "17:00:00",
+          "status": "scheduled"
+        }
+      },
+      "events": [
+        {
+          "event_type": "orphan_quarantined",
+          "created_at": "2026-08-02 20:50:39.909078+00"
+        }
+      ],
+      "digits_from_key": "96552202357"
+    },
+    {
+      "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+      "shift": {
+        "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+        "employee_key": "WATHEFNI-96552263564",
+        "employee_phone": "None",
+        "employee_name": "None",
+        "shift_date": "2026-08-11",
+        "start_time": "09:00:00",
+        "end_time": "17:00:00",
+        "status": "cancelled",
+        "updated_at": "2026-08-02 20:50:39.909078+00:00"
+      },
+      "exact_employee_match": null,
+      "phone_like_hits": [],
+      "key_like_hits": [],
+      "quarantine": {
+        "quarantine_id": "5abefd3c-6e09-42ee-b847-0d3fd15c0d11",
+        "status": "quarantined",
+        "reason": "orphan_employee_key",
+        "quarantined_at": "2026-08-02 20:50:39.909078+00",
+        "snapshot_keys": [
+          "role",
+          "notes",
+          "status",
+          "end_time",
+          "location",
+          "metadata",
+          "shift_id",
+          "site_key",
+          "team_key",
+          "timezone",
+          "branch_key",
+          "created_at",
+          "shift_date",
+          "start_time",
+          "updated_at",
+          "row_version",
+          "source_text",
+          "company_code",
+          "employee_key",
+          "position_key",
+          "break_minutes",
+          "employee_name",
+          "ends_next_day",
+          "employee_phone",
+          "idempotency_key",
+          "created_by_phone",
+          "reminder_sent_at"
+        ],
+        "snapshot_compact": {
+          "shift_id": "f9ebecf3-8838-456a-8124-c34c3c7600ca",
+          "employee_key": "WATHEFNI-96552263564",
+          "employee_phone": null,
+          "employee_name": null,
+          "shift_date": "2026-08-11",
+          "start_time": "09:00:00",
+          "end_time": "17:00:00",
+          "status": "scheduled"
+        }
+      },
+      "events": [
+        {
+          "event_type": "orphan_quarantined",
+          "created_at": "2026-08-02 20:50:39.909078+00"
+        }
+      ],
+      "digits_from_key": "96552263564"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+    pt5 succession mobility — db journeys
+      PASS  nominate
+      PASS  intel ok
+      PASS  empty role uncovered
+      PASS  single-successor risk
+      PASS  does not invent candidates
+      PASS  bench score none
+      PASS  bench counts present
+      PASS  mobility ok
+      PASS  advisory only
+      PASS  no employment mutate
+      PASS  no silent application
+
+    11 passed, 0 failed
+PT5_SUCCESSION_MOBILITY_INTELLIGENCE_DB_PASS
+STAGING_RC=0

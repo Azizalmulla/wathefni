@@ -1,0 +1,1 @@
+wrote /Users/azizalmulla/Desktop/claw/ops/evidence/production-readiness-r3-data-safety-20260812T175202Z/inventory/script-inventory.json scripts=1064 dispositions={'retained_explicit_env_no_production_default': 57, 'retained': 950, 'retained_fail_closed_non_production': 54, 'retained_production_maintenance': 3}

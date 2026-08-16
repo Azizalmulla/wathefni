@@ -1,0 +1,146 @@
+{
+  "prep": {
+    "ok": false,
+    "status": "needs_confirmation",
+    "confirmation": {
+      "confirmation_id": "8ae90460-e1dd-4864-bda1-12a6df1d8592",
+      "confirmation_hash": "f90d694e980bbbd68d8ad5fda1d495a58af3f111592c5b9d7c4f82f528476c88",
+      "action": "reject_shift_swap",
+      "target": {
+        "type": "shift_swap",
+        "id": "8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08"
+      },
+      "summary": "swap 8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08",
+      "consequence": "Reject shift swap.",
+      "current_state": "requested",
+      "expires_at": "2026-08-10T18:42:07.745677+00:00",
+      "status": "pending",
+      "backend_confirmation": {
+        "args": {
+          "swap_id": "8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08"
+        },
+        "text": "Reject the shift swap?",
+        "action_hash": "60286e86decf43557337018c76ca05340d9cebe0df9b8ccc6eb215b3aacc7e13",
+        "action_type": "reject_shift_swap"
+      },
+      "idempotent_replay": false
+    },
+    "result": null
+  },
+  "conf": {
+    "ok": true,
+    "status": "completed",
+    "confirmation": {
+      "confirmation_id": "8ae90460-e1dd-4864-bda1-12a6df1d8592",
+      "confirmation_hash": "f90d694e980bbbd68d8ad5fda1d495a58af3f111592c5b9d7c4f82f528476c88",
+      "action": "reject_shift_swap",
+      "target": {
+        "type": "shift_swap",
+        "id": "8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08"
+      },
+      "summary": "swap 8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08",
+      "consequence": "Reject shift swap.",
+      "current_state": "requested",
+      "expires_at": "2026-08-10T18:42:07.745677+00:00",
+      "status": "completed",
+      "backend_confirmation": {
+        "args": {
+          "swap_id": "8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08"
+        },
+        "text": "Reject the shift swap?",
+        "action_hash": "60286e86decf43557337018c76ca05340d9cebe0df9b8ccc6eb215b3aacc7e13",
+        "action_type": "reject_shift_swap"
+      },
+      "idempotent_replay": false
+    },
+    "result": {
+      "ok": true,
+      "status": "completed",
+      "message": "Rejected shift swap for SHW2 Synth d3ffcf98 on Saturday, 29 August 2026.",
+      "confirmation": null,
+      "result": {
+        "ok": true,
+        "swap": {
+          "swap_id": "8c7fe1c8-38d9-460a-8a6b-8cc2f86a3f08",
+          "company_code": "WATHEFNI",
+          "requester_employee_key": "WATHEFNI-SHW2-d3ffcf98",
+          "requester_employee_phone": "965529398000",
+          "requester_employee_name": "SHW2 Synth d3ffcf98",
+          "target_employee_key": "WATHEFNI-SHW2B-d3ffcf98",
+          "target_employee_phone": "965529980008",
+          "target_employee_name": "SHW2B Synth d3ffcf98",
+          "requester_shift_id": "13b8fe1c-7021-4cbf-9fb3-ac6bdba7505d",
+          "target_shift_id": "0325f7f0-0de4-43b0-a207-b445dce46989",
+          "shift_date": "2026-08-29",
+          "status": "rejected",
+          "reason": "hr-cfa3 disposable reject",
+          "decision_note": null,
+          "source_text": null,
+          "requested_by_phone": "965529398000",
+          "decided_by_phone": "96599338566",
+          "requested_at": "2026-08-10T18:32:07.715318+00:00",
+          "decided_at": "2026-08-10T18:32:07.992381+00:00",
+          "metadata": {
+            "tag": "hr-cfa3",
+            "disposable": true
+          },
+          "created_at": "2026-08-10T18:32:07.715318+00:00",
+          "updated_at": "2026-08-10T18:32:07.992381+00:00"
+        },
+        "updated_shifts": [],
+        "requester_notification": {
+          "ok": false,
+          "send": {
+            "ok": false,
+            "error": "missing_candidate_conversation_id",
+            "phone": "965529398000",
+            "unhealthy_conversation_ids": []
+          },
+          "message": "Your shift swap request for Saturday, 29 August 2026 was not approved.",
+          "employee": {
+            "employee_key": "WATHEFNI-SHW2-d3ffcf98",
+            "company_code": "WATHEFNI",
+            "name": "SHW2 Synth d3ffcf98",
+            "phone": "965529398000"
+          }
+        },
+        "target_notification": {
+          "ok": false,
+          "send": {
+            "ok": false,
+            "error": "missing_candidate_conversation_id",
+            "phone": "965529980008",
+            "unhealthy_conversation_ids": []
+          },
+          "message": "A shift swap involving you for Saturday, 29 August 2026 was not approved.",
+          "employee": {
+            "employee_key": "WATHEFNI-SHW2B-d3ffcf98",
+            "company_code": "WATHEFNI",
+            "name": "SHW2B Synth d3ffcf98",
+            "phone": "965529980008"
+          }
+        },
+        "action_type": "reject_shift_swap",
+        "success": true,
+        "status": "completed",
+        "message": "Rejected shift swap for SHW2 Synth d3ffcf98 on Saturday, 29 August 2026.",
+        "safe_user_message": "Rejected shift swap for SHW2 Synth d3ffcf98 on Saturday, 29 August 2026.",
+        "employee": null,
+        "employee_notification": null,
+        "hr_notification": null,
+        "attendance": null,
+        "shift": null,
+        "created": null,
+        "cancelled": null,
+        "conflicts": null,
+        "timesheet": null,
+        "timesheets": null,
+        "policy": null,
+        "export": null,
+        "summaries": null,
+        "analytics": null
+      }
+    }
+  },
+  "after": "rejected"
+}

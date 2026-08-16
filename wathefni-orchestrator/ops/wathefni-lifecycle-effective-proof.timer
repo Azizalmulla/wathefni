@@ -1,0 +1,13 @@
+[Unit]
+Description=Minutely Wathefni Wave 3E lifecycle proof timer (production synthetic-only, temporary)
+Documentation=file:///opt/wathefni/production-evidence/employees360-wave3e-scheduler-closeout/
+
+[Timer]
+OnBootSec=15s
+OnCalendar=*-*-* *:*:00
+AccuracySec=1s
+Persistent=true
+Unit=wathefni-lifecycle-effective.service
+
+[Install]
+WantedBy=timers.target

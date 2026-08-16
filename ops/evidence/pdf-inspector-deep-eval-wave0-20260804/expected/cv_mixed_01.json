@@ -1,0 +1,23 @@
+{
+  "fixture_id": "cv_mixed_01",
+  "category": "mixed_digital_scanned",
+  "language": "en",
+  "layout": "mixed_pages",
+  "pdf_nature": "mixed",
+  "pages": 2,
+  "expected_ocr_pages_1idx": [
+    2
+  ],
+  "expected_text_needles": [
+    "Mixed Digital Scan",
+    "mixed01@example.com",
+    "DIGITAL PAGE"
+  ],
+  "expected_fields": {
+    "full_name": "Mixed Digital Scan",
+    "email": "mixed01@example.com"
+  },
+  "notes": "Page 1 digital text; page 2 image-only. OCR expected only on page 2.",
+  "sha256": "dcfd69012db6244c90942577c30f2f1f6a43993a932b080940cf9688b56de923",
+  "bytes": 54000
+}

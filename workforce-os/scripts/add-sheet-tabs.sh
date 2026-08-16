@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Add "Employees" and "Compliance" tabs to the AI Octopus Google Sheet
+# Add "Employees", "Compliance", and "Shifts" tabs to the AI Octopus Google Sheet
 # Usage: ./add-sheet-tabs.sh
 
 SHEET_ID="1zMqYRGj0OSdoYYlMThAEfxoc1DQv-rRfHzpiAronwRM"
@@ -9,7 +9,7 @@ ACCOUNT="azizalmulla16@gmail.com"
 TOKEN_FILE="/tmp/gog-token.json"
 CREDS_FILE="$HOME/Library/Application Support/gogcli/credentials.json"
 
-echo "📋 Adding Employees + Compliance tabs to AI Octopus sheet..."
+echo "📋 Adding Employees + Compliance + Shifts tabs to AI Octopus sheet..."
 
 # 1. Export refresh token
 gog auth tokens export "$ACCOUNT" --out "$TOKEN_FILE" --overwrite >/dev/null 2>&1
@@ -40,7 +40,8 @@ RESULT=$(curl -s -w "\n%{http_code}" -X POST \
   -d '{
     "requests": [
       {"addSheet": {"properties": {"title": "Employees", "index": 1}}},
-      {"addSheet": {"properties": {"title": "Compliance", "index": 2}}}
+      {"addSheet": {"properties": {"title": "Compliance", "index": 2}}},
+      {"addSheet": {"properties": {"title": "Shifts", "index": 3}}}
     ]
   }')
 
@@ -75,7 +76,14 @@ gog sheets update "$SHEET_ID" "Compliance!A1:J1" \
   --values-json '[["Employee","Phone","Document Type","Status","Expiry Date","Days Until Expiry","Last Reminded","Reminder Count","Authority","Notes"]]' \
   --account "$ACCOUNT" 2>&1 && echo "  ✓ Compliance headers set" || echo "  ⚠️ Failed to set Compliance headers"
 
-# 7. Cleanup
+# 7. Add column headers to Shifts tab
+echo ""
+echo "📝 Adding headers to Shifts tab..."
+gog sheets update "$SHEET_ID" "Shifts!A1:J1" \
+  --values-json '[["Date","Employee","Phone","Start","End","Location","Role","Status","Notes","Shift ID"]]' \
+  --account "$ACCOUNT" 2>&1 && echo "  ✓ Shifts headers set" || echo "  ⚠️ Failed to set Shifts headers"
+
+# 8. Cleanup
 rm -f "$TOKEN_FILE"
 
 echo ""

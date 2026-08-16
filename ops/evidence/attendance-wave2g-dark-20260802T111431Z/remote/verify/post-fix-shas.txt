@@ -1,0 +1,2 @@
+0ac71abd7e21c151b88797f4b1b46b0ce57fee72fc78d9efcc44b707f2220a1e  attendance_capture_ops.py
+910d5a3683ba47053114fb85bc22ced369710b37425462299241f213ef640172  attendance_capture_postgres.py

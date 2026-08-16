@@ -1,0 +1,31 @@
+active
+health=200
+68020:def encode_leave_history_cursor(row: dict[str, Any]) -> str:
+68116:    next_cursor = encode_leave_history_cursor(page_rows[-1]) if has_more and page_rows else None
+69213:@app.get("/app/leave/history")
+PASS  cursor round-trips
+PASS  malformed cursor raises
+PASS  empty history
+PASS  page1 has_more
+PASS  page1 size
+PASS  page1 newest-first
+PASS  pages do not overlap — set()
+PASS  page2 has_more
+PASS  no duplicates across cursors
+PASS  all seeded reachable — got=55 want=55
+PASS  older-than-50-cap reachable
+PASS  status filter cancelled only — got=11
+PASS  status values preserved
+PASS  year filter returns only that year — ['2025-08-28', '2025-08-27', '2025-08-26', '2025-08-25', '2025-08-24']
+PASS  employee isolation
+PASS  tenant isolation (wrong company empty)
+PASS  invalid cursor → 400
+PASS  invalid range → 400 — {'error': 'invalid_range', 'message': 'The start date must be on or before the end date.'}
+PASS  invalid status → 400
+PASS  invalid date_from → 400
+PASS  root leave still capped ≤50
+PASS  root leave has requests field
+PASS  root leave honesty flags intact
+PASS  history exceeds root window — hist=55 root=50
+---
+PASS employee leave history contract

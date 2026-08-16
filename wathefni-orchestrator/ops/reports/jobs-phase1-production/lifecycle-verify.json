@@ -1,0 +1,123 @@
+{
+  "results": [
+    {
+      "ok": true,
+      "label": "existing positions remain",
+      "detail": "open=10 apps=11"
+    },
+    {
+      "ok": true,
+      "label": "list positions",
+      "detail": "n=10"
+    },
+    {
+      "ok": true,
+      "label": "existing applications remain attached",
+      "detail": "ACCOUNTING_EXCEL"
+    },
+    {
+      "ok": true,
+      "label": "draft creation works",
+      "detail": "PRODJP1_224732"
+    },
+    {
+      "ok": true,
+      "label": "editing draft does not publish",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "salary visibility hr_only",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "vacancy/remaining",
+      "detail": "v=3 r=3"
+    },
+    {
+      "ok": true,
+      "label": "duplicate position code rejected",
+      "detail": "409"
+    },
+    {
+      "ok": true,
+      "label": "stale edit fails safely",
+      "detail": "409"
+    },
+    {
+      "ok": true,
+      "label": "publish works for owner",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "APPLY/wa.me uses 96599338566",
+      "detail": "https://wa.me/96599338566?text=APPLY-WATHEFNI-PRODJP1_224732"
+    },
+    {
+      "ok": true,
+      "label": "QR payload uses same number",
+      "detail": "https://wa.me/96599338566?text=APPLY-WATHEFNI-PRODJP1_224732"
+    },
+    {
+      "ok": true,
+      "label": "edit open job does not change status",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "pause rejects new intake",
+      "detail": "paused"
+    },
+    {
+      "ok": true,
+      "label": "resume restores intake",
+      "detail": "open"
+    },
+    {
+      "ok": true,
+      "label": "close rejects new intake",
+      "detail": "closed"
+    },
+    {
+      "ok": true,
+      "label": "reopen restores intake",
+      "detail": "open"
+    },
+    {
+      "ok": true,
+      "label": "generic create cannot reopen closed job",
+      "detail": "409"
+    },
+    {
+      "ok": true,
+      "label": "stale transition fails safely",
+      "detail": "409"
+    },
+    {
+      "ok": true,
+      "label": "file-based positions disabled",
+      "detail": "false"
+    },
+    {
+      "ok": true,
+      "label": "Assistant/share apply_link parity",
+      "detail": "https://wa.me/96599338566?text=APPLY-WATHEFNI-PRODJP1_224732"
+    },
+    {
+      "ok": true,
+      "label": "verification dry_run only",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "label": "cleanup closed synthetic job",
+      "detail": "PRODJP1_224732"
+    }
+  ],
+  "passed": 23,
+  "failed": 0,
+  "code": "PRODJP1_224732",
+  "artifact": "0c0ac7a45b9c516368650cb434e145b8acd5f771f09e422e6ae615281763e0a1"
+}

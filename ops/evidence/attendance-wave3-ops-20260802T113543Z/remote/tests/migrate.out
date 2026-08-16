@@ -1,0 +1,6 @@
+env staging
+expected_db wathefni_staging
+connected_db wathefni_staging
+tables ['attendance_ops_attachments', 'attendance_ops_audit_events', 'attendance_ops_cases', 'attendance_ops_comments', 'attendance_ops_disputes', 'attendance_ops_exceptions', 'attendance_ops_idempotency']
+triggers ['trg_att_ops_audit_immutable']
+OK wave3 schema

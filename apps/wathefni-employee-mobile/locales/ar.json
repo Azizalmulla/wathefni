@@ -1,0 +1,5 @@
+{
+  "NSFaceIDUsageDescription": "يمكن لـ Wathefni فتح القفل بـ Face ID على هذا الجهاز. رقمك السري يبقى صالحاً في أي وقت.",
+  "NSCameraUsageDescription": "يستخدم Wathefni الكاميرا فقط عندما تختار التقاط مستند لرفعه إلى الموارد البشرية.",
+  "NSPhotoLibraryUsageDescription": "يصل Wathefni إلى صورك فقط عندما تختار إرفاق مستند لرفعه إلى الموارد البشرية."
+}

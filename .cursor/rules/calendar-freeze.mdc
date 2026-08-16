@@ -1,0 +1,15 @@
+---
+description: Permanent freeze for Calendar UX / visual system; block chrome reopen and preview-in-prod
+globs: apps/wathefni-dashboard/src/components/CalendarShell.tsx,apps/wathefni-dashboard/src/components/Calendar*.test.*,apps/wathefni-dashboard/src/lib/query/hooks.ts,wathefni-orchestrator/calendar_populated_preview.py,ops/CALENDAR*.md,ops/evidence/calendar-*/**
+alwaysApply: false
+---
+
+# Calendar UX permanent freeze
+
+See `ops/CALENDAR_UX_PERMANENT_FREEZE.md`.
+
+- Day/week/month layouts, card variants, category rails, all-day row, overlap/+N, portal drawer, soft-keep/transitions, CRUD/Interview ownership, toolbar/tokens are frozen.
+- Do not reopen Calendar UX without a new owner wave.
+- Do not add post-hire calendar emitters without Wave 2 change-control.
+- Do not weaken Interview authority or `calendar.sync` owner-only.
+- Populated preview mechanism may exist for canary QA; keep `WATHEFNI_CALENDAR_POPULATED_PREVIEW` **off** for normal production visibility.

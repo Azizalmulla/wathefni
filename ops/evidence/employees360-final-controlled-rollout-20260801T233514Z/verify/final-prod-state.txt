@@ -1,0 +1,73 @@
+{
+  "reals": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "name": "Talal Fadhli",
+      "phone": "96550252254",
+      "email": "talalabdalla89@gmail.com",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "name": "Fouad Burhamad",
+      "phone": "96566363363",
+      "email": "fb-urhama@gmail.com",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "name": "mohammad alqattan",
+      "phone": "96597727743",
+      "email": "",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "name": "Brian Saleh",
+      "phone": "96599411617",
+      "email": "briansaleh92@gmail.com",
+      "policy_pack_code": "KW_PRIVATE_SECTOR",
+      "policy_pack_version": "1.0.0",
+      "policy_pack_status": "resolved",
+      "jurisdiction_code": "KW",
+      "worker_category": "private_sector",
+      "contract_type": "unlimited",
+      "pay_frequency": "monthly",
+      "probation_status": "completed",
+      "employment_status": "active"
+    }
+  ],
+  "remediation_count": 0,
+  "quarantined_synthetic_employments": 8,
+  "canary_binding_active": 1,
+  "shas": {
+    "app.py": "0e3e10f1fb0596c3add6aedcd92a319deb8d75254167bbe3ee792c9fe37648e5",
+    "employee_selfservice_wave5.py": "a8f65ab04fe5f9f53e75ce1ae0eb27b1398b2c2223e6348319151620db79e2a3",
+    "employee_lifecycle_wave3.py": "7964a01790edf5b637ee1b459a25aba08f182ba980dcc5498467bd3edcf808e1",
+    "employee_policy_packs_wave3h.py": "c0d9a80255745656446113b8b305936df972efececc2bb4bccc53e17d17f9254"
+  }
+}

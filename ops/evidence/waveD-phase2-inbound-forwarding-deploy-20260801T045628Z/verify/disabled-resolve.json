@@ -1,0 +1,23 @@
+{
+  "disabled_resolve_checks": [
+    {
+      "intake_id": "e40df0d2-6d0a-4da0-9780-ca13cfab9ba6",
+      "status": "disabled",
+      "address": "wathefni-cv-1cb7e3@inbound.wathefni.ai",
+      "resolves": false
+    },
+    {
+      "intake_id": "80da2266-f722-4084-aadb-3b525cccb309",
+      "status": "disabled",
+      "address": "wathefni-d2-44a79e@inbound.wathefni.ai",
+      "resolves": false
+    },
+    {
+      "intake_id": "c3f26ffd-bd5f-423e-82c2-923e301ed7e8",
+      "status": "disabled",
+      "address": "wathefni-cv-d11603@inbound.wathefni.ai",
+      "resolves": false
+    }
+  ],
+  "ok": true
+}

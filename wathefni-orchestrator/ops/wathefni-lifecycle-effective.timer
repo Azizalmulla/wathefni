@@ -1,0 +1,13 @@
+[Unit]
+Description=Hourly Wathefni Wave 3E lifecycle effective scheduler (production synthetic-only)
+Documentation=file:///opt/wathefni/production-evidence/employees360-wave3d-synthetic-canary/20260801T210838Z/REPORT.md
+
+[Timer]
+OnBootSec=3min
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=90
+Unit=wathefni-lifecycle-effective.service
+
+[Install]
+WantedBy=timers.target

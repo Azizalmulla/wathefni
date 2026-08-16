@@ -1,0 +1,53 @@
+{
+  "resourceSpecificApplicationPermissions": [],
+  "info": {
+    "supportUrl": null,
+    "termsOfServiceUrl": null,
+    "logoUrl": null,
+    "privacyStatementUrl": null,
+    "marketingUrl": null
+  },
+  "signInAudience": "AzureADMyOrg",
+  "appOwnerOrganizationId": "ffd171d7-94a7-41a2-a38a-b9bc3ba4a082",
+  "applicationTemplateId": null,
+  "tokenEncryptionKeyId": null,
+  "logoutUrl": null,
+  "servicePrincipalNames": [
+    "8994e095-0605-4baa-86c0-54185c95b496"
+  ],
+  "accountEnabled": true,
+  "alternativeNames": [],
+  "oauth2PermissionScopes": [],
+  "loginUrl": null,
+  "samlSingleSignOnSettings": null,
+  "isDisabled": null,
+  "tags": [],
+  "addIns": [],
+  "verifiedPublisher": {
+    "addedDateTime": null,
+    "displayName": null,
+    "verifiedPublisherId": null
+  },
+  "appDescription": null,
+  "appDisplayName": "Wathefni Email Send",
+  "createdByAppId": "14d82eec-204b-4c2f-b7e8-296a70dab67e",
+  "appRoles": [],
+  "preferredTokenSigningKeyThumbprint": null,
+  "passwordCredentials": [],
+  "replyUrls": [],
+  "notes": null,
+  "deletedDateTime": null,
+  "homepage": null,
+  "keyCredentials": [],
+  "appRoleAssignmentRequired": false,
+  "id": "a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+  "servicePrincipalType": "Application",
+  "notificationEmailAddresses": [],
+  "disabledByMicrosoftStatus": null,
+  "createdDateTime": null,
+  "description": null,
+  "preferredSingleSignOnMode": null,
+  "displayName": "Wathefni Email Send",
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#servicePrincipals/$entity",
+  "appId": "8994e095-0605-4baa-86c0-54185c95b496"
+}

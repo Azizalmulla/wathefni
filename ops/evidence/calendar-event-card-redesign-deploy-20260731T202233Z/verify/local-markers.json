@@ -1,0 +1,12 @@
+{
+  "stone": true,
+  "yellow": true,
+  "blue": true,
+  "pink": true,
+  "join": true,
+  "plus1d": true,
+  "plus_day_ar": true,
+  "data_density": true,
+  "data_lane": true,
+  "teams": true
+}

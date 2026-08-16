@@ -1,0 +1,14 @@
+[Unit]
+Description=Wathefni full backup (PostgreSQL + files/media + encrypted secrets + offsite)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Optional offsite push: set one of these (and install rclone for the remote form).
+# Environment=WATHEFNI_BACKUP_RCLONE_REMOTE=wathefni-offsite:wathefni-backups
+# Environment=WATHEFNI_BACKUP_RSYNC_TARGET=backup@offsite-host:/srv/wathefni-backups
+ExecStart=/usr/local/bin/backup-wathefni daily
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

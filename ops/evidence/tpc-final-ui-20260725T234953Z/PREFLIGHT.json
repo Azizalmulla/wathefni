@@ -1,0 +1,99 @@
+{
+  "timestamp": "2026-07-25T23:52:55Z",
+  "source_commit": "40a4e2621f4818bf7c0f6ce3642032297bfbe7b2",
+  "source_manifest_sha": "860352bf28f7a1402c1df5b1671565e8ab0005f1be6eaf2975ed31c6a77b0dfb",
+  "qualified_dist_manifest_sha": "518382a4b7effd8b4d3719daa1513d08acdc295247bba964f566b62f38226bdc",
+  "qualified_asset_set_sha": "bdb205f855bb80fccd38adba11d2f5c53adbeed08b8741fafe37837c82d03ee3",
+  "candidate_ui_composite_sha": "2914540fbe7bda23196fdb985c8f89f5aa62a1cbe4793fcdf2ecc7e08203f296",
+  "staging_manifest_verified": true,
+  "staging_manifest": [
+    {
+      "path": "assets/ConfirmDialog-BUONn0_T.css",
+      "expected_sha": "9f29fa3ea95f534b7c3b2575f0882a9e0625045d26fd2f3dc3c83a6363da85ac",
+      "actual_sha": "9f29fa3ea95f534b7c3b2575f0882a9e0625045d26fd2f3dc3c83a6363da85ac"
+    },
+    {
+      "path": "assets/ConfirmDialog-Dgk27sGZ.js",
+      "expected_sha": "d73a765ea50234d76c9524304069e9e101f166a0bb80076b96a9ea4488642ed6",
+      "actual_sha": "d73a765ea50234d76c9524304069e9e101f166a0bb80076b96a9ea4488642ed6"
+    },
+    {
+      "path": "assets/dashboard-BH_0JGYz.js",
+      "expected_sha": "688eef6899816c769f1f891215eddc7e4cd427d72a0bab7d2d9b9edac9f03391",
+      "actual_sha": "688eef6899816c769f1f891215eddc7e4cd427d72a0bab7d2d9b9edac9f03391"
+    },
+    {
+      "path": "assets/setupConsole-DhxTLcLR.js",
+      "expected_sha": "6abd206d061145288f574244ff1ff37cdc534c8a7971ac566287302b81bf2fc0",
+      "actual_sha": "6abd206d061145288f574244ff1ff37cdc534c8a7971ac566287302b81bf2fc0"
+    },
+    {
+      "path": "favicon.svg",
+      "expected_sha": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66",
+      "actual_sha": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66"
+    },
+    {
+      "path": "index.html",
+      "expected_sha": "92136f864a7f4c1405a66c9c4e72b32c485a9f2ba6db36712efa19281969460d",
+      "actual_sha": "92136f864a7f4c1405a66c9c4e72b32c485a9f2ba6db36712efa19281969460d"
+    },
+    {
+      "path": "setup-console.html",
+      "expected_sha": "708d70228151102b30b43af6a93674ef1fc0af5c6ab48afbd3af6f7ce2b5655b",
+      "actual_sha": "708d70228151102b30b43af6a93674ef1fc0af5c6ab48afbd3af6f7ce2b5655b"
+    }
+  ],
+  "staging_current_tree_sha_including_stale_asset": "b899f5c5831ea0c86dd198943918e351d546931791210f4b9b04d55e56b6324d",
+  "production_dashboard_tree_sha": "c7b8b954a48f14c2c3c03d4c7e330772259a4527a53fe6c612524868dbc91e02",
+  "production_health": "200",
+  "classification_conf": "[Service]\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_TENANTS=\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_SCHEMA=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_MANUAL=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_WORKERS=off\nEnvironment=WATHEFNI_TALENT_POOL_CLASSIFICATION_UI=off\n",
+  "worker": "inactive",
+  "sidecars": {
+    "candidate_classification_runs": 0,
+    "candidate_classification_suggestions": 0,
+    "candidate_classification_review_events": 0,
+    "talent_pool_classification_jobs": 0,
+    "taxonomy_tenant_nodes": 0
+  },
+  "backup": "/opt/wathefni/backups/production-pre-tpc-final-ui-20260725T234953Z",
+  "backup_db_sha": "dd2e6dbac97f2a85bb6cdf0c5dbc6d4ba9b9cd747c4f60bc004934593725ecaa",
+  "restore_entries": 1130,
+  "rollback_sha": "e755a374090697d937cb5a42e3c2886b49c369c57ad88dc5971b2714bea57c4f",
+  "artifact_acceptance_checks": {
+    "markers_present": true,
+    "career_area_control": true,
+    "likely_role_control": true,
+    "skill_control": false,
+    "industry_control": false,
+    "seniority_control": false,
+    "experience_band_control": false,
+    "confidence_state_control": false,
+    "classification_filters_applied_to_query": false,
+    "classification_filters_saved": false,
+    "add_control": false,
+    "correct_control": false,
+    "explicit_review_confirmation_ui": false,
+    "review_history_rendered": false,
+    "current_stale_rendered": false,
+    "immutable_run_history_available": false,
+    "candidate_list_chip_projected": false
+  },
+  "qualification_blockers": [
+    "skill_control",
+    "industry_control",
+    "seniority_control",
+    "experience_band_control",
+    "confidence_state_control",
+    "classification_filters_applied_to_query",
+    "classification_filters_saved",
+    "add_control",
+    "correct_control",
+    "explicit_review_confirmation_ui",
+    "review_history_rendered",
+    "current_stale_rendered",
+    "immutable_run_history_available",
+    "candidate_list_chip_projected"
+  ],
+  "decision": "NO_GO_PREDEPLOY_ARTIFACT_INCOMPLETE",
+  "production_dashboard_deployed": false
+}

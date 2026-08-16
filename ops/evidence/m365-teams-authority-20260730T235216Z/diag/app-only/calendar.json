@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "status": 200,
+  "json": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('ABDULAZIZALMULLA%40wathefni.onmicrosoft.com')/calendar(id,name,allowedOnlineMeetingProviders,defaultOnlineMeetingProvider,canEdit,canShare,owner)/$entity",
+    "id": "AAMkADFhYjZlYjE2LTk5NzYtNDJlOS05NDdjLWMzMDhjMDUzZDEzYQBGAAAAAAB9XXdYtni8TJo8RKfG_od7BwCJEHvw6fDsRpSbpMyyeozuAAAAAAEGAACJEHvw6fDsRpSbpMyyeozuAAAAY5HvAAA=",
+    "name": "Calendar",
+    "canShare": true,
+    "canEdit": true,
+    "allowedOnlineMeetingProviders": [],
+    "defaultOnlineMeetingProvider": "unknown",
+    "owner": {
+      "name": "ABDULAZIZ ALMULLA",
+      "address": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+test_lifecycle_buckets_unchanged (test_candidates_stage_contract.CandidatesStageContractTests.test_lifecycle_buckets_unchanged) ... ok
+test_new_excludes_talent_pool_intake (test_candidates_stage_contract.CandidatesStageContractTests.test_new_excludes_talent_pool_intake) ... ok
+test_offer_display_is_shortlisted (test_candidates_stage_contract.CandidatesStageContractTests.test_offer_display_is_shortlisted) ... ok
+test_shortlisted_includes_legacy_offer (test_candidates_stage_contract.CandidatesStageContractTests.test_shortlisted_includes_legacy_offer) ... ok
+test_talent_pool_display_is_none_not_new (test_candidates_stage_contract.CandidatesStageContractTests.test_talent_pool_display_is_none_not_new) ... ok
+test_unknown_not_silently_new (test_candidates_stage_contract.CandidatesStageContractTests.test_unknown_not_silently_new) ... ok
+test_comma_separated_uses_any (test_prehire_stage_filter_contract.PrehireStageFilterContractTests.test_comma_separated_uses_any) ... ok
+test_empty_status_is_noop (test_prehire_stage_filter_contract.PrehireStageFilterContractTests.test_empty_status_is_noop) ... ok
+test_shortlisted_expands_with_legacy_offer_aliases (test_prehire_stage_filter_contract.PrehireStageFilterContractTests.test_shortlisted_expands_with_legacy_offer_aliases) ... ok
+test_single_status_unchanged (test_prehire_stage_filter_contract.PrehireStageFilterContractTests.test_single_status_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.000s
+
+OK

@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "status": "rolled_back",
+  "before": {
+    "scoped_keys": [
+      "WATHEFNI-96550252254",
+      "WATHEFNI-96566363363",
+      "WATHEFNI-96597727743",
+      "WATHEFNI-96599411617"
+    ],
+    "mappings": 4,
+    "persons": 4,
+    "employments": 4,
+    "assignments": 4
+  },
+  "after": {
+    "mappings": 0
+  },
+  "journal": {
+    "journal_id": "54c41793-e6c0-4125-ac0e-52057716b07b",
+    "company_code": "WATHEFNI",
+    "action": "backfill_authority",
+    "idempotency_key": "wave2-backfill:WATHEFNI:approved-map-v1",
+    "before_json": {
+      "employee_keys": [
+        "WATHEFNI-96566363363",
+        "WATHEFNI-96597727743",
+        "WATHEFNI-96550252254",
+        "WATHEFNI-96599411617"
+      ],
+      "employee_count": 4
+    },
+    "after_json": {
+      "person_count": 4,
+      "mapping_count": 4,
+      "assignment_count": 4,
+      "employment_count": 4
+    },
+    "evidence": {
+      "approved_map_keys": [
+        "WATHEFNI-96550252254",
+        "WATHEFNI-96566363363",
+        "WATHEFNI-96597727743",
+        "WATHEFNI-96599411617"
+      ],
+      "duplicate_persons": [],
+      "idempotent_replay": true
+    },
+    "status": "rolled_back",
+    "created_at": "2026-08-01T20:28:13.928245+00:00",
+    "rolled_back_at": "2026-08-01T20:28:14.190073+00:00"
+  }
+}

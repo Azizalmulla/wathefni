@@ -1,0 +1,2 @@
+PASS UI_en-desktop_settings {"urlPage":"settings","title":"Settings","bodyLen":856,"loginWall":false,"shell":true,"hasSettings":true}
+PASS UI_en-mobile_settings {"urlPage":"settings","title":"Settings","bodyLen":146,"loginWall":false,"shell":true,"hasSettings":true}

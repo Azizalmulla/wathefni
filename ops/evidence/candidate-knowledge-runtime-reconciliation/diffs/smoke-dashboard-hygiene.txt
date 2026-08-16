@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-dashboard-data-hygiene.py", line 6, in <module>
+    import app
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 37, in <module>
+    import psycopg2
+ModuleNotFoundError: No module named 'psycopg2'

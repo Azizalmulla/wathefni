@@ -1,0 +1,10 @@
+{
+  "pass": 66,
+  "fail": 0,
+  "tag": "f4a5069e",
+  "residual": 0,
+  "ack_count": 3,
+  "mutations_allowed": false,
+  "inbox_authority": "partial",
+  "setup_overall": "live_controlled"
+}

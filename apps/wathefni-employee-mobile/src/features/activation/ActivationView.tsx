@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   Animated,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
+import { keyboardSafeBehavior } from '@/components/keyboardSafe'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { EditorialHeading, FadeIn, PremiumButton, WathefniBloom, Wordmark } from '@/components/premium'
 import { motion, useReducedMotion } from '@/motion'
@@ -28,6 +28,8 @@ type ActivationViewProps = {
   onCodeChange: (value: string) => void
   onSignIn: () => void
   onRequestCode: () => void
+  /** Optional content rendered above the wordmark (e.g. unified method switch). */
+  headerSlot?: ReactNode
 }
 
 export function ActivationView({
@@ -40,6 +42,7 @@ export function ActivationView({
   onCodeChange,
   onSignIn,
   onRequestCode,
+  headerSlot,
 }: ActivationViewProps) {
   const { t, isRTL, locale, syncAuthLocale } = useI18n()
   const codeRef = useRef<TextInput>(null)
@@ -54,7 +57,7 @@ export function ActivationView({
 
   return (
     <SafeAreaView style={[styles.safe, { direction: isRTL ? 'rtl' : 'ltr' }]} key={`auth-${locale}`}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+      <KeyboardAvoidingView behavior={keyboardSafeBehavior()} style={styles.flex}>
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -62,6 +65,7 @@ export function ActivationView({
           automaticallyAdjustKeyboardInsets
           showsVerticalScrollIndicator={false}
         >
+          {headerSlot}
           <View style={styles.wordmarkRow}>
             <Wordmark />
           </View>
@@ -87,6 +91,7 @@ export function ActivationView({
                     <Text style={styles.countryText}>+965</Text>
                   </View>
                   <TextInput
+                    testID="e2e.auth.employee.phone"
                     value={phone}
                     onChangeText={onPhoneChange}
                     onFocus={() => setPhoneFocused(true)}
@@ -110,6 +115,7 @@ export function ActivationView({
               <FocusFrame focused={codeFocused} invalid={Boolean(error)}>
                 <TextInput
                   ref={codeRef}
+                  testID="e2e.auth.employee.code"
                   value={code}
                   onChangeText={onCodeChange}
                   onFocus={() => setCodeFocused(true)}
@@ -152,6 +158,7 @@ export function ActivationView({
             ) : null}
 
             <PremiumButton
+              testID="e2e.auth.employee.signIn"
               label={t('auth.signIn')}
               onPress={onSignIn}
               busy={busy}
@@ -159,6 +166,7 @@ export function ActivationView({
               showDirection
             />
             <Pressable
+              testID="e2e.auth.employee.requestCode"
               accessibilityRole="button"
               accessibilityState={{ disabled: busy || !phone.trim() }}
               onPress={onRequestCode}

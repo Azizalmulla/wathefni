@@ -1,0 +1,71 @@
+{
+  "tag": "38301248",
+  "employee_key": "WATHEFNI-PYW1-PYW4-W4B-38301248",
+  "phones": {
+    "creator": "965541138301",
+    "approver": "965541238301",
+    "closer": "965541338301",
+    "exporter": "965541438301",
+    "exporter2": "965541538301"
+  },
+  "close_run_ids": [
+    "fa152724-f006-4f1a-b167-467c5dd55fb4",
+    "00fb79d7-1df2-4e2b-9ad6-ed370a10ceed"
+  ],
+  "journal_draft_ids": [
+    "e9ca6f62-deff-4ddd-a252-f23548c033ad"
+  ],
+  "bank_export_ids": [
+    "dac9a34b-e41c-483d-b938-71b1f78ac1e3"
+  ],
+  "finance_export_ids": [
+    "103fa924-94b2-46b6-af95-ba3a96f2df88",
+    "5341cdaa-0047-4271-acd6-4d210709a1a6"
+  ],
+  "preview_run_ids": [
+    "eccb4746-c47b-4c76-8845-4ac52d1c68fc"
+  ],
+  "import_run_ids": [
+    "f3568471-3584-4f0e-8f24-fad7d681545d"
+  ],
+  "export_run_ids": [
+    "44a3a58d-02e4-494c-9f44-21fb304dbdce"
+  ],
+  "period_ids": [
+    "456e863a-0b09-4e93-8662-db6d926e6026"
+  ],
+  "contract_ids": [
+    "e22a0922-7d26-4da7-80ea-9717cd1d33b9"
+  ],
+  "prior_mode": "external",
+  "period": {
+    "start": "2040-09-01",
+    "end": "2040-09-30"
+  },
+  "cleanup": {
+    "deleted": {
+      "finance_exports": 2,
+      "journal_lines": 3,
+      "journal_drafts": 1,
+      "bank_drafts": 1,
+      "dual_control": 1,
+      "close_events": 11,
+      "close_runs": 2,
+      "mappings": 3,
+      "preview_lines": 2,
+      "preview_employees": 1,
+      "preview_events": 1,
+      "preview_runs": 1,
+      "import_lines": 2,
+      "import_recons": 0,
+      "imports": 1,
+      "adapter_exports": 1,
+      "contract_events": 2,
+      "contract_components": 2,
+      "contracts": 1,
+      "period_events": 1,
+      "periods": 1
+    },
+    "residual_total": 0
+  }
+}

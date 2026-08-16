@@ -1,0 +1,19 @@
+{
+  "en_desktop_visual": "overview-en-desktop.png / overview-en-desktop.jpg",
+  "ar_title": true,
+  "ar_role_body_no_plan_interviews_en": true,
+  "ar_role_has_arabic_plan": true,
+  "ar_active_badge": true,
+  "ar_no_english_active": true,
+  "empty_caught_up": true,
+  "empty_no_open_followups_cta": true,
+  "empty_no_roles": true,
+  "empty_ar_caught_up": true,
+  "empty_zero_detail": true,
+  "laptop_ok": true,
+  "empty_proof_file": "overview-empty-en-proof.txt",
+  "queue_dedupe_file": "queue-dedupe-proof.json",
+  "shell_decision_file": "shell-localization-decision.md",
+  "staging_artifact_sha256": "3fcacb6eeb389d89146ea4e4caf675ed5773a0d3600349d1d5e18c28bb675037",
+  "commits": ["ff4508b", "9849714"]
+}

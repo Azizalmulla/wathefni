@@ -1,0 +1,20 @@
+const recoverPinByReactivation = useCallback(async () => {
+    if (recoverInFlightRef.current) return
+    recoverInFlightRef.current = true
+    try {
+      const token = sealedSessionRef.current?.token || sessionRef.current?.token
+      if (token) {
+        try {
+          await rawRequest('/app/auth/logout', { method: 'POST', token })
+        } catch {
+          // Best-effort — local clear is authoritative.
+        }
+      }
+      await clearLocalAuthMaterial()
+      setStatus('signedOut')
+    } finally {
+      recoverInFlightRef.current = false
+    }
+  }, [clearLocalAuthMaterial])
+
+  

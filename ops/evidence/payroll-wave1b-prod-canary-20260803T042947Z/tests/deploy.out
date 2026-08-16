@@ -1,0 +1,103 @@
+stamp=20260803T042947Z
+time_utc=2026-08-03T04:30:18Z
+active
+=== SHAs before ===
+cc774b5ad9a128b17f3338b42c512d72a7df92c4d0c59a34448412d63e1fcdad  /opt/wathefni/orchestrator/app.py
+ls: cannot access '/opt/wathefni/orchestrator/payroll_authority_wave1.py': No such file or directory
+payroll_authority_wave1.py absent
+=== flags before ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_LEAVE_AUTHORITY_COMPANIES=WATHEFNI
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_KEY_MARKERS=LVW1B,LVW1B-SYNTH|,LVW2C,LVW2C-SYNTH|,LVW3B,LVW3B-SYNTH|,LVW4,LVW4-SYNTH|
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_ONLY=on
+WATHEFNI_LEAVE_AUTHORITY_SYNTHETIC_PHONE_PREFIXES=965525,965526,965527
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1
+{
+  "db": "wathefni",
+  "smoke_timesheets": [
+    {
+      "timesheet_id": "7950dafd-6cf7-44b1-9f92-26f685c34ab5",
+      "employee_key": "WATHEFNI-96597727743",
+      "status": "draft",
+      "payroll_status": "Ready",
+      "period_start": "2026-05-11",
+      "period_end": "2026-05-17",
+      "created_by_phone": "96599338566"
+    },
+    {
+      "timesheet_id": "cc68a9fb-df72-4e13-a0db-cc13a3805380",
+      "employee_key": "WATHEFNI-96566363363",
+      "status": "draft",
+      "payroll_status": "Ready",
+      "period_start": "2026-05-11",
+      "period_end": "2026-05-17",
+      "created_by_phone": "96599338566"
+    }
+  ],
+  "wave1_cols_present": [],
+  "company_payment_processing": "disabled"
+}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[04:30:20] backing up orchestrator modules + smoke fingerprint
+cc774b5ad9a128b17f3338b42c512d72a7df92c4d0c59a34448412d63e1fcdad  app.py
+82a3e5a3f0108b045998a86b81cd81030f59eb876143ab002334c978db9c3fb2  smoke-timesheets-before.csv
+b4d9035f911d1283fbe619fc2dcfb0d9782ce881ce33806f3c7a02573de74a74  modules/tenant_control_roles.py
+25e07c793c9ff1ce9c54e63a043ccd5249e95f57ad8cc7494094eeaf34748edf  modules/tool_call_orchestrator.py
+[04:30:20] deploying payroll wave1 modules
+[04:30:20] writing synthetic-only drop-in
+[04:30:20] migrate schema + quarantine smoke
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'money_authority': False, 'annual_leave_eligibility_months': 6}
+connected_db wathefni
+tables ['payroll_company_settings', 'payroll_compensation_components', 'payroll_compensation_contracts', 'payroll_compensation_events', 'payroll_period_events', 'payroll_periods']
+timesheet_cols ['quarantine_status', 'row_version']
+smoke_before [{'timesheet_id': '7950dafd-6cf7-44b1-9f92-26f685c34ab5', 'employee_key': 'WATHEFNI-96597727743', 'status': 'draft', 'quarantine_status': None, 'payroll_status': 'Ready'}, {'timesheet_id': 'cc68a9fb-df72-4e13-a0db-cc13a3805380', 'employee_key': 'WATHEFNI-96566363363', 'status': 'draft', 'quarantine_status': None, 'payroll_status': 'Ready'}]
+quarantine {'ok': True, 'count': 2, 'hard_deleted': False}
+smoke_after [{'timesheet_id': '7950dafd-6cf7-44b1-9f92-26f685c34ab5', 'employee_key': 'WATHEFNI-96597727743', 'status': 'draft', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}, {'timesheet_id': 'cc68a9fb-df72-4e13-a0db-cc13a3805380', 'employee_key': 'WATHEFNI-96566363363', 'status': 'draft', 'quarantine_status': 'wave0_smoke_quarantined', 'payroll_status': 'quarantined'}]
+MIGRATE_OK payroll_authority_wave1_prod
+health_ok
+active
+=== SHAs after ===
+57f216307e43e0b91c3fd9d54773fb084795244fc31a6bc15b2c3b23ce55bd89  /opt/wathefni/orchestrator/app.py
+7a49696446deb6e469a8a4b23e615932b8c849d28f521cbcb3ccc9c49ffd0207  /opt/wathefni/orchestrator/payroll_authority_wave1.py
+68e96706d3cfb4e4eef43893b2a537ca233d9980cc60c709efc515520502fb80  /opt/wathefni/orchestrator/tenant_control_roles.py
+3416837273e526fff8d23eeccddb2dd10870eb7e779b691225c8a4607863d358  /opt/wathefni/orchestrator/tool_call_orchestrator.py
+=== flags after ===
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_LEAVE_AUTHORITY=on
+WATHEFNI_PAYROLL_WAVE1=1
+WATHEFNI_PAYROLL_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS=PYW1,PYW1-SYNTH|
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_PHONE_PREFIXES=965539
+WATHEFNI_SHIFTS_AUTHORITY_WAVE1=1
+PAYROLL_WAVE1 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW1', 'PYW1-SYNTH|')
+prefixes ('965539',)
+honesty {'payment_processing': 'disabled', 'money_authority': False, 'synthetic_only': True, 'annual_leave_eligibility_months': 6}
+flags_ok_synthetic=true
+{
+  "quarantined": [
+    {
+      "timesheet_id": "7950dafd-6cf7-44b1-9f92-26f685c34ab5",
+      "employee_key": "WATHEFNI-96597727743",
+      "status": "draft",
+      "payroll_status": "quarantined",
+      "quarantine_status": "wave0_smoke_quarantined"
+    },
+    {
+      "timesheet_id": "cc68a9fb-df72-4e13-a0db-cc13a3805380",
+      "employee_key": "WATHEFNI-96566363363",
+      "status": "draft",
+      "payroll_status": "quarantined",
+      "quarantine_status": "wave0_smoke_quarantined"
+    }
+  ],
+  "hard_deleted": false,
+  "count": 2
+}
+DEPLOY_OK stamp=20260803T042947Z backup=/opt/wathefni/backups/production-pre-payroll-wave1b-20260803T042947Z evid=/opt/wathefni/production-evidence/payroll-wave1b-prod-canary/20260803T042947Z

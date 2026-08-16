@@ -1,0 +1,20 @@
+    shifts mss c3 — prove
+      PASS  mss module
+      PASS  rollback guidance
+      PASS  EN status scheduled
+      PASS  AR status scheduled
+      PASS  EN status open
+      PASS  AR status open
+      PASS  self_decision false in honesty
+      PASS  attendance not required
+      PASS  global mss off
+      PASS  empty company allowlist denies
+      PASS  empty manager allowlist denies
+      PASS  canary company entitled
+      PASS  other company denied
+      PASS  global MANAGER_ALLOWLIST still empty
+      PASS  wave6c boundary still holds
+      PASS  legacy manager_real_rollout remains False
+      PASS  C3 manager unlock recognized
+      PASS  non-allowlisted denied by real_mutation
+      PASS  C3 manager allowed by real_mutation

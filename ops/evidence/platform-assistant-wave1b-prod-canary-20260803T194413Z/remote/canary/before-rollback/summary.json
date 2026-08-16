@@ -1,0 +1,10 @@
+{
+  "pass": 66,
+  "fail": 0,
+  "tag": "83322695",
+  "residual": 0,
+  "ack_count": 2,
+  "mutations_allowed": false,
+  "inbox_authority": "partial",
+  "setup_overall": "live_controlled"
+}

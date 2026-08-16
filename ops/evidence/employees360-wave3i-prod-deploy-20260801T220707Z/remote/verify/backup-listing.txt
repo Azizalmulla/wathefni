@@ -1,0 +1,12 @@
+total 3284
+drwxr-xr-x   2 root root    4096 Aug  1 22:14 .
+drwx------ 321 root root   32768 Aug  1 22:14 ..
+-rwxr-xr-x   1 root root    1606 Aug  1 22:14 ROLLBACK.sh
+-rw-r--r--   1 root root 3133621 Aug  1 21:08 app.py
+-rw-r--r--   1 root root     377 Aug  1 21:08 employee-lifecycle-v3-synthetic.conf
+-rw-r--r--   1 root root   67257 Aug  1 21:08 employee_lifecycle_wave3.py
+-rw-r--r--   1 root root   75670 Aug  1 21:08 employee_lifecycle_wave3c.py
+-rwxr-xr-x   1 root root    1292 Aug  1 21:08 lifecycle-effective-worker.py
+-rw-r--r--   1 root root   13605 Aug  1 22:14 lifecycle-tables.dump.sql
+-rw-r--r--   1 root root    1517 Aug  1 21:19 wathefni-lifecycle-effective.service
+-rw-r--r--   1 root root     376 Aug  1 21:19 wathefni-lifecycle-effective.timer

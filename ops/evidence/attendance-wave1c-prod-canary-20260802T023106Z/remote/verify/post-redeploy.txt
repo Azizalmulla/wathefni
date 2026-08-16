@@ -1,0 +1,7 @@
+tables ['attendance_authority_events', 'attendance_compat_drift', 'attendance_corrections', 'attendance_day_projections', 'attendance_events', 'attendance_import_batch_rows', 'attendance_import_batches', 'attendance_import_mappings', 'attendance_payroll_snapshots', 'attendance_punches', 'attendance_records']
+attendance_punches 0
+attendance_day_projections 0
+attendance_payroll_snapshots 0
+attendance_authority_events 0
+attendance_compat_drift 0
+redeploy_ok

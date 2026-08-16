@@ -1,0 +1,22 @@
+MainPID=2665151
+PASS  new activation delivery supersedes prior Inbox rows after send
+PASS  activation delivery uses invite-scoped dedupe without blocking new codes
+PASS  invitation deliver passes invite_id into activation delivery
+PASS  Inbox projection omits inbox_hidden rows
+PASS  Inbox projection keeps only the newest visible app_activation
+PASS  activation flood collapses to newest only (['a3', 'p1'])
+PASS  hidden activation stays out of projection
+PASS  non-activation flows are unaffected
+PASS  unread counts only projected rows (unread=2)
+PASS  live WATHEFNI-96599338566: at most one visible app_activation after remediate (before_visible=20 remediate={'ok': True, 'hidden': 19, 'kept': 'a4d91ba1-dda4-488f-a319-395d09ba58fd'} projected_activation=1)
+INFO  live WATHEFNI-96599338566: activation_before_visible=20 hidden=19 kept=a4d91ba1-dda4-488f-a319-395d09ba58fd inbox_total=5 unread=1
+PASS  live WATHEFNI-96550252254: at most one visible app_activation after remediate (before_visible=0 remediate={'ok': True, 'hidden': 0, 'kept': None} projected_activation=0)
+INFO  live WATHEFNI-96550252254: activation_before_visible=0 hidden=0 kept=None inbox_total=32 unread=31
+PASS employee app activation inbox projection
+WATHEFNI_ENV= production
+APPLICATION_ENVIRONMENT= None
+BEFORE WATHEFNI-96599338566: stored_activation_total=20 stored_visible_flag=20 projected_activation=1 inbox_unread=1 inbox_total=5
+BEFORE WATHEFNI-96550252254: stored_activation_total=0 stored_visible_flag=0 projected_activation=0 inbox_unread=31 inbox_total=32
+AFTER  WATHEFNI-96599338566: stored_total=20 hidden=19 visible_flag=1 projected_activation=1 inbox_unread=1 inbox_total=5 flows={'app_activation': 1, 'shift': 1, 'leave_decision': 1, 'onboarding': 1, 'compliance': 1}
+AFTER  WATHEFNI-96550252254: stored_total=0 hidden=0 visible_flag=0 projected_activation=0 inbox_unread=31 inbox_total=32 flows={'shift': 32}
+LIVE_ASSERT_OK

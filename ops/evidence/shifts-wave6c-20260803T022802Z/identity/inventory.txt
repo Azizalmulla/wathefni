@@ -1,0 +1,125 @@
+Pager usage is off.
+=== SECTION company ===
+ company_code |   name   | status 
+--------------+----------+--------
+ WATHEFNI     | Wathefni | active
+(1 row)
+
+=== SECTION company_modules ===
+  module_key  | enabled |          source          
+--------------+---------+--------------------------
+ attendance   | t       | attendance_mvp_deploy
+ employee_app | t       | final_controlled_rollout
+ leave        | t       | 
+ onboarding   | t       | company_config
+ payroll      | t       | payroll_policy_mvp
+ shifts       | t       | company_config
+(6 rows)
+
+=== SECTION dashboard_users ===
+               user_id                |            email            |      name      |    phone    |  role  | status | last_active |  accepted  | disabled 
+--------------------------------------+-----------------------------+----------------+-------------+--------+--------+-------------+------------+----------
+ 88b17ca9-aff4-4721-a553-c1b5514ef95f | azizalmulla16@gmail.com     | Aziz Almulla   | 96599338566 | owner  | active | 2026-08-03  | 2026-05-28 | -
+ b69f4cad-589d-4029-8a2d-cfa85399966c | f.burhama@disruptv.tech     | Fouad          | 66363363    | owner  | active | 2026-07-27  | 2026-06-08 | -
+ 201d0b3b-6a6f-483f-914a-7a2356fd0a2e | fslalmulla@gmail.com        | Faisal Almulla | -           | viewer | active | 2026-07-27  | 2026-07-13 | -
+ 90b78a42-9eb2-43b6-9eeb-c9c134a964b6 | h.almulla@almulla-media.com | hamad almulla  | -           | viewer | active | 2026-05-29  | 2026-05-28 | -
+(4 rows)
+
+=== SECTION dashboard_permission_grants ===
+               user_id                |        permission        | status | granted_at | revoked_at 
+--------------------------------------+--------------------------+--------+------------+------------
+ 201d0b3b-6a6f-483f-914a-7a2356fd0a2e | employees.manage         | active | 2026-07-13 | -
+ 201d0b3b-6a6f-483f-914a-7a2356fd0a2e | employees.read           | active | 2026-07-13 | -
+ 88b17ca9-aff4-4721-a553-c1b5514ef95f | employees.manage         | active | 2026-07-12 | -
+ 88b17ca9-aff4-4721-a553-c1b5514ef95f | employees.read           | active | 2026-07-12 | -
+ 88b17ca9-aff4-4721-a553-c1b5514ef95f | employees.status.approve | active | 2026-08-01 | -
+ 90b78a42-9eb2-43b6-9eeb-c9c134a964b6 | employees.manage         | active | 2026-07-12 | -
+ 90b78a42-9eb2-43b6-9eeb-c9c134a964b6 | employees.read           | active | 2026-07-12 | -
+ b69f4cad-589d-4029-8a2d-cfa85399966c | employees.manage         | active | 2026-07-12 | -
+ b69f4cad-589d-4029-8a2d-cfa85399966c | employees.read           | active | 2026-07-12 | -
+ b69f4cad-589d-4029-8a2d-cfa85399966c | employees.status.approve | active | 2026-07-12 | -
+(10 rows)
+
+=== SECTION manager_scopes ===
+ scope_id | dashboard_user_id | manager_phone | scope_type | branch_key | team_key | role | is_active | permissions 
+----------+-------------------+---------------+------------+------------+----------+------+-----------+-------------
+(0 rows)
+
+=== SECTION manager_scope_members ===
+ scope_id | employee_key 
+----------+--------------
+(0 rows)
+
+=== SECTION branches ===
+ branch_key | branch_name | is_active 
+------------+-------------+-----------
+(0 rows)
+
+=== SECTION teams ===
+ team_key | team_name | branch_key | is_active 
+----------+-----------+------------+-----------
+(0 rows)
+
+=== SECTION real_employees ===
+        employee_key         |        name         |    phone    |          email           |    position_title    | employment_status | hire_date  | lifecycle_state | employment_lifecycle_status | last_working_day | termination_effective_on | branch_key | team_key | org_role |                  app_key                  
+-----------------------------+---------------------+-------------+--------------------------+----------------------+-------------------+------------+-----------------+-----------------------------+------------------+--------------------------+------------+----------+----------+-------------------------------------------
+ WATHEFNI-96550252254        | Talal Fadhli        | 96550252254 | talalabdalla89@gmail.com | Social Media Manager | active            | 2026-05-12 | active          | active                      | -                | -                        | -          | -        | -        | 96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER
+ WATHEFNI-96566363363        | Fouad Burhamad      | 96566363363 | fb-urhama@gmail.com      | IT Maintenance       | active            | 2026-05-07 | active          | active                      | -                | -                        | -          | -        | -        | 96566363363-WATHEFNI-IT_MAINTENANCE
+ WATHEFNI-96597727743        | mohammad alqattan   | 96597727743 |                          | Marketing Specialist | active            | 2026-05-07 | active          | active                      | -                | -                        | -          | -        | -        | 96597727743-WATHEFNI-MARKETING_SPECIALIST
+ WATHEFNI-96599411617        | Brian Saleh         | 96599411617 | briansaleh92@gmail.com   | -                    | active            | -          | active          | active                      | -                | -                        | -          | -        | -        | -
+ WATHEFNI-REALBLOCK-0F290BF7 | Real Block 0F290BF7 | 96599998877 | -                        | -                    | -                 | -          | -               | -                           | -                | -                        | -          | -        | -        | -
+(5 rows)
+
+=== SECTION synthetic_employee_count ===
+ synthetic_like_rows 
+---------------------
+                  59
+(1 row)
+
+=== SECTION push_tokens ===
+ employee_key | platform | active | last_seen | token_tail 
+--------------+----------+--------+-----------+------------
+(0 rows)
+
+=== SECTION employee_sessions_recent ===
+     employee_key     | sessions | last_session 
+----------------------+----------+--------------
+ WATHEFNI-96550252254 |       11 | 2026-08-01
+ WATHEFNI-96552202357 |        1 | 2026-08-01
+ WATHEFNI-96552263564 |        1 | 2026-08-01
+ WATHEFNI-96552295759 |        1 | 2026-08-01
+ WATHEFNI-96554919301 |        1 | 2026-08-01
+ WATHEFNI-96554919853 |        1 | 2026-08-01
+ WATHEFNI-96554971089 |        1 | 2026-08-01
+ WATHEFNI-96596552203 |        1 | 2026-08-01
+(8 rows)
+
+=== SECTION channel_preferences ===
+ scope_type | scope_key | channel_order | enabled_channels | fallback_enabled 
+------------+-----------+---------------+------------------+------------------
+(0 rows)
+
+=== SECTION whatsapp_identities ===
+               user_id                |    phone    | status | linked_at  
+--------------------------------------+-------------+--------+------------
+ b69f4cad-589d-4029-8a2d-cfa85399966c | 66363363    | active | 2026-06-08
+ 88b17ca9-aff4-4721-a553-c1b5514ef95f | 96599338566 | active | 2026-05-28
+ 88b17ca9-aff4-4721-a553-c1b5514ef95f | 99338566    | active | 2026-05-28
+(3 rows)
+
+=== SECTION consent_records ===
+ purpose | status | n 
+---------+--------+---
+(0 rows)
+
+=== SECTION real_shift_footprint ===
+             t             | n  
+---------------------------+----
+ shift_assignments         | 31
+ shift_notification_events |  0
+ shift_open_shifts         |  0
+ shift_rotation_patterns   |  0
+ shift_schedule_periods    |  0
+ shift_templates           |  0
+(6 rows)
+

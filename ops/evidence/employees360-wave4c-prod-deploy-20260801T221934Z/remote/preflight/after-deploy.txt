@@ -1,0 +1,38 @@
+=== SHAs after ===
+fb3522fc939ec87666853a99dac9e5bc7db757bf95dcfc6dea908ab7a248662b  /opt/wathefni/orchestrator/app.py
+2828df20cbedca6905ec15adf602994abfa96f678648947ffdf1d3577f2bb5f5  /opt/wathefni/orchestrator/employee_org_wave4.py
+aed53ec6c8244a1a1f0d31b18fc5a3e466dda30ea79247e798bd8ff3245a6f0f  /opt/wathefni/orchestrator/lifecycle-effective-worker.py
+d2ea50f8bb3374a91bd0ceb488954c105e45643a83f855864f53860481807713  /opt/wathefni/orchestrator/canary-prod-wave4c-org.py
+=== FLAGS after ===
+WATHEFNI_EMPLOYEE_AUTHORITY_V2=on
+WATHEFNI_EMPLOYEE_AUTHORITY_V2_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_NAME_PREFIX=W3D-SYNTH|
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_ONLY=on
+WATHEFNI_EMPLOYEE_LIFECYCLE_V3_SYNTHETIC_PHONE_PREFIXES=965522
+WATHEFNI_EMPLOYEE_ORG_V4=on
+WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_DUE=on
+WATHEFNI_EMPLOYEE_ORG_V4_ACTIVATE_LOOKBACK_DAYS=7
+WATHEFNI_EMPLOYEE_ORG_V4_COMPANIES=WATHEFNI
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H=on
+WATHEFNI_EMPLOYEE_POLICY_PACKS_V3H_COMPANIES=WATHEFNI
+=== TIMER still ===
+enabled
+active
+=== ORG ROUTES AFTER ===
+14
+/dashboard/posthire/employee-org/activate-due
+/dashboard/posthire/employee-org/bulk-assign
+/dashboard/posthire/employee-org/change-requests
+/dashboard/posthire/employee-org/export
+/dashboard/posthire/employee-org/migration-batches
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/commit
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/dry-run
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/pause
+/dashboard/posthire/employee-org/migration-batches/{batch_id}/rollback
+/dashboard/posthire/employee-org/policy
+/dashboard/posthire/employee-org/reconcile
+/dashboard/posthire/employee-org/units
+/dashboard/posthire/employees/{employee_key}/org-as-of
+/dashboard/posthire/employees/{employee_key}/org-history

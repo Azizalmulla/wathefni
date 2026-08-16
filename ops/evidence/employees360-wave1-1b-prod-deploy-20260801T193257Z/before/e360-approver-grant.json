@@ -1,0 +1,20 @@
+{
+  "granted": {
+    "grant_id": "f57d2968-760f-4475-a5f4-398e2d9eeab7",
+    "user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+    "permission": "employees.status.approve",
+    "status": "active",
+    "review_reference": "employees360-wave1b-prod-deploy-separate-approver"
+  },
+  "ok": true,
+  "approvers": [
+    {
+      "id": "b69f4cad-589d-4029-8a2d-cfa85399966c",
+      "email": "f.burhama@disruptv.tech"
+    },
+    {
+      "id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+      "email": "azizalmulla16@gmail.com"
+    }
+  ]
+}

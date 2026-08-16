@@ -1,0 +1,15 @@
+PASS Hiring tab uses home view
+PASS Wordmark + EditorialHeading
+PASS destinationAvailable on open + section filter
+PASS summary + priority + upcoming + browse
+PASS one AmbientCard priority (not card grid)
+PASS demo gated and prefixed
+PASS demo source isolated
+PASS live compose from positions+interviews+priorities
+PASS browse omits assessments
+PASS jobs/candidates/ranking go via /hr/jobs
+PASS upcoming has no EN hardcoded Interview label
+PASS demo ids never decision-shaped
+PASS no PrioritySectionList placeholder
+PASS hrHiring keys EN+AR
+hr-hiring-home: GREEN

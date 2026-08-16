@@ -1,0 +1,21 @@
+ apps/wathefni-dashboard/src/App.test.tsx           |  165 +-
+ apps/wathefni-dashboard/src/App.tsx                | 8260 +++++---------------
+ .../src/components/ConfirmDialog.tsx               |  109 +-
+ .../src/components/ImportCenter.tsx                |   38 +-
+ .../wathefni-dashboard/src/components/JobsForm.tsx |  429 +-
+ .../wathefni-dashboard/src/components/ui/badge.tsx |   30 +-
+ apps/wathefni-dashboard/src/components/ui/card.tsx |   12 +-
+ .../src/components/ui/load-more-bar.tsx            |   19 +-
+ apps/wathefni-dashboard/src/index.css              |   41 +
+ apps/wathefni-dashboard/src/lib/api.ts             | 1053 ++-
+ .../src/lib/lifecycle-labels.test.ts               |    7 +-
+ .../src/lib/prehireOverviewPresentation.test.ts    |  118 +-
+ .../src/lib/prehireOverviewPresentation.ts         |  127 +-
+ .../src/lib/recruitingLifecycle.ts                 |  381 +-
+ apps/wathefni-dashboard/src/main.tsx               |   13 +-
+ apps/wathefni-dashboard/src/pages/SettingsPage.tsx |    9 +-
+ apps/wathefni-dashboard/src/posthire/PostHire.tsx  |  195 +-
+ .../src/setup-console/SetupConsoleApp.tsx          |   55 +-
+ apps/wathefni-dashboard/src/setup-console/api.ts   |   99 +
+ apps/wathefni-dashboard/src/types.ts               |  862 +-
+ 20 files changed, 5310 insertions(+), 6712 deletions(-)

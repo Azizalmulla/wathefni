@@ -1,0 +1,63 @@
+auth wave2 phase3 auto-lock unit
+  PASS  EN/AR autoLock key parity
+  PASS  required autoLock EN keys
+  PASS  master flag EXPO_PUBLIC_LOCAL_AUTO_LOCK
+  PASS  inherits PIN master when unset
+  PASS  canary Aziz key
+  PASS  canary Talal key
+  PASS  default 30s
+  PASS  never option supported
+  PASS  company may disable never
+  PASS  device lock always locks
+  PASS  never skips time lock
+  PASS  inactive-only stays unlocked
+  PASS  decideAutoLockOnResume reasons
+  PASS  timeout SecureStore key
+  PASS  WHEN_UNLOCKED
+  PASS  lazy screen detector require
+  PASS  falls back false without native
+  PASS  probe warns against inactive
+  PASS  AppState auto-lock wiring
+  PASS  seals without clearing PIN
+  PASS  never seals from background setState
+  PASS  timeout intent only (no setState in timer)
+  PASS  inactive ignored for arming
+  PASS  arms only on true background
+  PASS  resume coordinator
+  PASS  resume decision logs
+  PASS  duplicate seal prevented
+  PASS  cancels timers on resume
+  PASS  stable AppState listener (refs)
+  PASS  setAutoLockTimeout API
+  PASS  autoLockEnabled context
+  PASS  no OTP on auto-lock path
+  PASS  does not clearSession on auto-lock
+  PASS  biometric unlock still present
+  PASS  PIN unlock still present
+  PASS  logs OTA update id
+  PASS  coordinator module present
+  PASS  coordinator reasons
+  PASS  biometric prompt delayed after active
+  PASS  blocks duplicate biometric prompt
+  PASS  settings auto-lock wiring
+  PASS  settings UI timeout options
+  PASS  production PIN flag
+  PASS  production biometric flag
+  PASS  production auto-lock flag
+  PASS  expo-screen-detector dependency
+  PASS  bg <30s default → stay
+  PASS  bg >=30s default → lock
+  PASS  immediate locks at 0ms
+  PASS  1m threshold
+  PASS  5m threshold
+  PASS  never: long bg stays unlocked
+  PASS  device lock overrides never
+  PASS  device lock overrides short bg
+  PASS  inactive-only reason none
+  PASS  timeout reason
+  PASS  confirmed_device_lock reason
+  PASS  short bg reason none
+  PASS  Wave 1 frozen contract still present
+  PASS  mobile tsc --noEmit
+
+60 passed, 0 failed

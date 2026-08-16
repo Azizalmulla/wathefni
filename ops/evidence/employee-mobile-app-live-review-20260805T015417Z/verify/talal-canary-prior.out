@@ -1,0 +1,46 @@
+PASS non_allowlisted_denied {'error': 'employee_app_not_allowlisted', 'message': 'The employee app is in controlled rollout and is not enabled for this account.'}
+PASS talal_allowlisted 
+PASS session_minted {'employee_key': None, 'expires_at': datetime.datetime(2026, 8, 12, 1, 44, 11, 328016, tzinfo=datetime.timezone.utc)}
+PASS me_200 <class 'dict'>
+PASS me_employee_key {'employee_key': 'WATHEFNI-96550252254', 'company_code': 'WATHEFNI', 'name': 'Talal Fadhli', 'phone': '96550252254', 'email': 'talalabdalla89@gmail.com', 'position_title': 'Social Media Manager', 'department': '', 'onboarding_status': 'in_progress', 'locale': 'en'}
+PASS features_present 
+PASS payslips_disabled {'enabled': False, 'reason': 'feature_not_available', 'dependency_mode': 'all', 'module_keys': ['payroll'], 'actions': []}
+PASS notifications_ok 200
+PASS onboarding_ok 200
+PASS documents_ok 200
+PASS attendance_ok 200
+PASS leave_ok 200
+PASS shifts_today_ok 200
+PASS shifts_upcoming_ok 200
+PASS profile_ok 200
+PASS invalid_token_closed 401
+TALAL_EMPLOYEE_APP_CANARY_OK
+PASS  onboarding freeze intact
+PASS  onboarding freeze mentions SEED off
+PASS  onboarding freeze mentions default_kuwait@2.0.0
+
+57 passed, 0 failed
+PASS leave-only tenant gets core plus leave
+PASS leave-only tenant does not get documents
+PASS shifts/attendance tenant gets both projections
+PASS shifts/attendance tenant does not get leave
+PASS onboarding enables checklist and documents
+PASS compliance enables documents
+PASS unfinished compliance actions stay disabled
+PASS future payslips stay disabled
+PASS push action follows backend channel availability
+PASS module removal deterministically removes optional features
+PASS canonical registry is authoritative even when all rows are disabled
+PASS legacy sync cannot re-enable an explicit registry disable
+PASS app_onboarding enforces onboarding
+PASS app_leave enforces leave
+PASS app_leave_request enforces leave
+PASS app_leave_cancel enforces leave
+PASS app_shifts_today enforces shifts
+PASS app_shifts_upcoming enforces shifts
+PASS app_attendance enforces attendance
+PASS app_documents enforces documents
+PASS app_document_file enforces documents
+PASS app_onboarding_document_upload enforces onboarding
+PASS app_push_register enforces settings
+employee app capability contract: GREEN

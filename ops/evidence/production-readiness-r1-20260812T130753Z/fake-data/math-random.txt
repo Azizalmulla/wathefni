@@ -1,0 +1,12 @@
+== Math.random in app source (non-test) ==
+apps/wathefni-hr-mobile/src/lib/idempotency.ts:2:  const random = Math.random().toString(36).slice(2, 12)
+apps/wathefni-employee-mobile/app/bank.tsx:112:        idempotencyKey.current = `bank-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+apps/wathefni-employee-mobile/src/auth/pinCrypto.ts:90:  for (let i = 0; i < bytes; i++) arr[i] = Math.floor(Math.random() * 256)
+apps/wathefni-employee-mobile/src/auth/pinCrypto.ts:96:    // keep Math.random fallback
+apps/wathefni-employee-mobile/src/hr/lib/idempotency.ts:2:  const random = Math.random().toString(36).slice(2, 12)
+apps/wathefni-dashboard/src/App.tsx:315:  const id = `dashboard:${company}:${phone}:pre_hiring:${Date.now()}-${Math.random().toString(16).slice(2)}`
+apps/wathefni-dashboard/src/App.tsx:335:    id: message.message_id || `${message.role}-${message.created_at || Math.random()}`,
+apps/wathefni-dashboard/src/posthire/MigrationSyncShell.tsx:877:                  const tag = Math.random().toString(16).slice(2, 8)
+apps/wathefni-dashboard/src/posthire/PostHire.tsx:2174:      const idempotencyKey = globalThis.crypto?.randomUUID?.() || `status-${Date.now()}-${Math.random().toString(16).slice(2)}`
+apps/wathefni-dashboard/src/posthire/PostHire.tsx:2307:    const newKey = () => globalThis.crypto?.randomUUID?.() || `invite-${Date.now()}-${Math.random().toString(16).slice(2)}`
+apps/wathefni-dashboard/src/posthire/PostHire.tsx:2474:        idempotency_key: globalThis.crypto?.randomUUID?.() || `revoke-${Date.now()}-${Math.random().toString(16).slice(2)}`,

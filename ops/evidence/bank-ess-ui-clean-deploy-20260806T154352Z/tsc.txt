@@ -1,0 +1,119 @@
+src/App.tsx(215,46): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'PostHireModulePage' is not assignable to type 'Page'.
+    Type '"workforce"' is not assignable to type 'Page'.
+src/App.tsx(5202,30): error TS2345: Argument of type 'number | null | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+src/App.tsx(7471,40): error TS2322: Type '{ score: number | null | undefined; score_breakdown: { role_fit?: number; skill_match?: number; experience?: number; accomplishments?: number; cv_evidence?: number; screening?: number; ... 8 more ...; semantic_alignment?: number; } | undefined; ... 6 more ...; evaluation_audit: Record<...> | undefined; }' is not assignable to type '{ score?: number | undefined; score_breakdown?: { role_fit?: number | undefined; skill_match?: number | undefined; experience?: number | undefined; accomplishments?: number | undefined; ... 10 more ...; semantic_alignment?: number | undefined; } | undefined; ... 6 more ...; evaluation_audit?: Record<...> | undefined...'.
+  Types of property 'score' are incompatible.
+    Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+      Type 'null' is not assignable to type 'number | undefined'.
+src/App.tsx(7484,5): error TS2322: Type '{ score: number | null | undefined; score_breakdown: { role_fit?: number; skill_match?: number; experience?: number; accomplishments?: number; cv_evidence?: number; screening?: number; ... 8 more ...; semantic_alignment?: number; } | undefined; ... 6 more ...; evaluation_audit: Record<...> | undefined; }' is not assignable to type '{ score?: number | undefined; score_breakdown?: { role_fit?: number | undefined; skill_match?: number | undefined; experience?: number | undefined; accomplishments?: number | undefined; ... 10 more ...; semantic_alignment?: number | undefined; } | undefined; ... 6 more ...; evaluation_audit?: Record<...> | undefined...'.
+  Types of property 'score' are incompatible.
+    Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+      Type 'null' is not assignable to type 'number | undefined'.
+src/components/CalendarShell.test.tsx(11,37): error TS2307: Cannot find module '@/test/render' or its corresponding type declarations.
+src/components/CalendarShell.tsx(19,30): error TS2307: Cannot find module '@/components/PeoplePicker' or its corresponding type declarations.
+src/components/CalendarShell.tsx(42,20): error TS2307: Cannot find module '@/lib/query/keys' or its corresponding type declarations.
+src/components/CalendarShell.tsx(43,37): error TS2307: Cannot find module '@/lib/query/fetchers' or its corresponding type declarations.
+src/components/CalendarShell.tsx(517,35): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(776,20): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(960,41): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1079,51): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1151,54): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1151,57): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1163,51): error TS7006: Parameter 'g' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1163,54): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1190,44): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/components/CalendarShell.tsx(1294,30): error TS7006: Parameter 'userId' implicitly has an 'any' type.
+src/components/candidates/IntakeOperationsPage.tsx(4,32): error TS2305: Module '"@/types"' has no exported member 'IntakeOperationsSummary'.
+src/components/candidates/IntakeOperationsPage.tsx(5,10): error TS2305: Module '"@/lib/api"' has no exported member 'getIntakeOperations'.
+src/components/candidates/IntakeOperationsPage.tsx(89,66): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/PlatformIntegrationsPanel.tsx(21,20): error TS2307: Cannot find module '@/lib/query/keys' or its corresponding type declarations.
+src/components/PlatformIntegrationsPanel.tsx(356,33): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/lib/api.ts(1053,112): error TS2307: Cannot find module '@/components/assessments/AssessmentReportPage' or its corresponding type declarations.
+src/lib/query/hooks.ts(5,38): error TS2307: Cannot find module '@/lib/query/keys' or its corresponding type declarations.
+src/lib/query/hooks.ts(36,8): error TS2307: Cannot find module '@/lib/query/fetchers' or its corresponding type declarations.
+src/lib/query/hooks.ts(37,43): error TS2307: Cannot find module '@/lib/perf/dashboardPerf' or its corresponding type declarations.
+src/lib/query/invalidation.ts(4,32): error TS2307: Cannot find module '@/lib/query/keys' or its corresponding type declarations.
+src/lib/workspaceCapability.ts(16,59): error TS2307: Cannot find module '@/pages/shared/access' or its corresponding type declarations.
+src/pages/CandidatesPage.tsx(14,52): error TS2307: Cannot find module '@/hooks/useOverlayA11y' or its corresponding type declarations.
+src/pages/CandidatesPage.tsx(32,28): error TS2307: Cannot find module '@/pages/shared/primitives' or its corresponding type declarations.
+src/pages/CandidatesPage.tsx(455,54): error TS2322: Type '{ children: Element[]; className: string; tone: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/pages/SettingsEmailSending.test.tsx(9,37): error TS2307: Cannot find module '@/test/render' or its corresponding type declarations.
+src/pages/SettingsPage.tsx(28,52): error TS2307: Cannot find module '@/pages/shared/format' or its corresponding type declarations.
+src/pages/SettingsPage.tsx(35,8): error TS2307: Cannot find module '@/pages/shared/access' or its corresponding type declarations.
+src/pages/SettingsPage.tsx(36,22): error TS2307: Cannot find module '@/pages/shared/primitives' or its corresponding type declarations.
+src/pages/SettingsPage.tsx(260,55): error TS7006: Parameter 'capability' implicitly has an 'any' type.
+src/pages/SettingsPage.tsx(313,103): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/pages/SettingsPage.tsx(404,111): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/posthire/CloseExportWorkspace.tsx(125,25): error TS2339: Property 'body' does not exist on type 'DashboardApiError'.
+src/posthire/CloseExportWorkspace.tsx(141,9): error TS2322: Type '{ title: string; detail: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(149,27): error TS2322: Type '{ title: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(282,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(466,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/CloseExportWorkspace.tsx(495,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/employees360/BankReviewPanel.tsx(187,13): error TS2322: Type '{ children: Element; tone: string; className: string; "data-testid": string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/BankReviewPanel.tsx(200,11): error TS2322: Type '{ children: Element[]; tone: string; className: string; "data-testid": string; dir: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/ProfilePanels.tsx(61,11): error TS2322: Type '{ children: Element[]; tone: string; className: string; "data-testid": string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/ProfilePanels.tsx(153,11): error TS2322: Type '{ children: Element[]; tone: string; className: string; "data-testid": string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/WorkforcePage.tsx(301,15): error TS2322: Type '{ children: Element[]; tone: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/WorkforcePage.tsx(435,56): error TS2322: Type '{ children: Element; key: string; tone: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/WorkforcePage.tsx(477,58): error TS2339: Property 'withReason' does not exist on type '(options: ConfirmOptions) => Promise<boolean>'.
+src/posthire/employees360/WorkforcePage.tsx(688,36): error TS2322: Type '{ children: Element; key: string; tone: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/employees360/WorkforcePage.tsx(900,40): error TS2322: Type '{ children: Element; key: string; tone: string; className: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/ExternalPayrollWorkspace.tsx(178,24): error TS2339: Property 'setup' does not exist on type 'ExternalPayrollWorkspaceResponse'.
+src/posthire/ExternalPayrollWorkspace.tsx(180,12): error TS2339: Property 'package_contents' does not exist on type 'ExternalPayrollWorkspaceResponse'.
+src/posthire/PayslipWorkspace.tsx(132,27): error TS2322: Type '{ title: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/PayslipWorkspace.tsx(299,40): error TS2322: Type '{ title: string; description: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'description' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/PostHire.tsx(38,8): error TS2307: Cannot find module '@/posthire/attendanceUx' or its corresponding type declarations.
+src/posthire/PostHire.tsx(75,43): error TS2307: Cannot find module '@/posthire/AttendanceCaptureOps' or its corresponding type declarations.
+src/posthire/PostHire.tsx(76,36): error TS2307: Cannot find module '@/posthire/AttendanceOpsPanel' or its corresponding type declarations.
+src/posthire/PostHire.tsx(77,63): error TS2307: Cannot find module '@/posthire/AttendanceDailyBoard' or its corresponding type declarations.
+src/posthire/PostHire.tsx(83,32): error TS2307: Cannot find module '@/posthire/LeaveWorkspace' or its corresponding type declarations.
+src/posthire/PostHire.tsx(84,33): error TS2307: Cannot find module '@/posthire/ShiftsWorkspace' or its corresponding type declarations.
+src/posthire/PostHire.tsx(1071,17): error TS2322: Type '{ children: Element[]; tone: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/PostHire.tsx(1383,36): error TS2339: Property 'withReason' does not exist on type '(options: ConfirmOptions) => Promise<boolean>'.
+src/posthire/PostHire.tsx(1392,47): error TS2339: Property 'withReason' does not exist on type '(options: ConfirmOptions) => Promise<boolean>'.
+src/posthire/PostHire.tsx(1593,17): error TS2322: Type '{ children: Element; tone: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/PostHire.tsx(2849,17): error TS2322: Type '{ children: Element[]; tone: string; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+  Property 'tone' does not exist on type 'IntrinsicAttributes & HTMLAttributes<HTMLDivElement>'.
+src/posthire/PostHire.tsx(3350,35): error TS7006: Parameter 'rowKey' implicitly has an 'any' type.
+src/posthire/PostHire.tsx(3351,32): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/posthire/PostHire.tsx(3351,37): error TS7006: Parameter 'rowKey' implicitly has an 'any' type.
+src/posthire/PostHire.tsx(3369,33): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/posthire/PostHire.tsx(3369,38): error TS7006: Parameter 'rowKey' implicitly has an 'any' type.
+src/posthire/StatutoryWorksheetWorkspace.tsx(113,25): error TS2339: Property 'body' does not exist on type 'DashboardApiError'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(125,27): error TS2322: Type '{ title: string; detail: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(127,36): error TS2322: Type '{ title: string; onRetry: () => undefined; retryLabel: string; }' is not assignable to type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & { reason: string; missing?: string[] | undefined; locale?: Locale | undefined; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(248,44): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/posthire/StatutoryWorksheetWorkspace.tsx(273,40): error TS2322: Type '{ title: string; detail: string; }' is not assignable to type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+  Property 'detail' does not exist on type 'IntrinsicAttributes & { title: string; hint?: string | undefined; icon?: ReactNode; action?: ReactNode; className?: string | undefined; }'.
+src/setup-console/LaunchReadinessPage.tsx(14,10): error TS2305: Module '"./api"' has no exported member 'getLaunchReadiness'.
+src/setup-console/LaunchReadinessPage.tsx(15,15): error TS2305: Module '"./types"' has no exported member 'LaunchReadinessResponse'.
+src/setup-console/LaunchReadinessPage.tsx(15,40): error TS2305: Module '"./types"' has no exported member 'LaunchReadinessItem'.
+src/setup-console/LaunchReadinessPage.tsx(168,45): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/setup-console/LaunchReadinessPage.tsx(190,27): error TS7006: Parameter 'stageBlock' implicitly has an 'any' type.
+src/setup-console/LaunchReadinessPage.tsx(195,33): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/setup-console/LaunchReadinessPage.tsx(214,27): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/setup-console/LaunchReadinessPage.tsx(231,101): error TS7006: Parameter 'line' implicitly has an 'any' type.

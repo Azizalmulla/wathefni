@@ -1,0 +1,3 @@
+rollback_syntax_ok=true
+rollback_script=/opt/wathefni/backups/production-pre-onboarding-wave3-20260802T012829Z/ROLLBACK.sh
+data_rollback=module_rollback_batch

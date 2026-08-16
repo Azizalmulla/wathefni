@@ -1,0 +1,12 @@
+{
+  "prefix": "CLSPFA725C",
+  "keys": {
+    "multi_a": "CLSPFA725C-A",
+    "multi_b": "CLSPFA725C-B",
+    "lower": "CLSPFA725C-LOWER",
+    "upper": "CLSPFA725C-UPPER",
+    "dup1": "CLSPFA725C-DUP1",
+    "dup2": "CLSPFA725C-DUP2"
+  },
+  "email": "clsp.shared.clspfa725c@example.invalid"
+}

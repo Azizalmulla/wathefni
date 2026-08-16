@@ -1,0 +1,310 @@
+{
+  "stamp": "20260807T223616Z",
+  "tag": "929ef807",
+  "pass": 47,
+  "fail": 0,
+  "package_id": "e92c0ff5-733c-49f8-9a85-8a1915437302",
+  "activated_official_clear": [
+    "eos_indemnity",
+    "ot_ordinary",
+    "pifss",
+    "public_holiday_work",
+    "rest_day_work",
+    "sick_leave_fractions"
+  ],
+  "still_gated_count": 13,
+  "honesty": {
+    "payroll_authority_p4b_version": "1.0.0",
+    "baseline_schema": "wathefni.payroll_statutory_baseline.v1",
+    "policy_version": "KW_PUBLIC_BASELINE_v1.0.0",
+    "authority_kind": "wathefni_public_baseline",
+    "money_authority": "preview_non_authoritative",
+    "mode_a_wathefni_seal_unlocked": false,
+    "native_official_pdf_unlocked": false,
+    "payment_processing": "disabled",
+    "posts_payment": false,
+    "payment_date_invented": false,
+    "synthetic_only": true,
+    "official_clear_may_activate": true,
+    "ambiguous_cases_remain_gated": true,
+    "company_cannot_override_mandatory_statutory": true,
+    "p1_p2_p3_p4a_preserved": true
+  },
+  "setup_matrix": {
+    "wathefni_owned_kuwait_statutory_baseline": [
+      "Ordinary OT premium (Art.66 +25%)",
+      "Rest-day work premium (Art.67 \u226550% + compensatory day)",
+      "Public-holiday work premium (Art.68 double + day off)",
+      "Sick-leave statutory day bands (Art.69)",
+      "EOS indemnity structure Arts 51\u201353 (settlement)",
+      "PIFSS Kuwaiti contribution % and caps (FAQ table)",
+      "PIFSS remittance timing notes (reporting prep)",
+      "Statutory policy version + source provenance"
+    ],
+    "company_provided_never_kuwait_law": [
+      "Payroll operating mode (preview / synthetic / future modes)",
+      "Employee statutory classification (kuwaiti / gcc / expatriate)",
+      "PIFSS insurable wage base by fund (classified components \u2014 not auto BASIC)",
+      "Salary/allowance structures and custom earnings/deductions",
+      "OT eligibility groups / who may be ordered OT",
+      "Attendance-pay and lateness policy",
+      "Payroll cut-off and period settings",
+      "Approval workflow",
+      "Working-day calendar / weekly rest definition for divisor operations",
+      "Annual public-holiday calendar additions beyond Art.68 list",
+      "Sick-leave year basis choice when required by operations",
+      "EOS last-remuneration classified input",
+      "Special regime flags (oil / GCC extension / Law17 interaction resolution)"
+    ],
+    "never_ask_company": [
+      "What is Kuwait OT premium?",
+      "What is Kuwait sick-leave band table?",
+      "What are Kuwaiti PIFSS contribution percentages?"
+    ],
+    "review_gated_exception_layer": [
+      "GCC extension home-scheme rates",
+      "Oil/special-sector regimes",
+      "PIFSS wage-element mapping disputes",
+      "EOS \u00d7 PIFSS Law 17/2018",
+      "Night OT +50% (unsupported in baseline)",
+      "Financial remuneration 2.5% eligibility"
+    ]
+  },
+  "results": [
+    {
+      "name": "p4b version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a locked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pdf locked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payments disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "classification pack loaded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "has official clear",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "has gated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activate ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "legal claim true on package",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authority wathefni baseline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode a still locked after activate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activated ot_ordinary",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activated rest_day_work",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activated public_holiday_work",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activated sick_leave_fractions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activated eos_indemnity",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "activated pifss",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot selects baseline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot provenance retained",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot policy version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot not before effective",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ot not apply oil without private",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "rest distinct family",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ph distinct family",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sick bands present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "families not collapsed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p3 gets ot baseline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p3 source public baseline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p3 gets sick fractions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss wage gate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gcc gated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss eval ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss EE A class",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss ER B class",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss remittance D",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pifss EE ER distinct amounts",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos rem gate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos kuwaiti law17 gate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos settlement ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos not auto pay",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos C class",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "company override refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "setup wathefni owned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "setup company provided",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "never ask kuwait law",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "p4a resolve baseline",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

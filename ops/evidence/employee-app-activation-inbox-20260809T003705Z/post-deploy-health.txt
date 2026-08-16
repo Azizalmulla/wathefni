@@ -1,0 +1,50 @@
+active
+MainPID=2665151
+ActiveState=active
+SubState=running
+try=1 health=200
+ready=200
+notifications=401
+home=401
+LISTEN 0      2048       127.0.0.1:8011       0.0.0.0:*    users:(("uvicorn",pid=4025525,fd=14))                     
+LISTEN 0      2048       127.0.0.1:8010       0.0.0.0:*    users:(("uvicorn",pid=2665151,fd=14))                     
+Aug 09 00:24:49 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/home?locale=en HTTP/1.1" 200 OK
+Aug 09 00:24:49 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/payslips?locale=en HTTP/1.1" 200 OK
+Aug 09 00:24:49 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/leave HTTP/1.1" 200 OK
+Aug 09 00:24:53 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/leave/duration?start_date=2026-08-09&end_date=2026-08-09&leave_type=annual HTTP/1.1" 200 OK
+Aug 09 00:25:12 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/leave/duration?start_date=2026-08-09&end_date=2026-08-09&leave_type=sick HTTP/1.1" 200 OK
+Aug 09 00:25:18 srv1419988 uvicorn[2541962]: INFO:     127.0.0.1:50794 - "GET /health HTTP/1.1" 200 OK
+Aug 09 00:26:16 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/notifications?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:16 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/me HTTP/1.1" 200 OK
+Aug 09 00:26:17 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/notifications?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:17 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/workday?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:17 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/profile HTTP/1.1" 200 OK
+Aug 09 00:26:17 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/payslips?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:17 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/leave HTTP/1.1" 200 OK
+Aug 09 00:26:17 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/home?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:23 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/me HTTP/1.1" 200 OK
+Aug 09 00:26:24 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/notifications?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:24 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/profile HTTP/1.1" 200 OK
+Aug 09 00:26:24 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/leave HTTP/1.1" 200 OK
+Aug 09 00:26:24 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/workday?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:24 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/payslips?locale=en HTTP/1.1" 200 OK
+Aug 09 00:26:24 srv1419988 uvicorn[2541962]: INFO:     94.187.238.82:0 - "GET /app/home?locale=en HTTP/1.1" 200 OK
+Aug 09 00:30:20 srv1419988 uvicorn[2541962]: INFO:     127.0.0.1:39860 - "GET /health HTTP/1.1" 200 OK
+Aug 09 00:35:20 srv1419988 uvicorn[2541962]: INFO:     127.0.0.1:42422 - "GET /health HTTP/1.1" 200 OK
+Aug 09 00:37:35 srv1419988 systemd[1]: Stopping wathefni-orchestrator.service - Wathefni HR LangGraph Orchestrator...
+Aug 09 00:37:35 srv1419988 uvicorn[2541962]: INFO:     Shutting down
+Aug 09 00:37:35 srv1419988 uvicorn[2541962]: INFO:     Waiting for application shutdown.
+Aug 09 00:37:35 srv1419988 uvicorn[2541962]: INFO:     Application shutdown complete.
+Aug 09 00:37:35 srv1419988 uvicorn[2541962]: INFO:     Finished server process [2541962]
+Aug 09 00:37:35 srv1419988 systemd[1]: wathefni-orchestrator.service: Deactivated successfully.
+Aug 09 00:37:35 srv1419988 systemd[1]: Stopped wathefni-orchestrator.service - Wathefni HR LangGraph Orchestrator.
+Aug 09 00:37:35 srv1419988 systemd[1]: wathefni-orchestrator.service: Consumed 53.853s CPU time, 259.7M memory peak, 0B memory swap peak.
+Aug 09 00:37:35 srv1419988 systemd[1]: Started wathefni-orchestrator.service - Wathefni HR LangGraph Orchestrator.
+Aug 09 00:37:44 srv1419988 uvicorn[2665151]: INFO:     Started server process [2665151]
+Aug 09 00:37:44 srv1419988 uvicorn[2665151]: INFO:     Waiting for application startup.
+Aug 09 00:37:45 srv1419988 uvicorn[2665151]: INFO:     Application startup complete.
+Aug 09 00:37:45 srv1419988 uvicorn[2665151]: INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+Aug 09 00:37:50 srv1419988 uvicorn[2665151]: INFO:     127.0.0.1:54802 - "GET /health HTTP/1.1" 200 OK
+Aug 09 00:37:50 srv1419988 uvicorn[2665151]: INFO:     127.0.0.1:54806 - "GET /ready HTTP/1.1" 200 OK
+Aug 09 00:37:50 srv1419988 uvicorn[2665151]: INFO:     127.0.0.1:54820 - "GET /app/notifications HTTP/1.1" 401 Unauthorized
+Aug 09 00:37:50 srv1419988 uvicorn[2665151]: INFO:     127.0.0.1:54826 - "GET /app/home HTTP/1.1" 401 Unauthorized

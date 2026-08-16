@@ -1,0 +1,29 @@
+68595:def encode_schedule_history_cursor(row: dict[str, Any]) -> str:
+68704:    next_cursor = encode_schedule_history_cursor(page_rows[-1]) if has_more and page_rows else None
+68713:@app.get("/app/schedule/history")
+health=200
+PASS  cursor round-trips
+PASS  malformed cursor raises
+PASS  empty history
+PASS  page1 has_more
+PASS  page1 size
+PASS  page1 newest-first
+PASS  pages do not overlap — set()
+PASS  page2 has_more
+PASS  final page drains
+PASS  no duplicates across cursors
+PASS  all five reachable
+PASS  older-than-30d reachable — ['2026-04-11']
+PASS  canonical shift attached when shift_id exists
+PASS  no fabricated scheduled without shift_id
+PASS  employee isolation
+PASS  tenant isolation (wrong company empty)
+PASS  newest→oldest ordering — ['2026-08-06', '2026-07-30', '2026-07-29', '2026-06-25', '2026-04-11']
+PASS  invalid cursor → 400
+PASS  invalid range → 400 — {'error': 'invalid_range', 'message': 'The start date must be on or before the end date.'}
+PASS  invalid date_from → 400
+PASS  shifts-only refused — 403
+PASS  workday window still 30
+PASS  workday recent excludes ancient row — {'2026-07-30', '2026-08-06', '2026-07-29'}
+---
+PASS employee schedule history contract

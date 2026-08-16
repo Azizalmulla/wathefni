@@ -1,0 +1,64 @@
+R7 mobile native safety — source contracts
+
+    PH-1…PH-4 — shared keyboard contract
+      PASS  hr-mobile helper uses padding on every platform
+      PASS  hr-mobile helper never hardcodes offset 0 for iOS
+      PASS  employee-mobile helper uses padding on every platform
+      PASS  employee-mobile helper never hardcodes offset 0 for iOS
+      PASS  standalone HR Screen wraps KeyboardAvoidingView + Android insets
+      PASS  employee HR Screen uses the same keyboard-safe primitive
+      PASS  employee PageScrollView enables keyboard insets on Android when opted in
+      PASS  PIN uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  HR Assistant uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  employee leave request uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  activation uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  unified sign-in uses shared keyboard behavior, not iOS-only / offset 0
+      PASS  employee leave request opts into keyboardInsets
+      PASS  HR leave rejection and interview notes sit inside keyboard-safe Screen
+
+    P1-4 / P1-5 — leave queue and task actions
+      PASS  leave is a capability-gated workspace route
+      PASS  leave list and detail destinations are admitted
+      PASS  attendance/document prefix destinations are admitted
+      PASS  Home nav includes leave
+      PASS  leave index is registered
+      PASS  leave queue route file exists
+      PASS  LeaveQueueRoute loads GET /dashboard/mobile/leave
+      PASS  mobileApi.leave exists
+      PASS  TasksRoute wires resolve actions
+      PASS  taskResolve posts to backend resolve
+
+    P1-6 / P1-7 / P1-8 — dead chevrons, interview honesty, ranking
+      PASS  OperationalListView gates chevrons with canOpen
+      PASS  documents hide Review unless compliance + keys exist
+      PASS  today's shifts do not open unless they are swaps
+      PASS  alerts open only with a real destination
+      PASS  schedule interview is honest View interviews
+      PASS  candidates expose ranking note and stage filter
+
+    P1-9 — preboarding / probation reachability
+      PASS  MODULE_SURFACES still omits preboarding/probation tiles
+      PASS  composition exposes journey flags, not Home tiles
+      PASS  push defaults include preboarding and probation
+      PASS  Profile can open both journeys
+      PASS  Profile route gates journeys on features
+      PASS  Home journey cards are not destination tiles
+
+    EN/AR key parity
+      PASS  HR Mobile exact key parity
+      PASS  HR key present EN+AR: nav.leave
+      PASS  HR key present EN+AR: leave.queueEyebrow
+      PASS  HR key present EN+AR: leave.queueTitle
+      PASS  HR key present EN+AR: tasks.complete
+      PASS  HR key present EN+AR: candidates.rankingNote
+      PASS  HR key present EN+AR: candidate.viewInterviews
+      PASS  HR key present EN+AR: candidate.scheduleOnWeb
+      PASS  Employee App exact key parity
+      PASS  Employee key present EN+AR: home.preboarding
+      PASS  Employee key present EN+AR: home.probation
+      PASS  Employee key present EN+AR: profile.journeys
+      PASS  Employee key present EN+AR: profile.preboarding
+      PASS  Employee key present EN+AR: profile.probation
+
+    R7_MOBILE_NATIVE_SAFETY_UNIT PASS  50 passed, 0 failed
+R7_MOBILE_NATIVE_SAFETY_UNIT_PASS

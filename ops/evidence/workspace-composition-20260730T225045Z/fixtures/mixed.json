@@ -1,0 +1,40 @@
+{
+  "id": "mixed",
+  "label": "Mixed pre/post-hire",
+  "modules": [
+    "pre_hiring",
+    "assessments",
+    "leave",
+    "attendance"
+  ],
+  "role": "owner",
+  "nav_groups": [
+    "prehire",
+    "posthire",
+    "settings"
+  ],
+  "nav_ids": [
+    "overview",
+    "ai",
+    "jobs",
+    "candidates",
+    "interviews",
+    "assessments",
+    "ranking",
+    "reports",
+    "employees",
+    "attendance",
+    "leave",
+    "notifications",
+    "activity",
+    "settings"
+  ],
+  "overview_layout": "three",
+  "offerable_tabs": {
+    "video_interviews": false
+  },
+  "settings": {
+    "team": true,
+    "integrations": true
+  }
+}

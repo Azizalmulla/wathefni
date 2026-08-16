@@ -1,0 +1,101 @@
+anydoc                 .docx  promoted=True cv_en.docx
+anydoc                 .docx  promoted=True cv_ar_en.docx
+anydoc                 .docx  promoted=True contract_offer_ar_en.docx
+anydoc                 .docx  promoted=True hr_letter_en.docx
+anydoc                 .pptx  promoted=True deck_onboarding_en.pptx
+anydoc                 .pptx  promoted=True deck_ar.pptx
+existing_structured    .xlsx  promoted=None employee_list_ar_en.xlsx
+existing_structured    .xlsx  promoted=None payroll_aug2026.xlsx
+existing_structured    .csv   promoted=None payroll_aug2026.csv
+anydoc                 .odt   promoted=True gov_notice_ar.odt
+anydoc                 .ods   promoted=True gov_roster.ods
+anydoc                 .docx  promoted=True prior_cv_ar_en.docx
+anydoc                 .pptx  promoted=True prior_deck_ar.pptx
+existing_structured    .xlsx  promoted=None prior_roster_ar.xlsx
+existing_structured    .csv   promoted=None prior_table_ar.csv
+anydoc                 .odt   promoted=True prior_sample_ar.odt
+anydoc                 .ods   promoted=True prior_sample.ods
+existing               .rtf   promoted=None memo_ar.rtf
+existing               .doc   promoted=None legacy_stub.doc
+{
+  "mode": "staging",
+  "files": 19,
+  "by_extension": {
+    ".docx": {
+      "n": 5,
+      "promoted": 5,
+      "fallback": 0,
+      "shadow_only": 0,
+      "md_only": 0,
+      "disagree": 0
+    },
+    ".pptx": {
+      "n": 3,
+      "promoted": 3,
+      "fallback": 0,
+      "shadow_only": 0,
+      "md_only": 0,
+      "disagree": 0
+    },
+    ".xlsx": {
+      "n": 3,
+      "promoted": 0,
+      "fallback": 0,
+      "shadow_only": 0,
+      "md_only": 3,
+      "disagree": 0
+    },
+    ".csv": {
+      "n": 2,
+      "promoted": 0,
+      "fallback": 0,
+      "shadow_only": 0,
+      "md_only": 2,
+      "disagree": 0
+    },
+    ".odt": {
+      "n": 2,
+      "promoted": 2,
+      "fallback": 0,
+      "shadow_only": 0,
+      "md_only": 0,
+      "disagree": 0
+    },
+    ".ods": {
+      "n": 2,
+      "promoted": 2,
+      "fallback": 0,
+      "shadow_only": 0,
+      "md_only": 0,
+      "disagree": 0
+    },
+    ".rtf": {
+      "n": 1,
+      "promoted": 0,
+      "fallback": 1,
+      "shadow_only": 1,
+      "md_only": 0,
+      "disagree": 1
+    },
+    ".doc": {
+      "n": 1,
+      "promoted": 0,
+      "fallback": 1,
+      "shadow_only": 1,
+      "md_only": 0,
+      "disagree": 0
+    }
+  },
+  "promoted_total": 12,
+  "fallback_total": 2,
+  "material_disagreement_total": 1,
+  "deterministic_ok": 17,
+  "deterministic_checked": 17,
+  "structured_xlsx_integrity": true,
+  "structured_csv_integrity": true,
+  "identity_denied": true,
+  "pdf_denied": true,
+  "pinned_version": "0.1.2",
+  "no_gpt": true
+}
+ANYDOC_OFFICE_AUTHORITY_QUALIFY_OK

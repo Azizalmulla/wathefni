@@ -1,0 +1,5 @@
+      PASS  wave2 honesty denies leave balance mutation
+      PASS  wave2 module no leave balance SQL
+      PASS  wave2 module no payroll money calc
+
+    82 passed, 0 failed

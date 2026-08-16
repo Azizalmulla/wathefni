@@ -1,0 +1,280 @@
+{
+  "wave": "payroll_wave2acb_prod_synthetic",
+  "tag": "a3fbb756",
+  "passed": 50,
+  "failed": 0,
+  "cleanup": {
+    "deleted": {
+      "import_lines": 2,
+      "reconciliations": 1,
+      "events_import": 3,
+      "imports": 2,
+      "recon_export": 0,
+      "events_export": 2,
+      "quarantine_by_export": 2,
+      "exports": 1,
+      "quarantine": 0,
+      "contracts": 1,
+      "periods": 1
+    },
+    "residual_total": 0
+  },
+  "honesty": {
+    "payment_processing": "disabled",
+    "money_authority": "external",
+    "vendor_claimed": false,
+    "authoritative_in_wathefni": false
+  },
+  "results": [
+    {
+      "name": "wave2a enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2a company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "money authority external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wathefni not money authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "vendor unclaimed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no bank files",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no native g2n",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 contracts unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 still enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "route external workspace",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "route readiness",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "route exports",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "route quarantine",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "route events",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "helper _payroll_w2a_require",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "helper scope keys",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "db is wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real employee export refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synth contract draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synth contract approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "readiness ready",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "readiness not authoritative",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bootstrap ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bootstrap not authoritative",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bootstrap payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager empty scope blocks export assembly",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assemble has synth employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "export ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history list exports",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "upload import ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "import money external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "duplicate upload idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fingerprint drift blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fingerprint drift quarantined",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "malformed quarantined",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "quarantine queue non-empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reconcile ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reconciliation stored",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee-level lines",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace import ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace flagged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace not authoritative",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace money external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "audit history events",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace event in history",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native mode blocks readiness",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual synthetic zero",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+api_chunk=dist/assets/api-C_t6EuRq.js
+post_chunk=dist/assets/PostHire-BpJgJtFf.js
+FOUND canonical_shifts_create_post
+CLEAN no_plural_actions
+FOUND create_submit_testid
+eb4bea428948bfd5057741fd2a827fd93a768898f8b16ea83d7d54e850cda056  dist/assets/api-C_t6EuRq.js
+7982812e40a733910b10711bdbc3ce993de417b54bd259bd41cdb558555a6aba  dist/assets/PostHire-BpJgJtFf.js

@@ -1,0 +1,24 @@
+SHW3A tag=46989F88 key=WATHEFNI-SHW2B-W3A-46989F88 evid=/opt/wathefni/staging-evidence/shifts-wave3a-20260802T225214Z/tests
+PASS  connected_db_is_staging
+PASS  db_name_wathefni_staging
+PASS  wave3_module_enabled
+PASS  honesty_payroll_false
+PASS  honesty_no_templates
+PASS  create_shift_ok
+PASS  create_has_shift_id
+PASS  overnight_create_ok
+PASS  overnight_ends_next_day
+PASS  list_wave3_enabled
+PASS  list_honesty_embedded
+PASS  list_contains_created
+PASS  ui_state_present
+PASS  history_versions
+PASS  history_has_current
+PASS  stale_rejected
+PASS  reschedule_ok
+PASS  cancel_ok
+PASS  overnight_cancel_ok
+PASS  dashboard_dist_calendar_aligned
+PASS  residual_zero
+
+21 passed, 0 failed

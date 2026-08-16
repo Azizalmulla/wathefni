@@ -1,0 +1,167 @@
+{
+  "pass": 26,
+  "fail": 0,
+  "evidence": [
+    {
+      "status": "PASS",
+      "name": "id_match_ignores_renamed_and_duplicate_names",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ambiguous_name_migration_fail_closed",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_departments_by_id",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_selected_no_auto",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "future_hire_everyone_auto",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "scale_matcher_100",
+      "detail": {
+        "ms": 0.07
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "scale_matcher_1000",
+      "detail": {
+        "ms": 0.64
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "scale_matcher_10000",
+      "detail": {
+        "ms": 6.52
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "source:selected_department_org_unit_ids",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:migrate_selected_department_names_to_ids",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:preview_access_policy_drilldown",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:resolve_department_policy_attention",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:measure_access_scale",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:allow_invite=False",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:department_org_unit_id",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:PHASE_2C",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "source:page_size_max",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-phase=\"2c\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:selectedOrgUnitIds",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-employee-picker=\"paged\"",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-access-drilldown",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:data-policy-attention",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Select page",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:Who should have access",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui_no_internal_jargon",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "live_api_skipped_no_token",
+      "detail": null
+    }
+  ],
+  "scale": {
+    "synthetic_matcher": [
+      {
+        "n": 100,
+        "matcher_ms": 0.07,
+        "gain": 33,
+        "lose": 17,
+        "unchanged": 50
+      },
+      {
+        "n": 1000,
+        "matcher_ms": 0.64,
+        "gain": 333,
+        "lose": 167,
+        "unchanged": 500
+      },
+      {
+        "n": 10000,
+        "matcher_ms": 6.52,
+        "gain": 3333,
+        "lose": 1667,
+        "unchanged": 5000
+      }
+    ]
+  }
+}

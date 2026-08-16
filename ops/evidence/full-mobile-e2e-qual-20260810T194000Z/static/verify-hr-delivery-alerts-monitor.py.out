@@ -1,0 +1,25 @@
+PASS cream monitor view wired
+PASS ops route is thin re-export
+PASS no OperationalListView on alerts path
+PASS read-only — no mutate APIs
+PASS no resolve/resend UI actions
+PASS has_task client belt
+PASS normalize has_task + employee + channel
+PASS types include has_task/kind/attempts
+PASS More only destination
+PASS Inbox allowlist excludes delivery_alerts
+PASS Home allowlist excludes delivery_alerts
+PASS demo gated
+PASS app.config deliveryAlertsDemo
+PASS canonical delivery_failed vocab
+PASS backend exclude_linked_tasks on mobile queue
+PASS priorities omit delivery_alerts emit
+PASS priorities comment present
+PASS outbound SQL has_task dedupe
+PASS dashboard API pass-through
+PASS capability parity with hr_task_read
+PASS delivery_alerts actions read-only
+PASS task type canonical delivery_failed
+PASS hrAlerts keys EN+AR
+PASS More body mentions non-task
+hr-delivery-alerts-monitor: GREEN

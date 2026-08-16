@@ -1,0 +1,19 @@
+{
+  "prefix": "ATTWFINUI5621E9",
+  "company": "WATHEFNI",
+  "work_date": "2026-08-02",
+  "tag": "7700A6A9",
+  "shots": [
+    "daily-board-ar-desktop.png",
+    "daily-board-ar-mobile.png",
+    "daily-board-en-desktop.png",
+    "daily-board-en-mobile.png",
+    "ops-ar-desktop.png",
+    "ops-ar-mobile.png",
+    "ops-en-desktop.png",
+    "ops-en-mobile.png"
+  ],
+  "authenticated": true,
+  "attw4b_rows": 12,
+  "ingest_enabled": false
+}

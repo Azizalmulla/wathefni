@@ -1,0 +1,919 @@
+{
+  "prefix": "UCCYFF7BD250",
+  "marker": "unified_candidates_prod_canary_v1",
+  "company": "WATHEFNI",
+  "pass_count": 66,
+  "fail_count": 0,
+  "results": [
+    {
+      "name": "pre_master_off",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=\n"
+    },
+    {
+      "name": "pre_tenants_empty",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=\n"
+    },
+    {
+      "name": "pre_feature_disabled",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "activation_mode": "off"
+      }
+    },
+    {
+      "name": "master_still_off",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n"
+    },
+    {
+      "name": "tenants_wathefni_only",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n"
+    },
+    {
+      "name": "canary_enabled_wathefni",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true,
+        "activation_mode": "tenant_canary_override"
+      }
+    },
+    {
+      "name": "activation_mode_canary",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true,
+        "activation_mode": "tenant_canary_override"
+      }
+    },
+    {
+      "name": "view_all",
+      "pass": true,
+      "detail": {
+        "include": true,
+        "exclude": true,
+        "unified": true
+      }
+    },
+    {
+      "name": "view_active",
+      "pass": true,
+      "detail": {
+        "include": true,
+        "exclude": true,
+        "unified": true
+      }
+    },
+    {
+      "name": "view_talent_pool",
+      "pass": true,
+      "detail": {
+        "include": true,
+        "exclude": true,
+        "unified": true
+      }
+    },
+    {
+      "name": "view_hired",
+      "pass": true,
+      "detail": {
+        "include": true,
+        "exclude": true,
+        "unified": true
+      }
+    },
+    {
+      "name": "view_archived",
+      "pass": true,
+      "detail": {
+        "include": true,
+        "exclude": true,
+        "unified": true
+      }
+    },
+    {
+      "name": "view_restricted",
+      "pass": true,
+      "detail": {
+        "include": true,
+        "exclude": true,
+        "unified": true
+      }
+    },
+    {
+      "name": "held_job_not_linked",
+      "pass": true,
+      "detail": "Not linked"
+    },
+    {
+      "name": "held_status_talent_pool",
+      "pass": true,
+      "detail": "Talent Pool"
+    },
+    {
+      "name": "held_assessment_dash",
+      "pass": true,
+      "detail": "\u2014"
+    },
+    {
+      "name": "held_comm_no_outreach",
+      "pass": true,
+      "detail": {
+        "status": "intentionally_skipped",
+        "message_kind": "no_outreach",
+        "channel": null,
+        "sent_at": null,
+        "failed_at": null,
+        "last_error": null,
+        "stage_changed_without_contact": false
+      }
+    },
+    {
+      "name": "held_hides_imp",
+      "pass": true,
+      "detail": "00000000000"
+    },
+    {
+      "name": "live_keeps_job",
+      "pass": true,
+      "detail": {
+        "code": "CANARY_ROLE",
+        "title": "Canary Synthetic Role"
+      }
+    },
+    {
+      "name": "no_duplicate_held",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "held_gate_shortlist",
+      "pass": true,
+      "detail": {
+        "code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "confirmation_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "confirmation_token"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "observed_stage"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "observed_version"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "held_gate_reject",
+      "pass": true,
+      "detail": {
+        "code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "confirmation_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true,
+                "reason": "canary"
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "confirmation_token"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true,
+                "reason": "canary"
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "observed_stage"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true,
+                "reason": "canary"
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "observed_version"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true,
+                "reason": "canary"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "held_gate_hire",
+      "pass": true,
+      "detail": {
+        "code": 422,
+        "body": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "confirmation_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "confirmation_token"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "observed_stage"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "observed_version"
+              ],
+              "msg": "Field required",
+              "input": {
+                "confirm": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "held_gate_notify",
+      "pass": true,
+      "detail": {
+        "code": 409,
+        "body": {
+          "detail": {
+            "error": "held_record_outreach_forbidden",
+            "message": "Talent Pool held records cannot receive outreach until linked to a Job."
+          }
+        }
+      }
+    },
+    {
+      "name": "held_gate_evaluation",
+      "pass": true,
+      "detail": {
+        "code": 409,
+        "body": {
+          "detail": {
+            "error": "held_record_evaluation_forbidden",
+            "message": "Talent Pool held records cannot be ranked or evaluated until linked to a Job."
+          }
+        }
+      }
+    },
+    {
+      "name": "held_gate_assessment",
+      "pass": true,
+      "detail": {
+        "code": 409,
+        "body": {
+          "detail": {
+            "error": "held_record_assessment_forbidden",
+            "message": "Talent Pool held records cannot receive assessments until linked to a Job."
+          }
+        }
+      }
+    },
+    {
+      "name": "held_gate_interview",
+      "pass": true,
+      "detail": {
+        "code": 405,
+        "body": {
+          "detail": "Method Not Allowed"
+        }
+      }
+    },
+    {
+      "name": "held_gate_offer",
+      "pass": true,
+      "detail": {
+        "code": 409,
+        "body": {
+          "detail": {
+            "error": "stage_not_eligible",
+            "message": "Offers can only be drafted for shortlisted or interview-stage candidates.",
+            "stage": "needs_role"
+          }
+        }
+      }
+    },
+    {
+      "name": "held_gate_link_to_job",
+      "pass": true,
+      "detail": {
+        "code": 405,
+        "body": {
+          "detail": "Method Not Allowed"
+        }
+      }
+    },
+    {
+      "name": "held_gate_intake_admit",
+      "pass": true,
+      "detail": {
+        "code": 405,
+        "body": {
+          "detail": "Method Not Allowed"
+        }
+      }
+    },
+    {
+      "name": "held_gate_ai_assign_job",
+      "pass": true,
+      "detail": {
+        "code": 405,
+        "body": {
+          "detail": "Method Not Allowed"
+        }
+      }
+    },
+    {
+      "name": "held_gate_lifecycle",
+      "pass": true,
+      "detail": {
+        "code": 405,
+        "body": {
+          "detail": "Method Not Allowed"
+        }
+      }
+    },
+    {
+      "name": "ranking_no_held_canary",
+      "pass": true,
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "name": "profile_loaded",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "keys": [
+          "company_code",
+          "application",
+          "record_state",
+          "held_reason",
+          "source_channel",
+          "sender_provenance",
+          "grounded_contacts",
+          "documents",
+          "files",
+          "facts",
+          "privacy",
+          "held_applications",
+          "live_applications",
+          "processing_timeline",
+          "link_to_job",
+          "cv_truth"
+        ]
+      }
+    },
+    {
+      "name": "sender_provenance_separate",
+      "pass": true,
+      "detail": {
+        "sender_email": "sender.canary@example.invalid",
+        "role": "provenance_only",
+        "note": "Sender address is provenance, not the candidate identity key."
+      }
+    },
+    {
+      "name": "link_to_job_disabled",
+      "pass": true,
+      "detail": {
+        "available": false,
+        "enabled": false,
+        "label": "Link to Job",
+        "reason": "Reserved for a future confirmed intake_admit action. Not implemented in this phase."
+      }
+    },
+    {
+      "name": "no_negative_missing_facts",
+      "pass": true,
+      "detail": {
+        "extraction_snapshot": {
+          "schema": "application-cv-facts-v1",
+          "immutable": true,
+          "snapshot": {
+            "schema": "application-cv-facts-v1",
+            "projected_from": "candidate_profile",
+            "name": "Canary Synthetic Held",
+            "contacts": {
+              "email": "canary.held@example.invalid",
+              "phone": "00000000000"
+            },
+            "skills": [],
+            "languages": [],
+            "education": [],
+            "employment": [],
+            "certifications": [],
+            "summary": "canary synthetic accountant excel reporting semantic fixture kuwait university",
+            "location": null
+          },
+          "source": "profile_projection"
+        },
+        "effective": {
+          "schema": "application-cv-facts-v1",
+          "projected_from": "candidate_profile",
+          "name": "Canary Synthetic Held",
+          "contacts": {
+            "email": "canary.held@example.invalid",
+            "phone": "00000000000"
+          },
+          "skills": [
+            "Excel",
+            "Reporting"
+          ],
+          "languages": [],
+          "education": [],
+          "employment": [],
+          "certifications": [],
+          "summary": "canary synthetic accountant excel reporting semantic fixture kuwait university",
+          "location": null
+        },
+        "reviews_by_path": {
+          "skills": {
+            "event_id": "18be39f7-8458-4692-8291-ef3cd7514a28",
+            "company_code": "WATHEFNI",
+            "app_key": "UCCYFF7BD250-HELD-NR",
+            "document_version_id": null,
+            "extraction_version_id": null,
+            "fact_path": "skills",
+            "action": "add",
+            "previous_value": null,
+            "new_value": [
+              "Excel",
+              "Reporting"
+            ],
+            "evidence_refs": [],
+            "note": "unified_candidates_prod_canary_v1 confirmed skills",
+            "actor_user_id": "prod-canary-owner",
+            "actor_email": "canary.owner@example.invalid",
+            "supersedes_event_id": null,
+            "created_at": "2026-07-25T20:09:39.542803+00:00",
+            "display_state": "hr_confirmed"
+          }
+        },
+        "events": [
+          {
+            "event_id": "18be39f7-8458-4692-8291-ef3cd7514a28",
+            "company_code": "WATHEFNI",
+            "app_key": "UCCYFF7BD250-HELD-NR",
+            "document_version_id": null,
+            "extraction_version_id": null,
+            "fact_path": "skills",
+            "action": "add",
+            "previous_value": null,
+            "new_value": [
+              "Excel",
+              "Reporting"
+            ],
+            "evidence_refs": [],
+            "note": "unified_candidates_prod_canary_v1 confirmed skills",
+            "actor_user_id": "prod-canary-owner",
+            "actor_email": "canary.owner@example.invalid",
+            "supersedes_event_id": null,
+            "created_at": "2026-07-25T20:09:39.542803+00:00"
+          }
+        ],
+        "completeness": [
+          {
+            "section": "Contacts",
+            "state": "incomplete",
+            "label": "Contacts incomplete"
+          },
+          {
+            "section": "Employment",
+            "state": "incomplete",
+            "label": "Employment incomplete"
+          },
+          {
+            "section": "Skills",
+            "state": "not_extracted",
+            "label": "Skills not extracted"
+          },
+          {
+            "section": "Languages",
+            "state": "not_extracted",
+            "label": "Languages not extracted"
+          },
+          {
+            "section": "Education",
+            "state": "incomplete",
+            "label": "Education incomplete"
+          },
+          {
+            "section": "Certifications",
+            "state": "not_extracted",
+            "label": "Certifications not extracted"
+          }
+        ],
+        "missing_policy": "Not extracted or Unknown \u2014 never a negative fact"
+      }
+    },
+    {
+      "name": "fact_preview",
+      "pass": true,
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "name": "fact_commit",
+      "pass": true,
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "name": "fact_append_only",
+      "pass": true,
+      "detail": 2
+    },
+    {
+      "name": "saved_view_create",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "view": {
+          "view_id": "7f962307-7b72-40ef-a9e2-4cb08fd855d7",
+          "company_code": "WATHEFNI",
+          "actor_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+          "name": "UCCYFF7BD250-talent",
+          "filters": {
+            "view": "talent_pool",
+            "marker": "unified_candidates_prod_canary_v1"
+          },
+          "created_at": "2026-07-25T20:09:42.521860+00:00",
+          "updated_at": "2026-07-25T20:09:42.521860+00:00"
+        }
+      }
+    },
+    {
+      "name": "saved_view_list",
+      "pass": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "views": [
+          {
+            "view_id": "7f962307-7b72-40ef-a9e2-4cb08fd855d7",
+            "company_code": "WATHEFNI",
+            "actor_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+            "name": "UCCYFF7BD250-talent",
+            "filters": {
+              "view": "talent_pool",
+              "marker": "unified_candidates_prod_canary_v1"
+            },
+            "created_at": "2026-07-25T20:09:42.521860+00:00",
+            "updated_at": "2026-07-25T20:09:42.521860+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "saved_view_delete",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "view_id": "7f962307-7b72-40ef-a9e2-4cb08fd855d7"
+      }
+    },
+    {
+      "name": "search_reasons_present",
+      "pass": true,
+      "detail": [
+        "Matched education"
+      ]
+    },
+    {
+      "name": "search_excludes_restricted",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "intake_operations",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "malware_forbidden": true
+      }
+    },
+    {
+      "name": "intake_attention",
+      "pass": true,
+      "detail": {
+        "company_code": "WATHEFNI",
+        "attention_count": 0,
+        "banner": null,
+        "link": "/intake-operations"
+      }
+    },
+    {
+      "name": "cross_tenant_dark",
+      "pass": true,
+      "detail": [
+        {
+          "company": "UCCX7BD250",
+          "enabled": null,
+          "master": null,
+          "legacy_unified": null,
+          "legacy_code": 403,
+          "intake_code": 403
+        }
+      ]
+    },
+    {
+      "name": "staging_unchanged",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=on\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n"
+    },
+    {
+      "name": "rollback_override_disables",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": false,
+        "activation_mode": "off"
+      }
+    },
+    {
+      "name": "rollback_legacy_experience",
+      "pass": true,
+      "detail": {
+        "code": 200,
+        "unified": false
+      }
+    },
+    {
+      "name": "rollback_preserves_sidecar",
+      "pass": true,
+      "detail": {
+        "before": 2,
+        "after": 2
+      }
+    },
+    {
+      "name": "rollback_no_job_binding",
+      "pass": true,
+      "detail": {
+        "status": "needs_role",
+        "position_code": ""
+      }
+    },
+    {
+      "name": "reenable_canary",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "flag": "WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL",
+        "master_enabled": false,
+        "allowed_tenants": [
+          "WATHEFNI"
+        ],
+        "company_code": "WATHEFNI",
+        "enabled_for_company": true,
+        "activation_mode": "tenant_canary_override"
+      }
+    },
+    {
+      "name": "unified_restored_without_rewrite",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "pack_test_unified_candidates.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-canonical-recruiting-lifecycle.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-offer-lifecycle.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-assessments.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-prehire-assistant-parity.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-tenant-isolation-harness.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "pack_smoke-test-jobs-phase2-stage-a-unit.py",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "zero_residue",
+      "pass": true,
+      "detail": {
+        "applications": 0,
+        "facts": 0,
+        "views": 0,
+        "governance": 0,
+        "candidates": 0,
+        "removed": {
+          "fact_review_events": 2,
+          "saved_views": 0,
+          "governance": 1,
+          "files": 2,
+          "applications": 8,
+          "candidates": 2,
+          "outbound": 0,
+          "rank_evals": 0,
+          "lifecycle": 0,
+          "assessments": 0
+        },
+        "sidecar_totals": {
+          "facts": 0,
+          "views": 0,
+          "governance": 0
+        }
+      }
+    },
+    {
+      "name": "sidecar_back_to_empty",
+      "pass": true,
+      "detail": {
+        "facts": 0,
+        "views": 0,
+        "governance": 0
+      }
+    },
+    {
+      "name": "final_master_off",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n"
+    },
+    {
+      "name": "final_tenants_wathefni",
+      "pass": true,
+      "detail": "[Service]\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off\nEnvironment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI\n"
+    }
+  ],
+  "failed": [],
+  "packs": [
+    {
+      "pack": "test_unified_candidates.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-canonical-recruiting-lifecycle.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-offer-lifecycle.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-assessments.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-prehire-assistant-parity.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-tenant-isolation-harness.py",
+      "status": "pass",
+      "rc": 0
+    },
+    {
+      "pack": "smoke-test-jobs-phase2-stage-a-unit.py",
+      "status": "pass",
+      "rc": 0
+    }
+  ],
+  "flag_final": {
+    "master": "off",
+    "tenants": "WATHEFNI"
+  },
+  "verdict": "GO_PRODUCTION_CANARY"
+}

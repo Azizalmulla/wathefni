@@ -1,0 +1,7 @@
+stamp=20260803T043108Z
+evidence=/Users/azizalmulla/Desktop/claw/ops/evidence/payroll-wave1b-prod-canary-20260803T043108Z
+payment_processing=disabled
+money_authority=false
+synthetic_only=true
+GATE=PROD_SYNTHETIC_PAYROLL_WAVE1_FOUNDATION_GO
+FREEZE_WAVE1=GO

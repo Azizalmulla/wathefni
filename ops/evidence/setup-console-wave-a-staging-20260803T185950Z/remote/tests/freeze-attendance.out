@@ -1,0 +1,24 @@
+PASS  attendance freeze doc present
+PASS  freeze doc mentions CAPTURE_INGEST
+PASS  freeze doc mentions SYNTHETIC_ONLY
+PASS  freeze doc mentions punch immutability
+PASS  freeze doc mentions approve
+PASS  freeze doc mentions apply
+PASS  freeze doc mentions manager self
+PASS  freeze doc mentions payroll
+PASS  freeze doc mentions Employees 360
+PASS  freeze doc mentions Onboarding
+PASS  freeze doc mentions NO-GO
+PASS  authority has synthetic-only gate
+PASS  authority punch append path present
+PASS  ops has manager_self_correction_denied
+PASS  ops has employee_outside_manager_scope
+PASS  ops has payroll_period_locked
+PASS  ops separates approve/apply
+PASS  ops dual approval
+PASS  ops stale_row_version
+PASS  E360 freeze doc present
+PASS  Onboarding freeze doc present
+PASS  attendance freeze cursor rule present or evidence copy
+
+22 passed, 0 failed

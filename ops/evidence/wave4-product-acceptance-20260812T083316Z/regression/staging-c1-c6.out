@@ -1,0 +1,458 @@
+=== REG C smoke-test-performance-goals-c1.py ===
+    performance goals c1 — prove
+      PASS  c1 module
+      PASS  charter stamp
+      PASS  commercial performance
+      PASS  OKRs first-class honesty
+      PASS  decorative % forbidden
+      PASS  talent not required
+      PASS  cycles not required
+      PASS  assistant out
+      PASS  rollback
+      PASS  EN objective
+      PASS  AR key result
+      PASS  higher_is_better 40%
+      PASS  lower_is_better math
+      PASS  missing current ≠ 100%
+      PASS  target_range in bounds
+      PASS  reject free-typed %
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  blocked while entitlement off
+      PASS  enable company
+      PASS  OKRs visible
+      PASS  cycles hidden in C1
+      PASS  talent hidden in C1
+      PASS  measure contract created
+      PASS  versioned target change
+      PASS  target versions retained
+      PASS  objective created
+      PASS  objective requires KR
+      PASS  KR created with measure
+      PASS  second KR
+      PASS  KR without valid measure rejected
+      PASS  objective activated
+      PASS  OKR rollup unknown before progress
+      PASS  refuse decorative progress_pct
+      PASS  KR progress computed
+      PASS  KR2 progress
+      PASS  KR progress → Objective roll-up
+      PASS  KPI goal coexist
+      PASS  milestone goal
+      PASS  development goal without forcing OKR
+      PASS  OKR not stored as goal_kind
+      PASS  alignment without forced cascade
+      PASS  scope team
+      PASS  scope department
+      PASS  scope company
+      PASS  disable preserves history
+      PASS  objectives intact after rollback
+      PASS  progress history intact
+      PASS  module-off after disable
+      PASS  EN/AR contracts
+      PASS  conflation guards
+
+    53 passed, 0 failed
+PERFORMANCE_GOALS_UNIT_PASS
+PERFORMANCE_GOALS_FULL_PASS
+=== REG C smoke-test-performance-reviews-c2.py ===
+    performance reviews c2 — prove
+      PASS  c2 module
+      PASS  charter stamp
+      PASS  talent not required
+      PASS  no hipo in c2
+      PASS  snapshot honesty
+      PASS  anonymity fail-closed
+      PASS  assistant out
+      PASS  EN launched
+      PASS  AR closed
+      PASS  rollback
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  blocked while entitlement off
+      PASS  enable reviews
+      PASS  threshold <2 rejected
+      PASS  cycles visible
+      PASS  talent hidden
+      PASS  custom rating scale
+      PASS  scale versioned (new id)
+      PASS  template created
+      PASS  create cycle draft
+      PASS  configure cycle
+      PASS  launch snapshots rules/population
+      PASS  status in_progress
+      PASS  snapshot has scale version
+      PASS  snapshot has population
+      PASS  snapshot has goal evidence
+      PASS  setup cannot mutate launched cycle
+      PASS  later goal edits do not rewrite cycle snapshot
+      PASS  employee self-review submit
+      PASS  manager cannot review out-of-scope
+      PASS  reviewer assignment enforcement
+      PASS  manager review submit
+      PASS  C1 goal evidence consumed on review
+      PASS  submitted immutable
+      PASS  duplicate submission idempotent
+      PASS  360 invitation/submission (1)
+      PASS  anonymity threshold fail-closed
+      PASS  no identities on fail
+      PASS  anonymity threshold pass
+      PASS  raw 360 denied without sensitive perm
+      PASS  HR raw 360 with sensitive permission
+      PASS  reviewer reassignment
+      PASS  reassignment audited
+      PASS  self/manager/360 layers separate
+      PASS  acknowledgement
+      PASS  close cycle
+      PASS  closed cycle cannot silently reopen
+      PASS  final distinct from self/manager
+      PASS  original manager rationale preserved
+      PASS  reviews without 360/goals
+      PASS  reviews without Talent (always)
+      PASS  goals work without depending on cycles
+      PASS  disable preserves history
+      PASS  historical review truth intact
+      PASS  module-off after disable
+      PASS  EN/AR contracts
+      PASS  no fake anonymity
+
+    60 passed, 0 failed
+PERFORMANCE_REVIEWS_UNIT_PASS
+PERFORMANCE_REVIEWS_FULL_PASS
+=== REG C smoke-test-performance-feedback-c3.py ===
+    performance feedback c3 — prove
+      PASS  c3 module
+      PASS  charter stamp
+      PASS  check-ins canonical
+      PASS  no review required
+      PASS  no goals required
+      PASS  no talent required
+      PASS  no auto goal mutate
+      PASS  no auto rating mutate
+      PASS  competency versioned
+      PASS  assessment independent
+      PASS  mapping explicit
+      PASS  scores ≠ overall
+      PASS  dev durable
+      PASS  no L&D in c3
+      PASS  no hipo/9box
+      PASS  assistant out
+      PASS  task contract
+      PASS  EN completed
+      PASS  AR completed
+      PASS  rollback
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable company
+      PASS  require_reviews false
+      PASS  require_talent false
+      PASS  require_learning false
+      PASS  create check-in
+      PASS  no goal mutate on create
+      PASS  no rating mutate on create
+      PASS  check-in with objective link
+      PASS  link does not mutate progress
+      PASS  no progress entries from check-in
+      PASS  check-in without goals
+      PASS  commitment added
+      PASS  update open check-in
+      PASS  stale rejected
+      PASS  employee can view shared
+      PASS  employee sensitive redacted
+      PASS  hr sees sensitive
+      PASS  out-of-scope denied
+      PASS  manager in scope
+      PASS  out manager denied
+      PASS  complete check-in
+      PASS  completed immutable
+      PASS  amend via audit
+      PASS  amendment row retained
+      PASS  create framework
+      PASS  add competency
+      PASS  role-specific competency
+      PASS  empty assessment map rejected
+      PASS  explicit assessment map
+      PASS  self assessment
+      PASS  self not overall
+      PASS  manager assessment
+      PASS  layers separate
+      PASS  two assessment layers
+      PASS  scores not collapsed
+      PASS  framework versioned
+      PASS  historical assessment stays v1
+      PASS  deprecate competency
+      PASS  deprecated readable
+      PASS  assessments survive deprecate
+      PASS  competency without review cycle
+      PASS  reviews c2 honesty independent
+      PASS  create development plan
+      PASS  dev action from check-in
+      PASS  provenance check_in
+      PASS  source_id retained
+      PASS  dev action from competency gap
+      PASS  hr_task linked
+      PASS  task sot contract
+      PASS  accept action
+      PASS  in_progress action
+      PASS  complete action
+      PASS  task mirrors action SoT
+      PASS  action survives origin close
+      PASS  not buried
+      PASS  provenance retained
+      PASS  manual development action
+      PASS  close plan
+      PASS  actions retained on close
+      PASS  disable preserves history flag
+      PASS  check-ins remain after disable
+      PASS  dev actions remain after disable
+      PASS  assessments remain after disable
+      PASS  module-off blocks writes
+      PASS  cross-tenant write denied
+      PASS  goals c1 independent honesty
+      PASS  reviews c2 independent honesty
+
+    91 passed, 0 failed
+    PERFORMANCE_FEEDBACK_COMPETENCIES_FULL_PASS
+=== REG C smoke-test-performance-calibration-c4.py ===
+    performance calibration c4 — prove
+      PASS  c4 module
+      PASS  charter stamp
+      PASS  deterministic
+      PASS  missing explicit
+      PASS  no 1-5 assumption
+      PASS  cal separate layer
+      PASS  never erase
+      PASS  no forced dist
+      PASS  no talent
+      PASS  assistant out
+      PASS  EN locked
+      PASS  AR locked
+      PASS  rollback
+      PASS  weighted goal+comp agg
+      PASS  components preserved
+      PASS  deterministic replay identical
+      PASS  missing exclude rule
+      PASS  missing not zero/full silent
+      PASS  exclude recorded
+      PASS  missing blocks finalization
+      PASS  neutral default applied
+      PASS  custom labeled scale agg
+      PASS  360 aggregate component
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable company
+      PASS  forced dist false
+      PASS  create calc policy
+      PASS  store pre-cal
+      PASS  frozen replay identical
+      PASS  policy versioned
+      PASS  history raw unchanged
+      PASS  history policy version frozen
+      PASS  scale snapshot frozen
+      PASS  guidance session
+      PASS  guidance not forced
+      PASS  create session
+      PASS  cross-tenant denied
+      PASS  population freeze
+      PASS  population count
+      PASS  start in_session
+      PASS  unauthorized adj denied
+      PASS  sensitive required
+      PASS  authorized adjustment
+      PASS  pre-cal preserved on adj
+      PASS  submitted preserved on adj
+      PASS  final changed
+      PASS  pre-cal unchanged
+      PASS  frozen manager intact
+      PASS  frozen self intact
+      PASS  frozen 360 intact
+      PASS  stale adj denied
+      PASS  hard constraint blocks
+      PASS  audited distribution exception
+      PASS  employee provisional hidden
+      PASS  hr with sensitive ok
+      PASS  manager scope denied
+      PASS  population immune to reassignment
+      PASS  not silently rewritten
+      PASS  complete session
+      PASS  sod lock denied for facilitator
+      PASS  lock publish
+      PASS  post-lock adj denied
+      PASS  employee sees final after lock
+      PASS  audited amendment
+      PASS  amend keeps pre-cal
+      PASS  no talent writes honesty
+      PASS  disable preserves history
+      PASS  calibrated history remains
+      PASS  adjustment history remains
+      PASS  pre-cal history remains
+      PASS  module-off blocks writes
+
+    74 passed, 0 failed
+    PERFORMANCE_CALIBRATION_DEV_FULL_PASS
+=== REG C smoke-test-talent-profile-c5.py ===
+    talent profile c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  module key talent
+      PASS  canonical identity
+      PASS  no shadow person
+      PASS  no master score
+      PASS  perf optional
+      PASS  talent w/o perf
+      PASS  no hipo/9box
+      PASS  perf ≠ potential
+      PASS  c3 dev canonical
+      PASS  pool isolated
+      PASS  assistant out
+      PASS  EN claimed
+      PASS  AR claimed
+      PASS  rollback
+      PASS  no forbidden writes
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable talent
+      PASS  perf consume off
+      PASS  canonical profile
+      PASS  identity employee_key
+      PASS  no master score on profile
+      PASS  no shadow person
+      PASS  employee aspiration
+      PASS  aspiration source employee
+      PASS  manager aspiration separate
+      PASS  contradictory aspirations coexist
+      PASS  employee aspiration intact
+      PASS  strength with provenance
+      PASS  dev area confidential
+      PASS  employee cannot see hr_confidential
+      PASS  skill claimed
+      PASS  skill verified distinct
+      PASS  skill history retained
+      PASS  map without skill code rejected
+      PASS  explicit competency map
+      PASS  competency evidence applied
+      PASS  skill ≠ auto competency object
+      PASS  mapping query by skill
+      PASS  not 9-box precompute
+      PASS  potential framework
+      PASS  potential needs sensitive
+      PASS  potential without performance
+      PASS  perf ≠ potential flag
+      PASS  not AI assigned
+      PASS  potential accepted
+      PASS  potential new version
+      PASS  potential history retained
+      PASS  potential hidden from employee
+      PASS  hr sees potential history
+      PASS  perf link blocked when consume off
+      PASS  optional perf evidence
+      PASS  potential with optional perf
+      PASS  still not equals potential
+      PASS  perf evidence marked not potential
+      PASS  readiness primitive
+      PASS  mobility preference
+      PASS  as-of query
+      PASS  as-of has facts
+      PASS  as-of why trackable
+      PASS  aspiration versioned update
+      PASS  aspiration history survives
+      PASS  recruiting pool isolated
+      PASS  cross-tenant denied
+      PASS  disable preserves history
+      PASS  perf history untouched flag
+      PASS  facts remain after disable
+      PASS  potential remains after disable
+      PASS  module-off blocks writes
+      PASS  talent functional perf flags off
+      PASS  write after re-enable
+
+    75 passed, 0 failed
+    TALENT_PROFILE_FULL_PASS
+=== REG C smoke-test-talent-succession-c6.py ===
+    talent succession c6 — prove
+      PASS  c6 module
+      PASS  charter stamp
+      PASS  c5 authoritative
+      PASS  not perf cal
+      PASS  hipo explicit
+      PASS  no auto hipo
+      PASS  9box projection
+      PASS  9box optional
+      PASS  succ w/o 9box
+      PASS  hipo w/o 9box
+      PASS  succ w/o hipo
+      PASS  target readiness
+      PASS  no master score
+      PASS  assistant out
+      PASS  EN designated
+      PASS  AR ready_now
+      PASS  rollback
+      PASS  no ai hipo
+      PASS  no employee.box
+      PASS  9box projects
+      PASS  9box not SoT
+      PASS  top-right ≠ hipo
+      PASS  9box unavailable if axis missing
+      PASS  global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable c6
+      PASS  9box disabled setting
+      PASS  critical role
+      PASS  canonical role key
+      PASS  succession plan
+      PASS  uncovered honest
+      PASS  nominate successor
+      PASS  target-specific readiness
+      PASS  no global readiness
+      PASS  multiple successors
+      PASS  one emp multiple roles
+      PASS  map role→successors
+      PASS  map emp→roles
+      PASS  map no master score
+      PASS  wave5 coverage facts
+      PASS  no longer uncovered eng
+      PASS  explicit hipo
+      PASS  top-right not auto hipo
+      PASS  stale hipo denied
+      PASS  hipo change versioned
+      PASS  hipo history retained
+      PASS  hipo hidden from employee
+      PASS  create talent review
+      PASS  review population snapshot
+      PASS  9box off in snapshot
+      PASS  review in_review
+      PASS  review locked
+      PASS  historical review survives
+      PASS  9box config
+      PASS  projection top-right
+      PASS  no auto hipo from projection
+      PASS  review with 9box snapshot
+      PASS  historical projection stored
+      PASS  projection not employee SoT
+      PASS  succ hidden from employee
+      PASS  mgr needs sensitive
+      PASS  hr with sensitive ok
+      PASS  cross-tenant denied
+      PASS  idempotent nomination
+      PASS  disable preserves
+      PASS  reviews remain
+      PASS  nominations remain
+      PASS  hipo history remains
+      PASS  module-off blocks
+      PASS  perf flags remain off
+
+    72 passed, 0 failed
+    TALENT_SUCCESSION_MOBILITY_FULL_PASS
+REG_C_FAILS=0

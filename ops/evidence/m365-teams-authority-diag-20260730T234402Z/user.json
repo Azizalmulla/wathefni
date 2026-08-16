@@ -1,0 +1,13 @@
+{
+  "id": "dcb6b7dd-8509-4a20-8069-ec0de9445dd7",
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users(id,displayName,userPrincipalName,accountEnabled,assignedLicenses)/$entity",
+  "assignedLicenses": [
+    {
+      "disabledPlans": [],
+      "skuId": "3b555118-da6a-4418-894f-7df1e2096870"
+    }
+  ],
+  "userPrincipalName": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com",
+  "displayName": "ABDULAZIZ ALMULLA",
+  "accountEnabled": true
+}

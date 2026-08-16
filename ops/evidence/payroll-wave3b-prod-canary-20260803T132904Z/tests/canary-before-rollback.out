@@ -1,0 +1,56 @@
+payroll wave3b prod synthetic canary tag=6037515a
+[PASS] wave3 enabled
+[PASS] synthetic only
+[PASS] payment disabled
+[PASS] not money
+[PASS] native non-auth
+[PASS] external authority
+[PASS] no AI
+[PASS] no bank
+[PASS] wave1 enabled
+[PASS] wave2a enabled synthetic
+[PASS] wave2b enabled synthetic
+[PASS] history never deleted
+[PASS] ux sources present
+[PASS] ux EN title
+[PASS] ux AR title
+[PASS] ux honesty
+[PASS] ux payment disabled
+[PASS] ux mobile
+[PASS] ux rtl
+[PASS] ux posthire tab
+connected_db wathefni
+[PASS] production db
+[PASS] settings payment disabled
+[PASS] draft
+[PASS] approve
+[PASS] period
+[PASS] preview ok
+[PASS] native payslip ok
+[PASS] native money authority preview
+[PASS] native payment disabled
+[PASS] native idempotent
+[PASS] scope denied
+[PASS] real refused
+[PASS] replace ok
+[PASS] replace version 2
+[PASS] prior replaced
+[PASS] history after replace
+[PASS] download EN
+[PASS] download AR
+[PASS] external export
+[PASS] external import
+[PASS] external payslip ok
+[PASS] external money authority
+[PASS] external authoritative label
+[PASS] external idempotent
+[PASS] revoke ok
+[PASS] revoke status
+[PASS] history after revoke
+[PASS] no hard delete
+[PASS] audit events
+[PASS] restore prior mode
+[PASS] residual zero
+
+51 passed, 0 failed
+QUALIFICATION_JSON /opt/wathefni/production-evidence/payroll-wave3b-prod-canary/20260803T132904Z/canary/before-rollback/qualification.json

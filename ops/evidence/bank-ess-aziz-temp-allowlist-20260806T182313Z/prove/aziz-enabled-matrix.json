@@ -1,0 +1,63 @@
+{
+  "employee_key": "WATHEFNI-96599338566",
+  "helper": {
+    "eligible": true,
+    "reason": null,
+    "company_code": "WATHEFNI",
+    "employee_key": "WATHEFNI-96599338566",
+    "contract_version": "bank_ess_v1"
+  },
+  "me": {
+    "http": 200,
+    "bank_enabled": true,
+    "bank_reason": null,
+    "bank_ess": {
+      "eligible": true,
+      "reason": null,
+      "contract_version": "bank_ess_v1"
+    },
+    "actions": [
+      "view",
+      "submit",
+      "withdraw",
+      "upload_evidence"
+    ]
+  },
+  "onboarding": {
+    "http": 200,
+    "bank_ess": {
+      "eligible": true,
+      "reason": null,
+      "contract_version": "bank_ess_v1"
+    },
+    "open_bank": true,
+    "bank_items": [
+      {
+        "item_id": "bank_details",
+        "actions": [
+          "open_bank"
+        ],
+        "status": "pending"
+      }
+    ],
+    "ar_http": 200
+  },
+  "bank": {
+    "http": 200,
+    "keys": [
+      "can_submit_new",
+      "change_under_review",
+      "contract_version",
+      "employee_key",
+      "has_verified_bank",
+      "masking",
+      "next_step",
+      "payroll_effective",
+      "submission",
+      "submission_state",
+      "validation_scheme",
+      "verified"
+    ]
+  },
+  "aligned_enabled": true
+}

@@ -1,0 +1,14 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "group": "173506a4-e2ea-4a66-9d1e-d5b2860c426c",
+  "androidUpdateId": "019fd927-692a-7afc-a1bc-b7051517b4b0",
+  "iosUpdateId": "019fd927-692a-76b0-81ab-65300fcf6386",
+  "message": "Auth Wave 2 Phase 1: calm RTL language restart (preserve session)",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1"
+  },
+  "nativeBuildRequired": false,
+  "priorGroup": "b41cdbcf-9338-4073-a0be-af8ea9773c71",
+  "finding": "Language switch used silent DevSettings.reload on RTL flip \u2014 looked like a crash. Now confirm Alert + Updates.reloadAsync + one-shot unlocked session resume."
+}

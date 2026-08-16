@@ -1,0 +1,6 @@
+/opt/wathefni/backups/staging-pre-anydoc-office-authority-20260804T213606Z
+Requirement already satisfied: firecrawl-anydoc==0.1.2 in /opt/wathefni/orchestrator/.venv/lib/python3.12/site-packages (0.1.2)
+staging_health_ok
+WATHEFNI_ANYDOC_OFFICE_AUTHORITY=staging
+WATHEFNI_ANYDOC_OFFICE_SHADOW=production_shadow
+STAGING_AUTHORITY_DEPLOY_OK

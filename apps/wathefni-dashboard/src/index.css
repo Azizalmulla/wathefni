@@ -19,13 +19,91 @@
   --color-processing: #6f7f8e;
   --shadow-soft: 0 1px 2px rgba(24, 20, 15, 0.04), 0 16px 42px rgba(24, 20, 15, 0.07);
   --shadow-premium: 0 1px 0 rgba(255, 255, 255, 0.72) inset, 0 18px 60px rgba(24, 20, 15, 0.09), 0 0 0 1px rgba(200, 148, 69, 0.025);
+
+  /* Wathefni pre-hire system (Overview authority; page personalities vary composition) */
+  --color-wf-canvas: #eee8da;
+  --color-wf-frame: #f8f2e6;
+  --color-wf-sidebar: #23211d;
+  --color-wf-surface: #fffaf0;
+  --color-wf-surface-raised: #fffdf8;
+  --color-wf-ink: #23211d;
+  --color-wf-ink-muted: #756b5d;
+  /* Semantic accents — Overview/mobile composition (COLOR_MAP.md) */
+  --color-wf-accent-review: #f1d96f;
+  --color-wf-accent-review-soft: #f7e89a;
+  --color-wf-accent-review-ink: #3d3410;
+  --color-wf-accent-assess: #e8acd0;
+  --color-wf-accent-assess-soft: #f0c4de;
+  --color-wf-accent-assess-ink: #4a2438;
+  --color-wf-accent-follow: #b4c9e5;
+  --color-wf-accent-follow-soft: #c9d8ef;
+  --color-wf-accent-follow-ink: #243044;
+  --color-wf-accent-priority: #a9ba7d;
+  --color-wf-accent-priority-soft: #dfe8c8;
+  --color-wf-accent-priority-ink: #2f3a22;
+  --color-wf-accent-active: #e2574c;
+  --color-wf-accent-active-soft: #f5ddd7;
+  --color-wf-accent-active-ink: #6b221c;
+  --color-wf-accent-paused: #c4b49a;
+  --color-wf-accent-paused-soft: #efe8dc;
+  --color-wf-accent-paused-ink: #4a4338;
+  /* Mobile brand (sparing moments) */
+  --color-wf-brand-plum: #74415f;
+  --color-wf-brand-plum-soft: #f0dde8;
+  --color-wf-brand-pink: #aa477f;
+  --radius-wf-panel: 1.55rem;
+  --radius-wf-card: 1.35rem;
+  --radius-wf-pill: 9999px;
+
+  /*
+   * Shared post-hiring visual baseline (Shifts Wave 3+)
+   * Aliases map to the same pre-hire semantic accents — same color, same meaning.
+   * scheduled→priority · conflict→review · recon→assess · overnight→follow · cancelled→paused
+   */
+  --color-ph-state-scheduled: var(--color-wf-accent-priority);
+  --color-ph-state-scheduled-soft: var(--color-wf-accent-priority-soft);
+  --color-ph-state-scheduled-ink: var(--color-wf-accent-priority-ink);
+  --color-ph-state-conflict: var(--color-wf-accent-review);
+  --color-ph-state-conflict-soft: var(--color-wf-accent-review-soft);
+  --color-ph-state-conflict-ink: var(--color-wf-accent-review-ink);
+  --color-ph-state-recon: var(--color-wf-accent-assess);
+  --color-ph-state-recon-soft: var(--color-wf-accent-assess-soft);
+  --color-ph-state-recon-ink: var(--color-wf-accent-assess-ink);
+  --color-ph-state-overnight: var(--color-wf-accent-follow);
+  --color-ph-state-overnight-soft: var(--color-wf-accent-follow-soft);
+  --color-ph-state-overnight-ink: var(--color-wf-accent-follow-ink);
+  --color-ph-state-cancelled: var(--color-wf-accent-paused);
+  --color-ph-state-cancelled-soft: var(--color-wf-accent-paused-soft);
+  --color-ph-state-cancelled-ink: var(--color-wf-accent-paused-ink);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Setup Console is a separate MPA — it must scroll and never inherit a clipped blank shell. */
+html.setup-console-boot,
+html.setup-console-boot body,
+html.setup-console-boot #root {
+  overflow: auto;
+  height: auto;
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100dvh;
+  height: 100dvh;
 }
 
 :root {
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #09090b;
-  background: #f6f1e8;
+  background: #f8f2e6;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -39,10 +117,30 @@
 body {
   margin: 0;
   min-width: 320px;
-  background:
-    radial-gradient(circle at 50% -18%, rgba(255, 250, 240, 0.94) 0, rgba(247, 243, 235, 0.72) 34%, rgba(244, 239, 230, 0) 62%),
-    radial-gradient(circle at 82% 10%, rgba(200, 148, 69, 0.08) 0, rgba(200, 148, 69, 0.025) 26%, rgba(200, 148, 69, 0) 48%),
-    linear-gradient(180deg, #f8f3ea 0%, #f4eee3 48%, #f1eadf 100%);
+  background: #f8f2e6;
+}
+
+/* Sidebar: only show a thin scrollbar when nav content overflows */
+.wf-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.wf-sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.wf-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wf-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.wf-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 body::selection {
@@ -77,4 +175,10 @@ textarea {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* Ensure assessment configuration admin panel stays hidden until expanded.
+   Some UA/CSS combinations leave details children visible when closed. */
+details[data-testid='assessment-configuration']:not([open]) > *:not(summary) {
+  display: none;
 }

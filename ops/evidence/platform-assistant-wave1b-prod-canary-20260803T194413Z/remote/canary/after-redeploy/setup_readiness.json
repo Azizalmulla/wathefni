@@ -1,0 +1,185 @@
+{
+  "action_type": "get_launch_readiness_summary",
+  "success": true,
+  "status": "completed",
+  "message": "Launch readiness for WATHEFNI is 'Live \u00b7 controlled'. 5 important blocker(s). Setup mutations stay operator-only; assistant prepares links only.",
+  "grounding": {
+    "ok": true,
+    "wave1_contract": "platform_assistant_spine_wave1",
+    "summary_en": "Launch readiness for WATHEFNI is 'Live \u00b7 controlled'. 5 important blocker(s). Setup mutations stay operator-only; assistant prepares links only.",
+    "summary_ar": "\u062c\u0627\u0647\u0632\u064a\u0629 \u0627\u0644\u0625\u0637\u0644\u0627\u0642 \u0644\u0640 WATHEFNI \u0647\u064a '\u064a\u0639\u0645\u0644 \u00b7 \u0645\u0646\u0636\u0628\u0637'. 5 \u0639\u0627\u0626\u0642(\u0639\u0648\u0627\u0626\u0642) \u0645\u0647\u0645. \u062a\u0639\u062f\u064a\u0644\u0627\u062a \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u062a\u0628\u0642\u0649 \u0644\u0644\u0645\u0634\u063a\u0651\u0644 \u0641\u0642\u0637\u061b \u0627\u0644\u0645\u0633\u0627\u0639\u062f \u064a\u062c\u0647\u0651\u0632 \u0627\u0644\u0631\u0648\u0627\u0628\u0637 \u0641\u0642\u0637.",
+    "message": "Launch readiness for WATHEFNI is 'Live \u00b7 controlled'. 5 important blocker(s). Setup mutations stay operator-only; assistant prepares links only.",
+    "citations": [
+      {
+        "kind": "launch_readiness",
+        "module": "setup_console",
+        "id": "overall:live_controlled",
+        "label_en": "Live \u00b7 controlled",
+        "label_ar": "\u064a\u0639\u0645\u0644 \u00b7 \u0645\u0646\u0636\u0628\u0637",
+        "as_of": "2026-08-03T22:45:22.510144+03:00",
+        "authority_state": "read_only_compose"
+      },
+      {
+        "kind": "blocker",
+        "module": "setup_console",
+        "id": "module:attendance",
+        "label_en": "Attendance",
+        "label_ar": "Attendance",
+        "as_of": "2026-08-03T22:45:22.510167+03:00",
+        "deep_link": "/dashboard",
+        "authority_state": "live_controlled"
+      },
+      {
+        "kind": "blocker",
+        "module": "setup_console",
+        "id": "manager_scope",
+        "label_en": "Manager access",
+        "label_ar": "\u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646",
+        "as_of": "2026-08-03T22:45:22.510175+03:00",
+        "deep_link": "/dashboard",
+        "authority_state": "blocked"
+      },
+      {
+        "kind": "blocker",
+        "module": "setup_console",
+        "id": "payroll_mode",
+        "label_en": "Payroll mode",
+        "label_ar": "\u0648\u0636\u0639 \u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+        "as_of": "2026-08-03T22:45:22.510179+03:00",
+        "deep_link": "/dashboard",
+        "authority_state": "live_controlled"
+      },
+      {
+        "kind": "blocker",
+        "module": "setup_console",
+        "id": "whatsapp_channel",
+        "label_en": "Company WhatsApp channel",
+        "label_ar": "\u0642\u0646\u0627\u0629 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0629",
+        "as_of": "2026-08-03T22:45:22.510181+03:00",
+        "deep_link": "/setup-console",
+        "authority_state": "blocked"
+      },
+      {
+        "kind": "blocker",
+        "module": "setup_console",
+        "id": "attendance_devices",
+        "label_en": "Attendance devices",
+        "label_ar": "\u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u062d\u0636\u0648\u0631",
+        "as_of": "2026-08-03T22:45:22.510184+03:00",
+        "deep_link": "/dashboard",
+        "authority_state": "blocked"
+      }
+    ],
+    "data_freshness": "2026-08-03T22:45:22.510204+03:00",
+    "as_of_tz": "Asia/Kuwait",
+    "authority_state": "read_only_compose",
+    "confidence": "grounded",
+    "deep_links": [
+      {
+        "page": "setup_launch_readiness",
+        "path": "/setup-console"
+      }
+    ],
+    "proposed_actions": [
+      {
+        "kind": "deep_link",
+        "module": "setup_console",
+        "label_en": "Use the Attendance board for review. Do not connect devices yet.",
+        "label_ar": "\u0627\u0633\u062a\u062e\u062f\u0645 \u0644\u0648\u062d\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u0644\u0644\u0645\u0631\u0627\u062c\u0639\u0629. \u0644\u0627 \u062a\u0635\u0644 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0622\u0646.",
+        "deep_link": "/dashboard",
+        "executes": false
+      },
+      {
+        "kind": "deep_link",
+        "module": "setup_console",
+        "label_en": "Keep manager scheduling closed. Use the approved HR operator for Shifts.",
+        "label_ar": "\u0623\u0628\u0642\u0650 \u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0645\u063a\u0644\u0642\u0629. \u0627\u0633\u062a\u062e\u062f\u0645 \u0645\u0634\u063a\u0651\u0644 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u0645\u0639\u062a\u0645\u062f \u0644\u0644\u0645\u0646\u0627\u0648\u0628\u0627\u062a.",
+        "deep_link": "/dashboard",
+        "executes": false
+      },
+      {
+        "kind": "deep_link",
+        "module": "setup_console",
+        "label_en": "Open External payroll run for setup status and checklist.",
+        "label_ar": "\u0627\u0641\u062a\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u0644\u062d\u0627\u0644\u0629 \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u0648\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062a\u062d\u0642\u0642.",
+        "deep_link": "/dashboard",
+        "executes": false
+      },
+      {
+        "kind": "deep_link",
+        "module": "setup_console",
+        "label_en": "Leave company WhatsApp closed unless platform ops opens company-owned routing.",
+        "label_ar": "\u0623\u0628\u0642\u0650 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0629 \u0645\u063a\u0644\u0642\u0627\u064b \u0645\u0627 \u0644\u0645 \u064a\u0641\u062a\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0646\u0635\u0629 \u0627\u0644\u062a\u0648\u062c\u064a\u0647 \u0627\u0644\u0645\u0645\u0644\u0648\u0643 \u0644\u0644\u0634\u0631\u0643\u0629.",
+        "deep_link": "/setup-console",
+        "executes": false
+      },
+      {
+        "kind": "deep_link",
+        "module": "setup_console",
+        "label_en": "Do not connect biometric devices from Setup.",
+        "label_ar": "\u0644\u0627 \u062a\u0635\u0644 \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0628\u0635\u0645\u0629 \u0645\u0646 \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+        "deep_link": "/dashboard",
+        "executes": false
+      }
+    ],
+    "payload": {
+      "overall_state": "live_controlled",
+      "blockers": 5,
+      "entitlements_cannot_bypass_gates": true,
+      "payroll_money": false,
+      "attendance_ingest": false,
+      "pause_impact": {
+        "title_en": "If you pause the company or a module",
+        "title_ar": "\u0625\u0630\u0627 \u0623\u0648\u0642\u0641\u062a \u0627\u0644\u0634\u0631\u0643\u0629 \u0623\u0648 \u0648\u062d\u062f\u0629",
+        "bullets_en": [
+          "Interactive Setup and HR sessions for that scope are held.",
+          "Background jobs, timers, and device intake are not fully stopped by a Setup toggle alone.",
+          "Payroll money and Attendance device intake stay off regardless of resume.",
+          "Resuming never overrides safety freezes or allowlists."
+        ],
+        "bullets_ar": [
+          "\u062c\u0644\u0633\u0627\u062a \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u0648\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u062a\u0641\u0627\u0639\u0644\u064a\u0629 \u0644\u0647\u0630\u0627 \u0627\u0644\u0646\u0637\u0627\u0642 \u062a\u064f\u0639\u0644\u0651\u064e\u0642.",
+          "\u0627\u0644\u0645\u0647\u0627\u0645 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0648\u0627\u0644\u0645\u0624\u0642\u062a\u0627\u062a \u0648\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0644\u0627 \u062a\u062a\u0648\u0642\u0641 \u0628\u0627\u0644\u0643\u0627\u0645\u0644 \u0628\u0645\u0641\u062a\u0627\u062d \u0625\u0639\u062f\u0627\u062f \u0648\u062d\u062f\u0647.",
+          "\u0623\u0645\u0648\u0627\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0648\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u064a\u0628\u0642\u064a\u0627\u0646 \u0645\u063a\u0644\u0642\u064a\u0646 \u0628\u063a\u0636 \u0627\u0644\u0646\u0638\u0631 \u0639\u0646 \u0627\u0644\u0627\u0633\u062a\u0626\u0646\u0627\u0641.",
+          "\u0627\u0644\u0627\u0633\u062a\u0626\u0646\u0627\u0641 \u0644\u0627 \u064a\u062a\u062c\u0627\u0648\u0632 \u062a\u062c\u0645\u064a\u062f\u0627\u062a \u0627\u0644\u0633\u0644\u0627\u0645\u0629 \u0623\u0648 \u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0633\u0645\u0627\u062d."
+        ]
+      }
+    },
+    "fallback_key": null,
+    "honesty": {
+      "contract": "platform_assistant_spine_wave1",
+      "wave1_version": "1.0.0",
+      "wathefni_only": true,
+      "hr_dashboard_only": true,
+      "manager_assistant": false,
+      "employee_assistant": false,
+      "whatsapp_widening": false,
+      "mobile_assistant": false,
+      "candidate_knowledge_wired": false,
+      "ai_embedded_in_frozen_module_uis": false,
+      "new_mutation_tools": false,
+      "mutates_records": false,
+      "payroll_money": false,
+      "attendance_ingest": false,
+      "capture_ingest_must_remain_off": true,
+      "legal_government_authority": false,
+      "default_posthire_entry": "action_inbox",
+      "may": [
+        "summarize",
+        "explain",
+        "investigate",
+        "prepare_deep_link_or_proposed_action"
+      ],
+      "must_not": [
+        "mutate_records",
+        "bypass_confirmation_permissions_sod_allowlists_freezes",
+        "payroll_money",
+        "attendance_ingest",
+        "claim_legal_or_government_authority"
+      ]
+    },
+    "mutates_records": false
+  },
+  "mutates_records": false,
+  "reply": "Launch readiness for WATHEFNI is 'Live \u00b7 controlled'. 5 important blocker(s). Setup mutations stay operator-only; assistant prepares links only."
+}

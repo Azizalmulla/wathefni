@@ -1,0 +1,11 @@
+{
+  "probe_utc": "2026-08-04T01:58:53.385843+00:00",
+  "batch_id": "70679db7-62c7-4de0-b09d-dd5560d7eb66",
+  "batch": null,
+  "rows": {},
+  "chunk_jobs": {},
+  "failed_reasons": [],
+  "active_intake_for_batch": 0,
+  "sessions": [],
+  "ungranted_locks": 0
+}

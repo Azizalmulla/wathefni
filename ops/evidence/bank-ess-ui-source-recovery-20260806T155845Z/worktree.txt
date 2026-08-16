@@ -1,0 +1,2 @@
+Preparing worktree (new branch 'release/bank-ess-ui-clean-20260806T155845Z')
+HEAD is now at cf26d59 feat: record Hybrid Email Phase 1 production-dark artifacts

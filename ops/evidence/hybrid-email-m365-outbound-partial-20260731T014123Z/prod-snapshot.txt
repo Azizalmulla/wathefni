@@ -1,0 +1,9 @@
+health_adjacent_mail_configured True
+mail_client 54185c95b496
+calendar_client 2d2b13de3131
+distinct True
+WATHEFNI_outbound_mode wathefni
+all_settings [{"company_code": "WATHEFNI", "outbound_mode": "wathefni"}]
+mailboxes [{"address": "abdulazizalmulla@wathefni.onmicrosoft.com", "status": "approved", "allow_send": true, "last_probe_ok": true}]
+health=200
+no_probe_procs

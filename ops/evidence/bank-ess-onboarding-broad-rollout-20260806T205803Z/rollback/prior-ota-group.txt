@@ -1,0 +1,8 @@
+Update group:
+Platforms                 android, ios
+Runtime Version           0.1.0
+Message                   "Bank ESS: correction resubmit UX + field errors" (1 hour ago by abdulazizalmulla)
+Code Signing Key          N/A
+Is Roll Back to Embedded  No
+Rollout Percentage        N/A
+Group ID                  e3d3ffae-14a8-42f9-bc87-301763b0b0cd

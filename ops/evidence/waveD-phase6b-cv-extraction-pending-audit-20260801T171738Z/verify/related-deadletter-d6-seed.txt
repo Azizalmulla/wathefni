@@ -1,0 +1,7 @@
+                job_id                |   status    |          created_at           | attempts |   last_error_code    |             left              |   ?column?    |                       ?column?                       |      status      
+--------------------------------------+-------------+-------------------------------+----------+----------------------+-------------------------------+---------------+------------------------------------------------------+------------------
+ c1d7303b-3f66-4554-ab22-d16b13316c45 | dead_letter | 2026-08-01 16:22:17.712291+00 |        5 | cv_extraction_failed | ocr_required_mistral_disabled | email_inbound | imp-wathefni-fe1b596eb9134774-WATHEFNI-OCCTST_044035 | import_archived
+ 8a768dac-8f52-445d-acb6-f2a7d2e5e867 | dead_letter | 2026-08-01 16:22:17.712291+00 |        5 | cv_extraction_failed | ocr_required_mistral_disabled | email_inbound | imp-wathefni-23db1ab51767d4bf-WATHEFNI-IMPORT        | ready_for_review
+ f598e9eb-f299-4797-abd0-dd6c14d5659e | dead_letter | 2026-08-01 16:22:17.712291+00 |        5 | cv_extraction_failed | ocr_required_mistral_disabled | email_inbound | imp-wathefni-4eb023e97547f488-WATHEFNI-IMPORT        | ready_for_review
+(3 rows)
+

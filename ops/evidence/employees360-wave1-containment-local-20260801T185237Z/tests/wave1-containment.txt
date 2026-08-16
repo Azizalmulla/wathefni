@@ -1,0 +1,26 @@
+    employees 360 wave1 containment — aliases, dups, canary, scope, concurrency
+      PASS  pure: WATHEFNI+staging canary allowed
+      PASS  pure: WATHEFNI+production canary denied by default
+      PASS  pure: production canary allowed only when explicitly listed
+      FAIL  pure: empty company allowlist fails closed
+      PASS  pure: alias list bidirectional
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-employee-wave1-containment.py", line 441, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-employee-wave1-containment.py", line 51, in main
+    with app.db_connect() as conn:
+         ~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 197, in __enter__
+    self._conn = _get_db_pool().getconn()
+                 ~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 174, in _get_db_pool
+    binding = runtime_binding()
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 163, in runtime_binding
+    assert_runtime_environment_binding()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 141, in assert_runtime_environment_binding
+    binding = _runtime_environment.resolve_runtime_binding(os.environ)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/runtime_environment.py", line 105, in resolve_runtime_binding
+    raise RuntimeEnvironmentError("database_environment_file_not_configured")
+runtime_environment.RuntimeEnvironmentError: database_environment_file_not_configured

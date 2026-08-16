@@ -1,0 +1,716 @@
+{
+  "tag": "A02201FB",
+  "checks": [
+    {
+      "name": "prior_run_residue_retired",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_subject_has_no_live_future_schedule",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w6c_version_6_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w6c_enabled_for_wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w6c_disabled_other_tenant",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hr_allowlist_is_named_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager_allowlist_empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager_real_rollout_nogo",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notify_allowlist_single_recipient",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notify_channels_app_email_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_delivery_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill_switch_off_at_start",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "operator_timers_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "broad_employee_app_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_read_and_ack_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_submission_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payroll_money_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "leave_balances_not_mutated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance_authority_not_mutated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ack_authority_wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract_1_5",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_payroll_money_sql",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_leave_balance_sql",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_attendance_authority_sql",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_pam_submit_call",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "excluded_HAN-1db8844d",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "excluded_OCK-0F290BF7",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_not_excluded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "empty_key_excluded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "consent_refused_for_excluded_1db8844d",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "delivery_blocked_for_excluded_1db8844d",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "consent_refused_for_excluded_0F290BF7",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "delivery_blocked_for_excluded_0F290BF7",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "email_blocked_before_consent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "consent_recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "consent_destination_is_talal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "email_allowed_after_consent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "app_channel_needs_no_external_consent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unapproved_channel_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "non_allowlisted_recipient_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "non_allowlisted_actor_denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "audit_reason_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hr_same_day_created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "idempotent_repeat_no_duplicate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hr_split_shift_both_parts",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hr_overnight_created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "all_real_rows_future_dated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "created_rows_visible_in_db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_flagged_ends_next_day",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "split_same_date_two_windows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_unexpected_active_real_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hr_reschedule_with_token",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "stale_concurrency_token_rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unauthorized_reschedule_denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "event_emitted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_duplicate_business_notification",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "drafts_do_not_notify",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "delivery_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "app_inbox_delivered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "app_not_counted_as_real_send",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "email_attempted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "email_delivered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "email_real_sent_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "provider_receipt_captured",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recipient_ref_is_consented_email",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "inbox_row_written_once",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "redelivery_still_single_business_event",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ack_recorded_once",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "second_channel_ack_is_noop",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "exactly_one_ack_row",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "acked_event_not_redelivered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill_switch_engaged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_delivery_off_while_killed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill_switch_skips_every_channel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill_switch_no_real_send",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill_switch_reason_recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kill_switch_released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invalidate_on_cancel_runs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_failure_recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_failure_not_real_sent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_failure_visible_to_hr",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cross_tenant_event_rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cross_tenant_delivery_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_sees_own_upcoming",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_sees_only_own_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_inbox_has_shift_notification",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee_app_write_disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_read_only_flag",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_cannot_mutate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_can_acknowledge",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_no_open_shift_claim",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "talal_no_swap_request",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "broad_app_read_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager_real_rollout_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager_self_decision_banned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager_publish_needs_matrix",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manager_synthetic_scope_in_scope_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unallowlisted_manager_cannot_touch_real",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic_subject_path_open",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_ran",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_batch_bounded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_run_recorded_completed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_batch_clamped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_clamped_run_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_failure_recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_failure_visible",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_overlapping_execution",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "locked_out_job_did_not_process",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "locked_out_run_recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_runs_again_once_lock_released",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "job_kill_switch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_manual_submission_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_warn_default",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_canary_rows_soft_cancelled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "soft_cancel_not_hard_delete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "every_created_row_retired",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_active_future_real_rows_left",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "historical_rows_untouched_count",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract_version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_residual_zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual_recount_zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "historical_assignment_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "employee_records_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "orphan_quarantine_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "other_real_employees_untouched",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_canonical_l0_authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_published_version_immutability",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_self_decision_ban",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_manager_scope_enforcement",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_notification_deduplication",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_real_notify_allowlist_fail_closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_notify_kill_switch",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_controlled_subject_exclusions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_no_payroll_money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invariant_pam_export_only",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "real_shift_ids": [
+      "a2fec024-6f1b-4b77-92c6-91b3edcecf74",
+      "fd923668-164e-42d9-a763-ffaaba131493",
+      "48dd16ba-20d1-4bc8-b687-4041d64aaabc",
+      "6a198a64-d6a4-418f-abe1-d00a21681c81"
+    ],
+    "notify_event_id": "05fd2a24-9da5-4944-b681-e04af3b2cb5b"
+  },
+  "real_sends": [
+    {
+      "channel": "email",
+      "recipient": "talalabdalla89@gmail.com",
+      "provider": "postmark",
+      "provider_message_id": null,
+      "correlation_id": "w6c|email|9b04b7840dac"
+    }
+  ],
+  "prior_run_sweep": {
+    "found": [
+      "1ef7f5cb-e5ac-4992-9025-f89f288451f4",
+      "b20a0f14-0002-4d42-9d21-5aaa499f2346",
+      "d3811489-4270-4021-a400-272e4f009efd",
+      "5dd3c450-4dee-4d00-93ae-2071e308594a"
+    ],
+    "cancelled": 4,
+    "errors": []
+  },
+  "baseline_fp": "e4acc3ea8642211b03c4fef85a08f3a0",
+  "passed": 136,
+  "failed": 0
+}

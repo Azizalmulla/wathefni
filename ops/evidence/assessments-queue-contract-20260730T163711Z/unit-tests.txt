@@ -1,0 +1,14 @@
+test_application_count_only_never_uses_people (test_assessments_queue_contract.AssessmentsQueueContractTests.test_application_count_only_never_uses_people) ... ok
+test_authorities_and_operational_keys (test_assessments_queue_contract.AssessmentsQueueContractTests.test_authorities_and_operational_keys) ... ok
+test_cancelled_never_maps_to_send_or_attention (test_assessments_queue_contract.AssessmentsQueueContractTests.test_cancelled_never_maps_to_send_or_attention) ... ok
+test_delivery_failed_is_facet_of_pending_in_progress (test_assessments_queue_contract.AssessmentsQueueContractTests.test_delivery_failed_is_facet_of_pending_in_progress) ... ok
+test_expired_latest_is_resend_superseded_is_history_only (test_assessments_queue_contract.AssessmentsQueueContractTests.test_expired_latest_is_resend_superseded_is_history_only) ... ok
+test_hybrid_visibility_clause_is_threaded_into_cohort_sql_shape (test_assessments_queue_contract.AssessmentsQueueContractTests.test_hybrid_visibility_clause_is_threaded_into_cohort_sql_shape) ... ok
+test_multi_attempt_history_units_stay_separate (test_assessments_queue_contract.AssessmentsQueueContractTests.test_multi_attempt_history_units_stay_separate)
+Documented proof shape: resend apps (latest) ≠ expired attempt history. ... ok
+test_needs_review_and_report_ready_predicates (test_assessments_queue_contract.AssessmentsQueueContractTests.test_needs_review_and_report_ready_predicates) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.000s
+
+OK

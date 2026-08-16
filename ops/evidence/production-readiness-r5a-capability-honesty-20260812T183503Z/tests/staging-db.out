@@ -1,0 +1,32 @@
+    PRODUCTION READINESS R5A — capability honesty (staging DB)
+    tenant: R5AC48B33
+      PASS  internal python patch still writes overlay
+      PASS  internal overlay stored enabled
+      FAIL  internal JA enable still works :: {'ok': False, 'enabled': False, 'error': 'job_architecture_c1_off', 'gate': 'runtime_flag', 'phase': 'job_architecture_c1'}
+      PASS  GET stored_enabled true
+      PASS  GET usable false
+      PASS  GET customer_enableable false
+      PASS  wave4 payload not customer visible
+      PASS  wave4 goals stored enabled preserved
+      PASS  wave4 goals not usable
+      PASS  customer cannot enable performance
+      PASS  customer cannot enable talent
+      PASS  customer cannot enable job_architecture
+      PASS  customer cannot enable learning
+      PASS  customer cannot enable benefits
+      PASS  customer cannot enable employee_relations
+      PASS  customer cannot enable engagement
+      PASS  customer cannot enable comp_planning
+      PASS  customer cannot enable workforce_planning
+      PASS  performance overlay still enabled after refuse
+      FAIL  JA settings row preserved :: {}
+      PASS  leave still enabled for tenant
+      PASS  runtime gated off without env
+      PASS  internal env qualification still possible
+      PASS  env on still not customer usable
+      PASS  JA runtime off without env
+      PASS  JA internal env qualification still possible
+      PASS  leave catalog enableable
+      PASS  analytics catalog enableable
+
+    26 passed, 2 failed

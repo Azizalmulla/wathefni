@@ -1,0 +1,12 @@
+{
+  "job_specific_alias": true,
+  "general_address": true,
+  "held_cvs": true,
+  "assign_admit": true,
+  "needs_a_job": true,
+  "bound_to_a_job": true,
+  "identity_review": true,
+  "quarantined": true,
+  "ar_needs": true,
+  "no_intake_ops": true
+}

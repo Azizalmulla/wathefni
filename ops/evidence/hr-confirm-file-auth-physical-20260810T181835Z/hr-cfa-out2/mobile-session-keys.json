@@ -1,0 +1,9 @@
+[
+  "session_id",
+  "access_token",
+  "refresh_token",
+  "expires_at",
+  "refresh_expires_at",
+  "token_type",
+  "channel"
+]

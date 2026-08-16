@@ -1,0 +1,1 @@
+REPAIR_OK managers_applied=5 compliance_removed=14

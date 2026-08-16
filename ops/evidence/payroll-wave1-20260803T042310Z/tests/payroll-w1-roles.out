@@ -1,0 +1,91 @@
+PASS: hr_admin normalizes to itself
+PASS: hr admin spaced normalizes to hr_admin
+PASS: company_admin aliases to owner
+PASS: owner stays owner
+PASS: interviewer is a real role
+PASS: payroll_operator is a real role
+PASS: hr_admin is in ROLE_PERMISSIONS
+PASS: interviewer is in ROLE_PERMISSIONS
+PASS: payroll_operator is in ROLE_PERMISSIONS
+PASS: manager remains for Team Manager
+PASS: owner labeled Company Admin
+PASS: hr_admin labeled HR Admin
+PASS: interviewer labeled Interviewer
+PASS: payroll labeled Payroll Operator
+PASS: Company Admin has users.manage
+PASS: HR Admin lacks users.manage
+PASS: Company Admin has settings.manage
+PASS: HR Admin has settings.manage
+PASS: HR Manager lacks settings.manage
+PASS: HR Manager lacks users.manage
+PASS: HR Manager lacks audit.read
+PASS: HR Admin has audit.read
+PASS: HR Admin lacks calendar.sync
+PASS: owner has calendar.sync
+PASS: owner perms are a strict superset of hr_admin
+PASS: hr_admin perms are a strict superset of hr_manager
+PASS: owner keeps users.manage
+PASS: owner keeps settings.manage
+PASS: owner keeps audit.read
+PASS: owner keeps candidate.decide
+PASS: owner keeps jobs.publish
+PASS: owner keeps payroll.export
+PASS: owner keeps assessment.manage
+PASS: payroll_operator has payroll.read
+PASS: payroll_operator has payroll.manage
+PASS: payroll_operator has payroll.approve
+PASS: payroll_operator lacks payroll.export (SOD)
+PASS: payroll_operator lacks prehire.read
+PASS: payroll_operator lacks candidates.read
+PASS: payroll_operator lacks candidate.manage
+PASS: payroll_operator lacks interview.manage
+PASS: payroll_operator lacks assessment.manage
+PASS: payroll_operator lacks jobs.read
+PASS: payroll_operator lacks users.manage
+PASS: payroll_operator lacks settings.manage
+PASS: payroll_operator lacks audit.read
+PASS: interviewer has prehire.read
+PASS: interviewer has interview.manage
+PASS: interviewer lacks candidates.read
+PASS: interviewer lacks candidate.manage
+PASS: interviewer lacks jobs.create
+PASS: interviewer lacks jobs.publish
+PASS: interviewer lacks assessment.manage
+PASS: interviewer lacks offer.send
+PASS: interviewer lacks users.manage
+PASS: interviewer lacks settings.manage
+PASS: interviewer lacks payroll.read
+PASS: interviewer lacks report.export
+PASS: interviewer is assignment-scoped role
+PASS: recruiter is not assignment-scoped
+PASS: interviewer actions exclude cancel/schedule/assign
+PASS: owner has no assessment.publish default
+PASS: owner has no offer.hire_override default
+PASS: owner has no employees.manage default
+PASS: hr_admin has no assessment.publish default
+PASS: hr_admin has no offer.hire_override default
+PASS: hr_admin has no employees.manage default
+PASS: hr_manager has no assessment.publish default
+PASS: hr_manager has no offer.hire_override default
+PASS: hr_manager has no employees.manage default
+PASS: manager has no assessment.publish default
+PASS: manager has no offer.hire_override default
+PASS: manager has no employees.manage default
+PASS: recruiter has no assessment.publish default
+PASS: recruiter has no offer.hire_override default
+PASS: recruiter has no employees.manage default
+PASS: hiring_manager has no assessment.publish default
+PASS: hiring_manager has no offer.hire_override default
+PASS: hiring_manager has no employees.manage default
+PASS: interviewer has no assessment.publish default
+PASS: interviewer has no offer.hire_override default
+PASS: interviewer has no employees.manage default
+PASS: payroll_operator has no assessment.publish default
+PASS: payroll_operator has no offer.hire_override default
+PASS: payroll_operator has no employees.manage default
+PASS: viewer has no assessment.publish default
+PASS: viewer has no offer.hire_override default
+PASS: viewer has no employees.manage default
+PASS: admin still maps to Company Admin/owner
+PASS: hr_admin does NOT map to owner
+ALL WAVE1 ROLE CHECKS PASSED

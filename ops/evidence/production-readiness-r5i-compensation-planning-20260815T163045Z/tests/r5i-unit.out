@@ -1,0 +1,114 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5I — compensation planning surface (unit)
+      PASS  comp planning customer enableable
+      PASS  comp planning customer visible
+      PASS  JA still enableable (hard dep)
+      PASS  engagement still enableable
+      PASS  workforce planning still hidden
+      PASS  comp planning is catalog SKU
+      PASS  comp planning people_surface off
+      PASS  comp planning audience is hr
+      PASS  comp planning has no employee app surface
+      PASS  comp planning domain_authority_ready
+      PASS  comp planning http_ready
+      PASS  comp planning hr_web_ready
+      PASS  comp planning employee surface not required
+      PASS  comp planning employee surface not ready
+      PASS  comp planning manager surface not required
+      PASS  comp planning manager surface ready (optional)
+      PASS  comp planning mobile not required
+      PASS  comp planning mobile not ready
+      PASS  comp planning depends on JA
+      PASS  fail-closed skips comp planning namespaces
+      PASS  fail-closed keeps workforce planning
+      PASS  plan ≠ salary change
+      PASS  salary change ≠ payroll
+      PASS  payroll ≠ paid
+      PASS  finalized ≠ applied
+      PASS  eligible ≠ increase
+      PASS  grade ≠ band
+      PASS  range ≠ salary
+      PASS  recommendation ≠ approval
+      PASS  original preserved
+      PASS  JA is hard
+      PASS  no duplicate grades
+      PASS  no FX
+      PASS  KWD explicit
+      PASS  performance optional
+      PASS  rating not automatic
+      PASS  talent optional
+      PASS  HiPo not automatic
+      PASS  empty manager is zero rows
+      PASS  assistant mutations out
+      PASS  C6 remains canonical
+      PASS  Setup remounts Comp Planning
+      PASS  Setup still remounts Engagement
+      PASS  Setup still remounts JA
+      PASS  Setup still omits Workforce Planning
+      PASS  PostHire mounts Comp Planning workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace names plan boundary
+      PASS  workspace names eligible boundary
+      PASS  workspace names finalized boundary
+      PASS  workspace names KWD
+      PASS  403 is not empty-cycles copy
+      PASS  403 copy is not No compensation changes
+      PASS  Page includes compensation-planning
+      PASS  nav.compensation-planning registered
+      PASS  nav allows manager or read
+      PASS  comp_planning is a canonical posthire SKU
+      PASS  comp_planning is not a people-360 module
+      PASS  app registers Comp Planning HTTP
+      PASS  comp_planning.read permission exists
+      PASS  comp_planning.manage permission exists
+      PASS  comp_planning.recommend permission exists
+      PASS  comp_planning.calibrate permission exists
+      PASS  comp_planning.approve permission exists
+      PASS  comp_planning.finalize permission exists
+      PASS  comp_planning.export permission exists
+      PASS  comp_planning.manager permission exists
+      PASS  notification flow compensation_planning
+      PASS  manager fixture has comp_planning.manager
+      PASS  manager fixture has no comp_planning.manage
+      PASS  viewer fixture has no comp_planning admin
+      PASS  HR full has comp_planning.read
+      PASS  HTTP mentions /dashboard/compensation-planning
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /cycles
+      PASS  HTTP mentions /eligibility
+      PASS  HTTP mentions /budgets
+      PASS  HTTP mentions /bands
+      PASS  HTTP mentions /worksheet
+      PASS  HTTP mentions /recommendations
+      PASS  HTTP mentions /calibrate
+      PASS  HTTP mentions /approve
+      PASS  HTTP mentions /finalize
+      PASS  HTTP mentions /finalized
+      PASS  HTTP mentions /handoffs
+      PASS  HTTP mentions /execution
+      PASS  HTTP mentions /history
+      PASS  HTTP mentions /export
+      PASS  HTTP mentions /manager
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP derives actor_key from context
+      PASS  HTTP refuses manager admin workspace
+      PASS  no Employee App compensation namespace
+      PASS  no HR Mobile compensation namespace
+      PASS  notification copy has no salary
+      PASS  notification text does not leak salary values
+      PASS  no second compensation model
+      PASS  no frontend math authority
+      PASS  handoff idempotent wrapper
+      PASS  assistant wrapper exists
+      PASS  no local grade table
+      PASS  no employee hub
+      PASS  no employee compensation dir
+      PASS  no HR mobile compensation dir
+      PASS  fail-closed no longer steals Compensation Planning
+      PASS  workforce planning still fail-closed
+
+    108 passed, 0 failed
+R5I_COMPENSATION_PLANNING_SURFACE_UNIT_PASS

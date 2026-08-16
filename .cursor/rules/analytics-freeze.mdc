@@ -1,0 +1,32 @@
+---
+description: Analytics Wave 1 Attention Contract freeze — do not reopen without owner change-control
+globs: apps/wathefni-dashboard/src/posthire/PostHire.tsx,wathefni-orchestrator/analytics_attention_wave1.py,wathefni-orchestrator/app.py,wathefni-orchestrator/assistant_capability_catalog.py
+alwaysApply: false
+---
+
+# Analytics Wave 1 freeze
+
+Analytics Attention Contract is **production-qualified under synthetic-only posture** and **frozen**. See `ops/ANALYTICS_WAVE1_ATTENTION_FREEZE.md`.
+
+## Final posture (do not weaken)
+
+- Read-only; not money authority
+- `WATHEFNI_ANALYTICS_WAVE1=1` + `SYNTHETIC_ONLY=1` (markers `ANW1`, phones `965540*`)
+- Hiring Reports remain separate
+- Alerts & Delivery owns communication/delivery
+- No AI, Compliance metrics, or payroll cost analytics in Analytics
+
+## Hard bans
+
+1. **Do not add AI** inside Analytics.
+2. **Do not add Compliance metrics** to Analytics (Compliance is a separate roadmap module).
+3. **Do not add payroll money / cost analytics** or imply money authority from hours-above-schedule.
+4. **Do not weaken dashboard actor identity** (`viewer_user_id` / `actor_role`) on analytics reads.
+5. **Do not change frozen module contracts** to unblock Analytics.
+6. **Do not start Analytics Wave 2** without owner-approved change-control.
+
+## Allowed without a new wave
+
+- Bugfixes restoring freeze invariants
+- Ops evidence / documentation
+- `smoke-test-analytics-freeze-regression.py`

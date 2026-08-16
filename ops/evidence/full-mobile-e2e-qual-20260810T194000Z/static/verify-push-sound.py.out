@@ -1,0 +1,14 @@
+PASS  exists wathefni_default.wav
+PASS  exists wathefni_default.caf
+PASS  exists universfield-new-notification-040-493469.mp3
+PASS  wav is linear PCM s16le (iOS-safe)
+PASS  wav 44.1 kHz
+PASS  wav duration 1.07s <= 30s
+PASS  duration preserved from source
+PASS  app.json bundles wathefni_default.wav
+PASS  app.json defaultChannel wathefni_default_v2
+PASS  Android channel wired
+PASS  foreground plays sound
+PASS  orchestrator Expo payload uses wathefni_default.wav
+PASS  orchestrator Expo payload sets channelId
+PASS push sound (13 checks)

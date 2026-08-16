@@ -1,0 +1,11 @@
+{
+  "blocker": false,
+  "category": "voyage",
+  "detail": "Real Voyage not authorized/credentialed in this environment; mock provider used",
+  "gate_id": "voyage_real",
+  "metrics": {
+    "api_key_present": false,
+    "voyage_enabled": false
+  },
+  "status": "ACCEPTED_LIMITATION"
+}

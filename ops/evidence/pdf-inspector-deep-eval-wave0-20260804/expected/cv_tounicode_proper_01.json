@@ -1,0 +1,23 @@
+{
+  "fixture_id": "cv_tounicode_proper_01",
+  "category": "cid_tounicode",
+  "language": "ar_en",
+  "layout": "single_column",
+  "pdf_nature": "digital_text_tounicode",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Nadia Faris",
+    "nadia.faris@example.com",
+    "نادية فارس",
+    "café"
+  ],
+  "expected_fields": {
+    "full_name": "Nadia Faris",
+    "email": "nadia.faris@example.com",
+    "phone": "+96554445566"
+  },
+  "notes": "Proper embedded TrueType with Unicode text; should NOT need OCR.",
+  "sha256": "32c4bf880b45bddb42eba47421af6be0afd4d9f272289238e7c73e60a7ff6341",
+  "bytes": 44655
+}

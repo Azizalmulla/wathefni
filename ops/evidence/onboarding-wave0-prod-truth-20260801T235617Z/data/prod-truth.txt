@@ -1,0 +1,73 @@
+=== FLAGS ===
+WATHEFNI_DOC_UPLOAD=on
+WATHEFNI_OUTBOUND_LAYER=on
+WATHEFNI_OUTBOUND_FLOWS=leave_decision,onboarding,compliance,shift
+WATHEFNI_OUTBOUND_TEMPLATES=off
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+-- /etc/systemd/system/wathefni-orchestrator.service.d/doc-upload.conf
+Environment=WATHEFNI_DOC_UPLOAD=on
+-- /etc/systemd/system/wathefni-orchestrator.service.d/outbound-layer.conf
+# Enabled flows: leave_decision, onboarding, compliance, shift — each routes
+Environment=WATHEFNI_OUTBOUND_FLOWS=leave_decision,onboarding,compliance,shift
+-- /etc/systemd/system/wathefni-orchestrator.service.d/setup-console-v2.conf
+Environment=WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_DOC_UPLOAD=on
+WATHEFNI_EMPLOYEE_APP=on
+WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST=WATHEFNI-96550252254
+WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST=on
+WATHEFNI_ONBOARDING_SEED=off
+WATHEFNI_OUTBOUND_FLOWS=leave_decision,onboarding,compliance,shift
+=== MODULE ===
+onboarding_seed_enabled False
+onboarding_hr_mutate_enabled False
+doc_upload_enabled False
+employee_app_enabled False
+outbound_onboarding False
+company_has_onboarding_module True
+ONBOARDING_ITEMS_COLS [{"column_name": "employee_key", "data_type": "text"}, {"column_name": "item_id", "data_type": "text"}, {"column_name": "label", "data_type": "text"}, {"column_name": "item_type", "data_type": "text"}, {"column_name": "required", "data_type": "boolean"}, {"column_name": "document_type", "data_type": "text"}, {"column_name": "status", "data_type": "text"}, {"column_name": "value", "data_type": "text"}, {"column_name": "local_path", "data_type": "text"}, {"column_name": "drive_file_id", "data_type": "text"}, {"column_name": "drive_url", "data_type": "text"}, {"column_name": "expiry_date", "data_type": "date"}, {"column_name": "raw_json", "data_type": "jsonb"}, {"column_name": "created_at", "data_type": "timestamp with time zone"}, {"column_name": "updated_at", "data_type": "timestamp with time zone"}, {"column_name": "storage_provider", "data_type": "text"}, {"column_name": "storage_object_key", "data_type": "text"}, {"column_name": "external_file_id", "data_type": "text"}, {"column_name": "storage_url", "data_type": "text"}, {"column_name": "content_sha256", "data_type": "text"}, {"column_name": "mime_type", "data_type": "text"}, {"column_name": "stored_at", "data_type": "timestamp with time zone"}, {"column_name": "storage_status", "data_type": "text"}, {"column_name": "storage_error", "data_type": "text"}, {"column_name": "reminder_count", "data_type": "integer"}, {"column_name": "last_reminded_at", "data_type": "timestamp with time zone"}, {"column_name": "escalated_at", "data_type": "timestamp with time zone"}, {"column_name": "category", "data_type": "text"}, {"column_name": "owner", "data_type": "text"}, {"column_name": "sort_order", "data_type": "integer"}]
+has_onboarding_items 1
+employees_total 4
+by_status [{"s": "in_progress", "n": 4}]
+onboarding_items_total 19
+employees_with_items 4
+item_status [{"s": "pending", "n": 17}, {"s": "received", "n": 2}]
+active_cases [{"employee_key": "WATHEFNI-96550252254", "name": "Talal Fadhli", "onboarding_status": "in_progress", "employment_status": "active", "items": 6, "pending_required": 4}, {"employee_key": "WATHEFNI-96597727743", "name": "mohammad alqattan", "onboarding_status": "in_progress", "employment_status": "active", "items": 6, "pending_required": 2}, {"employee_key": "WATHEFNI-96599411617", "name": "Brian Saleh", "onboarding_status": "in_progress", "employment_status": "active", "items": 1, "pending_required": 1}, {"employee_key": "WATHEFNI-96566363363", "name": "Fouad Burhamad", "onboarding_status": "in_progress", "employment_status": "active", "items": 6, "pending_required": 4}]
+orphan_items 0
+in_progress_zero_items 0
+completed_but_pending_required 0
+hire_ops []
+four_reals [{"employee_key": "WATHEFNI-96550252254", "name": "Talal Fadhli", "onboarding_status": "in_progress", "items": 6}, {"employee_key": "WATHEFNI-96566363363", "name": "Fouad Burhamad", "onboarding_status": "in_progress", "items": 6}, {"employee_key": "WATHEFNI-96597727743", "name": "mohammad alqattan", "onboarding_status": "in_progress", "items": 6}, {"employee_key": "WATHEFNI-96599411617", "name": "Brian Saleh", "onboarding_status": "in_progress", "items": 1}]
+users_by_role [{"role": "owner", "count": 2}, {"role": "viewer", "count": 2}]
+employee_onboarding_items_len 964
+employee_onboarding_items_has_candidates_read True
+employee_onboarding_items_snippet def employee_onboarding_items(employee_key: str) -> list[dict[str, Any]]:
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT item_id, label, item_type, required, document_type, status, value,
+                       storage_provider, storage_status, storage_url, drive_url,
+                       reminder_count, last_reminded_at, escalated_at, updated_at
+                FROM onboarding_items
+                WHERE employee_key=%s
+                ORDER BY required DESC, created_at ASC
+                """,
+                (employee_key,),
+            )
+            recruiters = []
+            for source_user in cur.fetchall():
+                user = dict(source_user)
+                if "candidates.read" not in das
+=== OPENAPI onboarding ===
+/app/onboarding
+/app/onboarding/documents
+/dashboard/mobile/onboarding
+/dashboard/mobile/onboarding/{employee_key}
+/dashboard/mobile/onboarding/{employee_key}/review
+/dashboard/posthire/onboarding
+/dashboard/posthire/onboarding/{employee_key}
+/orchestrator/onboarding/seed-missing
+count 8

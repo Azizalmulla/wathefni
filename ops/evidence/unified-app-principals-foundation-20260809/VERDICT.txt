@@ -1,0 +1,7 @@
+PASS
+build=fa70005b-6eb4-4481-860f-9c4013d92a93
+version=0.3.0
+buildNumber=23
+bundle=ai.wathefni.employee
+hr_workspace=1
+sdk=54_backport_hr

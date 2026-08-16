@@ -1,0 +1,40 @@
+auth wave1 freeze unit
+  PASS  invite TTL 24h
+  PASS  max OTP attempts 5
+  PASS  resend cooldown 60s
+  PASS  access TTL 7d
+  PASS  refresh TTL 180d
+  PASS  route @app.post("/app/auth/activate")
+  PASS  route @app.post("/app/auth/request-code")
+  PASS  route @app.post("/app/auth/refresh")
+  PASS  route @app.post("/app/auth/logout")
+  PASS  new-device revoke reason frozen
+  PASS  logout revoke reason frozen
+  PASS  session_epoch stale reason frozen
+  PASS  activate uses phone aliases
+  PASS  request-code never discloses registration
+  PASS  tokens hashed only
+  SKIP  Kuwait alias live import (ModuleNotFoundError: No module named 'psycopg2')
+  PASS  phone alias helper present in source
+  PASS  phone_identity_candidates used for aliases
+  PASS  SecureStore access key
+  PASS  SecureStore refresh key
+  PASS  SecureStore WHEN_UNLOCKED only
+  PASS  no AsyncStorage import for tokens
+  PASS  save/load/clear session API
+  PASS  mobile activate hits /app/auth/activate
+  PASS  mobile refresh hits /app/auth/refresh
+  PASS  mobile logout hits /app/auth/logout
+  PASS  mobile request-code path
+  PASS  401 triggers rotate+retry
+  PASS  no expo-local-authentication dep
+  PASS  no PIN unlock module yet
+  PASS  frozen contract doc present
+  PASS  UX first-login rule documented
+  PASS  UX return rule documented
+  PASS  session.ts non-empty
+  PASS  AuthProvider.tsx non-empty
+  PASS  app.py parses
+
+35 passed, 0 failed
+AUTH_WAVE1_FREEZE_UNIT: PASS

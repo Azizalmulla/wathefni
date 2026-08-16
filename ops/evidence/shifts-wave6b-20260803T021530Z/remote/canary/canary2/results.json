@@ -1,0 +1,909 @@
+{
+  "tag": "729C2418",
+  "checks": [
+    {
+      "name": "db_is_wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave6_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave6_company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave6_synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "version_6_0_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "shw6b_synth_w6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_phone_not_synth_w6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notifications_wave6b_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notifications_wave6b_company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notifications_version_6_1_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_delivery_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w5_synth_w6b",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w4_synth_w6b",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3_gate_on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlists_empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_reminders_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_mutation_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synth_mutation_allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_rotations_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_remote_rosters_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_pam_export_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_pam_submission_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_compliance_profiles_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_payroll_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_leave_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_attendance_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_multi_channel_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_real_provider_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_mock_only_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_drafts_do_not_notify_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_payroll_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_pam_submission_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_whatsapp_channel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_teams_channel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_telegram_channel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_email_channel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "notif_honesty_sms_channel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w5_honesty_rotations_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w4_honesty_publishing_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3_honesty_templates_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_leave_balances_sql_w6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_real_provider_send_sql_n6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract_1_4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "day_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "night_template_ends_next_day",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pattern_four_on_four_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pattern_panama_223",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pattern_six_on_one_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pattern_alternating_day_night",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pattern_hitch_n_n_14_14",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pattern_custom_sequence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assign_four_on_four_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assign_alternating_day_night",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assign_hitch_n_n",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hitch_remote_metadata_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "hitch_offset_differs_from_4on4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assign_panama_223",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assign_six_on_one_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "assign_custom_sequence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_hitch_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_hitch_work_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_hitch_rest_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_hitch_travel_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_hitch_remote_fields",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_custom_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_custom_work_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_custom_rest_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_custom_travel_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_custom_standby_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_panama_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_six_on_one_off_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create_period1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "generate_draft_from_rotation_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft_rows_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "l0_written_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "L0_unchanged_after_draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft_includes_work",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft_includes_rest",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "at_least_one_work_row",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_profile_upsert",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_evaluate_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_payroll_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_ramadan_hours_warn",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_midday_restriction_warn",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_daily_hours_warning_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_weekly_rest_days_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_public_holiday_warning_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "compliance_blocks_publish_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_in_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "review_diff_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "return_to_draft_with_note",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_in_review_again",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_version1_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_created_work_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_skipped_non_work_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "published_L0_rows_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "republish_idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "test_lock_acquired",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent_publish_lock_held",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent_worker_finished",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "create_period2_overnight",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "generate_draft_from_rotation_altdn_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft2_l0_written_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_altdn_in_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "transition_altdn_approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_altdn_version_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "publish_altdn_created_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_L0_rows_via_night_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_fingerprint_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_csv_en_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_csv_ar_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_report_en_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_report_ar_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_status_manual_submission_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pam_export_submission_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "key_published_shift_found",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "keyb_published_shift_found",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_key_default_source",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_key_default_app_first",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_key_default_whatsapp_fallback",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pref_keyb_teams_preferred_upsert",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_keyb_source_employee",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_keyb_teams_preferred",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_keyb_telegram_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "plan_keyb_email_sms_available",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_schedule_published_key_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_schedule_published_key_not_dup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_key_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_key_any_delivered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_key_real_sent_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_key_first_channel_app",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_key_first_delivered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_schedule_published_key_dup_suppressed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ack_key_via_whatsapp_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ack_key_via_app_already_acked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_shift_assigned_keyb_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_keyb_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_keyb_first_channel_teams",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "drafts_do_not_notify",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "tenant_isolation_no_other_company_data",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_retry_event_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_retry1_first_attempt_failed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_retry1_real_sent_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "retry_recovers_after_fail_once",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "retry_event_delivered_after_recovery",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_terminal_event_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "deliver_terminal1_failed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_failed_reached",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "emit_pending_for_invalidate_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "shift_soft_cancelled_for_invalidate_test",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invalidate_notifications_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "invalidate_notifications_gt_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "event_status_invalidated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_assignment_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_template_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_rotation_pattern_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_rotation_assignment_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_compliance_profile_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_notification_event_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_channel_preference_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_schedule_period_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_schedule_version_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_event_count_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_residual_zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract_version",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_fps_unchanged_after_cleanup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual_total_zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "period_id": "3bbc75cf-8b08-4aca-aa9a-05013395df07",
+    "version_ids": [
+      "e2c8155b-85c9-4f60-997c-19012ae81662",
+      "d5ff4889-71a6-4a15-afcf-c72420d4f611"
+    ],
+    "shift_ids": [
+      "e8e47c48-af51-429d-a0da-1b1d44be0072",
+      "37c545b4-df66-4544-8bb1-456d0b87a9be",
+      "881ce6f0-2f82-41d0-b448-c5e393cb232a",
+      "e36cd29c-a049-47c4-999a-2e1afc25a375",
+      "02523b53-619b-46ec-9c8b-1738403d188b",
+      "a8dfd89e-56b7-4f40-8a93-88b806682218",
+      "53cd1b81-359a-484a-9146-7a4899fedc5e",
+      "47ae6c7d-beb5-4419-98af-25dc1efe6c7c",
+      "3bb61a34-e7ec-4155-95e0-3cafb5896493",
+      "e5bee3b9-732c-4341-b6ec-46871fb527ac",
+      "e278346a-306e-466a-80fc-769a5c826026",
+      "3a9aba68-4a85-4f22-b17b-39c158cc63a0",
+      "29b512fe-e4ef-455b-b0f4-7508c97c7826",
+      "641c4148-f28b-4738-ba7d-a415e3e6f8d4",
+      "0d17a9ac-aef0-4473-994a-3a6edccf477e",
+      "e59b436a-1d04-4594-b0a9-05b9d043ae1f"
+    ],
+    "employees": [
+      "WATHEFNI-SHW6B-729C2418",
+      "WATHEFNI-SHW6B-B-729C2418"
+    ],
+    "day_template": "b58c3a9c-c84b-4589-981a-48cadeeca4c4",
+    "night_template": "b0622349-996f-464c-a522-ca158dcbc846",
+    "patterns": {
+      "four_on_four_off": "56c6fe5c-4da8-4500-8596-9da9432a3ec8",
+      "panama_223": "7a75fdda-5a60-4d77-b3ae-d7f767fc2fad",
+      "six_on_one_off": "91d86376-b383-4314-8820-e54d24ae3ef3",
+      "alternating_day_night": "a67c3541-5b2b-41d1-9a1e-37f8f6b31e6c",
+      "hitch_n_n": "c15529bb-1c56-4b6c-b430-12f7620af1c5",
+      "custom_sequence": "b95ab1da-f658-4f5f-99b6-2bf7ad15087b"
+    },
+    "events": {
+      "key": "cf82c063-da16-4029-8cd3-f46c585ea430",
+      "keyb": "a4925b96-209a-4934-be16-0695e71d95c3",
+      "retry": "10129c22-9aea-4154-a96e-1c4c69fb229c",
+      "terminal": "61f34582-28cf-4786-bac3-f3849486cc5a"
+    }
+  },
+  "fps_before_counts": {
+    "assignments": 81,
+    "templates": 0,
+    "rotation_patterns": 0,
+    "rotation_assignments": 0,
+    "compliance_profiles": 0,
+    "notification_events": 0,
+    "channel_preferences": 0,
+    "schedule_periods": 0,
+    "schedule_versions": 0,
+    "events": 115
+  },
+  "passed": 169,
+  "failed": 0
+}

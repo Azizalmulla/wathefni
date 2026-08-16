@@ -1,0 +1,6 @@
+staging_health=200
+      PASS  live health
+      PASS  live /dashboard/posthire/talent/role-fit/sets not public
+      PASS  live /dashboard/posthire/talent/role-fit/evaluations not public
+      PASS  live /dashboard/posthire/talent/models not public
+    LIVE_SERVICE 4 passed, 0 failed

@@ -1,0 +1,75 @@
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+CAPTURE_INGEST_OFF_OK
+MUTATIONS_OFF_OK
+WAVE1_ON_OK
+[PASS] wave1 enabled
+[PASS] wathefni company
+[PASS] external denied
+[PASS] mutations off
+[PASS] master kill off
+[PASS] no payroll money
+[PASS] no attendance ingest
+[PASS] no whatsapp widen
+[PASS] no ck wiring
+[PASS] no mutations honesty
+[PASS] default inbox entry
+[PASS] hr dashboard only
+[PASS] ingest env off
+[PASS] production db
+[PASS] audit event written
+[PASS] tool action inbox
+[PASS] tool employee 360
+[PASS] tool setup readiness
+[PASS] mutation approve_leave hidden
+[PASS] mutation export_payroll hidden
+[PASS] whatsapp spine tools hidden
+[PASS] external spine tools hidden
+[PASS] inbox tool ran
+[PASS] inbox freshness
+[PASS] inbox authority label
+[PASS] inbox citations list
+[PASS] inbox no mutate
+[PASS] inbox proposed actions prepare-only
+[PASS] setup readiness ran
+[PASS] setup freshness
+[PASS] setup authority
+[PASS] setup payroll money false
+[PASS] setup attendance ingest false
+[PASS] e360 asks for subject or returns envelope
+[PASS] e360 missing/partial authority
+[PASS] e360 keyed summary
+[PASS] e360 citations
+[PASS] e360 no mutate
+[PASS] tenant isolation inbox
+[PASS] permission denial
+[PASS] fallback en missing
+[PASS] fallback ar missing
+[PASS] fallback en stale
+[PASS] fallback ar stale
+[PASS] fallback en partial
+[PASS] fallback ar partial
+[PASS] fallback en unavailable
+[PASS] fallback ar unavailable
+[PASS] fallback en blocked
+[PASS] fallback ar blocked
+[PASS] fallback en unsupported
+[PASS] fallback ar unsupported
+[PASS] fallback en mutations_killed
+[PASS] fallback ar mutations_killed
+[PASS] mutation denial status
+[PASS] approve_leave is mutation
+[PASS] inbox not mutation
+[PASS] orchestrator has pending block
+[PASS] master kill engaged
+[PASS] master kill intent
+[PASS] master kill ar
+[PASS] master kill cleared
+[PASS] whatsapp executor denied
+[PASS] canary events deleted
+[PASS] residual canary 0
+[PASS] durable ack retained
+{"pass": 66, "fail": 0, "tag": "f4a5069e", "residual": 0, "ack_count": 3, "mutations_allowed": false, "inbox_authority": "partial", "setup_overall": "live_controlled"}

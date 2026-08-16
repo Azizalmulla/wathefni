@@ -1,0 +1,247 @@
+[
+  {
+    "id": "one_module_prehire",
+    "label": "One enabled module (pre_hiring)",
+    "modules": [
+      "pre_hiring"
+    ],
+    "role": "owner",
+    "nav_groups": [
+      "prehire",
+      "settings"
+    ],
+    "nav_ids": [
+      "overview",
+      "ai",
+      "jobs",
+      "candidates",
+      "interviews",
+      "ranking",
+      "reports",
+      "notifications",
+      "activity",
+      "settings"
+    ],
+    "overview_layout": "two",
+    "offerable_tabs": {
+      "video_interviews": false
+    },
+    "settings": {
+      "team": true,
+      "integrations": true
+    }
+  },
+  {
+    "id": "two_modules",
+    "label": "Two modules (pre_hiring + assessments)",
+    "modules": [
+      "pre_hiring",
+      "assessments"
+    ],
+    "role": "owner",
+    "nav_groups": [
+      "prehire",
+      "settings"
+    ],
+    "nav_ids": [
+      "overview",
+      "ai",
+      "jobs",
+      "candidates",
+      "interviews",
+      "assessments",
+      "ranking",
+      "reports",
+      "notifications",
+      "activity",
+      "settings"
+    ],
+    "overview_layout": "three",
+    "offerable_tabs": {
+      "video_interviews": false
+    },
+    "settings": {
+      "team": true,
+      "integrations": true
+    }
+  },
+  {
+    "id": "three_four_modules",
+    "label": "Three to four modules",
+    "modules": [
+      "pre_hiring",
+      "assessments",
+      "interviews",
+      "calendar"
+    ],
+    "role": "owner",
+    "nav_groups": [
+      "prehire",
+      "settings"
+    ],
+    "nav_ids": [
+      "overview",
+      "ai",
+      "jobs",
+      "candidates",
+      "interviews",
+      "calendar",
+      "assessments",
+      "ranking",
+      "reports",
+      "notifications",
+      "activity",
+      "settings"
+    ],
+    "overview_layout": "three",
+    "offerable_tabs": {
+      "video_interviews": false
+    },
+    "settings": {
+      "team": true,
+      "integrations": true
+    }
+  },
+  {
+    "id": "full_prehiring",
+    "label": "Full pre-hiring",
+    "modules": [
+      "pre_hiring",
+      "assessments",
+      "interviews",
+      "video_interviews",
+      "calendar"
+    ],
+    "role": "owner",
+    "nav_groups": [
+      "prehire",
+      "settings"
+    ],
+    "nav_ids": [
+      "overview",
+      "ai",
+      "jobs",
+      "candidates",
+      "interviews",
+      "calendar",
+      "assessments",
+      "ranking",
+      "reports",
+      "notifications",
+      "activity",
+      "settings"
+    ],
+    "overview_layout": "three",
+    "offerable_tabs": {
+      "video_interviews": true
+    },
+    "settings": {
+      "team": true,
+      "integrations": true
+    }
+  },
+  {
+    "id": "posthire_only",
+    "label": "Post-hire only",
+    "modules": [
+      "onboarding",
+      "attendance",
+      "leave",
+      "payroll"
+    ],
+    "role": "owner",
+    "nav_groups": [
+      "posthire",
+      "settings"
+    ],
+    "nav_ids": [
+      "ai",
+      "employees",
+      "onboarding",
+      "attendance",
+      "leave",
+      "payroll",
+      "notifications",
+      "activity",
+      "settings"
+    ],
+    "overview_layout": "none",
+    "offerable_tabs": {
+      "video_interviews": false
+    },
+    "settings": {
+      "team": true,
+      "integrations": true
+    }
+  },
+  {
+    "id": "mixed",
+    "label": "Mixed pre/post-hire",
+    "modules": [
+      "pre_hiring",
+      "assessments",
+      "leave",
+      "attendance"
+    ],
+    "role": "owner",
+    "nav_groups": [
+      "prehire",
+      "posthire",
+      "settings"
+    ],
+    "nav_ids": [
+      "overview",
+      "ai",
+      "jobs",
+      "candidates",
+      "interviews",
+      "assessments",
+      "ranking",
+      "reports",
+      "employees",
+      "attendance",
+      "leave",
+      "notifications",
+      "activity",
+      "settings"
+    ],
+    "overview_layout": "three",
+    "offerable_tabs": {
+      "video_interviews": false
+    },
+    "settings": {
+      "team": true,
+      "integrations": true
+    }
+  },
+  {
+    "id": "restricted_recruiter",
+    "label": "Restricted recruiter vs owner",
+    "modules": [
+      "pre_hiring",
+      "assessments",
+      "interviews",
+      "leave",
+      "payroll"
+    ],
+    "role": "recruiter",
+    "nav_groups": [
+      "prehire",
+      "settings"
+    ],
+    "nav_ids": [
+      "jobs",
+      "candidates",
+      "interviews",
+      "notifications"
+    ],
+    "overview_layout": "two",
+    "offerable_tabs": {
+      "video_interviews": false
+    },
+    "settings": {
+      "team": false,
+      "integrations": false
+    }
+  }
+]

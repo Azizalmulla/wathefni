@@ -1,0 +1,357 @@
+[
+  {
+    "name": "p4a version",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "preview only",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no invented rates",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no legal claim",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "mode a locked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "native pdf locked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "payment disabled",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "remittance not payment",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos not auto payable",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "no speculative gcc",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "invariant no invented",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "invariant pifss distinct",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "invariant eos settlement",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "boundary A exists",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "boundary D remittance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p4b inputs listed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p1 preserved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p2 preserved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p3 preserved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "legal approve refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "draft package",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "invented rate refused",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "awaiting legal validation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "architecture package",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "architecture never legal_claim",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot v1 fixture",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot v2 fixture",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "effective-date selects v1",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "effective-date selects v2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "missing legal approved fails closed",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "p3 legal rate still none",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "family rest_day_work",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "family public_holiday_work",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "family sick_leave_fractions",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "family eos_indemnity",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "family pifss",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot not collapsible to B",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss rule resolved",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss employee_deduction",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss employer_contribution",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss remittance_obligation",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss EE is A",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss ER is B",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "pifss remit is D",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "supersede ot v2",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "superseded not selected",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot v3 after supersede",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has ot",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has rest",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has ph",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has sick",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has pifss",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has A",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has B",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval has D",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eval never legal_claim",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "ot/rest/ph remain separate",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "legal eval blocked",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sick engine lines",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "sick provenance rule",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos settlement created",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos output class C",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos not auto pay",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos preview authority",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos never legal_claim",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos has rule provenance",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos provisional architecture amount",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "eos legal path blocked/awaiting",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "workspace ok",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "workspace p4b inputs",
+    "ok": true,
+    "detail": null
+  }
+]

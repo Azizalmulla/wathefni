@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/opt/wathefni/orchestrator/canary-prod-attendance-wave3.py", line 935, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/wathefni/orchestrator/canary-prod-attendance-wave3.py", line 202, in main
+    auth_store = auth_pg.PostgresAuthorityStore()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: PostgresAuthorityStore.__init__() missing 1 required positional argument: 'connect'
+PASS  production database
+PASS  ops enabled
+PASS  ops companies WATHEFNI
+PASS  ops store postgres
+PASS  ops synthetic only
+PASS  authority synthetic only
+PASS  capture ingest off
+PASS  app capture ingest off
+PASS  import off
+PASS  synthetic employee allowed
+PASS  real denied ops 66363363
+PASS  real denied authority 66363363
+PASS  real denied ops 97727743
+PASS  real denied authority 97727743
+PASS  real denied ops 50252254
+PASS  real denied authority 50252254
+PASS  real denied ops 99411617
+PASS  real denied authority 99411617
+PASS  baseline 42 attendance rows
+PASS  four reals present

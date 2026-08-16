@@ -1,0 +1,1215 @@
+[walk] hr session for azizalmulla16@gmail.com role=owner
+PASS T0 baseline (bank applied): completed employee leaves the onboarding queue :: {"drawer_state": "completed"}
+PASS T0 baseline (bank applied): all surfaces report one state :: {"hr_queue": {"state": "completed", "satisfied": 0, "required": 0, "owner": null}, "hr_drawer": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}, "employee_app": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}, "employee_profile": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}}
+PASS T0 baseline (bank applied): a second HR drawer read does not change anything :: {"first": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none", "bank": "accepted"}, "second": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none", "bank": "accepted"}}
+PASS T0 baseline (bank applied): bank item agrees between HR and the employee app :: {"hr": "accepted", "app": "accepted"}
+[walk] T0 baseline (bank applied): state=completed 4/4 owner=none bank=accepted
+PASS T1: employee submits a bank change :: {"http": 200, "detail": null}
+PASS T1: submission returns a request id :: "462ac1d6-2dd2-4f2d-986a-192bb341f947"
+PASS T1 submitted (with HR): all surfaces report one state :: {"hr_queue": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "hr_drawer": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_app": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_profile": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}}
+PASS T1 submitted (with HR): a second HR drawer read does not change anything :: {"first": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}, "second": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}}
+PASS T1 submitted (with HR): bank item agrees between HR and the employee app :: {"hr": "processing", "app": "processing"}
+[walk] T1 submitted (with HR): state=reopened 3/4 owner=hr bank=processing
+PASS T2: HR returns the request for correction :: {"http": 200, "detail": null}
+PASS T2 returned (waiting on employee): all surfaces report one state :: {"hr_queue": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "employee"}, "hr_drawer": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "employee"}, "employee_app": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "employee"}, "employee_profile": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "employee"}}
+PASS T2 returned (waiting on employee): a second HR drawer read does not change anything :: {"first": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "employee", "bank": "replacement_required"}, "second": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "employee", "bank": "replacement_required"}}
+PASS T2 returned (waiting on employee): bank item agrees between HR and the employee app :: {"hr": "replacement_required", "app": "replacement_required"}
+[walk] T2 returned (waiting on employee): state=reopened 3/4 owner=employee bank=replacement_required
+PASS T2: the correction reason HR wrote is the one shown :: "Walkthrough: please correct the account holder name and resubmit."
+PASS T2: the employee sees bank under their own actions :: {"your_actions": ["bank_details"], "being_reviewed": ["offer_letter"], "handled_by_others": [], "completed": ["civil_id", "personal_photo", "employment_contract"]}
+PASS T3: employee resubmits without a duplicate-request conflict :: {"http": 200, "detail": null}
+PASS T3: the correction reuses the same request, preserving audit history :: {"original": "462ac1d6-2dd2-4f2d-986a-192bb341f947", "resubmit": "462ac1d6-2dd2-4f2d-986a-192bb341f947"}
+PASS T3 resubmitted (with HR): all surfaces report one state :: {"hr_queue": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "hr_drawer": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_app": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_profile": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}}
+PASS T3 resubmitted (with HR): a second HR drawer read does not change anything :: {"first": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}, "second": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}}
+PASS T3 resubmitted (with HR): bank item agrees between HR and the employee app :: {"hr": "processing", "app": "processing"}
+[walk] T3 resubmitted (with HR): state=reopened 3/4 owner=hr bank=processing
+PASS T3: the stale correction reason is cleared once resubmitted
+PASS T4: HR approves (first stage) :: {"http": 200, "detail": null}
+PASS T4: the request moves to payroll approval, not straight to approved :: "pending_payroll"
+PASS T4 HR approved (pending payroll): all surfaces report one state :: {"hr_queue": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "hr_drawer": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_app": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_profile": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}}
+PASS T4 HR approved (pending payroll): a second HR drawer read does not change anything :: {"first": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}, "second": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}}
+PASS T4 HR approved (pending payroll): bank item agrees between HR and the employee app :: {"hr": "processing", "app": "processing"}
+[walk] T4 HR approved (pending payroll): state=reopened 3/4 owner=hr bank=processing
+PASS T5: payroll approves (second stage) :: {"http": 200, "detail": null}
+PASS T5: the request is approved and awaiting apply :: "approved"
+PASS T5 approved (awaiting apply): all surfaces report one state :: {"hr_queue": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "hr_drawer": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_app": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}, "employee_profile": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr"}}
+PASS T5 approved (awaiting apply): a second HR drawer read does not change anything :: {"first": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}, "second": {"state": "reopened", "satisfied": 3, "required": 4, "owner": "hr", "bank": "processing"}}
+PASS T5 approved (awaiting apply): bank item agrees between HR and the employee app :: {"hr": "processing", "app": "processing"}
+[walk] T5 approved (awaiting apply): state=reopened 3/4 owner=hr bank=processing
+PASS T6: Apply succeeds :: {"http": 200, "detail": null}
+PASS T6 applied (complete): completed employee leaves the onboarding queue :: {"drawer_state": "completed"}
+PASS T6 applied (complete): all surfaces report one state :: {"hr_queue": {"state": "completed", "satisfied": 0, "required": 0, "owner": null}, "hr_drawer": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}, "employee_app": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}, "employee_profile": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none"}}
+PASS T6 applied (complete): a second HR drawer read does not change anything :: {"first": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none", "bank": "accepted"}, "second": {"state": "completed", "satisfied": 4, "required": 4, "owner": "none", "bank": "accepted"}}
+PASS T6 applied (complete): bank item agrees between HR and the employee app :: {"hr": "accepted", "app": "accepted"}
+[walk] T6 applied (complete): state=completed 4/4 owner=none bank=accepted
+PASS T6: one Apply satisfies the bank item :: "accepted"
+PASS T6: one Apply completes onboarding on every surface :: {"drawer": "completed", "app": "completed", "profile": "completed"}
+PASS T6: no next action is claimed once complete :: "none"
+PASS T6: the completed bank item sits under Completed for the employee :: {"your_actions": [], "being_reviewed": ["offer_letter"], "handled_by_others": [], "completed": ["civil_id", "personal_photo", "employment_contract", "bank_details"]}
+PASS T6: no HR mark-complete or waive is offered on the applied bank item
+PASS T6: repeated HR reads keep onboarding complete :: {"state": "completed", "bank": "accepted"}
+PASS Talal: bank is not offered as an action he cannot take :: {"bank_actions": [], "bank_http": 403}
+PASS Talal: app checklist and profile completion agree :: {"app": {"http": 200, "state": "waiting_on_employee", "satisfied": 0, "required": 4, "owner": "employee", "bank_status": "pending", "bank_actions": [], "groups": {"your_actions": ["employment_contract", "civil_id", "personal_photo", "bank_details"], "being_reviewed": [], "handled_by_others": [], "completed": ["education_cert", "medical"]}}, "profile": {"http": 200, "state": "waiting_on_employee", "satisfied": 0, "required": 4, "owner": "employee"}}
+PASS Talal: HR drawer agrees with his app :: {"drawer": {"state": "waiting_on_employee", "satisfied": 0, "required": 4}, "app": {"state": "waiting_on_employee", "satisfied": 0, "required": 4}}
+PASS Talal: the employee app never lists work owned by others :: {"your_actions": ["employment_contract", "civil_id", "personal_photo", "bank_details"], "being_reviewed": [], "handled_by_others": [], "completed": ["education_cert", "medical"]}
+{
+  "checkpoints": [
+    {
+      "checkpoint": "T0 baseline (bank applied)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": true,
+        "state": "completed",
+        "satisfied": 0,
+        "required": 0,
+        "owner": null
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none",
+        "bank_status": "accepted",
+        "bank_actions": [],
+        "bank_reason": null
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none",
+        "bank_status": "accepted",
+        "bank_actions": [],
+        "bank_reason": null
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none",
+        "bank_status": "accepted",
+        "bank_actions": [],
+        "groups": {
+          "your_actions": [],
+          "being_reviewed": [
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract",
+            "bank_details"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none"
+      }
+    },
+    {
+      "checkpoint": "T1 submitted (with HR)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "next_owner_group": "hr"
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "open_bank"
+        ],
+        "groups": {
+          "your_actions": [],
+          "being_reviewed": [
+            "bank_details",
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr"
+      }
+    },
+    {
+      "checkpoint": "T2 returned (waiting on employee)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "next_owner_group": "employee"
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "bank_status": "replacement_required",
+        "bank_actions": [
+          "waive"
+        ],
+        "bank_reason": "Walkthrough: please correct the account holder name and resubmit."
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "bank_status": "replacement_required",
+        "bank_actions": [
+          "waive"
+        ],
+        "bank_reason": "Walkthrough: please correct the account holder name and resubmit."
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "bank_status": "replacement_required",
+        "bank_actions": [
+          "open_bank"
+        ],
+        "groups": {
+          "your_actions": [
+            "bank_details"
+          ],
+          "being_reviewed": [
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee"
+      }
+    },
+    {
+      "checkpoint": "T3 resubmitted (with HR)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "next_owner_group": "hr"
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "open_bank"
+        ],
+        "groups": {
+          "your_actions": [],
+          "being_reviewed": [
+            "bank_details",
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr"
+      }
+    },
+    {
+      "checkpoint": "T4 HR approved (pending payroll)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "next_owner_group": "hr"
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "open_bank"
+        ],
+        "groups": {
+          "your_actions": [],
+          "being_reviewed": [
+            "bank_details",
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr"
+      }
+    },
+    {
+      "checkpoint": "T5 approved (awaiting apply)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "next_owner_group": "hr"
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "review_bank"
+        ],
+        "bank_reason": null
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr",
+        "bank_status": "processing",
+        "bank_actions": [
+          "open_bank"
+        ],
+        "groups": {
+          "your_actions": [],
+          "being_reviewed": [
+            "bank_details",
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "hr"
+      }
+    },
+    {
+      "checkpoint": "T6 applied (complete)",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": true,
+        "state": "completed",
+        "satisfied": 0,
+        "required": 0,
+        "owner": null
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none",
+        "bank_status": "accepted",
+        "bank_actions": [],
+        "bank_reason": null
+      },
+      "hr_drawer_reread": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none",
+        "bank_status": "accepted",
+        "bank_actions": [],
+        "bank_reason": null
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none",
+        "bank_status": "accepted",
+        "bank_actions": [],
+        "groups": {
+          "your_actions": [],
+          "being_reviewed": [
+            "offer_letter"
+          ],
+          "handled_by_others": [],
+          "completed": [
+            "civil_id",
+            "personal_photo",
+            "employment_contract",
+            "bank_details"
+          ]
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "completed",
+        "satisfied": 4,
+        "required": 4,
+        "owner": "none"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "check": "T0 baseline (bank applied): completed employee leaves the onboarding queue",
+      "status": "proven",
+      "detail": {
+        "drawer_state": "completed"
+      }
+    },
+    {
+      "check": "T0 baseline (bank applied): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "completed",
+          "satisfied": 0,
+          "required": 0,
+          "owner": null
+        },
+        "hr_drawer": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        },
+        "employee_app": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        },
+        "employee_profile": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        }
+      }
+    },
+    {
+      "check": "T0 baseline (bank applied): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none",
+          "bank": "accepted"
+        },
+        "second": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none",
+          "bank": "accepted"
+        }
+      }
+    },
+    {
+      "check": "T0 baseline (bank applied): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "accepted",
+        "app": "accepted"
+      }
+    },
+    {
+      "check": "T1: employee submits a bank change",
+      "status": "proven",
+      "detail": {
+        "http": 200,
+        "detail": null
+      }
+    },
+    {
+      "check": "T1: submission returns a request id",
+      "status": "proven",
+      "detail": "462ac1d6-2dd2-4f2d-986a-192bb341f947"
+    },
+    {
+      "check": "T1 submitted (with HR): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "hr_drawer": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_app": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_profile": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        }
+      }
+    },
+    {
+      "check": "T1 submitted (with HR): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        },
+        "second": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        }
+      }
+    },
+    {
+      "check": "T1 submitted (with HR): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "processing",
+        "app": "processing"
+      }
+    },
+    {
+      "check": "T2: HR returns the request for correction",
+      "status": "proven",
+      "detail": {
+        "http": 200,
+        "detail": null
+      }
+    },
+    {
+      "check": "T2 returned (waiting on employee): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee"
+        },
+        "hr_drawer": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee"
+        },
+        "employee_app": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee"
+        },
+        "employee_profile": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee"
+        }
+      }
+    },
+    {
+      "check": "T2 returned (waiting on employee): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee",
+          "bank": "replacement_required"
+        },
+        "second": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee",
+          "bank": "replacement_required"
+        }
+      }
+    },
+    {
+      "check": "T2 returned (waiting on employee): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "replacement_required",
+        "app": "replacement_required"
+      }
+    },
+    {
+      "check": "T2: the correction reason HR wrote is the one shown",
+      "status": "proven",
+      "detail": "Walkthrough: please correct the account holder name and resubmit."
+    },
+    {
+      "check": "T2: the employee sees bank under their own actions",
+      "status": "proven",
+      "detail": {
+        "your_actions": [
+          "bank_details"
+        ],
+        "being_reviewed": [
+          "offer_letter"
+        ],
+        "handled_by_others": [],
+        "completed": [
+          "civil_id",
+          "personal_photo",
+          "employment_contract"
+        ]
+      }
+    },
+    {
+      "check": "T3: employee resubmits without a duplicate-request conflict",
+      "status": "proven",
+      "detail": {
+        "http": 200,
+        "detail": null
+      }
+    },
+    {
+      "check": "T3: the correction reuses the same request, preserving audit history",
+      "status": "proven",
+      "detail": {
+        "original": "462ac1d6-2dd2-4f2d-986a-192bb341f947",
+        "resubmit": "462ac1d6-2dd2-4f2d-986a-192bb341f947"
+      }
+    },
+    {
+      "check": "T3 resubmitted (with HR): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "hr_drawer": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_app": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_profile": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        }
+      }
+    },
+    {
+      "check": "T3 resubmitted (with HR): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        },
+        "second": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        }
+      }
+    },
+    {
+      "check": "T3 resubmitted (with HR): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "processing",
+        "app": "processing"
+      }
+    },
+    {
+      "check": "T3: the stale correction reason is cleared once resubmitted",
+      "status": "proven",
+      "detail": null
+    },
+    {
+      "check": "T4: HR approves (first stage)",
+      "status": "proven",
+      "detail": {
+        "http": 200,
+        "detail": null
+      }
+    },
+    {
+      "check": "T4: the request moves to payroll approval, not straight to approved",
+      "status": "proven",
+      "detail": "pending_payroll"
+    },
+    {
+      "check": "T4 HR approved (pending payroll): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "hr_drawer": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_app": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_profile": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        }
+      }
+    },
+    {
+      "check": "T4 HR approved (pending payroll): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        },
+        "second": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        }
+      }
+    },
+    {
+      "check": "T4 HR approved (pending payroll): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "processing",
+        "app": "processing"
+      }
+    },
+    {
+      "check": "T5: payroll approves (second stage)",
+      "status": "proven",
+      "detail": {
+        "http": 200,
+        "detail": null
+      }
+    },
+    {
+      "check": "T5: the request is approved and awaiting apply",
+      "status": "proven",
+      "detail": "approved"
+    },
+    {
+      "check": "T5 approved (awaiting apply): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "hr_drawer": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_app": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        },
+        "employee_profile": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr"
+        }
+      }
+    },
+    {
+      "check": "T5 approved (awaiting apply): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        },
+        "second": {
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "hr",
+          "bank": "processing"
+        }
+      }
+    },
+    {
+      "check": "T5 approved (awaiting apply): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "processing",
+        "app": "processing"
+      }
+    },
+    {
+      "check": "T6: Apply succeeds",
+      "status": "proven",
+      "detail": {
+        "http": 200,
+        "detail": null
+      }
+    },
+    {
+      "check": "T6 applied (complete): completed employee leaves the onboarding queue",
+      "status": "proven",
+      "detail": {
+        "drawer_state": "completed"
+      }
+    },
+    {
+      "check": "T6 applied (complete): all surfaces report one state",
+      "status": "proven",
+      "detail": {
+        "hr_queue": {
+          "state": "completed",
+          "satisfied": 0,
+          "required": 0,
+          "owner": null
+        },
+        "hr_drawer": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        },
+        "employee_app": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        },
+        "employee_profile": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none"
+        }
+      }
+    },
+    {
+      "check": "T6 applied (complete): a second HR drawer read does not change anything",
+      "status": "proven",
+      "detail": {
+        "first": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none",
+          "bank": "accepted"
+        },
+        "second": {
+          "state": "completed",
+          "satisfied": 4,
+          "required": 4,
+          "owner": "none",
+          "bank": "accepted"
+        }
+      }
+    },
+    {
+      "check": "T6 applied (complete): bank item agrees between HR and the employee app",
+      "status": "proven",
+      "detail": {
+        "hr": "accepted",
+        "app": "accepted"
+      }
+    },
+    {
+      "check": "T6: one Apply satisfies the bank item",
+      "status": "proven",
+      "detail": "accepted"
+    },
+    {
+      "check": "T6: one Apply completes onboarding on every surface",
+      "status": "proven",
+      "detail": {
+        "drawer": "completed",
+        "app": "completed",
+        "profile": "completed"
+      }
+    },
+    {
+      "check": "T6: no next action is claimed once complete",
+      "status": "proven",
+      "detail": "none"
+    },
+    {
+      "check": "T6: the completed bank item sits under Completed for the employee",
+      "status": "proven",
+      "detail": {
+        "your_actions": [],
+        "being_reviewed": [
+          "offer_letter"
+        ],
+        "handled_by_others": [],
+        "completed": [
+          "civil_id",
+          "personal_photo",
+          "employment_contract",
+          "bank_details"
+        ]
+      }
+    },
+    {
+      "check": "T6: no HR mark-complete or waive is offered on the applied bank item",
+      "status": "proven",
+      "detail": []
+    },
+    {
+      "check": "T6: repeated HR reads keep onboarding complete",
+      "status": "proven",
+      "detail": {
+        "state": "completed",
+        "bank": "accepted"
+      }
+    },
+    {
+      "check": "Talal: bank is not offered as an action he cannot take",
+      "status": "proven",
+      "detail": {
+        "bank_actions": [],
+        "bank_http": 403
+      }
+    },
+    {
+      "check": "Talal: app checklist and profile completion agree",
+      "status": "proven",
+      "detail": {
+        "app": {
+          "http": 200,
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4,
+          "owner": "employee",
+          "bank_status": "pending",
+          "bank_actions": [],
+          "groups": {
+            "your_actions": [
+              "employment_contract",
+              "civil_id",
+              "personal_photo",
+              "bank_details"
+            ],
+            "being_reviewed": [],
+            "handled_by_others": [],
+            "completed": [
+              "education_cert",
+              "medical"
+            ]
+          }
+        },
+        "profile": {
+          "http": 200,
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4,
+          "owner": "employee"
+        }
+      }
+    },
+    {
+      "check": "Talal: HR drawer agrees with his app",
+      "status": "proven",
+      "detail": {
+        "drawer": {
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4
+        },
+        "app": {
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4
+        }
+      }
+    },
+    {
+      "check": "Talal: the employee app never lists work owned by others",
+      "status": "proven",
+      "detail": {
+        "your_actions": [
+          "employment_contract",
+          "civil_id",
+          "personal_photo",
+          "bank_details"
+        ],
+        "being_reviewed": [],
+        "handled_by_others": [],
+        "completed": [
+          "education_cert",
+          "medical"
+        ]
+      }
+    }
+  ],
+  "failed": 0,
+  "talal": {
+    "app": {
+      "http": 200,
+      "state": "waiting_on_employee",
+      "satisfied": 0,
+      "required": 4,
+      "owner": "employee",
+      "bank_status": "pending",
+      "bank_actions": [],
+      "groups": {
+        "your_actions": [
+          "employment_contract",
+          "civil_id",
+          "personal_photo",
+          "bank_details"
+        ],
+        "being_reviewed": [],
+        "handled_by_others": [],
+        "completed": [
+          "education_cert",
+          "medical"
+        ]
+      }
+    },
+    "profile": {
+      "http": 200,
+      "state": "waiting_on_employee",
+      "satisfied": 0,
+      "required": 4,
+      "owner": "employee"
+    },
+    "drawer": {
+      "http": 200,
+      "state": "waiting_on_employee",
+      "satisfied": 0,
+      "required": 4,
+      "owner": "employee",
+      "bank_status": "pending",
+      "bank_actions": [
+        "waive"
+      ],
+      "bank_reason": null
+    },
+    "bank_http": 403,
+    "bank_eligible": false
+  }
+}
+WALKTHROUGH_OK

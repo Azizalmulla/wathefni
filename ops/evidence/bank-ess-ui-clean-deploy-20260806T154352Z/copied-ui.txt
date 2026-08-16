@@ -1,0 +1,11 @@
+/tmp/wf-bank-ess-ui-release-20260806T154352Z/apps/wathefni-dashboard/src/posthire/DocumentExtractionSummary.tsx
+/tmp/wf-bank-ess-ui-release-20260806T154352Z/apps/wathefni-dashboard/src/posthire/DocumentExtractionSummaryLoader.tsx
+
+/tmp/wf-bank-ess-ui-release-20260806T154352Z/apps/wathefni-dashboard/src/posthire/employees360:
+OnboardingCompletionStrip.tsx
+ProfilePanels.tsx
+WorkforcePage.tsx
+bankReview.ts
+chrome.test.tsx
+chrome.tsx
+onboardingCompletion.ts

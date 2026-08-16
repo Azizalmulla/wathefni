@@ -1,0 +1,66 @@
+    shifts authority wave1 — overnight + gates + concurrency + honesty
+      PASS  version pinned
+      PASS  wave1 enabled
+      PASS  WATHEFNI company allowed
+      PASS  other company gated
+      PASS  allow_overnight default true
+      PASS  overnight windows equal Attendance
+      PASS  overnight ends next calendar day
+      PASS  ends_next_day_for 22-06
+      PASS  ends_next_day_for 09-17
+      PASS  same-day normalize
+      PASS  overnight normalize
+      PASS  overnight banned
+      PASS  split abut no overlap
+      PASS  split mid overlap
+      PASS  overnight vs next-morning overlap
+      PASS  lifecycle blocks terminated
+      PASS  lifecycle blocks suspended
+      PASS  lifecycle blocks future_start
+      PASS  lifecycle blocks notice_period
+      PASS  lifecycle allows active
+      PASS  self-swap approve banned
+      PASS  other actor swap ok
+      PASS  leave conflict block
+      PASS  leave conflict require_ack
+      PASS  leave conflict ack ok
+      PASS  honesty payroll_money false
+      PASS  honesty leave_balances_mutated false
+      PASS  rest_weekdays configurable default Fri
+      PASS  synthetic marker SHW1
+      PASS  synthetic phone prefix
+      PASS  create does not touch leave_balances
+      PASS  create does not calculate payment
+      PASS  create refuses empty employee
+      PASS  overnight allowed in extract
+      PASS  self swap wired
+      PASS  dashboard reschedule expects concurrency
+      PASS  unknown employee creation fails closed
+      PASS  same-day fixed create
+      PASS  break_minutes persisted
+      PASS  site_key persisted
+      PASS  ends_next_day false for day shift
+      PASS  duplicate create idempotent
+      PASS  split morning ok
+      PASS  split afternoon ok
+      PASS  split overlap detected
+      PASS  overnight 22-06 create
+      PASS  overnight ends_next_day true
+      PASS  overnight vs next-morning overlap
+      PASS  Attendance overnight interval matches Shifts
+      PASS  approved-leave conflict requires handling
+      PASS  leave conflict ack allows create
+      PASS  cancel ok
+      PASS  duplicate cancel idempotent
+      PASS  soft-cancel status cancelled
+      PASS  append-only cancel event
+      PASS  reschedule subject created
+      PASS  stale concurrent reschedule one winner
+      PASS  orphan quarantine ok
+      PASS  restore blocked while still orphan
+      PASS  orphan quarantine reversible
+      PASS  restored shift scheduled again
+      PASS  lifecycle blocks terminated
+      PASS  tenant isolation company mismatch
+
+    63 passed, 0 failed

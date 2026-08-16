@@ -1,0 +1,34 @@
+auth wave2 phase5 device security unit
+  PASS  contract exists
+  PASS  route GET /app/device-security
+  PASS  route GET app-access
+  PASS  route POST app-access/revoke
+  PASS  activate returns replaced_previous_device
+  PASS  activate accepts platform
+  PASS  new-device clears refresh_hash
+  PASS  logout clears refresh_hash
+  PASS  hr revoke reason
+  PASS  hr revoke audited
+  PASS  hr revoke idempotent
+  PASS  device summary helper hides ids
+  PASS  no multi-device list route
+  PASS  EN device keys
+  PASS  AR device keys
+  PASS  EN/AR device key parity
+  PASS  EN replaced copy exact
+  PASS  activate sends platform
+  PASS  activate marks replaced notice
+  PASS  notice consume once
+  PASS  notice shown on signedIn
+  PASS  settings loads device-security
+  PASS  settings sign out this device
+  PASS  SettingsView device section
+  PASS  dashboard getEmployeeAppAccess
+  PASS  dashboard revokeEmployeeAppAccess
+  PASS  HR App access card
+  PASS  HR revoke wired
+  PASS  HR re-invite present
+  PASS  soft failures do not wipe
+  PASS  mobile tsc --noEmit
+
+31 passed, 0 failed

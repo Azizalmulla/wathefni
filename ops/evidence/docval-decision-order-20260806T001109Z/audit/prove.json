@@ -1,0 +1,139 @@
+{
+  "blur_sha256": "afa47900d614dd8c270369917f9d0f688800e1faf45b752898ca628d2bcc0c4f",
+  "nondoc_sha256": "cecff1e58912fa53401bb6c7b07e3390e83576ec0fe8429fc9ad08f7302627d9",
+  "blur_assess": {
+    "status": "reject",
+    "reason": "too_blurry",
+    "metrics": {
+      "width": 1583,
+      "height": 994,
+      "short_side": 994,
+      "long_side": 1583,
+      "laplacian_var": 3.366,
+      "glare_frac": 0.0,
+      "crop_hot_sides": 3
+    },
+    "engine": "pil_numpy_v1"
+  },
+  "nondoc_assess": {
+    "status": "reject",
+    "reason": "glare_or_shadow",
+    "metrics": {
+      "width": 1350,
+      "height": 900,
+      "short_side": 900,
+      "long_side": 1350,
+      "laplacian_var": 100.34,
+      "glare_frac": 0.4436,
+      "crop_hot_sides": 0
+    },
+    "engine": "pil_numpy_v1"
+  },
+  "thresholds": {
+    "BLUR_REJECT_MAX": 6.0,
+    "BLUR_BORDERLINE_MAX": 40.0,
+    "GLARE_REJECT_MIN": 0.28,
+    "GLARE_BORDERLINE_MIN": 0.18,
+    "CROP_REJECT_SIDES": 3
+  },
+  "blur_high_ocr_mock": {
+    "decision": "block",
+    "reason": "too_blurry",
+    "message_en": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "too_blurry",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1583,
+        "height": 994,
+        "short_side": 994,
+        "long_side": 1583,
+        "laplacian_var": 3.366,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 3
+      },
+      "engine": "pil_numpy_v1"
+    },
+    "verification": {
+      "detected_item": "civil_id",
+      "matches_expected_item": true,
+      "confidence": 0.97,
+      "extraction_status": "extracted"
+    }
+  },
+  "blur_live_mistral": {
+    "decision": "block",
+    "reason": "too_blurry",
+    "message_en": "This photo is too blurry to read. Please retake it closer and in focus, then try again.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "too_blurry",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1583,
+        "height": 994,
+        "short_side": 994,
+        "long_side": 1583,
+        "laplacian_var": 3.366,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 3
+      },
+      "engine": "pil_numpy_v1"
+    },
+    "verification": {
+      "detected_item": "civil_id",
+      "confidence": 0.96,
+      "matches_expected_item": true,
+      "extraction_status": "extracted",
+      "unreadable_reason": null
+    }
+  },
+  "nondoc_lifestyle_mock": {
+    "decision": "block",
+    "reason": "looks_like_photo_not_document",
+    "message_en": "That looks like a personal photo, not the requested document. Please upload the correct document.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "glare_or_shadow",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1350,
+        "height": 900,
+        "short_side": 900,
+        "long_side": 1350,
+        "laplacian_var": 100.34,
+        "glare_frac": 0.4436,
+        "crop_hot_sides": 0
+      },
+      "engine": "pil_numpy_v1"
+    }
+  },
+  "nondoc_live_mistral": {
+    "decision": "block",
+    "reason": "not_a_document",
+    "message_en": "This doesn't look like the document we asked for. Please upload a clear photo or scan of the requested document.",
+    "capture_quality": {
+      "status": "reject",
+      "reason": "glare_or_shadow",
+      "signal_reason": null,
+      "metrics": {
+        "width": 1350,
+        "height": 900,
+        "short_side": 900,
+        "long_side": 1350,
+        "laplacian_var": 100.34,
+        "glare_frac": 0.4436,
+        "crop_hot_sides": 0
+      },
+      "engine": "pil_numpy_v1"
+    },
+    "verification": {
+      "detected_item": "unknown",
+      "confidence": 0.0,
+      "matches_expected_item": false,
+      "extraction_status": "needs_review",
+      "unreadable_reason": null
+    }
+  }
+}

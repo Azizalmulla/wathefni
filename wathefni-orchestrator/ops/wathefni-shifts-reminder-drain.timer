@@ -1,0 +1,14 @@
+[Unit]
+Description=Wathefni Shifts Wave 2 reminder drain timer (DISABLED BY DEFAULT — synthetic-only)
+Documentation=file:///opt/wathefni/orchestrator/ops/runbooks/shifts-wave2b-operator-jobs.md
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=10min
+AccuracySec=1min
+Persistent=false
+RandomizedDelaySec=45
+Unit=wathefni-shifts-reminder-drain.service
+
+[Install]
+WantedBy=timers.target

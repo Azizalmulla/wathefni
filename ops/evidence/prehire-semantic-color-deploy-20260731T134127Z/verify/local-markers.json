@@ -1,0 +1,11 @@
+{
+  "dashboard": "dashboard-CsYb-K_I.js",
+  "markers": {
+    "accent-priority-soft_in_css": true,
+    "accent-assess_in_css": true,
+    "accent-paused_in_css": true,
+    "surface-raised_in_css": true,
+    "badge_priority_or_paused_in_js": true
+  },
+  "all_pass": true
+}

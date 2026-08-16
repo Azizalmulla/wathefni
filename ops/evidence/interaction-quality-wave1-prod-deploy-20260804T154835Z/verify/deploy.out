@@ -1,0 +1,65 @@
+BACKUP=/opt/wathefni/backups/production-pre-interaction-quality-wave1-20260804T154835Z
+DEPLOYED_DASHBOARD=/var/www/wathefni-dashboard/assets/dashboard-fA_AOGGG.js
+DEPLOYED_POSTHIRE=/var/www/wathefni-dashboard/assets/PostHire-BkppdKlQ.js
+BACKUP=/opt/wathefni/backups/production-pre-interaction-quality-wave1-20260804T154835Z
+PASS data-interaction-confirm
+PASS data-interaction-shell-busy
+PASS data-activity-refreshing
+PASS Working
+PASS settings ia
+PASS activity
+STATIC_GATES_OK
+PASS confirm_marker
+PASS shell_busy_marker
+PASS activity_refreshing
+PASS working_copy
+PASS no_always_refreshing_banner_only
+PASS activity_timeline
+PASS settings_ia
+PASS alerts_preserved
+IQ_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+INTERACTION_QUALITY_WAVE1_SMOKE_OK
+PASS settings_marker
+PASS ia_closure_marker
+PASS nav_marker
+PASS account_marker
+PASS team_marker
+PASS company_marker
+PASS comms_marker
+PASS integrations_marker
+PASS advanced_marker
+PASS ownership_marker
+PASS no_page_purpose_dup
+PASS nav_labels
+PASS setup_guide_collapsible
+PASS plain_legacy_label
+PASS no_ensure_legacy_copy
+PASS no_platform_integrations_title
+PASS no_c6b_jargon
+PASS arabic_surface
+PASS activity_still_present
+PASS alerts_still_present
+SETTINGS_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+SETTINGS_PAGE_WAVE1_SMOKE_OK
+PASS posthire_bundle_present — PostHire-BkppdKlQ.js
+PASS timeline_marker
+PASS list_marker
+PASS filters_marker
+PASS export_marker
+PASS details_marker
+PASS purpose_copy
+PASS no_company_activity_card
+PASS no_decorative_category_meta
+PASS rbac_admins
+PASS no_hr_managers_copy
+PASS arabic_surface
+PASS read_only_honesty
+PASS alerts_still_present
+PASS compliance_still_present
+ACTIVITY_WAVE1_DB {"db": "wathefni"}
+PASS db_readable — wathefni
+ACTIVITY_PAGE_WAVE1_SMOKE_OK
+SMOKE_OK
+DEPLOY_OK

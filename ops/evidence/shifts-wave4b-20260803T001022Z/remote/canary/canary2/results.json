@@ -1,0 +1,425 @@
+{
+  "tag": "88988BA1",
+  "checks": [
+    {
+      "name": "db_is_wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave4_enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave4_company",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave4_synthetic_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "version_4_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "shw4b_synth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_phone_not_synth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3_gate_on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "allowlists_empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_reminders_off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_mutation_blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synth_mutation_allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_templates_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_recurring_true",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_rotations_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_publishing_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_draft_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_payroll_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_leave_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "honesty_attendance_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3_honesty_templates_false",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_leave_balances_sql",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract_1_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "same_day_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "split_afternoon_template",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fixed_sun_thu_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "six_on_one_off_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "alternating_day_night_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "team_target_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "site_target_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "role_target_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "split_second_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "incomplete_target_skipped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_newly_generated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "effective_window",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_weekly_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_created_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "duplicate_materialize_idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_after_rematerialize",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "advisory_lock_acquired",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent_materialize_one_winner",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrent_worker_finished",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "alternating_materialize_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "overnight_generated_rows",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_split_pm",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_team",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_site",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_role",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "materialize_six_on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "skip_exception",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "one_off_override",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "pause_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "paused_preview_empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "resume_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_historical_generated",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancelled_held",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cancelled_does_not_return",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "manual_detach_class",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "template_edit_ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "planning_version_bumped",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "template_edit_skips_historical_current",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview_classes_present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "end_recurrence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_assignment_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_template_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_recurrence_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_exception_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_version_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_event_count_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_residual_zero",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "cleanup_contract",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real_fps_unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual_total_zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "day_template": "1ad5e255-8f71-4f4d-a63b-c1b836639c3a",
+    "night_template": "2df93218-1ec4-49de-88f2-d95e1761e28c",
+    "aft_template": "33b0a656-2850-4f5d-bc8a-df0519a5d5b6",
+    "weekly": "c10bc6b1-9620-4e00-b87e-146bd478810b",
+    "six": "b10a1afe-1618-4534-bdb1-265bd6cb4ab5",
+    "alt": "76e0536b-2a93-401b-9056-6669eead981f",
+    "team": "9bd54a0f-fa85-49d7-a0c5-5004a3c80748",
+    "site": "671ebd86-421a-4e50-8128-e16a4e7d2935",
+    "role": "86c31202-e478-42a5-af29-e6e613bee9e8",
+    "split": "bf022886-def4-4c96-af03-43558bac8412",
+    "miss": "83df9148-2536-4e46-baf5-1ff393923682",
+    "employees": [
+      "WATHEFNI-SHW4B-88988BA1",
+      "WATHEFNI-SHW4B-B-88988BA1"
+    ],
+    "weekly_created": [
+      "6e07205b-7591-4385-b212-3c40b467f18e",
+      "d2481bcd-77d5-4b38-ad38-56ccad124601",
+      "5b7776e1-bd3b-4fdf-8452-829c29ed3dc1",
+      "e7a81d4d-9f31-47e4-96c6-e154b6014333",
+      "6858415f-c450-4a9f-9d4b-11ffed8248d2",
+      "34d12220-d569-4eb3-8b37-4f9cda6c9d6f",
+      "34a871d8-069c-46f0-b5fa-5ca207c86047",
+      "98c74ac1-9dbf-4b4a-9f0b-07db0f00c2af",
+      "60bfd276-bd1b-4f1f-adf0-3df9b410a74b",
+      "64cc9969-f582-4f1c-a23f-259aafab973e",
+      "64927453-148f-4612-8292-a285bb3c3fa6",
+      "127ba9b5-81ed-40b4-802f-0d3e413fa326",
+      "c4c82055-588e-4914-a566-fa7768611580",
+      "ee23dbce-4b08-40cc-8923-7720f2ecaaa7",
+      "96785120-cccc-4b8d-b0bc-e221c0d4c36b",
+      "4f8163fa-663f-4583-9f2f-7d811f526625"
+    ]
+  },
+  "fps_before_counts": {
+    "assignments": 100,
+    "templates": 0,
+    "recurrences": 0,
+    "exceptions": 0,
+    "versions": 57,
+    "events": 146
+  },
+  "passed": 75,
+  "failed": 0
+}

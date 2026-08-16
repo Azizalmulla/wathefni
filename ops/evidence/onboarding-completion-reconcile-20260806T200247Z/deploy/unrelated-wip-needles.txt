@@ -1,0 +1,11 @@
+PRESENT: Backup access code  (SettingsPage-mIb0lVjj.js dashboard-DElmN1iD.js )
+PRESENT: Connect recruitment mailbox  (SettingsPage-mIb0lVjj.js )
+PRESENT: Launch readiness  (setupConsole-CIlSGWRL.js )
+PRESENT: Candidate intake  (SettingsPage-mIb0lVjj.js )
+PRESENT: Company control  (setupConsole-CIlSGWRL.js )
+=== pre-deploy backup (what was live before this stamp) ===
+PRESENT: Backup access code  (SettingsPage-Bo2Wey-8.js dashboard-CZudO8Ow.js )
+PRESENT: Connect recruitment mailbox  (SettingsPage-Bo2Wey-8.js )
+PRESENT: Launch readiness  (setupConsole-CHxYty0g.js )
+PRESENT: Candidate intake  (SettingsPage-Bo2Wey-8.js )
+PRESENT: Company control  (setupConsole-CHxYty0g.js )

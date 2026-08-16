@@ -1,0 +1,24 @@
+{
+  "fixture_id": "cv_scanned_en_01",
+  "category": "scanned_image_only_cv",
+  "language": "en",
+  "layout": "single_column",
+  "pdf_nature": "scanned_image_only",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [
+    1
+  ],
+  "expected_text_needles": [
+    "Scanned CV — Dana Wilkes",
+    "Email: dana.wilkes@example.com",
+    "Phone: +96551110000"
+  ],
+  "expected_fields": {
+    "full_name": "Dana Wilkes",
+    "email": "dana.wilkes@example.com",
+    "phone": "+96551110000"
+  },
+  "notes": "Rendered text embedded as image-only page; native extractors should miss needles.",
+  "sha256": "681c09d8c991aa149cbbf3d618aee635d56f98142fb6abfab7c2cd75fb3900d7",
+  "bytes": 29389
+}

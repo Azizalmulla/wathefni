@@ -1,0 +1,29 @@
+WAVE1C_PRODUCTION_SYNTHETIC_CANARY=PASS
+CANARY=47/0
+E360_FREEZE=57/0
+ONBOARDING_FREEZE=54/0
+BACKUP_ROLLBACK_REDEPLOY=PASS
+REAL_CLOCKING=OFF
+IMPORT_QR_GPS_KIOSK=OFF
+LEGACY_DEMO_ROWS=42_UNTOUCHED
+FOUR_REALS=UNTOUCHED
+
+# Separate verdicts
+
+SYNTHETIC_PRODUCTION_AUTHORITY=PASS
+# Strict ATTW1C / 965524 allowlist; four reals denied; hooks deny real;
+# full synthetic scenario suite green; cleanup leaves legacy untouched.
+
+POSTGRESQL_DURABILITY=PASS
+# Immutable punch + payroll-snapshot triggers; restart projection persistence;
+# concurrent idempotent ingest; schema + adapters live on wathefni;
+# pool capped at WATHEFNI_DB_POOL_MAX=8.
+
+PAYROLL_SNAPSHOT_BOUNDARY=PASS
+# Approved attendance snapshot → exact payroll reconcile;
+# snapshot immutable; punch append-only; leave reversal preserves correction.
+
+CONTROLLED_CAPTURE_READINESS=NO-GO
+# Dark synthetic canary only. Real clocking, device import, QR, GPS, kiosk,
+# and employee-app clocking remain disabled. Do not expand allowlist or
+# enable capture channels without a separate Wave.

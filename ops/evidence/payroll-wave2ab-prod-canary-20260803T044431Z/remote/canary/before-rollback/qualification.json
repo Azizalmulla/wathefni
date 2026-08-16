@@ -1,0 +1,79 @@
+{
+  "stamp_tag": "e1dc9522",
+  "passed": 32,
+  "failed": 0,
+  "ids": {
+    "tag": "e1dc9522",
+    "employee_key": "WATHEFNI-PYW1-W2AB-e1dc9522",
+    "phones": {
+      "creator": "965540119522",
+      "approver": "965540219522"
+    },
+    "export_run_ids": [
+      "5bf52b57-ec1e-4841-a749-015562608bfa",
+      "5bf55cb0-6cea-45b0-8813-927208942d0c"
+    ],
+    "import_run_ids": [
+      "309ec55a-f87a-4ba4-98db-b49aa9d97433",
+      "48ba9490-7409-4fee-bac6-b36722782301",
+      "713f5248-65d8-44a5-b78f-562e9a1a7449"
+    ],
+    "period_ids": [
+      "a49c7aee-0258-42b1-a03a-8e5dbd708f23"
+    ],
+    "contract_ids": [
+      "cbf24aed-fd28-4920-9d0e-59b527447eb7"
+    ],
+    "cleanup": {
+      "import_lines": 3,
+      "reconciliations": 2,
+      "events_import": 5,
+      "imports": 3,
+      "recon_export": 0,
+      "events_export": 3,
+      "exports": 2,
+      "quarantine": 2,
+      "contracts": 1,
+      "periods": 1
+    },
+    "residual_total": 0
+  },
+  "honesty": {
+    "payroll_wave2a_version": "1.0.0",
+    "adapter_kind": "synthetic_csv_sftp",
+    "adapter_label": "Synthetic generic CSV/SFTP (not a real vendor)",
+    "vendor_claimed": false,
+    "payment_processing": "disabled",
+    "money_authority": "external",
+    "wathefni_money_authority": false,
+    "posts_payment": false,
+    "bank_files": false,
+    "native_gross_to_net": false,
+    "pifss": false,
+    "wps": false,
+    "eos": false,
+    "journals": false,
+    "xbrl": false,
+    "input_export_schema": "payroll_input_export@1.0.0",
+    "result_import_schema": "payroll_result_import@1.0.0",
+    "wave1_contracts_unchanged": true,
+    "synthetic_only": true
+  },
+  "cleanup": {
+    "residual_total": 0,
+    "import_lines": 3,
+    "reconciliations": 2,
+    "events_import": 5,
+    "imports": 3,
+    "recon_export": 0,
+    "events_export": 3,
+    "exports": 2,
+    "quarantine": 2,
+    "contracts": 1,
+    "periods": 1
+  },
+  "payment_processing": "disabled",
+  "money_authority": "external",
+  "vendor_claimed": false,
+  "wave": "payroll_wave2ab_prod_synthetic"
+}

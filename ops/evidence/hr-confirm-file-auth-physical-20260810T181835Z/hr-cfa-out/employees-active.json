@@ -1,0 +1,122 @@
+[
+  {
+    "employee_key": "WATHEFNI-9655237101",
+    "name": "W2B-SYNTH| Onboarding Visual",
+    "phone": "9655237101",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-9655497003",
+    "name": "W5C-SYNTH| Bank Visual 7003",
+    "phone": "9655497003",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-9655497002",
+    "name": "W5C-SYNTH| Bank Visual 7002",
+    "phone": "9655497002",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-9655497001",
+    "name": "W5C-SYNTH| Bank Visual 7001",
+    "phone": "9655497001",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-96599338566",
+    "name": "W5C-SYNTH|Aziz Mobile QA",
+    "phone": "96599338566",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-96558968662",
+    "name": "P51 Beta 15352d14",
+    "phone": "96558968662",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96557057331",
+    "name": "P5 Canary Alpha p5115352d14",
+    "phone": "96557057331",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96558740881",
+    "name": "P51 Alpha eb5f8c4f",
+    "phone": "96558740881",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96557057342",
+    "name": "P5 Canary Beta p5115352d14",
+    "phone": "96557057342",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96558968664",
+    "name": "P51 Delta 15352d14",
+    "phone": "96558968664",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96558740882",
+    "name": "P51 Beta eb5f8c4f",
+    "phone": "96558740882",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96558968661",
+    "name": "P51 Alpha 15352d14",
+    "phone": "96558968661",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96566363363",
+    "name": "Fouad Burhamad",
+    "phone": "96566363363",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-96550252254",
+    "name": "Talal Fadhli",
+    "phone": "96550252254",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-96550010001",
+    "name": "Noura Almutairi",
+    "phone": "96550010001",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96550010002",
+    "name": "Fahad Alenezi",
+    "phone": "96550010002",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96599411617",
+    "name": "Brian Saleh",
+    "phone": "96599411617",
+    "employment_status": "active"
+  },
+  {
+    "employee_key": "WATHEFNI-96550010005",
+    "name": "Dana Alajmi",
+    "phone": "96550010005",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96557057353",
+    "name": "P5 Canary Gamma p5115352d14",
+    "phone": "96557057353",
+    "employment_status": null
+  },
+  {
+    "employee_key": "WATHEFNI-96558968663",
+    "name": "P51 Gamma 15352d14",
+    "phone": "96558968663",
+    "employment_status": null
+  }
+]

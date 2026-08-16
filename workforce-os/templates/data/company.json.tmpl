@@ -9,6 +9,56 @@
   "contact_email": "{{PRIMARY_HR_EMAIL}}",
   "contact_phone": "{{PRIMARY_HR_PHONE}}",
   "modules": {{MODULES_JSON}},
+  "module_settings": {
+    "shifts": {
+      "timezone": "Asia/Kuwait",
+      "reminder_hours_before": 2,
+      "default_workweek": ["sunday", "monday", "tuesday", "wednesday", "thursday"],
+      "availability_requests_enabled": true,
+      "shift_swap_approval_required": true
+    },
+    "attendance": {
+      "timezone": "Asia/Kuwait",
+      "absence_grace_minutes": 30,
+      "late_grace_minutes": 0,
+      "requires_scheduled_shift": true
+    },
+    "leave": {
+      "timezone": "Asia/Kuwait",
+      "requires_approval": true,
+      "check_shift_conflicts": true
+    },
+    "payroll": {
+      "timezone": "Asia/Kuwait",
+      "source_modules": ["shifts", "attendance", "leave"],
+      "overtime_policy": "review_only",
+      "timesheet_approval_required": true,
+      "payroll_export_enabled": true,
+      "payment_file_generation": "disabled",
+      "policy": {
+        "employee_pay_type": "monthly",
+        "leave_policy": "paid",
+        "overtime_policy": "review_only",
+        "absence_deduction_enabled": true,
+        "late_deduction_enabled": false,
+        "early_leave_deduction_enabled": false,
+        "default_hourly_rate_kwd": null,
+        "payment_processing": "disabled"
+      }
+    },
+    "analytics": {
+      "timezone": "Asia/Kuwait",
+      "source_modules": ["shifts", "attendance", "leave", "payroll"],
+      "dashboard_enabled": true,
+      "manager_scope_enforced": true
+    }
+  },
+  "org_structure": {
+    "branches": [],
+    "teams": [],
+    "managers": [],
+    "employee_assignments": []
+  },
   "created_at": "{{TODAY}}",
   "is_active": true
 }

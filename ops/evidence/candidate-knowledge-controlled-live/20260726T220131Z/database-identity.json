@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "database_url_name": "wathefni",
+  "connected_db": "wathefni",
+  "tenants": "WATHEFNI",
+  "wathefni_env": "production",
+  "expected_db": "wathefni",
+  "staging_tenants_leaked": false,
+  "mismatch_refused": true,
+  "production_flags_file": true,
+  "voyage_enabled_flag": "0"
+}

@@ -1,0 +1,4 @@
+canary_allowed_WATHEFNI False
+env production
+has_aliases True
+eligible 1 canary False self False

@@ -1,0 +1,30 @@
+{
+  "db": "wathefni",
+  "smoke_timesheets": [
+    {
+      "timesheet_id": "7950dafd-6cf7-44b1-9f92-26f685c34ab5",
+      "employee_key": "WATHEFNI-96597727743",
+      "status": "draft",
+      "payroll_status": "quarantined",
+      "period_start": "2026-05-11",
+      "period_end": "2026-05-17",
+      "created_by_phone": "96599338566",
+      "quarantine_status": "wave0_smoke_quarantined"
+    },
+    {
+      "timesheet_id": "cc68a9fb-df72-4e13-a0db-cc13a3805380",
+      "employee_key": "WATHEFNI-96566363363",
+      "status": "draft",
+      "payroll_status": "quarantined",
+      "period_start": "2026-05-11",
+      "period_end": "2026-05-17",
+      "created_by_phone": "96599338566",
+      "quarantine_status": "wave0_smoke_quarantined"
+    }
+  ],
+  "wave1_cols_present": [
+    "quarantine_status",
+    "row_version"
+  ],
+  "company_payment_processing": "disabled"
+}

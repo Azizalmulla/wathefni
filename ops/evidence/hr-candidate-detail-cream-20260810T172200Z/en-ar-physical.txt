@@ -1,0 +1,15 @@
+PASS EN/AR key parity
+PASS AR shortlist is Arabic
+PASS AR CV empty is Arabic
+PASS EN shortlist not raw key
+PASS en shortlist consequence · Move Hamad to the shortlist for IT manager..
+PASS en reject consequence · Reject Hamad for IT manager. This removes them from the active pipeline.
+PASS en hire consequence · Hire Hamad for IT manager. This creates the employee and starts post-hire setup.
+PASS en unknown passthrough · Server-only custom consequence text.
+PASS ar shortlist consequence · نقل Hamad إلى القائمة المختصرة لـ IT manager..
+PASS ar reject consequence · رفض Hamad لـ IT manager. سيُزال من المسار النشط.
+PASS ar hire consequence · تعيين Hamad لـ IT manager. سيُنشأ سجل الموظف وتبدأ إعدادات ما بعد التعيين.
+PASS ar unknown passthrough · Server-only custom consequence text.
+PASS view cream + no #id
+PASS route already_decided + localized confirm
+hr-candidate-en-ar-physical: PASS

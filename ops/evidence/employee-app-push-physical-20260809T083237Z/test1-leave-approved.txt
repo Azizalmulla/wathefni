@@ -1,0 +1,17 @@
+=== PREFLIGHT ===
+{"push_enabled": true, "active_token_count": 1, "token_prefixes": ["ExponentPushToken[xRmlaRGQX8nYXR"]}
+
+=== SEND leave_approved stamp=leave1-20260809T083237Z ===
+{"ok": true, "employee_key": "WATHEFNI-96599338566", "event": "leave_approved", "dedupe": "canary_push_phys:leave_approved:leave1-20260809T083237Z", "active_tokens": 1, "push_enabled": true, "delivery_status": "delivered_push", "channel": "push", "message_id": "87733528-0d61-47ba-b27d-49c76b3761e3", "send": {"ok": true, "delivery_status": "delivered_push", "channel": "push", "throttled": null, "error": null}}
+exit 0
+=== DUPE leave_approved same stamp (expect throttle/dedupe, no second banner spam) ===
+{"ok": true, "employee_key": "WATHEFNI-96599338566", "event": "leave_approved", "dedupe": "canary_push_phys:leave_approved:leave1-20260809T083237Z", "active_tokens": 1, "push_enabled": true, "delivery_status": "delivered_push", "channel": "push", "message_id": "87733528-0d61-47ba-b27d-49c76b3761e3", "send": {"ok": true, "delivery_status": "delivered_push", "channel": "push", "throttled": null, "error": null}}
+exit 0
+=== EXPECTED_TRAY_EN ===
+{
+  "title": "Leave approved",
+  "body": "Your leave for 2026-08-23 to 2026-08-25 was approved.",
+  "sound": "wathefni_default",
+  "deep_link": "/(tabs)/leave",
+  "dedupe": "canary_push_phys:leave_approved:leave1-20260809T083237Z"
+}

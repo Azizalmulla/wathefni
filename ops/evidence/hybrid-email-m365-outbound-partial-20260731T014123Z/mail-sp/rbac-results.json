@@ -1,0 +1,21 @@
+{
+  "evidence_upn": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com",
+  "denied_upn": "wathefni-rbac-deny-probe@wathefni.onmicrosoft.com",
+  "administrative_unit_id": "d3302de0-0dcc-4169-8937-17f440410a7b",
+  "role": "Application Mail.Send",
+  "app_id": "8994e095-0605-4baa-86c0-54185c95b496",
+  "sp_object_id": "a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+  "allow_mail_send_inscope": true,
+  "deny_mail_send_inscope": false,
+  "assignments": [
+    {
+      "Identity": "Application Mail.Send-a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+      "Role": "Application Mail.Send",
+      "RoleAssignee": "a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+      "RoleAssigneeName": "a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+      "RecipientWriteScope": "AdministrativeUnit",
+      "CustomResourceScope": "d3302de0-0dcc-4169-8937-17f440410a7b",
+      "WhenCreatedUTC": "2026-07-31T01:22:47Z"
+    }
+  ]
+}

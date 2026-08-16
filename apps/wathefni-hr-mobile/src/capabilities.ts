@@ -42,6 +42,7 @@ export type WorkspaceRoute = {
 
 const routeDefinitions: WorkspaceRoute[] = [
   { key: 'tasks', path: '/tasks', workspace: 'hr', features: ['hr_tasks'] },
+  { key: 'leave', path: '/leave', workspace: 'hr', features: ['leave_approvals'] },
   {
     key: 'onboarding',
     path: '/onboarding',
@@ -115,9 +116,11 @@ export function routeAvailable(me: MobileMe | null, key: string): boolean {
 export function destinationAvailable(me: MobileMe | null, destination: string): boolean {
   const path = destination.split('?')[0]
   if (path === '/' || path === '/settings') return Boolean(me)
-  if (path.startsWith('/leave/')) return hasCapability(me, 'hr', 'leave_approvals')
+  if (path === '/leave' || path.startsWith('/leave/')) return hasCapability(me, 'hr', 'leave_approvals')
   if (path.startsWith('/candidates/')) return routeAvailable(me, 'candidates')
-  if (path.startsWith('/onboarding/')) return routeAvailable(me, 'onboarding')
+  if (path === '/onboarding' || path.startsWith('/onboarding/')) return routeAvailable(me, 'onboarding')
+  if (path === '/documents' || path.startsWith('/documents/')) return routeAvailable(me, 'documents')
+  if (path === '/attendance' || path.startsWith('/attendance/')) return routeAvailable(me, 'attendance')
   if (path.startsWith('/employees/')) return routeAvailable(me, 'employees')
   if (path.startsWith('/shift-swaps/')) {
     return hasCapability(me, 'hr', 'shift_swap_decisions')

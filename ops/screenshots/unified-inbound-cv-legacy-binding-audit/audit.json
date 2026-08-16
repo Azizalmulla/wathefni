@@ -1,0 +1,1097 @@
+{
+  "stamp": "20260727T003453Z",
+  "database": "wathefni",
+  "company_code": "WATHEFNI",
+  "read_only": true,
+  "mutations": 0,
+  "total_applications": 18,
+  "verified_bindings": 0,
+  "missing_verified_bindings": 18,
+  "bucket_counts": {
+    "safe_to_backfill_after_owner_approval": 11,
+    "ambiguous": 5,
+    "held": 2
+  },
+  "applications": [
+    {
+      "app_key": "96597727743-WATHEFNI-FULLSTACK_DEVELOPER",
+      "status": "awaiting_cv",
+      "candidate": {
+        "phone": "96597727743",
+        "name": "MOHAMMAD QATTAN",
+        "person_id": "f2185087-2654-47c6-9d3f-17a651f4cc86"
+      },
+      "position_code": "FULLSTACK_DEVELOPER",
+      "position_title": "Full Stack Developer",
+      "apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Full Stack Developer",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+          "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+          "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-04-13",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-04-13",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job FULLSTACK_DEVELOPER; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96599338566-WATHEFNI-FULLSTACK_DEVELOPER",
+      "status": "screening_complete",
+      "candidate": {
+        "phone": "96599338566",
+        "name": "Aziz Almulla",
+        "person_id": null
+      },
+      "position_code": "FULLSTACK_DEVELOPER",
+      "position_title": "Full Stack Developer",
+      "apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Full Stack Developer",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+          "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-FULLSTACK_DEVELOPER",
+          "job_id": "824b6a9e-e6fe-4a2d-a795-46d7b90c1d2c",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-04-13",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-04-13",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job FULLSTACK_DEVELOPER; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "status": "hired",
+      "candidate": {
+        "phone": "96597727743",
+        "name": "MOHAMMAD QATTAN",
+        "person_id": "f2185087-2654-47c6-9d3f-17a651f4cc86"
+      },
+      "position_code": "MARKETING_SPECIALIST",
+      "position_title": "Marketing Specialist",
+      "apply_code": "APPLY-WATHEFNI-MARKETING_SPECIALIST",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Marketing Specialist",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-MARKETING_SPECIALIST",
+          "job_id": "5cf8e5d9-4bb3-4645-a771-6b8367b0b395"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-MARKETING_SPECIALIST",
+          "job_id": "5cf8e5d9-4bb3-4645-a771-6b8367b0b395",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-03",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-05-03",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job MARKETING_SPECIALIST; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "status": "hired",
+      "candidate": {
+        "phone": "96550252254",
+        "name": "Talal Fadhli",
+        "person_id": "d0c9fb3e-d96c-44a5-b1f0-16a7ca08fd6b"
+      },
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "position_title": "Social Media Manager",
+      "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Social Media Manager",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-04",
+        "ingested_at": "2026-05-12T21:41:29.324635+00:00",
+        "updated_at": "2026-05-12",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job SOCIAL_MEDIA_MANAGER; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "status": "shortlisted",
+      "candidate": {
+        "phone": "96599652277",
+        "name": "Faisal Almulla",
+        "person_id": "57bc724b-60cf-48c2-8933-6f17974c52cf"
+      },
+      "position_code": "SOCIAL_MEDIA_MANAGER",
+      "position_title": "Social Media Manager",
+      "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Social Media Manager",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+          "job_id": "4cb2db97-2294-4059-a56c-f9aa6f75430a",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-04",
+        "ingested_at": "2026-05-13T17:10:06.901048+00:00",
+        "updated_at": "2026-05-13",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job SOCIAL_MEDIA_MANAGER; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-HR",
+      "status": "shortlisted",
+      "candidate": {
+        "phone": "96597485758",
+        "name": "Hamad Almulla",
+        "person_id": "6949ca91-9e51-4511-b968-ee0b21a64b5e"
+      },
+      "position_code": "HR",
+      "position_title": "HR",
+      "apply_code": "APPLY-WATHEFNI-HR",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "HR",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-HR",
+          "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-HR",
+          "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-05",
+        "ingested_at": "2026-05-13T13:23:05.380995+00:00",
+        "updated_at": "2026-05-27",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job HR; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "status": "review_pending",
+      "candidate": {
+        "phone": "96598900677",
+        "name": "AZIZ ALMULLA",
+        "person_id": "ef5d089a-9414-4747-9e4a-e9cf7a28c2c4"
+      },
+      "position_code": "ACCOUNTING",
+      "position_title": "Accounting",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+          "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+          "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-05",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-05-05",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job ACCOUNTING; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-FINANCE",
+      "status": "screening",
+      "candidate": {
+        "phone": "96598900677",
+        "name": "AZIZ ALMULLA",
+        "person_id": "ef5d089a-9414-4747-9e4a-e9cf7a28c2c4"
+      },
+      "position_code": "FINANCE",
+      "position_title": "Finance",
+      "apply_code": "APPLY-WATHEFNI-FINANCE",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Finance",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-FINANCE",
+          "job_id": "3ca7ad6a-9726-48d9-8b9c-3cab473bda90"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-FINANCE",
+          "job_id": "3ca7ad6a-9726-48d9-8b9c-3cab473bda90",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-05",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-05-05",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job FINANCE; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-HR",
+      "status": "shortlisted",
+      "candidate": {
+        "phone": "96598900677",
+        "name": "AZIZ ALMULLA",
+        "person_id": "ef5d089a-9414-4747-9e4a-e9cf7a28c2c4"
+      },
+      "position_code": "HR",
+      "position_title": "HR",
+      "apply_code": "APPLY-WATHEFNI-HR",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "HR",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-HR",
+          "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-HR",
+          "job_id": "1350c838-d9bb-4848-84a5-b89ea6d07909",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-05",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-05-11",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job HR; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "status": "hired",
+      "candidate": {
+        "phone": "96566363363",
+        "name": "Fouad Burhamad",
+        "person_id": "12b7d8c8-7dad-4ffd-aa1a-2b678e2de82a"
+      },
+      "position_code": "IT_MAINTENANCE",
+      "position_title": "IT Maintenance",
+      "apply_code": "APPLY-WATHEFNI-IT_MAINTENANCE",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "IT Maintenance",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-IT_MAINTENANCE",
+          "job_id": "7821c69b-5ed1-4036-86eb-04512d79afee"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-IT_MAINTENANCE",
+          "job_id": "7821c69b-5ed1-4036-86eb-04512d79afee",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-06",
+        "ingested_at": "2026-05-12T13:57:40.978512+00:00",
+        "updated_at": "2026-05-07",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job IT_MAINTENANCE; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "screening_complete",
+      "candidate": {
+        "phone": "96597485758",
+        "name": "Hamad Almulla",
+        "person_id": "6949ca91-9e51-4511-b968-ee0b21a64b5e"
+      },
+      "position_code": "ACCOUNTING_EXCEL",
+      "position_title": "Accounting Excel",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting Excel",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-14",
+        "ingested_at": "2026-05-14T21:03:05.514355+00:00",
+        "updated_at": "2026-07-05",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "production",
+          "data_source_detail": null,
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "production",
+      "data_source_detail": null,
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled.",
+      "classification": "safe_to_backfill_after_owner_approval",
+      "safe_to_backfill": true,
+      "notes": "Legacy live application with canonical Job ACCOUNTING_EXCEL; source_channel=legacy_unspecified_channel; lifecycle_events=0. Backfill only with audited consent/provenance \u2014 not in this task.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96555550132-WATHEFNI-ACCOUNTING",
+      "status": "awaiting_cv",
+      "candidate": {
+        "phone": "96555550132",
+        "name": null,
+        "person_id": null
+      },
+      "position_code": "ACCOUNTING",
+      "position_title": "Accounting",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+          "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+          "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-15",
+        "ingested_at": "2026-05-15T04:07:58.785699+00:00",
+        "updated_at": "2026-05-15",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "smoke_test",
+          "data_source_detail": "quarantined_by_cleanup_script",
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "smoke_test",
+      "data_source_detail": "quarantined_by_cleanup_script",
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Row is smoke_test / quarantine residue, not a production hiring authority record.",
+      "classification": "ambiguous",
+      "safe_to_backfill": false,
+      "notes": "Do not backfill as a real verified Job binding without explicit cleanup/owner decision.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+      "status": "screening",
+      "candidate": {
+        "phone": "96555550133",
+        "name": "Test Candidate",
+        "person_id": null
+      },
+      "position_code": "ACCOUNTING",
+      "position_title": "Accounting",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+          "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING",
+          "job_id": "8f08acad-1cd3-4651-a307-96d04d454eb2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-15",
+        "ingested_at": "2026-05-15T04:10:46.223246+00:00",
+        "updated_at": "2026-05-15",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "smoke_test",
+          "data_source_detail": "quarantined_by_cleanup_script",
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "smoke_test",
+      "data_source_detail": "quarantined_by_cleanup_script",
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Row is smoke_test / quarantine residue, not a production hiring authority record.",
+      "classification": "ambiguous",
+      "safe_to_backfill": false,
+      "notes": "Do not backfill as a real verified Job binding without explicit cleanup/owner decision.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96555550134-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "candidate": {
+        "phone": "96555550134",
+        "name": null,
+        "person_id": null
+      },
+      "position_code": "ACCOUNTING_EXCEL",
+      "position_title": "Accounting Excel",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting Excel",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-15",
+        "ingested_at": "2026-05-15T04:22:53.809053+00:00",
+        "updated_at": "2026-05-15",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "smoke_test",
+          "data_source_detail": "quarantined_by_cleanup_script",
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "smoke_test",
+      "data_source_detail": "quarantined_by_cleanup_script",
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Row is smoke_test / quarantine residue, not a production hiring authority record.",
+      "classification": "ambiguous",
+      "safe_to_backfill": false,
+      "notes": "Do not backfill as a real verified Job binding without explicit cleanup/owner decision.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96555550135-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "candidate": {
+        "phone": "96555550135",
+        "name": null,
+        "person_id": null
+      },
+      "position_code": "ACCOUNTING_EXCEL",
+      "position_title": "Accounting Excel",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting Excel",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-15",
+        "ingested_at": "2026-05-15T04:31:09.859176+00:00",
+        "updated_at": "2026-05-15",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "smoke_test",
+          "data_source_detail": "quarantined_by_cleanup_script",
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "smoke_test",
+      "data_source_detail": "quarantined_by_cleanup_script",
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Row is smoke_test / quarantine residue, not a production hiring authority record.",
+      "classification": "ambiguous",
+      "safe_to_backfill": false,
+      "notes": "Do not backfill as a real verified Job binding without explicit cleanup/owner decision.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "96555550136-WATHEFNI-ACCOUNTING_EXCEL",
+      "status": "awaiting_cv",
+      "candidate": {
+        "phone": "96555550136",
+        "name": null,
+        "person_id": null
+      },
+      "position_code": "ACCOUNTING_EXCEL",
+      "position_title": "Accounting Excel",
+      "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+      "job": {
+        "exists_canonically": true,
+        "position_row": {
+          "title": "Accounting Excel",
+          "status": "open",
+          "apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2"
+        },
+        "trust": {
+          "job_exists_canonically": true,
+          "position_status": "open",
+          "position_apply_code": "APPLY-WATHEFNI-ACCOUNTING_EXCEL",
+          "job_id": "df841f68-95b1-4ac1-b60e-f985424952a2",
+          "title_match": true,
+          "current_job_link_trustworthy": true,
+          "trust": "trustworthy",
+          "trust_reasons": [
+            "position_status=open",
+            "live_status_with_position"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-05-15",
+        "ingested_at": "2026-05-15T14:57:09.803865+00:00",
+        "updated_at": "2026-05-15",
+        "how": {
+          "inferred": "legacy_row_without_lifecycle_event",
+          "data_source": "smoke_test",
+          "data_source_detail": "quarantined_by_cleanup_script",
+          "source_ref": null
+        }
+      },
+      "source_channel": "legacy_unspecified_channel",
+      "data_source": "smoke_test",
+      "data_source_detail": "quarantined_by_cleanup_script",
+      "source_ref": null,
+      "import_batch_id": null,
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Row is smoke_test / quarantine residue, not a production hiring authority record.",
+      "classification": "ambiguous",
+      "safe_to_backfill": false,
+      "notes": "Do not backfill as a real verified Job binding without explicit cleanup/owner decision.",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "candidate": {
+        "phone": "imp-wathefni-06ffffc36d7fd375",
+        "name": "Esraa Aziz",
+        "person_id": "4164ce1d-d430-440d-b556-978fa9372f0e"
+      },
+      "position_code": "",
+      "position_title": null,
+      "apply_code": null,
+      "job": {
+        "exists_canonically": false,
+        "position_row": null,
+        "trust": {
+          "job_exists_canonically": false,
+          "current_job_link_trustworthy": false,
+          "trust": "untrustworthy",
+          "trust_reasons": [
+            "empty_position_code"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-06-01",
+        "ingested_at": "2026-06-01T14:30:21.880442+00:00",
+        "updated_at": "2026-07-26",
+        "how": {
+          "inferred": "manual_or_bulk_import",
+          "import_batch_id": "cdf19dc3-fdc5-4625-821f-51124c9aca46",
+          "data_source": "production"
+        }
+      },
+      "source_channel": "email",
+      "data_source": "production",
+      "data_source_detail": "bulk_import:cdf19dc3-fdc5-4625-821f-51124c9aca46",
+      "source_ref": "email_inbound:cv-resume-5.webp",
+      "import_batch_id": "cdf19dc3-fdc5-4625-821f-51124c9aca46",
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Record is held/unassigned Talent Pool style and must not receive a Job binding without exact Job confirmation.",
+      "classification": "held",
+      "safe_to_backfill": false,
+      "notes": "status=needs_role; position_code=empty",
+      "has_application_job_binding": false
+    },
+    {
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "status": "needs_role",
+      "candidate": {
+        "phone": "imp-wathefni-837eb9b1bf14506b",
+        "name": "yasser al dossary",
+        "person_id": null
+      },
+      "position_code": "",
+      "position_title": null,
+      "apply_code": null,
+      "job": {
+        "exists_canonically": false,
+        "position_row": null,
+        "trust": {
+          "job_exists_canonically": false,
+          "current_job_link_trustworthy": false,
+          "trust": "untrustworthy",
+          "trust_reasons": [
+            "empty_position_code"
+          ]
+        }
+      },
+      "originally_created": {
+        "created_at": "2026-07-26",
+        "ingested_at": "2026-07-26T15:44:18.708461+00:00",
+        "updated_at": "2026-07-26",
+        "how": {
+          "inferred": "manual_or_bulk_import",
+          "import_batch_id": "4d7e58c6-4355-4bf4-b1e2-a789a170166b",
+          "data_source": "production"
+        }
+      },
+      "source_channel": "email",
+      "data_source": "production",
+      "data_source_detail": "bulk_import:4d7e58c6-4355-4bf4-b1e2-a789a170166b",
+      "source_ref": "email_inbound:Yasser_Al_Dossary_CV_Test.pdf",
+      "import_batch_id": "4d7e58c6-4355-4bf4-b1e2-a789a170166b",
+      "lifecycle_history": [],
+      "lifecycle_summary": {
+        "event_count": 0,
+        "first": null,
+        "last": null
+      },
+      "why_no_verified_binding": "Application predates Wave 4 application_job_bindings dual-write; no verified binding row was ever written because the authority did not exist yet and production-dark has not backfilled. Record is held/unassigned Talent Pool style and must not receive a Job binding without exact Job confirmation.",
+      "classification": "held",
+      "safe_to_backfill": false,
+      "notes": "status=needs_role; position_code=empty",
+      "has_application_job_binding": false
+    }
+  ],
+  "conclusion_seed": {
+    "all_missing_are_pre_wave4": true,
+    "real_data_problems": []
+  }
+}

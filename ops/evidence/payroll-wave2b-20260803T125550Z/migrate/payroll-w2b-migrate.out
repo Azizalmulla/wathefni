@@ -1,0 +1,5 @@
+wave2b 1.0.0
+policy payroll_preview_policy@1.0.0
+connected_db wathefni_staging
+preview_tables ['payroll_preview_adjustments', 'payroll_preview_employee_results', 'payroll_preview_events', 'payroll_preview_lines', 'payroll_preview_policies', 'payroll_preview_runs']
+MIGRATE_OK payroll_native_preview_wave2b

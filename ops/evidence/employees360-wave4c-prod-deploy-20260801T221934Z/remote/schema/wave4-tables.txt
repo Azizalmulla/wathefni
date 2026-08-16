@@ -1,0 +1,12 @@
+[{'schema_name': 'employees360_wave4', 'schema_version': 'employees360-wave4b-org-authority-v1'}]
+employee_bulk_job_items
+employee_bulk_jobs
+employee_migration_batches
+employee_migration_rows
+employee_org_assignment_history
+employee_org_assignments
+employee_org_change_requests
+employee_org_company_policies
+employee_org_migration_journal
+employee_org_schema_meta
+employee_org_units

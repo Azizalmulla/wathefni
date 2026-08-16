@@ -1,0 +1,49 @@
+stamp=20260803T233348Z
+time_utc=2026-08-03T23:34:07Z
+active
+=== SHAs before ===
+3d4d237e3bbe0ddb28a19af925e4d5eb11d30ef9ef5c2ec94455f5a384180d45  /opt/wathefni/orchestrator/app.py
+eb1dcf5d1d45f24678a810ac8ef99b54930066b8deda6b5f2f6036157b57ccc3  /opt/wathefni/orchestrator/migration_wave1_cv_foundation.py
+e7ef57bf0df09e260ed949e9333ebfe5cefe319bf936d816d5d8d2747024ce5c  /opt/wathefni/orchestrator/smoke-test-migration-wave1.py
+=== flags before ===
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DASHBOARD_DIST=/opt/wathefni/dashboard-dist
+WATHEFNI_MIGRATION_WAVE1=1
+WATHEFNI_MIGRATION_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_MIGRATION_WAVE1_SYNTHETIC_ONLY=1
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+[23:34:07] backing up modules + dropins
+e7ef57bf0df09e260ed949e9333ebfe5cefe319bf936d816d5d8d2747024ce5c  modules/smoke-test-migration-wave1.py
+3d4d237e3bbe0ddb28a19af925e4d5eb11d30ef9ef5c2ec94455f5a384180d45  modules/app.py
+54e9483dc3f10394bff556dda03064162ec5bfef8e5e21ca7b4e9b4209076a17  modules/canary-prod-migration-wave1b.py
+eb1dcf5d1d45f24678a810ac8ef99b54930066b8deda6b5f2f6036157b57ccc3  modules/migration_wave1_cv_foundation.py
+[23:34:07] deploying migration wave1 modules
+[23:34:07] preflight orphan / queue residual
+active_other_ats_export_jobs 0
+MIGRATION_QUEUE_PREFLIGHT_OK
+[23:34:10] writing Wave 1-B production drop-in (synthetic-only; WATHEFNI; ingest off)
+[23:34:10] migrate ACK
+ack_id 4e9fa746-cd6c-4e45-bfe3-d6de6cfc38cf
+ACK_PRODUCTION_MIGRATION_WAVE1B=YES
+residual_policy=synthetic_batches_rolled_back_ack_retained
+MIGRATE_OK
+health_ok
+active
+=== SHAs after ===
+c810a954df3cf36715d1eee72cedf57466e3ade682a64b1c53d2935c53ef20f0  /opt/wathefni/orchestrator/app.py
+58edc84c0aae2f014e185cf0eb597a07429076f524ce1d72962c925cc963c832  /opt/wathefni/orchestrator/migration_wave1_cv_foundation.py
+a1199d3f5c1b6f4284f66eb821021d535a3be6f50a413376086e6f14a4a0b7fc  /opt/wathefni/orchestrator/canary-prod-migration-wave1b.py
+=== flags after ===
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_MIGRATION_WAVE1=1
+WATHEFNI_MIGRATION_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_MIGRATION_WAVE1_SYNTHETIC_ONLY=1
+MIGRATION_WAVE1 1
+SYNTHETIC_ONLY 1
+COMPANIES WATHEFNI
+CAPTURE_INGEST off
+MIGW1B_MARKER=MIGW1B
+flags_ok_migration_wave1b=true
+DEPLOY_OK stamp=20260803T233348Z backup=/opt/wathefni/backups/production-pre-migration-wave1b-20260803T233348Z evid=/opt/wathefni/production-evidence/migration-wave1b-prod-canary/20260803T233348Z

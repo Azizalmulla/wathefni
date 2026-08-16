@@ -1,0 +1,36 @@
+{
+  "ios": {
+    "id": "7b3dc831-287d-4b0a-8676-eed08838ac6c",
+    "buildNumber": "11",
+    "runtimeVersion": "0.1.0",
+    "channel": "canary",
+    "distribution": "INTERNAL",
+    "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/7b3dc831-287d-4b0a-8676-eed08838ac6c",
+    "artifact": "https://expo.dev/artifacts/eas/YmqXdIRKc80wPUP75yAbM3FNxIFrRfietpp6NAdacp4.ipa",
+    "note": "Includes expo-screen-detector (npm 0.1.1 iOS path OK)"
+  },
+  "android": {
+    "id": "92869701-685b-4975-823b-52c1bc4109d9",
+    "versionCode": "5",
+    "runtimeVersion": "0.1.0",
+    "channel": "canary",
+    "distribution": "INTERNAL",
+    "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/92869701-685b-4975-823b-52c1bc4109d9",
+    "artifact": "https://expo.dev/artifacts/eas/P-_S_7SzFKJ2-2O9c85mYTIdrI2Uecv9NDT4Pyy1gnE.apk",
+    "note": "Vendored modules/wathefni-screen-detector Expo 51 gradle",
+    "priorFailed": "b3c3ba7e-a6ee-41f9-b4b6-c95e729be0d8"
+  },
+  "nativeCapabilities": {
+    "expo-screen-detector": "file:./modules/wathefni-screen-detector (0.1.1-wathefni)",
+    "bakedEnv": {
+      "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
+      "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
+      "EXPO_PUBLIC_LOCAL_AUTO_LOCK": "1"
+    }
+  },
+  "ota": {
+    "updateGroupId": "fda08e77-f7a1-464c-8596-00cc4e4c6461",
+    "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/fda08e77-f7a1-464c-8596-00cc4e4c6461",
+    "priorGroupForRollback": "3d4d10ca-1852-473b-b912-a32de97d5245"
+  }
+}

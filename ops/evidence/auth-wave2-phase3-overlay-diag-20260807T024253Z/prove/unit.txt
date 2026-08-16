@@ -1,0 +1,42 @@
+auth wave2 phase3 overlay unit
+  PASS  EN/AR autoLock key parity
+  PASS  master requires explicit 1
+  PASS  no PIN-master inherit for auto-lock
+  PASS  biometric overlay gate separate
+  PASS  timeout-only decision
+  PASS  no device-lock reason
+  PASS  canary keys
+  PASS  AuthProvider has no AppState auto-lock
+  PASS  AuthProvider never seals from autolock
+  PASS  overlay comment in AuthProvider
+  PASS  cold-start locked status still exists
+  PASS  needsLocalUnlock flag
+  PASS  never setStatus locked
+  PASS  never signedOut from overlay
+  PASS  arms on true background
+  PASS  inactive ignored for lock
+  PASS  privacy cover
+  PASS  shell patches diagnostics
+  PASS  build marker exported
+  PASS  PIN overlay present
+  PASS  overlay uses Modal above native-stack
+  PASS  no Face ID in PIN-only overlay
+  PASS  overlay never wipes session on lockout
+  PASS  privacy cover component
+  PASS  diagnostics module
+  PASS  settings wires diagnostics
+  PASS  settings shows diag fields
+  PASS  al-overlay build marker
+  PASS  LocalUnlockShell wraps AuthGate
+  PASS  cold-start biometric gate still for status locked
+  PASS  production auto-lock on for overlay prove
+  PASS  overlay Face ID still off
+  PASS  inactive-only none
+  PASS  short bg none
+  PASS  40s timeout
+  PASS  never none
+  PASS  immediate
+  PASS  shell does not import deviceLock
+  PASS  mobile tsc --noEmit
+
+39 passed, 0 failed

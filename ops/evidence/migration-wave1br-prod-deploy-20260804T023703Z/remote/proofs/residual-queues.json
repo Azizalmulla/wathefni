@@ -1,0 +1,21 @@
+{
+  "probe_utc": "2026-08-04T02:39:01.144297+00:00",
+  "active_migration_extraction": 0,
+  "active_other_ats_export": 0,
+  "active_live_cv": 0,
+  "active_email_inbound": 0,
+  "open_canary_batches": 0,
+  "iso_companies": 0,
+  "migration_apps": 0,
+  "deferred_docs": 0,
+  "has_schema_ledger": true,
+  "ledger_recent": [
+    {
+      "module": "wave1br.bundle",
+      "contract_version": "wave1br-runtime-ddl-ban-v1",
+      "mode": "apply",
+      "applied_at": "2026-08-04T02:38:20.856566+00:00"
+    }
+  ]
+}
+RESIDUAL_QUEUES_OK

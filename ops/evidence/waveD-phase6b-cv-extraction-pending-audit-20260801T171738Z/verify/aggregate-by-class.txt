@@ -1,0 +1,8 @@
+       class        |      last_error_code      |   app_status    | count 
+--------------------+---------------------------+-----------------+-------
+ d6a_prod_synthetic | cv_extraction_failed      | import_archived |    16
+ d6a_prod_synthetic | intake_document_not_clean | import_archived |    10
+ d6a_prod_synthetic | cv_extraction_failed      | needs_role      |     1
+ d6a_prod_synthetic | intake_document_not_clean | needs_role      |     1
+(4 rows)
+

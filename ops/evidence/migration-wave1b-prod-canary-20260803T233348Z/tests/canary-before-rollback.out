@@ -1,0 +1,34 @@
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_MIGRATION_WAVE1=1
+WATHEFNI_MIGRATION_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_MIGRATION_WAVE1_SYNTHETIC_ONLY=1
+CAPTURE_INGEST_OFF_OK
+MIGRATION_WAVE1_ON_OK
+MIGRATION_WAVE1B_CANARY_START
+{"core": 50, "1k": 1000, "10k": 10000, "stage_root": "/root/.openclaw/workspaces/company-wathefni", "evid": "/opt/wathefni/production-evidence/migration-wave1b-prod-canary/20260803T233348Z/canary/before-rollback", "db_expected": "wathefni"}
+=== core contract (prod synthetic) ===
+
+=== scale lane 1k count=1000 company=WATHEFNI ===
+{
+  "label": "1k",
+  "count": 1000,
+  "batch_id": "7cddc498-46ba-4dff-a93b-38dfeaa8dfe7",
+  "elapsed_s": 229.69,
+  "committed": 981,
+  "duplicates": 19,
+  "held": {
+    "apps": 981,
+    "with_external_id": 981,
+    "held_ok": true
+  },
+  "rollback": {
+    "applications": 981,
+    "documents": 981,
+    "files": 981,
+    "candidates": 981,
+    "extraction_jobs_cancelled": 0
+  }
+}
+
+=== scale lane 10k count=10000 company=WATHEFNI ===

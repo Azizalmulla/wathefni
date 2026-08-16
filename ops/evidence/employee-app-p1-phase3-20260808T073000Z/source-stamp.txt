@@ -1,0 +1,8 @@
+commit=cf26d59512a22a7634eb4edd28b4425ec1624405
+branch=authority-cutover
+--- deployed backend ---
+5356f7f6a9df2381f9c8aae4ad3ede7a55f60456f9437e656a9fba8fa7189f30  /opt/wathefni/orchestrator/app.py
+b70214abf7d374cde5e5e9fc10845f51564a216a55b1deb590ce7c31465b285e  /opt/wathefni/orchestrator/smoke-test-employee-app-profile.py
+--- local backend ---
+5356f7f6a9df2381f9c8aae4ad3ede7a55f60456f9437e656a9fba8fa7189f30  wathefni-orchestrator/app.py
+b70214abf7d374cde5e5e9fc10845f51564a216a55b1deb590ce7c31465b285e  wathefni-orchestrator/smoke-test-employee-app-profile.py

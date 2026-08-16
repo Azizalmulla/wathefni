@@ -1,0 +1,537 @@
+{
+  "employees": [
+    {
+      "employee_key": "WATHEFNI-96599338566",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+        "completion_next_action": {
+          "owner": "employee",
+          "message": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+          "message_en": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+          "message_ar": "\u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u0641\u062a\u062d \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u2014 \u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+          "message_en": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+          "message_ar": "\u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u0641\u062a\u062d \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u2014 \u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+          "message_en": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+          "message_ar": "\u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u0641\u062a\u062d \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u2014 \u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "reopened",
+        "satisfied": 3,
+        "required": 4,
+        "owner": "employee"
+      },
+      "bank": {
+        "http": 200,
+        "detail": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee",
+        "next_item_label": "Civil ID (front and back)",
+        "completion_next_action": {
+          "owner": "employee",
+          "message": "Complete the remaining items assigned to you.",
+          "message_en": "Complete the remaining items assigned to you.",
+          "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Complete the remaining items assigned to you.",
+          "message_en": "Complete the remaining items assigned to you.",
+          "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Complete the remaining items assigned to you.",
+          "message_en": "Complete the remaining items assigned to you.",
+          "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee"
+      },
+      "bank": {
+        "http": 403,
+        "detail": {
+          "detail": {
+            "error": "bank_ess_not_allowlisted",
+            "message": "Bank self-service is not enabled for your account yet."
+          }
+        }
+      }
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee",
+        "next_item_label": "Civil ID (front and back)",
+        "completion_next_action": {
+          "owner": "employee",
+          "message": "Complete the remaining items assigned to you.",
+          "message_en": "Complete the remaining items assigned to you.",
+          "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Complete the remaining items assigned to you.",
+          "message_en": "Complete the remaining items assigned to you.",
+          "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Complete the remaining items assigned to you.",
+          "message_en": "Complete the remaining items assigned to you.",
+          "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "waiting_on_employee",
+        "satisfied": 0,
+        "required": 4,
+        "owner": "employee"
+      },
+      "bank": {
+        "http": 200,
+        "detail": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "employee_key": "WATHEFNI-96550010001",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": null,
+        "satisfied": null,
+        "required": null,
+        "owner": null,
+        "next_item_label": null,
+        "completion_next_action": null
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "not_started",
+        "satisfied": 0,
+        "required": 0,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Start your onboarding checklist.",
+          "message_en": "Start your onboarding checklist.",
+          "message_ar": "\u0627\u0628\u062f\u0623 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u0627\u0644\u062e\u0627\u0635\u0629 \u0628\u0643."
+        }
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "not_started",
+        "satisfied": 0,
+        "required": 0,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Start your onboarding checklist.",
+          "message_en": "Start your onboarding checklist.",
+          "message_ar": "\u0627\u0628\u062f\u0623 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u0627\u0644\u062e\u0627\u0635\u0629 \u0628\u0643."
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "not_started",
+        "satisfied": 0,
+        "required": 0,
+        "owner": "employee"
+      },
+      "bank": {
+        "http": 200,
+        "detail": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "employee_key": "WATHEFNI-96550010002",
+      "hr_queue": {
+        "http": 200,
+        "absent_from_queue": false,
+        "state": null,
+        "satisfied": null,
+        "required": null,
+        "owner": null,
+        "next_item_label": null,
+        "completion_next_action": null
+      },
+      "hr_drawer": {
+        "http": 200,
+        "state": "not_started",
+        "satisfied": 0,
+        "required": 0,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Start your onboarding checklist.",
+          "message_en": "Start your onboarding checklist.",
+          "message_ar": "\u0627\u0628\u062f\u0623 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u0627\u0644\u062e\u0627\u0635\u0629 \u0628\u0643."
+        }
+      },
+      "employee_app": {
+        "http": 200,
+        "state": "not_started",
+        "satisfied": 0,
+        "required": 0,
+        "owner": "employee",
+        "next_action": {
+          "owner": "employee",
+          "message": "Start your onboarding checklist.",
+          "message_en": "Start your onboarding checklist.",
+          "message_ar": "\u0627\u0628\u062f\u0623 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u0627\u0644\u062e\u0627\u0635\u0629 \u0628\u0643."
+        }
+      },
+      "employee_profile": {
+        "http": 200,
+        "state": "not_started",
+        "satisfied": 0,
+        "required": 0,
+        "owner": "employee"
+      },
+      "bank": {
+        "http": 200,
+        "detail": {
+          "ok": true
+        }
+      }
+    }
+  ],
+  "checks": [
+    {
+      "check": "WATHEFNI-96599338566: surfaces agree",
+      "ok": true,
+      "detail": {
+        "cores": [
+          [
+            "drawer",
+            "reopened",
+            3,
+            4,
+            "employee"
+          ],
+          [
+            "app",
+            "reopened",
+            3,
+            4,
+            "employee"
+          ],
+          [
+            "profile",
+            "reopened",
+            3,
+            4,
+            "employee"
+          ]
+        ],
+        "mismatches": [],
+        "queue": {
+          "http": 200,
+          "absent_from_queue": false,
+          "state": "reopened",
+          "satisfied": 3,
+          "required": 4,
+          "owner": "employee",
+          "next_item_label": "Bank setup via Employee Self-Service (encrypted IBAN)",
+          "completion_next_action": {
+            "owner": "employee",
+            "message": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+            "message_en": "Onboarding reopened \u2014 Complete the remaining items assigned to you.",
+            "message_ar": "\u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u0641\u062a\u062d \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u2014 \u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+          }
+        },
+        "queue_unenriched": false
+      }
+    },
+    {
+      "check": "Aziz bank still reachable",
+      "ok": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "check": "WATHEFNI-96550252254: surfaces agree",
+      "ok": true,
+      "detail": {
+        "cores": [
+          [
+            "drawer",
+            "waiting_on_employee",
+            0,
+            4,
+            "employee"
+          ],
+          [
+            "app",
+            "waiting_on_employee",
+            0,
+            4,
+            "employee"
+          ],
+          [
+            "profile",
+            "waiting_on_employee",
+            0,
+            4,
+            "employee"
+          ]
+        ],
+        "mismatches": [],
+        "queue": {
+          "http": 200,
+          "absent_from_queue": false,
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4,
+          "owner": "employee",
+          "next_item_label": "Civil ID (front and back)",
+          "completion_next_action": {
+            "owner": "employee",
+            "message": "Complete the remaining items assigned to you.",
+            "message_en": "Complete the remaining items assigned to you.",
+            "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+          }
+        },
+        "queue_unenriched": false
+      }
+    },
+    {
+      "check": "Talal bank still 403 after rollout",
+      "ok": true,
+      "detail": {
+        "http": 403,
+        "detail": {
+          "detail": {
+            "error": "bank_ess_not_allowlisted",
+            "message": "Bank self-service is not enabled for your account yet."
+          }
+        }
+      }
+    },
+    {
+      "check": "WATHEFNI-96566363363: surfaces agree",
+      "ok": true,
+      "detail": {
+        "cores": [
+          [
+            "drawer",
+            "waiting_on_employee",
+            0,
+            4,
+            "employee"
+          ],
+          [
+            "app",
+            "waiting_on_employee",
+            0,
+            4,
+            "employee"
+          ],
+          [
+            "profile",
+            "waiting_on_employee",
+            0,
+            4,
+            "employee"
+          ]
+        ],
+        "mismatches": [],
+        "queue": {
+          "http": 200,
+          "absent_from_queue": false,
+          "state": "waiting_on_employee",
+          "satisfied": 0,
+          "required": 4,
+          "owner": "employee",
+          "next_item_label": "Civil ID (front and back)",
+          "completion_next_action": {
+            "owner": "employee",
+            "message": "Complete the remaining items assigned to you.",
+            "message_en": "Complete the remaining items assigned to you.",
+            "message_ar": "\u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+          }
+        },
+        "queue_unenriched": false
+      }
+    },
+    {
+      "check": "WATHEFNI-96550010001: surfaces agree",
+      "ok": true,
+      "detail": {
+        "cores": [
+          [
+            "drawer",
+            "not_started",
+            0,
+            0,
+            "employee"
+          ],
+          [
+            "app",
+            "not_started",
+            0,
+            0,
+            "employee"
+          ],
+          [
+            "profile",
+            "not_started",
+            0,
+            0,
+            "employee"
+          ]
+        ],
+        "mismatches": [],
+        "queue": {
+          "http": 200,
+          "absent_from_queue": false,
+          "state": null,
+          "satisfied": null,
+          "required": null,
+          "owner": null,
+          "next_item_label": null,
+          "completion_next_action": null
+        },
+        "queue_unenriched": true
+      }
+    },
+    {
+      "check": "WATHEFNI-96550010002: surfaces agree",
+      "ok": true,
+      "detail": {
+        "cores": [
+          [
+            "drawer",
+            "not_started",
+            0,
+            0,
+            "employee"
+          ],
+          [
+            "app",
+            "not_started",
+            0,
+            0,
+            "employee"
+          ],
+          [
+            "profile",
+            "not_started",
+            0,
+            0,
+            "employee"
+          ]
+        ],
+        "mismatches": [],
+        "queue": {
+          "http": 200,
+          "absent_from_queue": false,
+          "state": null,
+          "satisfied": null,
+          "required": null,
+          "owner": null,
+          "next_item_label": null,
+          "completion_next_action": null
+        },
+        "queue_unenriched": true
+      }
+    }
+  ],
+  "failed": 0,
+  "started_at": "2026-08-06T21:07:56Z",
+  "hr": {
+    "email": "azizalmulla16@gmail.com",
+    "role": "owner"
+  },
+  "keys": [
+    "WATHEFNI-96599338566",
+    "WATHEFNI-96550252254",
+    "WATHEFNI-96566363363",
+    "WATHEFNI-96550010001",
+    "WATHEFNI-96550010002"
+  ]
+}

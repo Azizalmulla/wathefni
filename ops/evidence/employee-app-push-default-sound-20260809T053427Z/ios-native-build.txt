@@ -1,0 +1,45 @@
+Resolved "preview" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "preview" environment on EAS.
+Environment variables loaded from the "production" build profile "env" configuration: EXPO_PUBLIC_API_BASE_URL, EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED, EXPO_PUBLIC_LOCAL_PIN_UNLOCK, EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK, EXPO_PUBLIC_LOCAL_AUTO_LOCK, EXPO_PUBLIC_LOCAL_AUTO_LOCK_BIOMETRIC.
+
+- Incrementing buildNumber from 12 to 13.
+✔ Incremented buildNumber from 12 to 13.
+
+
+✔ Using remote iOS credentials (Expo server)
+
+Distribution Certificate is not validated for non-interactive builds.
+Skipping Provisioning Profile validation on Apple Servers because we aren't authenticated.
+
+Project Credentials Configuration
+
+Project                   @abdulazizalmullas-team/aziz
+Bundle Identifier         ai.wathefni.employee
+                          
+Ad Hoc Configuration      
+                          
+Distribution Certificate  
+Serial Number             1C9027324A329572B8DFB331DF64FA65
+Expiration Date           Thu, 05 Aug 2027 05:31:59 GMT+0300
+Apple Team                ZZJ645575F (aziz almulla (Individual))
+Updated                   4 days ago
+                          
+Provisioning Profile      
+Developer Portal ID       W3NU2H4Z67
+Status                    active
+Expiration                Thu, 05 Aug 2027 05:31:59 GMT+0300
+Apple Team                ZZJ645575F (aziz almulla (Individual))
+Provisioned devices       - iPhone (UDID: 00008130-000C08563A30001C)
+Updated                   4 days ago
+                          
+All credentials are ready to build @abdulazizalmullas-team/aziz (ai.wathefni.employee)
+
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+- Compressing project files
+Your project archive is 299 MB. You can reduce its size and the time it takes to upload by excluding files that are unnecessary for the build process in .easignore file. Learn more: https://expo.fyi/eas-build-archive
+- Uploading to EAS Build (0 / 299 MB)
+✔ Uploaded to EAS 54s
+
+See logs: https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/builds/64e563e7-684e-4a70-ba4e-764cf9a057b3
+

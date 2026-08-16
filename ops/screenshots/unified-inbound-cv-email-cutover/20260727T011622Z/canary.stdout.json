@@ -1,0 +1,213 @@
+{
+  "ok": true,
+  "out": "/opt/wathefni/production-evidence/unified-inbound-cv-email-cutover/20260727T011622Z",
+  "passed": 41,
+  "failed": 0,
+  "assertions": [
+    {
+      "name": "health_200_pre",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "enforce_off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "email_authority_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wa_manual_still_on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tenants_wathefni_only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "modules_importable",
+      "ok": true,
+      "detail": "unified-inbound-cv-wa-manual-email-cutover-v1"
+    },
+    {
+      "name": "email_auth_helper",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "external_tenant_off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage_b_untouched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "email_observe_patched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "email_extraction_patched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "postmark_boundary_preserved",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "baseline_counts",
+      "ok": true,
+      "detail": "{\"apps\": 20, \"persons_contact\": 18, \"cv_versions\": 15, \"tp\": 14}"
+    },
+    {
+      "name": "receive_durable",
+      "ok": true,
+      "detail": "c993b8a3-3610-50a9-ba3f-08df8c4da80c"
+    },
+    {
+      "name": "multi_attachment_accepted",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "one_document_per_attachment",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "provider_replay_idempotent",
+      "ok": true,
+      "detail": "{\"duplicate\": true}"
+    },
+    {
+      "name": "scan_before_extraction",
+      "ok": true,
+      "detail": "clean,clean"
+    },
+    {
+      "name": "unified_accept",
+      "ok": true,
+      "detail": "c83e2179-23ff-5253-b56c-63ad52a2c173"
+    },
+    {
+      "name": "no_job_application_created",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "one_source_event",
+      "ok": true,
+      "detail": "67bd376e-7be8-5e49-b99a-531b794f97fb"
+    },
+    {
+      "name": "sender_provenance_only",
+      "ok": true,
+      "detail": "{\"sender_email_provenance_only\": true, \"sender_email\": \"email_cutover_canary.20260727T011801Z@example-canary.invalid\"}"
+    },
+    {
+      "name": "one_item_per_attachment",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "one_envelope_doc_link_per_attachment",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "ocr_plan_local_mistral_gpt",
+      "ok": true,
+      "detail": "document_acceptance,gpt_vision_rescue,immutable_cv_version,local_extraction,malware_scan,mime_content_validation,mistral_ocr"
+    },
+    {
+      "name": "malware_scan_stage_recorded",
+      "ok": true,
+      "detail": "['completed']"
+    },
+    {
+      "name": "person_or_identity_from_extracted",
+      "ok": true,
+      "detail": "05230465-ac8c-5f72-a06f-dc70a26fae6c"
+    },
+    {
+      "name": "sender_not_candidate_identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "talent_pool_no_job",
+      "ok": true,
+      "detail": "8ce5e588-09a2-50b8-993a-3c0ebf73e806"
+    },
+    {
+      "name": "reusable_cv_versions",
+      "ok": true,
+      "detail": "4"
+    },
+    {
+      "name": "no_dup_cv_on_replay",
+      "ok": true,
+      "detail": "4"
+    },
+    {
+      "name": "ck_index_enqueued",
+      "ok": true,
+      "detail": "3"
+    },
+    {
+      "name": "accept_replay_no_dup_event",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "zero_canary_applications",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "restart_durable_quarantine",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "malware_reject_before_extract",
+      "ok": true,
+      "detail": "malware_rejected"
+    },
+    {
+      "name": "dead_letter_replay",
+      "ok": true,
+      "detail": "e06b18f8-d14d-440e-87a6-82190f15d64c"
+    },
+    {
+      "name": "retry_dl_mechanics_unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "zero_unrelated_app_mutations",
+      "ok": true,
+      "detail": "20->20"
+    },
+    {
+      "name": "person_growth_bounded",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "health_200_post",
+      "ok": true,
+      "detail": "200"
+    }
+  ]
+}

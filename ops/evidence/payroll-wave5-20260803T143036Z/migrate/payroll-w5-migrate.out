@@ -1,0 +1,4 @@
+wave5 1.0.0
+connected_db wathefni_staging
+wave5_tables ['payroll_eos_worksheets', 'payroll_pifss_worksheets', 'payroll_statutory_dual_control', 'payroll_statutory_rule_tables', 'payroll_statutory_worksheet_events']
+MIGRATE_OK payroll_pifss_eos_wave5

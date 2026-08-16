@@ -1,0 +1,7 @@
+syncLayoutLocale True
+typeof_guard True
+bank.verifiedTitle True
+COMPLETION_STATES True
+no_stale_clean_tree True
+hbc_size_ok True
+PUBLISHED_FINGERPRINT_PASS

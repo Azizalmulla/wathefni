@@ -1,0 +1,17 @@
+{
+  "dash_chunk": "dashboard-CmztGRNg.js",
+  "cand_chunk": "CandidatesPage-CMHaxZSu.js",
+  "post_chunk": "PostHire-BoHDU-E2.js",
+  "cal_chunk": "CalendarShell-Cfrjq7e2.js",
+  "dash_sha256": "3afa9f3d6114cbcab80280e5dd610b66893c91f94f974c08b80f67bb9ee0ed42",
+  "html_refs_dash": true,
+  "nav_skeleton": true,
+  "work_queue_scope": true,
+  "matchMedia": true,
+  "expected_dash": "dashboard-CmztGRNg.js",
+  "expected_cand": "CandidatesPage-CMHaxZSu.js",
+  "expected_post": "PostHire-BoHDU-E2.js",
+  "expected_cal": "CalendarShell-Cfrjq7e2.js",
+  "chunk_match": true,
+  "sha_match": true
+}

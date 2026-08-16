@@ -1,0 +1,134 @@
+{
+  "namespace": "6b1c0f3a-9d2e-4a7b-8c5d-1e2f3a4b5c6d",
+  "company_code": "WATHEFNI",
+  "employee_count": 4,
+  "employees": [
+    {
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-96550252254",
+      "phone_redacted": "***2254",
+      "email_redacted": "t***@gmail.com",
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "employment_status": null,
+      "onboarding_status": "in_progress",
+      "person_id": "a0b0d348-addd-5da3-87d7-e0f94a5a466c",
+      "person_seed": "person:WATHEFNI:phone:96550252254",
+      "employment_id": "e25da3b1-13a3-558d-a147-42dd8445edf7",
+      "assignments": [
+        {
+          "assignment_id": "112ac62d-bfe5-5f5e-bb33-2f36fb32e2f3",
+          "source": "synthetic_primary",
+          "raw": {
+            "role": "primary_employment"
+          }
+        }
+      ],
+      "compatibility": {
+        "legacy_pk": "employee_key",
+        "future_person_pk": "person_id",
+        "future_employment_pk": "employment_id",
+        "future_assignment_pk": "assignment_id",
+        "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+      }
+    },
+    {
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-96566363363",
+      "phone_redacted": "***3363",
+      "email_redacted": "f***@gmail.com",
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "person_id": "c24a9068-62a7-5a8e-9b60-d1004dd3c265",
+      "person_seed": "person:WATHEFNI:phone:96566363363",
+      "employment_id": "fe3359c9-2b14-53a6-88ac-4662e6c04902",
+      "assignments": [
+        {
+          "assignment_id": "e46040d8-c069-5b9d-aef8-bf507acc73cd",
+          "source": "synthetic_primary",
+          "raw": {
+            "role": "primary_employment"
+          }
+        }
+      ],
+      "compatibility": {
+        "legacy_pk": "employee_key",
+        "future_person_pk": "person_id",
+        "future_employment_pk": "employment_id",
+        "future_assignment_pk": "assignment_id",
+        "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+      }
+    },
+    {
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-96597727743",
+      "phone_redacted": "***7743",
+      "email_redacted": "",
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "employment_status": null,
+      "onboarding_status": "in_progress",
+      "person_id": "9bf69b24-2ee3-5d36-9c4a-ed5756afbc50",
+      "person_seed": "person:WATHEFNI:phone:96597727743",
+      "employment_id": "8fe3358b-18c5-581c-84ea-94f120fd597f",
+      "assignments": [
+        {
+          "assignment_id": "def8f1c7-9c2a-55ee-a5c9-7a7b92b30d7f",
+          "source": "synthetic_primary",
+          "raw": {
+            "role": "primary_employment"
+          }
+        }
+      ],
+      "compatibility": {
+        "legacy_pk": "employee_key",
+        "future_person_pk": "person_id",
+        "future_employment_pk": "employment_id",
+        "future_assignment_pk": "assignment_id",
+        "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+      }
+    },
+    {
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-96599411617",
+      "phone_redacted": "***1617",
+      "email_redacted": "b***@gmail.com",
+      "app_key": null,
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "person_id": "12966424-7e65-556a-9678-cc3f264836d0",
+      "person_seed": "person:WATHEFNI:phone:96599411617",
+      "employment_id": "7e51c028-f1db-5b3b-942a-da0f005ac2f1",
+      "assignments": [
+        {
+          "assignment_id": "fdf5845d-3e96-5f34-b78b-0194f61f438d",
+          "source": "synthetic_primary",
+          "raw": {
+            "role": "primary_employment"
+          }
+        }
+      ],
+      "compatibility": {
+        "legacy_pk": "employee_key",
+        "future_person_pk": "person_id",
+        "future_employment_pk": "employment_id",
+        "future_assignment_pk": "assignment_id",
+        "join_strategy": "employee_key \u2192 employment_id (1:1 for current hub); person_id groups phone/email identity"
+      }
+    }
+  ],
+  "synthetic_orphans_excluded_from_person_mint": [
+    {
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "person_id": null,
+      "employment_id": null,
+      "assignments": [],
+      "note": "synthetic orphan \u2014 do not mint person/employment IDs; quarantine messages only"
+    }
+  ],
+  "wave2_notes": [
+    "Do not create person/employment/assignment tables in Wave 1C",
+    "IDs are deterministic uuid5 from stable seeds \u2014 safe to recompute",
+    "Phone-canonical person seed aligns with Wave 1 alias model",
+    "Quarantined synthetic keys must not receive person_id"
+  ]
+}

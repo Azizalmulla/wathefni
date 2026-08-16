@@ -1,0 +1,61 @@
+    payroll authoritative c4 — prove
+      PASS  c4 module
+      PASS  rollback guidance
+      PASS  EN finalized
+      PASS  AR finalized
+      PASS  payment disabled honesty
+      PASS  no WPS/bank
+      PASS  e360 not calculator
+      PASS  attendance not required
+      PASS  global c4 off
+      PASS  empty allowlist denies
+      PASS  canary runtime allowlisted
+      PASS  other company denied
+      PASS  not enabled until opt-in
+      PASS  authoritative finalize enabled
+      PASS  authoritative gate open
+      PASS  feed mode manual path
+      PASS  feed mode manual has provenance
+      PASS  feed mode manual calc preview authority
+      PASS  manual finalize authoritative
+      PASS  manual sealed present
+      PASS  money_authority=wathefni
+      PASS  post-finalize immutability
+      PASS  duplicate finalize idempotent
+      PASS  audit before/after present
+      PASS  period reopen forbidden after authoritative seal
+      PASS  feed mode imported path
+      PASS  feed mode imported has provenance
+      PASS  feed mode imported calc preview authority
+      PASS  feed mode attendance path
+      PASS  feed mode attendance has provenance
+      PASS  feed mode attendance calc preview authority
+      PASS  feed mode leave path
+      PASS  feed mode leave has provenance
+      PASS  feed mode leave calc preview authority
+      PASS  feed mode ot path
+      PASS  feed mode ot has provenance
+      PASS  feed mode ot calc preview authority
+      PASS  feed mode all path
+      PASS  feed mode all has provenance
+      PASS  feed mode all calc preview authority
+      PASS  all-feeds finalize ok
+      PASS  sod fixture calculated
+      PASS  approve/finalize SoD
+      PASS  stale concurrent approval conflict
+      PASS  versioned approve ok
+      PASS  tenant isolation
+      PASS  synthetic default flagged
+      PASS  non-allowlisted company cannot claim
+      PASS  disabled feeds do not break payroll
+      PASS  c4 does not import attendance_truth
+      PASS  c4 does not import leave_enforcement
+      PASS  c4 does not import shifts_mss
+      PASS  rollback entitlement off
+      PASS  gate closed after rollback
+      PASS  company payment_processing disabled
+
+    55 passed, 0 failed
+PAYROLL_AUTHORITY_UNIT_PASS
+PAYROLL_AUTHORITY_FULL_PASS
+STAGING_RC=0

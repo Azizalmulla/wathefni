@@ -1,0 +1,16 @@
+{
+  "settings_chunk": "SettingsPage-CtnZVrSW.js",
+  "candidates_chunk": "CandidatesPage-CpHnUIxl.js",
+  "settings_sha256": "c4c5227716d504777128737eef4f0414664efdf9046454b71dcb0ca6f28c75ad",
+  "candidates_sha256": "2bebdd49fe953ac822ac967482042691b7aea0769d4a48ca290b8ef8282b612c",
+  "job_specific_alias": true,
+  "general_address": true,
+  "needs_a_job": true,
+  "bound_to_a_job": true,
+  "held_cvs": true,
+  "assign_admit": true,
+  "identity_review": true,
+  "quarantined": true,
+  "ar_needs_job": false,
+  "no_intake_ops": true
+}

@@ -1,0 +1,59 @@
+PASS  wave1 version
+PASS  wathefni only
+PASS  wave1 enabled
+PASS  company ok
+PASS  external company denied
+PASS  mutations default off
+PASS  master kill default off
+PASS  honesty no money
+PASS  honesty no ingest
+PASS  honesty no mutations
+PASS  honesty no legal auth
+PASS  default posthire inbox
+PASS  hr dashboard only
+PASS  contract action_inbox
+PASS  contract employees_360
+PASS  contract setup_console
+PASS  contracts read-only
+PASS  contracts no mutations
+PASS  grounding has freshness
+PASS  grounding has authority
+PASS  grounding has citations
+PASS  fallback en missing
+PASS  fallback ar missing
+PASS  fallback en stale
+PASS  fallback ar stale
+PASS  fallback en partial
+PASS  fallback ar partial
+PASS  fallback en unavailable
+PASS  fallback ar unavailable
+PASS  fallback en blocked
+PASS  fallback ar blocked
+PASS  fallback en unsupported
+PASS  fallback ar unsupported
+PASS  master kill on
+PASS  master kill reply
+PASS  master kill off
+PASS  mutation denial status
+PASS  tool summarize_action_inbox
+PASS  tool summarize_employee_360
+PASS  tool get_launch_readiness_summary
+PASS  mutation tools hidden
+PASS  whatsapp no spine tools
+PASS  external no spine tools
+PASS  catalog action inbox
+PASS  catalog e360
+PASS  catalog setup
+PASS  empty chips en inbox
+PASS  empty chips ar
+PASS  inbox tool returns grounding
+PASS  inbox freshness
+PASS  inbox authority label
+PASS  inbox no mutate
+PASS  tenant isolation on tool
+PASS  permission denial
+db path skipped (no postgres env)
+PASS  mutations explicit on
+PASS  mutations explicit off
+
+56 passed, 0 failed

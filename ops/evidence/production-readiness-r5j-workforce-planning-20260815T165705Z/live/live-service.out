@@ -1,0 +1,17 @@
+staging_health=200
+      PASS  live workforce planning customer enableable
+      PASS  live comp planning still enableable
+      PASS  live engagement still enableable
+      PASS  live ER still enableable
+      PASS  live benefits still enableable
+      PASS  live learning still enableable
+      PASS  live JA still enableable
+      PASS  live talent still enableable
+      PASS  live performance still enableable
+      PASS  live unreleased empty
+      PASS  live health
+      PASS  live /dashboard/workforce-planning/workspace not fail-closed
+      PASS  live /dashboard/workforce-planning/workspace not public
+      PASS  live /dashboard/workforce-planning/plans not fail-closed
+      PASS  live /dashboard/workforce-planning/plans not public
+    LIVE_SERVICE 15 passed, 0 failed

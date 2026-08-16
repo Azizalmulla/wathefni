@@ -1,0 +1,39 @@
+    learning development c2 — prove
+      PASS  phase
+      PASS  stamp
+      PASS  commercial key
+      PASS  no employee ownership
+      PASS  no c3 duplicate
+      PASS  no silent c3 close
+      PASS  no auto skill verify
+      PASS  ja optional
+      PASS  talent optional
+      PASS  works perf/talent off
+      PASS  no lms player
+      PASS  external provider
+      PASS  costs informational
+      PASS  no payroll side effects
+      PASS  assistant mutations out
+      PASS  facts not analytics
+      PASS  setup wave6 learning
+      PASS  setup honesty
+      PASS  bilingual en
+      PASS  bilingual ar
+      PASS  hr web primary admin
+      PASS  employee no hr admin
+      PASS  hr mobile thin
+      PASS  assistant read only
+      PASS  gate off
+      PASS  empty allowlist
+      PASS  gate on
+      PASS  tenant gate
+      PASS  schema has catalog
+      PASS  schema has assignments
+      PASS  schema has completions
+      PASS  schema has certifications
+      PASS  c3 silent close check
+      PASS  no employee table ownership
+      PASS  no development plan table
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    35 passed, 0 failed (unit-only)

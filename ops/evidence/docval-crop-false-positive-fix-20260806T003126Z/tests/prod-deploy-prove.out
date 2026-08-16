@@ -1,0 +1,184 @@
+health_ok
+WATHEFNI_ONBOARDING_DOC_VALIDATION_SOFT=on
+WATHEFNI_ONBOARDING_DOC_VALIDATION_HARD=off
+WATHEFNI_ONBOARDING_DOC_VALIDATION_COMPANIES=WATHEFNI
+WATHEFNI_ONBOARDING_DOC_VALIDATION_EMPLOYEE_ALLOWLIST=WATHEFNI-96599338566,WATHEFNI-96550252254
+PASS clear status clean
+PASS clear crop_signal none
+PASS blur rejects or borderline
+PASS blur reason too_blurry
+PASS glare rejects
+PASS glare reason
+PASS frame-fill not hard reject
+PASS frame-fill not crop reason
+PASS frame-fill weak crop signal
+PASS tiny rejects
+PASS tiny reason resolution
+PASS mild blur borderline
+PASS mild blur HR reason
+PASS clear inset allows
+PASS clear frame-filling allows
+PASS frame-fill not document_not_fully_visible
+PASS edge-touching valid allows
+PASS genuinely cut-off blocks
+PASS cut-off reason document_not_fully_visible
+PASS missing side blocks
+PASS missing_side reason
+PASS severe blur still blocks
+PASS severe blur reason too_blurry
+PASS nondoc wrong-document wins
+OK onboarding capture quality smoke
+PASS missing_side reason
+PASS missing_side EN
+PASS clear civil_id allow
+PASS clear civil_id not blocked
+PASS low-conf credible blocks
+PASS low-conf not uncertain
+PASS low-conf retake reason
+PASS oreo-style blocks
+PASS oreo-style not_a_document
+PASS oreo-style not uncertain
+PASS nondoc blocks
+PASS nondoc reason photo/wrong-doc
+PASS nondoc not glare/blur message
+PASS blurry+highOCR blocks
+PASS blurry+highOCR reason too_blurry
+PASS blurry+highOCR not allow
+PASS blurry+highOCR not HR
+PASS blurry capture reject status
+PASS alias helper matches EN
+PASS alias not applied to other employees
+PASS canary alias allows clear ID
+PASS canary alias not blocked
+PASS validator unavailable blocks
+PASS validator_unavailable reason
+OK onboarding doc validation parity local smoke
+{
+  "inset": {
+    "assess": {
+      "status": "clean",
+      "reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 5316.082,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 0,
+        "crop_signal": "none"
+      }
+    },
+    "decision": "allow",
+    "reason": null
+  },
+  "frame_fill": {
+    "assess": {
+      "status": "clean",
+      "reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 3310.837,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 4,
+        "crop_signal": "weak"
+      }
+    },
+    "decision": "allow",
+    "reason": null
+  },
+  "edge": {
+    "assess": {
+      "status": "clean",
+      "reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 5232.609,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 2,
+        "crop_signal": "weak"
+      }
+    },
+    "decision": "allow",
+    "reason": null
+  },
+  "cutoff_supported": {
+    "decision": "block",
+    "reason": "document_not_fully_visible",
+    "capture_quality": {
+      "status": "clean",
+      "reason": null,
+      "signal_reason": null,
+      "metrics": {
+        "width": 1000,
+        "height": 640,
+        "short_side": 640,
+        "long_side": 1000,
+        "laplacian_var": 3310.837,
+        "glare_frac": 0.0,
+        "crop_hot_sides": 4,
+        "crop_signal": "weak"
+      },
+      "engine": "pil_numpy_v1"
+    }
+  },
+  "missing_side": {
+    "decision": "block",
+    "reason": "missing_side"
+  },
+  "rejection_detail_has_capture_quality": true
+}
+PROVE_OK
+{
+  "action": "reset",
+  "canary": {
+    "status": "pending",
+    "document_type": "civil_id_canary_test",
+    "required": false
+  },
+  "civil_id_untouched": "accepted"
+}
+{
+  "verify": {
+    "canary_present": true,
+    "canary_status": "pending",
+    "canary_document_type": "civil_id_canary_test",
+    "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+    "visible_in_employee_app": true,
+    "group": "your_actions",
+    "actions": [
+      "upload"
+    ],
+    "upload_enabled": true,
+    "required_canary": false,
+    "real_civil_id_status": "accepted",
+    "real_civil_id_required": true,
+    "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "required_item_count_excluding_canary": 4
+  }
+}
+READY_FOR_APP_TEST civil_id_canary_test
+{
+  "canary_present": true,
+  "canary_status": "pending",
+  "canary_document_type": "civil_id_canary_test",
+  "canary_label": "CANARY ONLY \u2014 Civil ID upload test (disposable)",
+  "visible_in_employee_app": true,
+  "group": "your_actions",
+  "actions": [
+    "upload"
+  ],
+  "upload_enabled": true,
+  "required_canary": false,
+  "real_civil_id_status": "accepted",
+  "real_civil_id_required": true,
+  "real_civil_id_sha": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+  "required_item_count_excluding_canary": 4
+}
+VERIFY PASS

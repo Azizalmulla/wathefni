@@ -1,0 +1,201 @@
+{
+  "mode": "dry_run_read_only",
+  "generated_at": "2026-08-01T01:44:19.488936+00:00",
+  "all_total": 791,
+  "null_total": 722,
+  "class_counts": {
+    "quarantine_orphan_no_application": 690,
+    "backfill_unambiguous_application": 32
+  },
+  "follow_up_class_counts": {
+    "quarantine_orphan_no_application": 448,
+    "backfill_unambiguous_application": 13
+  },
+  "ambiguous_rows": [],
+  "backfill_follow_up": [
+    {
+      "delivery_id": "orchestrator-4cfb0222-da95-47c2-8d65-207aeac1b27f",
+      "subject_key": "96555550133-WATHEFNI-ACCOUNTING",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-abd3b217-8c56-48f0-b1c8-13561543dd41",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-1088aaa4-32a1-46b0-89e3-6a06d0ef0612",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-6babc06b-ce89-4419-b650-525030e42489",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-6162046b-6ba9-47f8-99ad-033f6c44c447",
+      "subject_key": "96598900677-WATHEFNI-HR",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-ebab11c6-d1fc-4f71-9221-ff0e89f438de",
+      "subject_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-fa446853-8650-480d-ab57-a75942d4cbd0",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-a5e92172-2e00-4fdc-911b-f403e3203a7c",
+      "subject_key": "96597485758-WATHEFNI-HR",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-75474408-62e0-47ea-9416-ddb141c0aa2d",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-7c58ec04-91e5-4afe-b925-12279c78dfc5",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-7f361e4e-84f1-4e56-b545-be697364f18c",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-2e69ecc6-8de1-42ea-bca7-1342df57a3b9",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    },
+    {
+      "delivery_id": "orchestrator-2f037019-2973-4d72-a198-7c44d311e460",
+      "subject_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "class": "backfill_unambiguous_application",
+      "owner_company_code": "WATHEFNI",
+      "app_companies": [
+        "WATHEFNI"
+      ],
+      "signals": {
+        "account_id_is_company": false
+      },
+      "follow_up_relevant": true
+    }
+  ],
+  "backfill_count": 32,
+  "orphan_count": 690,
+  "ambiguous_count": 0,
+  "wathefni_strict_after_simulated_backfill": {
+    "apps": 4,
+    "people": 2,
+    "apps_null_still_visible_under_old_shape": 4
+  },
+  "null_events_strict_qualify_count": 0,
+  "cross_tenant_wathefni_coded_vs_tenant_b": 0,
+  "authority": "applications.app_key unique company_code only",
+  "heuristics_not_assigned": [
+    "account_id_is_company",
+    "subject_key_embeds_company"
+  ]
+}

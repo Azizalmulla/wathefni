@@ -1,0 +1,102 @@
+[
+  {
+    "employee_key": "WATHEFNI-96597727743",
+    "name": "mohammad alqattan",
+    "phone": "96597727743",
+    "lifecycle": "active",
+    "ok": true,
+    "policies": [
+      {
+        "leave_type": "annual",
+        "days_per_year": "30.00",
+        "eligibility_months": 6,
+        "enforced": false,
+        "legal_reviewed": false
+      },
+      {
+        "leave_type": "sick",
+        "days_per_year": "0.00",
+        "eligibility_months": 0,
+        "enforced": false,
+        "legal_reviewed": false
+      }
+    ],
+    "enforced": false,
+    "legal_reviewed": false
+  },
+  {
+    "employee_key": "WATHEFNI-96566363363",
+    "name": "Fouad Burhamad",
+    "phone": "96566363363",
+    "lifecycle": "active",
+    "ok": true,
+    "policies": [
+      {
+        "leave_type": "annual",
+        "days_per_year": "30.00",
+        "eligibility_months": 6,
+        "enforced": false,
+        "legal_reviewed": false
+      },
+      {
+        "leave_type": "sick",
+        "days_per_year": "0.00",
+        "eligibility_months": 0,
+        "enforced": false,
+        "legal_reviewed": false
+      }
+    ],
+    "enforced": false,
+    "legal_reviewed": false
+  },
+  {
+    "employee_key": "WATHEFNI-96599411617",
+    "name": "Brian Saleh",
+    "phone": "96599411617",
+    "lifecycle": "active",
+    "ok": true,
+    "policies": [
+      {
+        "leave_type": "annual",
+        "days_per_year": "30.00",
+        "eligibility_months": 6,
+        "enforced": false,
+        "legal_reviewed": false
+      },
+      {
+        "leave_type": "sick",
+        "days_per_year": "0.00",
+        "eligibility_months": 0,
+        "enforced": false,
+        "legal_reviewed": false
+      }
+    ],
+    "enforced": false,
+    "legal_reviewed": false
+  },
+  {
+    "employee_key": "WATHEFNI-96550252254",
+    "name": "Talal Fadhli",
+    "phone": "96550252254",
+    "lifecycle": "active",
+    "ok": true,
+    "policies": [
+      {
+        "leave_type": "annual",
+        "days_per_year": "30.00",
+        "eligibility_months": 6,
+        "enforced": false,
+        "legal_reviewed": false
+      },
+      {
+        "leave_type": "sick",
+        "days_per_year": "0.00",
+        "eligibility_months": 0,
+        "enforced": false,
+        "legal_reviewed": false
+      }
+    ],
+    "enforced": false,
+    "legal_reviewed": false
+  }
+]

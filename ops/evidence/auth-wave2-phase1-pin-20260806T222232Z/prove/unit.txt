@@ -1,0 +1,41 @@
+auth wave2 phase1 pin unit
+  PASS  EN/AR pin key parity
+  PASS  PIN length 6
+  PASS  max attempts 5
+  PASS  canary Aziz key
+  PASS  canary Talal key
+  PASS  master flag EXPO_PUBLIC_LOCAL_PIN_UNLOCK
+  PASS  stores verifier not plaintext key name
+  PASS  stores salt
+  PASS  derivePinVerifier used
+  PASS  never writes raw pin to SecureStore setItem of pin
+  PASS  stretched verifier
+  PASS  no expo-crypto import
+  PASS  sealed session while locked
+  PASS  statuses locked + needsPinSetup
+  PASS  createLocalPin API
+  PASS  unlockWithPin API
+  PASS  changeLocalPin API
+  PASS  5-fail resets to OTP
+  PASS  no background re-lock
+  PASS  flag off Wave 1 path
+  PASS  RTL restart can resume unlocked session once
+  PASS  locale restart never wipes session via blockForError
+  PASS  locale restart /me failure falls back to PIN lock
+  PASS  language switch confirms before reload
+  PASS  language switch uses Updates.reloadAsync first
+  PASS  no silent DevSettings.reload on setLocale
+  PASS  locale restart marks preserve-auth
+  PASS  preserve marker dual-written to SecureStore
+  PASS  AuthGate create PIN
+  PASS  AuthGate unlock PIN
+  PASS  change-pin route registered
+  PASS  no expo-local-authentication
+  PASS  no new expo-crypto dep
+  PASS  mobile typecheck
+  PASS  verify-capability-foundation
+  PASS  pinCrypto exports derivePinVerifier
+  PASS  pinCrypto constantTimeEqual
+
+37 passed, 0 failed
+AUTH_WAVE2_PHASE1_PIN_UNIT:PASS

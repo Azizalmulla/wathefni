@@ -1,0 +1,10 @@
+PASS no candidates.read in employee_onboarding_items
+PASS load_onboarding_items present
+PASS bank forbidden helper
+PASS reminder company fail-closed
+PASS wave2 module present
+PASS wave5 module present
+PASS wave4 module present
+PASS ess plaintext bank forbidden retained
+FAIL ess synthetic only retained None
+RESULT pass=8 fail=1

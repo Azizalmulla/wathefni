@@ -1,0 +1,96 @@
+PASS AuthProvider stores typed /app/me
+PASS entitlement soft-refresh on foreground
+PASS local PIN seals tokens while locked
+PASS local PIN setup status exists
+PASS document download refreshes on 401
+PASS optional tabs are capability-driven
+PASS Inbox is not a bottom tab, and Payslips took the slot
+PASS home reads the server-owned projection instead of re-querying modules
+PASS home presents server tasks and never re-derives them from status strings
+PASS home actions are capability-driven
+PASS phase5 composition contract exists
+PASS inbox not counted as purchased home module
+PASS home has a single launcher, not tiles plus duplicate quick actions
+PASS onboarding demotes when complete
+PASS deep links resolve through the strict route registry
+PASS push taps follow through when entitled, else Inbox/Home
+PASS unknown or unentitled links fall back to Home calmly
+PASS home tracks per-module read state
+PASS an unrecognized module state fails closed instead of claiming ready
+PASS home never states an unavailable module as an empty business fact
+PASS today's attendance is proven to be today's record
+PASS the split Shifts and Attendance surfaces are gone
+PASS Schedule opens on either contributing entitlement
+PASS Schedule reads the server-owned workday projection, not the module endpoints
+PASS Schedule shows today's expectation beside today's record
+PASS an unavailable authority stays informational instead of reading as empty
+PASS Schedule is read-only: no clocking, correction or write of any kind
+PASS Schedule states that HR owns the schedule and the record
+PASS Schedule offers a dedicated attendance history entry without becoming an archive
+PASS Attendance history pages via cursor and never invents scheduled shifts
+PASS Schedule presents stored values and computes no lateness or duration of its own
+PASS Schedule renders attendance times in Kuwait time, not device time
+PASS Profile reads /app/profile instead of inventing a second employee store
+PASS Profile hierarchy is Personal / Employment / Bank / Account
+PASS Profile states identity once: hero only, never again as a detail row
+PASS Bank remains only under Profile, not Settings
+PASS Documents hierarchy separates attention, current, and history
+PASS Documents renew still invalidates onboarding and Home tasks
+PASS Payslips group earnings and deductions with net pay prominence
+PASS Payslip payment date comes from payroll and is omitted when unconfirmed
+PASS Inbox opens without waiting on mark-read or a full refetch
+PASS Inbox rows keep VoiceOver labels and calm unavailable deep links
+PASS Inbox destination resolution shares push flow defaults including leave_decision
+PASS Settings keeps Auth diagnostics build-gated and offers device-security retry
+PASS payslip share copy is removed from the cache
+PASS auto-lock diagnostics are build-gated
+PASS unsupported employee compliance tab remains absent
+PASS temporary design preview does not ship
+PASS Wathefni branding is typography only
+PASS motion respects reduced-motion preference
+PASS leave types come from backend
+PASS Leave offers a dedicated history entry without becoming an archive
+PASS Leave history pages via cursor with year/status filters and no invented balances
+PASS documents do not read secure-store tokens directly
+PASS documents expose an explicit back control
+PASS settings expose an explicit back control
+PASS account deletion is capability-gated and repeat-locked
+PASS onboarding uploads are capability-gated
+PASS Onboarding preview uses latest-wins open and soft refresh after upload
+PASS repeatable mobile mutations are locked
+PASS privacy URL is centralized
+PASS localized not-found route exists
+PASS bank screen reads the backend bank contract only
+PASS bank submissions are idempotent across retries
+PASS sensitive bank input is not retained after submit
+PASS bank evidence opens through the authorized stream, never a raw URL
+PASS bank screen separates verified, payroll-effective and submitted
+PASS bank screen states cover every submission state
+PASS bank rejection reason and next step are surfaced
+PASS bank evidence open is latest-wins and upload refresh is non-blocking
+PASS controlled rollout renders an explained state, not an error loop
+PASS onboarding completion comes from the canonical contract
+PASS app never recomputes completion locally
+PASS next action copy comes from the backend, not a local state table
+PASS onboarding bank CTA requires open_bank action from backend eligibility
+PASS bank route respects the same feature gate as onboarding
+PASS app/(tabs)/leave.tsx blocks direct access without leave
+PASS app/onboarding.tsx blocks direct access without onboarding
+PASS app/documents.tsx blocks direct access without documents
+PASS app/leave/request.tsx blocks direct access without leave
+PASS FeatureUnavailable presents server features.reason as customer copy
+PASS app/(tabs)/leave.tsx passes feature into FeatureUnavailableState
+PASS app/onboarding.tsx passes feature into FeatureUnavailableState
+PASS app/documents.tsx passes feature into FeatureUnavailableState
+PASS app/leave/request.tsx passes feature into FeatureUnavailableState
+PASS app/(tabs)/payslips.tsx passes feature into FeatureUnavailableState
+PASS Schedule FeatureUnavailable covers both schedule authorities
+PASS English account/capability copy complete
+PASS Arabic account/capability copy complete
+PASS English/Arabic keysets match
+PASS payslip authority copy is source-neutral and free of payroll jargon
+PASS no internal terminology in employee-facing copy ([])
+PASS translation keys have no scalar/object collisions
+PASS scroll bottom padding does not double-count the tab bar height
+PASS Home does not override shared scroll bottom padding
+employee mobile capability foundation: GREEN

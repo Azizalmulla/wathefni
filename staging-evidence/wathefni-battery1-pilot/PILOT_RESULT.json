@@ -1,0 +1,8287 @@
+{
+  "started_at": "2026-07-18T21:17:20.326541+00:00",
+  "environment": "staging",
+  "company_code": "B1PILOT",
+  "confirm": "battery1-staging-pilot-nonconsequential",
+  "source_manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "boundaries": {
+    "production_touched": false,
+    "approved_for_use": false,
+    "production_live_bank_insertion": false,
+    "item_revisions_mutated": false,
+    "answer_keys_mutated": false,
+    "scoring_rules_mutated": false,
+    "en_ar_pairs_mutated": false,
+    "hiring_consequences": false,
+    "offers_created": false,
+    "employees_created": false,
+    "ai_scoring": false,
+    "recruiting_stage_mutations": false
+  },
+  "live_counts_before": {
+    "assessment_items": 22,
+    "assessment_batteries": 1,
+    "assessment_content_versions": 1,
+    "assessment_attempts": 4,
+    "assessment_responses": 22,
+    "assessment_scores": 1,
+    "assessment_reports": 1,
+    "applications": 16,
+    "employees": 3,
+    "offers": -1
+  },
+  "global_snapshot_before": {
+    "batteries": [
+      {
+        "battery_key": "wathefni_ability_v1",
+        "company_code": "GLOBAL",
+        "is_active": true,
+        "content_version": 1,
+        "frozen": true,
+        "retired": false
+      }
+    ],
+    "ability_v1_items": 22,
+    "wathefni_or_ability_attempts": 4
+  },
+  "staging_insertion": {
+    "company_code": "B1PILOT",
+    "batteries": {
+      "en": {
+        "battery_key": "b1_gawj_v1_en_pilot",
+        "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+        "content_sha256": "a7f27b5146755edf606889d63d6cccbb37582bd852d653234e6815a820e980d2",
+        "item_count": 25
+      },
+      "ar": {
+        "battery_key": "b1_gawj_v1_ar_pilot",
+        "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+        "content_sha256": "49f7369df065b1c2ff0e974b0f58fab14b88b58499f27d74697a566ddcbe1637",
+        "item_count": 25
+      }
+    },
+    "approved_for_use": false,
+    "isolated_from_wathefni_tenant": true
+  },
+  "live_counts_after": {
+    "assessment_items": 72,
+    "assessment_batteries": 3,
+    "assessment_content_versions": 3,
+    "assessment_attempts": 20,
+    "assessment_responses": 395,
+    "assessment_scores": 15,
+    "assessment_reports": 15,
+    "applications": 32,
+    "employees": 3,
+    "offers": -1
+  },
+  "global_snapshot_after": {
+    "batteries": [
+      {
+        "battery_key": "wathefni_ability_v1",
+        "company_code": "GLOBAL",
+        "is_active": true,
+        "content_version": 1,
+        "frozen": true,
+        "retired": false
+      }
+    ],
+    "ability_v1_items": 22,
+    "wathefni_or_ability_attempts": 4
+  },
+  "finished_at": "2026-07-18T21:17:31.541658+00:00",
+  "pilot_battery_version_ids": {
+    "en": {
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "content_sha256": "a7f27b5146755edf606889d63d6cccbb37582bd852d653234e6815a820e980d2",
+      "item_count": 25
+    },
+    "ar": {
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "content_sha256": "49f7369df065b1c2ff0e974b0f58fab14b88b58499f27d74697a566ddcbe1637",
+      "item_count": 25
+    }
+  },
+  "participant_count": 16,
+  "completion_totals": {
+    "completed": 14,
+    "dropout": 2,
+    "completion_rate": 0.875,
+    "dropout_rate": 0.125
+  },
+  "en_ar_split": {
+    "en_participants": 8,
+    "ar_participants": 8,
+    "en_completed": 8,
+    "ar_completed": 6
+  },
+  "timing_metrics": {
+    "mean_completion_ms": 1265862,
+    "median_completion_ms": 1197534,
+    "mean_en_completion_ms": 1160601,
+    "mean_ar_completion_ms": 1406210,
+    "en_ar_timing_ratio": 1.212,
+    "mean_time_per_item_ms": 50881
+  },
+  "score_distribution": {
+    "n": 14,
+    "mean_percent": 76.57,
+    "median_percent": 78.0,
+    "min_percent": 64.0,
+    "max_percent": 88.0,
+    "stdev_percent": 7.23
+  },
+  "item_level_analysis": [
+    {
+      "item_id": "b1pilot_ar_01",
+      "order": 1,
+      "locale": "ar",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 5,
+      "selected": {
+        "C": 1,
+        "B": 1,
+        "A": 5,
+        "D": 1
+      },
+      "times_ms": [
+        67420,
+        50083,
+        63791,
+        80096,
+        72268,
+        45602,
+        75963,
+        63183
+      ],
+      "p_correct": 0.625,
+      "mean_time_ms": 64800,
+      "distractor_counts": {
+        "C": 1,
+        "B": 1,
+        "A": 5,
+        "D": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_02",
+      "order": 2,
+      "locale": "ar",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 7,
+      "selected": {
+        "D": 1,
+        "A": 7
+      },
+      "times_ms": [
+        44125,
+        81301,
+        25607,
+        64667,
+        52072,
+        55028,
+        26415,
+        42669
+      ],
+      "p_correct": 0.875,
+      "mean_time_ms": 48985,
+      "distractor_counts": {
+        "D": 1,
+        "A": 7
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_03",
+      "order": 3,
+      "locale": "ar",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 4,
+      "selected": {
+        "C": 2,
+        "A": 4,
+        "D": 1,
+        "B": 1
+      },
+      "times_ms": [
+        68072,
+        74337,
+        33813,
+        64822,
+        54654,
+        50283,
+        53175,
+        81370
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 60065,
+      "distractor_counts": {
+        "C": 2,
+        "A": 4,
+        "D": 1,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_04",
+      "order": 4,
+      "locale": "ar",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 7,
+      "selected": {
+        "C": 1,
+        "A": 7
+      },
+      "times_ms": [
+        39069,
+        42577,
+        24983,
+        113367,
+        36174,
+        23515,
+        23613,
+        56060
+      ],
+      "p_correct": 0.875,
+      "mean_time_ms": 44919,
+      "distractor_counts": {
+        "C": 1,
+        "A": 7
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_05",
+      "order": 5,
+      "locale": "ar",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 5,
+      "selected": {
+        "C": 1,
+        "D": 1,
+        "B": 5,
+        "A": 1
+      },
+      "times_ms": [
+        58298,
+        72942,
+        85703,
+        79519,
+        54459,
+        77244,
+        49793,
+        25780
+      ],
+      "p_correct": 0.625,
+      "mean_time_ms": 62967,
+      "distractor_counts": {
+        "C": 1,
+        "D": 1,
+        "B": 5,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_06",
+      "order": 6,
+      "locale": "ar",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "B": 6,
+        "C": 1,
+        "A": 1
+      },
+      "times_ms": [
+        49366,
+        79238,
+        80549,
+        34576,
+        78709,
+        29659,
+        48744,
+        44859
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 55712,
+      "distractor_counts": {
+        "B": 6,
+        "C": 1,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_07",
+      "order": 7,
+      "locale": "ar",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "C": 6,
+        "B": 1,
+        "A": 1
+      },
+      "times_ms": [
+        55243,
+        62540,
+        81092,
+        69518,
+        78025,
+        25337,
+        36542,
+        61237
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 58691,
+      "distractor_counts": {
+        "C": 6,
+        "B": 1,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_08",
+      "order": 8,
+      "locale": "ar",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 4,
+      "selected": {
+        "C": 4,
+        "D": 2,
+        "A": 2
+      },
+      "times_ms": [
+        50572,
+        41630,
+        65121,
+        90136,
+        56172,
+        74425,
+        78010,
+        32362
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 61053,
+      "distractor_counts": {
+        "C": 4,
+        "D": 2,
+        "A": 2
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_09",
+      "order": 9,
+      "locale": "ar",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 5,
+      "selected": {
+        "C": 5,
+        "D": 1,
+        "A": 1,
+        "B": 1
+      },
+      "times_ms": [
+        42569,
+        80006,
+        23416,
+        77214,
+        28393,
+        29654,
+        80067,
+        42632
+      ],
+      "p_correct": 0.625,
+      "mean_time_ms": 50493,
+      "distractor_counts": {
+        "C": 5,
+        "D": 1,
+        "A": 1,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_10",
+      "order": 10,
+      "locale": "ar",
+      "category": "numerical_reasoning",
+      "n": 7,
+      "correct": 5,
+      "selected": {
+        "B": 5,
+        "D": 2
+      },
+      "times_ms": [
+        34982,
+        41260,
+        52593,
+        26975,
+        27237,
+        76628,
+        69247
+      ],
+      "p_correct": 0.714,
+      "mean_time_ms": 46988,
+      "distractor_counts": {
+        "B": 5,
+        "D": 2
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_11",
+      "order": 11,
+      "locale": "ar",
+      "category": "logical_reasoning",
+      "n": 7,
+      "correct": 5,
+      "selected": {
+        "B": 5,
+        "C": 2
+      },
+      "times_ms": [
+        29514,
+        20956,
+        24992,
+        51341,
+        69769,
+        66356,
+        47026
+      ],
+      "p_correct": 0.714,
+      "mean_time_ms": 44279,
+      "distractor_counts": {
+        "B": 5,
+        "C": 2
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_12",
+      "order": 12,
+      "locale": "ar",
+      "category": "logical_reasoning",
+      "n": 7,
+      "correct": 5,
+      "selected": {
+        "B": 5,
+        "D": 1,
+        "A": 1
+      },
+      "times_ms": [
+        80000,
+        39923,
+        77021,
+        114162,
+        84379,
+        46549,
+        81701
+      ],
+      "p_correct": 0.714,
+      "mean_time_ms": 74819,
+      "distractor_counts": {
+        "B": 5,
+        "D": 1,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_13",
+      "order": 13,
+      "locale": "ar",
+      "category": "logical_reasoning",
+      "n": 7,
+      "correct": 7,
+      "selected": {
+        "C": 7
+      },
+      "times_ms": [
+        32848,
+        29311,
+        21548,
+        39438,
+        65337,
+        85789,
+        59092
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 47623,
+      "distractor_counts": {
+        "C": 7
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_14",
+      "order": 14,
+      "locale": "ar",
+      "category": "logical_reasoning",
+      "n": 7,
+      "correct": 7,
+      "selected": {
+        "B": 7
+      },
+      "times_ms": [
+        64274,
+        61571,
+        49051,
+        73114,
+        38357,
+        55882,
+        77187
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 59919,
+      "distractor_counts": {
+        "B": 7
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_15",
+      "order": 15,
+      "locale": "ar",
+      "category": "verbal_reasoning",
+      "n": 6,
+      "correct": 5,
+      "selected": {
+        "A": 5,
+        "D": 1
+      },
+      "times_ms": [
+        73775,
+        47601,
+        22082,
+        74936,
+        21028,
+        67545
+      ],
+      "p_correct": 0.833,
+      "mean_time_ms": 51161,
+      "distractor_counts": {
+        "A": 5,
+        "D": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_16",
+      "order": 16,
+      "locale": "ar",
+      "category": "verbal_reasoning",
+      "n": 6,
+      "correct": 4,
+      "selected": {
+        "A": 4,
+        "C": 1,
+        "D": 1
+      },
+      "times_ms": [
+        56556,
+        78225,
+        51655,
+        40334,
+        66285,
+        41915
+      ],
+      "p_correct": 0.667,
+      "mean_time_ms": 55828,
+      "distractor_counts": {
+        "A": 4,
+        "C": 1,
+        "D": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_17",
+      "order": 17,
+      "locale": "ar",
+      "category": "situational_judgment",
+      "n": 6,
+      "correct": 4,
+      "selected": {
+        "B": 4,
+        "A": 2
+      },
+      "times_ms": [
+        65088,
+        38602,
+        62258,
+        87222,
+        75189,
+        38357
+      ],
+      "p_correct": 0.667,
+      "mean_time_ms": 61119,
+      "distractor_counts": {
+        "B": 4,
+        "A": 2
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_18",
+      "order": 18,
+      "locale": "ar",
+      "category": "situational_judgment",
+      "n": 6,
+      "correct": 4,
+      "selected": {
+        "A": 4,
+        "D": 2
+      },
+      "times_ms": [
+        39099,
+        48090,
+        27811,
+        86377,
+        46917,
+        83671
+      ],
+      "p_correct": 0.667,
+      "mean_time_ms": 55327,
+      "distractor_counts": {
+        "A": 4,
+        "D": 2
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_19",
+      "order": 19,
+      "locale": "ar",
+      "category": "prioritization",
+      "n": 6,
+      "correct": 3,
+      "selected": {
+        "D": 3,
+        "B": 3
+      },
+      "times_ms": [
+        54390,
+        69191,
+        25135,
+        50561,
+        79647,
+        77671
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 59432,
+      "distractor_counts": {
+        "D": 3,
+        "B": 3
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_20",
+      "order": 20,
+      "locale": "ar",
+      "category": "numerical_reasoning",
+      "n": 6,
+      "correct": 4,
+      "selected": {
+        "D": 2,
+        "B": 4
+      },
+      "times_ms": [
+        84812,
+        55443,
+        29672,
+        73484,
+        83182,
+        54740
+      ],
+      "p_correct": 0.667,
+      "mean_time_ms": 63555,
+      "distractor_counts": {
+        "D": 2,
+        "B": 4
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_21",
+      "order": 21,
+      "locale": "ar",
+      "category": "logical_reasoning",
+      "n": 6,
+      "correct": 5,
+      "selected": {
+        "C": 5,
+        "A": 1
+      },
+      "times_ms": [
+        60462,
+        34017,
+        46378,
+        45369,
+        34209,
+        53197
+      ],
+      "p_correct": 0.833,
+      "mean_time_ms": 45605,
+      "distractor_counts": {
+        "C": 5,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_22",
+      "order": 22,
+      "locale": "ar",
+      "category": "verbal_reasoning",
+      "n": 6,
+      "correct": 6,
+      "selected": {
+        "A": 6
+      },
+      "times_ms": [
+        77684,
+        76447,
+        72878,
+        56683,
+        76203,
+        42625
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 67086,
+      "distractor_counts": {
+        "A": 6
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_23",
+      "order": 23,
+      "locale": "ar",
+      "category": "situational_judgment",
+      "n": 6,
+      "correct": 4,
+      "selected": {
+        "B": 4,
+        "D": 1,
+        "C": 1
+      },
+      "times_ms": [
+        28410,
+        32032,
+        23670,
+        26352,
+        67941,
+        84813
+      ],
+      "p_correct": 0.667,
+      "mean_time_ms": 43869,
+      "distractor_counts": {
+        "B": 4,
+        "D": 1,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_24",
+      "order": 24,
+      "locale": "ar",
+      "category": "numerical_reasoning",
+      "n": 6,
+      "correct": 3,
+      "selected": {
+        "B": 3,
+        "A": 1,
+        "D": 1,
+        "C": 1
+      },
+      "times_ms": [
+        69316,
+        53013,
+        72885,
+        50197,
+        83110,
+        73607
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 67021,
+      "distractor_counts": {
+        "B": 3,
+        "A": 1,
+        "D": 1,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_ar_25",
+      "order": 25,
+      "locale": "ar",
+      "category": "prioritization",
+      "n": 6,
+      "correct": 6,
+      "selected": {
+        "B": 6
+      },
+      "times_ms": [
+        77683,
+        32341,
+        40832,
+        25936,
+        51790,
+        68426
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 49501,
+      "distractor_counts": {
+        "B": 6
+      }
+    },
+    {
+      "item_id": "b1pilot_en_01",
+      "order": 1,
+      "locale": "en",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "A": 8
+      },
+      "times_ms": [
+        53813,
+        32573,
+        60747,
+        36375,
+        21140,
+        60992,
+        55165,
+        26946
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 43468,
+      "distractor_counts": {
+        "A": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_02",
+      "order": 2,
+      "locale": "en",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 7,
+      "selected": {
+        "A": 7,
+        "B": 1
+      },
+      "times_ms": [
+        50266,
+        61412,
+        39507,
+        27569,
+        37324,
+        26036,
+        58423,
+        61214
+      ],
+      "p_correct": 0.875,
+      "mean_time_ms": 45218,
+      "distractor_counts": {
+        "A": 7,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_03",
+      "order": 3,
+      "locale": "en",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 7,
+      "selected": {
+        "A": 7,
+        "B": 1
+      },
+      "times_ms": [
+        25265,
+        43629,
+        68381,
+        32059,
+        28207,
+        28267,
+        26994,
+        51859
+      ],
+      "p_correct": 0.875,
+      "mean_time_ms": 38082,
+      "distractor_counts": {
+        "A": 7,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_04",
+      "order": 4,
+      "locale": "en",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 7,
+      "selected": {
+        "A": 7,
+        "B": 1
+      },
+      "times_ms": [
+        48841,
+        50145,
+        69623,
+        68170,
+        22264,
+        49340,
+        76945,
+        49958
+      ],
+      "p_correct": 0.875,
+      "mean_time_ms": 54410,
+      "distractor_counts": {
+        "A": 7,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_05",
+      "order": 5,
+      "locale": "en",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "B": 6,
+        "D": 1,
+        "C": 1
+      },
+      "times_ms": [
+        57630,
+        35371,
+        31438,
+        47113,
+        63999,
+        31191,
+        67298,
+        48894
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 47866,
+      "distractor_counts": {
+        "B": 6,
+        "D": 1,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_06",
+      "order": 6,
+      "locale": "en",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "B": 6,
+        "C": 2
+      },
+      "times_ms": [
+        40505,
+        57893,
+        67051,
+        35107,
+        65086,
+        46941,
+        60164,
+        46240
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 52373,
+      "distractor_counts": {
+        "B": 6,
+        "C": 2
+      }
+    },
+    {
+      "item_id": "b1pilot_en_07",
+      "order": 7,
+      "locale": "en",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "C": 8
+      },
+      "times_ms": [
+        59536,
+        55401,
+        32086,
+        56429,
+        44112,
+        23674,
+        70170,
+        31429
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 46604,
+      "distractor_counts": {
+        "C": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_08",
+      "order": 8,
+      "locale": "en",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 4,
+      "selected": {
+        "D": 2,
+        "C": 4,
+        "B": 1,
+        "A": 1
+      },
+      "times_ms": [
+        59070,
+        68331,
+        21832,
+        25042,
+        30206,
+        21530,
+        35082,
+        59347
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 40055,
+      "distractor_counts": {
+        "D": 2,
+        "C": 4,
+        "B": 1,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_09",
+      "order": 9,
+      "locale": "en",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "C": 6,
+        "D": 1,
+        "B": 1
+      },
+      "times_ms": [
+        71152,
+        69179,
+        35073,
+        26531,
+        38401,
+        70485,
+        32619,
+        60609
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 50506,
+      "distractor_counts": {
+        "C": 6,
+        "D": 1,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_10",
+      "order": 10,
+      "locale": "en",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "B": 6,
+        "A": 1,
+        "C": 1
+      },
+      "times_ms": [
+        40761,
+        68300,
+        36702,
+        32700,
+        37663,
+        24625,
+        47561,
+        46378
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 41836,
+      "distractor_counts": {
+        "B": 6,
+        "A": 1,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_11",
+      "order": 11,
+      "locale": "en",
+      "category": "logical_reasoning",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "B": 6,
+        "A": 1,
+        "D": 1
+      },
+      "times_ms": [
+        38498,
+        21351,
+        63558,
+        70543,
+        61838,
+        65853,
+        76100,
+        39041
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 54597,
+      "distractor_counts": {
+        "B": 6,
+        "A": 1,
+        "D": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_12",
+      "order": 12,
+      "locale": "en",
+      "category": "logical_reasoning",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "B": 8
+      },
+      "times_ms": [
+        38847,
+        56391,
+        46985,
+        60698,
+        67346,
+        28200,
+        47516,
+        38410
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 48049,
+      "distractor_counts": {
+        "B": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_13",
+      "order": 13,
+      "locale": "en",
+      "category": "logical_reasoning",
+      "n": 8,
+      "correct": 7,
+      "selected": {
+        "C": 7,
+        "D": 1
+      },
+      "times_ms": [
+        36286,
+        71925,
+        67320,
+        31001,
+        63360,
+        48665,
+        42751,
+        43176
+      ],
+      "p_correct": 0.875,
+      "mean_time_ms": 50560,
+      "distractor_counts": {
+        "C": 7,
+        "D": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_14",
+      "order": 14,
+      "locale": "en",
+      "category": "logical_reasoning",
+      "n": 8,
+      "correct": 4,
+      "selected": {
+        "D": 2,
+        "B": 4,
+        "A": 1,
+        "C": 1
+      },
+      "times_ms": [
+        26532,
+        41583,
+        45686,
+        31169,
+        41947,
+        32213,
+        24428,
+        18872
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 32803,
+      "distractor_counts": {
+        "D": 2,
+        "B": 4,
+        "A": 1,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_15",
+      "order": 15,
+      "locale": "en",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "A": 8
+      },
+      "times_ms": [
+        24514,
+        38934,
+        49165,
+        63342,
+        71251,
+        74912,
+        36759,
+        45497
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 50546,
+      "distractor_counts": {
+        "A": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_16",
+      "order": 16,
+      "locale": "en",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 4,
+      "selected": {
+        "D": 3,
+        "A": 4,
+        "B": 1
+      },
+      "times_ms": [
+        30857,
+        53794,
+        18334,
+        80008,
+        24204,
+        58219,
+        27995,
+        54132
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 43442,
+      "distractor_counts": {
+        "D": 3,
+        "A": 4,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_17",
+      "order": 17,
+      "locale": "en",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 5,
+      "selected": {
+        "B": 5,
+        "C": 2,
+        "A": 1
+      },
+      "times_ms": [
+        66456,
+        67233,
+        70216,
+        70352,
+        69792,
+        25705,
+        33937,
+        61510
+      ],
+      "p_correct": 0.625,
+      "mean_time_ms": 58150,
+      "distractor_counts": {
+        "B": 5,
+        "C": 2,
+        "A": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_18",
+      "order": 18,
+      "locale": "en",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 4,
+      "selected": {
+        "A": 4,
+        "D": 3,
+        "B": 1
+      },
+      "times_ms": [
+        63173,
+        48822,
+        25785,
+        79302,
+        31575,
+        63069,
+        35888,
+        23407
+      ],
+      "p_correct": 0.5,
+      "mean_time_ms": 46377,
+      "distractor_counts": {
+        "A": 4,
+        "D": 3,
+        "B": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_19",
+      "order": 19,
+      "locale": "en",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "B": 6,
+        "D": 1,
+        "C": 1
+      },
+      "times_ms": [
+        37864,
+        43273,
+        49371,
+        49360,
+        33843,
+        70330,
+        30497,
+        73822
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 48545,
+      "distractor_counts": {
+        "B": 6,
+        "D": 1,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_20",
+      "order": 20,
+      "locale": "en",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "B": 8
+      },
+      "times_ms": [
+        18573,
+        32292,
+        61169,
+        65305,
+        47970,
+        22804,
+        53924,
+        58125
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 45020,
+      "distractor_counts": {
+        "B": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_21",
+      "order": 21,
+      "locale": "en",
+      "category": "logical_reasoning",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "C": 8
+      },
+      "times_ms": [
+        39127,
+        47636,
+        54826,
+        67804,
+        44461,
+        39828,
+        23681,
+        23248
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 42576,
+      "distractor_counts": {
+        "C": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_22",
+      "order": 22,
+      "locale": "en",
+      "category": "verbal_reasoning",
+      "n": 8,
+      "correct": 8,
+      "selected": {
+        "A": 8
+      },
+      "times_ms": [
+        46310,
+        20512,
+        44837,
+        66633,
+        29820,
+        51255,
+        41780,
+        51571
+      ],
+      "p_correct": 1.0,
+      "mean_time_ms": 44089,
+      "distractor_counts": {
+        "A": 8
+      }
+    },
+    {
+      "item_id": "b1pilot_en_23",
+      "order": 23,
+      "locale": "en",
+      "category": "situational_judgment",
+      "n": 8,
+      "correct": 5,
+      "selected": {
+        "B": 5,
+        "C": 3
+      },
+      "times_ms": [
+        47121,
+        41406,
+        33235,
+        63383,
+        27080,
+        61441,
+        64202,
+        73885
+      ],
+      "p_correct": 0.625,
+      "mean_time_ms": 51469,
+      "distractor_counts": {
+        "B": 5,
+        "C": 3
+      }
+    },
+    {
+      "item_id": "b1pilot_en_24",
+      "order": 24,
+      "locale": "en",
+      "category": "numerical_reasoning",
+      "n": 8,
+      "correct": 6,
+      "selected": {
+        "D": 1,
+        "B": 6,
+        "C": 1
+      },
+      "times_ms": [
+        22357,
+        40059,
+        38155,
+        47700,
+        36069,
+        69761,
+        20441,
+        32389
+      ],
+      "p_correct": 0.75,
+      "mean_time_ms": 38366,
+      "distractor_counts": {
+        "D": 1,
+        "B": 6,
+        "C": 1
+      }
+    },
+    {
+      "item_id": "b1pilot_en_25",
+      "order": 25,
+      "locale": "en",
+      "category": "prioritization",
+      "n": 8,
+      "correct": 5,
+      "selected": {
+        "B": 5,
+        "C": 2,
+        "D": 1
+      },
+      "times_ms": [
+        36850,
+        29680,
+        66862,
+        39819,
+        60292,
+        53915,
+        35670,
+        41571
+      ],
+      "p_correct": 0.625,
+      "mean_time_ms": 45582,
+      "distractor_counts": {
+        "B": 5,
+        "C": 2,
+        "D": 1
+      }
+    }
+  ],
+  "participant_feedback": [
+    {
+      "attempt_id": "ba0ea17b-81cf-49e3-8845-ee2808c35e35",
+      "locale": "en",
+      "feedback": {
+        "clarity": "good",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "2a94aa2f-3201-4c6a-b15f-688e5622139c",
+      "locale": "en",
+      "feedback": {
+        "clarity": "ok",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "25266e37-36ff-4d5b-b6dc-07b40354bdae",
+      "locale": "en",
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "free_text": "One prioritization item felt generically virtuous.",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "286f3d04-407b-4f92-bcb4-b33e301a6657",
+      "locale": "en",
+      "feedback": {
+        "clarity": "ok",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": "Mobile Safari: brief blank render between items; recovered on refresh."
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "2afc43c0-fe86-4c42-9952-92c6893a9e50",
+      "locale": "en",
+      "feedback": {
+        "clarity": "ok",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "e64a62fb-a277-4d0d-b89d-47f501783073",
+      "locale": "en",
+      "feedback": {
+        "clarity": "good",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "dff83f42-fe2c-433b-929e-d208b1603f31",
+      "locale": "en",
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "4d33c62f-e868-4fa6-be39-0189bd858374",
+      "locale": "en",
+      "feedback": {
+        "clarity": "good",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "Overall clear; Arabic read naturally.",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "ad9d44c5-c344-4da9-88c1-6dcd475bcede",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "ok",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "free_text": "One prioritization item felt generically virtuous.",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "64ad2c66-a9af-414e-81c4-03db6516811a",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "d107d71f-d5aa-4d53-8372-d5c44f6a178b",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "free_text": "One prioritization item felt generically virtuous.",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "c84ad234-b01a-4ded-bd4d-06eb6c543eb7",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": "Mobile Safari: brief blank render between items; recovered on refresh."
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "e49b9fe5-bf58-40d9-bc9f-2f4b78dedb38",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "good",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "0bb6bfae-9726-4b6f-9a85-1d9973655c3a",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "good",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "dropped": false
+    },
+    {
+      "attempt_id": "be7c6fba-6807-48c4-9d94-8f04f4b836a3",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "Stopped early due to time; no hiring consequence.",
+        "browser_device_notes": null
+      },
+      "dropped": true
+    },
+    {
+      "attempt_id": "0f8e0f57-b3a2-47a8-8477-ec7689d3381d",
+      "locale": "ar",
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "ok",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "Stopped early due to time; no hiring consequence.",
+        "browser_device_notes": null
+      },
+      "dropped": true
+    }
+  ],
+  "technical_defects": [
+    {
+      "attempt_id": "286f3d04-407b-4f92-bcb4-b33e301a6657",
+      "locale": "en",
+      "device": "mobile",
+      "browser": "safari",
+      "note": "Mobile Safari: brief blank render between items; recovered on refresh."
+    },
+    {
+      "attempt_id": "c84ad234-b01a-4ded-bd4d-06eb6c543eb7",
+      "locale": "ar",
+      "device": "mobile",
+      "browser": "safari",
+      "note": "Mobile Safari: brief blank render between items; recovered on refresh."
+    }
+  ],
+  "recommendations": [
+    {
+      "order": 1,
+      "category": "verbal_reasoning",
+      "p_correct": 0.812,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 43468,
+          "distractors": {
+            "A": 8
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.625,
+          "mean_time_ms": 64800,
+          "distractors": {
+            "C": 1,
+            "B": 1,
+            "A": 5,
+            "D": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 2,
+      "category": "verbal_reasoning",
+      "p_correct": 0.875,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.875,
+          "mean_time_ms": 45218,
+          "distractors": {
+            "A": 7,
+            "B": 1
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.875,
+          "mean_time_ms": 48985,
+          "distractors": {
+            "D": 1,
+            "A": 7
+          }
+        }
+      }
+    },
+    {
+      "order": 3,
+      "category": "situational_judgment",
+      "p_correct": 0.688,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.875,
+          "mean_time_ms": 38082,
+          "distractors": {
+            "A": 7,
+            "B": 1
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.5,
+          "mean_time_ms": 60065,
+          "distractors": {
+            "C": 2,
+            "A": 4,
+            "D": 1,
+            "B": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 4,
+      "category": "situational_judgment",
+      "p_correct": 0.875,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.875,
+          "mean_time_ms": 54410,
+          "distractors": {
+            "A": 7,
+            "B": 1
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.875,
+          "mean_time_ms": 44919,
+          "distractors": {
+            "C": 1,
+            "A": 7
+          }
+        }
+      }
+    },
+    {
+      "order": 5,
+      "category": "prioritization",
+      "p_correct": 0.688,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 47866,
+          "distractors": {
+            "B": 6,
+            "D": 1,
+            "C": 1
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.625,
+          "mean_time_ms": 62967,
+          "distractors": {
+            "C": 1,
+            "D": 1,
+            "B": 5,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 6,
+      "category": "prioritization",
+      "p_correct": 0.75,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 52373,
+          "distractors": {
+            "B": 6,
+            "C": 2
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 55712,
+          "distractors": {
+            "B": 6,
+            "C": 1,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 7,
+      "category": "prioritization",
+      "p_correct": 0.875,
+      "n": 16,
+      "recommendation": "revise",
+      "reasons": [
+        "confusing_wording_reports"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 46604,
+          "distractors": {
+            "C": 8
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 58691,
+          "distractors": {
+            "C": 6,
+            "B": 1,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 8,
+      "category": "numerical_reasoning",
+      "p_correct": 0.5,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.5,
+          "mean_time_ms": 40055,
+          "distractors": {
+            "D": 2,
+            "C": 4,
+            "B": 1,
+            "A": 1
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.5,
+          "mean_time_ms": 61053,
+          "distractors": {
+            "C": 4,
+            "D": 2,
+            "A": 2
+          }
+        }
+      }
+    },
+    {
+      "order": 9,
+      "category": "numerical_reasoning",
+      "p_correct": 0.688,
+      "n": 16,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 50506,
+          "distractors": {
+            "C": 6,
+            "D": 1,
+            "B": 1
+          }
+        },
+        "ar": {
+          "n": 8,
+          "p_correct": 0.625,
+          "mean_time_ms": 50493,
+          "distractors": {
+            "C": 5,
+            "D": 1,
+            "A": 1,
+            "B": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 10,
+      "category": "numerical_reasoning",
+      "p_correct": 0.733,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 41836,
+          "distractors": {
+            "B": 6,
+            "A": 1,
+            "C": 1
+          }
+        },
+        "ar": {
+          "n": 7,
+          "p_correct": 0.714,
+          "mean_time_ms": 46988,
+          "distractors": {
+            "B": 5,
+            "D": 2
+          }
+        }
+      }
+    },
+    {
+      "order": 11,
+      "category": "logical_reasoning",
+      "p_correct": 0.733,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 54597,
+          "distractors": {
+            "B": 6,
+            "A": 1,
+            "D": 1
+          }
+        },
+        "ar": {
+          "n": 7,
+          "p_correct": 0.714,
+          "mean_time_ms": 44279,
+          "distractors": {
+            "B": 5,
+            "C": 2
+          }
+        }
+      }
+    },
+    {
+      "order": 12,
+      "category": "logical_reasoning",
+      "p_correct": 0.867,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 48049,
+          "distractors": {
+            "B": 8
+          }
+        },
+        "ar": {
+          "n": 7,
+          "p_correct": 0.714,
+          "mean_time_ms": 74819,
+          "distractors": {
+            "B": 5,
+            "D": 1,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 13,
+      "category": "logical_reasoning",
+      "p_correct": 0.933,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.875,
+          "mean_time_ms": 50560,
+          "distractors": {
+            "C": 7,
+            "D": 1
+          }
+        },
+        "ar": {
+          "n": 7,
+          "p_correct": 1.0,
+          "mean_time_ms": 47623,
+          "distractors": {
+            "C": 7
+          }
+        }
+      }
+    },
+    {
+      "order": 14,
+      "category": "logical_reasoning",
+      "p_correct": 0.733,
+      "n": 15,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.5,
+          "mean_time_ms": 32803,
+          "distractors": {
+            "D": 2,
+            "B": 4,
+            "A": 1,
+            "C": 1
+          }
+        },
+        "ar": {
+          "n": 7,
+          "p_correct": 1.0,
+          "mean_time_ms": 59919,
+          "distractors": {
+            "B": 7
+          }
+        }
+      }
+    },
+    {
+      "order": 15,
+      "category": "verbal_reasoning",
+      "p_correct": 0.929,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 50546,
+          "distractors": {
+            "A": 8
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.833,
+          "mean_time_ms": 51161,
+          "distractors": {
+            "A": 5,
+            "D": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 16,
+      "category": "verbal_reasoning",
+      "p_correct": 0.571,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.5,
+          "mean_time_ms": 43442,
+          "distractors": {
+            "D": 3,
+            "A": 4,
+            "B": 1
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.667,
+          "mean_time_ms": 55828,
+          "distractors": {
+            "A": 4,
+            "C": 1,
+            "D": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 17,
+      "category": "situational_judgment",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.625,
+          "mean_time_ms": 58150,
+          "distractors": {
+            "B": 5,
+            "C": 2,
+            "A": 1
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.667,
+          "mean_time_ms": 61119,
+          "distractors": {
+            "B": 4,
+            "A": 2
+          }
+        }
+      }
+    },
+    {
+      "order": 18,
+      "category": "situational_judgment",
+      "p_correct": 0.571,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.5,
+          "mean_time_ms": 46377,
+          "distractors": {
+            "A": 4,
+            "D": 3,
+            "B": 1
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.667,
+          "mean_time_ms": 55327,
+          "distractors": {
+            "A": 4,
+            "D": 2
+          }
+        }
+      }
+    },
+    {
+      "order": 19,
+      "category": "prioritization",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 48545,
+          "distractors": {
+            "B": 6,
+            "D": 1,
+            "C": 1
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.5,
+          "mean_time_ms": 59432,
+          "distractors": {
+            "D": 3,
+            "B": 3
+          }
+        }
+      }
+    },
+    {
+      "order": 20,
+      "category": "numerical_reasoning",
+      "p_correct": 0.857,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 45020,
+          "distractors": {
+            "B": 8
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.667,
+          "mean_time_ms": 63555,
+          "distractors": {
+            "D": 2,
+            "B": 4
+          }
+        }
+      }
+    },
+    {
+      "order": 21,
+      "category": "logical_reasoning",
+      "p_correct": 0.929,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 42576,
+          "distractors": {
+            "C": 8
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.833,
+          "mean_time_ms": 45605,
+          "distractors": {
+            "C": 5,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 22,
+      "category": "verbal_reasoning",
+      "p_correct": 1.0,
+      "n": 14,
+      "recommendation": "collect more data",
+      "reasons": [
+        "suspiciously_high_success"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 1.0,
+          "mean_time_ms": 44089,
+          "distractors": {
+            "A": 8
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 1.0,
+          "mean_time_ms": 67086,
+          "distractors": {
+            "A": 6
+          }
+        }
+      }
+    },
+    {
+      "order": 23,
+      "category": "situational_judgment",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.625,
+          "mean_time_ms": 51469,
+          "distractors": {
+            "B": 5,
+            "C": 3
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.667,
+          "mean_time_ms": 43869,
+          "distractors": {
+            "B": 4,
+            "D": 1,
+            "C": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 24,
+      "category": "numerical_reasoning",
+      "p_correct": 0.643,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.75,
+          "mean_time_ms": 38366,
+          "distractors": {
+            "D": 1,
+            "B": 6,
+            "C": 1
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 0.5,
+          "mean_time_ms": 67021,
+          "distractors": {
+            "B": 3,
+            "A": 1,
+            "D": 1,
+            "C": 1
+          }
+        }
+      }
+    },
+    {
+      "order": 25,
+      "category": "prioritization",
+      "p_correct": 0.786,
+      "n": 14,
+      "recommendation": "keep",
+      "reasons": [
+        "within_expected_band"
+      ],
+      "locales": {
+        "en": {
+          "n": 8,
+          "p_correct": 0.625,
+          "mean_time_ms": 45582,
+          "distractors": {
+            "B": 5,
+            "C": 2,
+            "D": 1
+          }
+        },
+        "ar": {
+          "n": 6,
+          "p_correct": 1.0,
+          "mean_time_ms": 49501,
+          "distractors": {
+            "B": 6
+          }
+        }
+      }
+    }
+  ],
+  "skipped_items": [
+    {
+      "attempt_id": "be7c6fba-6807-48c4-9d94-8f04f4b836a3",
+      "locale": "ar",
+      "answered": 9,
+      "total": 25,
+      "skipped_from_index": 9
+    },
+    {
+      "attempt_id": "0f8e0f57-b3a2-47a8-8477-ec7689d3381d",
+      "locale": "ar",
+      "answered": 14,
+      "total": 25,
+      "skipped_from_index": 14
+    }
+  ],
+  "answer_key_challenges": [],
+  "rollback_rehearsal": {
+    "retired_batteries": [
+      {
+        "battery_key": "b1_gawj_v1_en_pilot",
+        "is_active": false,
+        "retired": true
+      },
+      {
+        "battery_key": "b1_gawj_v1_ar_pilot",
+        "is_active": false,
+        "retired": true
+      }
+    ],
+    "items_retired": 50,
+    "active_b1pilot_batteries_after": [],
+    "global_wathefni_unchanged": true,
+    "before": {
+      "batteries": [
+        {
+          "battery_key": "wathefni_ability_v1",
+          "company_code": "GLOBAL",
+          "is_active": true,
+          "content_version": 1,
+          "frozen": true,
+          "retired": false
+        }
+      ],
+      "ability_v1_items": 22,
+      "wathefni_or_ability_attempts": 4
+    },
+    "after": {
+      "batteries": [
+        {
+          "battery_key": "wathefni_ability_v1",
+          "company_code": "GLOBAL",
+          "is_active": true,
+          "content_version": 1,
+          "frozen": true,
+          "retired": false
+        }
+      ],
+      "ability_v1_items": 22,
+      "wathefni_or_ability_attempts": 4
+    },
+    "approved_for_use": false,
+    "production_untouched": true
+  },
+  "employees_created": 0,
+  "offers_created": 0,
+  "ready_for_larger_validation_pilot": {
+    "ready_for_larger_validation_pilot": true,
+    "keep": 23,
+    "revise": 1,
+    "retire": 0,
+    "collect_more_data": 1,
+    "gates": {
+      "completion_rate_ge_0_75": true,
+      "no_retire_recommendations": true,
+      "revise_le_5": true,
+      "no_answer_key_challenges": true,
+      "rollback_global_unchanged": true,
+      "participants_ge_10": true
+    },
+    " blockers": []
+  },
+  "runs": [
+    {
+      "attempt_id": "ba0ea17b-81cf-49e3-8845-ee2808c35e35",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-01",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 53813
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 50266
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 25265
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 48841
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 57630
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 40505
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 59536
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 59070
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 71152
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 40761
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 38498
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 38847
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 36286
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 26532
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 24514
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 30857
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 66456
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 63173
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 37864
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 18573
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 39127
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 46310
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 47121
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 22357
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 36850
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 53813,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 50266,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 25265,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 48841,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 57630,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 40505,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 59536,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 59070,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 71152,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 40761,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 38498,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 38847,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 36286,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 26532,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 24514,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 30857,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 66456,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 63173,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 37864,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 18573,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 39127,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 46310,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 47121,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 22357,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 36850,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "84.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "good",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 1,
+        "locale": "en",
+        "seed": 5001,
+        "accuracy": 0.8271292516695923,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "good",
+        "feedback_length": "a_bit_long",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 763
+    },
+    {
+      "attempt_id": "2a94aa2f-3201-4c6a-b15f-688e5622139c",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-02",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 32573
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 61412
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 43629
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 50145
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 35371
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 57893
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 55401
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 68331
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 69179
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 68300
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 21351
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 56391
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 71925
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 41583
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 38934
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 53794
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 67233
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 48822
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 43273
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 32292
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 47636
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 20512
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 41406
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 40059
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 29680
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 32573,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 61412,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 43629,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 50145,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 35371,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 57893,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 55401,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 68331,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 69179,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 68300,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 21351,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 56391,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 71925,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 41583,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 38934,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 53794,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 67233,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 48822,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 43273,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 32292,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 47636,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 20512,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 41406,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 40059,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 29680,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "84.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "ok",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 2,
+        "locale": "en",
+        "seed": 5002,
+        "accuracy": 0.7554465858256962,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "ok",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 726
+    },
+    {
+      "attempt_id": "25266e37-36ff-4d5b-b6dc-07b40354bdae",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-03",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 60747
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 39507
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 68381
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 69623
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 31438
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 67051
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 32086
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 21832
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 35073
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 36702
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 63558
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 46985
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 67320
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 45686
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 49165
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 18334
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 70216
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 25785
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 49371
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 61169
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 54826
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 44837
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 33235
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 38155
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 66862
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 60747,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 39507,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 68381,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 69623,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 31438,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 67051,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 32086,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 21832,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 35073,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 36702,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 63558,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 46985,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 67320,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 45686,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 49165,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 18334,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 70216,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 25785,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 49371,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 61169,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 54826,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 44837,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 33235,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 38155,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 66862,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "84.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "free_text": "One prioritization item felt generically virtuous.",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 3,
+        "locale": "en",
+        "seed": 5003,
+        "accuracy": 0.7493087694443489,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "somewhat_unclear",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "One prioritization item felt generically virtuous.",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 751
+    },
+    {
+      "attempt_id": "286f3d04-407b-4f92-bcb4-b33e301a6657",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-04",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 36375
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 27569
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 32059
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 68170
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 47113
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 35107
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 56429
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 25042
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 26531
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 32700
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 70543
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 60698
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 31001
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 31169
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 63342
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 80008
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 70352
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 79302
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 49360
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 65305
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 67804
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 66633
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 63383
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 47700
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 39819
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 36375,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 27569,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 32059,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 68170,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 47113,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 35107,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 56429,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 25042,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 26531,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 32700,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 70543,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 60698,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 31001,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 31169,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 63342,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 80008,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 70352,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 79302,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 49360,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 65305,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 67804,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 66633,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 63383,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 47700,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 39819,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "80.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "ok",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": "Mobile Safari: brief blank render between items; recovered on refresh."
+      },
+      "profile": {
+        "participant_index": 4,
+        "locale": "en",
+        "seed": 5004,
+        "accuracy": 0.729492475596426,
+        "device": "mobile",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "ok",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": true,
+        "browser_issue_note": "Mobile Safari: brief blank render between items; recovered on refresh.",
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 841
+    },
+    {
+      "attempt_id": "2afc43c0-fe86-4c42-9952-92c6893a9e50",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-05",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 21140
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 37324
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 28207
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 22264
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 63999
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 65086
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 44112
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "B",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 30206
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "B",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 38401
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 37663
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 61838
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 67346
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 63360
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 41947
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 71251
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 24204
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 69792
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 31575
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 33843
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 47970
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 44461
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 29820
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 27080
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 36069
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 60292
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 21140,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 37324,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 28207,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 22264,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 63999,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 65086,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 44112,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 30206,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 38401,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 37663,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 61838,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 67346,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 63360,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 41947,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 71251,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 24204,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 69792,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 31575,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 33843,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 47970,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 44461,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 29820,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 27080,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 36069,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 60292,
+          "selected": "C"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "80.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "ok",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 5,
+        "locale": "en",
+        "seed": 5005,
+        "accuracy": 0.7456087030863625,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "ok",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 752
+    },
+    {
+      "attempt_id": "e64a62fb-a277-4d0d-b89d-47f501783073",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-06",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 60992
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 26036
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 28267
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 49340
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 31191
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 46941
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 23674
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "A",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 21530
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 70485
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 24625
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 65853
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 28200
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 48665
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 32213
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 74912
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 58219
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 25705
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 63069
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 70330
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 22804
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 39828
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 51255
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 61441
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 69761
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 53915
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 60992,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 26036,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 28267,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 49340,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 31191,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 46941,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 23674,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 21530,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 70485,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 24625,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 65853,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 28200,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 48665,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 32213,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 74912,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 58219,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 25705,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 63069,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 70330,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 22804,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 39828,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 51255,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 61441,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 69761,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 53915,
+          "selected": "D"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "64.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "good",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 6,
+        "locale": "en",
+        "seed": 5006,
+        "accuracy": 0.710121188718971,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "good",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 653
+    },
+    {
+      "attempt_id": "dff83f42-fe2c-433b-929e-d208b1603f31",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-07",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 55165
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 58423
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 26994
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 76945
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 67298
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 60164
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 70170
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 35082
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 32619
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 47561
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 76100
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 47516
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 42751
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 24428
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 36759
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 27995
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 33937
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 35888
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 30497
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 53924
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 23681
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 41780
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 64202
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 20441
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 35670
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 55165,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 58423,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 26994,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 76945,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 67298,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 60164,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 70170,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 35082,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 32619,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 47561,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 76100,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 47516,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 42751,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 24428,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 36759,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 27995,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 33937,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 35888,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 30497,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 53924,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 23681,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 41780,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 64202,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 20441,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 35670,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "80.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 7,
+        "locale": "en",
+        "seed": 5007,
+        "accuracy": 0.8425442410139566,
+        "device": "mobile",
+        "browser": "safari",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "ok",
+        "feedback_length": "a_bit_long",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 682
+    },
+    {
+      "attempt_id": "4d33c62f-e868-4fa6-be39-0189bd858374",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "locale": "en",
+      "app_key": "b1pilot-en-08",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_en_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 26946
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 61214
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 51859
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 49958
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "item_order": 5,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 48894
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "item_order": 6,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 46240
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 31429
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 59347
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 60609
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 46378
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 39041
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 38410
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 43176
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 18872
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 45497
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "item_order": 16,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 54132
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 61510
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "item_order": 18,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 23407
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 73822
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 58125
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 23248
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 51571
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "item_order": 23,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 73885
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "item_order": 24,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 32389
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "item_order": 25,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 41571
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_en_01",
+          "ms": 26946,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_02",
+          "ms": 61214,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_03",
+          "ms": 51859,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_04",
+          "ms": 49958,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_05",
+          "ms": 48894,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_06",
+          "ms": 46240,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_07",
+          "ms": 31429,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_08",
+          "ms": 59347,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_09",
+          "ms": 60609,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_10",
+          "ms": 46378,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_11",
+          "ms": 39041,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_12",
+          "ms": 38410,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_13",
+          "ms": 43176,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_14",
+          "ms": 18872,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_15",
+          "ms": 45497,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_16",
+          "ms": 54132,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_17",
+          "ms": 61510,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_18",
+          "ms": 23407,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_en_19",
+          "ms": 73822,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_20",
+          "ms": 58125,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_en_21",
+          "ms": 23248,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_22",
+          "ms": 51571,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_en_23",
+          "ms": 73885,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_24",
+          "ms": 32389,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_en_25",
+          "ms": 41571,
+          "selected": "C"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "72.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "good",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "Overall clear; Arabic read naturally.",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 8,
+        "locale": "en",
+        "seed": 5008,
+        "accuracy": 0.7551541949078246,
+        "device": "desktop",
+        "browser": "firefox",
+        "ar_time_factor": 1.0,
+        "feedback_clarity": "good",
+        "feedback_length": "a_bit_long",
+        "feedback_language": "good",
+        "feedback_text": "Overall clear; Arabic read naturally.",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 700
+    },
+    {
+      "attempt_id": "ad9d44c5-c344-4da9-88c1-6dcd475bcede",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-09",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "C",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 67420
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 44125
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "C",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 68072
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "C",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 39069
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 58298
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 49366
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 55243
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 50572
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 42569
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 34982
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 29514
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 80000
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 32848
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 64274
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 73775
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 56556
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 65088
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 39099
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "item_order": 19,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 54390
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "item_order": 20,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 84812
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 60462
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 77684
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 28410
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 69316
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 77683
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 67420,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 44125,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 68072,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 39069,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 58298,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 49366,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 55243,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 50572,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 42569,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 34982,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 29514,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 80000,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 32848,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 64274,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "ms": 73775,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "ms": 56556,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "ms": 65088,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "ms": 39099,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "ms": 54390,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "ms": 84812,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "ms": 60462,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "ms": 77684,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "ms": 28410,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "ms": 69316,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "ms": 77683,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "72.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "ok",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "free_text": "One prioritization item felt generically virtuous.",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 9,
+        "locale": "ar",
+        "seed": 5009,
+        "accuracy": 0.6668500288061394,
+        "device": "desktop",
+        "browser": "chrome",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "somewhat_unclear",
+        "feedback_length": "ok",
+        "feedback_language": "ok",
+        "feedback_text": "One prioritization item felt generically virtuous.",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 718
+    },
+    {
+      "attempt_id": "64ad2c66-a9af-414e-81c4-03db6516811a",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-10",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 50083
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 81301
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 74337
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 42577
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 72942
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 79238
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 62540
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 41630
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 80006
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 41260
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 20956
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 39923
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 29311
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 61571
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 47601
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 78225
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "item_order": 17,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 38602
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 48090
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 69191
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 55443
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "item_order": 21,
+          "selected": "A",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 34017
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 76447
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "item_order": 23,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 32032
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "item_order": 24,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 53013
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 32341
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 50083,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 81301,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 74337,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 42577,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 72942,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 79238,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 62540,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 41630,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 80006,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 41260,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 20956,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 39923,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 29311,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 61571,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "ms": 47601,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "ms": 78225,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "ms": 38602,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "ms": 48090,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "ms": 69191,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "ms": 55443,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "ms": 34017,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "ms": 76447,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "ms": 32032,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "ms": 53013,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "ms": 32341,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "64.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 10,
+        "locale": "ar",
+        "seed": 5010,
+        "accuracy": 0.7944614240306247,
+        "device": "desktop",
+        "browser": "chrome",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "somewhat_unclear",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 685
+    },
+    {
+      "attempt_id": "d107d71f-d5aa-4d53-8372-d5c44f6a178b",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-11",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 63791
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 25607
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 33813
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 24983
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 85703
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 80549
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 81092
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "A",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 65121
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 23416
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 52593
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 24992
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 77021
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 21548
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 49051
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 22082
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 51655
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "item_order": 17,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 62258
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "item_order": 18,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 27811
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 25135
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 29672
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 46378
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 72878
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "item_order": 23,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 23670
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "item_order": 24,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 72885
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 40832
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 63791,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 25607,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 33813,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 24983,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 85703,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 80549,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 81092,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 65121,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 23416,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 52593,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 24992,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 77021,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 21548,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 49051,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "ms": 22082,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "ms": 51655,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "ms": 62258,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "ms": 27811,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "ms": 25135,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "ms": 29672,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "ms": 46378,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "ms": 72878,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "ms": 23670,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "ms": 72885,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "ms": 40832,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "72.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "free_text": "One prioritization item felt generically virtuous.",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 11,
+        "locale": "ar",
+        "seed": 5011,
+        "accuracy": 0.7153994024242409,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "ok",
+        "feedback_length": "a_bit_long",
+        "feedback_language": "good",
+        "feedback_text": "One prioritization item felt generically virtuous.",
+        "confusing_items": [
+          7
+        ],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 668
+    },
+    {
+      "attempt_id": "c84ad234-b01a-4ded-bd4d-06eb6c543eb7",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-12",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 80096
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 64667
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 64822
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 113367
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 79519
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 34576
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 69518
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 90136
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 77214
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 26975
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 51341
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 114162
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 39438
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 73114
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 74936
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "item_order": 16,
+          "selected": "C",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 40334
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 87222
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "item_order": 18,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 86377
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "item_order": 19,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 50561
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "item_order": 20,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 73484
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 45369
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 56683
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 26352
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "item_order": 24,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 50197
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 25936
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 80096,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 64667,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 64822,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 113367,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 79519,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 34576,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 69518,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 90136,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 77214,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 26975,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 51341,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 114162,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 39438,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 73114,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "ms": 74936,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "ms": 40334,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "ms": 87222,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "ms": 86377,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "ms": 50561,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "ms": 73484,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "ms": 45369,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "ms": 56683,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "ms": 26352,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "ms": 50197,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "ms": 25936,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "72.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": "Mobile Safari: brief blank render between items; recovered on refresh."
+      },
+      "profile": {
+        "participant_index": 12,
+        "locale": "ar",
+        "seed": 5012,
+        "accuracy": 0.7080037666946549,
+        "device": "mobile",
+        "browser": "safari",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "ok",
+        "feedback_length": "a_bit_long",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": true,
+        "browser_issue_note": "Mobile Safari: brief blank render between items; recovered on refresh.",
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 646
+    },
+    {
+      "attempt_id": "e49b9fe5-bf58-40d9-bc9f-2f4b78dedb38",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-13",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 72268
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 52072
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 54654
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 36174
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 54459
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 78709
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 78025
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 56172
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "A",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 28393
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 27237
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 69769
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 84379
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 65337
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 38357
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "item_order": 15,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 21028
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "item_order": 16,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 66285
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 75189
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 46917
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "item_order": 19,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 79647
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 83182
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 34209
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 76203
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 67941
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 83110
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 51790
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 72268,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 52072,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 54654,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 36174,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 54459,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 78709,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 78025,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 56172,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 28393,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 27237,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 69769,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 84379,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 65337,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 38357,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "ms": 21028,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "ms": 66285,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "ms": 75189,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "ms": 46917,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "ms": 79647,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "ms": 83182,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "ms": 34209,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "ms": 76203,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "ms": 67941,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "ms": 83110,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "ms": 51790,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "88.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "good",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 13,
+        "locale": "ar",
+        "seed": 5013,
+        "accuracy": 0.855437139927492,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "good",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 653
+    },
+    {
+      "attempt_id": "0bb6bfae-9726-4b6f-9a85-1d9973655c3a",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-14",
+      "status": "completed",
+      "dropped": false,
+      "answered_count": 25,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 45602
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 55028
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 50283
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 23515
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 77244
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 29659
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "B",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 25337
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "A",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 74425
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "B",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 29654
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 76628
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 66356
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 46549
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 85789
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 55882
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "item_order": 15,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 67545
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "item_order": 16,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 41915
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "item_order": 17,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 38357
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "item_order": 18,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 83671
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "item_order": 19,
+          "selected": "D",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 77671
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "item_order": 20,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 54740
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "item_order": 21,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 53197
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "item_order": 22,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 42625
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "item_order": 23,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 84813
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "item_order": 24,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 73607
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "item_order": 25,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 68426
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 45602,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 55028,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 50283,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 23515,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 77244,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 29659,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 25337,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 74425,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 29654,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 76628,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 66356,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 46549,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 85789,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 55882,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_15",
+          "ms": 67545,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_16",
+          "ms": 41915,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_17",
+          "ms": 38357,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_18",
+          "ms": 83671,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_19",
+          "ms": 77671,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_20",
+          "ms": 54740,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_21",
+          "ms": 53197,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_22",
+          "ms": 42625,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_23",
+          "ms": 84813,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_24",
+          "ms": 73607,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_25",
+          "ms": 68426,
+          "selected": "B"
+        }
+      ],
+      "score": {
+        "official_score": null,
+        "max_score": "25.0",
+        "percent": "76.0",
+        "immutable": true
+      },
+      "feedback": {
+        "clarity": "good",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 14,
+        "locale": "ar",
+        "seed": 5014,
+        "accuracy": 0.7540406121424019,
+        "device": "desktop",
+        "browser": "firefox",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "good",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": null
+      },
+      "elapsed_wall_ms": 636
+    },
+    {
+      "attempt_id": "be7c6fba-6807-48c4-9d94-8f04f4b836a3",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-15",
+      "status": "in_progress",
+      "dropped": true,
+      "answered_count": 9,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 75963
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 26415
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "B",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 53175
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 23613
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 49793
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "A",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 48744
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 36542
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 78010
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 80067
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 75963,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 26415,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 53175,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 23613,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 49793,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 48744,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 36542,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 78010,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 80067,
+          "selected": "C"
+        }
+      ],
+      "score": null,
+      "feedback": {
+        "clarity": "somewhat_unclear",
+        "length": "ok",
+        "language_quality": "good",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "Stopped early due to time; no hiring consequence.",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 15,
+        "locale": "ar",
+        "seed": 5015,
+        "accuracy": 0.6469776528941547,
+        "device": "desktop",
+        "browser": "safari",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "somewhat_unclear",
+        "feedback_length": "ok",
+        "feedback_language": "good",
+        "feedback_text": "Stopped early due to time; no hiring consequence.",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": 9
+      },
+      "elapsed_wall_ms": 250
+    },
+    {
+      "attempt_id": "0f8e0f57-b3a2-47a8-8477-ec7689d3381d",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "locale": "ar",
+      "app_key": "b1pilot-ar-16",
+      "status": "in_progress",
+      "dropped": true,
+      "answered_count": 14,
+      "total_items": 25,
+      "answers": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "item_order": 1,
+          "selected": "D",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 63183
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "item_order": 2,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 42669
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "item_order": 3,
+          "selected": "C",
+          "correct_key": "A",
+          "is_correct": false,
+          "think_ms": 81370
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "item_order": 4,
+          "selected": "A",
+          "correct_key": "A",
+          "is_correct": true,
+          "think_ms": 56060
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "item_order": 5,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 25780
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "item_order": 6,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 44859
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "item_order": 7,
+          "selected": "A",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 61237
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "item_order": 8,
+          "selected": "D",
+          "correct_key": "C",
+          "is_correct": false,
+          "think_ms": 32362
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "item_order": 9,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 42632
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "item_order": 10,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 69247
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "item_order": 11,
+          "selected": "C",
+          "correct_key": "B",
+          "is_correct": false,
+          "think_ms": 47026
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "item_order": 12,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 81701
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "item_order": 13,
+          "selected": "C",
+          "correct_key": "C",
+          "is_correct": true,
+          "think_ms": 59092
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "item_order": 14,
+          "selected": "B",
+          "correct_key": "B",
+          "is_correct": true,
+          "think_ms": 77187
+        }
+      ],
+      "item_times": [
+        {
+          "item_id": "b1pilot_ar_01",
+          "ms": 63183,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_02",
+          "ms": 42669,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_03",
+          "ms": 81370,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_04",
+          "ms": 56060,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_05",
+          "ms": 25780,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_06",
+          "ms": 44859,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_07",
+          "ms": 61237,
+          "selected": "A"
+        },
+        {
+          "item_id": "b1pilot_ar_08",
+          "ms": 32362,
+          "selected": "D"
+        },
+        {
+          "item_id": "b1pilot_ar_09",
+          "ms": 42632,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_10",
+          "ms": 69247,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_11",
+          "ms": 47026,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_12",
+          "ms": 81701,
+          "selected": "B"
+        },
+        {
+          "item_id": "b1pilot_ar_13",
+          "ms": 59092,
+          "selected": "C"
+        },
+        {
+          "item_id": "b1pilot_ar_14",
+          "ms": 77187,
+          "selected": "B"
+        }
+      ],
+      "score": null,
+      "feedback": {
+        "clarity": "ok",
+        "length": "a_bit_long",
+        "language_quality": "ok",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "free_text": "Stopped early due to time; no hiring consequence.",
+        "browser_device_notes": null
+      },
+      "profile": {
+        "participant_index": 16,
+        "locale": "ar",
+        "seed": 5016,
+        "accuracy": 0.7148566930717408,
+        "device": "desktop",
+        "browser": "firefox",
+        "ar_time_factor": 1.15,
+        "feedback_clarity": "ok",
+        "feedback_length": "a_bit_long",
+        "feedback_language": "ok",
+        "feedback_text": "Stopped early due to time; no hiring consequence.",
+        "confusing_items": [],
+        "answer_key_challenges": [],
+        "browser_issue": false,
+        "browser_issue_note": null,
+        "drop_after": 14
+      },
+      "elapsed_wall_ms": 420
+    }
+  ]
+}

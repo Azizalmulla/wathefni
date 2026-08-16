@@ -1,0 +1,76 @@
+{
+  "hub": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "email": "talalabdalla89@gmail.com",
+      "name": "Talal Fadhli",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "position_title": "Social Media Manager",
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "person_id": null,
+      "employment_id": null,
+      "assignment_id": null,
+      "updated_at": "2026-08-01 20:03:20.703316+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "email": "fb-urhama@gmail.com",
+      "name": "Fouad Burhamad",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "position_title": "IT Maintenance",
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "person_id": null,
+      "employment_id": null,
+      "assignment_id": null,
+      "updated_at": "2026-07-12 15:46:31.905837+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "email": "",
+      "name": "mohammad alqattan",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "position_title": "Marketing Specialist",
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "person_id": null,
+      "employment_id": null,
+      "assignment_id": null,
+      "updated_at": "2026-08-01 20:03:20.680449+00:00"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "email": "briansaleh92@gmail.com",
+      "name": "Brian Saleh",
+      "employment_status": "active",
+      "onboarding_status": "in_progress",
+      "position_title": null,
+      "app_key": null,
+      "person_id": null,
+      "employment_id": null,
+      "assignment_id": null,
+      "updated_at": "2026-07-13 19:22:41.486318+00:00"
+    }
+  ],
+  "authority": {
+    "schema_version": "employees360-wave2-authority-v1",
+    "maps": [],
+    "counts": {
+      "persons": 0,
+      "employments": 0,
+      "assignments": 0
+    },
+    "duplicates": {
+      "persons": [],
+      "employments": [],
+      "assignments": []
+    },
+    "journal": []
+  },
+  "stamp": "2026-08-01T20:28:13.924318+00:00"
+}

@@ -1,0 +1,23 @@
+{
+  "db": "wathefni",
+  "payroll_pifss_worksheets": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_eos_worksheets": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_statutory_rule_tables": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_close_runs": {
+    "present": true,
+    "count": 0
+  },
+  "payroll_payslip_documents": {
+    "present": true,
+    "count": 0
+  }
+}

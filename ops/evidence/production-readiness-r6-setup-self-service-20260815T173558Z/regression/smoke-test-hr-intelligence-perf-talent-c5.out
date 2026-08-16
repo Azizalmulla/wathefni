@@ -1,0 +1,20 @@
+    hr intelligence performance talent c5 — prove
+      PASS  c5 module
+      PASS  c5 contract
+      PASS  c5 stamp
+      PASS  c4 stamp regression
+      PASS  commercial analytics
+      PASS  all semantic keys
+      PASS  uses C1 evaluator
+      PASS  projection not SoT
+      PASS  recruiting pool isolation honesty
+      PASS  forbidden scores declared
+      PASS  EN label
+      PASS  AR label
+      PASS  c5 global off
+      PASS  empty allowlist admits after R6
+      PASS  canary gate
+      PASS  tenant runtime isolation
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    16 passed, 0 failed (unit-only)

@@ -1,0 +1,604 @@
+{
+  "ok": true,
+  "wave_a_version": "1.0.0",
+  "company_code": "WATHEFNI",
+  "company_name": "Wathefni",
+  "overall_state": "live_controlled",
+  "overall_label_en": "Live \u00b7 controlled",
+  "overall_label_ar": "\u064a\u0639\u0645\u0644 \u00b7 \u0645\u0646\u0636\u0628\u0637",
+  "stages": [
+    {
+      "stage": {
+        "key": "company_basics",
+        "label_en": "Company basics",
+        "label_ar": "\u0623\u0633\u0627\u0633\u064a\u0627\u062a \u0627\u0644\u0634\u0631\u0643\u0629"
+      },
+      "items": [
+        {
+          "key": "company_profile",
+          "title_en": "Company profile",
+          "title_ar": "\u0645\u0644\u0641 \u0627\u0644\u0634\u0631\u0643\u0629",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Company name, country, timezone, and currency are set.",
+          "summary_ar": "\u0627\u0633\u0645 \u0627\u0644\u0634\u0631\u0643\u0629 \u0648\u0627\u0644\u062f\u0648\u0644\u0629 \u0648\u0627\u0644\u0645\u0646\u0637\u0642\u0629 \u0627\u0644\u0632\u0645\u0646\u064a\u0629 \u0648\u0627\u0644\u0639\u0645\u0644\u0629 \u0645\u0636\u0628\u0648\u0637\u0629.",
+          "next_action_en": null,
+          "next_action_ar": null,
+          "deep_link": "/setup-console",
+          "evidence": {
+            "profile_ok": true
+          }
+        },
+        {
+          "key": "company_locale",
+          "title_en": "Language default",
+          "title_ar": "\u0627\u0644\u0644\u063a\u0629 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a\u0629",
+          "state": "setup_required",
+          "purchased": true,
+          "configured": false,
+          "blocked": false,
+          "live": false,
+          "summary_en": "No company default language yet. Operators can still switch EN/AR in the console.",
+          "summary_ar": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0644\u063a\u0629 \u0627\u0641\u062a\u0631\u0627\u0636\u064a\u0629 \u0644\u0644\u0634\u0631\u0643\u0629 \u0628\u0639\u062f. \u064a\u0645\u0643\u0646 \u0644\u0644\u0645\u0634\u063a\u0651\u0644\u064a\u0646 \u0627\u0644\u062a\u0628\u062f\u064a\u0644 \u0628\u064a\u0646 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0648\u0627\u0644\u0625\u0646\u062c\u0644\u064a\u0632\u064a\u0629 \u0641\u064a \u0627\u0644\u0648\u0627\u062c\u0647\u0629.",
+          "next_action_en": "Set default language to English or Arabic when ready.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 \u0627\u0644\u0644\u063a\u0629 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a\u0629 \u0625\u0644\u0649 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0623\u0648 \u0627\u0644\u0625\u0646\u062c\u0644\u064a\u0632\u064a\u0629 \u0639\u0646\u062f \u0627\u0644\u062c\u0627\u0647\u0632\u064a\u0629.",
+          "deep_link": "/setup-console",
+          "evidence": {
+            "default_locale": null
+          }
+        }
+      ]
+    },
+    {
+      "stage": {
+        "key": "modules",
+        "label_en": "Modules",
+        "label_ar": "\u0627\u0644\u0648\u062d\u062f\u0627\u062a"
+      },
+      "items": [
+        {
+          "key": "module:pre_hiring",
+          "title_en": "Pre-Hiring",
+          "title_ar": "Pre-Hiring",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Pre-Hiring is included and available in the current controlled company posture.",
+          "summary_ar": "Pre-Hiring \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Pre-Hiring inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Pre-Hiring \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "pre_hiring"
+          }
+        },
+        {
+          "key": "module:assessments",
+          "title_en": "Assessments",
+          "title_ar": "Assessments",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Assessments is included and available in the current controlled company posture.",
+          "summary_ar": "Assessments \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Assessments inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Assessments \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "assessments"
+          }
+        },
+        {
+          "key": "module:interviews",
+          "title_en": "Interviews",
+          "title_ar": "Interviews",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Interviews is included and available in the current controlled company posture.",
+          "summary_ar": "Interviews \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Interviews inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Interviews \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "interviews"
+          }
+        },
+        {
+          "key": "module:calendar",
+          "title_en": "Calendar",
+          "title_ar": "Calendar",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Calendar is included and available in the current controlled company posture.",
+          "summary_ar": "Calendar \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Calendar inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Calendar \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "calendar"
+          }
+        },
+        {
+          "key": "module:video_interviews",
+          "title_en": "Video Interviews",
+          "title_ar": "Video Interviews",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Video Interviews is included and available in the current controlled company posture.",
+          "summary_ar": "Video Interviews \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Video Interviews inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Video Interviews \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "video_interviews"
+          }
+        },
+        {
+          "key": "module:employment_offers",
+          "title_en": "Employment Offers",
+          "title_ar": "Employment Offers",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Employment Offers is included and available in the current controlled company posture.",
+          "summary_ar": "Employment Offers \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Employment Offers inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Employment Offers \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "employment_offers"
+          }
+        },
+        {
+          "key": "module:onboarding",
+          "title_en": "Onboarding",
+          "title_ar": "Onboarding",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Onboarding is included and available in the current controlled company posture.",
+          "summary_ar": "Onboarding \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Onboarding inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Onboarding \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "onboarding"
+          }
+        },
+        {
+          "key": "module:compliance",
+          "title_en": "Compliance",
+          "title_ar": "Compliance",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Compliance is included and available in the current controlled company posture.",
+          "summary_ar": "Compliance \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Compliance inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Compliance \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "compliance"
+          }
+        },
+        {
+          "key": "module:attendance",
+          "title_en": "Attendance",
+          "title_ar": "Attendance",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": true,
+          "live": true,
+          "summary_en": "Attendance review is live in a controlled way. Real device punch intake stays off.",
+          "summary_ar": "\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u062a\u0639\u0645\u0644 \u0628\u0634\u0643\u0644 \u0645\u0646\u0636\u0628\u0637. \u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0627\u0644\u0628\u0635\u0645\u0627\u062a \u0645\u0646 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0645\u0627 \u0632\u0627\u0644 \u0645\u063a\u0644\u0642\u0627\u064b.",
+          "next_action_en": "Use the Attendance board for review. Do not connect devices yet.",
+          "next_action_ar": "\u0627\u0633\u062a\u062e\u062f\u0645 \u0644\u0648\u062d\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u0644\u0644\u0645\u0631\u0627\u062c\u0639\u0629. \u0644\u0627 \u062a\u0635\u0644 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0622\u0646.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "gate": "capture_ingest_off",
+            "synthetic_only": true
+          }
+        },
+        {
+          "key": "module:shifts",
+          "title_en": "Shifts",
+          "title_ar": "Shifts",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Shifts is live for the approved HR operator only. Manager scheduling and broad reminders stay closed.",
+          "summary_ar": "\u0627\u0644\u0645\u0646\u0627\u0648\u0628\u0627\u062a \u062a\u0639\u0645\u0644 \u0644\u0645\u0634\u063a\u0651\u0644 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u0645\u0639\u062a\u0645\u062f \u0641\u0642\u0637. \u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0648\u0627\u0644\u062a\u0630\u0643\u064a\u0631\u0627\u062a \u0627\u0644\u0648\u0627\u0633\u0639\u0629 \u0645\u063a\u0644\u0642\u0629.",
+          "next_action_en": "Publish schedules in Shifts. Do not widen manager access from Setup.",
+          "next_action_ar": "\u0627\u0646\u0634\u0631 \u0627\u0644\u062c\u062f\u0627\u0648\u0644 \u0641\u064a \u0627\u0644\u0645\u0646\u0627\u0648\u0628\u0627\u062a. \u0644\u0627 \u062a\u0648\u0633\u0651\u0639 \u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0645\u0646 \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "gate": "shifts_controlled",
+            "manager_allowlist_empty": true,
+            "reminders_off": true
+          }
+        },
+        {
+          "key": "module:leave",
+          "title_en": "Leave",
+          "title_ar": "Leave",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Leave is available in a controlled company posture. Policy details stay in Leave.",
+          "summary_ar": "\u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a \u0645\u062a\u0627\u062d\u0629 \u0628\u0648\u0636\u0639 \u0634\u0631\u0643\u0629 \u0645\u0646\u0636\u0628\u0637. \u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0633\u064a\u0627\u0633\u0629 \u062a\u0628\u0642\u0649 \u0641\u064a \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a.",
+          "next_action_en": "Review leave policies inside Leave \u2014 not in Setup.",
+          "next_action_ar": "\u0631\u0627\u062c\u0639 \u0633\u064a\u0627\u0633\u0627\u062a \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a \u062f\u0627\u062e\u0644 \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a \u2014 \u0648\u0644\u064a\u0633 \u0645\u0646 \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "synthetic_only": true
+          }
+        },
+        {
+          "key": "module:payroll",
+          "title_en": "Payroll",
+          "title_ar": "Payroll",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": true,
+          "live": true,
+          "summary_en": "External payroll run is available in a controlled way. Wathefni does not process pay money.",
+          "summary_ar": "\u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u0645\u062a\u0627\u062d \u0628\u0634\u0643\u0644 \u0645\u0646\u0636\u0628\u0637. \u0648\u062b\u0641\u0646\u064a \u0644\u0627 \u064a\u0639\u0627\u0644\u062c \u0623\u0645\u0648\u0627\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628.",
+          "next_action_en": "Use External payroll run for setup and exports. Keep payment processing off.",
+          "next_action_ar": "\u0627\u0633\u062a\u062e\u062f\u0645 \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u0644\u0644\u0625\u0639\u062f\u0627\u062f \u0648\u0627\u0644\u062a\u0635\u062f\u064a\u0631. \u0623\u0628\u0642\u0650 \u0645\u0639\u0627\u0644\u062c\u0629 \u0627\u0644\u062f\u0641\u0639 \u0645\u063a\u0644\u0642\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "gate": "payroll_synthetic_or_money_disabled",
+            "synthetic_only": true,
+            "companies_ok": true
+          }
+        },
+        {
+          "key": "module:analytics",
+          "title_en": "Analytics",
+          "title_ar": "Analytics",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Analytics is included and available in the current controlled company posture.",
+          "summary_ar": "Analytics \u0645\u0636\u0645\u0651\u0646\u0629 \u0648\u0645\u062a\u0627\u062d\u0629 \u0641\u064a \u0648\u0636\u0639 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Configure Analytics inside its own workspace when needed.",
+          "next_action_ar": "\u0627\u0636\u0628\u0637 Analytics \u062f\u0627\u062e\u0644 \u0645\u0633\u0627\u062d\u062a\u0647\u0627 \u0639\u0646\u062f \u0627\u0644\u062d\u0627\u062c\u0629.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "module_key": "analytics"
+          }
+        },
+        {
+          "key": "module:employee_app",
+          "title_en": "Employee App",
+          "title_ar": "Employee App",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Employee App channel is open in a controlled allowlist posture.",
+          "summary_ar": "\u0642\u0646\u0627\u0629 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u0645\u0648\u0638\u0641 \u0645\u0641\u062a\u0648\u062d\u0629 \u0628\u0648\u0636\u0639 \u0642\u0627\u0626\u0645\u0629 \u0633\u0645\u0627\u062d \u0645\u0646\u0636\u0628\u0637\u0629.",
+          "next_action_en": "Manage employee access in the Employee App rollout \u2014 not via Setup toggles.",
+          "next_action_ar": "\u0623\u062f\u0650\u0631 \u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u0648\u0638\u0641\u064a\u0646 \u0645\u0646 \u0625\u0637\u0644\u0627\u0642 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u0645\u0648\u0638\u0641 \u2014 \u0648\u0644\u064a\u0633 \u0639\u0628\u0631 \u0645\u0641\u0627\u062a\u064a\u062d \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "gate": "employee_app_on"
+          }
+        }
+      ]
+    },
+    {
+      "stage": {
+        "key": "people_roles",
+        "label_en": "People and roles",
+        "label_ar": "\u0627\u0644\u0623\u0634\u062e\u0627\u0635 \u0648\u0627\u0644\u0623\u062f\u0648\u0627\u0631"
+      },
+      "items": [
+        {
+          "key": "owner_role",
+          "title_en": "Owner or HR admin",
+          "title_ar": "\u0627\u0644\u0645\u0627\u0644\u0643 \u0623\u0648 \u0645\u0633\u0624\u0648\u0644 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "2 owner/HR admin account(s) present.",
+          "summary_ar": "\u064a\u0648\u062c\u062f 2 \u062d\u0633\u0627\u0628 \u0645\u0627\u0644\u0643/\u0645\u0633\u0624\u0648\u0644 \u0645\u0648\u0627\u0631\u062f \u0628\u0634\u0631\u064a\u0629.",
+          "next_action_en": null,
+          "next_action_ar": null,
+          "deep_link": "/setup-console",
+          "evidence": {
+            "owner_count": 2
+          }
+        },
+        {
+          "key": "employee_records",
+          "title_en": "People records",
+          "title_ar": "\u0633\u062c\u0644\u0627\u062a \u0627\u0644\u0623\u0634\u062e\u0627\u0635",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "76 employee record(s) on file.",
+          "summary_ar": "\u064a\u0648\u062c\u062f 76 \u0633\u062c\u0644 \u0645\u0648\u0638\u0641.",
+          "next_action_en": null,
+          "next_action_ar": null,
+          "deep_link": "/dashboard",
+          "evidence": {
+            "employee_count": 76
+          }
+        },
+        {
+          "key": "manager_scope",
+          "title_en": "Manager access",
+          "title_ar": "\u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646",
+          "state": "blocked",
+          "purchased": true,
+          "configured": false,
+          "blocked": true,
+          "live": false,
+          "summary_en": "Scoped manager scheduling is not part of the current controlled launch.",
+          "summary_ar": "\u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0630\u0627\u062a \u0627\u0644\u0646\u0637\u0627\u0642 \u0644\u064a\u0633\u062a \u062c\u0632\u0621\u0627\u064b \u0645\u0646 \u0627\u0644\u0625\u0637\u0644\u0627\u0642 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+          "next_action_en": "Keep manager scheduling closed. Use the approved HR operator for Shifts.",
+          "next_action_ar": "\u0623\u0628\u0642\u0650 \u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0645\u063a\u0644\u0642\u0629. \u0627\u0633\u062a\u062e\u062f\u0645 \u0645\u0634\u063a\u0651\u0644 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u0645\u0639\u062a\u0645\u062f \u0644\u0644\u0645\u0646\u0627\u0648\u0628\u0627\u062a.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "gate": "manager_scope_frozen"
+          }
+        }
+      ]
+    },
+    {
+      "stage": {
+        "key": "policies_payroll",
+        "label_en": "Policies and payroll",
+        "label_ar": "\u0627\u0644\u0633\u064a\u0627\u0633\u0627\u062a \u0648\u0627\u0644\u0631\u0648\u0627\u062a\u0628"
+      },
+      "items": [
+        {
+          "key": "leave_policies",
+          "title_en": "Leave policies",
+          "title_ar": "\u0633\u064a\u0627\u0633\u0627\u062a \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "Leave policy details stay inside Leave. Setup only shows whether Leave is included.",
+          "summary_ar": "\u062a\u0641\u0627\u0635\u064a\u0644 \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a \u062a\u0628\u0642\u0649 \u062f\u0627\u062e\u0644 \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a. \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u064a\u0638\u0647\u0631 \u0641\u0642\u0637 \u0625\u0646 \u0643\u0627\u0646\u062a \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a \u0645\u0636\u0645\u0651\u0646\u0629.",
+          "next_action_en": "Open Leave to review policy packs \u2014 do not duplicate them here.",
+          "next_action_ar": "\u0627\u0641\u062a\u062d \u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a \u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u062d\u0632\u0645 \u0627\u0644\u0633\u064a\u0627\u0633\u0627\u062a \u2014 \u0648\u0644\u0627 \u062a\u0643\u0631\u0631\u0647\u0627 \u0647\u0646\u0627.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "owned_by": "leave_module"
+          }
+        },
+        {
+          "key": "payroll_mode",
+          "title_en": "Payroll mode",
+          "title_ar": "\u0648\u0636\u0639 \u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": true,
+          "live": true,
+          "summary_en": "External payroll remains the money authority. Payment processing stays disabled.",
+          "summary_ar": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u062a\u0628\u0642\u0649 \u0633\u0644\u0637\u0629 \u0627\u0644\u0645\u0627\u0644. \u0645\u0639\u0627\u0644\u062c\u0629 \u0627\u0644\u062f\u0641\u0639 \u062a\u0628\u0642\u0649 \u0645\u0639\u0637\u0651\u0644\u0629.",
+          "next_action_en": "Open External payroll run for setup status and checklist.",
+          "next_action_ar": "\u0627\u0641\u062a\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u0644\u062d\u0627\u0644\u0629 \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u0648\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062a\u062d\u0642\u0642.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "owned_by": "payroll_module",
+            "payment_processing": "disabled"
+          }
+        }
+      ]
+    },
+    {
+      "stage": {
+        "key": "channels_integrations",
+        "label_en": "Channels and integrations",
+        "label_ar": "\u0627\u0644\u0642\u0646\u0648\u0627\u062a \u0648\u0627\u0644\u062a\u0643\u0627\u0645\u0644\u0627\u062a"
+      },
+      "items": [
+        {
+          "key": "channel_policy",
+          "title_en": "Messaging policy",
+          "title_ar": "\u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0645\u0631\u0627\u0633\u0644\u0629",
+          "state": "setup_required",
+          "purchased": true,
+          "configured": false,
+          "blocked": false,
+          "live": false,
+          "summary_en": "Messaging policy still needs a review check.",
+          "summary_ar": "\u0645\u0627 \u0632\u0627\u0644\u062a \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0645\u0631\u0627\u0633\u0644\u0629 \u062a\u062d\u062a\u0627\u062c \u0645\u0631\u0627\u062c\u0639\u0629.",
+          "next_action_en": "Mark messaging policy reviewed in Classic setup.",
+          "next_action_ar": "\u0639\u0644\u0651\u0645 \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0645\u0631\u0627\u0633\u0644\u0629 \u0643\u0645\u0631\u0627\u062c\u0639\u0629 \u0641\u064a \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u0627\u0644\u0643\u0644\u0627\u0633\u064a\u0643\u064a.",
+          "deep_link": "/setup-console",
+          "evidence": {
+            "channel_policy_reviewed": false
+          }
+        },
+        {
+          "key": "whatsapp_channel",
+          "title_en": "Company WhatsApp channel",
+          "title_ar": "\u0642\u0646\u0627\u0629 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0629",
+          "state": "blocked",
+          "purchased": true,
+          "configured": false,
+          "blocked": true,
+          "live": false,
+          "summary_en": "Company-owned WhatsApp routing is not open. Shared platform messaging may still apply.",
+          "summary_ar": "\u062a\u0648\u062c\u064a\u0647 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0645\u0645\u0644\u0648\u0643 \u0644\u0644\u0634\u0631\u0643\u0629 \u063a\u064a\u0631 \u0645\u0641\u062a\u0648\u062d. \u0642\u062f \u062a\u0628\u0642\u0649 \u0645\u0631\u0627\u0633\u0644\u0629 \u0627\u0644\u0645\u0646\u0635\u0629 \u0627\u0644\u0645\u0634\u062a\u0631\u0643\u0629.",
+          "next_action_en": "Leave company WhatsApp closed unless platform ops opens company-owned routing.",
+          "next_action_ar": "\u0623\u0628\u0642\u0650 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0629 \u0645\u063a\u0644\u0642\u0627\u064b \u0645\u0627 \u0644\u0645 \u064a\u0641\u062a\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0646\u0635\u0629 \u0627\u0644\u062a\u0648\u062c\u064a\u0647 \u0627\u0644\u0645\u0645\u0644\u0648\u0643 \u0644\u0644\u0634\u0631\u0643\u0629.",
+          "deep_link": "/setup-console",
+          "evidence": {
+            "company_channel_accounts": false
+          }
+        },
+        {
+          "key": "attendance_devices",
+          "title_en": "Attendance devices",
+          "title_ar": "\u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u062d\u0636\u0648\u0631",
+          "state": "blocked",
+          "purchased": true,
+          "configured": false,
+          "blocked": true,
+          "live": false,
+          "summary_en": "Real device punch intake stays off. Device setup is not part of this launch checklist.",
+          "summary_ar": "\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0628\u0635\u0645\u0627\u062a \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u064a\u0628\u0642\u0649 \u0645\u063a\u0644\u0642\u0627\u064b. \u0625\u0639\u062f\u0627\u062f \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0644\u064a\u0633 \u062c\u0632\u0621\u0627\u064b \u0645\u0646 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0625\u0637\u0644\u0627\u0642 \u0647\u0630\u0647.",
+          "next_action_en": "Do not connect biometric devices from Setup.",
+          "next_action_ar": "\u0644\u0627 \u062a\u0635\u0644 \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0628\u0635\u0645\u0629 \u0645\u0646 \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+          "deep_link": "/dashboard",
+          "evidence": {
+            "gate": "capture_ingest_off"
+          }
+        }
+      ]
+    },
+    {
+      "stage": {
+        "key": "launch_readiness",
+        "label_en": "Launch readiness",
+        "label_ar": "\u062c\u0627\u0647\u0632\u064a\u0629 \u0627\u0644\u0625\u0637\u0644\u0627\u0642"
+      },
+      "items": [
+        {
+          "key": "overall_launch",
+          "title_en": "Overall launch posture",
+          "title_ar": "\u0648\u0636\u0639 \u0627\u0644\u0625\u0637\u0644\u0627\u0642 \u0627\u0644\u0639\u0627\u0645",
+          "state": "live_controlled",
+          "purchased": true,
+          "configured": true,
+          "blocked": false,
+          "live": true,
+          "summary_en": "WATHEFNI is operating in a controlled launch posture.",
+          "summary_ar": "\u0648\u062b\u0641\u0646\u064a \u062a\u0639\u0645\u0644 \u0628\u0648\u0636\u0639 \u0625\u0637\u0644\u0627\u0642 \u0645\u0646\u0636\u0628\u0637.",
+          "next_action_en": "Work the next action on each important blocker. Do not widen freezes from Setup.",
+          "next_action_ar": "\u0646\u0641\u0651\u0630 \u0627\u0644\u0625\u062c\u0631\u0627\u0621 \u0627\u0644\u062a\u0627\u0644\u064a \u0644\u0643\u0644 \u0639\u0627\u0626\u0642 \u0645\u0647\u0645. \u0644\u0627 \u062a\u0648\u0633\u0651\u0639 \u0627\u0644\u062a\u062c\u0645\u064a\u062f\u0627\u062a \u0645\u0646 \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+          "deep_link": "/setup-console",
+          "evidence": {
+            "overall": "live_controlled"
+          }
+        }
+      ]
+    }
+  ],
+  "important_blockers": [
+    {
+      "key": "module:attendance",
+      "title_en": "Attendance",
+      "title_ar": "Attendance",
+      "summary_en": "Attendance review is live in a controlled way. Real device punch intake stays off.",
+      "summary_ar": "\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u062a\u0639\u0645\u0644 \u0628\u0634\u0643\u0644 \u0645\u0646\u0636\u0628\u0637. \u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0627\u0644\u0628\u0635\u0645\u0627\u062a \u0645\u0646 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0645\u0627 \u0632\u0627\u0644 \u0645\u063a\u0644\u0642\u0627\u064b.",
+      "next_action_en": "Use the Attendance board for review. Do not connect devices yet.",
+      "next_action_ar": "\u0627\u0633\u062a\u062e\u062f\u0645 \u0644\u0648\u062d\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u0644\u0644\u0645\u0631\u0627\u062c\u0639\u0629. \u0644\u0627 \u062a\u0635\u0644 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0622\u0646.",
+      "deep_link": "/dashboard",
+      "state": "live_controlled"
+    },
+    {
+      "key": "manager_scope",
+      "title_en": "Manager access",
+      "title_ar": "\u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646",
+      "summary_en": "Scoped manager scheduling is not part of the current controlled launch.",
+      "summary_ar": "\u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0630\u0627\u062a \u0627\u0644\u0646\u0637\u0627\u0642 \u0644\u064a\u0633\u062a \u062c\u0632\u0621\u0627\u064b \u0645\u0646 \u0627\u0644\u0625\u0637\u0644\u0627\u0642 \u0627\u0644\u0645\u0646\u0636\u0628\u0637 \u0627\u0644\u062d\u0627\u0644\u064a.",
+      "next_action_en": "Keep manager scheduling closed. Use the approved HR operator for Shifts.",
+      "next_action_ar": "\u0623\u0628\u0642\u0650 \u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u062f\u064a\u0631\u064a\u0646 \u0645\u063a\u0644\u0642\u0629. \u0627\u0633\u062a\u062e\u062f\u0645 \u0645\u0634\u063a\u0651\u0644 \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u0645\u0639\u062a\u0645\u062f \u0644\u0644\u0645\u0646\u0627\u0648\u0628\u0627\u062a.",
+      "deep_link": "/dashboard",
+      "state": "blocked"
+    },
+    {
+      "key": "payroll_mode",
+      "title_en": "Payroll mode",
+      "title_ar": "\u0648\u0636\u0639 \u0627\u0644\u0631\u0648\u0627\u062a\u0628",
+      "summary_en": "External payroll remains the money authority. Payment processing stays disabled.",
+      "summary_ar": "\u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u062a\u0628\u0642\u0649 \u0633\u0644\u0637\u0629 \u0627\u0644\u0645\u0627\u0644. \u0645\u0639\u0627\u0644\u062c\u0629 \u0627\u0644\u062f\u0641\u0639 \u062a\u0628\u0642\u0649 \u0645\u0639\u0637\u0651\u0644\u0629.",
+      "next_action_en": "Open External payroll run for setup status and checklist.",
+      "next_action_ar": "\u0627\u0641\u062a\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u0629 \u0644\u062d\u0627\u0644\u0629 \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u0648\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062a\u062d\u0642\u0642.",
+      "deep_link": "/dashboard",
+      "state": "live_controlled"
+    },
+    {
+      "key": "whatsapp_channel",
+      "title_en": "Company WhatsApp channel",
+      "title_ar": "\u0642\u0646\u0627\u0629 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0629",
+      "summary_en": "Company-owned WhatsApp routing is not open. Shared platform messaging may still apply.",
+      "summary_ar": "\u062a\u0648\u062c\u064a\u0647 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0645\u0645\u0644\u0648\u0643 \u0644\u0644\u0634\u0631\u0643\u0629 \u063a\u064a\u0631 \u0645\u0641\u062a\u0648\u062d. \u0642\u062f \u062a\u0628\u0642\u0649 \u0645\u0631\u0627\u0633\u0644\u0629 \u0627\u0644\u0645\u0646\u0635\u0629 \u0627\u0644\u0645\u0634\u062a\u0631\u0643\u0629.",
+      "next_action_en": "Leave company WhatsApp closed unless platform ops opens company-owned routing.",
+      "next_action_ar": "\u0623\u0628\u0642\u0650 \u0648\u0627\u062a\u0633\u0627\u0628 \u0627\u0644\u0634\u0631\u0643\u0629 \u0645\u063a\u0644\u0642\u0627\u064b \u0645\u0627 \u0644\u0645 \u064a\u0641\u062a\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u0645\u0646\u0635\u0629 \u0627\u0644\u062a\u0648\u062c\u064a\u0647 \u0627\u0644\u0645\u0645\u0644\u0648\u0643 \u0644\u0644\u0634\u0631\u0643\u0629.",
+      "deep_link": "/setup-console",
+      "state": "blocked"
+    },
+    {
+      "key": "attendance_devices",
+      "title_en": "Attendance devices",
+      "title_ar": "\u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u062d\u0636\u0648\u0631",
+      "summary_en": "Real device punch intake stays off. Device setup is not part of this launch checklist.",
+      "summary_ar": "\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0628\u0635\u0645\u0627\u062a \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u064a\u0628\u0642\u0649 \u0645\u063a\u0644\u0642\u0627\u064b. \u0625\u0639\u062f\u0627\u062f \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0644\u064a\u0633 \u062c\u0632\u0621\u0627\u064b \u0645\u0646 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0625\u0637\u0644\u0627\u0642 \u0647\u0630\u0647.",
+      "next_action_en": "Do not connect biometric devices from Setup.",
+      "next_action_ar": "\u0644\u0627 \u062a\u0635\u0644 \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u0628\u0635\u0645\u0629 \u0645\u0646 \u0627\u0644\u0625\u0639\u062f\u0627\u062f.",
+      "deep_link": "/dashboard",
+      "state": "blocked"
+    }
+  ],
+  "pause_impact": {
+    "title_en": "If you pause the company or a module",
+    "title_ar": "\u0625\u0630\u0627 \u0623\u0648\u0642\u0641\u062a \u0627\u0644\u0634\u0631\u0643\u0629 \u0623\u0648 \u0648\u062d\u062f\u0629",
+    "bullets_en": [
+      "Interactive Setup and HR sessions for that scope are held.",
+      "Background jobs, timers, and device intake are not fully stopped by a Setup toggle alone.",
+      "Payroll money and Attendance device intake stay off regardless of resume.",
+      "Resuming never overrides safety freezes or allowlists."
+    ],
+    "bullets_ar": [
+      "\u062c\u0644\u0633\u0627\u062a \u0627\u0644\u0625\u0639\u062f\u0627\u062f \u0648\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0627\u0644\u062a\u0641\u0627\u0639\u0644\u064a\u0629 \u0644\u0647\u0630\u0627 \u0627\u0644\u0646\u0637\u0627\u0642 \u062a\u064f\u0639\u0644\u0651\u064e\u0642.",
+      "\u0627\u0644\u0645\u0647\u0627\u0645 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0648\u0627\u0644\u0645\u0624\u0642\u062a\u0627\u062a \u0648\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0627\u0644\u0623\u062c\u0647\u0632\u0629 \u0644\u0627 \u062a\u062a\u0648\u0642\u0641 \u0628\u0627\u0644\u0643\u0627\u0645\u0644 \u0628\u0645\u0641\u062a\u0627\u062d \u0625\u0639\u062f\u0627\u062f \u0648\u062d\u062f\u0647.",
+      "\u0623\u0645\u0648\u0627\u0644 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0648\u0627\u0633\u062a\u0642\u0628\u0627\u0644 \u0623\u062c\u0647\u0632\u0629 \u0627\u0644\u062d\u0636\u0648\u0631 \u064a\u0628\u0642\u064a\u0627\u0646 \u0645\u063a\u0644\u0642\u064a\u0646 \u0628\u063a\u0636 \u0627\u0644\u0646\u0638\u0631 \u0639\u0646 \u0627\u0644\u0627\u0633\u062a\u0626\u0646\u0627\u0641.",
+      "\u0627\u0644\u0627\u0633\u062a\u0626\u0646\u0627\u0641 \u0644\u0627 \u064a\u062a\u062c\u0627\u0648\u0632 \u062a\u062c\u0645\u064a\u062f\u0627\u062a \u0627\u0644\u0633\u0644\u0627\u0645\u0629 \u0623\u0648 \u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0633\u0645\u0627\u062d."
+    ]
+  },
+  "entitlements_cannot_bypass_gates": true,
+  "external_tenants": false,
+  "payroll_money": false,
+  "attendance_ingest": false,
+  "honesty": {
+    "payment_processing": "disabled",
+    "capture_ingest": "off",
+    "operator_only": true,
+    "wathefni_only": true
+  }
+}

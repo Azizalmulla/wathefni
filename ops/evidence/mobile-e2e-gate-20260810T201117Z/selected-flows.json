@@ -1,0 +1,4 @@
+[
+  "apps/wathefni-employee-mobile/.maestro/smoke/00-unsigned-entry.yaml",
+  "apps/wathefni-employee-mobile/.maestro/smoke/05-method-switch-en.yaml"
+]

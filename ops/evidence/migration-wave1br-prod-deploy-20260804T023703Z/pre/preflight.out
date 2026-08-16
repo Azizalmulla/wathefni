@@ -1,0 +1,44 @@
+preflight_utc=2026-08-04T02:37:18Z
+active
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_DOC_FOUNDATION_DAILY_DOC_AI_COST_CAP_USD=5.0
+WATHEFNI_DOC_FOUNDATION_DAILY_OCR_COST_CAP_USD=2.0
+WATHEFNI_DOC_FOUNDATION_GPT_AUTO_OCR_FALLBACK=off
+WATHEFNI_DOC_FOUNDATION_MAX_SAMPLED_PDFS=50
+WATHEFNI_LOCAL_HYBRID_PDF_ENGINE=production_authority
+WATHEFNI_MIGRATION_WAVE1=1
+WATHEFNI_MIGRATION_WAVE1_COMPANIES=WATHEFNI
+WATHEFNI_MIGRATION_WAVE1_SYNTHETIC_ONLY=1
+c810a954df3cf36715d1eee72cedf57466e3ade682a64b1c53d2935c53ef20f0  /opt/wathefni/orchestrator/app.py
+d4bad0838c7757431d267ebb27b4941c85acdf7c7173b546bfca33b2fa0ccdb9  /opt/wathefni/orchestrator/inbound_cv_intake.py
+7538c93995df941e879b2ebb32ce6916b2cc96f53f5d62ea839e6fb9d93dd19c  /opt/wathefni/orchestrator/inbound_cv_processing.py
+5807b200bd1f22e3e4d6512be485b73595b1e4b5c89915e14dc2d0177fa59a16  /opt/wathefni/orchestrator/durable_email_ingress.py
+58edc84c0aae2f014e185cf0eb597a07429076f524ce1d72962c925cc963c832  /opt/wathefni/orchestrator/migration_wave1_cv_foundation.py
+c9ccd7d371cfcb224c96c3e23641e88580d588f0ae6d60d177e342afc1d73e78  /opt/wathefni/orchestrator/inbound_cv_adapters.py
+schema_contract_absent_before
+{
+  "probe_utc": "2026-08-04T02:37:20.846998+00:00",
+  "active_migration_extraction": 0,
+  "active_other_ats_export": 0,
+  "active_live_cv": 0,
+  "open_canary_batches": 0,
+  "iso_companies": 0,
+  "has_hr_turns": true,
+  "has_candidates": true,
+  "has_applications": true,
+  "has_intake_source_events": true,
+  "has_cv_versions": true,
+  "has_migration_batches": true,
+  "has_inbound_messages": true,
+  "has_intake_submissions": true
+}
+PREFLIGHT_OK
+c810a954df3cf36715d1eee72cedf57466e3ade682a64b1c53d2935c53ef20f0  modules/app.py
+d4bad0838c7757431d267ebb27b4941c85acdf7c7173b546bfca33b2fa0ccdb9  modules/inbound_cv_intake.py
+7538c93995df941e879b2ebb32ce6916b2cc96f53f5d62ea839e6fb9d93dd19c  modules/inbound_cv_processing.py
+c9ccd7d371cfcb224c96c3e23641e88580d588f0ae6d60d177e342afc1d73e78  modules/inbound_cv_adapters.py
+5807b200bd1f22e3e4d6512be485b73595b1e4b5c89915e14dc2d0177fa59a16  modules/durable_email_ingress.py
+58edc84c0aae2f014e185cf0eb597a07429076f524ce1d72962c925cc963c832  modules/migration_wave1_cv_foundation.py
+/opt/wathefni/backups/production-pre-migration-wave1br-20260804T023703Z
+BACKUP_OK backup=/opt/wathefni/backups/production-pre-migration-wave1br-20260804T023703Z evid=/opt/wathefni/production-evidence/migration-wave1br-prod-deploy/20260804T023703Z

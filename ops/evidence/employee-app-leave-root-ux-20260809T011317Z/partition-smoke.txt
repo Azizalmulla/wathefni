@@ -1,0 +1,5 @@
+LEAVE_PARTITION_OK
+(node:68608) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/src/features/leave/leaveRequests.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

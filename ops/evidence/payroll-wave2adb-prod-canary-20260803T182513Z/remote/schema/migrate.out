@@ -1,0 +1,10 @@
+wave2a_version 1.0.0
+wave2ad_operability 1.0.0
+wave1_version 1.0.0
+operability_helpers_ok
+honesty_ok
+connected_db wathefni
+quarantine_ack_columns_ok ['acknowledged_at', 'acknowledged_by_phone', 'acknowledgement_reason']
+bootstrap_setup_ok
+MIGRATE_OK
+ACK_PRODUCTION_PAYROLL_W2ADB=YES

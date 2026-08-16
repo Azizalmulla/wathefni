@@ -1,0 +1,22 @@
+payroll wave2acb prod synthetic canary tag=361c2f32
+[PASS] wave2a enabled
+[PASS] wave2a company
+[PASS] synthetic_only on
+[PASS] payment disabled
+[PASS] money authority external
+[PASS] wathefni not money authority
+[PASS] vendor unclaimed
+[PASS] no bank files
+[PASS] no native g2n
+[PASS] wave1 contracts unchanged
+[PASS] wave1 still enabled
+[PASS] route external workspace
+[PASS] route readiness
+[PASS] route exports
+[PASS] route quarantine
+[PASS] route events
+[PASS] helper _payroll_w2a_require
+[PASS] helper scope keys
+[PASS] db is wathefni
+[PASS] real employee export refused
+[FAIL] synth contract draft :: {'ok': False, 'error': 'payroll_synthetic_only', 'message': 'Payroll Wave 1 is synthetic-only; real employees are blocked.', 'action': 'create_contract_draft', 'employee_key': 'WATHEFNI-PYW2ACB-361c2f32'}

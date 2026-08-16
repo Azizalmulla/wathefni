@@ -1,0 +1,5 @@
+employee_key,name,phone,email,updated_at,employment_id,employment_status,lifecycle_state,policy_pack_status
+WATHEFNI-96550252254,Talal Fadhli,96550252254,talalabdalla89@gmail.com,2026-08-01 20:03:20.703316+00,e25da3b1-13a3-558d-a147-42dd8445edf7,active,active,remediation
+WATHEFNI-96566363363,Fouad Burhamad,96566363363,fb-urhama@gmail.com,2026-07-12 15:46:31.905837+00,fe3359c9-2b14-53a6-88ac-4662e6c04902,active,active,remediation
+WATHEFNI-96597727743,mohammad alqattan,96597727743,"",2026-08-01 20:03:20.680449+00,8fe3358b-18c5-581c-84ea-94f120fd597f,active,active,remediation
+WATHEFNI-96599411617,Brian Saleh,96599411617,briansaleh92@gmail.com,2026-07-13 19:22:41.486318+00,7e51c028-f1db-5b3b-942a-da0f005ac2f1,active,active,remediation

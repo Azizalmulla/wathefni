@@ -1,0 +1,25 @@
+[PASS] seed_request :: {"code": 200}
+[PASS] seed_payroll_effective_present :: {"fp": "5425959aa0fc0391"}
+[PASS] upload_ok :: {"evidence_id": "a882d310-7508-4e69-bbea-511f9f1449ac"}
+[PASS] extraction_non_authoritative :: {"authoritative": false}
+[FAIL] extraction_not_fail_open_empty :: {"status": "needs_review", "proposed_keys": [], "fallback": true}
+[FAIL] bank_name_extracted :: {"bank_name": ""}
+[FAIL] account_holder_extracted :: {"holder_masked": ""}
+[FAIL] kw_iban_extracted :: {"iban_masked": "", "len": 0}
+[FAIL] kw_iban_validation :: {"code": 422, "error": "bank_account_invalid", "iban_masked": ""}
+[PASS] extraction_confidence_present :: {"confidence": 0.0}
+[PASS] extraction_status_useful :: {"status": "needs_review", "warnings": [], "uncertain": false}
+[SKIP] optional_account_number_present :: not on document / not extracted
+[SKIP] optional_branch_present :: not on document / not extracted
+[SKIP] optional_swift_present :: not on document / not extracted
+[SKIP] optional_currency_present :: not on document / not extracted
+[FAIL] employee_confirm_correct_submit :: {"code": 422, "state": null, "request_id": null}
+[PASS] payroll_effective_unchanged_until_apply :: {"seed_fp": "5425959aa0fc0391", "mid_fp": "5425959aa0fc0391"}
+[PASS] ocr_submit_did_not_write_verified :: {"verified_for_request": 0}
+[PASS] evidence_private_owner_ok :: {}
+[PASS] evidence_private_other_denied :: {}
+[PASS] evidence_no_public_url_in_upload :: {"keys": ["evidence_id", "extraction", "filename", "needs_manual_fallback", "ok", "proposed_fields", "retention_until"]}
+[FAIL] hr_current_vs_proposed :: "no hr token/request"
+[PASS] aziz_effective_unchanged :: {"before": "0f349ce848ab5e4b", "after": "0f349ce848ab5e4b"}
+SUMMARY {"PASS": 12, "FAIL": 7, "SKIP": 4, "verdict": "FAIL"}
+EXTRACTION_MASKED {"status": "needs_review", "confidence": 0.0, "uncertain": false, "needs_manual_fallback": true, "authoritative": false, "warnings": [], "unreadable_reason": "http_400:{\"object\":\"error\",\"message\":\"Document content must be a URL (starting with 'https') or base64 encoded document (starting with 'data:<mime-type>;base64,<document-base64>')Received: data:application/oct|circuit_opened", "proposed_masked": {"bank_name": null, "account_holder": null, "iban": null, "account_number": null, "branch": null, "swift": null, "currency": null}, "field_confidence": {}, "evidence_id": "a882d310-7508-4e69-bbea-511f9f1449ac"}

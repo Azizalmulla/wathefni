@@ -1,0 +1,14 @@
+{
+  "PostHire-BrW2GlcR.js": {
+    "Onboarding queue": true,
+    "قائمة التهيئة": true,
+    "Mark complete": true,
+    "Reschedule": true,
+    "secure Employee Self-Service": true,
+    "Waive": true,
+    "Remind": true,
+    "Cancel onboarding": true,
+    "size": 189551
+  }
+}
+markers_ok

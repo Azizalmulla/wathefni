@@ -1,0 +1,43 @@
+{
+  "en": {
+    "status": "ready",
+    "chips": [
+      "What should I work on today?",
+      "Create or update a job opening",
+      "Review candidates",
+      "Who needs an interview scheduled?",
+      "What's on the hiring calendar?",
+      "Who needs an assessment?"
+    ],
+    "modules": "candidates · rankings · assessments · interviews · reports · jobs · overview · follow-ups · onboarding · attendance · leave · shifts · payroll · compliance · workforce analytics",
+    "dir": "ltr",
+    "navAssistantH": 44,
+    "navJobsH": 44,
+    "composerVisible": true,
+    "pageScrollExcess": 8,
+    "transcriptScrollable": true,
+    "genericChip": false,
+    "afterClickHasUserMessage": true
+  },
+  "ar": {
+    "status": "ready",
+    "chips": [
+      "بماذا أبدأ اليوم؟",
+      "إنشاء أو تحديث وظيفة",
+      "مراجعة المرشحين",
+      "من يحتاج جدولة مقابلة؟",
+      "ماذا في تقويم التوظيف؟",
+      "من يحتاج تقييمًا؟"
+    ],
+    "modules": "المرشحين · الترتيب · التقييمات · المقابلات · التقارير · الوظائف · نظرة عامة · المتابعات · التهيئة · الحضور · الإجازات · الورديات · الرواتب · الامتثال · تحليلات القوى العاملة",
+    "dir": "rtl",
+    "navAssistantH": 44,
+    "navJobsH": 44,
+    "composerVisible": true,
+    "pageScrollExcess": 8,
+    "transcriptScrollable": true,
+    "genericChip": false,
+    "afterClickHasUserMessage": true
+  },
+  "pass": true
+}

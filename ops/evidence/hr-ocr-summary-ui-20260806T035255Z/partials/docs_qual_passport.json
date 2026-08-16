@@ -1,0 +1,304 @@
+{
+  "item_id": "docs_qual_passport",
+  "validation_item": "passport",
+  "started_at": "2026-08-06T03:54:12.942400+00:00",
+  "checks": {
+    "civil_untouched": {
+      "status": "accepted",
+      "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+      "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+    },
+    "linkage": {
+      "employee_key": "WATHEFNI-96599338566",
+      "item_id": "docs_qual_passport",
+      "document_type": "docs_qual_passport",
+      "status": "pending",
+      "required": false,
+      "owner": "employee",
+      "collection_mode": "document"
+    },
+    "wrong_document": {
+      "http": 422,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "document_validation_instruction_screenshot",
+          "message": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+          "message_en": "That looks like a screenshot of instructions, not the document itself. Please upload the actual document.",
+          "message_ar": "\u064a\u0628\u062f\u0648 \u0623\u0646 \u0647\u0630\u0647 \u0644\u0642\u0637\u0629 \u0634\u0627\u0634\u0629 \u0644\u0644\u062a\u0639\u0644\u064a\u0645\u0627\u062a \u0648\u0644\u064a\u0633\u062a \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0646\u0641\u0633\u0647. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0641\u0639\u0644\u064a.",
+          "reason": "instruction_screenshot",
+          "gate": "soft",
+          "detected_item": "instruction_screenshot",
+          "validation": {
+            "decision": "block",
+            "confidence": 0.0,
+            "route": {
+              "document_class": "identity",
+              "file_type": "png",
+              "extension": ".png",
+              "reading_route": "shared_envelope_intake",
+              "gpt_auto_ocr_fallback": false,
+              "file_types": [
+                "jpg",
+                "jpeg",
+                "png",
+                "pdf",
+                "tif",
+                "tiff",
+                "webp"
+              ],
+              "fallback_reading": "needs_review",
+              "structuring": "identity_document_extraction_mistral",
+              "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+              "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+              "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+              "gpt_fallback_forbidden": true
+            },
+            "gpt_used": false
+          },
+          "capture_quality": {
+            "status": "reject",
+            "reason": "glare_or_shadow",
+            "signal_reason": null,
+            "metrics": {
+              "width": 1400,
+              "height": 1000,
+              "short_side": 1000,
+              "long_side": 1400,
+              "laplacian_var": 351.994,
+              "glare_frac": 0.4561,
+              "crop_hot_sides": 0,
+              "crop_signal": "none"
+            },
+            "engine": "pil_numpy_v1"
+          }
+        }
+      }
+    },
+    "cross_type_rejection": {
+      "http": 422,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "document_validation_wrong_media_item",
+          "message": "This file doesn't look like the document we asked for. Please upload the correct document and try again.",
+          "message_en": "This file doesn't look like the document we asked for. Please upload the correct document and try again.",
+          "message_ar": "\u0647\u0630\u0627 \u0627\u0644\u0645\u0644\u0641 \u0644\u0627 \u064a\u0628\u062f\u0648 \u0643\u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628. \u064a\u0631\u062c\u0649 \u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u062a\u0646\u062f \u0627\u0644\u0635\u062d\u064a\u062d \u0648\u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.",
+          "reason": "wrong_media_item",
+          "gate": "soft",
+          "detected_item": "civil_id",
+          "validation": {
+            "decision": "block",
+            "confidence": 0.97,
+            "route": {
+              "document_class": "identity",
+              "file_type": "png",
+              "extension": ".png",
+              "reading_route": "shared_envelope_intake",
+              "gpt_auto_ocr_fallback": false,
+              "file_types": [
+                "jpg",
+                "jpeg",
+                "png",
+                "pdf",
+                "tif",
+                "tiff",
+                "webp"
+              ],
+              "fallback_reading": "needs_review",
+              "structuring": "identity_document_extraction_mistral",
+              "ocr_policy": "mistral_document_ai_no_cv_v2_no_gpt",
+              "authority_in_this_wave": "mistral_identity_authority_hr_confirmation_required",
+              "notes": "Live identity authority via identity_document_extraction; GPT document fallback retired.",
+              "gpt_fallback_forbidden": true
+            },
+            "gpt_used": false
+          },
+          "capture_quality": {
+            "status": "clean",
+            "reason": null,
+            "signal_reason": null,
+            "metrics": {
+              "width": 1400,
+              "height": 1000,
+              "short_side": 1000,
+              "long_side": 1400,
+              "laplacian_var": 665.808,
+              "glare_frac": 0.008,
+              "crop_hot_sides": 0,
+              "crop_signal": "none"
+            },
+            "engine": "pil_numpy_v1"
+          }
+        }
+      }
+    },
+    "upload": {
+      "http": 200,
+      "kind": "ok",
+      "body": {
+        "ok": true,
+        "item_id": "docs_qual_passport",
+        "file_id": "1a786653-ee1a-4a9e-a214-76ddd3a3c49e",
+        "storage_status": "stored",
+        "status": "processing",
+        "lifecycle_version": "2a",
+        "validation": {
+          "gate": "soft",
+          "decision": "allow",
+          "reason": null,
+          "hr_review_recommended": false,
+          "message": null,
+          "message_en": null,
+          "message_ar": null,
+          "gpt_used": false
+        }
+      }
+    },
+    "version": {
+      "version_id": "030533cf-9305-4443-8812-b7b9bc09c9da",
+      "review_status": "pending_hr_review",
+      "parts_complete": false,
+      "document_number": "A12345678",
+      "expiry_date": "2032-05-31",
+      "issue_date": "2022-06-01",
+      "file_id": "1a786653-ee1a-4a9e-a214-76ddd3a3c49e"
+    },
+    "identity": {
+      "match": true,
+      "status": "matched",
+      "token_score": 1.0,
+      "canary_alias": "ABDULAZIZ H R ALMULLA",
+      "document_name": "ABDULAZIZ H R ALMULLA",
+      "expected_name": "ABDULAZIZ H R ALMULLA",
+      "overlap_tokens": [
+        "abdulaziz",
+        "almulla"
+      ],
+      "sequence_score": 1.0,
+      "canary_employee_key": "WATHEFNI-96599338566"
+    },
+    "expiry": "2032-05-31",
+    "hr_journey_hit": true,
+    "hr_projection": {
+      "review_status": "pending_hr_review",
+      "expiry_date": "2032-05-31",
+      "issue_date": "2022-06-01",
+      "has_ocr_proposal": true,
+      "ocr_keys": [
+        "authoritative",
+        "confidence",
+        "date_of_birth",
+        "document_number",
+        "document_type",
+        "expiry_date",
+        "extraction_status",
+        "full_name",
+        "full_name_ar",
+        "full_name_en",
+        "identity_check",
+        "issue_date",
+        "name",
+        "nationality",
+        "side"
+      ],
+      "versions_count": 1
+    },
+    "hr_fields_shown_in_ui": [
+      "expiry_date",
+      "issue_date",
+      "review_status",
+      "rejection_reason",
+      "versions",
+      "extracted_name",
+      "document_type",
+      "nationality",
+      "date_of_birth",
+      "employer_or_sponsor",
+      "confidence",
+      "extraction_status",
+      "identity_match",
+      "hr_warnings",
+      "document_number_masked",
+      "civil_id_parts_front_back",
+      "extracted_vs_verified"
+    ],
+    "hr_fields_in_api_not_ui": [],
+    "extraction_vs_verified": {
+      "extracted_are_proposals": true,
+      "never_auto_overwrite_employee_profile": true,
+      "hr_must_confirm_explicitly": true
+    },
+    "verified_fields": null,
+    "preview_file_id": "1a786653-ee1a-4a9e-a214-76ddd3a3c49e",
+    "preview_http": 200,
+    "employee_status_after_approve": "accepted",
+    "employee_status_after_reject": "replacement_required",
+    "cross_employee_upload": {
+      "http": 404,
+      "kind": "http_error",
+      "body": {
+        "detail": {
+          "error": "item_not_found",
+          "message": "We couldn't find that document on your checklist."
+        }
+      }
+    }
+  },
+  "proven": [
+    "linkage",
+    "wrong_document_rejection",
+    "cross_type_rejection",
+    "supported_upload",
+    "classification_allow",
+    "ocr_stored",
+    "identity_matching",
+    "expiry_extraction",
+    "version_history",
+    "hr_receives_submission",
+    "hr_ocr_summary_ui",
+    "hr_ocr_no_raw_dump",
+    "preview",
+    "hr_approve_roundtrip",
+    "hr_reject_replacement",
+    "cross_employee_blocked"
+  ],
+  "partial": [],
+  "missing": [],
+  "extracted_schema": {
+    "document_type": "passport",
+    "side": "front",
+    "full_name": "ABDULAZIZ H R ALMULLA",
+    "full_name_ar": "\u0639\u0628\u062f \u0627\u0644\u0639\u0632\u064a\u0632 \u062d\u0645\u062f \u0631\u0627\u0634\u062f \u0627\u0644\u0645\u0644\u0627",
+    "full_name_en": "ABDULAZIZ H R ALMULLA",
+    "document_number": "A12345678",
+    "nationality": "Kuwaiti",
+    "date_of_birth": "1990-01-15",
+    "issue_date": "2022-06-01",
+    "expiry_date": "2032-05-31",
+    "confidence": 0.0,
+    "extraction_status": "needs_review",
+    "_top_level_keys": [
+      "authoritative",
+      "confidence",
+      "date_of_birth",
+      "document_number",
+      "document_type",
+      "expiry_date",
+      "extraction_status",
+      "full_name",
+      "full_name_ar",
+      "full_name_en",
+      "identity_check",
+      "issue_date",
+      "name",
+      "nationality",
+      "side"
+    ],
+    "_field_keys": []
+  },
+  "errors": [],
+  "failing_request": null,
+  "verdict": "fully proven",
+  "finished_at": "2026-08-06T03:54:24.629529+00:00"
+}

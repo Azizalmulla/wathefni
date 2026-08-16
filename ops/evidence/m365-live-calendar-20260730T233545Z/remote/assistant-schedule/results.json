@@ -1,0 +1,32 @@
+{
+  "stamp": "20260730T233701Z",
+  "steps": {
+    "imports": {
+      "ok": true,
+      "microsoft_env": true,
+      "mailbox": "ABDULAZIZALMULLA@wathefni.onmicrosoft.com"
+    },
+    "executor": {
+      "found": true,
+      "name": "_schedule_interview_executor",
+      "source_has_microsoft": true,
+      "source_snippet_markers": {
+        "microsoft_teams": true,
+        "interview_service": true
+      }
+    },
+    "assistant_equivalent_graph": {
+      "ok": true,
+      "meet_link": false,
+      "web_link": true,
+      "verdict": "PARTIAL",
+      "blocker": "Teams join URL not returned; OnlineMeetings API 403 Missing required permissions; event isOnlineMeeting=false"
+    },
+    "invitation_email_mailbox_read": {
+      "ok": false,
+      "status": 403,
+      "detail": "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"Access is denied. Check credentials and try again.\"}}",
+      "note": "Cannot prove SMTP delivery with current RBACfA calendar-only authority; attendees were attached on create"
+    }
+  }
+}

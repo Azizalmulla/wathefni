@@ -1,0 +1,23 @@
+{
+  "fixture_id": "cv_mixed_02",
+  "category": "mixed_digital_scanned",
+  "language": "en",
+  "layout": "mixed_pages",
+  "pdf_nature": "mixed",
+  "pages": 2,
+  "expected_ocr_pages_1idx": [
+    2
+  ],
+  "expected_text_needles": [
+    "Hybrid Resume Case",
+    "mixed02@example.com",
+    "DIGITAL PAGE"
+  ],
+  "expected_fields": {
+    "full_name": "Hybrid Resume Case",
+    "email": "mixed02@example.com"
+  },
+  "notes": "Page 1 digital text; page 2 image-only. OCR expected only on page 2.",
+  "sha256": "91b544e6bc06e504986b3205c03ddbf067efe5611f21c86483d1d17c416f8363",
+  "bytes": 53998
+}

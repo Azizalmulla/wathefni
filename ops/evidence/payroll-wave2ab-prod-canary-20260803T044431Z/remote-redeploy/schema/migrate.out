@@ -1,0 +1,8 @@
+wave2a_version 1.0.0
+wave1_version 1.0.0
+honesty_ok {'payment_processing': 'disabled', 'money_authority': 'external', 'vendor_claimed': False, 'adapter_kind': 'synthetic_csv_sftp'}
+connected_db wathefni
+adapter_tables ['payroll_adapter_events', 'payroll_adapter_export_runs', 'payroll_adapter_import_lines', 'payroll_adapter_import_runs', 'payroll_adapter_quarantine', 'payroll_adapter_reconciliations']
+wave1_contract_cols_ok ['contract_id', 'row_version', 'status']
+MIGRATE_OK payroll_external_adapter_wave2a_prod
+ACK_PRODUCTION_PAYROLL_W2AB=YES

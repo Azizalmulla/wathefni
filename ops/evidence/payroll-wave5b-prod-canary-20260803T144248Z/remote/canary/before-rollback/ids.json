@@ -1,0 +1,32 @@
+{
+  "tag": "c496064e",
+  "employee_key": "WATHEFNI-PYW1-PYW5-W5B-c496064e",
+  "phones": {
+    "creator": "965541149606",
+    "approver": "965541249606",
+    "override2": "965541349606"
+  },
+  "worksheet_ids": [
+    "63f409eb-4152-4610-abf3-3683a2671b79",
+    "5238f43a-a81a-4798-a2f0-57191fc1acde",
+    "5a9a4a54-cbb3-4f90-beab-15cfb8313aa5",
+    "73ca8bb3-13bb-46ad-8977-0559345ca176",
+    "2d2eb7f7-e7b1-4556-a263-59b4f5016e5a"
+  ],
+  "rule_table_ids": [
+    "00ccbc79-1964-410b-b713-f26c3c3ad3d4",
+    "7cbd62f6-e6b1-4ecf-9285-82fa2a3e81ba",
+    "03e5701c-f792-4d51-a8d4-2b8eb9c23d47"
+  ],
+  "cleanup": {
+    "deleted": {
+      "dual_control": 1,
+      "events": 20,
+      "pifss": 5,
+      "eos": 3,
+      "rules": 3,
+      "events_sweep": 0
+    },
+    "residual_total": 0
+  }
+}

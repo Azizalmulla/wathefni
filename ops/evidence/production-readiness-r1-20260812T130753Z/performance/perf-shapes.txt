@@ -1,0 +1,28 @@
+== uncapped company_employees ==
+14946:def company_employees(company_code: str | None) -> list[dict[str, Any]]:
+14947-    # The employee hub is the source of truth for mention-resolution ("message all
+14948-    # staff"), roster/analytics roll-ups and onboarding cards — every one of those
+14949-    # needs the COMPLETE workforce, so this read is intentionally uncapped. A LIMIT
+14950-    # here silently dropped every employee past the arbitrary cutoff (e.g. a 1,200
+14951-    # person company would lose 200 people from "all staff" with no error). The
+14952-    # result is bounded naturally by one company's headcount. For paged DISPLAY of
+14953-    # the directory, use list_employees_page instead.
+14954-    company = (company_code or "WATHEFNI").upper()
+14955-    with db_connect() as conn:
+14956-        with conn.cursor() as cur:
+14957-            cur.execute(
+14958-                """
+14959-                SELECT *
+14960-                FROM employees
+14961-                WHERE company_code=%s
+14962-                ORDER BY name NULLS LAST, phone, employee_key
+14963-                """,
+14964-                (company,),
+14965-            )
+14966-            return [dict(row) for row in cur.fetchall()]
+
+== FlatList usage per app ==
+-- apps/wathefni-employee-mobile
+apps/wathefni-employee-mobile/src/hr/features/assistant/HRAssistantView.tsx:4
+apps/wathefni-employee-mobile/src/hr/features/people/HRPeopleDirectoryView.tsx:2
+-- apps/wathefni-hr-mobile

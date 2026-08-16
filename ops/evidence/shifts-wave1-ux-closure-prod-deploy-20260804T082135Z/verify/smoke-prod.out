@@ -1,0 +1,30 @@
+DEPLOYED_BUNDLE=/var/www/wathefni-dashboard/assets/PostHire-bz887YSK.js
+BACKUP=/opt/wathefni/backups/production-pre-shifts-wave1-ux-closure-20260804T082135Z
+PASS data-shifts-planning-hr
+PASS data-shifts-advanced
+PASS expected_updated_at
+PASS data-payroll-surfaces
+PASS Show advanced operations
+STATIC_GATES_OK
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backe
+PASS posthire_bundle_present — PostHire-bz887YSK.js
+PASS surfaces_marker
+PASS planning_marker
+PASS planning_hr
+PASS advanced_ops
+PASS composer_org
+PASS advanced_ops_copy
+PASS shared_reason_modal
+PASS hr_cancel_impact
+PASS hr_copy_no_real_mutation
+PASS hr_copy_no_allowlist_jargon
+PASS hr_copy_no_concurrency_token
+PASS mutation_concurrency
+PASS primary_schedule
+PASS arabic_surface
+PASS payroll_still_present
+PASS leave_still_present
+SHIFT_STATUS_COUNTS [{"status": "scheduled", "c": 81}, {"status": "cancelled", "c": 73}]
+PASS shifts_table_readable — statuses=2
+SHIFTS_WAVE1_UX_CLOSURE_SMOKE_OK
+DEPLOY_OK

@@ -1,0 +1,64 @@
+LEAVE_WAVE3_SCHEMA_OK 3.0.0
+enforced=false legal_reviewed=false
+    leave workflow wave3 — partial-day, unpaid, attachments, withdraw/RFI/cancel
+      PASS  version
+      PASS  enforced honesty via authority
+      PASS  needs_info status present
+      PASS  withdrawn status present
+      PASS  parse half am
+      PASS  parse overnight hourly
+      PASS  overnight shift hours=8
+      PASS  hourly inside overnight shift
+      PASS  hourly outside overnight shift
+      PASS  full vs half overlap
+      PASS  am vs pm no overlap
+      PASS  hourly overlap
+      PASS  hourly no overlap
+      PASS  half chargeable days=0.5
+      PASS  unpaid handoff no money
+      PASS  money handoff rejected
+      PASS  sensitive masked
+      PASS  employee seeded
+      PASS  accrual posted
+      PASS  shifts seeded
+      PASS  half-day request ok
+      PASS  half chargeable ~0.5
+      PASS  half reservation
+      PASS  half-day PM ok (no AM overlap)
+      PASS  full vs partial overlap denied
+      PASS  hourly request ok
+      PASS  hourly hours=2
+      PASS  overnight hourly ok
+      PASS  split-shift hourly ok
+      PASS  concurrent half reservations both ok
+      PASS  approve half ok
+      PASS  attendance derived
+      PASS  self-approval denied
+      PASS  stale concurrency denied
+      PASS  reject ok
+      PASS  return for info
+      PASS  resubmit -> requested
+      PASS  withdraw ok
+      PASS  cancel future approved ok
+      PASS  cancel temporal future
+      PASS  already taken denied
+      PASS  already started denied
+      PASS  unpaid request ok
+      PASS  unpaid reservation skipped
+      PASS  unpaid handoff no money on request
+      PASS  unpaid approve ok
+      PASS  unpaid approve no money
+      PASS  handoff event recorded
+      PASS  handoff monetary false
+      PASS  attachment upload
+      PASS  attachment replace versioned
+      PASS  sensitive upload
+      PASS  sensitive masked for denied viewer
+      PASS  attachment reject
+      PASS  attachment audit trail
+      PASS  enforced false
+      PASS  honesty enforced=false
+      PASS  honesty legal_reviewed=false
+
+    58 passed, 0 failed
+STAGING_LEAVE_W3_OK

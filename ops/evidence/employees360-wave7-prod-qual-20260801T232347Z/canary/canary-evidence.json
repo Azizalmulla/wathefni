@@ -1,0 +1,288 @@
+{
+  "checks": [
+    {
+      "label": "ess synthetic only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank encryption available",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "lifecycle synthetic only env",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "employee app off or unset",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "prod remediation readable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "exactly four reals in remediation queue",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "org units listable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "migration batches listable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "assignment history present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "future-effective assignment recorded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "activate_due runs",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "activate_due future-effective",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "identity bind",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "session live",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "session revoke",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "personal apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank \u2192 payroll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "approve \u2260 apply",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank apply + idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "bank masked default",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ess transfer apply via wave4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale conflict fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "stale enters needs_review",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "self-approval denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cross-tenant denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real employee ess blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager-scope denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "ess reconcile callable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 50252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 66363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 97727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real untouched 99411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic cleanup zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "e": "WATHEFNI-96554919853",
+    "m": "WATHEFNI-96554919854",
+    "r": "WATHEFNI-96554919855",
+    "tag": "8e201f5d"
+  },
+  "reals": {
+    "before": {
+      "WATHEFNI-96550252254": {
+        "hub_updated_at": "2026-08-01 20:03:20.703316+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96566363363": {
+        "hub_updated_at": "2026-07-12 15:46:31.905837+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96597727743": {
+        "hub_updated_at": "2026-08-01 20:03:20.680449+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96599411617": {
+        "hub_updated_at": "2026-07-13 19:22:41.486318+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      }
+    },
+    "after": {
+      "WATHEFNI-96550252254": {
+        "hub_updated_at": "2026-08-01 20:03:20.703316+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96566363363": {
+        "hub_updated_at": "2026-07-12 15:46:31.905837+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96597727743": {
+        "hub_updated_at": "2026-08-01 20:03:20.680449+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      },
+      "WATHEFNI-96599411617": {
+        "hub_updated_at": "2026-07-13 19:22:41.486318+00:00",
+        "employment": {
+          "employment_status": "active",
+          "policy_pack_status": "remediation",
+          "lifecycle_state": "active",
+          "jurisdiction_code": "None",
+          "worker_category": "None"
+        },
+        "ess_requests": 0
+      }
+    }
+  },
+  "remediation": {
+    "total": 12,
+    "reals": 4,
+    "note": "prod reals remain unclassified by design; staging count differs by environment data"
+  },
+  "cleanup": {
+    "remaining": 0
+  },
+  "flags": {
+    "ess_v5": "on",
+    "ess_synthetic_only": "on",
+    "lifecycle_synthetic_only": "on",
+    "employee_app": "off"
+  },
+  "summary": {
+    "pass": 33,
+    "fail": 0,
+    "tag": "8e201f5d"
+  }
+}

@@ -1,0 +1,679 @@
+{
+  "run_tag": "20260807T074340Z",
+  "base_url": "http://127.0.0.1:8010",
+  "bank_ess": [
+    {
+      "case": "employee_view_status_no_bank",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "state": "none"
+      }
+    },
+    {
+      "case": "next_step_present_when_empty",
+      "verdict": "proven",
+      "detail": "Add your bank details so salary can be paid to you."
+    },
+    {
+      "case": "draft_save",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "state": "draft"
+      }
+    },
+    {
+      "case": "masking_default_employee",
+      "verdict": "proven",
+      "detail": {
+        "leaked": false
+      }
+    },
+    {
+      "case": "proposal_sealed_at_rest",
+      "verdict": "proven",
+      "detail": {
+        "sealed": true,
+        "leaked": false
+      }
+    },
+    {
+      "case": "retry_idempotency_create",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "idempotent": true
+      }
+    },
+    {
+      "case": "submit_draft_for_review",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "state": "pending_hr"
+      }
+    },
+    {
+      "case": "change_under_review_flag",
+      "verdict": "proven",
+      "detail": null
+    },
+    {
+      "case": "duplicate_submit_protection",
+      "verdict": "proven",
+      "detail": {
+        "code": 409,
+        "error": "bank_request_already_active"
+      }
+    },
+    {
+      "case": "unauthorized_employee_isolation",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "leaked": false,
+        "other_request_id": null,
+        "draft_id_present": true
+      }
+    },
+    {
+      "case": "unauthorized_employee_cannot_withdraw",
+      "verdict": "proven",
+      "detail": {
+        "code": 403,
+        "error": "not_request_owner"
+      }
+    },
+    {
+      "case": "hr_review_compare_current_vs_proposed",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "changed_fields": [
+          "account_holder",
+          "bank_name",
+          "iban"
+        ],
+        "first": true
+      }
+    },
+    {
+      "case": "hr_view_masked_by_default",
+      "verdict": "proven",
+      "detail": {
+        "leaked": false
+      }
+    },
+    {
+      "case": "hr_sees_evidence_list",
+      "verdict": "proven",
+      "detail": null
+    },
+    {
+      "case": "hr_reject_requires_reason",
+      "verdict": "proven",
+      "detail": {
+        "code": 422,
+        "error": "decision_reason_required"
+      }
+    },
+    {
+      "case": "hr_reject_with_reason",
+      "verdict": "proven",
+      "detail": {
+        "state": "rejected",
+        "reason": "QUAL: account holder name does not match your civil ID."
+      }
+    },
+    {
+      "case": "employee_sees_rejection_next_step",
+      "verdict": "proven",
+      "detail": {
+        "owner": "employee",
+        "message": "Your submission was rejected. Review the reason, correct it and resubmit.",
+        "message_en": "Your submission was rejected. Review the reason, correct it and resubmit.",
+        "message_ar": "\u062a\u0645 \u0631\u0641\u0636 \u0637\u0644\u0628\u0643. \u0631\u0627\u062c\u0639 \u0627\u0644\u0633\u0628\u0628\u060c \u0635\u062d\u062d\u0647 \u0648\u0623\u0639\u062f \u0627\u0644\u0625\u0631\u0633\u0627\u0644."
+      }
+    },
+    {
+      "case": "can_resubmit_after_reject",
+      "verdict": "proven",
+      "detail": null
+    },
+    {
+      "case": "employee_correction_and_resubmit",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "state": "pending_hr"
+      }
+    },
+    {
+      "case": "withdrawal",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "state": "withdrawn"
+      }
+    },
+    {
+      "case": "withdraw_clears_onboarding_processing",
+      "verdict": "proven",
+      "detail": {
+        "status": "pending"
+      }
+    },
+    {
+      "case": "kw_iban_enforced_at_submit",
+      "verdict": "proven",
+      "detail": {
+        "code": 422,
+        "error": "bank_account_invalid",
+        "detail": {
+          "error": "bank_account_invalid",
+          "message": "A Kuwait IBAN must contain 30 letters and numbers.",
+          "message_en": "A Kuwait IBAN must contain 30 letters and numbers.",
+          "message_ar": "\u064a\u062c\u0628 \u0623\u0646 \u064a\u062a\u0643\u0648\u0646 \u0627\u0644\u0622\u064a\u0628\u0627\u0646 \u0627\u0644\u0643\u0648\u064a\u062a\u064a \u0645\u0646 30 \u062d\u0631\u0641\u064b\u0627 \u0648\u0631\u0642\u0645\u064b\u0627.",
+          "scheme": "kw_iban",
+          "problems": [
+            "iban_length_invalid"
+          ],
+          "fields": [
+            "iban"
+          ]
+        }
+      }
+    },
+    {
+      "case": "needs_review_replace_recovery",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "replaced": true,
+        "state": "pending_hr",
+        "error": ""
+      }
+    },
+    {
+      "case": "first_submission_live",
+      "verdict": "proven",
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "case": "hr_approve_stage_1",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "error": ""
+      }
+    },
+    {
+      "case": "hr_approve_stamps_verified_not_effective",
+      "verdict": "proven",
+      "detail": {
+        "verified_by_stage": "hr",
+        "submission_state": "pending_payroll",
+        "next_step": {
+          "owner": "payroll",
+          "message": "HR verified your details. Payroll is reviewing them before they become effective.",
+          "message_en": "HR verified your details. Payroll is reviewing them before they become effective.",
+          "message_ar": "\u062a\u062d\u0642\u0642\u062a \u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u0645\u0646 \u0628\u064a\u0627\u0646\u0627\u062a\u0643. \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u062a\u0631\u0627\u062c\u0639\u0647\u0627 \u0642\u0628\u0644 \u0623\u0646 \u062a\u0635\u0628\u062d \u0633\u0627\u0631\u064a\u0629."
+        },
+        "effective_fp": null
+      }
+    },
+    {
+      "case": "concurrent_hr_review_guard",
+      "verdict": "proven",
+      "detail": {
+        "code": 409,
+        "error": "stale_concurrency_version"
+      }
+    },
+    {
+      "case": "payroll_effective_transition",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "request_state": "applied",
+        "effective_from": "2026-08-07",
+        "bank_profile_version": 1
+      }
+    },
+    {
+      "case": "retry_idempotency_apply",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "current_effective_rows": 1
+      }
+    },
+    {
+      "case": "authority_layers_separated",
+      "verdict": "proven",
+      "detail": {
+        "verified_rows": 1,
+        "current_effective_rows": 1
+      }
+    },
+    {
+      "case": "payroll_effective_never_plaintext",
+      "verdict": "proven",
+      "detail": {
+        "leaked": false
+      }
+    },
+    {
+      "case": "notification_deduplication",
+      "verdict": "proven",
+      "detail": {
+        "groups": 4,
+        "dupes": []
+      }
+    },
+    {
+      "case": "audit_history",
+      "verdict": "proven",
+      "detail": {
+        "event_count": 12,
+        "actions": [
+          "apply",
+          "correct_and_resubmit",
+          "create_draft",
+          "decide_approve",
+          "decide_reject",
+          "submit",
+          "withdraw"
+        ]
+      }
+    },
+    {
+      "case": "onboarding_bank_item_synced_on_apply",
+      "verdict": "proven",
+      "detail": {
+        "status": "accepted"
+      }
+    },
+    {
+      "case": "existing_bank_change",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "has_verified": true,
+        "state": "pending_hr"
+      }
+    },
+    {
+      "case": "verified_separate_from_submitted",
+      "verdict": "proven",
+      "detail": {
+        "verified_present": true,
+        "submitted_present": true
+      }
+    },
+    {
+      "case": "unreviewed_input_not_payroll_truth",
+      "verdict": "proven",
+      "detail": {
+        "effective_fingerprint_matches_previous": true
+      }
+    },
+    {
+      "case": "evidence_upload",
+      "verdict": "proven",
+      "detail": {
+        "evidence_id": "c26f44c5-d4de-4bc7-ac24-dbf36cb1019c"
+      }
+    },
+    {
+      "case": "evidence_access_own",
+      "verdict": "proven",
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "case": "evidence_access_denied_other_employee",
+      "verdict": "proven",
+      "detail": {
+        "code": 404
+      }
+    },
+    {
+      "case": "evidence_access_hr_authorized",
+      "verdict": "proven",
+      "detail": {
+        "code": 200
+      }
+    },
+    {
+      "case": "unauthorized_hr_access_denied",
+      "verdict": "proven",
+      "detail": {
+        "code": 401,
+        "error": "dashboard_auth_failed"
+      }
+    },
+    {
+      "case": "cross_tenant_isolation_unknown_key",
+      "verdict": "proven",
+      "detail": {
+        "code": 404
+      }
+    },
+    {
+      "case": "cross_tenant_isolation_storage",
+      "verdict": "proven",
+      "detail": {
+        "rows_outside_tenant": 0
+      }
+    },
+    {
+      "case": "arabic_next_step",
+      "verdict": "proven",
+      "detail": {
+        "message": "\u0627\u0644\u0645\u0648\u0627\u0631\u062f \u0627\u0644\u0628\u0634\u0631\u064a\u0629 \u062a\u0631\u0627\u062c\u0639 \u0637\u0644\u0628\u0643. \u0644\u0627 \u064a\u0644\u0632\u0645 \u0634\u064a\u0621 \u0622\u062e\u0631 \u0645\u0646\u0643."
+      }
+    },
+    {
+      "case": "masking_and_permitted_reveal_contract",
+      "verdict": "proven",
+      "detail": {
+        "masking": {
+          "masked_by_default": true,
+          "reveal_requires_permission": "employees.ess.unmask",
+          "reveal_is_audited": true
+        },
+        "leaked": false
+      }
+    },
+    {
+      "case": "payroll_lock_state_defined",
+      "verdict": "proven",
+      "detail": {
+        "locked": false,
+        "period_status": null,
+        "period_end": null
+      }
+    }
+  ],
+  "onboarding_completion": [
+    {
+      "case": "new_employee_no_progress",
+      "verdict": "proven",
+      "detail": "not_started"
+    },
+    {
+      "case": "partial_progress",
+      "verdict": "proven",
+      "detail": {
+        "satisfied": 0,
+        "open": 3
+      }
+    },
+    {
+      "case": "waiting_on_employee",
+      "verdict": "proven",
+      "detail": "waiting_on_employee"
+    },
+    {
+      "case": "waiting_on_hr",
+      "verdict": "proven",
+      "detail": "waiting_on_hr"
+    },
+    {
+      "case": "rejected_item",
+      "verdict": "proven",
+      "detail": "waiting_on_employee"
+    },
+    {
+      "case": "corrected_item",
+      "verdict": "proven",
+      "detail": [
+        "qual_doc_a"
+      ]
+    },
+    {
+      "case": "waived_item",
+      "verdict": "proven",
+      "detail": {
+        "waiting_hr": [
+          "qual_doc_b"
+        ]
+      }
+    },
+    {
+      "case": "not_applicable_item",
+      "verdict": "proven",
+      "detail": "completed"
+    },
+    {
+      "case": "completion",
+      "verdict": "proven",
+      "detail": "completed"
+    },
+    {
+      "case": "completion_evidence_recorded",
+      "verdict": "proven",
+      "detail": {
+        "first_completed_at": "2026-08-07 07:43:44.442107+00:00",
+        "evidence": 1
+      }
+    },
+    {
+      "case": "legacy_columns_mirrored",
+      "verdict": "proven",
+      "detail": {
+        "onboarding_status": "completed",
+        "documents_pending": 0,
+        "documents_complete": 1
+      }
+    },
+    {
+      "case": "requirement_added_after_completion",
+      "verdict": "proven",
+      "detail": "reopened"
+    },
+    {
+      "case": "reopened_onboarding",
+      "verdict": "proven",
+      "detail": "reopened"
+    },
+    {
+      "case": "historical_evidence_preserved",
+      "verdict": "proven",
+      "detail": {
+        "evidence": 1
+      }
+    },
+    {
+      "case": "requirement_removed_after_progress",
+      "verdict": "proven",
+      "detail": "completed"
+    },
+    {
+      "case": "blocked_dependency_detected",
+      "verdict": "proven",
+      "detail": {
+        "blocked": [
+          "qual_dep_child"
+        ]
+      }
+    },
+    {
+      "case": "accepted_satisfies_dependency",
+      "verdict": "proven",
+      "detail": {
+        "blocked": []
+      }
+    },
+    {
+      "case": "employee_transfer_new_requirement",
+      "verdict": "proven",
+      "detail": "reopened"
+    },
+    {
+      "case": "legacy_received_not_verified",
+      "verdict": "proven",
+      "detail": {
+        "waiting_hr": [
+          "qual_dep_child"
+        ]
+      }
+    },
+    {
+      "case": "legacy_backfill_stamps_history",
+      "verdict": "proven",
+      "detail": {
+        "pre": false,
+        "stamped": true,
+        "first_completed_at": "2025-01-15 00:00:00+00:00"
+      }
+    },
+    {
+      "case": "legacy_backfill_idempotent",
+      "verdict": "proven",
+      "detail": {
+        "restamped": false,
+        "first_completed_at": "2025-01-15 00:00:00+00:00"
+      }
+    },
+    {
+      "case": "legacy_employee_recompute_completed",
+      "verdict": "proven",
+      "detail": "completed"
+    },
+    {
+      "case": "legacy_employee_reopens_not_restarts",
+      "verdict": "proven",
+      "detail": "reopened"
+    },
+    {
+      "case": "cross_surface_status_consistency",
+      "verdict": "proven",
+      "detail": {
+        "employee_app": "reopened",
+        "hr_completion_endpoint": "reopened",
+        "hr_onboarding_web": "reopened",
+        "contract": "reopened"
+      }
+    },
+    {
+      "case": "reminder_covers_correction_state",
+      "verdict": "proven",
+      "detail": {
+        "party": "employee",
+        "items": [
+          "qual_dep_child",
+          "qual_transfer_req"
+        ],
+        "dedup_key": "onboarding:reopened:employee:qual_dep_child,qual_transfer_req"
+      }
+    },
+    {
+      "case": "reminder_deduplication",
+      "verdict": "proven",
+      "detail": {
+        "key": "onboarding:reopened:employee:qual_dep_child,qual_transfer_req"
+      }
+    },
+    {
+      "case": "retry_idempotency_recompute",
+      "verdict": "proven",
+      "detail": {
+        "state": "reopened",
+        "history_before": 9,
+        "history_after": 9
+      }
+    },
+    {
+      "case": "permissions_unauthenticated_denied",
+      "verdict": "proven",
+      "detail": {
+        "code": 401
+      }
+    },
+    {
+      "case": "tenant_isolation",
+      "verdict": "proven",
+      "detail": {
+        "code": 404
+      }
+    },
+    {
+      "case": "arabic_next_action",
+      "verdict": "proven",
+      "detail": "\u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u0641\u062a\u062d \u0627\u0644\u0627\u0644\u062a\u062d\u0627\u0642 \u2014 \u0623\u0643\u0645\u0644 \u0627\u0644\u0628\u0646\u0648\u062f \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646\u0643."
+    },
+    {
+      "case": "mobile_projection_contract",
+      "verdict": "proven",
+      "detail": {
+        "code": 200,
+        "lifecycle_version": "2a"
+      }
+    }
+  ],
+  "created_canaries": [
+    "WATHEFNI-9655497001",
+    "WATHEFNI-9655497002",
+    "WATHEFNI-9655497003",
+    "WATHEFNI-9655497004"
+  ],
+  "errors": [],
+  "pre_run_cleanup": {
+    "evidence_files_unlinked": 0,
+    "employee_ess_request_events": 0,
+    "employee_bank_notifications": 0,
+    "employee_bank_evidence": 0,
+    "employee_bank_effective": 0,
+    "employee_bank_verified": 0,
+    "employee_ess_bank_profiles": 0,
+    "employee_ess_requests": 0,
+    "employee_onboarding_completion_events": 0,
+    "employee_onboarding_completion": 0,
+    "onboarding_items": 0,
+    "employee_onboarding_assignments": 0,
+    "employee_sessions": 0,
+    "employees": 0
+  },
+  "hr_permission_probe": {
+    "count": 61,
+    "ess_approve_hr": false,
+    "employees_manage": true,
+    "ess_unmask": false
+  },
+  "cleanup": {
+    "evidence_files_unlinked": 1,
+    "employee_ess_request_events": 13,
+    "employee_bank_notifications": 4,
+    "employee_bank_evidence": 1,
+    "employee_bank_effective": 1,
+    "employee_bank_verified": 1,
+    "employee_ess_bank_profiles": 1,
+    "employee_ess_requests": 5,
+    "employee_onboarding_completion_events": 15,
+    "employee_onboarding_completion": 3,
+    "onboarding_items": 14,
+    "employee_onboarding_assignments": 0,
+    "employee_sessions": 3,
+    "employees": 4
+  },
+  "bank_ess_summary": {
+    "total": 47,
+    "proven": 47,
+    "failed": 0,
+    "partial": 0,
+    "skipped": 0
+  },
+  "onboarding_completion_summary": {
+    "total": 31,
+    "proven": 31,
+    "failed": 0,
+    "partial": 0,
+    "skipped": 0
+  }
+}

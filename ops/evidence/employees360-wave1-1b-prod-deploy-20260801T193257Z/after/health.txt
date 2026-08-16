@@ -1,0 +1,5 @@
+health=200
+dashboard=308
+public_posthire=404
+public_api_js=404
+public_health_api=404

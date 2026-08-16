@@ -1,0 +1,14 @@
+    wave1 lifecycle — unit wiring
+      PASS  requisitions create
+      PASS  requisitions transition
+      PASS  preboarding create
+      PASS  hire bridge offer
+      PASS  hire bridge hire tx
+      PASS  probation create
+      PASS  probation decide
+      PASS  db smoke present
+      PASS  qualify present
+      PASS  prior freezes present
+
+    10 passed, 0 failed
+WAVE1_LIFECYCLE_UNIT_PASS

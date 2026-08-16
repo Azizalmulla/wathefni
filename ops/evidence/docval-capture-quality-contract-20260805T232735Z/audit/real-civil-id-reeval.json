@@ -1,0 +1,19 @@
+{
+  "real_civil_id": {
+    "local_path": "/root/.openclaw/workspaces/company-wathefni/data/companies/WATHEFNI/employees/96599338566/documents/civil_id/civil_id-fe98f7d9d481-b6dd8343c46046e5a6e5d2105272c741.jpg",
+    "content_sha256": "fe98f7d9d481578804a3ca3e19ca96ad4b4fa6e046f46e25d4ab21d9e15f0bb7",
+    "status": "accepted",
+    "mime_type": "image/jpeg",
+    "value": "9BCE2072-6C8D-4437-A88D-F51308F2C05E.jpg"
+  },
+  "exists": true,
+  "reeval": {
+    "decision": "block",
+    "reason": "instruction_screenshot",
+    "should_block": true,
+    "gate": "soft",
+    "detected": "instruction_screenshot",
+    "confidence": 0.0,
+    "matches": false
+  }
+}

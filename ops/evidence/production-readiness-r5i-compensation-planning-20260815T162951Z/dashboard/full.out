@@ -1,0 +1,110 @@
+
+ RUN  v4.1.6 /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ src/posthire/ActivationHandoff.security.test.tsx (0 test)
+Not implemented: Window's scrollTo() method
+stderr | src/EmployeeProfile.repro.test.tsx > employee profile click (production data repro) > opening an employee from the directory does not crash the dashboard
+An error occurred in one of your React components.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+ ❯ src/EmployeeProfile.repro.test.tsx (1 test | 1 failed) 5005ms
+     × opening an employee from the directory does not crash the dashboard 5004ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/posthire/ActivationHandoff.security.test.tsx [ src/posthire/ActivationHandoff.security.test.tsx ]
+Error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] Error:[0m Expected `:` but found `}`
+     [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/posthire/CompensationPlanningWorkspace.tsx:437:16 [38;5;246m][0m
+     [38;5;246m│[0m
+ [38;5;246m418 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m{[0m[38;5;249mc[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m [0m[38;5;249m&[0m[38;5;249m&[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mC[0m[38;5;249my[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249m [0m?[38;5;249m [0m[38;5;249m([0m
+ [38;5;240m    │[0m                                              ┬  
+ [38;5;240m    │[0m                                              ╰── Conditional starts here
+ [38;5;240m    │[0m 
+ [38;5;246m437 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m)[0m}
+ [38;5;240m    │[0m                ┬  
+ [38;5;240m    │[0m                ╰── `:` expected
+[38;5;246m─────╯[0m
+
+  Plugin: vite:oxc
+  File: /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard/src/posthire/CompensationPlanningWorkspace.tsx
+ ❯ transformWithOxc node_modules/vite/dist/node/chunks/node.js:3340:19
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:3408:26
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:30193:51
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:24511:26
+ ❯ fetchModule node_modules/vite/dist/node/chunks/node.js:23102:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/EmployeeProfile.repro.test.tsx > employee profile click (production data repro) > opening an employee from the directory does not crash the dashboard
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/EmployeeProfile.repro.test.tsx:129:3
+    127|
+    128| describe('employee profile click (production data repro)', () => {
+    129|   test('opening an employee from the directory does not crash the dash…
+       |   ^
+    130|     localStorage.setItem('wathefni_dashboard_token', 'saved-token')
+    131|     localStorage.setItem('wathefni_hr_phone', '96599338566')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+Error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] Error:[0m Expected `:` but found `}`
+     [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/posthire/CompensationPlanningWorkspace.tsx:437:16 [38;5;246m][0m
+     [38;5;246m│[0m
+ [38;5;246m418 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m{[0m[38;5;249mc[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m [0m[38;5;249m&[0m[38;5;249m&[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mC[0m[38;5;249my[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249m [0m?[38;5;249m [0m[38;5;249m([0m
+ [38;5;240m    │[0m                                              ┬  
+ [38;5;240m    │[0m                                              ╰── Conditional starts here
+ [38;5;240m    │[0m 
+ [38;5;246m437 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m)[0m}
+ [38;5;240m    │[0m                ┬  
+ [38;5;240m    │[0m                ╰── `:` expected
+[38;5;246m─────╯[0m
+
+  Plugin: vite:oxc
+  File: /Users/azizalmulla/Desktop/claw/apps/wathefni-dashboard/src/posthire/CompensationPlanningWorkspace.tsx
+ ❯ transformWithOxc node_modules/vite/dist/node/chunks/node.js:3340:19
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:3408:26
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:30193:51
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:24511:26
+
+This error originated in "src/EmployeeProfile.repro.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "opening an employee from the directory does not crash the dashboard". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  2 failed | 87 passed (89)
+      Tests  1 failed | 479 passed (480)
+     Errors  1 error
+   Start at  19:29:53
+   Duration  8.64s (transform 5.07s, setup 10.73s, import 7.76s, tests 15.41s, environment 48.53s)
+

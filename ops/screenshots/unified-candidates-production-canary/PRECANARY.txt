@@ -1,0 +1,20 @@
+stamp=20260725T200938Z
+{"status":"ok","runtime":"toolcall_fastapi","environment_binding":{"application_environment":"production","database_environment":"production","database_environment_marker":"2646585bbedb","database_logical_name":"b1f1a54885f2","database_host":"aaf075b7b4bf","match":true},"permission_authority":"backend_current_required","legacy_dashboard_token_auth":false,"legacy_untrusted_auth_usable":false}
+[Service]
+Environment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=off
+Environment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=
+---staging---
+[Service]
+Environment=WATHEFNI_UNIFIED_CANDIDATES_TALENT_POOL=on
+Environment=WATHEFNI_UNIFIED_CANDIDATES_TENANTS=WATHEFNI
+---hashes---
+2938ab332693a4815a97f0b3d748f4e7a4ee2238ef677d74d9e5b3e2c73b304a  /opt/wathefni/orchestrator/app.py
+6d7fa436ae05f345047896b7ee0d94f941117c062464ba9e9b7e8e612da5ae27  /opt/wathefni/orchestrator/unified_candidates.py
+331047d051ec72b0bd6415b815355877e4aaf5dfaad21b3febe25185642c58e7  /opt/wathefni/orchestrator/unified_candidates_routes.py
+---sidecar---
+governance=0
+facts=0
+views=0
+---rollback---
+/opt/wathefni/backups/production-pre-unified-candidates-dark-20260725T150641Z/ROLLBACK.sh
+ROLLBACK_AVAILABLE

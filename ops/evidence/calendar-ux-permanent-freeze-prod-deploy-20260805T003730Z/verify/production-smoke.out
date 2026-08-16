@@ -1,0 +1,7 @@
+health_ok
+WATHEFNI_CALENDAR_POPULATED_PREVIEW=off
+WATHEFNI_CALENDAR_POPULATED_PREVIEW_COMPANIES=WATHEFNI
+PREVIEW_FLAG_OFF_OK
+PREVIEW_MECHANISM_RETAINED_OK
+PROD_VIEW_AND_CLOSE_SMOKE {'bundle': 'CalendarShell-B4VWDUZW.js', 'week': True, 'day_or_agenda': True, 'all_day_row': True, 'category_rail': True, 'card_variant': True, 'overlap_menu': True, 'portal': True, 'detail_drawer': True, 'detail_close': True, 'soft_keep': True, 'board_pending': True, 'painted_view': True, 'selected': True, 'scope_mine': True, 'scope_company': True}
+PROD_SMOKE_OK

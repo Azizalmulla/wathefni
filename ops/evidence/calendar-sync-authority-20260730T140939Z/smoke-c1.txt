@@ -1,0 +1,47 @@
+=== Wathefni Calendar C1 smoke ===
+PASS: calendar in MODULE_CATALOG
+PASS: calendar order 28
+PASS: calendar not legacy-implied
+PASS: owner calendar.sync
+PASS: hr_admin no calendar.sync
+PASS: hr_manager no calendar.sync
+PASS: hr_manager has calendar.company
+PASS: recruiter calendar.manage
+PASS: interviewer calendar.read only manage
+PASS: payroll no calendar
+PASS: known permission calendar.read
+PASS: known permission calendar.manage
+PASS: known permission calendar.company
+PASS: known permission calendar.sync
+PASS: known permission calendar.conflict_override
+PASS: route /dashboard/calendar/events
+PASS: route /dashboard/calendar/events/{event_id}
+PASS: route /dashboard/calendar/events/{event_id}/cancel
+PASS: interview route unchanged
+PASS: gog calendar helper still present
+PASS: acl does not query manager_scopes
+PASS: projections do not query manager_scopes
+PASS: acl imports only adapter contract
+PASS: projections use get_org_scope_adapter
+PASS: OrgScopeAdapter protocol present
+PASS: ManagerScopesOrgAdapter present
+PASS: factory present
+PASS: viewer in-scope team → busy_only
+PASS: candidate-linked company oversight → busy_only
+PASS: busy_only hides title/attendees/guests/links
+PASS: hidden serializes to None
+PASS: organizer gets full even when candidate-linked
+PASS: reminder rejected as timed event
+PASS: interview authority fields include schedule/status
+PASS: wave1 interviewer scoped
+PASS: wave2 default shared
+PASS: wave3 ownership
+PASS: wave4 personal work
+PASS: wave5 conflict message
+PASS: wave6 people route
+PASS: schema defines calendar_events
+PASS: schema unique active workflow links
+PASS: schema outbox unused infrastructure
+PASS: ensure_schema wires calendar
+PASS: calendar schema ensure (skipped DB)
+=== C1 smoke done PASS=45 FAIL=0 ===

@@ -79,6 +79,13 @@ const ALL_FEATURES = [
   'leave',
   'payslips',
   'bank',
+  'performance',
+  'talent',
+  'learning',
+  'benefits',
+  'engagement',
+  'preboarding',
+  'probation',
 ]
 
 function me(enabled, extraActions = {}) {
@@ -157,6 +164,21 @@ function main() {
   )
   check('Inbox is never a Home module tile', !full.homeTiles.includes('inbox'))
   check('Bank is never a Home module tile', !full.homeTiles.includes('bank'))
+  const perfOnly = compositionFromMe(me(['performance']))
+  check('performance-only Home shows the Performance tile', perfOnly.homeTiles.join(',') === 'performance')
+  check('performance is a Home destination, not a tab', perfOnly.homeDestinations.map((d) => d.id).join(',') === 'performance')
+  const talentOnly = compositionFromMe(me(['talent']))
+  check('talent-only Home shows the Talent tile', talentOnly.homeTiles.join(',') === 'talent')
+  check('talent is a Home destination, not a tab', talentOnly.homeDestinations.map((d) => d.id).join(',') === 'talent')
+  const learningOnly = compositionFromMe(me(['learning']))
+  check('learning-only Home shows the Learning tile', learningOnly.homeTiles.join(',') === 'learning')
+  check('learning is a Home destination, not a tab', learningOnly.homeDestinations.map((d) => d.id).join(',') === 'learning')
+  const benefitsOnly = compositionFromMe(me(['benefits']))
+  check('benefits-only Home shows the Benefits tile', benefitsOnly.homeTiles.join(',') === 'benefits')
+  check('benefits is a Home destination, not a tab', benefitsOnly.homeDestinations.map((d) => d.id).join(',') === 'benefits')
+  const engagementOnly = compositionFromMe(me(['engagement']))
+  check('engagement-only Home shows the Engagement tile', engagementOnly.homeTiles.join(',') === 'engagement')
+  check('engagement is a Home destination, not a tab', engagementOnly.homeDestinations.map((d) => d.id).join(',') === 'engagement')
 
   // --- shape F: onboarding journey lifecycle
   const active = compositionFromMe(me(['onboarding']), {
@@ -193,6 +215,13 @@ function main() {
     requiredTotal: 0,
   })
   check('unloaded onboarding counts do not claim completion', loading.showOnboardingJourney === false)
+
+  const journeys = compositionFromMe(me(['preboarding', 'probation']))
+  check('preboarding/probation are journeys, not Home destinations', journeys.homeDestinations.length === 0)
+  check('preboarding journey is entitled without becoming a tile', journeys.showPreboardingJourney === true && !journeys.homeTiles.includes('preboarding'))
+  check('probation journey is entitled without becoming a tile', journeys.showProbationJourney === true && !journeys.homeTiles.includes('probation'))
+  check('preboarding deep link opens when entitled', canOpenPath(me(['preboarding']), '/preboarding') === true)
+  check('probation deep link is refused when unentitled', canOpenPath(me(['preboarding']), '/probation') === false)
 
   // --- Home renders one launcher, and never a second route to a tab
   check(

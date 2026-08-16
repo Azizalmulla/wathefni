@@ -1,0 +1,27 @@
+{
+  "fixture_id": "cv_bilingual_02",
+  "category": "bilingual_cv",
+  "language": "ar_en",
+  "layout": "stacked_bilingual",
+  "pdf_nature": "digital_text",
+  "pages": 1,
+  "expected_ocr_pages_1idx": [],
+  "expected_text_needles": [
+    "Hessa Al-Ali",
+    "حصة العلي",
+    "hessa.ali@example.com",
+    "+96559876543",
+    "EXPERIENCE",
+    "الخبرة العملية"
+  ],
+  "expected_fields": {
+    "full_name": "Hessa Al-Ali",
+    "full_name_ar": "حصة العلي",
+    "email": "hessa.ali@example.com",
+    "phone": "+96559876543",
+    "title": "Finance Controller / مراقبة مالية"
+  },
+  "notes": "English block then Arabic block; both embedded as real text.",
+  "sha256": "8f749173728e88914e3474039e8d839415aac4e501418e623878242047f9c8f5",
+  "bytes": 46397
+}

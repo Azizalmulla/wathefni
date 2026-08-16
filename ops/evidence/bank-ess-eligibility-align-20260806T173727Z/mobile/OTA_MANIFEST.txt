@@ -1,0 +1,6 @@
+group=388e8cf5-1d6b-4140-9c84-bfff55504928
+runtime=0.1.0
+branch=canary
+ios=019fd849-26c1-72ec-94b8-500e667e3bc0
+android=019fd849-26c1-740a-bc32-6e4a2283d429
+message=Bank ESS eligibility align me/onboarding/bank 20260806T181405Z (runtime 0.1.0)

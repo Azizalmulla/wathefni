@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Employees 360 Wave1/1B Prod Deploy Proof</title>
+<style>body{font-family:ui-sans-serif,system-ui;margin:32px;background:#0f172a;color:#e2e8f0}h1{font-size:28px}code{background:#1e293b;padding:2px 6px;border-radius:4px}.ok{color:#4ade80}.box{border:1px solid #334155;border-radius:12px;padding:16px;margin:16px 0}</style></head><body>
+<h1>Employees 360 Wave 1 + 1B — Production Deploy</h1>
+<p class="ok">Post-deploy proofs: 37/37 PASS</p>
+<div class="box"><h2>Approval policy</h2>
+<ul>
+<li>environment: <code>production</code></li>
+<li>canary_allowed: <code>false</code></li>
+<li>self_approval_allowed: <code>false</code></li>
+<li>eligible approver: Aziz Almulla (separate from Fouad)</li>
+<li>no_eligible → <code>blocked_reason=no_eligible_approver</code></li>
+</ul></div>
+<div class="box"><h2>Dashboard markers deployed</h2>
+<ul>
+<li><code>Choose approver</code></li>
+<li><code>Status change requested</code></li>
+<li><code>Waiting for approval</code></li>
+<li><code>designated_approver</code></li>
+<li><code>approval-policy</code></li>
+</ul></div>
+<div class="box"><h2>Integrity</h2>
+<p>employee_messages orphans=3 retained (P0-DUP synthetic). Null statuses preserved.</p>
+</div>
+</body></html>

@@ -1,0 +1,25 @@
+# Smoke: Phone ↔ Work email method switch without credentials.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - unsigned
+  - locale
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.methodSwitch"
+    timeout: 45000
+- tapOn:
+    id: "e2e.auth.method.workEmail"
+- assertVisible:
+    id: "e2e.auth.hr.company"
+- assertVisible:
+    id: "e2e.auth.hr.signIn"
+- takeScreenshot: unsigned-work-email
+- tapOn:
+    id: "e2e.auth.method.phone"
+- assertVisible:
+    id: "e2e.auth.employee.phone"
+- takeScreenshot: unsigned-phone

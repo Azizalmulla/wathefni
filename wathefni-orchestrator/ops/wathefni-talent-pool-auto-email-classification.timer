@@ -1,0 +1,12 @@
+[Unit]
+Description=Poll one WATHEFNI classification job every 15 seconds
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=15s
+AccuracySec=2s
+Unit=wathefni-talent-pool-auto-email-classification.service
+
+[Install]
+WantedBy=timers.target
+

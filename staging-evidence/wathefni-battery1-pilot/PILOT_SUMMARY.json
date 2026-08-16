@@ -1,0 +1,59 @@
+{
+  "pilot_battery_version_ids": {
+    "en": {
+      "battery_key": "b1_gawj_v1_en_pilot",
+      "assessment_version_id": "4960f1a0-d239-48c5-bbd8-19386c4b2587",
+      "content_sha256": "a7f27b5146755edf606889d63d6cccbb37582bd852d653234e6815a820e980d2",
+      "item_count": 25
+    },
+    "ar": {
+      "battery_key": "b1_gawj_v1_ar_pilot",
+      "assessment_version_id": "4fc699ef-883b-4a50-bd6d-bc7bf1f1de42",
+      "content_sha256": "49f7369df065b1c2ff0e974b0f58fab14b88b58499f27d74697a566ddcbe1637",
+      "item_count": 25
+    }
+  },
+  "participant_count": 16,
+  "completion_totals": {
+    "completed": 14,
+    "dropout": 2,
+    "completion_rate": 0.875,
+    "dropout_rate": 0.125
+  },
+  "en_ar_split": {
+    "en_participants": 8,
+    "ar_participants": 8,
+    "en_completed": 8,
+    "ar_completed": 6
+  },
+  "timing_metrics": {
+    "mean_completion_ms": 1265862,
+    "median_completion_ms": 1197534,
+    "mean_en_completion_ms": 1160601,
+    "mean_ar_completion_ms": 1406210,
+    "en_ar_timing_ratio": 1.212,
+    "mean_time_per_item_ms": 50881
+  },
+  "score_distribution": {
+    "n": 14,
+    "mean_percent": 76.57,
+    "median_percent": 78.0,
+    "min_percent": 64.0,
+    "max_percent": 88.0,
+    "stdev_percent": 7.23
+  },
+  "recommendation_counts": {
+    "keep": 23,
+    "revise": 1,
+    "retire": 0,
+    "collect_more_data": 1
+  },
+  "technical_defects_count": 2,
+  "rollback_global_unchanged": true,
+  "employees_created": 0,
+  "offers_created": 0,
+  "ready_for_larger_validation_pilot": true,
+  "source_manifest_sha256": "238481b1659aa80a592b6633fa08cd67f4cf43092c954afbbd05f6b6adee74bd",
+  "post_pilot_manifest_sha256": "06bb95fcc06ed347e8b6a429544de75f64628394daf21e0fc5533e48da99d681",
+  "approved_for_use": false
+}

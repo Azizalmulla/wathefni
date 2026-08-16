@@ -1,0 +1,8 @@
+52:  const [failedUploadItemId, setFailedUploadItemId] = useState<string | null>(null)
+59:  const onUploadRef = useRef<(item: OnboardingItem) => void>(() => {})
+72:      setFailedUploadItemId(null)
+97:        setFailedUploadItemId(itemId)
+104:            text: t('common.retry'),
+107:              void onUploadRef.current?.(item)
+151:    onUploadRef.current = (item) => {
+239:        setFailedUploadItemId(null)

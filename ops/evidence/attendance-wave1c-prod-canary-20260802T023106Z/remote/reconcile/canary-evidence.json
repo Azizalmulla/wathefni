@@ -1,0 +1,368 @@
+{
+  "pass": 47,
+  "fail": 0,
+  "verdict": "PASS",
+  "synthetic_ids": {
+    "employee_key": "WATHEFNI-ATTW1C-926c95ec",
+    "phone": "965524926c95",
+    "tag": "926c95ec",
+    "shift_id": "1028741b-7c8a-44bc-8204-9fd8662603c0",
+    "oshift_id": "db3ff406-d13d-49aa-a2c7-c723349d7a2c",
+    "punch_in": "fa5306ef-bb69-4cf4-bad4-dae991fe5835",
+    "projection_id": "376be87d-d4c4-4eb8-8edd-b83de124d89f",
+    "snapshot_id": "66d1c355-3ef3-48ea-a61e-63d5af6f2106"
+  },
+  "results": [
+    {
+      "label": "production database",
+      "ok": true,
+      "detail": "wathefni"
+    },
+    {
+      "label": "authority on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "companies WATHEFNI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic only on",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "store postgres",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "import still off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96550252254",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96599411617",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96597727743",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "real denied WATHEFNI-96566363363",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "hooks deny real",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "cleanup GUC absent from app.py",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "baseline 42 rows",
+      "ok": true,
+      "detail": {
+        "n": 42,
+        "demo": 42
+      }
+    },
+    {
+      "label": "synthetic allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "normal completed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "normal worked 480",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "overnight ok",
+      "ok": true,
+      "detail": 475
+    },
+    {
+      "label": "multi sessions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unpaid/paid breaks",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "worked excludes unpaid",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "restart projection",
+      "ok": true,
+      "detail": {
+        "proj": "376be87d-d4c4-4eb8-8edd-b83de124d89f",
+        "worked": 480,
+        "punches": 2
+      }
+    },
+    {
+      "label": "duplicate idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "concurrent ok",
+      "ok": true,
+      "detail": {
+        "errors": [],
+        "ids": [
+          [
+            true,
+            "c08ebcba-b8f9-4153-b118-4000bd85de96"
+          ],
+          [
+            false,
+            "c08ebcba-b8f9-4153-b118-4000bd85de96"
+          ],
+          [
+            false,
+            "c08ebcba-b8f9-4153-b118-4000bd85de96"
+          ],
+          [
+            false,
+            "c08ebcba-b8f9-4153-b118-4000bd85de96"
+          ],
+          [
+            false,
+            "c08ebcba-b8f9-4153-b118-4000bd85de96"
+          ],
+          [
+            false,
+            "c08ebcba-b8f9-4153-b118-4000bd85de96"
+          ]
+        ]
+      }
+    },
+    {
+      "label": "rebuild exact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "absence first",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "late supersedes absence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "absence loses to check-in",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction requested",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction rejected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction disputed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "correction approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "self-correction denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "leave reverse preserves correction",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "unapproved excluded",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "day approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "payroll reconcile exact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "snapshot immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "punch append-only",
+      "ok": true,
+      "detail": "attendance_punches are append-only (Wave 1B)"
+    },
+    {
+      "label": "drift detected+quarantined",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "start_date": "2026-08-28",
+        "end_date": "2026-08-29",
+        "projection_count": 2,
+        "legacy_count": 2,
+        "matched": 1,
+        "drift_count": 1,
+        "orphan_authority_count": 0,
+        "orphan_legacy_count": 0,
+        "quarantined": 1,
+        "drifts": [
+          {
+            "kind": "field_mismatch",
+            "projection_id": "8b1101b5-3da8-42a1-8869-4aa879f50302",
+            "attendance_id": "1ae7c1a5-9776-4918-9bc1-ff58f92b5ea8",
+            "employee_key": "WATHEFNI-ATTW1C-926c95ec",
+            "work_date": "2026-08-29",
+            "shift_key": "",
+            "mismatches": {
+              "status": {
+                "authority": "completed",
+                "legacy": "absent"
+              },
+              "check_in_at": {
+                "authority": "2026-08-29T09:00:00+03:00",
+                "legacy": null
+              },
+              "check_out_at": {
+                "authority": "2026-08-29T17:00:00+03:00",
+                "legacy": null
+              }
+            }
+          }
+        ],
+        "orphan_authority": [],
+        "orphan_legacy": [],
+        "silent_overwrite": false
+      }
+    },
+    {
+      "label": "matched mirror",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "company_code": "WATHEFNI",
+        "start_date": "2026-08-28",
+        "end_date": "2026-08-29",
+        "projection_count": 2,
+        "legacy_count": 2,
+        "matched": 1,
+        "drift_count": 1,
+        "orphan_authority_count": 0,
+        "orphan_legacy_count": 0,
+        "quarantined": 1,
+        "drifts": [
+          {
+            "kind": "field_mismatch",
+            "projection_id": "8b1101b5-3da8-42a1-8869-4aa879f50302",
+            "attendance_id": "1ae7c1a5-9776-4918-9bc1-ff58f92b5ea8",
+            "employee_key": "WATHEFNI-ATTW1C-926c95ec",
+            "work_date": "2026-08-29",
+            "shift_key": "",
+            "mismatches": {
+              "status": {
+                "authority": "completed",
+                "legacy": "absent"
+              },
+              "check_in_at": {
+                "authority": "2026-08-29T09:00:00+03:00",
+                "legacy": null
+              },
+              "check_out_at": {
+                "authority": "2026-08-29T17:00:00+03:00",
+                "legacy": null
+              }
+            }
+          }
+        ],
+        "orphan_authority": [],
+        "orphan_legacy": [],
+        "silent_overwrite": false
+      }
+    },
+    {
+      "label": "tenant list only synthetic key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "manager scope helper",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "demo rows untouched count",
+      "ok": true,
+      "detail": {
+        "before": 42,
+        "after": 42
+      }
+    },
+    {
+      "label": "demo fingerprint unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic punches cleaned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "synthetic projections cleaned",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "four reals still present",
+      "ok": true,
+      "detail": 4
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "9a9a11be-dc9a-4e01-a1ec-f6f98bc5e2de",
+  "androidUpdateId": "019fda5d-a312-7bf2-8c5c-bb97ab252744",
+  "iosUpdateId": "019fda5d-a312-76b0-981a-686d5eed5db8",
+  "message": "Auth Wave 2 Phase 3B: preserve nav under unlock (iOS FullWindowOverlay)",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/9a9a11be-dc9a-4e01-a1ec-f6f98bc5e2de",
+  "priorGroup": "9aa012bf-dec5-4c54-9bf0-db525484eeca"
+}

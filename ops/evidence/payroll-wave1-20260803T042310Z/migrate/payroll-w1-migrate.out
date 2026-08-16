@@ -1,0 +1,9 @@
+env staging
+wave1_version 1.0.0
+expected_db wathefni_staging
+honesty {'payment_processing': 'disabled', 'money_authority': False, 'modes': ['native', 'external', 'parallel_shadow'], 'annual_leave_eligibility_months': 6}
+connected_db wathefni_staging
+tables ['payroll_company_settings', 'payroll_compensation_components', 'payroll_compensation_contracts', 'payroll_compensation_events', 'payroll_period_events', 'payroll_periods']
+timesheet_cols ['quarantine_status', 'row_version']
+quarantine {'ok': True, 'count': 2, 'hard_deleted': False}
+MIGRATE_OK payroll_authority_wave1

@@ -1,0 +1,30 @@
+PASS EN/AR key parity for leave honesty
+PASS AR conflict copy is Arabic
+PASS AR approve label is Arabic
+PASS AR reject label is Arabic
+PASS AR observe-only caption is Arabic
+PASS EN approve is not raw action key
+PASS EN reject is not raw action key
+PASS en approve consequence localized · Approve Fouad's leave and notify the employee.
+PASS en reject consequence localized · Reject Fouad's leave and notify the employee.
+PASS en unknown consequence passthrough (no invented meaning) · Server-only custom consequence text.
+PASS en empty consequence uses generic template · Approve this leave and notify the employee.
+PASS en balance line renders numbers · Available 17.5 · current 17.5 · entitlement 30
+PASS en conflict one/many distinct · '1 scheduled shift overlaps this leave.' / '3 scheduled shifts overlap this leave.'
+PASS ar approve consequence localized · الموافقة على إجازة Fouad وإشعار الموظف.
+PASS ar reject consequence localized · رفض إجازة Fouad وإشعار الموظف.
+PASS ar unknown consequence passthrough (no invented meaning) · Server-only custom consequence text.
+PASS ar empty consequence uses generic template · الموافقة على هذه الإجازة وإشعار الموظف.
+PASS ar balance line renders numbers · المتاح 17.5 · الحالي 17.5 · الاستحقاق 30
+PASS ar conflict one/many distinct · 'وردية مجدولة واحدة تتعارض مع هذه الإجازة.' / '3 ورديات مجدولة تتعارض مع هذه الإجازة.'
+PASS composition has localizeLeaveConsequence
+PASS composition has leaveStatusTone
+PASS route maps approve/reject labels via i18n
+PASS route wires already_decided
+PASS view hides actions when not actionable
+PASS view shows observe-only caption
+PASS view uses real status tone
+PASS no raw #id chrome
+PASS cream PageScreen + HrPushedNav
+PASS no legacy plum/amber/sky stack
+hr-leave-en-ar-physical: PASS

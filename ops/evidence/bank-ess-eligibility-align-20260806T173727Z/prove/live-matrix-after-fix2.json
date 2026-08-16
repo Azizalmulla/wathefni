@@ -1,0 +1,36 @@
+{
+  "cases": [
+    {
+      "label": "disabled",
+      "expect": false,
+      "me_enabled": false,
+      "me_reason": "bank_ess_not_allowlisted",
+      "onb_bank_ess": {
+        "eligible": false,
+        "reason": "bank_ess_not_allowlisted",
+        "contract_version": "bank_ess_v1"
+      },
+      "open_bank": false,
+      "bank_http": 403,
+      "bank_error": "bank_ess_not_allowlisted",
+      "ar_ok": true,
+      "aligned": true
+    },
+    {
+      "label": "enabled",
+      "expect": true,
+      "me_enabled": true,
+      "me_reason": null,
+      "onb_bank_ess": {
+        "eligible": true,
+        "reason": null,
+        "contract_version": "bank_ess_v1"
+      },
+      "open_bank": true,
+      "bank_http": 200,
+      "bank_error": null,
+      "ar_ok": true,
+      "aligned": true
+    }
+  ]
+}

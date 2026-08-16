@@ -1,0 +1,6 @@
+PASS wave2
+PASS wave4 overlap
+PASS KW only
+PASS ess bank encrypt
+PASS ess plaintext forbid
+RESULT pass=5 fail=0

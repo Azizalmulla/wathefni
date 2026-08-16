@@ -3,8 +3,9 @@
 Pins the safety and behaviour of the client-facing activity feed over the shared
 action_results audit substrate:
 
-  - RBAC: only Owner and HR Manager hold audit.read; Team Manager, Viewer,
-    Recruiter, and Hiring Manager are denied (fail-closed).
+  - RBAC: only Company Admin (owner) and HR Admin hold audit.read; HR Manager,
+    Team Manager, Viewer, Recruiter, Hiring Manager, Interviewer, and Payroll
+    Operator are denied (fail-closed).
   - The endpoint is read-only — there is NO mutation/delete path on /dashboard/activity.
   - Company scoping: a company never sees another company's activity.
   - Redaction: returned rows are a whitelist (id/at/actor/action_type/category/
@@ -111,10 +112,11 @@ def main() -> int:
     check("endpoint excludes read/list noise (list_/answer_)", "<> 'list_'" in body and "<> 'answer_'" in body)
     check("no mutation verb on the activity route", not any(f'@app.{verb}("/dashboard/activity"' in source for verb in ("post", "put", "patch", "delete")))
 
-    # --- RBAC: only owner + hr_manager hold audit.read ------------------------
+    # --- RBAC: only Company Admin (owner) + HR Admin hold audit.read ------------
     check("owner holds audit.read", "audit.read" in app.hr_role_permissions("owner"))
-    check("hr_manager holds audit.read", "audit.read" in app.hr_role_permissions("hr_manager"))
-    for role in ("manager", "viewer", "recruiter", "hiring_manager"):
+    check("hr_admin holds audit.read", "audit.read" in app.hr_role_permissions("hr_admin"))
+    check("hr_manager is denied audit.read", "audit.read" not in app.hr_role_permissions("hr_manager"))
+    for role in ("manager", "viewer", "recruiter", "hiring_manager", "interviewer", "payroll_operator"):
         check(f"{role} is denied audit.read", "audit.read" not in app.hr_role_permissions(role))
 
     # --- pure humanization / redaction unit checks (no DB) --------------------

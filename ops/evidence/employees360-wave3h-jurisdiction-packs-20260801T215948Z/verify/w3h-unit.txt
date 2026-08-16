@@ -1,0 +1,33 @@
+PASS  schema wave3h
+PASS  lifecycle schema wave3h
+PASS  only KW verified
+PASS  reserved includes SA
+PASS  reserved includes KW domestic
+PASS  kw pack enabled
+PASS  kw pack version
+PASS  kw content hash stable
+PASS  kw hash immutable across loads
+PASS  resolve KW private
+PASS  missing category fail-closed
+PASS  missing jurisdiction fail-closed
+PASS  SA reserved not implemented
+PASS  AE unsupported fail-closed
+PASS  KW domestic reserved
+PASS  reject weaken LWD
+PASS  reject lower retention
+PASS  mandatory LWD still true
+PASS  allow raise retention
+PASS  reject money owner change
+PASS  overlay payroll owner
+PASS  overlay reinstate off
+PASS  overlay wave3h
+PASS  notice hidden by default
+PASS  notice eligible KW unlimited
+PASS  notice hidden fixed_term
+PASS  mutated copy does not alter catalog
+PASS  mutated hash differs locally
+PASS  default counsel gate off
+PASS  default jurisdiction policy_pack
+PASS  kuwait only mode removed as default
+
+31 passed, 0 failed

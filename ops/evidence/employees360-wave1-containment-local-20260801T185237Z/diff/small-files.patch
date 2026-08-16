@@ -1,0 +1,1811 @@
+diff --git a/apps/wathefni-dashboard/src/lib/api.ts b/apps/wathefni-dashboard/src/lib/api.ts
+index 6345a5f..8131d8a 100644
+--- a/apps/wathefni-dashboard/src/lib/api.ts
++++ b/apps/wathefni-dashboard/src/lib/api.ts
+@@ -4,6 +4,7 @@ import type {
+   ApplicationSummary,
+   ApplicationsResponse,
+   AssessmentAuthoringDraftsResponse,
++  AssessmentAttempt,
+   AssessmentConfigResponse,
+   AssessmentNormRecalculationResponse,
+   AssessmentsResponse,
+@@ -16,11 +17,14 @@ import type {
+   DashboardAccess,
+   DashboardAuthResponse,
+   DashboardBootstrapResponse,
++  AssistantCapabilitiesResponse,
+   DashboardChatResponse,
+   DashboardChatSession,
+   DashboardChatStoredMessage,
+   DashboardTeamResponse,
+   DashboardTeamUser,
++  EmailSendingActionResponse,
++  EmailSendingSettingsResponse,
+   EmployeeDocumentsResponse,
+   ImportBatchesResponse,
+   ImportBulkActionResponse,
+@@ -67,8 +71,6 @@ import type {
+   RankingResponse,
+   SetupReadinessResponse,
+   SummaryResponse,
+-  EmailSendingActionResponse,
+-  EmailSendingSettingsResponse
+ } from '@/types'
+ 
+ type DashboardErrorDetail = {
+@@ -160,6 +162,36 @@ export function getDashboardTeam(access: DashboardAccess) {
+   return request<DashboardTeamResponse>('/dashboard/team', access)
+ }
+ 
++export type TeamPerson = {
++  user_id: string
++  name: string
++  role: string
++  role_label?: string
++  status?: string
++  label?: string
++  purpose?: string
++}
++
++export type TeamPeopleResponse = {
++  company_code: string
++  purpose: string
++  q?: string | null
++  people: TeamPerson[]
++  unassigned_allowed?: boolean
++  directory_view?: string
++}
++
++export function getTeamPeople(
++  access: DashboardAccess,
++  params: { purpose: string; q?: string; limit?: number } = { purpose: 'recruiter' },
++) {
++  const search = new URLSearchParams()
++  search.set('purpose', params.purpose || 'recruiter')
++  if (params.q) search.set('q', params.q)
++  if (typeof params.limit === 'number') search.set('limit', String(params.limit))
++  return request<TeamPeopleResponse>(`/dashboard/team/people?${search.toString()}`, access)
++}
++
+ function activitySearchParams(filters: ActivityFilters = {}): URLSearchParams {
+   const search = new URLSearchParams()
+   if (filters.start_date) search.set('start_date', filters.start_date)
+@@ -218,25 +250,69 @@ export function linkDashboardWhatsApp(access: DashboardAccess, phone: string) {
+   })
+ }
+ 
+-export function getSummary(access: DashboardAccess) {
+-  return request<SummaryResponse>('/dashboard/prehire/summary', access)
++export function getSummary(access: DashboardAccess, init?: RequestInit) {
++  return request<SummaryResponse>('/dashboard/prehire/summary', access, init)
+ }
+ 
+-export function getPrehireWorkQueue(access: DashboardAccess, params: { limit?: number; cursor?: string } = {}) {
++export function getPrehireWorkQueue(
++  access: DashboardAccess,
++  params: { limit?: number; cursor?: string; scope?: 'mine' | 'company' | string } = {},
++  init?: RequestInit,
++) {
+   const search = new URLSearchParams()
+   search.set('limit', String(params.limit || 25))
+   if (params.cursor) search.set('cursor', params.cursor)
+-  return request<PrehireWorkQueueResponse>(`/dashboard/prehire/overview/work-queue?${search.toString()}`, access)
++  if (params.scope) search.set('scope', params.scope)
++  return request<PrehireWorkQueueResponse>(`/dashboard/prehire/overview/work-queue?${search.toString()}`, access, init)
+ }
+ 
+-export function getPrehireNextAction(access: DashboardAccess) {
+-  return request<PrehireNextAction>(`/dashboard/prehire/overview/next-action`, access)
++export function getPrehireNextAction(access: DashboardAccess, params: { scope?: 'mine' | 'company' | string } = {}) {
++  const search = new URLSearchParams()
++  if (params.scope) search.set('scope', params.scope)
++  const qs = search.toString()
++  return request<PrehireNextAction>(`/dashboard/prehire/overview/next-action${qs ? `?${qs}` : ''}`, access)
+ }
+ 
+ export function getDashboardBootstrap(access: DashboardAccess) {
+   return request<DashboardBootstrapResponse>('/dashboard/bootstrap', access)
+ }
+ 
++export function getPrehireVisibilityPolicy(access: DashboardAccess) {
++  return request<{
++    company_code: string
++    prehire_visibility_policy: string
++    allowed_policies: string[]
++    prehire_visibility_scope?: string
++    prehire_visibility_summary_company_wide?: boolean
++    prehire_visibility_oversight?: boolean
++    version?: number
++    updated_at?: string | null
++    last_updated_by?: string | null
++  }>('/dashboard/prehire/visibility-policy', access)
++}
++
++export function putPrehireVisibilityPolicy(
++  access: DashboardAccess,
++  policy: string,
++  concurrency?: { expected_version?: number | null; expected_updated_at?: string | null },
++) {
++  return request<{
++    ok: boolean
++    prehire_visibility_policy: string
++    previous?: string
++    version?: number
++    updated_at?: string | null
++    last_updated_by?: string | null
++  }>('/dashboard/prehire/visibility-policy', access, {
++    method: 'PUT',
++    body: JSON.stringify({
++      prehire_visibility_policy: policy,
++      expected_version: concurrency?.expected_version ?? undefined,
++      expected_updated_at: concurrency?.expected_updated_at ?? undefined,
++    }),
++  })
++}
++
+ export function getPrehirePositions(
+   access: DashboardAccess,
+   opts?: {
+@@ -252,6 +328,7 @@ export function getPrehirePositions(
+     has_remaining_vacancies?: boolean
+     cursor?: string
+   },
++  init?: RequestInit,
+ ) {
+   const params = new URLSearchParams()
+   if (opts?.offset) params.set('offset', String(opts.offset))
+@@ -266,7 +343,7 @@ export function getPrehirePositions(
+   if (opts?.has_remaining_vacancies) params.set('has_remaining_vacancies', 'true')
+   if (opts?.cursor) params.set('cursor', opts.cursor)
+   const qs = params.toString()
+-  return request<PositionsResponse>(`/dashboard/prehire/positions${qs ? `?${qs}` : ''}`, access)
++  return request<PositionsResponse>(`/dashboard/prehire/positions${qs ? `?${qs}` : ''}`, access, init)
+ }
+ 
+ export type JobUpsertPayload = {
+@@ -347,11 +424,21 @@ export function getSetupReadiness(access: DashboardAccess) {
+   return request<SetupReadinessResponse>('/dashboard/setup/readiness', access)
+ }
+ 
+-export function getPrehireReports(access: DashboardAccess) {
+-  return request<PrehireReportsResponse>('/dashboard/prehire/reports', access)
++export function getPrehireReports(
++  access: DashboardAccess,
++  init?: RequestInit & { locale?: string },
++) {
++  const locale = String(init?.locale || 'en')
++  const headers = init?.headers
++  const signal = init?.signal
++  return request<PrehireReportsResponse>(
++    `/dashboard/prehire/reports?locale=${encodeURIComponent(locale)}`,
++    access,
++    { headers, signal },
++  )
+ }
+ 
+-export async function downloadPrehireReport(access: DashboardAccess, type: 'candidates' | 'roles' | 'assessments' | 'interviews' | 'followups') {
++export async function downloadPrehireReport(access: DashboardAccess, type: 'candidates' | 'roles' | 'assessments' | 'interviews' | 'followups' | 'followup_delivery_history') {
+   const response = await fetch(`/dashboard/prehire/reports/export?type=${encodeURIComponent(type)}`, {
+     headers: dashboardHeaders(access),
+   })
+@@ -375,6 +462,13 @@ export function getDashboardChatSessions(access: DashboardAccess) {
+   return request<{ sessions: DashboardChatSession[] }>('/dashboard/prehire/chat/sessions', access)
+ }
+ 
++export function getAssistantCapabilities(access: DashboardAccess, locale: 'en' | 'ar' = 'en') {
++  return request<AssistantCapabilitiesResponse>(
++    `/dashboard/prehire/assistant/capabilities?locale=${encodeURIComponent(locale)}`,
++    access,
++  )
++}
++
+ export function getDashboardChatSession(access: DashboardAccess, conversationId: string) {
+   return request<{ session: DashboardChatSession; messages: DashboardChatStoredMessage[] }>(
+     `/dashboard/prehire/chat/sessions/${encodeURIComponent(conversationId)}`,
+@@ -392,12 +486,21 @@ export function startDashboardChatSession(access: DashboardAccess, currentConver
+ export async function streamDashboardChat(
+   access: DashboardAccess,
+   body: { message: string; conversation_id?: string; page?: string; selected_app_key?: string },
+-  onEvent: (event: { type: 'typing' | 'delta' | 'done' | 'error'; text?: string; message?: DashboardChatResponse | string }) => void,
++  onEvent: (event: {
++    type: 'typing' | 'delta' | 'done' | 'error' | 'progress'
++    text?: string
++    phase?: string
++    tool?: string
++    status?: string
++    message?: DashboardChatResponse | string
++  }) => void,
++  options?: { signal?: AbortSignal },
+ ) {
+   const response = await fetch('/dashboard/prehire/chat/stream', {
+     method: 'POST',
+     headers: dashboardHeaders(access, { 'Content-Type': 'application/json' }),
+     body: JSON.stringify(body),
++    signal: options?.signal,
+   })
+   if (!response.ok || !response.body) {
+     const payload = await response.json().catch(() => ({}))
+@@ -407,17 +510,28 @@ export async function streamDashboardChat(
+   const reader = response.body.getReader()
+   const decoder = new TextDecoder()
+   let buffer = ''
+-  while (true) {
+-    const { done, value } = await reader.read()
+-    if (done) break
+-    buffer += decoder.decode(value, { stream: true })
+-    const events = buffer.split('\n\n')
+-    buffer = events.pop() || ''
+-    for (const event of events) {
+-      const line = event.split('\n').find((item) => item.startsWith('data: '))
+-      if (!line) continue
+-      onEvent(JSON.parse(line.slice(6)))
++  try {
++    while (true) {
++      if (options?.signal?.aborted) {
++        await reader.cancel().catch(() => undefined)
++        throw new DOMException('Aborted', 'AbortError')
++      }
++      const { done, value } = await reader.read()
++      if (done) break
++      buffer += decoder.decode(value, { stream: true })
++      const events = buffer.split('\n\n')
++      buffer = events.pop() || ''
++      for (const event of events) {
++        const line = event.split('\n').find((item) => item.startsWith('data: '))
++        if (!line) continue
++        onEvent(JSON.parse(line.slice(6)))
++      }
++    }
++  } catch (error) {
++    if (options?.signal?.aborted || (error instanceof DOMException && error.name === 'AbortError')) {
++      throw new DOMException('Aborted', 'AbortError')
+     }
++    throw error
+   }
+ }
+ 
+@@ -432,12 +546,35 @@ export function getApplications(
+     interview_status?: string
+     follow_up?: string
+     review_status?: string
++    overview_cohort?: string
++    assessment_cohort?: string
+     activity_from?: string
+     activity_to?: string
+     sort?: string
++    view?: string
++    source_channel?: string
++    recruiter_owner?: string
++    cv_processing_state?: string
++    received_from?: string
++    received_to?: string
++    has_grounded_email?: string
++    has_grounded_phone?: string
++    fact_completeness?: string
++    department_intake_tag?: string
++    classification_career_area?: string
++    classification_likely_role?: string
++    classification_skill?: string
++    classification_industry?: string
++    classification_seniority?: string
++    classification_experience_band?: string
++    classification_node_ids?: string
++    classification_authority?: string
++    classification_confidence?: string
++    classification_include_medium_ai?: string
+     limit?: number
+     offset?: number
+   } = {},
++  init?: RequestInit,
+ ) {
+   const search = new URLSearchParams()
+   search.set('limit', String(params.limit || 50))
+@@ -450,37 +587,241 @@ export function getApplications(
+   if (params.interview_status) search.set('interview_status', params.interview_status)
+   if (params.follow_up) search.set('follow_up', params.follow_up)
+   if (params.review_status) search.set('review_status', params.review_status)
++  const cohort = params.overview_cohort || params.assessment_cohort
++  if (cohort) search.set('overview_cohort', cohort)
+   if (params.activity_from) search.set('activity_from', params.activity_from)
+   if (params.activity_to) search.set('activity_to', params.activity_to)
+   if (params.sort) search.set('sort', params.sort)
+-  return request<ApplicationsResponse>(`/dashboard/prehire/applications?${search.toString()}`, access)
++  if (params.view) search.set('view', params.view)
++  if (params.source_channel) search.set('source_channel', params.source_channel)
++  if (params.recruiter_owner) search.set('recruiter_owner', params.recruiter_owner)
++  if (params.cv_processing_state) search.set('cv_processing_state', params.cv_processing_state)
++  if (params.received_from) search.set('received_from', params.received_from)
++  if (params.received_to) search.set('received_to', params.received_to)
++  if (params.has_grounded_email) search.set('has_grounded_email', params.has_grounded_email)
++  if (params.has_grounded_phone) search.set('has_grounded_phone', params.has_grounded_phone)
++  if (params.fact_completeness) search.set('fact_completeness', params.fact_completeness)
++  if (params.department_intake_tag) search.set('department_intake_tag', params.department_intake_tag)
++  if (params.classification_career_area) search.set('classification_career_area', params.classification_career_area)
++  if (params.classification_likely_role) search.set('classification_likely_role', params.classification_likely_role)
++  if (params.classification_skill) search.set('classification_skill', params.classification_skill)
++  if (params.classification_industry) search.set('classification_industry', params.classification_industry)
++  if (params.classification_seniority) search.set('classification_seniority', params.classification_seniority)
++  if (params.classification_experience_band) {
++    search.set('classification_experience_band', params.classification_experience_band)
++  }
++  if (params.classification_node_ids) search.set('classification_node_ids', params.classification_node_ids)
++  if (params.classification_authority) search.set('classification_authority', params.classification_authority)
++  if (params.classification_confidence) search.set('classification_confidence', params.classification_confidence)
++  if (params.classification_include_medium_ai) {
++    search.set('classification_include_medium_ai', params.classification_include_medium_ai)
++  }
++  return request<ApplicationsResponse>(`/dashboard/prehire/applications?${search.toString()}`, access, init)
++}
++
++export function getCandidateProfile(access: DashboardAccess, appKey: string, init?: RequestInit) {
++  return request<import('@/types').CandidateProfileResponse>(
++    `/dashboard/prehire/applications/${encodeURIComponent(appKey)}/profile`,
++    access,
++    init,
++  )
++}
++
++export function getCandidatePersonProfile(access: DashboardAccess, appKey: string, init?: RequestInit) {
++  return request<import('@/types').CandidatePersonProfileResponse>(
++    `/dashboard/prehire/applications/${encodeURIComponent(appKey)}/person-profile`,
++    access,
++    init,
++  )
+ }
+ 
+-export function getRanking(access: DashboardAccess, params: { q?: string; position?: string }) {
++export function addCandidateToJobViaPersonProfile(
++  access: DashboardAccess,
++  appKey: string,
++  body: { position_code: string; position_title?: string; confirm: boolean },
++) {
++  return request<{ ok: boolean; app_key: string; status: string; position_code?: string | null }>(
++    `/dashboard/prehire/applications/${encodeURIComponent(appKey)}/person-profile/add-to-job`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function reviewCandidateFact(
++  access: DashboardAccess,
++  appKey: string,
++  body: {
++    action: 'confirm' | 'correct' | 'reject' | 'add' | 'supersede'
++    fact_path: string
++    new_value?: unknown
++    previous_value?: unknown
++    note?: string
++    evidence_refs?: unknown[]
++    supersedes_event_id?: string
++    preview?: boolean
++    confirm?: boolean
++  },
++) {
++  return request<{ ok: boolean; preview?: boolean; event?: Record<string, unknown>; message?: string }>(
++    `/dashboard/prehire/applications/${encodeURIComponent(appKey)}/facts/review`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function getUnifiedCandidatesFeature(access: DashboardAccess) {
++  return request<{
++    ok: boolean
++    flag: string
++    master_enabled: boolean
++    allowed_tenants: string[]
++    company_code: string | null
++    enabled_for_company: boolean
++  }>('/dashboard/prehire/candidates/feature', access)
++}
++
++export function getTalentPoolClassificationFeature(access: DashboardAccess) {
++  return request<{
++    ok: boolean
++    master_enabled: boolean
++    allowed_tenants: string[]
++    company_code: string | null
++    enabled_for_company: boolean
++    schema_enabled: boolean
++    manual_enabled: boolean
++    workers_enabled: boolean
++    ui_enabled: boolean
++    coupled_to_unified_candidates: boolean
++  }>('/dashboard/prehire/classification/feature', access)
++}
++
++export function getTalentPoolClassificationTaxonomy(access: DashboardAccess) {
++  return request<{
++    ok: boolean
++    taxonomy_version?: string
++    nodes?: Array<Record<string, unknown>>
++    tenant_nodes?: Array<Record<string, unknown>>
++    dimensions?: Array<{
++      dimension: string
++      node_type: string
++      nodes: Array<{
++        node_id: string
++        node_type?: string
++        dimension?: string
++        label_en?: string
++        label_ar?: string
++        parent_ids?: string[]
++        status?: string
++        scope?: string
++        broad?: boolean
++      }>
++    }>
++    authorities?: string[]
++    confidence_states?: string[]
++  }>('/dashboard/prehire/classification/taxonomy', access)
++}
++
++export function getApplicationClassification(
++  access: DashboardAccess,
++  appKey: string,
++  params: { runs_offset?: number; runs_limit?: number } = {},
++) {
++  const search = new URLSearchParams()
++  if (params.runs_offset != null) search.set('runs_offset', String(params.runs_offset))
++  if (params.runs_limit != null) search.set('runs_limit', String(params.runs_limit))
++  const suffix = search.toString() ? `?${search.toString()}` : ''
++  return request<{ ok: boolean; classification: Record<string, unknown> }>(
++    `/dashboard/prehire/applications/${encodeURIComponent(appKey)}/classification${suffix}`,
++    access,
++  )
++}
++
++export function reviewApplicationClassification(
++  access: DashboardAccess,
++  appKey: string,
++  body: Record<string, unknown>,
++) {
++  return request<{ ok: boolean; preview?: boolean; event?: Record<string, unknown>; message?: string }>(
++    `/dashboard/prehire/applications/${encodeURIComponent(appKey)}/classification/review`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function getCandidateSavedViews(access: DashboardAccess) {
++  return request<{ company_code: string; views: import('@/types').CandidateSavedView[] }>(
++    '/dashboard/prehire/candidates/saved-views',
++    access,
++  )
++}
++
++export function saveCandidateSavedView(
++  access: DashboardAccess,
++  body: { name: string; filters: Record<string, unknown>; view_id?: string },
++) {
++  return request<{ ok: boolean; view: import('@/types').CandidateSavedView }>(
++    '/dashboard/prehire/candidates/saved-views',
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function deleteCandidateSavedView(access: DashboardAccess, viewId: string) {
++  return request<{ ok: boolean; view_id: string }>(
++    `/dashboard/prehire/candidates/saved-views/${encodeURIComponent(viewId)}`,
++    access,
++    { method: 'DELETE' },
++  )
++}
++
++export function getRanking(
++  access: DashboardAccess,
++  params: { q?: string; position?: string; mode?: 'current' | 'latest' | 'run'; force?: boolean; locale?: string } = {},
++) {
+   const search = new URLSearchParams({ top_n: '10' })
+   if (params.q) search.set('q', params.q)
+   if (params.position) search.set('position', params.position)
++  if (params.mode) search.set('mode', params.mode)
++  if (params.force) search.set('force', 'true')
++  if (params.locale) search.set('locale', params.locale)
+   return request<RankingResponse>(`/dashboard/prehire/rank?${search.toString()}`, access)
+ }
+ 
+-export function getNotifications(access: DashboardAccess, params: { limit?: number } = {}) {
++export function getNotifications(
++  access: DashboardAccess,
++  params: { limit?: number; scope?: 'mine' | 'company' | string } = {},
++  init?: RequestInit,
++) {
+   const search = new URLSearchParams()
+   search.set('limit', String(params.limit || 25))
+-  return request<NotificationsResponse>(`/dashboard/prehire/notifications?${search.toString()}`, access)
++  if (params.scope) search.set('scope', params.scope)
++  return request<NotificationsResponse>(`/dashboard/prehire/notifications?${search.toString()}`, access, init)
+ }
+ 
+-export function getAssessments(access: DashboardAccess, params: { status?: string; position?: string; limit?: number; offset?: number } = {}) {
++export function getAssessments(
++  access: DashboardAccess,
++  params: {
++    status?: string
++    position?: string
++    limit?: number
++    offset?: number
++    needs_review?: boolean
++  } = {},
++  init?: RequestInit,
++) {
+   const search = new URLSearchParams()
+   search.set('limit', String(params.limit || 100))
+   search.set('offset', String(params.offset || 0))
+   if (params.status) search.set('status', params.status)
+   if (params.position) search.set('position', params.position)
+-  return request<AssessmentsResponse>(`/dashboard/prehire/assessments?${search.toString()}`, access)
++  if (params.needs_review) search.set('needs_review', 'true')
++  return request<AssessmentsResponse>(`/dashboard/prehire/assessments?${search.toString()}`, access, init)
+ }
+ 
+ export function getInterviews(
+   access: DashboardAccess,
+   params: { status?: string; q?: string; role?: string; date?: string; interviewer?: string; limit?: number; offset?: number } = {},
++  init?: RequestInit,
+ ) {
+   const search = new URLSearchParams()
+   search.set('limit', String(params.limit || 25))
+@@ -490,7 +831,7 @@ export function getInterviews(
+   if (params.role) search.set('role', params.role)
+   if (params.date) search.set('date', params.date)
+   if (params.interviewer) search.set('interviewer', params.interviewer)
+-  return request<InterviewsResponse>(`/dashboard/prehire/interviews?${search.toString()}`, access)
++  return request<InterviewsResponse>(`/dashboard/prehire/interviews?${search.toString()}`, access, init)
+ }
+ 
+ export function updateInterviewStatus(access: DashboardAccess, interviewId: string, status: string) {
+@@ -500,10 +841,38 @@ export function updateInterviewStatus(access: DashboardAccess, interviewId: stri
+   })
+ }
+ 
++export function interviewAssignInterviewer(access: DashboardAccess, interviewId: string, payload: Record<string, unknown>) {
++  return request<InterviewMutationResponse>(`/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/actions/assign-interviewer`, access, {
++    method: 'POST',
++    body: JSON.stringify(payload || {}),
++  })
++}
++
++export function interviewSendVideoInvitation(access: DashboardAccess, interviewId: string, payload: Record<string, unknown> = {}) {
++  return request<InterviewMutationResponse>(`/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/actions/send-video-invitation`, access, {
++    method: 'POST',
++    body: JSON.stringify(payload || {}),
++  })
++}
++
++export function interviewReschedule(access: DashboardAccess, interviewId: string, payload: Record<string, unknown>) {
++  return request<InterviewMutationResponse>(`/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/reschedule`, access, {
++    method: 'POST',
++    body: JSON.stringify(payload || {}),
++  })
++}
++
+ export function saveInterviewNotes(
+   access: DashboardAccess,
+   interviewId: string,
+-  body: { notes: string; transcript?: string; status?: string; generate_summary?: boolean },
++  body: {
++    notes: string
++    transcript?: string
++    status?: string
++    generate_summary?: boolean
++    expected_updated_at?: string | null
++    expected_version?: number | null
++  },
+ ) {
+   return request<InterviewMutationResponse>(`/dashboard/prehire/interviews/${encodeURIComponent(interviewId)}/notes`, access, {
+     method: 'POST',
+@@ -667,6 +1036,14 @@ export function recalculateAssessmentNorms(access: DashboardAccess, persist = tr
+   })
+ }
+ 
++export function getAssessmentReportPayload(access: DashboardAccess, attemptId: string, init?: RequestInit) {
++  return request<{ attempt?: AssessmentAttempt; report?: Record<string, unknown>; report_presentation?: import('@/components/assessments/AssessmentReportPage').AssessmentReportPresentation }>(
++    `/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}`,
++    access,
++    init,
++  )
++}
++
+ export async function previewAssessmentReport(access: DashboardAccess, attemptId: string) {
+   const previewWindow = window.open('about:blank', '_blank')
+   previewWindow?.document.write(
+@@ -717,6 +1094,36 @@ export async function previewCandidateCv(access: DashboardAccess, appKey: string
+   window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+ }
+ 
++export async function downloadCandidateCv(access: DashboardAccess, appKey: string, filename?: string) {
++  const response = await fetch(`/dashboard/prehire/applications/${encodeURIComponent(appKey)}/cv/preview`, {
++    headers: dashboardHeaders(access),
++  })
++  const contentType = response.headers.get('Content-Type') || ''
++  if (!response.ok) {
++    const payload = await response.json().catch(() => ({}))
++    const detail = payload?.detail || payload
++    throw new DashboardApiError(response.status, detail, 'Could not download the CV.')
++  }
++  if (contentType.includes('application/json')) {
++    const payload = (await response.json()) as { url?: string; filename?: string }
++    if (!payload.url) throw new Error('CV download URL was not returned.')
++    const anchor = document.createElement('a')
++    anchor.href = payload.url
++    anchor.download = payload.filename || filename || 'cv'
++    anchor.target = '_blank'
++    anchor.rel = 'noopener noreferrer'
++    anchor.click()
++    return
++  }
++  const blob = await response.blob()
++  const url = URL.createObjectURL(blob)
++  const anchor = document.createElement('a')
++  anchor.href = url
++  anchor.download = filename || `${appKey}-cv`
++  anchor.click()
++  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
++}
++
+ function openPreviewUrl(url: string, previewWindow: Window | null) {
+   if (previewWindow) {
+     previewWindow.location.assign(url)
+@@ -818,10 +1225,19 @@ export function cancelAssessment(access: DashboardAccess, attemptId: string, rea
+   })
+ }
+ 
+-export function reviewAssessment(access: DashboardAccess, attemptId: string, notes?: string) {
++export function reviewAssessment(
++  access: DashboardAccess,
++  attemptId: string,
++  notes?: string,
++  concurrency?: { expected_updated_at?: string | null; expected_version?: number | null },
++) {
+   return request<MutationResponse>(`/dashboard/prehire/assessments/${encodeURIComponent(attemptId)}/review`, access, {
+     method: 'POST',
+-    body: JSON.stringify({ notes: notes || null }),
++    body: JSON.stringify({
++      notes: notes || null,
++      expected_updated_at: concurrency?.expected_updated_at ?? undefined,
++      expected_version: concurrency?.expected_version ?? undefined,
++    }),
+   })
+ }
+ 
+@@ -914,6 +1330,84 @@ export async function downloadImportReport(access: DashboardAccess, batchId: str
+   URL.revokeObjectURL(url)
+ }
+ 
++export function getEmailSendingSettings(access: DashboardAccess) {
++  return request<EmailSendingSettingsResponse>('/dashboard/prehire/integrations/email', access)
++}
++
++export type IntakeAddressRow = EmailSendingSettingsResponse['intake']['addresses'][number]
++
++export type IntakeListResponse = {
++  company_code: string
++  feature: NonNullable<EmailSendingSettingsResponse['intake']['feature']>
++  addresses: IntakeAddressRow[]
++  forward_instructions_en?: string
++  forward_instructions_ar?: string
++  setup_steps_en?: string[]
++  setup_steps_ar?: string[]
++}
++
++export function listIntakeAddresses(access: DashboardAccess) {
++  return request<IntakeListResponse>('/dashboard/prehire/integrations/intake', access)
++}
++
++export function createIntakeAddress(
++  access: DashboardAccess,
++  body: {
++    local_part?: string
++    label?: string | null
++    position_code?: string | null
++    position_title?: string | null
++  } = {},
++) {
++  return request<{ ok: boolean; address: IntakeAddressRow }>('/dashboard/prehire/integrations/intake', access, {
++    method: 'POST',
++    body: JSON.stringify(body),
++  })
++}
++
++export function disableIntakeAddress(access: DashboardAccess, intakeId: string) {
++  return request<{ ok: boolean; address: IntakeAddressRow }>(
++    `/dashboard/prehire/integrations/intake/${encodeURIComponent(intakeId)}/disable`,
++    access,
++    { method: 'POST' },
++  )
++}
++
++export function rotateIntakeAddress(access: DashboardAccess, intakeId: string) {
++  return request<{ ok: boolean; previous: IntakeAddressRow; address: IntakeAddressRow }>(
++    `/dashboard/prehire/integrations/intake/${encodeURIComponent(intakeId)}/rotate`,
++    access,
++    { method: 'POST' },
++  )
++}
++
++export function updateEmailSendingSettings(
++  access: DashboardAccess,
++  body: {
++    current_sender?: string
++    outbound_mode?: string
++    display_name?: string | null
++    reply_to?: string | null
++    interview_email_when_calendar_sent?: boolean
++    allow_wathefni_emergency_fallback?: boolean
++    public_forward_address?: string | null
++    inbound_forwarding_enabled?: boolean
++    inbound_quotas?: Record<string, number>
++  },
++) {
++  return request<EmailSendingSettingsResponse>('/dashboard/prehire/integrations/email', access, {
++    method: 'PUT',
++    body: JSON.stringify(body),
++  })
++}
++
++export function emailSendingPrimaryAction(access: DashboardAccess, body: { action: 'connect' | 'verify' | 'test'; domain?: string }) {
++  return request<EmailSendingActionResponse>('/dashboard/prehire/integrations/email/action', access, {
++    method: 'POST',
++    body: JSON.stringify(body),
++  })
++}
++
+ export function getMailboxConnections(access: DashboardAccess) {
+   return request<MailboxListResponse>('/dashboard/prehire/integrations/mailbox', access)
+ }
+@@ -1020,7 +1514,15 @@ export async function importEmployees(access: DashboardAccess, body: { file: Fil
+ export function updateEmployee(
+   access: DashboardAccess,
+   employeeKey: string,
+-  body: { name?: string; phone?: string; email?: string; position_title?: string; department?: string; start_date?: string | null },
++  body: {
++    name?: string
++    phone?: string
++    email?: string
++    position_title?: string
++    department?: string
++    start_date?: string | null
++    expected_updated_at: string
++  },
+ ) {
+   return request<{ ok: boolean; status: 'updated' | 'duplicate'; employee: PosthireEmployee | null; message?: string }>(
+     `/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}`,
+@@ -1296,6 +1798,46 @@ export function getEmployeeDocuments(access: DashboardAccess, employeeKey: strin
+   return request<EmployeeDocumentsResponse>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents`, access)
+ }
+ 
++export function getEmployeeComplianceJourney(access: DashboardAccess, employeeKey: string) {
++  return request<{
++    ok: boolean
++    documents: Array<{
++      document_type: string
++      label: string
++      review_status: string
++      review_status_label: string
++      expiry_date?: string | null
++      rejection_reason?: string | null
++      ocr_proposal?: Record<string, unknown> | null
++      ocr_authoritative?: boolean
++      pending_version_id?: string | null
++      versions?: Array<Record<string, unknown>>
++    }>
++    legitimacy_note?: string
++  }>(`/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents/compliance`, access)
++}
++
++export async function reviewEmployeeDocument(
++  access: DashboardAccess,
++  employeeKey: string,
++  documentType: string,
++  body: {
++    action: 'approve' | 'reject' | 'request_reupload' | 'correct_metadata'
++    version_id?: string | null
++    reason?: string | null
++    issue_date?: string | null
++    expiry_date?: string | null
++    document_number?: string | null
++    confirm_ocr?: boolean
++  },
++) {
++  return request<{ ok: boolean; action: string; legitimacy_note?: string }>(
++    `/dashboard/posthire/employees/${encodeURIComponent(employeeKey)}/documents/${encodeURIComponent(documentType)}/review`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
+ // Upload (or replace) an employee onboarding document for a checklist item. The
+ // browser sets the multipart boundary, so we must not set Content-Type here.
+ export async function uploadEmployeeDocument(
+@@ -1398,32 +1940,504 @@ export function generateCandidateEvaluation(access: DashboardAccess, appKey: str
+   })
+ }
+ 
+-export function getEmailSendingSettings(access: DashboardAccess) {
+-  return request<EmailSendingSettingsResponse>('/dashboard/prehire/integrations/email', access)
++// --- Wathefni Calendar C1–C3 -------------------------------------------------
++
++export type CalendarEvent = {
++  event_id: string
++  company_code?: string
++  event_type?: string
++  title?: string
++  title_ar?: string
++  description?: string
++  description_ar?: string
++  status?: string
++  start_at?: string
++  end_at?: string
++  timezone?: string
++  all_day?: boolean
++  location?: string
++  meeting_url?: string
++  visibility?: string
++  sensitivity?: string
++  busy?: boolean
++  version?: number
++  updated_at?: string
++  detail_level?: 'full' | 'limited' | 'busy_only' | 'hidden' | string
++  attendees?: Array<Record<string, unknown>>
++  guests?: Array<Record<string, unknown>>
++  links?: Array<Record<string, unknown>>
++  org_scope_ids?: string[]
++  organizer_user_id?: string
++  owner_user_id?: string
++  interview_managed?: boolean
++  interview_id?: string
++  authority?: string
++  metadata?: Record<string, unknown>
++}
++
++export type CalendarEventsResponse = {
++  ok: boolean
++  company_code: string
++  scope: string
++  org_scope_id?: string | null
++  start: string
++  end: string
++  events: CalendarEvent[]
++  count: number
++  team?: {
++    show_team_switch?: boolean
++    has_team_scope?: boolean
++    has_company_oversight?: boolean
++    no_team_guidance?: boolean
++    scopes?: Array<{ org_scope_id: string; org_scope_kind?: string; label?: string | null }>
++    primary_org_scope_id?: string | null
++  }
+ }
+ 
+-export function updateEmailSendingSettings(
++export type CalendarOverviewResponse = {
++  ok: boolean
++  company_code: string
++  scope: string
++  today: string
++  month: { year: number; month: number; busy_days: string[] }
++  today_count: number
++  upcoming: CalendarEvent[]
++  upcoming_count: number
++  max_items: number
++  can_add_event: boolean
++}
++
++export type CalendarConflict = {
++  type: string
++  affected_ref?: { kind?: string; id?: string; label?: string }
++  start_at?: string
++  end_at?: string
++  severity?: string
++  blocking?: boolean
++  message?: string
++  message_ar?: string
++  attendee_role?: string
++}
++
++export function getCalendarEvents(
+   access: DashboardAccess,
+-  body: {
+-    current_sender?: string
+-    outbound_mode?: string
+-    display_name?: string | null
+-    reply_to?: string | null
+-    interview_email_when_calendar_sent?: boolean
+-    allow_wathefni_emergency_fallback?: boolean
+-    public_forward_address?: string | null
++  params: {
++    start: string
++    end: string
++    scope?: 'mine' | 'team' | 'company' | string
++    org_scope_id?: string
++    event_type?: string
++    status?: string
++    mine_only?: boolean
+   },
++  init?: RequestInit,
+ ) {
+-  return request<EmailSendingSettingsResponse>('/dashboard/prehire/integrations/email', access, {
+-    method: 'PUT',
++  const search = new URLSearchParams()
++  search.set('start', params.start)
++  search.set('end', params.end)
++  search.set('scope', params.scope || 'mine')
++  if (params.org_scope_id) search.set('org_scope_id', params.org_scope_id)
++  if (params.event_type) search.set('event_type', params.event_type)
++  if (params.status) search.set('status', params.status)
++  if (params.mine_only) search.set('mine_only', 'true')
++  return request<CalendarEventsResponse>(`/dashboard/calendar/events?${search.toString()}`, access, init)
++}
++
++export function getCalendarTeamScopes(access: DashboardAccess, init?: RequestInit) {
++  return request<{
++    ok: boolean
++    show_team_switch: boolean
++    has_team_scope: boolean
++    has_company_oversight: boolean
++    no_team_guidance: boolean
++    scopes: Array<{ org_scope_id: string; org_scope_kind?: string; label?: string | null }>
++    primary_org_scope_id?: string | null
++  }>('/dashboard/calendar/team-scopes', access, init)
++}
++
++export function getCalendarOverview(access: DashboardAccess, scope: 'mine' | 'company' = 'mine', init?: RequestInit) {
++  const search = new URLSearchParams({ scope })
++  return request<CalendarOverviewResponse>(`/dashboard/calendar/overview?${search.toString()}`, access, init)
++}
++
++export function previewCalendarConflicts(access: DashboardAccess, body: Record<string, unknown>) {
++  return request<{
++    ok: boolean
++    conflicts: CalendarConflict[]
++    blocking: CalendarConflict[]
++    warnings: CalendarConflict[]
++    blocking_count: number
++    warning_count: number
++  }>('/dashboard/calendar/conflicts/preview', access, { method: 'POST', body: JSON.stringify(body) })
++}
++
++export function getCalendarEvent(access: DashboardAccess, eventId: string, init?: RequestInit) {
++  return request<{ ok: boolean; company_code: string; event: CalendarEvent }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}`,
++    access,
++    init,
++  )
++}
++
++export function createCalendarEvent(access: DashboardAccess, body: Record<string, unknown>) {
++  return request<{ ok: boolean; company_code: string; event: CalendarEvent }>('/dashboard/calendar/events', access, {
++    method: 'POST',
+     body: JSON.stringify(body),
+   })
+ }
+ 
+-export function emailSendingPrimaryAction(access: DashboardAccess, body: { action: 'connect' | 'verify' | 'test'; domain?: string }) {
+-  return request<EmailSendingActionResponse>('/dashboard/prehire/integrations/email/action', access, {
++export function updateCalendarEvent(access: DashboardAccess, eventId: string, body: Record<string, unknown>) {
++  return request<{ ok: boolean; company_code: string; event: CalendarEvent }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}`,
++    access,
++    { method: 'PATCH', body: JSON.stringify(body) },
++  )
++}
++
++export function cancelCalendarEvent(
++  access: DashboardAccess,
++  eventId: string,
++  body: { expected_version: number; expected_updated_at?: string },
++) {
++  return request<{ ok: boolean; company_code: string; event: CalendarEvent }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}/cancel`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function rsvpCalendarEvent(
++  access: DashboardAccess,
++  eventId: string,
++  body: { rsvp_status: string; expected_rsvp_version?: number; target_user_id?: string },
++) {
++  return request<{ ok: boolean; company_code: string; event: CalendarEvent; attendee?: Record<string, unknown> }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}/rsvp`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function inviteCalendarGuest(
++  access: DashboardAccess,
++  eventId: string,
++  guestId: string,
++  body: { channel?: string } = {},
++) {
++  return request<{ ok: boolean; invite_path?: string }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}/guests/${encodeURIComponent(guestId)}/invite`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function getCalendarRescheduleRequests(
++  access: DashboardAccess,
++  params: { event_id?: string; status?: string } = {},
++  init?: RequestInit,
++) {
++  const search = new URLSearchParams()
++  if (params.event_id) search.set('event_id', params.event_id)
++  if (params.status) search.set('status', params.status)
++  const q = search.toString()
++  return request<{ ok: boolean; requests: Array<Record<string, unknown>>; count: number }>(
++    `/dashboard/calendar/reschedule-requests${q ? `?${q}` : ''}`,
++    access,
++    init,
++  )
++}
++
++export function resolveCalendarRescheduleRequest(
++  access: DashboardAccess,
++  requestId: string,
++  body: { decision: string; resolution_note?: string },
++) {
++  return request<{ ok: boolean; request: Record<string, unknown>; message?: string; safe_next_action?: string }>(
++    `/dashboard/calendar/reschedule-requests/${encodeURIComponent(requestId)}/resolve`,
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export type CalendarSyncConnection = {
++  connection_id: string
++  company_code: string
++  provider_key: string
++  mode: string
++  status: string
++  account_email?: string | null
++  external_calendar_id?: string
++  display_name?: string | null
++  sync_event_types?: string[]
++  sync_include_candidate_name?: boolean
++  with_meet_default?: boolean
++  platform_integration_id?: string | null
++  last_sync_at?: string | null
++  last_error?: string | null
++  has_credentials?: boolean
++}
++
++export type PlatformCompanyIntegration = {
++  integration_id: string
++  company_code: string
++  provider_key: string
++  status: string
++  connection_mode?: string | null
++  account_email?: string | null
++  impersonation_email?: string | null
++  external_tenant_id?: string | null
++  display_name?: string | null
++  granted_scopes?: string[]
++  capabilities?: string[]
++  implemented_capabilities?: string[]
++  reserved_capabilities_noted?: string[]
++  health?: Record<string, unknown>
++  last_error?: string | null
++  has_credentials?: boolean
++  reconnect_required?: boolean
++  credential_expires_at?: string | null
++  credential_days_remaining?: number | null
++  expiry_warning?: string | null
++}
++
++export type CalendarSyncBinding = {
++  binding_id: string
++  event_id: string
++  connection_id: string
++  provider_event_id?: string | null
++  external_html_link?: string | null
++  sync_status: string
++  last_pushed_version?: number | null
++  last_synced_at?: string | null
++  last_error?: string | null
++  provider_key?: string
++  connection_mode?: string
++  connection_status?: string
++  account_email?: string | null
++}
++
++export function getCalendarSyncConnections(access: DashboardAccess) {
++  return request<{ ok: boolean; company_code: string; connections: CalendarSyncConnection[]; count: number }>(
++    '/dashboard/calendar/sync/connections',
++    access,
++  )
++}
++
++export function getPlatformIntegrations(access: DashboardAccess) {
++  return request<{
++    ok: boolean
++    company_code: string
++    integrations: PlatformCompanyIntegration[]
++    count: number
++    registry: Record<string, unknown>
++    modes: Record<string, unknown>
++  }>('/dashboard/platform/integrations', access)
++}
++
++export function getPlatformIntegrationChecklist(
++  access: DashboardAccess,
++  providerKey: string,
++  mode: string,
++) {
++  return request<{ ok: boolean; checklist: Record<string, unknown> }>(
++    `/dashboard/platform/integrations/checklist?provider_key=${encodeURIComponent(providerKey)}&mode=${encodeURIComponent(mode)}`,
++    access,
++  )
++}
++
++export function startPlatformOAuth(
++  access: DashboardAccess,
++  body: { provider_key: 'google_workspace' | 'microsoft_365'; attach_calendar?: boolean },
++) {
++  return request<{ ok: boolean; authorize_url: string; checklist?: Record<string, unknown> }>(
++    '/dashboard/platform/integrations/oauth/start',
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function connectMicrosoftEnterprise(
++  access: DashboardAccess,
++  body: {
++    tenant_id: string
++    client_id: string
++    calendar_identity: string
++    client_secret?: string
++    certificate_pem?: string
++    certificate_thumbprint?: string
++    display_name?: string
++    credential_expires_at?: string
++    validate?: boolean
++    dry_run_accept?: boolean
++  },
++) {
++  return request<{ ok: boolean; integration: PlatformCompanyIntegration; connection?: CalendarSyncConnection; checklist?: Record<string, unknown> }>(
++    '/dashboard/platform/integrations/microsoft/enterprise',
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function connectGoogleEnterprise(
++  access: DashboardAccess,
++  body: {
++    impersonation_email: string
++    service_account_json: string
++    display_name?: string
++    validate?: boolean
++    dry_run_accept?: boolean
++  },
++) {
++  return request<{ ok: boolean; integration: PlatformCompanyIntegration; connection?: CalendarSyncConnection; checklist?: Record<string, unknown> }>(
++    '/dashboard/platform/integrations/google/enterprise',
++    access,
++    { method: 'POST', body: JSON.stringify(body) },
++  )
++}
++
++export function healthcheckPlatformIntegration(access: DashboardAccess, integrationId: string) {
++  return request<{ ok: boolean; integration: PlatformCompanyIntegration; health: Record<string, unknown> }>(
++    `/dashboard/platform/integrations/${encodeURIComponent(integrationId)}/health`,
++    access,
++    { method: 'POST', body: '{}' },
++  )
++}
++
++export function disconnectPlatformIntegration(access: DashboardAccess, integrationId: string) {
++  return request<{ ok: boolean; integration: PlatformCompanyIntegration }>(
++    `/dashboard/platform/integrations/${encodeURIComponent(integrationId)}/disconnect`,
++    access,
++    { method: 'POST', body: '{}' },
++  )
++}
++
++/** @deprecated Product UX must not paste refresh tokens — ops fallback only. */
++export function connectPlatformIntegration(
++  access: DashboardAccess,
++  body: {
++    provider_key: 'google_workspace' | 'microsoft_365'
++    account_email: string
++    refresh_token: string
++    display_name?: string
++    external_tenant_id?: string
++    attach_calendar?: boolean
++    with_meet_default?: boolean
++    external_calendar_id?: string
++  },
++) {
++  return request<{
++    ok: boolean
++    integration: PlatformCompanyIntegration
++    connection?: CalendarSyncConnection
++  }>('/dashboard/platform/integrations/connect', access, {
+     method: 'POST',
+     body: JSON.stringify(body),
+   })
+ }
+ 
++export function connectCalendarGoogleSync(
++  access: DashboardAccess,
++  body: {
++    account_email: string
++    refresh_token: string
++    external_calendar_id?: string
++    display_name?: string
++    sync_event_types?: string[]
++    sync_include_candidate_name?: boolean
++    with_meet_default?: boolean
++  },
++) {
++  return request<{ ok: boolean; connection: CalendarSyncConnection; integration?: PlatformCompanyIntegration }>(
++    '/dashboard/calendar/sync/connections/google',
++    access,
++    {
++      method: 'POST',
++      body: JSON.stringify(body),
++    },
++  )
++}
++
++export function connectCalendarMicrosoftSync(
++  access: DashboardAccess,
++  body: {
++    account_email: string
++    refresh_token: string
++    external_calendar_id?: string
++    display_name?: string
++    external_tenant_id?: string
++    with_meet_default?: boolean
++  },
++) {
++  return request<{ ok: boolean; connection: CalendarSyncConnection; integration?: PlatformCompanyIntegration }>(
++    '/dashboard/calendar/sync/connections/microsoft',
++    access,
++    {
++      method: 'POST',
++      body: JSON.stringify(body),
++    },
++  )
++}
++
++export function ensureCalendarLegacyOperatorSync(access: DashboardAccess) {
++  return request<{ ok: boolean; connection: CalendarSyncConnection }>(
++    '/dashboard/calendar/sync/connections/legacy-operator',
++    access,
++    { method: 'POST', body: '{}' },
++  )
++}
++
++export function updateCalendarSyncConnection(
++  access: DashboardAccess,
++  connectionId: string,
++  body: {
++    sync_event_types?: string[]
++    sync_include_candidate_name?: boolean
++    external_calendar_id?: string
++    with_meet_default?: boolean
++    display_name?: string
++  },
++) {
++  return request<{ ok: boolean; connection: CalendarSyncConnection }>(
++    `/dashboard/calendar/sync/connections/${encodeURIComponent(connectionId)}`,
++    access,
++    { method: 'PATCH', body: JSON.stringify(body) },
++  )
++}
++
++export function disconnectCalendarSync(access: DashboardAccess, connectionId: string) {
++  return request<{ ok: boolean; connection: CalendarSyncConnection }>(
++    `/dashboard/calendar/sync/connections/${encodeURIComponent(connectionId)}/disconnect`,
++    access,
++    { method: 'POST', body: '{}' },
++  )
++}
++
++export function reconnectCalendarSync(access: DashboardAccess, connectionId: string, refreshToken?: string) {
++  return request<{ ok: boolean; connection: CalendarSyncConnection; repair?: Record<string, unknown> }>(
++    `/dashboard/calendar/sync/connections/${encodeURIComponent(connectionId)}/reconnect`,
++    access,
++    { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken || null }) },
++  )
++}
++
++export function getCalendarEventSync(access: DashboardAccess, eventId: string, init?: RequestInit) {
++  return request<{
++    ok: boolean
++    event_id: string
++    detail?: 'full' | 'status'
++    customer_status?: 'synced' | 'pending' | 'unavailable' | null
++    bindings: CalendarSyncBinding[]
++  }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}/sync`,
++    access,
++    init,
++  )
++}
++
++export function retryCalendarEventSync(access: DashboardAccess, eventId: string) {
++  return request<{ ok: boolean; enqueued?: number }>(
++    `/dashboard/calendar/events/${encodeURIComponent(eventId)}/sync/retry`,
++    access,
++    { method: 'POST', body: '{}' },
++  )
++}
+diff --git a/apps/wathefni-dashboard/src/posthire/PostHire.tsx b/apps/wathefni-dashboard/src/posthire/PostHire.tsx
+index 11ee244..67c7253 100644
+--- a/apps/wathefni-dashboard/src/posthire/PostHire.tsx
++++ b/apps/wathefni-dashboard/src/posthire/PostHire.tsx
+@@ -21,7 +21,7 @@ import {
+   Upload,
+   UserRound,
+ } from 'lucide-react'
+-import { type ChangeEvent, Fragment, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
++import { type ChangeEvent, Fragment, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+ 
+ import { Badge } from '@/components/ui/badge'
+ import { Button } from '@/components/ui/button'
+@@ -57,6 +57,7 @@ import {
+   getPosthireShifts,
+   openEmployeeDocument,
+   resolveHrTask,
++  reviewEmployeeDocument,
+   runPosthireAction,
+   uploadEmployeeDocument,
+ } from '@/lib/api'
+@@ -108,7 +109,16 @@ export type PostHireModulePage =
+ export type NoticeFn = (message: string, tone?: 'success' | 'error' | 'info') => void
+ 
+ const MAX_EMPLOYEE_DOC_BYTES = 15 * 1024 * 1024
+-const SENSITIVE_DOC_KEYS = new Set(['civil_id', 'passport', 'residency', 'work_permit', 'medical', 'personal_photo', 'iqama'])
++const SENSITIVE_DOC_KEYS = new Set([
++  'civil_id',
++  'passport',
++  'residence',
++  'residency',
++  'residency_iqama',
++  'work_permit',
++  'medical',
++  'personal_photo',
++])
+ 
+ type PostHireProps = {
+   page: PostHireModulePage
+@@ -132,7 +142,7 @@ function isSensitiveIdentityDocument(itemId: string, label?: string | null): boo
+   const key = itemId.trim().toLowerCase().replace(/[\s-]+/g, '_')
+   if (SENSITIVE_DOC_KEYS.has(key)) return true
+   const text = String(label || '').toLowerCase()
+-  return /\bcivil id\b|\bpassport\b|\bresidency\b|\biqama\b|\bwork permit\b|\bmedical\b/.test(text)
++  return /\bcivil id\b|\bpassport\b|\bresidence\b|\bresidency\b|\bwork permit\b|\bmedical\b/.test(text)
+ }
+ 
+ // HR-facing copy for the error codes the post-hire backend can return, so we
+@@ -383,13 +393,18 @@ function useModuleData<T>(loader: () => Promise<T>, onAccessIssue?: (issue: Acce
+   const [data, setData] = useState<T | null>(null)
+   const [refreshing, setRefreshing] = useState(true)
+   const [error, setError] = useState<string | null>(null)
++  const requestIdRef = useRef(0)
+ 
+   const reload = useCallback(async () => {
++    const requestId = ++requestIdRef.current
+     setRefreshing(true)
+     setError(null)
+     try {
+-      setData(await loader())
++      const next = await loader()
++      if (requestId !== requestIdRef.current) return
++      setData(next)
+     } catch (err) {
++      if (requestId !== requestIdRef.current) return
+       const issue = accessIssueFromError(err)
+       if (issue) {
+         onAccessIssue?.(issue)
+@@ -397,17 +412,20 @@ function useModuleData<T>(loader: () => Promise<T>, onAccessIssue?: (issue: Acce
+       }
+       setError(friendlyError(err, 'We couldn’t load this section right now.'))
+     } finally {
+-      setRefreshing(false)
++      if (requestId === requestIdRef.current) setRefreshing(false)
+     }
+   }, [loader, onAccessIssue])
+ 
+   useEffect(() => {
++    // Param/view changes get a new loader identity — clear stale rows so the
++    // skeleton shows instead of the previous filter's content.
++    setData(null)
++    setError(null)
+     void reload()
+   }, [reload])
+ 
+-  // `loading` is the first-load skeleton only (no data yet). Background
+-  // refreshes keep the current data on screen so a single action never blanks
+-  // the whole page.
++  // `loading` is the first-load / param-change skeleton (no matching data yet).
++  // Soft refreshes call reload() without changing loader, so data stays painted.
+   const loading = refreshing && data === null
+   return { data, loading, refreshing, error, reload }
+ }
+@@ -678,6 +696,7 @@ function EditEmployeeModal({ access, employee, onClose, onNotice, onSaved }: {
+         position_title: title.trim(),
+         department: department.trim(),
+         start_date: startDate || null,
++        expected_updated_at: String(employee.updated_at || ''),
+       })
+       if (res.ok && res.status === 'updated') {
+         onNotice(`${name.trim()}'s details were updated.`, 'success')
+@@ -1619,7 +1638,6 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
+                     <ul className="space-y-2 text-[13px]">
+                       {sections.compliance.documents.map((doc, idx) => {
+                         const remindKey = `profile-remind:${doc.document_type || idx}`
+-                        const reviewKey = `profile-review:${doc.document_type || idx}`
+                         const args = { employee_name: emp.name, document_type: doc.document_type }
+                         return (
+                           <li key={doc.document_type || idx} className="flex flex-wrap items-center justify-between gap-2">
+@@ -1632,10 +1650,18 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
+                             </span>
+                             <span className="flex items-center gap-1.5">
+                               <Badge tone={doc.tone}>{doc.status_label}</Badge>
+-                              {canComplianceManage && doc.status === 'needs_review' ? (
+-                                <Button variant="ghost" size="sm" disabled={action.busy} onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey, confirm: { title: 'Mark document as reviewed?', body: `${doc.document_label} for ${emp.name} will be marked as reviewed and cleared from the needs-review list.`, confirmLabel: 'Mark reviewed' } })}>
+-                                  {action.runningKey === reviewKey ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mark reviewed'}
+-                                </Button>
++                              {canComplianceManage && doc.document_type ? (
++                                <DocumentHrReviewButtons
++                                  access={access}
++                                  employeeKey={emp.employee_key}
++                                  documentType={doc.document_type}
++                                  documentLabel={doc.document_label}
++                                  employeeName={emp.name}
++                                  showApprove={doc.status === 'needs_review'}
++                                  onDone={(message) => { onNotice(message, 'success'); void reload() }}
++                                  onError={(message) => onNotice(message, 'error')}
++                                  onAccessIssue={onAccessIssue}
++                                />
+                               ) : null}
+                               {canComplianceManage ? (
+                                 <Button
+@@ -1920,6 +1946,112 @@ function DocumentActions({
+   )
+ }
+ 
++function DocumentHrReviewButtons({
++  access,
++  employeeKey,
++  documentType,
++  documentLabel,
++  employeeName,
++  showApprove,
++  onDone,
++  onError,
++  onAccessIssue,
++}: {
++  access: DashboardAccess
++  employeeKey: string
++  documentType: string
++  documentLabel?: string | null
++  employeeName?: string | null
++  showApprove?: boolean
++  onDone: (message: string) => void
++  onError: (message: string) => void
++  onAccessIssue?: (issue: AccessIssue) => void
++}) {
++  const confirm = useConfirm()
++  const [busy, setBusy] = useState(false)
++  const label = documentLabel || titleCase(documentType)
++  const who = employeeName || 'this employee'
++  const run = async (action: 'approve' | 'reject' | 'request_reupload' | 'correct_metadata', extra: Record<string, string | boolean | null> = {}) => {
++    setBusy(true)
++    try {
++      await reviewEmployeeDocument(access, employeeKey, documentType, { action, ...extra })
++      onDone(
++        action === 'approve'
++          ? 'Marked as HR reviewed (not government verified).'
++          : action === 'correct_metadata'
++            ? 'Document metadata updated.'
++            : 'Rejected — re-upload required.',
++      )
++    } catch (err) {
++      const issue = accessIssueFromError(err)
++      if (issue) {
++        onAccessIssue?.(issue)
++        return
++      }
++      onError(friendlyError(err, 'We could not update that document review.'))
++    } finally {
++      setBusy(false)
++    }
++  }
++  return (
++    <span className="flex flex-wrap items-center gap-1">
++      {showApprove ? (
++        <Button
++          variant="ghost"
++          size="sm"
++          disabled={busy}
++          onClick={async () => {
++            if (!(await confirm({
++              title: 'Mark as HR reviewed?',
++              body: `${label} for ${who} will be marked HR reviewed. This confirms authorized HR reviewed the uploaded evidence — it is not PACI, MOI, or PAM verification.`,
++              confirmLabel: 'HR reviewed',
++            }))) return
++            await run('approve')
++          }}
++        >
++          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'HR reviewed'}
++        </Button>
++      ) : null}
++      <Button
++        variant="ghost"
++        size="sm"
++        disabled={busy}
++        onClick={async () => {
++          const reason = window.prompt(`Reason for rejecting ${label} (re-upload required):`)
++          if (!reason?.trim()) return
++          if (!(await confirm({
++            title: 'Reject — re-upload required?',
++            body: `The pending upload for ${label} will be rejected. Any previously HR-reviewed version stays current.`,
++            confirmLabel: 'Reject',
++            destructive: true,
++          }))) return
++          await run('reject', { reason: reason.trim() })
++        }}
++      >
++        Reject
++      </Button>
++      <Button
++        variant="ghost"
++        size="sm"
++        disabled={busy}
++        onClick={async () => {
++          const expiry = window.prompt(`Enter or correct expiry date for ${label} (YYYY-MM-DD). Leave blank to skip:`)
++          const issue = window.prompt(`Enter or correct issue date for ${label} (YYYY-MM-DD). Leave blank to skip:`)
++          const reason = window.prompt('Reason for metadata correction (optional):') || ''
++          if (!expiry?.trim() && !issue?.trim()) return
++          await run('correct_metadata', {
++            expiry_date: expiry?.trim() || null,
++            issue_date: issue?.trim() || null,
++            reason: reason.trim() || null,
++          })
++        }}
++      >
++        Enter dates
++      </Button>
++    </span>
++  )
++}
++
+ function DocumentUploadButton({
+   access,
+   employeeKey,
+@@ -1956,7 +2088,7 @@ function DocumentUploadButton({
+     if (hasFile && isSensitiveIdentityDocument(itemId, documentLabel)) {
+       const ok = await confirm({
+         title: 'Replace this document?',
+-        body: `The new file will replace the current ${label}. The previous file will no longer be shown here.`,
++        body: `The new file will be stored as a pending version of ${label} for HR review. The prior HR-reviewed file stays current until the replacement is approved. This is not government verification.`,
+         confirmLabel: 'Replace document',
+         destructive: true,
+       })
+@@ -4789,7 +4921,6 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }:
+                       {documents.map((doc, idx) => {
+                         const rowKey = `${doc.employee_key}-${doc.document_type}-${idx}`
+                         const remindKey = `remind:${doc.employee_key}:${doc.document_type}`
+-                        const reviewKey = `review:${doc.employee_key}:${doc.document_type}`
+                         const args = { employee_name: doc.employee_name, document_type: doc.document_type }
+                         return (
+                           <tr key={rowKey} className="hover:bg-white/45">
+@@ -4822,21 +4953,18 @@ function CompliancePage({ access, permissions, role, onNotice, onAccessIssue }:
+                                     compact
+                                   />
+                                 ) : null}
+-                                {canManage && doc.status === 'needs_review' ? (
+-                                  <Button
+-                                    variant="ghost"
+-                                    size="sm"
+-                                    disabled={action.busy || bulkBusy}
+-                                    onClick={() => action.run('compliance_mark_reviewed', args, { key: reviewKey, confirm: { title: 'Mark document as reviewed?', body: `${doc.document_label} for ${doc.employee_name} will be marked as reviewed and cleared from the needs-review list.`, confirmLabel: 'Mark reviewed' } })}
+-                                  >
+-                                    {action.runningKey === reviewKey ? (
+-                                      <>
+-                                        <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+-                                      </>
+-                                    ) : (
+-                                      'Mark reviewed'
+-                                    )}
+-                                  </Button>
++                                {canManage && doc.document_type ? (
++                                  <DocumentHrReviewButtons
++                                    access={access}
++                                    employeeKey={doc.employee_key}
++                                    documentType={doc.document_type}
++                                    documentLabel={doc.document_label}
++                                    employeeName={doc.employee_name}
++                                    showApprove={doc.status === 'needs_review'}
++                                    onDone={(message) => { onNotice(message, 'success'); void reload() }}
++                                    onError={(message) => onNotice(message, 'error')}
++                                    onAccessIssue={onAccessIssue}
++                                  />
+                                 ) : null}
+                                 {canManage && doc.status !== 'valid' ? (
+                                   <Button
+@@ -5130,8 +5258,12 @@ export function PostHireDeliveryCenter({ access, permissions, role, onNotice, on
+ function DeliveryStatusStrip({ access, onAccessIssue, onOpenNotifications }: Pick<PostHireProps, 'access' | 'onAccessIssue' | 'onOpenNotifications'>) {
+   const tasksLoader = useCallback(() => getHrTasks(access, 'open'), [access])
+   const followUpLoader = useCallback(() => getOutboundNeedsFollowUp(access), [access])
+-  const { data: tasksData, error: tasksError } = useModuleData<HrTasksResponse>(tasksLoader, onAccessIssue)
+-  const { data: followUpData, error: followUpError } = useModuleData<OutboundNeedsFollowUpResponse>(followUpLoader, onAccessIssue)
++  const { data: tasksData, error: tasksError, loading: tasksLoading } = useModuleData<HrTasksResponse>(tasksLoader, onAccessIssue)
++  const { data: followUpData, error: followUpError, loading: followUpLoading } = useModuleData<OutboundNeedsFollowUpResponse>(followUpLoader, onAccessIssue)
++
++  // Wait until both queries settle before mounting — avoids a late strip inserting
++  // above content when delivery is dirty (clean workspaces stay null→null).
++  if (tasksLoading || followUpLoading) return null
+ 
+   // Either endpoint can 403 on workspaces without post-hire read access; treat
+   // that as "nothing to surface" rather than an error.
+diff --git a/wathefni-orchestrator/hire_operations.py b/wathefni-orchestrator/hire_operations.py
+index c300d3d..6e5825c 100644
+--- a/wathefni-orchestrator/hire_operations.py
++++ b/wathefni-orchestrator/hire_operations.py
+@@ -203,21 +203,31 @@ def _employee_transaction(
+                 "employee_key": operation.get("employee_key"),
+             }
+         company = str(hired.get("company_code") or "").upper()
+-        phone = legacy.digits(hired.get("phone"))
++        phone = legacy.canonical_employee_phone(hired.get("phone"))
+         if not company or not phone:
+             return {"ok": False, "error": "candidate_identity_incomplete"}
++        aliases = sorted(legacy.phone_identity_candidates(phone))
++        alias_keys = [f"{company}-{alias}" for alias in aliases]
+         cur.execute("SELECT * FROM candidates WHERE phone=%s LIMIT 1", (phone,))
+         candidate_row = cur.fetchone()
++        if not candidate_row and aliases:
++            # Alias-aware candidate lookup for local/965 form mismatches.
++            cur.execute("SELECT * FROM candidates WHERE phone = ANY(%s) LIMIT 1", (aliases,))
++            candidate_row = cur.fetchone()
+         candidate = dict(candidate_row) if candidate_row else {}
+         employee_key = f"{company}-{phone}"
+         cur.execute(
+             """
+             SELECT * FROM employees
+-            WHERE company_code=%s AND (app_key=%s OR employee_key=%s)
++            WHERE company_code=%s AND (
++              app_key=%s
++              OR employee_key = ANY(%s)
++              OR phone = ANY(%s)
++            )
+             ORDER BY CASE WHEN app_key=%s THEN 0 ELSE 1 END
+             FOR UPDATE
+             """,
+-            (company, hired["app_key"], employee_key, hired["app_key"]),
++            (company, hired["app_key"], alias_keys, aliases, hired["app_key"]),
+         )
+         matches = [dict(item) for item in (cur.fetchall() or [])]
+         linked = [item for item in matches if str(item.get("app_key") or "") == str(hired["app_key"])]
+@@ -239,11 +249,12 @@ def _employee_transaction(
+                 UPDATE employees
+                 SET app_key=%s, name=COALESCE(NULLIF(name,''),%s),
+                     email=COALESCE(email,%s), position_title=COALESCE(position_title,%s),
++                    phone=%s,
+                     updated_at=now()
+                 WHERE employee_key=%s AND company_code=%s
+                 RETURNING *
+                 """,
+-                (hired["app_key"], name, email, position, employee["employee_key"], company),
++                (hired["app_key"], name, email, position, phone, employee["employee_key"], company),
+             )
+             employee = dict(cur.fetchone())
+         else:
+@@ -268,8 +279,42 @@ def _employee_transaction(
+                 ),
+             )
+             employee = dict(cur.fetchone())
++        # Kuwait first-client foundation: one immutable employment-applicability
++        # snapshot in the same TX as the employee row (no duplicate on replay).
++        try:
++            import kuwait_first_client_foundation as _kw_foundation
++
++            _kw_foundation.ensure_foundation_schema(cur)
++            snap = _kw_foundation.create_applicability_snapshot_on_cur(
++                legacy,
++                cur,
++                company_code=company,
++                employee_key=str(employee["employee_key"]),
++                app_key=str(hired["app_key"]),
++                hire_operation_id=str(operation_id),
++                hire_operation=operation,
++                actor_user_id=str(operation.get("actor_user_id") or "") or None,
++            )
++            result_snapshot_id = str((snap.get("snapshot") or {}).get("snapshot_id") or "")
++        except Exception as exc:
++            return {"ok": False, "error": "employment_applicability_snapshot_failed", "detail": f"{type(exc).__name__}:{exc}"}
++        # Compliance seed respects employee category when already known; otherwise
++        # nationals-safe defaults (no residence/work_permit required yet).
++        category = "unspecified"
++        try:
++            cur.execute(
++                "SELECT employee_category FROM employee_identity WHERE company_code=%s AND employee_key=%s",
++                (company, employee["employee_key"]),
++            )
++            idrow = cur.fetchone()
++            if idrow:
++                category = str(idrow.get("employee_category") or "unspecified")
++        except Exception:
++            category = "unspecified"
+         if hasattr(legacy, "_seed_employee_compliance_documents"):
+-            legacy._seed_employee_compliance_documents(cur, company, employee["employee_key"])
++            legacy._seed_employee_compliance_documents(
++                cur, company, employee["employee_key"], employee_category=category
++            )
+         if hasattr(legacy, "onboarding_seed_enabled") and legacy.onboarding_seed_enabled() and hasattr(legacy, "seed_onboarding_items"):
+             legacy.seed_onboarding_items(cur, employee)
+         cur.execute(
+@@ -288,6 +333,7 @@ def _employee_transaction(
+             "operation_id": operation_id,
+             "employee_key": employee["employee_key"],
+             "application_app_key": hired["app_key"],
++            "employment_applicability_snapshot_id": locals().get("result_snapshot_id") or "",
+         }
+         cur.execute(
+             """
+diff --git a/wathefni-orchestrator/smoke-test-employee-lifecycle.py b/wathefni-orchestrator/smoke-test-employee-lifecycle.py
+index 28ac1fb..d247357 100644
+--- a/wathefni-orchestrator/smoke-test-employee-lifecycle.py
++++ b/wathefni-orchestrator/smoke-test-employee-lifecycle.py
+@@ -20,6 +20,7 @@ Run against a DB (staging): python3 smoke-test-employee-lifecycle.py
+ 
+ from __future__ import annotations
+ 
++import os
+ import sys
+ import uuid
+ from pathlib import Path
+@@ -40,6 +41,9 @@ def check(label: str, condition: bool) -> None:
+ 
+ def main() -> int:
+     print("    employee lifecycle — edit + mark as left + reactivate, RBAC + scope + audit")
++    # Wave 1 canary is fail-closed outside allowlisted envs; default local smoke
++    # to a non-production env so status self-approval still exercises the path.
++    os.environ.setdefault("WATHEFNI_ENV", "test")
+     sys.path.insert(0, str(Path(__file__).resolve().parent))
+     try:
+         import app
+@@ -194,11 +198,27 @@ def main() -> int:
+ 
+         # --- PATCH endpoint: audit + RBAC --------------------------------
+         audits.clear()
+-        resp = app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="Lead"), context=owner)
++        with app.db_connect() as conn:
++            with conn.cursor() as cur:
++                cur.execute("SELECT updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
++                patch_version = dict(cur.fetchone())["updated_at"]
++        resp = app.dashboard_posthire_update_employee(
++            employee_key=key_a,
++            request=app.DashboardEmployeeUpdate(position_title="Lead", expected_updated_at=patch_version),
++            context=owner,
++        )
+         check("PATCH endpoint returns ok", bool(resp.get("ok")))
+         check("edit recorded an 'employee_updated' audit", any(a["action_type"] == "employee_updated" for a in audits))
+         try:
+-            app.dashboard_posthire_update_employee(employee_key=key_a, request=app.DashboardEmployeeUpdate(position_title="X"), context=ctx(["attendance.read"], role="viewer"))
++            with app.db_connect() as conn:
++                with conn.cursor() as cur:
++                    cur.execute("SELECT updated_at FROM employees WHERE company_code=%s AND employee_key=%s", (company, key_a))
++                    denied_version = dict(cur.fetchone())["updated_at"]
++            app.dashboard_posthire_update_employee(
++                employee_key=key_a,
++                request=app.DashboardEmployeeUpdate(position_title="X", expected_updated_at=denied_version),
++                context=ctx(["attendance.read"], role="viewer"),
++            )
+             check("role without employees.manage cannot edit", False)
+         except app.HTTPException as exc:
+             check("role without employees.manage cannot edit", exc.status_code in (401, 403))

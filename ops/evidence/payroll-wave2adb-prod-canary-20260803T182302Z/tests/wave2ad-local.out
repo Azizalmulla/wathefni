@@ -1,0 +1,18 @@
+PASS  payment_processing disabled
+PASS  money_authority external
+PASS  vendor unclaimed
+PASS  no AI
+PASS  wave2a contracts unchanged flag
+PASS  operability version
+PASS  package includes contracts
+PASS  package excludes attendance live
+PASS  attendance not packaged flag
+PASS  export csv headers present
+PASS  import csv headers present
+PASS  rollback concurrency required
+PASS  rollback passes expected_row_version
+PASS  quarantine acknowledge route
+PASS  acknowledge does not admit money
+PASS  db path skipped (no postgres env)
+
+16 passed, 0 failed

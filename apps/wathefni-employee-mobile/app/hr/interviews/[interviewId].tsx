@@ -1,0 +1,1 @@
+export { InterviewDetailRoute as default } from '@hr/features/operations/routes'

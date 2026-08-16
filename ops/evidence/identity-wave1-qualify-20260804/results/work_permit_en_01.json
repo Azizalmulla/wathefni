@@ -1,0 +1,375 @@
+{
+  "id": "work_permit_en_01",
+  "label": {
+    "document_type": "work_permit",
+    "document_number": "WP-445566",
+    "full_name_ar": null,
+    "full_name_en": "JUAN CARLOS MENDOZA",
+    "nationality": "Filipino",
+    "date_of_birth": "1990-09-30",
+    "issue_date": "2024-06-01",
+    "expiry_date": "2025-05-31",
+    "employer_or_sponsor": "AL MURQAB SERVICES",
+    "side": "single",
+    "lang": "english",
+    "variant": "scan",
+    "document_relationship": "standalone"
+  },
+  "mistral": {
+    "extraction_status": "extracted",
+    "extraction_error": null,
+    "confidence": 1.0,
+    "provider": "mistral",
+    "model": "mistral-ocr-4-0",
+    "cost_usd": 0.004,
+    "latency_ms": 2279,
+    "authoritative": false,
+    "hr_confirmation_required": true,
+    "validation": {
+      "ok": true,
+      "issues": [],
+      "has_issue_date": true,
+      "has_expiry_date": true,
+      "has_dob": true
+    },
+    "duplicate_keys": {
+      "content_sha256": "cf699770d33043f69655448b41667b60e3d3ba52bba22d5369980a3c1851f922",
+      "identifier_key": "work_permit:wp-445566"
+    },
+    "fields": {
+      "document_type": {
+        "value": "work_permit",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "side": {
+        "value": "single",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_relationship": {
+        "value": "standalone",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_ar": {
+        "value": null,
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name_en": {
+        "value": "JUAN CARLOS MENDOZA",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "document_number": {
+        "value": "WP-445566",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "nationality": {
+        "value": "Filipino",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "date_of_birth": {
+        "value": "1990-09-30",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issue_date": {
+        "value": "2024-06-01",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "expiry_date": {
+        "value": "2025-05-31",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "employer_or_sponsor": {
+        "value": "AL MURQAB SERVICES",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "full_name": {
+        "value": "JUAN CARLOS MENDOZA",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      },
+      "issued_date": {
+        "value": "2024-06-01",
+        "confidence": 1.0,
+        "provenance": {
+          "source": "mistral_document_ai",
+          "extractor": "identity_mistral_document_ai",
+          "contract": "identity-document-extraction-v1",
+          "page": null,
+          "authoritative": false,
+          "hr_confirmed": false
+        }
+      }
+    },
+    "flat_fields": {
+      "document_type": "work_permit",
+      "document_number": "WP-445566",
+      "full_name_ar": null,
+      "full_name_en": "JUAN CARLOS MENDOZA",
+      "nationality": "Filipino",
+      "date_of_birth": "1990-09-30",
+      "issue_date": "2024-06-01",
+      "expiry_date": "2025-05-31",
+      "employer_or_sponsor": "AL MURQAB SERVICES",
+      "side": "single",
+      "full_name": "JUAN CARLOS MENDOZA"
+    },
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 9,
+      "scored": 9,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": null,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    },
+    "envelope_contract": "document_envelope@1",
+    "attempts": [
+      {
+        "attempt": 1,
+        "ok": true,
+        "latency_ms": 2279
+      }
+    ]
+  },
+  "gpt": {
+    "ok": true,
+    "extraction_status": "extracted",
+    "confidence": 0.99,
+    "provider": "gpt",
+    "model": "gpt-5.6-terra",
+    "cost_usd": 0.003733,
+    "latency_ms": 2926,
+    "fields": {
+      "document_type": "work_permit",
+      "document_number": "WP-445566",
+      "full_name_ar": null,
+      "full_name_en": "JUAN CARLOS MENDOZA",
+      "nationality": "Filipino",
+      "date_of_birth": "1990-09-30",
+      "issue_date": "2024-06-01",
+      "expiry_date": "2025-05-31",
+      "employer_or_sponsor": "AL MURQAB SERVICES",
+      "side": "single",
+      "full_name": "JUAN CARLOS MENDOZA"
+    },
+    "authoritative": false,
+    "raw": {
+      "document_type": "work_permit",
+      "document_number": "WP-445566",
+      "issued_date": "2024-06-01",
+      "expiry_date": "2025-05-31",
+      "nationality": "Filipino",
+      "full_name": "JUAN CARLOS MENDOZA",
+      "full_name_ar": null,
+      "full_name_en": "JUAN CARLOS MENDOZA",
+      "side": "single",
+      "employer_or_sponsor": "AL MURQAB SERVICES",
+      "date_of_birth": "1990-09-30",
+      "confidence": 0.99,
+      "reason": "Work permit details clearly visible"
+    },
+    "usage": {
+      "input_tokens": 1021,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 118,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "total_tokens": 1139
+    },
+    "api": "openai-responses",
+    "temperature_omitted_for_terra": true,
+    "eval": {
+      "field_accuracy": 1.0,
+      "matches": 9,
+      "scored": 9,
+      "invented": 0,
+      "missing": 0,
+      "incorrect": 0,
+      "arabic_ok": null,
+      "per_field": {
+        "document_type": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "document_number": {
+          "match": true,
+          "kind": "exact"
+        },
+        "full_name_ar": {
+          "match": true,
+          "kind": "both_missing"
+        },
+        "full_name_en": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "nationality": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "date_of_birth": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "issue_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "expiry_date": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "employer_or_sponsor": {
+          "match": true,
+          "kind": "fuzzy"
+        },
+        "side": {
+          "match": true,
+          "kind": "fuzzy"
+        }
+      },
+      "hr_review_burden": 0
+    }
+  }
+}

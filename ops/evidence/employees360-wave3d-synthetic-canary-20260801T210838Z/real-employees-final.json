@@ -1,0 +1,30 @@
+{
+  "real_employees": [
+    {
+      "employee_key": "WATHEFNI-96550252254",
+      "phone": "96550252254",
+      "name": "Talal Fadhli",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96566363363",
+      "phone": "96566363363",
+      "name": "Fouad Burhamad",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96597727743",
+      "phone": "96597727743",
+      "name": "mohammad alqattan",
+      "employment_status": "active"
+    },
+    {
+      "employee_key": "WATHEFNI-96599411617",
+      "phone": "96599411617",
+      "name": "Brian Saleh",
+      "employment_status": "active"
+    }
+  ],
+  "all_active": true,
+  "synthetic_hub_leftover": 1
+}

@@ -1,0 +1,28 @@
+{
+  "ok": false,
+  "status": "needs_confirmation",
+  "confirmation": {
+    "confirmation_id": "c6b9d2f5-0e05-4f2b-a959-4fbced7a6f68",
+    "confirmation_hash": "52d6c4a416c748de32b58baccc8787374e4a90e700cb88aebf3336f8d7c7026f",
+    "action": "reject_shift_swap",
+    "target": {
+      "type": "shift_swap",
+      "id": "a2226f83-b648-40e4-8bd3-cb8397b4c485"
+    },
+    "summary": "swap a2226f83-b648-40e4-8bd3-cb8397b4c485",
+    "consequence": "Reject shift swap.",
+    "current_state": "requested",
+    "expires_at": "2026-08-10T18:40:39.359281+00:00",
+    "status": "pending",
+    "backend_confirmation": {
+      "args": {
+        "swap_id": "a2226f83-b648-40e4-8bd3-cb8397b4c485"
+      },
+      "text": "Reject the shift swap?",
+      "action_hash": "13b3bf5b0666f6425127344dd1ffca9ab85850d1d09136bf9d949e58cc9fe538",
+      "action_type": "reject_shift_swap"
+    },
+    "idempotent_replay": false
+  },
+  "result": null
+}

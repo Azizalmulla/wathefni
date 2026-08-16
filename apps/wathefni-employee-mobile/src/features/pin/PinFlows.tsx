@@ -61,14 +61,24 @@ type UnlockPinFlowProps = {
   error?: string | null
   onUnlock: (pin: string) => void
   onForgotPin?: () => void
+  /** Optional i18n keys — HR uses operator re-auth copy instead of activation OTP. */
+  forgotTitleKey?: string
+  forgotConfirmKey?: string
 }
 
-export function UnlockPinFlow({ busy, error, onUnlock, onForgotPin }: UnlockPinFlowProps) {
+export function UnlockPinFlow({
+  busy,
+  error,
+  onUnlock,
+  onForgotPin,
+  forgotTitleKey = 'pin.forgotTitle',
+  forgotConfirmKey = 'pin.forgotConfirm',
+}: UnlockPinFlowProps) {
   const { t } = useI18n()
 
   const confirmForgot = () => {
     if (!onForgotPin || busy) return
-    Alert.alert(t('pin.forgotTitle'), t('pin.forgotConfirm'), [
+    Alert.alert(t(forgotTitleKey), t(forgotConfirmKey), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('pin.forgotConfirmAction'),

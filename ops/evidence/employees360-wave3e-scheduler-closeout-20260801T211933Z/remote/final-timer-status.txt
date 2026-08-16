@@ -1,0 +1,8 @@
+● wathefni-lifecycle-effective.timer - Hourly Wathefni Wave 3E lifecycle effective scheduler (production synthetic-only)
+     Loaded: loaded (/etc/systemd/system/wathefni-lifecycle-effective.timer; enabled; preset: enabled)
+     Active: active (waiting) since Sat 2026-08-01 21:23:31 UTC; 44s ago
+    Trigger: Sat 2026-08-01 22:01:02 UTC; 36min left
+   Triggers: ● wathefni-lifecycle-effective.service
+       Docs: file:///opt/wathefni/production-evidence/employees360-wave3d-synthetic-canary/20260801T210838Z/REPORT.md
+
+Aug 01 21:23:31 srv1419988 systemd[1]: Started wathefni-lifecycle-effective.timer - Hourly Wathefni Wave 3E lifecycle effective scheduler (production synthetic-only).

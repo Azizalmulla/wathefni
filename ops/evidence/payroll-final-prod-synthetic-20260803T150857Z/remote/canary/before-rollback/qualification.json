@@ -1,0 +1,599 @@
+{
+  "tag": "5ca95758",
+  "passed": 96,
+  "failed": 0,
+  "ids": {
+    "tag": "5ca95758",
+    "employee_key": "WATHEFNI-PYW1-PYWF-FINAL-5ca95758",
+    "phones": {
+      "creator": "965541159575",
+      "approver": "965541259575",
+      "closer": "965541359575",
+      "exporter": "965541459575",
+      "exporter2": "965541559575"
+    },
+    "prior_mode": "external",
+    "period": {
+      "start": "2041-10-01",
+      "end": "2041-10-31"
+    },
+    "preview_run_id": "2e732c88-d417-4557-a154-3a0a56d2627c",
+    "cleanup": {
+      "deleted": {
+        "w5_dual": 0,
+        "w5_events": 3,
+        "w5_pifss": 2,
+        "w5_eos": 1,
+        "w5_rules": 0,
+        "finance_exports": 1,
+        "journal_lines": 3,
+        "journal_drafts": 1,
+        "bank_drafts": 1,
+        "close_dual": 1,
+        "close_events": 10,
+        "close_runs": 2,
+        "mappings": 3,
+        "payslip_lines": 4,
+        "payslip_events": 2,
+        "payslips": 2,
+        "preview_lines": 5,
+        "preview_employees": 2,
+        "preview_events": 2,
+        "preview_runs": 2,
+        "import_lines": 2,
+        "import_recons": 1,
+        "imports": 1,
+        "quarantine_by_export": 2,
+        "adapter_exports": 1,
+        "quarantine": 0,
+        "contract_events": 2,
+        "contract_components": 2,
+        "contracts": 1,
+        "period_events": 4,
+        "periods": 1
+      },
+      "residual_total": 0
+    }
+  },
+  "results": [
+    {
+      "name": "w1 honesty payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w2a honesty external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w2b honesty non-auth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3 honesty not money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w4 honesty drafts only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w5 honesty worksheets only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w2a enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w2b enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w3 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w4 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "w5 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native non-auth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no ai",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no bank/wps/ashal",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux statutory tab",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux close tab",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payslip tab",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payrollStatutoryUx.ts ar",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payrollStatutoryUx.ts disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payrollCloseExportUx.ts ar",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payrollCloseExportUx.ts disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payrollPayslipUx.ts ar",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payrollPayslipUx.ts disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period year >= 2035",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "settings payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode set native",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode set external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mode set parallel_shadow",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview blocked in external",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract self-approve forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "contract approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "concurrency stale denied or already approved",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period lock",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period close",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period reopen",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview ok (native)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unsupported fail-closed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview ok (shadow)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payslip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payslip non-auth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslips not money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip EN download",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payslip AR download",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close native authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close create idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close submit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self approve forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "sod approve+export blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self close forbidden",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "close ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "closed status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "snapshot immutable",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "snapshot fingerprint",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "immutable probe",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping BASIC",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping TRANSPORT",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping NET_PAYABLE",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "journal balanced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "bank contract only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no real bank files",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finance export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fingerprint drift detected",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finance export approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen initiate",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen same actor deny",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reopen confirm",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external import",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "import idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fingerprint drift blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "fingerprint drift quarantined",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "malformed quarantined",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "quarantine list non-empty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "reconcile ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external payslip",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external payslip authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external close create",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external close authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "nonsynthetic refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "expat unsupported",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwaiti counsel_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "kuwaiti status counsel_required",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "eos art blocked",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restore prior mode",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "wave": "FINAL",
+  "payment_processing": "disabled",
+  "posts_payment": false,
+  "remittance": false,
+  "statutory_filing": false,
+  "automatic_legal_compliance_claim": false,
+  "bank_files": false,
+  "wps": false,
+  "ashal": false,
+  "ai_calculations": false,
+  "native_results_authoritative": false,
+  "external_payroll_authority": "external",
+  "eos_auto_payable": false,
+  "pifss_remittance": false,
+  "synthetic_only": true,
+  "cleanup": {
+    "deleted": {
+      "w5_dual": 0,
+      "w5_events": 3,
+      "w5_pifss": 2,
+      "w5_eos": 1,
+      "w5_rules": 0,
+      "finance_exports": 1,
+      "journal_lines": 3,
+      "journal_drafts": 1,
+      "bank_drafts": 1,
+      "close_dual": 1,
+      "close_events": 10,
+      "close_runs": 2,
+      "mappings": 3,
+      "payslip_lines": 4,
+      "payslip_events": 2,
+      "payslips": 2,
+      "preview_lines": 5,
+      "preview_employees": 2,
+      "preview_events": 2,
+      "preview_runs": 2,
+      "import_lines": 2,
+      "import_recons": 1,
+      "imports": 1,
+      "quarantine_by_export": 2,
+      "adapter_exports": 1,
+      "quarantine": 0,
+      "contract_events": 2,
+      "contract_components": 2,
+      "contracts": 1,
+      "period_events": 4,
+      "periods": 1
+    },
+    "residual_total": 0
+  },
+  "capability_scopes": [
+    "wave1_foundation",
+    "wave2a_external",
+    "wave2b_native_preview",
+    "wave3_payslips",
+    "wave4_close_export",
+    "wave5_pifss_eos"
+  ]
+}

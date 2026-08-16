@@ -1,0 +1,10 @@
+{
+  "test_suite_url": "bs://4d377a277327b3e6e329171b969a36377bd04f20",
+  "execute": [
+    "bs-smoke/00-launch-unsigned.yaml",
+    "bs-smoke/01-hr-login.yaml",
+    "bs-smoke/02-hr-tabs.yaml",
+    "bs-smoke/03-hr-leave-approve.yaml",
+    "bs-smoke/04-hr-leave-reject.yaml"
+  ]
+}

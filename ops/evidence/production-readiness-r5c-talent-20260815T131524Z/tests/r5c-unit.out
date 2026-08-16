@@ -1,0 +1,65 @@
+/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+    PRODUCTION READINESS R5C — talent surface (unit)
+      PASS  talent customer enableable
+      PASS  talent customer visible
+      PASS  performance still enableable
+      PASS  job architecture still hidden
+      PASS  talent is catalog SKU
+      PASS  talent_pool is not the HCM SKU
+      PASS  talent http_ready
+      PASS  talent hr_web_ready
+      PASS  talent employee_surface_ready
+      PASS  talent manager_surface_ready
+      PASS  talent mobile not required
+      PASS  fail-closed skips talent namespaces
+      PASS  fail-closed keeps JA namespaces
+      PASS  no master score
+      PASS  high performer is not hipo
+      PASS  nine-box derived
+      PASS  pool isolated
+      PASS  learning not required
+      PASS  JA not required
+      PASS  employee strip hipo
+      PASS  employee strip potential
+      PASS  employee keeps facts
+      PASS  performance still strips hipo
+      PASS  performance keeps rating
+      PASS  Setup remounts Talent policies
+      PASS  Setup still remounts Performance
+      PASS  Setup still omits Wave6 cards
+      PASS  PostHire mounts Talent workspace
+      PASS  workspace bilingual AR
+      PASS  workspace uses ResourceState
+      PASS  workspace no talent_score formula
+      PASS  workspace names recruiting pool boundary
+      PASS  Page includes talent
+      PASS  nav.talent registered
+      PASS  app registers talent HTTP
+      PASS  talent permissions exist
+      PASS  employee feature talent
+      PASS  HTTP mentions /dashboard/posthire/talent
+      PASS  HTTP mentions /dashboard/talent
+      PASS  HTTP mentions /app/talent
+      PASS  HTTP mentions /workspace
+      PASS  HTTP mentions /profiles
+      PASS  HTTP mentions /reviews
+      PASS  HTTP mentions /hipo
+      PASS  HTTP mentions /succession
+      PASS  HTTP mentions /nine-box
+      PASS  HTTP mentions /mobility
+      PASS  HTTP never accepts client company authority as write
+      PASS  HTTP uses dashboard_context
+      PASS  HTTP uses employee_app_context
+      PASS  HTTP does not write talent_pool
+      PASS  employee composition has talent
+      PASS  employee hub exists
+      PASS  employee profile exists
+      PASS  no HR mobile talent admin
+      PASS  employee EN copy
+      PASS  employee AR copy
+      PASS  fail-closed no longer steals talent
+      PASS  JA still fail-closed
+
+    59 passed, 0 failed
+R5C_TALENT_SURFACE_UNIT_PASS

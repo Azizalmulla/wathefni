@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/dashboard/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Wathefni Setup Console</title>
+    <style>
+      /* Boot shell — visible before JS, and if the module bundle fails to load. */
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #f8f2e6;
+        color: #18140f;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      #root {
+        min-height: 100dvh;
+      }
+      /* Setup Console must scroll; dashboard shell overflow:hidden must not blank this page. */
+      html.setup-console-boot,
+      html.setup-console-boot body,
+      html.setup-console-boot #root {
+        overflow: auto;
+        height: auto;
+        min-height: 100dvh;
+      }
+      #setup-console-boot {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      #setup-console-boot[hidden] {
+        display: none !important;
+      }
+      .sc-boot-card {
+        max-width: 420px;
+        width: 100%;
+        text-align: center;
+        background: #fffdf8;
+        border: 1px solid #e5dccd;
+        border-radius: 20px;
+        padding: 28px 24px;
+        box-shadow: 0 16px 42px rgba(24, 20, 15, 0.07);
+      }
+      .sc-boot-card h1 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .sc-boot-card p {
+        margin: 0 0 18px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #5c564d;
+      }
+      .sc-boot-card button {
+        cursor: pointer;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        background: #11100e;
+      }
+      .sc-boot-muted { color: #756b5d; font-size: 12px; margin-top: 14px; }
+    </style>
+    <script type="module" crossorigin src="/dashboard/assets/setupConsole-Bj0igwhi.js"></script>
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/rolldown-runtime-ciTZEWaI.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/src-DyBXNr1u.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/lucide-DXG-lAS2.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/react-query-C-0RpxWl.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/button-CdsJfbcM.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/react-vendor-K9trxRfS.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/useOverlayA11y-Cdn2kTJj.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/ConfirmDialog-B1z6I9X4.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/badge-ByGi6G6Z.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/card-CRyt1qVN.js">
+    <link rel="modulepreload" crossorigin href="/dashboard/assets/field-jjpJt-eD.js">
+    <link rel="stylesheet" crossorigin href="/dashboard/assets/src-2OQEqqvz.css">
+  </head>
+  <body>
+    <script>
+      document.documentElement.classList.add('setup-console-boot')
+    </script>
+    <div id="root">
+      <div id="setup-console-boot" role="status" aria-live="polite">
+        <div class="sc-boot-card">
+          <h1>Loading Setup Console</h1>
+          <p>Preparing the operator workspace…</p>
+          <p class="sc-boot-muted">If this does not change, the application bundle may have failed to load.</p>
+        </div>
+      </div>
+    </div>
+    <noscript>
+      <div id="setup-console-boot">
+        <div class="sc-boot-card">
+          <h1>JavaScript required</h1>
+          <p>Enable JavaScript to use the Wathefni Setup Console.</p>
+        </div>
+      </div>
+    </noscript>
+    <script>
+      (function () {
+        var boot = document.getElementById('setup-console-boot')
+        function showFailure(message) {
+          if (!boot) return
+          boot.hidden = false
+          boot.innerHTML =
+            '<div class="sc-boot-card">' +
+            '<h1>Setup Console could not start</h1>' +
+            '<p>' + message + '</p>' +
+            '<button type="button" onclick="window.location.reload()">Reload</button>' +
+            '<p class="sc-boot-muted">Asset or runtime failure — contact Wathefni platform ops if this persists.</p>' +
+            '</div>'
+        }
+        window.addEventListener('error', function (event) {
+          var target = event && event.target
+          if (target && target.tagName === 'SCRIPT') {
+            showFailure('A required Setup Console script failed to load. This is usually a stale asset deploy.')
+          }
+        }, true)
+        window.__WATHEFNI_SETUP_CONSOLE_BOOT_FAIL__ = showFailure
+        // If the module never mounts within 12s, surface a recovery card instead of a blank page.
+        window.__WATHEFNI_SETUP_CONSOLE_BOOT_TIMER__ = window.setTimeout(function () {
+          if (document.documentElement.dataset.setupConsoleMounted === '1') return
+          showFailure('Setup Console is taking too long to start. Reload, or verify /dashboard/assets is in sync with this page.')
+        }, 12000)
+      })()
+    </script>
+  </body>
+</html>

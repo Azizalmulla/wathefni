@@ -1,0 +1,62 @@
+[PASS] wave1 enabled
+[PASS] synthetic_only enforced
+[PASS] company allowlisted
+[PASS] document compliance only
+[PASS] never government verified
+[PASS] no government APIs
+[PASS] no filing
+[PASS] no fine calculations
+[PASS] no legal-compliance claims
+[PASS] no AI
+[PASS] analytics excludes compliance
+[PASS] alerts own reminders
+[PASS] analytics freeze no compliance metrics
+[PASS] residence/work-permit integrity
+[PASS] findings omit valid
+[PASS] severity high-first
+[PASS] owner default hr_compliance
+[PASS] escalation overdue_daily
+[PASS] deadline present
+[PASS] location from profile
+[PASS] deep link compliance
+[PASS] reason AR present
+[PASS] evidence honesty expired
+[PASS] never gov verified on finding
+[PASS] guidance_only
+[PASS] legacy iqama → residence
+[PASS] missing deep link onboarding
+[PASS] employees secondary link
+[PASS] work_permit critical escalation
+[PASS] needs_review evidence uploaded
+[PASS] as_of present
+[PASS] timezone Kuwait
+[PASS] freshness stale_after
+[PASS] definitions EN/AR
+[PASS] partial sources disclosed
+[PASS] alerts delivery-only
+[PASS] owner override
+[PASS] production db
+[PASS] live contract
+[PASS] live as_of
+[PASS] live timezone Kuwait
+[PASS] live kuwait_date
+[PASS] live findings list
+[PASS] live freshness
+[PASS] live honesty never gov
+[PASS] live no legal claims
+[PASS] live alerts own reminders
+[PASS] live synthetic_only
+[PASS] live document_compliance_only
+[PASS] manager scope payload returns
+[PASS] manager scope isolation
+[PASS] dashboard compliance actor_role
+[PASS] dashboard compliance user_id
+[PASS] UI Findings EN/AR
+[PASS] UI never government verified
+[PASS] UI responsive grid
+[PASS] UI Open SoA EN/AR
+[PASS] canary ack deleted
+[PASS] residual 0
+[PASS] synthetic marker detection
+[PASS] real subject not synthetic
+{"pass": 61, "fail": 0, "tag": "f035ce94", "residual": 0}

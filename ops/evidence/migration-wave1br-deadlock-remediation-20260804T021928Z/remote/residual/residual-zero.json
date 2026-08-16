@@ -1,0 +1,10 @@
+{
+  "probe_utc": "2026-08-04T02:21:44.446101+00:00",
+  "w1br_batches": 0,
+  "migration_apps": 0,
+  "deferred": 0,
+  "active_mig_ext": 0,
+  "iso": 0,
+  "residual_zero": true
+}
+RESIDUAL_ZERO_OK

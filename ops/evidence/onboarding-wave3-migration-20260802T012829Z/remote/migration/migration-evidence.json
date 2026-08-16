@@ -1,0 +1,320 @@
+{
+  "checks": [
+    {
+      "label": "seed off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "hr_mutate off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "migration gate on",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "employee app allowlist talal-only hint",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "exactly 19 rows before",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "preview ok_to_commit",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "batch created",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "no conflicts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "self-approval forbidden",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "approved",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "approver distinct",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "commit ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "dry-run matches commit",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "no duplicate inserts 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "no duplicate inserts 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "no duplicate inserts 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "no duplicate inserts 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "pinned 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "received preserved 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "counts reconcile 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "obsolete auditable 50252254:education_cert",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "obsolete auditable 50252254:medical",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank ESS 50252254",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "pinned 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "received preserved 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "counts reconcile 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "obsolete auditable 66363363:education_cert",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "obsolete auditable 66363363:medical",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank ESS 66363363",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "pinned 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "received preserved 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "counts reconcile 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "obsolete auditable 97727743:education_cert",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "obsolete auditable 97727743:medical",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank ESS 97727743",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "pinned 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "received preserved 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "counts reconcile 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "brian photo preserved",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank ESS 99411617",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "bank plaintext still blocked",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "after has more than 19 rows",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "brian expanded",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rollback fingerprint restored",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rollback count 19",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "rollback fp equals before",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reapply ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "reapply dry-run match",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "final pinned all",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "seed still off",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "label": "hr_mutate still off",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "ids": {
+    "requester_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+    "approver_user_id": "201d0b3b-6a6f-483f-914a-7a2356fd0a2e",
+    "requester_email": "azizalmulla16@gmail.com",
+    "approver_email": "fslalmulla@gmail.com",
+    "planned_starts": {
+      "WATHEFNI-96550252254": "2026-08-01",
+      "WATHEFNI-96566363363": "2026-08-01",
+      "WATHEFNI-96597727743": "2026-08-01",
+      "WATHEFNI-96599411617": "2026-08-01"
+    },
+    "batch_id": "d01842ce-f80e-413d-bdb5-bb0ff4553001",
+    "reapply_batch_id": "74b7298b-0fe5-4a1e-b1ed-69c703f30a6d"
+  },
+  "summary": {
+    "pass": 51,
+    "fail": 0,
+    "final_counts": {
+      "item_rows": 150,
+      "by_employee": {
+        "WATHEFNI-96550252254": 38,
+        "WATHEFNI-96566363363": 38,
+        "WATHEFNI-96597727743": 38,
+        "WATHEFNI-96599411617": 36
+      },
+      "employees": [
+        {
+          "employee_key": "WATHEFNI-96550252254",
+          "name": "Talal Fadhli",
+          "template_version": "2.0.0",
+          "documents_pending": 4,
+          "documents_complete": 0,
+          "onboarding_status": "in_progress"
+        },
+        {
+          "employee_key": "WATHEFNI-96566363363",
+          "name": "Fouad Burhamad",
+          "template_version": "2.0.0",
+          "documents_pending": 4,
+          "documents_complete": 0,
+          "onboarding_status": "in_progress"
+        },
+        {
+          "employee_key": "WATHEFNI-96597727743",
+          "name": "mohammad alqattan",
+          "template_version": "2.0.0",
+          "documents_pending": 2,
+          "documents_complete": 2,
+          "onboarding_status": "in_progress"
+        },
+        {
+          "employee_key": "WATHEFNI-96599411617",
+          "name": "Brian Saleh",
+          "template_version": "2.0.0",
+          "documents_pending": 4,
+          "documents_complete": 0,
+          "onboarding_status": "in_progress"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "employee_count": 10,
+    "assemble_ms": 180.37878894805908,
+    "calculate_ms": 47.641629219055176,
+    "classify_ms": 40.00354862213135,
+    "finalize_ms": 90.51342487335205,
+    "payslip_ms": null,
+    "per_employee_calc_ms": 4.764162921905518,
+    "batch_oriented": true,
+    "n_plus_one_forbidden": true
+  },
+  {
+    "employee_count": 100,
+    "assemble_ms": 1628.9237270355225,
+    "calculate_ms": 313.82952404022217,
+    "classify_ms": 203.3749132156372,
+    "finalize_ms": 1139.9954118728638,
+    "payslip_ms": null,
+    "per_employee_calc_ms": 3.1382952404022215,
+    "batch_oriented": true,
+    "n_plus_one_forbidden": true
+  },
+  {
+    "employee_count": 1000,
+    "assemble_ms": 30302.253074645996,
+    "calculate_ms": 6305.830300331116,
+    "classify_ms": 2480.627914428711,
+    "finalize_ms": null,
+    "payslip_ms": null,
+    "per_employee_calc_ms": 6.305830300331116,
+    "batch_oriented": true,
+    "n_plus_one_forbidden": true
+  }
+]

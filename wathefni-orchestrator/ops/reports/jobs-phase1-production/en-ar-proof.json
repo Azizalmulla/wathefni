@@ -1,0 +1,16 @@
+{
+  "en": {
+    "locale": "en",
+    "title": true,
+    "create": true,
+    "apply": true,
+    "rtl": true
+  },
+  "ar": {
+    "locale": "ar",
+    "title": true,
+    "create": true,
+    "apply": true,
+    "rtl": true
+  }
+}

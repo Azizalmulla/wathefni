@@ -1,0 +1,9 @@
+PAYROLL_WAVE2A 1
+SYNTHETIC_ONLY True
+enabled True
+company True
+markers ('PYW2ACB', 'PYW2ACB-SYNTH|', 'PYW2AB', 'PYW2AB-SYNTH|', 'PYW2A', 'PYW2A-SYNTH|', 'PYW1', 'PYW1-SYNTH|')
+prefixes ('965540', '965539')
+honesty {'payment_processing': 'disabled', 'money_authority': 'external', 'wathefni_money_authority': False, 'posts_payment': False, 'vendor_claimed': False, 'bank_files': False, 'native_gross_to_net': False, 'wave1_contracts_unchanged': True, 'synthetic_only': True}
+flags_ok_synthetic=true
+ACK_OK

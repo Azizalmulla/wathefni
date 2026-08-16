@@ -1,5 +1,5 @@
 import { Alert, Linking } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
 
 import { useI18n } from '@/i18n'
 import { PRIVACY_URL } from '@/config'
@@ -9,7 +9,7 @@ const SUPPORT_URL = 'mailto:support@wathefni.ai'
 
 export default function PrivacySupportScreen() {
   const { t } = useI18n()
-  const router = useRouter()
+  const onBack = useEmployeeSafeBack()
 
   const open = async (url: string) => {
     try {
@@ -23,7 +23,7 @@ export default function PrivacySupportScreen() {
     <PrivacySupportView
       onPrivacy={() => void open(PRIVACY_URL)}
       onSupport={() => void open(SUPPORT_URL)}
-      onBack={() => router.back()}
+      onBack={onBack}
     />
   )
 }

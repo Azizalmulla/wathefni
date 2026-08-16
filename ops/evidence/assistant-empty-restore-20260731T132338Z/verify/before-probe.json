@@ -1,0 +1,12 @@
+{
+  "hasGeneric": true,
+  "genericChipCount": 1,
+  "sampleChips": [
+    "Interviews",
+    "Assessments",
+    "Ranking",
+    "Reports",
+    "What can you help me with?"
+  ],
+  "h1": "Wathefni Assistant"
+}

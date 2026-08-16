@@ -1,0 +1,25 @@
+    talent profile c5 — prove
+      PASS  c5 module
+      PASS  charter stamp
+      PASS  module key talent
+      PASS  canonical identity
+      PASS  no shadow person
+      PASS  no master score
+      PASS  perf optional
+      PASS  talent w/o perf
+      PASS  no hipo/9box
+      PASS  perf ≠ potential
+      PASS  c3 dev canonical
+      PASS  pool isolated
+      PASS  assistant out
+      PASS  EN claimed
+      PASS  AR claimed
+      PASS  rollback
+      PASS  no forbidden writes
+      PASS  global off
+      PASS  empty allowlist admits after R5C
+      PASS  canary ok
+      PASS  tenant iso
+SKIP DB (RuntimeEnvironmentError: application_environment_missing_or_invalid)
+
+    21 passed, 0 failed (unit-only)

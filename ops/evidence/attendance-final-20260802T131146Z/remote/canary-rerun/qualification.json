@@ -1,0 +1,179 @@
+{
+  "results": [
+    {
+      "name": "production env",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "capture ingest off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ops synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "authority synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "import off",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "db is wathefni",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "42 attendance rows before",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "42 demo_seed before",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "four reals present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave4b prove failed=0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave4b prove passed>=35",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "capture ops overview ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "capture ingest disabled in overview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "capture synthetic seed ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "capture connectors present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "connector simulate offline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "connector simulate lag",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "connector mark recovered",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unknown mapping remediation present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "mapping remediation reject",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "http daily board rows >= 8",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "api/ui life-state counts match seed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ops list has cases key",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real employee not synthetic-allowed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "42 attendance rows after cleanup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "42 demo_seed after cleanup",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "attendance fingerprint unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "four reals fingerprint unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payroll timesheets unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no leftover ATTW4B projections",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no leftover ATTW4B exceptions",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze smoke-test-employees360-freeze-regression.py",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "freeze smoke-test-onboarding-freeze-regression.py",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "summary": {
+    "wave": "attendance-final-prod",
+    "passed": 33,
+    "failed": 0,
+    "total": 33,
+    "tag": "98AA2996",
+    "capture_prefix": "ATTWFINB3B54A",
+    "work_date": "2026-08-02",
+    "evid": "/opt/wathefni/production-evidence/attendance-final/20260802T131146Z/canary-rerun"
+  }
+}

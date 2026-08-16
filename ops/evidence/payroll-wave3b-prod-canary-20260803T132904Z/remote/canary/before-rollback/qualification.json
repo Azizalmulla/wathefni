@@ -1,0 +1,350 @@
+{
+  "tag": "6037515a",
+  "passed": 51,
+  "failed": 0,
+  "ids": {
+    "tag": "6037515a",
+    "employee_key": "WATHEFNI-PYW1-PYW3-W3B-6037515a",
+    "phones": {
+      "creator": "965541760375",
+      "approver": "965541860375"
+    },
+    "payslip_ids": [
+      "8b80b949-5b4f-4012-a0ab-78440403a8d4",
+      "858a1173-ff2f-437f-8a37-3d40de6f6a98",
+      "6537ac0c-c9fc-4ccb-b13a-04a394f28316"
+    ],
+    "preview_run_ids": [
+      "69db2fcc-8c88-42d7-8a19-2351b5b60880"
+    ],
+    "import_run_ids": [
+      "fe8a77d2-497d-4de6-bca4-017bf2d7845d"
+    ],
+    "export_run_ids": [
+      "4bcde5ed-ef6e-4826-b217-0fc802c04144"
+    ],
+    "period_ids": [
+      "970b6976-77ae-4508-b38d-d11f89e98387"
+    ],
+    "contract_ids": [
+      "66741be2-e376-4d28-a7c5-eee77a34c7bf"
+    ],
+    "prior_mode": "external",
+    "period": {
+      "start": "2032-08-01",
+      "end": "2032-08-31"
+    },
+    "cleanup": {
+      "deleted": {
+        "payslip_lines": 6,
+        "payslip_events": 5,
+        "payslips": 3,
+        "orphan_events": 0,
+        "preview_runs": 1,
+        "imports": 1,
+        "exports": 1,
+        "contracts": 1,
+        "periods": 1
+      },
+      "residual_total": 0
+    }
+  },
+  "results": [
+    {
+      "name": "wave3 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "synthetic only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "not money",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native non-auth",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no AI",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no bank",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave1 enabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2a enabled synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "wave2b enabled synthetic",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history never deleted",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux sources present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux EN title",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux AR title",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux honesty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux mobile",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux rtl",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ux posthire tab",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "production db",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "settings payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "draft",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "approve",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "period",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "preview ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payslip ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native money authority preview",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native payment disabled",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "native idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "scope denied",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "real refused",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replace version 2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "prior replaced",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history after replace",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "download EN",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "download AR",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external export",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external import",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external payslip ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external money authority",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external authoritative label",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "external idempotent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "revoke ok",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "revoke status",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "history after revoke",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no hard delete",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "audit events",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "restore prior mode",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "residual zero",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "honesty": {
+    "payroll_wave3_version": "1.0.0",
+    "payslip_document_schema": "payroll_payslip_document@1.0.0",
+    "payment_processing": "disabled",
+    "posts_payment": false,
+    "payslip_documents": true,
+    "payslips_as_money": false,
+    "native_payslips_authoritative": false,
+    "external_payslips_authority": "external",
+    "bank_files": false,
+    "wps": false,
+    "pifss": false,
+    "eos": false,
+    "journals": false,
+    "ai_calculations": false,
+    "wave1_contracts_unchanged": true,
+    "wave2a_flows_unchanged": true,
+    "wave2b_flows_unchanged": true,
+    "synthetic_only": true
+  },
+  "cleanup": {
+    "deleted": {
+      "payslip_lines": 6,
+      "payslip_events": 5,
+      "payslips": 3,
+      "orphan_events": 0,
+      "preview_runs": 1,
+      "imports": 1,
+      "exports": 1,
+      "contracts": 1,
+      "periods": 1
+    },
+    "residual_total": 0
+  },
+  "wave": "3-B",
+  "payslips_as_money": false,
+  "native_payslips_authoritative": false,
+  "external_payslips_authority": "external",
+  "payment_processing": "disabled",
+  "ai_calculations": false,
+  "bank_files": false
+}

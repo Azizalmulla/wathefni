@@ -1,0 +1,347 @@
+wave5 1.0.0
+connected_db wathefni_staging
+wave5_tables ['payroll_eos_worksheets', 'payroll_pifss_worksheets', 'payroll_statutory_dual_control', 'payroll_statutory_rule_tables', 'payroll_statutory_worksheet_events']
+MIGRATE_OK payroll_pifss_eos_wave5
+    payroll pifss eos wave5
+      PASS  version
+      PASS  payment disabled
+      PASS  no posts payment
+      PASS  remittance false
+      PASS  pifss remittance false
+      PASS  eos_auto_payable false
+      PASS  no auto compliance claim
+      PASS  pifss worksheets
+      PASS  eos worksheets
+      PASS  native non-auth
+      PASS  external authority
+      PASS  freeze payment disabled
+      PASS  freeze category separation
+      PASS  freeze missing rule fail closed
+      PASS  freeze effective dated
+      PASS  freeze dual override
+      PASS  freeze approved immutable
+      PASS  freeze no remittance
+      PASS  freeze no auto payable
+      PASS  freeze native non-auth
+      PASS  freeze external authority
+      PASS  ux en title
+      PASS  ux ar title
+      PASS  ux honesty
+      PASS  ux payment disabled
+      PASS  ux no remittance
+      PASS  ux counsel
+      PASS  ux mobile
+      PASS  ux testid
+connected_db wathefni_staging
+      PASS  schemas ensured
+      PASS  expat ok True
+      PASS  expat status unsupported
+      PASS  expat error
+      PASS  gcc ok False
+      PASS  gcc error counsel
+      PASS  gcc status counsel_required
+      PASS  kuwaiti ok False
+      PASS  kuwaiti error counsel
+      PASS  kuwaiti status counsel_required
+      PASS  kuwaiti worksheet id
+      PASS  upsert pifss v1
+      PASS  resolve pending None
+      PASS  counsel approve v1
+      PASS  resolve returns v1
+      PASS  upsert pifss v2
+      PASS  counsel approve v2
+      PASS  as_of 2029 → v1
+      PASS  as_of 2030 → v2
+      PASS  recalc after rule ok
+      PASS  recalc draft status
+      PASS  recalc has rule
+      PASS  recalc new worksheet
+      PASS  prior counsel superseded
+      PASS  idempotent regenerate
+      PASS  idempotent same id
+      PASS  submit ok
+      PASS  self approve forbidden
+      PASS  approve ok
+      PASS  approved status
+      PASS  mutate_approved_forbidden
+      PASS  recalc new salary ok
+      PASS  new draft status
+      PASS  new draft distinct
+      PASS  prior approved superseded
+      PASS  history includes superseded approved
+      PASS  history superseded status
+      PASS  history includes new draft
+      PASS  eos art blocked ok False
+      PASS  eos art blocked error
+      PASS  eos law17 blocked ok False
+      PASS  eos law17 blocked error
+      PASS  upsert eos rule
+      PASS  counsel approve eos
+      PASS  eos generate ok
+      PASS  eos draft status
+      PASS  eos review worksheet
+      PASS  eos automatic_payable false
+      PASS  eos not payable instruction
+      PASS  override initiate
+      PASS  dual action id
+      PASS  override same actor deny
+      PASS  override confirm ok
+      PASS  override exception status
+      PASS  override no remittance
+      PASS  residual zero
+
+    85 passed, 0 failed
+    payroll pifss eos wave5 UX EN/AR/mobile
+      PASS  posthire dir
+      PASS  ux file
+      PASS  workspace file
+      PASS  posthire file
+      PASS  EN title
+      PASS  AR title
+      PASS  honesty EN
+      PASS  honesty AR
+      PASS  payment disabled EN
+      PASS  payment disabled AR
+      PASS  no remittance EN
+      PASS  no remittance AR
+      PASS  counsel EN
+      PASS  counsel AR
+      PASS  workspace rtl
+      PASS  mobile hint
+      PASS  testid
+      PASS  posthire tab
+      PASS  review only
+
+    19 passed, 0 failed
+    payroll close export wave4
+      PASS  version
+      PASS  payment disabled
+      PASS  no posts payment
+      PASS  journal drafts
+      PASS  no erp journals
+      PASS  bank contract only
+      PASS  no bank files
+      PASS  no bank connection
+      PASS  no wps
+      PASS  no ashal
+      PASS  no pifss
+      PASS  no eos
+      PASS  no AI
+      PASS  native non-auth
+      PASS  external authority
+      PASS  immutable invariant
+      PASS  dual reopen invariant
+      PASS  sod invariant
+      PASS  ux en title
+      PASS  ux ar title
+      PASS  ux honesty
+      PASS  ux payment disabled
+      PASS  ux mobile
+      PASS  ux rtl
+connected_db wathefni_staging
+      PASS  draft
+      PASS  contract approve
+      PASS  period
+      PASS  preview ok
+      PASS  create close run
+      PASS  native authority
+      PASS  payment disabled on run
+      PASS  create idempotent
+      PASS  sod blocked before submit or bad status
+      PASS  submit review
+      PASS  self approve forbidden
+      PASS  sod approve+export blocked
+      PASS  approve ok
+      PASS  sod close+export blocked
+      PASS  self close forbidden
+      PASS  close ok
+      PASS  closed status
+      PASS  snapshot immutable
+      PASS  snapshot fingerprint
+      PASS  immutable probe
+      PASS  reclose blocked
+      PASS  invalid mapping fail closed
+      PASS  mapping BASIC
+      PASS  mapping TRANSPORT
+      PASS  mapping NET_PAYABLE
+      PASS  journal ok
+      PASS  journal balanced
+      PASS  journal no erp
+      PASS  journal idempotent
+      PASS  bank contract ok
+      PASS  bank no real format
+      PASS  bank no connection
+      PASS  bank no wps
+      PASS  bank idempotent
+      PASS  sod closer≠exporter
+      PASS  sod export+approve blocked
+      PASS  export recorded
+      PASS  recon unmatched
+      PASS  export idempotent
+      PASS  drift detected
+      PASS  bank export recorded
+      PASS  export self approve forbidden
+      PASS  export approved
+      PASS  recon matched
+      PASS  export history
+      PASS  reopen initiate
+      PASS  reopen same actor denied
+      PASS  reopen confirmed
+      PASS  reopened status
+      PASS  external export
+      PASS  external import
+      PASS  external close create
+      PASS  external authority retained
+      PASS  residual zero
+      PASS  restore prior mode
+
+    79 passed, 0 failed
+    payroll payslip wave3
+      PASS  version
+      PASS  payment disabled
+      PASS  not money
+      PASS  native non-auth
+      PASS  external authority
+      PASS  no AI
+      PASS  wave1 unchanged
+      PASS  wave2a unchanged
+      PASS  wave2b unchanged
+      PASS  history never deleted
+      PASS  ux en title
+      PASS  ux ar title
+      PASS  ux honesty native
+      PASS  ux mobile hint
+      PASS  ux rtl
+connected_db wathefni_staging
+      PASS  draft
+      PASS  approve
+      PASS  period
+      PASS  preview ok
+      PASS  native payslip ok
+      PASS  native non-auth label
+      PASS  native payment disabled
+      PASS  native idempotent
+      PASS  scope denied
+      PASS  real refused
+      PASS  replace ok
+      PASS  replace version 2
+      PASS  prior replaced status
+      PASS  history retained after replace
+      PASS  download en
+      PASS  download ar
+      PASS  revoke ok
+      PASS  revoke status
+      PASS  history retained after revoke
+      PASS  no hard delete
+      PASS  external export
+      PASS  external import
+      PASS  external payslip ok
+      PASS  external money authority
+      PASS  external not wathefni auth
+      PASS  external idempotent
+      PASS  audit events
+      PASS  residual payslips zero
+      PASS  wave1 still enabled
+      PASS  wave2a still enabled
+      PASS  wave2b still enabled
+
+    46 passed, 0 failed
+    payroll native preview wave2b
+      PASS  version
+      PASS  payment disabled
+      PASS  not authoritative
+      PASS  preview only
+      PASS  no AI
+      PASS  external unchanged
+      PASS  no pifss
+      PASS  no bank
+      PASS  deterministic
+      PASS  money round half up
+      PASS  money 3dp
+      PASS  full-month ok
+      PASS  full-month earnings 550
+      PASS  full-month deductions 20
+      PASS  full-month net 530
+      PASS  mid join ok
+      PASS  mid join active 16
+      PASS  mid join earnings prorated
+      PASS  mid exit ok
+      PASS  mid exit active 15
+      PASS  mid exit earnings prorated
+      PASS  unpaid ok
+      PASS  unpaid deduction applied
+      PASS  adjustment ok
+      PASS  bonus included
+      PASS  fine rounded 3dp
+      PASS  missing contract blocked
+      PASS  missing contract code
+      PASS  overlap blocked
+      PASS  overlap code
+      PASS  pifss blocked
+      PASS  pifss review_only
+connected_db wathefni_staging
+      PASS  db draft
+      PASS  db approve
+      PASS  period
+      PASS  preview run ok
+      PASS  preview not authoritative
+      PASS  idempotent replay
+      PASS  recalc after input change
+      PASS  fingerprint changed
+      PASS  prior superseded
+      PASS  unsupported run failed closed
+      PASS  external mode blocks preview
+      PASS  rollback ok
+      PASS  rollback status
+      PASS  audit events present
+      PASS  real employee refused
+      PASS  wave1 still enabled
+
+    48 passed, 0 failed
+    payroll external adapter wave2a — export/import/reconcile
+      PASS  version pinned
+      PASS  payment disabled
+      PASS  money authority external
+      PASS  wathefni not money authority
+      PASS  no posts_payment
+      PASS  no bank files
+      PASS  no native g2n
+      PASS  vendor unclaimed
+      PASS  wave1 contracts unchanged flag
+      PASS  uses input schema 1.0.0
+      PASS  uses result schema 1.0.0
+      PASS  freeze mirror only
+      PASS  freeze wave1 ddl untouched
+      PASS  malformed csv rejected
+connected_db wathefni_staging
+      PASS  wave1 draft still works
+      PASS  wave1 approve still works
+      PASS  period create
+      PASS  clean export
+      PASS  export fingerprint present
+      PASS  export money authority external
+      PASS  export payment disabled
+      PASS  export posts_payment false
+      PASS  idempotent export replay
+      PASS  clean import
+      PASS  import mirror_only
+      PASS  import external authority
+      PASS  import matched
+      PASS  idempotent import replay
+      PASS  reconcile clean
+      PASS  unmatched import accepted/partial
+      PASS  unmatched quarantined count
+      PASS  malformed quarantined
+      PASS  malformed has quarantine row
+      PASS  fingerprint change blocks import
+      PASS  changed fingerprint detected
+      PASS  new export not idempotent
+      PASS  diff import ok
+      PASS  reconcile differences flagged
+      PASS  component diffs present
+      PASS  export rollback
+      PASS  quarantine soft only
+
+    41 passed, 0 failed
+HONESTY_OK
+STAGING_PAYROLL_W5_OK

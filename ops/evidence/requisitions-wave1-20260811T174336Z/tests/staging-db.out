@@ -1,0 +1,31 @@
+    requisitions wave1 — DB integration prove
+      PASS  migration tables present
+      PASS  migration second apply idempotent
+      PASS  settings default disabled
+      PASS  gate setting default true
+      PASS  gate closed: company setting
+      PASS  gate closed: runtime flag
+      PASS  gate closed: allowlist
+      PASS  gate open when all three set
+      PASS  create draft
+      PASS  idempotent create replay
+      PASS  idempotent same id
+      PASS  submit pending_approval
+      PASS  SoD blocks self-approve
+      PASS  approve by other actor
+      PASS  status approved
+      PASS  publish gate required (both modules)
+      PASS  publish denied without link
+      PASS  link job to approved req
+      PASS  publish allowed after link
+      PASS  gate reports requisition_id
+      PASS  approved→open
+      PASS  M-02 gate off when requisitions disabled
+      PASS  M-02 publish allowed without req
+      PASS  cross-tenant create blocked
+      PASS  gate off when pre_hiring off
+      PASS  rollback guidance
+
+26 passed, 0 failed
+REQUISITIONS_WAVE1_DB_FULL_PASS
+STAGING_DB_RC=0

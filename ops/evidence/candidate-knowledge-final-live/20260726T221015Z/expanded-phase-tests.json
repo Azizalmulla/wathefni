@@ -1,0 +1,198 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "id": "registry_live_tools",
+      "status": "PASS",
+      "phase": "expanded"
+    },
+    {
+      "id": "allowlisted_search",
+      "status": "PASS",
+      "phase": "expanded",
+      "total": 2,
+      "retrieval_mode": "hybrid",
+      "latency_ms": 269.59,
+      "error": null
+    },
+    {
+      "id": "viewer_denied",
+      "status": "PASS",
+      "error": "ck_actor_denied",
+      "phase": "expanded"
+    },
+    {
+      "id": "expanded_second_owner_allowed",
+      "status": "PASS",
+      "error": null,
+      "total": 2
+    },
+    {
+      "id": "arabic_search",
+      "status": "PASS",
+      "total": 2,
+      "retrieval_mode": "hybrid",
+      "latency_ms": 314.9
+    },
+    {
+      "id": "english_search",
+      "status": "PASS",
+      "total": 2,
+      "retrieval_mode": "hybrid",
+      "latency_ms": 280.16
+    },
+    {
+      "id": "bilingual_search",
+      "status": "PASS",
+      "total": 2,
+      "retrieval_mode": "hybrid",
+      "latency_ms": 287.95
+    },
+    {
+      "id": "exact_candidate_knowledge",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "chunk_count": 2,
+      "coverage_sections": [
+        "canonical_cv",
+        "effective_facts",
+        "classifications",
+        "applications",
+        "screening_evidence",
+        "assessments",
+        "interviews",
+        "ranking_evaluations",
+        "identity_state",
+        "notes"
+      ],
+      "canonical_version_id": "44cfbc94-9220-4d11-8af7-fd7823376079",
+      "latency_ms": 419.46,
+      "hallucination_guard": true,
+      "error": null
+    },
+    {
+      "id": "long_cv_evidence",
+      "status": "PASS",
+      "note": "grounded chunks/coverage/canonical metadata only; no full CV dump",
+      "chunk_count": 2
+    },
+    {
+      "id": "compare_candidates",
+      "status": "PASS",
+      "latency_ms": 629.76,
+      "recommendation": {
+        "best_candidate": null,
+        "reason": "Factual comparison only; no Job Ranking context provided."
+      }
+    },
+    {
+      "id": "held_denied_for_ranking",
+      "status": "PASS",
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "status_value": "needs_role",
+      "ranking_eligible": false,
+      "denial": "held_or_job_ranking_ineligible"
+    },
+    {
+      "id": "incomplete_candidate",
+      "status": "PASS",
+      "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "success": false,
+      "error": "ck_get_failed"
+    },
+    {
+      "id": "ambiguous_fail_closed",
+      "status": "PASS"
+    },
+    {
+      "id": "restricted_classes",
+      "status": "PASS",
+      "note": "adapter denies deleted_or_denied/restricted; held tested above"
+    },
+    {
+      "id": "audit_fail_closed",
+      "status": "PASS"
+    },
+    {
+      "id": "tenant_isolation",
+      "status": "PASS",
+      "other_company_chunks_in_db": 0
+    },
+    {
+      "id": "zero_mutation_guards",
+      "status": "PASS"
+    },
+    {
+      "id": "zero_lifecycle_comms_job_identity_fingerprint",
+      "status": "PASS",
+      "before": {
+        "apps": {
+          "apps": 18,
+          "with_status": 18
+        },
+        "jobs_criteria_sets": 0,
+        "status_hist": {
+          "awaiting_cv": 5,
+          "hired": 3,
+          "needs_role": 2,
+          "review_pending": 1,
+          "screening": 2,
+          "screening_complete": 2,
+          "shortlisted": 3
+        }
+      },
+      "after": {
+        "apps": {
+          "apps": 18,
+          "with_status": 18
+        },
+        "jobs_criteria_sets": 0,
+        "status_hist": {
+          "awaiting_cv": 5,
+          "hired": 3,
+          "needs_role": 2,
+          "review_pending": 1,
+          "screening": 2,
+          "screening_complete": 2,
+          "shortlisted": 3
+        }
+      }
+    },
+    {
+      "id": "index_freshness",
+      "status": "PASS",
+      "chunks": {
+        "current_chunks": 10,
+        "voyage_chunks": 10,
+        "model_chunks": 10,
+        "max_created": "2026-07-26 21:43:50.607864+00"
+      },
+      "jobs": {
+        "failed": 3,
+        "completed": 14
+      }
+    },
+    {
+      "id": "audit_events_recent",
+      "status": "PASS",
+      "events_2h": 65
+    }
+  ],
+  "monitoring": {
+    "latencies_ms": [
+      269.59,
+      292.59,
+      314.9,
+      280.16,
+      287.95,
+      419.46,
+      629.76
+    ],
+    "p95_ms": 419.46,
+    "error_count": 0,
+    "voyage_query_calls_observed": 3,
+    "allowlist": "88b17ca9-aff4-4721-a553-c1b5514ef95f,b69f4cad-589d-4029-8a2d-cfa85399966c",
+    "actors_phase": "expanded"
+  },
+  "blockers": []
+}

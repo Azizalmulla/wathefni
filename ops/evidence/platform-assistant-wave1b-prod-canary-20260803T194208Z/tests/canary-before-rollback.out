@@ -1,0 +1,75 @@
+WATHEFNI_ASSISTANT_KILL=0
+WATHEFNI_ASSISTANT_MUTATIONS=0
+WATHEFNI_ATTENDANCE_CAPTURE_INGEST=off
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1=1
+WATHEFNI_PLATFORM_ASSISTANT_WAVE1_COMPANIES=WATHEFNI
+CAPTURE_INGEST_OFF_OK
+MUTATIONS_OFF_OK
+WAVE1_ON_OK
+[PASS] wave1 enabled
+[PASS] wathefni company
+[PASS] external denied
+[PASS] mutations off
+[PASS] master kill off
+[PASS] no payroll money
+[PASS] no attendance ingest
+[PASS] no whatsapp widen
+[PASS] no ck wiring
+[PASS] no mutations honesty
+[PASS] default inbox entry
+[PASS] hr dashboard only
+[PASS] ingest env off
+[PASS] production db
+[PASS] audit event written
+[PASS] tool action inbox
+[PASS] tool employee 360
+[PASS] tool setup readiness
+[PASS] mutation approve_leave hidden
+[PASS] mutation export_payroll hidden
+[PASS] whatsapp spine tools hidden
+[PASS] external spine tools hidden
+[PASS] inbox tool ran
+[PASS] inbox freshness
+[PASS] inbox authority label
+[PASS] inbox citations list
+[PASS] inbox no mutate
+[PASS] inbox proposed actions prepare-only
+[PASS] setup readiness ran
+[PASS] setup freshness
+[PASS] setup authority
+[PASS] setup payroll money false
+[PASS] setup attendance ingest false
+[PASS] e360 asks for subject or returns envelope
+[PASS] e360 missing/partial authority
+[PASS] e360 keyed summary
+[PASS] e360 citations
+[PASS] e360 no mutate
+[PASS] tenant isolation inbox
+[FAIL] permission denial :: {'action_type': 'summarize_action_inbox', 'success': True, 'status': 'completed', 'message': 'I only have a partial view. Some sources were unavailable or blocked.', 'grounding': {'ok': True, 'wave1_contract': 'platform_assistant_spine_wave1', 'summary_en': 'I only have a partial view. Some sources were unavailable or blocked.', 'summary_ar': 'لديّ رؤية جزئية فقط. بعض المصادر غير متاحة أو محظورة.', 'message': 'I only have a partial view. Some sources were unavailable or blocked.', 'citations': [{'kind': 'module_contract', 'module': 'action_inbox', 'id': 'action_inbox_wave1', 'label_en': 'Unified Action Inbox', 'label_ar': 'صندوق الإجراءات الموحّد', 'as_of': '2026-08-03T22:43:19.272385+03:00'}], 'data_freshness': '2026-08-03T22:43:19.272393+03:00', 'as_of_tz': 'Asia/Kuwait', 'authority_state': 'partial', 'confidence': 'partial', 'deep_links': [{'page': 'action_inbox', 'path': '/dashboard/posthire?tab=action-inbox', 'label_en': 'Open Unified Action Inbox', 'label_ar': 'فتح صندوق الإجراءات الموحّد'}], 'proposed_actions': [{'kind': 'deep_link', 'module': 'action_inbox', 'label_en': 'Review what needs attention in Action Inbox', 'label_ar': 'راجع ما يحتاج انتباهاً في صندوق الإجراءات', 'deep_link': {'page': 'action_inbox'}, 'executes': False}], 'payload': {'summary': {'total': 0, 'by_stream': {'analytics': 0, 'compliance': 0, 'employees': 0}, 'by_severity': {'critical': 0, 'high': 0, 'medium': 0, 'low': 0}, 'deduped_e360_compliance': 0, 'phase0_drops': {'dropped_payroll': 0, 'dropped_subject': 0, 'dropped_unscoped': 0}}, 'honesty': {'wave': 'action_inbox_wave1', 'version': '1.0.1', 'contract': 'action_inbox_wave1', 'read_only': True, 'composes_only': True, 'mutates_records': False, 'ai': False, 'hiring_reports_separate': True, 'alerts_delivery_owns_notifications': True, 'compliance_wave2': False, 'analytics_wave2': False, 'payroll_money': False, 'attendance_ingest': False, 'shifts_manager_expansion': False, 'phase0_viewer_allowlist_fail_closed': True, 'phase0_subject_allowlist_fail_closed': True, 'phase0_exclude_payroll': True, 'real_viewer_allowlist_configured': True, 'real_subject_allowlist_configured': True, 'real_canary_enabled': True, 'systems_of_action': ['analytics', 'compliance', 'employees', 'onboarding', 'attendance', 'leave', 'shifts', 'payroll'], 'synthetic_only': True, 'enabled': True, 'companies': ['WATHEFNI'], 'synthetic_key_markers': ['AIW1', 'AIW1-SYNTH|'], 'synthetic_phone_prefixes': ['965542']}, 'compose_error': "403: {'error': 'action_inbox_viewer_denied', 'message': 'Action Inbox is not enabled for this account.'}"}, 'fallback_key': 'partial', 'honesty': {'contract': 'platform_assistant_spine_wave1', 'wave1_version': '1.0.0', 'wathefni_only': True, 'hr_dashboard_only': True, 'manager_assistant': False, 'employee_assistant': False, 'whatsapp_widening': False, 'mobile_assistant': False, 'candidate_knowledge_wired': False, 'ai_embedded_in_frozen_module_uis': False, 'new_mutation_tools': False, 'mutates_records': False, 'payroll_money': False, 'attendance_ingest': False, 'capture_ingest_must_remain_off': True, 'legal_government_authority': False, 'default_posthire_entry': 'action_inbox', 'may': ['summarize', 'explain', 'investigate', 'prepare_deep_link_or_proposed_action'], 'must_not': ['mutate_records', 'bypass_confirmation_permissions_sod_allowlists_freezes', 'payroll_money', 'attendance_ingest', 'claim_legal_or_government_authority']}, 'mutates_records': False}, 'mutates_records': False, 'reply': 'I only have a partial view. Some sources were unavailable or blocked.'}
+[PASS] fallback en missing
+[PASS] fallback ar missing
+[PASS] fallback en stale
+[PASS] fallback ar stale
+[PASS] fallback en partial
+[PASS] fallback ar partial
+[PASS] fallback en unavailable
+[PASS] fallback ar unavailable
+[PASS] fallback en blocked
+[PASS] fallback ar blocked
+[PASS] fallback en unsupported
+[PASS] fallback ar unsupported
+[PASS] fallback en mutations_killed
+[PASS] fallback ar mutations_killed
+[PASS] mutation denial status
+[PASS] approve_leave is mutation
+[PASS] inbox not mutation
+[PASS] orchestrator has pending block
+[PASS] master kill engaged
+[PASS] master kill intent
+[PASS] master kill ar
+[PASS] master kill cleared
+[PASS] whatsapp executor denied
+[PASS] canary events deleted
+[PASS] residual canary 0
+[PASS] durable ack retained
+{"pass": 65, "fail": 1, "tag": "eb1d2fca", "residual": 0, "ack_count": 1, "mutations_allowed": false, "inbox_authority": "partial", "setup_overall": "live_controlled"}

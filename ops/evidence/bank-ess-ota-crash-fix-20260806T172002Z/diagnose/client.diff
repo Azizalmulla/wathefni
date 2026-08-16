@@ -1,0 +1,68 @@
+--- /tmp/wf-bank-ess-ota-clean-20260806T170025Z/src/api/client.ts	2026-08-06 19:01:53
++++ /Users/azizalmulla/Desktop/claw/apps/wathefni-employee-mobile/src/api/client.ts	2026-08-06 18:23:31
+@@ -6,11 +6,20 @@
+ export class ApiError extends Error {
+   status: number
+   code: string
+-  constructor(status: number, code: string, message: string) {
++  messageEn?: string
++  messageAr?: string
++  constructor(
++    status: number,
++    code: string,
++    message: string,
++    extras?: { messageEn?: string; messageAr?: string },
++  ) {
+     super(message)
+     this.name = 'ApiError'
+     this.status = status
+     this.code = code
++    this.messageEn = extras?.messageEn
++    this.messageAr = extras?.messageAr
+   }
+ }
+ 
+@@ -22,11 +31,26 @@
+   signal?: AbortSignal
+ }
+ 
+-function detailMessage(payload: unknown, fallback: string): { code: string; message: string } {
++function detailMessage(payload: unknown, fallback: string): {
++  code: string
++  message: string
++  messageEn?: string
++  messageAr?: string
++} {
+   const detail = (payload as { detail?: unknown })?.detail ?? payload
+   if (detail && typeof detail === 'object') {
+-    const d = detail as { error?: string; message?: string }
+-    return { code: d.error || 'error', message: d.message || fallback }
++    const d = detail as {
++      error?: string
++      message?: string
++      message_en?: string
++      message_ar?: string
++    }
++    return {
++      code: d.error || 'error',
++      message: d.message || d.message_en || d.message_ar || fallback,
++      messageEn: d.message_en,
++      messageAr: d.message_ar,
++    }
+   }
+   return { code: 'error', message: fallback }
+ }
+@@ -61,8 +85,11 @@
+   }
+ 
+   if (!response.ok) {
+-    const { code, message } = detailMessage(parsed, 'Something went wrong. Please try again.')
+-    throw new ApiError(response.status, code, message)
++    const { code, message, messageEn, messageAr } = detailMessage(
++      parsed,
++      'Something went wrong. Please try again.',
++    )
++    throw new ApiError(response.status, code, message, { messageEn, messageAr })
+   }
+   return parsed as T
+ }

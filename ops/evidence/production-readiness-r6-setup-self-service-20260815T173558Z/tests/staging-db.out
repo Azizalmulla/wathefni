@@ -1,0 +1,48 @@
+    PRODUCTION READINESS R6 — setup self-service (staging DB)
+    tenants: R6AF1BAF5 / R6BF1BAF5
+      PASS  A leave setup write
+      PASS  A attendance setup write
+      PASS  A onboarding setup write
+      PASS  A notification preset via Setup
+      PASS  D leave enforced write-through
+      PASS  D wave2 reads canonical enforced
+      PASS  D onboarding cards share auto_start
+      PASS  D attendance grace from Setup overlay
+      PASS  B kill switch not usable
+      PASS  B kill switch state unavailable_deployment
+      PASS  B does not say Enabled
+      PASS  B unblock resolves deployment
+      PASS  E Intelligence enable via Setup
+      PASS  E min_cohort from Setup
+      PASS  E fiscal month from Setup
+      PASS  E no env edit required
+      PASS  E cohort downward forbidden
+      PASS  C Comp without JA governed
+      PASS  C Comp enable after JA
+      PASS  C WFP without JA governed
+      PASS  F history exists before disable
+      PASS  F disable ok
+      PASS  F disable preserves history flag
+      PASS  F historical cohort retained
+      PASS  F re-enable restores
+      PASS  F re-enable keeps raised cohort
+      PASS  ordinary HR Setup 403
+      PASS  ordinary HR not_permitted
+      PASS  company admin Setup 200
+      PASS  A/E wave5 present in Setup payload
+      PASS  delivery present
+      PASS  effective state present
+      PASS  G company-scoped write uses session tenant
+      PASS  G company admin cannot write tenant B via operator Setup
+      PASS  C HTTP Comp without JA is 409
+      PASS  G tenant B reads own Setup
+      PASS  G tenant B does not inherit A preset
+      PASS  G header did not write tenant B
+      PASS  failed save without reason is not 200-success
+      PASS  failed save does not look enabled
+      PASS  JA platform foundation not SKU
+      PASS  one effective state honesty
+
+    42 passed, 0 failed
+R6_SETUP_SELF_SERVICE_DB_PASS
+STAGING_RC=0

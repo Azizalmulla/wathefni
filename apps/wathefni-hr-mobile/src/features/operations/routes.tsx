@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -16,7 +17,14 @@ import {
   type ConfirmationView,
 } from '@/components/primitives'
 import { useLocale } from '@/i18n'
-import { formatDate, formatDateTime, formatTimeRange } from '@/i18n/date'
+import { formatDate, formatDateRange, formatDateTime, formatTimeRange } from '@/i18n/date'
+import {
+  facetStatusLabel,
+  intakeLabel,
+  lifecycleCommunicationLabel,
+  lifecycleStageLabel,
+  workflowLabel,
+} from '@/features/recruiting/lifecycle'
 import {
   NotesEditor,
   OperationalDetailView,
@@ -54,11 +62,24 @@ function queryState<T>(
 
 export function TasksRoute() {
   const shell = useShell()
+  const client = useQueryClient()
   const permitted = routeAvailable(shell.me, 'tasks')
   const query = useQuery({
     queryKey: ['hr-tasks'],
     queryFn: ({ signal }) => mobileApi.tasks(shell.request, signal),
     enabled: permitted,
+  })
+  const [pending, setPending] = useState<OperationalItem | null>(null)
+  const resolve = useMutation({
+    mutationFn: (item: OperationalItem) =>
+      mobileApi.taskResolve(shell.request, item.id, {
+        status: 'done',
+        expected_status: item.status || 'open',
+      }),
+    onSuccess: async () => {
+      setPending(null)
+      await client.invalidateQueries({ queryKey: ['hr-tasks'] })
+    },
   })
   const items = (query.data?.items || []).map<OperationalItem>((item) => ({
     id: item.task_id,
@@ -70,12 +91,78 @@ export function TasksRoute() {
     allowedActions: item.allowed_actions,
   }))
   return (
+    <>
+      <OperationalListView
+        company={shell.company}
+        eyebrow={shell.t('tasks.eyebrow')}
+        title={shell.t('tasks.title')}
+        items={items}
+        state={
+          permitted
+            ? resourceState({
+                loading: query.isLoading,
+                error: query.error || resolve.error,
+                stale: query.data?.stale,
+                empty: query.data?.items.length === 0,
+                success: resolve.isSuccess,
+              })
+            : 'permission'
+        }
+        actionsForItem={(item) =>
+          item.allowedActions?.includes('resolve')
+            ? [{ key: 'resolve', label: shell.t('tasks.complete') }]
+            : []
+        }
+        onAction={(item) => setPending(item)}
+        onRetry={() => void query.refetch()}
+        onLocale={shell.toggleLocale}
+      />
+      <ConfirmationSheet
+        visible={Boolean(pending)}
+        value={
+          pending
+            ? {
+                target: pending.title,
+                action: shell.t('tasks.complete'),
+                consequence: shell.t('tasks.completeConsequence'),
+                currentState: pending.status || 'open',
+              }
+            : null
+        }
+        loading={resolve.isPending}
+        onCancel={() => setPending(null)}
+        onConfirm={() => pending && resolve.mutate(pending)}
+      />
+    </>
+  )
+}
+
+export function LeaveQueueRoute() {
+  const shell = useShell()
+  const router = useRouter()
+  const permitted = routeAvailable(shell.me, 'leave')
+  const query = useQuery({
+    queryKey: ['hr-leave'],
+    queryFn: ({ signal }) => mobileApi.leave(shell.request, 'requested', signal),
+    enabled: permitted,
+  })
+  const items = (query.data?.items || []).map<OperationalItem>((item) => ({
+    id: item.leave_id,
+    title: item.employee.name,
+    subtitle: item.leave_type,
+    meta: formatDateRange(item.start_date, item.end_date, shell.locale),
+    status: item.status,
+    tone: toneForStatus(item.status),
+    allowedActions: item.allowed_actions,
+  }))
+  return (
     <OperationalListView
       company={shell.company}
-      eyebrow={shell.t('tasks.eyebrow')}
-      title={shell.t('tasks.title')}
+      eyebrow={shell.t('leave.queueEyebrow')}
+      title={shell.t('leave.queueTitle')}
       items={items}
       state={queryState(query, permitted)}
+      onOpen={(item) => router.push(`/leave/${encodeURIComponent(item.id)}` as never)}
       onRetry={() => void query.refetch()}
       onLocale={shell.toggleLocale}
     />
@@ -259,6 +346,12 @@ export function DocumentsRoute() {
         if (!employeeKey || !document.document_type || document.source !== 'compliance') return
         router.push(
           `/documents/${encodeURIComponent(employeeKey)}/${encodeURIComponent(document.document_type)}` as never,
+        )
+      }}
+      canOpen={(selected) => {
+        const document = query.data?.items.find((item) => item.document_id === selected.id)
+        return Boolean(
+          document?.source === 'compliance' && document.employee?.employee_key && document.document_type,
         )
       }}
       onRetry={() => void query.refetch()}
@@ -485,6 +578,7 @@ export function ShiftsRoute() {
       onOpen={(item) => {
         if (item.id.startsWith('swap:')) router.push(`/shift-swaps/${item.id.slice(5)}` as never)
       }}
+      canOpen={(item) => item.id.startsWith('swap:')}
       onRetry={() => {
         if (canShifts) void shifts.refetch()
         if (canSwaps) void swaps.refetch()
@@ -645,6 +739,10 @@ export function DeliveryAlertsRoute() {
         const destination = query.data?.items.find((item) => item.alert_id === selected.id)?.destination
         if (destination?.startsWith('/')) router.push(destination as never)
       }}
+      canOpen={(selected) => {
+        const destination = query.data?.items.find((item) => item.alert_id === selected.id)?.destination
+        return Boolean(destination?.startsWith('/'))
+      }}
       onRetry={() => void query.refetch()}
       onLocale={shell.toggleLocale}
     />
@@ -655,22 +753,39 @@ export function CandidatesRoute() {
   const shell = useShell()
   const router = useRouter()
   const permitted = routeAvailable(shell.me, 'candidates')
+  const [stageFilter, setStageFilter] = useState('')
   const query = useQuery({
     queryKey: ['candidates'],
     queryFn: ({ signal }) => mobileApi.candidates(shell.request, signal),
     enabled: permitted,
   })
+  const stages = useMemo(() => {
+    const values = new Set<string>()
+    for (const item of query.data?.items || []) {
+      const stage = item.canonical_stage || item.status
+      if (stage) values.add(stage)
+    }
+    return [...values]
+  }, [query.data?.items])
   const sorted = useMemo(
-    () => [...(query.data?.items || [])].sort((a, b) => (b.score ?? -1) - (a.score ?? -1)),
-    [query.data?.items],
+    () =>
+      [...(query.data?.items || [])]
+        .filter((item) => !stageFilter || (item.canonical_stage || item.status) === stageFilter)
+        .sort((a, b) => (b.score ?? -1) - (a.score ?? -1)),
+    [query.data?.items, stageFilter],
   )
   const items = sorted.map<OperationalItem>((item) => ({
     id: item.app_key,
     title: item.candidate.name,
     subtitle: item.position?.title || item.position?.code,
-    meta: item.score == null ? shell.t('candidate.scoreUnavailable') : `${shell.t('candidate.score')} ${item.score}/100`,
-    status: item.status,
-    tone: toneForStatus(item.status),
+    meta: [
+      item.score != null ? `${item.score}` : null,
+      intakeLabel(item.intake_source, shell.locale),
+      lifecycleCommunicationLabel(item.communication_status, shell.locale),
+      item.next_human_action ? workflowLabel(item.next_human_action, shell.locale) : null,
+    ].filter(Boolean).join(' · '),
+    status: lifecycleStageLabel(item.canonical_stage || item.status, shell.locale),
+    tone: toneForStatus(item.canonical_stage || item.status),
     allowedActions: item.allowed_actions,
   }))
   return (
@@ -680,6 +795,30 @@ export function CandidatesRoute() {
       title={shell.t('candidates.title')}
       items={items}
       state={queryState(query, permitted)}
+      header={
+        <View style={candidateStyles.header}>
+          <Text style={candidateStyles.note}>{shell.t('candidates.rankingNote')}</Text>
+          <View style={candidateStyles.filters}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setStageFilter('')}
+              style={[candidateStyles.chip, !stageFilter && candidateStyles.chipActive]}
+            >
+              <Text style={candidateStyles.chipText}>{shell.t('candidates.filterAll')}</Text>
+            </Pressable>
+            {stages.map((stage) => (
+              <Pressable
+                key={stage}
+                accessibilityRole="button"
+                onPress={() => setStageFilter(stage)}
+                style={[candidateStyles.chip, stageFilter === stage && candidateStyles.chipActive]}
+              >
+                <Text style={candidateStyles.chipText}>{lifecycleStageLabel(stage, shell.locale)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      }
       onOpen={(item) => router.push(`/candidates/${encodeURIComponent(item.id)}` as never)}
       onRetry={() => void query.refetch()}
       onLocale={shell.toggleLocale}
@@ -700,9 +839,13 @@ export function InterviewsRoute() {
     id: item.interview_id,
     title: item.candidate.name,
     subtitle: item.position?.title || item.position?.code,
-    meta: item.scheduled_at ? formatDateTime(item.scheduled_at, shell.locale) : item.communication_status,
-    status: item.status,
-    tone: toneForStatus(item.status),
+    meta: [
+      facetStatusLabel(item.status, shell.locale),
+      item.scheduled_at ? formatDateTime(item.scheduled_at, shell.locale) : null,
+      item.next_human_action ? workflowLabel(item.next_human_action, shell.locale) : null,
+    ].filter(Boolean).join(' · '),
+    status: lifecycleStageLabel(item.application_stage, shell.locale),
+    tone: toneForStatus(item.application_stage || item.status),
     allowedActions: item.allowed_actions,
   }))
   return (
@@ -735,17 +878,25 @@ export function InterviewDetailRoute() {
   })
   const item = query.data?.item
   const canWriteNotes = item?.allowed_actions.includes('write_notes') || item?.allowed_actions.includes('write')
+  const analysis = String(item?.ai_summary?.overall_summary || item?.ai_summary?.summary || '')
   return (
     <OperationalDetailView
       company={shell.company}
       eyebrow={shell.t('interviews.detailEyebrow')}
       title={item?.candidate.name || shell.t('interviews.detailTitle')}
-      status={item?.status}
+      status={lifecycleStageLabel(item?.application_stage, shell.locale)}
       state={!permitted ? 'permission' : resourceState({ loading: query.isLoading, error: query.error || notes.error, stale: query.data?.stale })}
       facts={[
         { label: shell.t('common.position'), value: item?.position?.title || item?.position?.code },
+        { label: shell.t('interviews.applicationStage'), value: lifecycleStageLabel(item?.application_stage, shell.locale) },
+        { label: shell.t('interviews.status'), value: facetStatusLabel(item?.status, shell.locale) },
         { label: shell.t('interviews.scheduled'), value: item?.scheduled_at ? formatDateTime(item.scheduled_at, shell.locale) : null },
-        { label: shell.t('interviews.delivery'), value: item?.communication_status },
+        { label: shell.t('interviews.channelLocation'), value: item?.meeting?.join_url || item?.meeting?.type },
+        { label: shell.t('interviews.invitationStatus'), value: lifecycleCommunicationLabel(item?.invitation_status || item?.communication_status, shell.locale) },
+        { label: shell.t('interviews.candidateConfirmation'), value: facetStatusLabel(item?.candidate_confirmation, shell.locale) },
+        { label: shell.t('interviews.notesStatus'), value: facetStatusLabel(item?.notes_status, shell.locale) },
+        { label: shell.t('interviews.nextHumanAction'), value: workflowLabel(item?.next_human_action, shell.locale) },
+        { label: shell.t('interviews.advisorySummary'), value: analysis || null },
         { label: shell.t('interviews.notes'), value: canWriteNotes ? null : item?.notes },
       ]}
       onRetry={() => void query.refetch()}
@@ -757,6 +908,22 @@ export function InterviewDetailRoute() {
 }
 
 type Translator = ReturnType<typeof useLocale>['t']
+
+const candidateStyles = StyleSheet.create({
+  header: { gap: 10 },
+  note: { color: '#5C4A3A', fontSize: 13, fontWeight: '700', lineHeight: 18 },
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#E4D6C8',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: '#FFF8F1',
+  },
+  chipActive: { backgroundColor: '#F3E4D4', borderColor: '#C9A98A' },
+  chipText: { color: '#2A2118', fontSize: 13, fontWeight: '800' },
+})
 
 function actionLabel(action: string, t: Translator): string {
   const labels: Record<string, string> = {

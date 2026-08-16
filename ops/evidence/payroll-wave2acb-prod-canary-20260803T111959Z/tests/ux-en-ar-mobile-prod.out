@@ -1,0 +1,27 @@
+PASS  posthire src present
+PASS  workspace file present
+PASS  honesty strip
+PASS  not authoritative banner
+PASS  quarantine tab
+PASS  replace import
+PASS  rtl dir support
+PASS  mobile flex wrap
+PASS  sm grid breakpoint
+PASS  loading state
+PASS  error retry
+PASS  WorkflowEmpty usage
+PASS  EN copy title
+PASS  AR copy title
+PASS  EN honesty money authority
+PASS  AR honesty money authority
+PASS  EN not authoritative
+PASS  AR not authoritative
+PASS  EN fingerprint drift
+PASS  AR fingerprint drift
+PASS  PostHire wires workspace
+PASS  Payroll tabs external/timesheets
+PASS  API external workspace route
+PASS  API import route pattern
+
+24 passed, 0 failed
+DIST_COPY_OK

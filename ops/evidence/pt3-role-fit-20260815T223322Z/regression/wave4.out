@@ -1,0 +1,54 @@
+    wave4 product acceptance — unit
+      PASS  setup wave4 policies module
+      PASS  setup patch wave4
+      PASS  modularity matrix >= 12
+      PASS  setup owns wave4
+      PASS  not env-only
+      PASS  no new domain in c7
+      PASS  c3 sole development
+      PASS  EN goals label
+      PASS  AR talent label
+      PASS  wave5 fact catalog
+      PASS  recruiting pool key
+      PASS  posthire module talent
+      PASS  no naming collision
+      PASS  assessment norms rename
+      PASS  assistant no mutations
+      PASS  no empty tabs rule
+      PASS  hr mobile not forced heavyweight
+      PASS  C1 off
+      PASS  C2 off
+      PASS  C3 off
+      PASS  C4 off
+      PASS  C5 off
+      PASS  C6 off
+      PASS  no forbidden authority in performance_goals_c1.py
+      PASS  no forbidden authority in performance_reviews_c2.py
+      PASS  no forbidden authority in performance_feedback_c3.py
+      PASS  no forbidden authority in performance_calibration_c4.py
+      PASS  no forbidden authority in talent_profile_c5.py
+      PASS  no forbidden authority in talent_succession_c6.py
+      PASS  no forbidden authority in setup_console_wave4_policies.py
+      PASS  c3 development honesty
+      PASS  c6 nine box projection
+      PASS  c5 no master score
+      PASS  assistant mutations explicit off
+      PASS  app merges wave4 policies
+      PASS  Setup Wave4 card file retained
+      PASS  Setup remounts Performance card after R5B
+      PASS  wave4 honesty performance enableable
+      PASS  wave4 honesty talent enableable after R5C
+      PASS  employee mobile present
+      PASS  EN/AR/RTL surface markers
+      PASS  prior stamp doc PERFORMANCE_GOALS_FULL_PASS.md
+      PASS  prior stamp doc PERFORMANCE_REVIEWS_FULL_PASS.md
+      PASS  prior stamp doc PERFORMANCE_FEEDBACK_COMPETENCIES_FULL_PASS.md
+      PASS  prior stamp doc PERFORMANCE_CALIBRATION_DEV_FULL_PASS.md
+      PASS  prior stamp doc TALENT_PROFILE_FULL_PASS.md
+      PASS  prior stamp doc TALENT_SUCCESSION_MOBILITY_FULL_PASS.md
+      PASS  prior stamp doc WAVE1_PRODUCT_FULL_PASS.md
+      PASS  prior stamp doc WAVE2_PRODUCT_FULL_PASS.md
+      PASS  prior stamp doc WAVE3_PRODUCT_FULL_PASS.md
+
+    50 passed, 0 failed
+WAVE4_PRODUCT_UNIT_PASS

@@ -1,0 +1,31 @@
+    shifts schedule integrity wave2 — history + availability + swap + attendance + reminders
+      PASS  wave2 version pinned 2.0.0
+      PASS  wave2 enabled
+      PASS  wave1 enabled
+      PASS  honesty payroll_money false
+      PASS  honesty leave_balances_mutated false
+      PASS  create records assignment version
+      PASS  create enqueues reminder
+      PASS  create does not touch leave_balances
+      PASS  wave2 reminder scan wired
+      PASS  terminal failure visibility
+Traceback (most recent call last):
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-shifts-schedule-integrity-wave2.py", line 1149, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/smoke-test-shifts-schedule-integrity-wave2.py", line 91, in main
+    with app.db_connect() as conn:
+         ~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 221, in __enter__
+    self._conn = _get_db_pool().getconn()
+                 ~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 198, in _get_db_pool
+    binding = runtime_binding()
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 187, in runtime_binding
+    assert_runtime_environment_binding()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/app.py", line 165, in assert_runtime_environment_binding
+    binding = _runtime_environment.resolve_runtime_binding(os.environ)
+  File "/Users/azizalmulla/Desktop/claw/wathefni-orchestrator/runtime_environment.py", line 105, in resolve_runtime_binding
+    raise RuntimeEnvironmentError("database_environment_file_not_configured")
+runtime_environment.RuntimeEnvironmentError: database_environment_file_not_configured

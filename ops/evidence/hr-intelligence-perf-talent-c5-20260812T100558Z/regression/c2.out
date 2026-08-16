@@ -1,0 +1,79 @@
+    hr intelligence workforce c2 — prove
+      PASS  c2 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  uses c1 evaluator
+      PASS  no second math engine
+      PASS  fte blocked
+      PASS  turnover not naive
+      PASS  retention cohort
+      PASS  EN active
+      PASS  AR pending
+      PASS  c2 global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable c2
+      PASS  publish workforce kpis
+      PASS  fte still blocked
+      PASS  seed A1
+      PASS  seed B1
+      PASS  seed C1
+      PASS  seed D1
+      PASS  seed E1
+      PASS  seed F1
+      PASS  seed P1
+      PASS  seed N1
+      PASS  seed L1
+      PASS  seed K1
+      PASS  seed X1
+      PASS  population ok
+      PASS  headcount excludes pending
+      PASS  future starters has pending
+      PASS  notice included
+      PASS  leave included
+      PASS  contingent excluded
+      PASS  left excluded
+      PASS  headcount count
+      PASS  historical as-of works
+      PASS  post-LWD left out
+      PASS  headcount eval
+      PASS  headcount drill
+      PASS  pins definition
+      PASS  ordinary HC not suppressed
+      PASS  future starters separate
+      PASS  fte evaluate unavailable
+      PASS  hires include rehire period
+      PASS  hire drill periods
+      PASS  exits recent
+      PASS  exit drill
+      PASS  turnover ok
+      PASS  turnover explain method
+      PASS  zero denom not_applicable
+      PASS  retention cohort
+      PASS  retention not inverse flag
+      PASS  tenure distribution
+      PASS  span of control
+      PASS  manager scope limited
+      PASS  no cross-manager leak
+      PASS  historical dept Ops
+      PASS  current dept Finance
+      PASS  definition versioned
+      PASS  pinned historical eval version
+      PASS  correction
+      PASS  idempotent rebuild
+      PASS  rebuild replay
+      PASS  no double hire count
+      PASS  complementary suppression
+      PASS  ordinary not complementary-suppressed
+      PASS  gender dimension forbidden
+      PASS  modularity perf off env
+      PASS  bilingual headcount name
+      PASS  periods survive disable
+      PASS  eval blocked when disabled
+      PASS  c1 still gateable
+      PASS  all off after prove
+
+    74 passed, 0 failed
+HR_INTELLIGENCE_WORKFORCE_FULL_PASS
+STAGING_RC=0

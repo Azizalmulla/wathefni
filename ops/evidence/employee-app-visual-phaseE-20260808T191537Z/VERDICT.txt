@@ -1,0 +1,51 @@
+EMPLOYEE APP VISUAL REFINEMENT — PHASE E: HIGH-VALUE EMPLOYEE ADDITIONS
+VERDICT: PASS
+PHYSICAL_VISUAL_QA_READY: YES
+
+Additions shipped (6):
+  1. Request Leave — canonical balance for the selected leave type
+  2. Request Leave — requested duration in working days (server-computed)
+  3. Profile — manager name + call action when a dialable number exists
+  4. Inbox — relative time EN/AR with exact timestamp preserved
+  5. Payslips — multi-year grouping verified; single-year dead end closed
+  6. Home — "Civil ID expires in 18 days" from canonical expiry data
+
+Regression fixed (pre-existing, live):
+  /app/leave emits current_balance; mobile read balance_days (never sent).
+  Every leave type rendered a confident "0 days available". Contract corrected;
+  a missing number now renders as nothing.
+
+Backend surface (read-only, no authority):
+  + GET /app/leave/duration      — composes get_leave_policy, holiday_dates_for_range,
+                                    chargeable_leave_days; writes nothing
+  + /app/home tasks[].detail     — soonest renewal's document_type/label/expiry_date,
+                                    passed through from rows already loaded
+
+Gates:
+  mobile behavioural          23 passed, 0 failed
+  mobile static (Phase E)     79 passed, 0 failed
+  backend (Phase E)           34 passed, 0 failed
+  prior suites re-run         11 suites, all green
+  typecheck                   clean (--noEmit --noUnusedLocals)
+  EN/AR                       identical keysets, matching placeholders
+  iOS bundle                  exported clean (3.24 MB)
+
+Known local limitation:
+  smoke-test-leave-guardrails.py imports app.py -> requires psycopg2 (not installed).
+  Pre-existing, unrelated to this phase, runs on staging.
+
+Deferred (asserted absent by gate): certificates, announcements, shift ack,
+  leave edit, YTD earnings, chat, clock in/out, attendance disputes, editable
+  employment profile, org chart/directory, Payments/WPS.
+
+Domain-model gap reported, not filled:
+  No human-facing staff number on /app/profile. employee_persons.employee_number
+  exists in the Wave 2 hub but is not joined into the profile projection.
+  Raw employee_key NOT restored; nothing invented.
+
+Owner decisions open:
+  1. WhatsApp-to-manager alongside call (not shipped)
+  2. Copy for `available` vs `current_balance` when reservations are enabled
+
+NOT CLAIMED: physical iPhone review. Dynamic Type AX3/AX5, on-device RTL,
+dialler hand-off, and the Request Leave summary at small widths need hardware.

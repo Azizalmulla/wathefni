@@ -1,0 +1,65 @@
+    PRODUCTION READINESS R5B — performance surface (staging DB)
+    tenant: R5B16BC91
+      PASS  sync catalog entitlement
+      PASS  talent still not required
+      PASS  competencies optional off
+      PASS  measure created
+      PASS  objective created
+      PASS  two KRs
+      PASS  progress recorded
+      PASS  decorative pct rejected
+      PASS  backend rollup ok
+      PASS  employee sees own objective
+      PASS  surface rollup matches authority
+      PASS  other employee empty not error
+      PASS  manager empty scope fail-closed empty
+      PASS  manager in-scope sees goal
+      PASS  cycle configured
+      PASS  cycle snapshot frozen
+      PASS  launched cycle immutable
+      PASS  objective history present
+      PASS  objective KRs reconstructable
+      PASS  self review submitted
+      PASS  manager review submitted
+      PASS  layers not collapsed
+      PASS  self preserved separately
+      PASS  manager preserved separately
+      PASS  360 fail-closed below threshold
+      PASS  360 aggregate after threshold
+      PASS  employee does not see 360 identities
+      PASS  cycle closed
+      PASS  final exists after close
+      PASS  self still distinct after close
+      PASS  calibration session
+      PASS  authorized facilitator sees session
+      PASS  unauthorized calibration forbidden
+      PASS  development plan Learning-off
+      PASS  development action
+      PASS  employee sees development
+      PASS  learning completion not development
+      PASS  employee workspace ok
+      PASS  employee workspace hides calibration
+      PASS  employee workspace talent off
+      PASS  no hipo key
+      PASS  HR workspace summary
+      PASS  HR talent_visible false
+      PASS  performance still catalog enableable
+      PASS  talent still not enableable
+      PASS  performance HTTP routes registered
+      PASS  unauthenticated dashboard not public
+      FAIL  unauthenticated employee not public :: 503
+      PASS  HR workspace HTTP
+      PASS  HR lists objectives
+      PASS  HR objective detail
+      PASS  tenant isolation 404
+      PASS  manager empty scope fail-closed
+      PASS  manager calibration forbidden
+      PASS  manager cannot launch cycle
+      PASS  raw 360 without sensitive forbidden
+      PASS  employee sees own goals
+      PASS  employee IDOR 404
+      PASS  employee cannot update others progress
+      PASS  history preserved after disable
+      PASS  new work blocked when disabled
+
+    60 passed, 1 failed

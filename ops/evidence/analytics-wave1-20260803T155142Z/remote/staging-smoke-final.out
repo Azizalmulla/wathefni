@@ -1,0 +1,11 @@
+analytics-attention-wave1 smoke tests passed
+PASS  frozen module doc intact ONBOARDING_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact ATTENDANCE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+PASS  frozen module doc intact LEAVE_CONTROLLED_ROLLOUT_COMPLETION_AND_FREEZE.md
+
+96 passed, 0 failed
+{"contract": "analytics_attention_wave1", "as_of": "2026-08-03T18:55:11.795215+03:00", "attention_count": 0, "headlines": ["absences", "late_records", "pending_review"], "unavailable": []}
+UI_ATTENTION_COPY_OK
+UI_HEADCOUNT_GONE
+UI_RESPONSIVE_GRID_OK
+STAGING_ANALYTICS_W1_OK

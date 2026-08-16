@@ -1,0 +1,5 @@
+    wave1 product acceptance — db
+      PASS  surface wiring (monorepo apps absent here — covered by unit smoke)
+    --- setup console policies ---
+FAIL exception: current transaction is aborted, commands ignored until end of transaction block
+

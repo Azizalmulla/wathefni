@@ -1,0 +1,123 @@
+[
+  {
+    "employee_key": "WATHEFNI-96550252254",
+    "name": "Talal Fadhli",
+    "before_count": 6,
+    "after_count": 38,
+    "template_version": "2.0.0",
+    "brian_photo_preserved": null,
+    "obsolete_retired": [
+      {
+        "item_id": "education_cert",
+        "status": "retired_legacy",
+        "deleted": false
+      },
+      {
+        "item_id": "medical",
+        "status": "retired_legacy",
+        "deleted": false
+      }
+    ],
+    "bank": {
+      "collection_mode": "ess_encrypted",
+      "authority": "ess",
+      "status": "pending",
+      "value_redacted": true
+    },
+    "received_history_ok": true,
+    "summary_pending": 4,
+    "summary_received": 0,
+    "summary_required_total": 4,
+    "documents_pending": 4,
+    "documents_complete": 0,
+    "counts_reconcile": true
+  },
+  {
+    "employee_key": "WATHEFNI-96566363363",
+    "name": "Fouad Burhamad",
+    "before_count": 6,
+    "after_count": 38,
+    "template_version": "2.0.0",
+    "brian_photo_preserved": null,
+    "obsolete_retired": [
+      {
+        "item_id": "education_cert",
+        "status": "retired_legacy",
+        "deleted": false
+      },
+      {
+        "item_id": "medical",
+        "status": "retired_legacy",
+        "deleted": false
+      }
+    ],
+    "bank": {
+      "collection_mode": "ess_encrypted",
+      "authority": "ess",
+      "status": "pending",
+      "value_redacted": true
+    },
+    "received_history_ok": true,
+    "summary_pending": 4,
+    "summary_received": 0,
+    "summary_required_total": 4,
+    "documents_pending": 4,
+    "documents_complete": 0,
+    "counts_reconcile": true
+  },
+  {
+    "employee_key": "WATHEFNI-96597727743",
+    "name": "mohammad alqattan",
+    "before_count": 6,
+    "after_count": 38,
+    "template_version": "2.0.0",
+    "brian_photo_preserved": null,
+    "obsolete_retired": [
+      {
+        "item_id": "education_cert",
+        "status": "retired_legacy",
+        "deleted": false
+      },
+      {
+        "item_id": "medical",
+        "status": "retired_legacy",
+        "deleted": false
+      }
+    ],
+    "bank": {
+      "collection_mode": "ess_encrypted",
+      "authority": "ess",
+      "status": "received",
+      "value_redacted": true
+    },
+    "received_history_ok": true,
+    "summary_pending": 2,
+    "summary_received": 2,
+    "summary_required_total": 4,
+    "documents_pending": 2,
+    "documents_complete": 2,
+    "counts_reconcile": true
+  },
+  {
+    "employee_key": "WATHEFNI-96599411617",
+    "name": "Brian Saleh",
+    "before_count": 1,
+    "after_count": 36,
+    "template_version": "2.0.0",
+    "brian_photo_preserved": true,
+    "obsolete_retired": [],
+    "bank": {
+      "collection_mode": "ess_encrypted",
+      "authority": "ess",
+      "status": "pending",
+      "value_redacted": true
+    },
+    "received_history_ok": true,
+    "summary_pending": 4,
+    "summary_received": 0,
+    "summary_required_total": 4,
+    "documents_pending": 4,
+    "documents_complete": 0,
+    "counts_reconcile": true
+  }
+]

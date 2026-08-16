@@ -1,0 +1,16 @@
+{
+  "value": [
+    {
+      "principalId": "a4ebfc44-a55d-4e50-a364-978f55c1d35c",
+      "principalDisplayName": "Wathefni Email Send",
+      "createdDateTime": "2026-07-31T01:20:41.2119507Z",
+      "appRoleId": "b633e1c5-b582-4048-a93e-9f11b44c7e96",
+      "deletedDateTime": null,
+      "resourceId": "d56ff723-dc12-4139-a5be-cc65fba22268",
+      "principalType": "ServicePrincipal",
+      "resourceDisplayName": "Microsoft Graph",
+      "id": "RPzrpF2lUE6jZJePVcHTXBZkCkPJdWFDspxaLw5ZWy4"
+    }
+  ],
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#appRoleAssignments"
+}

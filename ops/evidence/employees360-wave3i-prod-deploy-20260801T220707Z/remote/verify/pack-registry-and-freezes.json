@@ -1,0 +1,101 @@
+{
+  "registry": [
+    {
+      "pack_code": "BH_PRIVATE_SECTOR",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "9f4855be1081da1e"
+    },
+    {
+      "pack_code": "KW_DOMESTIC_WORKERS",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "4e7f441dd9e0cb6f"
+    },
+    {
+      "pack_code": "KW_GOVERNMENT",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "803a4e05c9737674"
+    },
+    {
+      "pack_code": "KW_MARITIME",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "64c196a6a4e149e4"
+    },
+    {
+      "pack_code": "KW_OIL_SECTOR",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "f117c8fb195b09ba"
+    },
+    {
+      "pack_code": "KW_PRIVATE_SECTOR",
+      "policy_version": "1.0.0",
+      "enabled": true,
+      "status": "verified",
+      "hash16": "fc0f28b10db1b0c6"
+    },
+    {
+      "pack_code": "OM_PRIVATE_SECTOR",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "2e16742a192d022b"
+    },
+    {
+      "pack_code": "QA_PRIVATE_SECTOR",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "ac9846e273377a4a"
+    },
+    {
+      "pack_code": "SA_PRIVATE_SECTOR",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "bd5d6bf93096cc3d"
+    },
+    {
+      "pack_code": "UAE_PRIVATE_SECTOR",
+      "policy_version": "0.0.0-reserved",
+      "enabled": false,
+      "status": "reserved",
+      "hash16": "112024f9bfbeea45"
+    }
+  ],
+  "freeze_count": 4,
+  "recent_freezes": [
+    {
+      "pack_code": "KW_PRIVATE_SECTOR",
+      "policy_version": "1.0.0",
+      "hash16": "fc0f28b10db1b0c6",
+      "frozen_at": "2026-08-01 22:15:15.814370+00:00"
+    },
+    {
+      "pack_code": "KW_PRIVATE_SECTOR",
+      "policy_version": "1.0.0",
+      "hash16": "fc0f28b10db1b0c6",
+      "frozen_at": "2026-08-01 22:15:15.138187+00:00"
+    },
+    {
+      "pack_code": "KW_PRIVATE_SECTOR",
+      "policy_version": "1.0.0",
+      "hash16": "fc0f28b10db1b0c6",
+      "frozen_at": "2026-08-01 22:15:13.144117+00:00"
+    },
+    {
+      "pack_code": "KW_PRIVATE_SECTOR",
+      "policy_version": "1.0.0",
+      "hash16": "fc0f28b10db1b0c6",
+      "frozen_at": "2026-08-01 22:15:12.618346+00:00"
+    }
+  ]
+}

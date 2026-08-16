@@ -1,0 +1,82 @@
+    hr intelligence recruiting c3 — prove
+      PASS  c3 module
+      PASS  stamp
+      PASS  commercial analytics
+      PASS  uses c1 evaluator
+      PASS  no second math engine
+      PASS  ttf distinct tth
+      PASS  no universal source score
+      PASS  unknown stays unknown
+      PASS  canonical hire bridge
+      PASS  EN open
+      PASS  AR filled
+      PASS  source unknown en
+      PASS  source referral
+      PASS  c3 global off
+      PASS  empty allowlist
+      PASS  canary ok
+      PASS  tenant iso
+      PASS  enable c3
+      PASS  publish recruiting kpis
+      PASS  universal score blocked
+      PASS  req filled
+      PASS  historical dept preserved
+      PASS  ttf ok
+      PASS  ttf milestones pinned
+      PASS  ttf cancelled excluded
+      PASS  ttf includes reopen cycle
+      PASS  ttf pins definition
+      PASS  unknown source preserved
+      PASS  merge ok
+      PASS  offers issued
+      PASS  offer versions not multiplied
+      PASS  offers accepted
+      PASS  offers declined
+      PASS  accept rate
+      PASS  accept denom reproducible
+      PASS  hire bridge a
+      PASS  tth ok
+      PASS  tth distinct milestones
+      PASS  tth excludes rejected
+      PASS  tth multi-app person
+      PASS  merge no double tth
+      PASS  recruiting hires
+      PASS  hire uses employment keys
+      PASS  c3/c2 reconcile shared
+      PASS  shared authority key
+      FAIL  apps by source referral :: {'ok': True, 'status': 'suppressed', 'value': None, 'unit': 'count', 'numerator_value': None, 'denominator_value': None, 'population_ids': [], 'population_count': 0, 'kpi_definition_id': 'a2c202fb-ea15-4913-a070-f27f26db3985', 'semantic_key': 'recruiting.applications_by_source', 'effective_version': 1, 'formula_snapshot': {'kind': 'recruiting_applications_by_source', 'sensitive_aggregate': True}, 'permission_class': 'workforce_general', 'filters': {'source_bucket': 'referral', 'has_recruiting_candidate_access': True}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.237062+00:00', 'guaranteed_current': False}, 'name_en': 'Applications by source', 'name_ar': 'الطلبات حسب المصدر', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'min_cohort_n': 5, 'segment_count': 1}, 'evaluation_id': '057a8a5c-9ee7-48bf-91ca-cc7f35a8835f', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      FAIL  unknown source apps :: {'ok': True, 'status': 'suppressed', 'value': None, 'unit': 'count', 'numerator_value': None, 'denominator_value': None, 'population_ids': [], 'population_count': 0, 'kpi_definition_id': 'a2c202fb-ea15-4913-a070-f27f26db3985', 'semantic_key': 'recruiting.applications_by_source', 'effective_version': 1, 'formula_snapshot': {'kind': 'recruiting_applications_by_source', 'sensitive_aggregate': True}, 'permission_class': 'workforce_general', 'filters': {'source_bucket': 'unknown', 'has_recruiting_candidate_access': True}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.245310+00:00', 'guaranteed_current': False}, 'name_en': 'Applications by source', 'name_ar': 'الطلبات حسب المصدر', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'min_cohort_n': 5, 'segment_count': 1}, 'evaluation_id': 'e20b3ff1-a781-4891-ac84-18f92da38174', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      PASS  hires by source
+      PASS  observed not causal
+      PASS  source conversion
+      PASS  no magical score flag
+      FAIL  funnel events :: {'ok': True, 'status': 'suppressed', 'value': None, 'unit': 'count', 'numerator_value': None, 'denominator_value': None, 'population_ids': ['APP1:interview:2026-05-24', 'APP1:offer_sent:2026-06-01'], 'population_count': 2, 'kpi_definition_id': '1c247f49-b40c-4002-ab4c-5fd1953029c6', 'semantic_key': 'recruiting.funnel.events', 'effective_version': 1, 'formula_snapshot': {'kind': 'recruiting_funnel_events', 'sensitive_aggregate': True}, 'permission_class': 'workforce_general', 'filters': {'has_recruiting_candidate_access': True}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.298183+00:00', 'guaranteed_current': False}, 'name_en': 'Recruiting funnel events', 'name_ar': 'أحداث قمع التوظيف', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'by_stage': {'interview': 1, 'offer_sent': 1}, 'event_based_not_current_state_only': True, 'candidate_ids_withheld': False}, 'evaluation_id': '3968aec4-10c7-4f6f-996e-5d06d0132279', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      PASS  funnel event based
+      PASS  hm scope ttf
+      PASS  hm no leak
+      FAIL  candidate ids withheld :: {'ok': True, 'status': 'suppressed', 'value': None, 'unit': 'count', 'numerator_value': None, 'denominator_value': None, 'population_ids': [], 'population_count': 0, 'kpi_definition_id': 'a2c202fb-ea15-4913-a070-f27f26db3985', 'semantic_key': 'recruiting.applications_by_source', 'effective_version': 1, 'formula_snapshot': {'kind': 'recruiting_applications_by_source', 'sensitive_aggregate': True}, 'permission_class': 'workforce_general', 'filters': {'hiring_manager_scope_keys': ['HI369245-HM'], 'has_recruiting_candidate_access': False}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.314688+00:00', 'guaranteed_current': False}, 'name_en': 'Applications by source', 'name_ar': 'الطلبات حسب المصدر', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'by_source': {'referral': {'count': 1, 'ids': ['APP1'], 'label_en': 'Referral', 'label_ar': 'إحالة'}, 'unknown': {'count': 1, 'ids': ['APP2'], 'label_en': 'Unknown', 'label_ar': 'غير معروف'}, 'careers_site': {'count': 1, 'ids': ['APP3'], 'label_en': 'Careers site', 'label_ar': 'موقع الوظائف'}}, 'candidate_ids_withheld': True, 'count': 3}, 'evaluation_id': '7d2dc070-b213-457f-9008-c89f5168eac1', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      PASS  preboard rate
+      PASS  onboard template historical
+      PASS  onboard rate
+      PASS  onboard time
+      PASS  probation no freetext outcome
+      PASS  probation outcomes
+      PASS  probation governed
+      PASS  correction
+      PASS  idempotent rebuild
+      PASS  no double hire count
+      PASS  definition versioned
+      PASS  pinned historical eval version
+      FAIL  preboard unavailable not zero :: {'ok': True, 'status': 'ok', 'value': 50.0, 'unit': 'percent', 'numerator_value': 1.0, 'denominator_value': 2.0, 'population_ids': ['PB1', 'PB2'], 'population_count': 2, 'kpi_definition_id': '80bf3f88-db1a-4e5b-a57e-88add2ad1e51', 'semantic_key': 'hire_ready.preboarding_completion_rate', 'effective_version': 1, 'formula_snapshot': {'kind': 'hire_ready_preboarding_rate', 'sensitive_aggregate': False}, 'permission_class': 'workforce_general', 'filters': {}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.665732+00:00', 'guaranteed_current': False}, 'name_en': 'Preboarding completion rate', 'name_ar': 'معدل إكمال التهيئة', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'completion_authority': 'canonical_preboarding_readiness', 'completed_ids': ['PB1']}, 'evaluation_id': '3978505b-a2dd-41eb-ab5b-0076fb7f52fd', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      FAIL  probation unavailable not zero :: {'ok': True, 'status': 'ok', 'value': 2.0, 'unit': 'count', 'numerator_value': None, 'denominator_value': None, 'population_ids': ['PR1', 'PR2'], 'population_count': 2, 'kpi_definition_id': '66b81e63-2a0f-4238-beb0-cd49a55488dd', 'semantic_key': 'hire_ready.probation_outcomes', 'effective_version': 1, 'formula_snapshot': {'kind': 'hire_ready_probation_outcomes', 'sensitive_aggregate': False}, 'permission_class': 'workforce_general', 'filters': {}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.668340+00:00', 'guaranteed_current': False}, 'name_en': 'Probation outcomes', 'name_ar': 'نتائج فترة التجربة', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'distribution': {'confirmed': 1, 'extended': 0, 'failed': 1, 'cancelled': 0}, 'ids_by_outcome': {'confirmed': ['PR1'], 'extended': [], 'failed': ['PR2'], 'cancelled': []}, 'not_inferred_from_due_date': True, 'governed_decision_only': True}, 'evaluation_id': '4d9930b0-8926-4f71-842e-345aa3d88b69', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      PASS  recruiting without preboard/probation
+      FAIL  onboarding unavailable :: {'ok': True, 'status': 'ok', 'value': 100.0, 'unit': 'percent', 'numerator_value': 1.0, 'denominator_value': 1.0, 'population_ids': ['OB1'], 'population_count': 1, 'kpi_definition_id': '30eabf56-9f5b-4d8e-bbe5-f18430da6b18', 'semantic_key': 'hire_ready.onboarding_completion_rate', 'effective_version': 1, 'formula_snapshot': {'kind': 'hire_ready_onboarding_rate', 'sensitive_aggregate': False}, 'permission_class': 'workforce_general', 'filters': {}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.677129+00:00', 'guaranteed_current': False}, 'name_en': 'Onboarding completion rate', 'name_ar': 'معدل إكمال التأهيل', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'completion_authority': 'onboarding_completion_contract', 'not_task_count_ratio': True, 'template_versions': {'OB1': 'tmpl_v1'}, 'completed_ids': ['OB1']}, 'evaluation_id': 'e4c22f2d-fe9e-4ff6-8a54-70ff31f43029', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      PASS  zero denom not_applicable
+      PASS  ttf insufficient_data
+      PASS  bilingual ttf
+      PASS  disable preserves
+      PASS  hires survive disable
+      FAIL  eval blocked when disabled :: {'ok': True, 'status': 'ok', 'value': 19.5, 'unit': 'days', 'numerator_value': None, 'denominator_value': None, 'population_ids': ['REQ1:1', 'REQ_REOPEN:2'], 'population_count': 2, 'kpi_definition_id': '4c45f19d-715a-4492-8bf2-7ef3ea4823fa', 'semantic_key': 'recruiting.time_to_fill', 'effective_version': 1, 'formula_snapshot': {'kind': 'recruiting_time_to_fill', 'elapsed': 'calendar_days', 'end_milestone': 'requisition_filled', 'start_milestone': 'requisition_opened', 'reopened_behavior': 'new_open_cycle_from_reopen_event', 'unfilled_behavior': 'exclude_from_average_insufficient_if_none', 'cancelled_behavior': 'exclude_from_completed_observations', 'sensitive_aggregate': False, 'internal_vs_external_fill': 'include_same_treatment'}, 'permission_class': 'workforce_general', 'filters': {}, 'time_window': {'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'freshness': {'mode': 'near_real_time_spine', 'evaluated_at': '2026-08-12T09:33:27.750758+00:00', 'guaranteed_current': False}, 'name_en': 'Time to fill', 'name_ar': 'زمن إشغال الشاغر', 'min_cohort_n': 5, 'same_authority_as_export': True, 'explain': {'milestones': {'start_milestone': 'requisition_opened', 'end_milestone': 'requisition_filled', 'elapsed': 'calendar_days', 'cancelled_behavior': 'exclude_from_completed_observations', 'reopened_behavior': 'new_open_cycle_from_reopen_event', 'unfilled_behavior': 'exclude_from_average_insufficient_if_none', 'internal_vs_external_fill': 'include_same_treatment'}, 'observations': [{'requisition_key': 'REQ1', 'open_cycle_id': '1', 'opened_at': '2026-05-16', 'filled_at': '2026-06-14', 'calendar_days': 29, 'department': 'Ops', 'hiring_manager_key': 'HI369245-HM', 'recruiter_key': 'HI369245-REC', 'fill_type': None}, {'requisition_key': 'REQ_REOPEN', 'open_cycle_id': '2', 'opened_at': '2026-06-23', 'filled_at': '2026-07-03', 'calendar_days': 10, 'department': 'Sales', 'hiring_manager_key': 'HI369245-HM', 'recruiter_key': 'HI369245-REC', 'fill_type': None}], 'period_start': '2026-05-14', 'period_end': '2026-08-12'}, 'evaluation_id': 'fb324e54-581b-4931-a4d2-a17473e4f501', 'evaluated_at': datetime.datetime(2026, 8, 12, 9, 33, 26, 356531, tzinfo=datetime.timezone.utc)}
+      PASS  all off after prove
+
+    71 passed, 8 failed

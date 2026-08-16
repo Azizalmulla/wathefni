@@ -1,0 +1,5 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users(id,userPrincipalName)/$entity",
+  "id": "08cd915e-3b63-43be-a35a-a35adfde96fc",
+  "userPrincipalName": "wathefni-rbac-deny-probe@wathefni.onmicrosoft.com"
+}

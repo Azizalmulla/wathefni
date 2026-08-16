@@ -1,0 +1,13 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "group": "7a0d99fc-0e0e-44be-8b9f-5cc4ad9c8b20",
+  "androidUpdateId": "019fd934-3625-71a9-b733-2846f502d65c",
+  "iosUpdateId": "019fd934-3625-789b-82ab-bf9e1dd04f52",
+  "message": "Auth Wave 2 Phase 1: seamless EN/AR switch (no restart Alert)",
+  "env": {
+    "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1"
+  },
+  "nativeBuildRequired": false,
+  "priorGroup": "9dc373a9-b9ce-4a7a-9877-5023454ecdc3"
+}

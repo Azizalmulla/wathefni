@@ -1,0 +1,319 @@
+{
+  "artifact_sha": "b99e800dd6b9666af7b1fe788cd7ca760285fbab6d8d4f83baf9129cbdb3fe83",
+  "expected_sha": "b99e800dd6b9666af7b1fe788cd7ca760285fbab6d8d4f83baf9129cbdb3fe83",
+  "sha_match": true,
+  "company": "WATHEFNI",
+  "passed": 48,
+  "failed": 0,
+  "total": 48,
+  "results": [
+    {
+      "section": "artifact",
+      "label": "staging-green SHA present",
+      "ok": true,
+      "detail": "b99e800dd6b9666af7b1fe788cd7ca760285fbab6d8d4f83baf9129cbdb3fe83"
+    },
+    {
+      "section": "artifact",
+      "label": "matches expected owner-review SHA",
+      "ok": true,
+      "detail": "got=b99e800dd6b9666af7b1fe788cd7ca760285fbab6d8d4f83baf9129cbdb3fe83"
+    },
+    {
+      "section": "self_approval",
+      "label": "policy OFF \u2014 offer_allow_self_approval is false",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "web_flow",
+      "label": "draft created",
+      "ok": true,
+      "detail": "736d577a-8604-40a9-9ac1-fb354c3c3377"
+    },
+    {
+      "section": "documents",
+      "label": "EN PDF generated",
+      "ok": true,
+      "detail": "sha256=175f3e4fc11de4b4"
+    },
+    {
+      "section": "documents",
+      "label": "AR PDF generated",
+      "ok": true,
+      "detail": "sha256=8eb651c00868f4b4"
+    },
+    {
+      "section": "documents",
+      "label": "EN/AR PDFs differ",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "documents",
+      "label": "upload without match confirmation rejected",
+      "ok": true,
+      "detail": "code=upload_match_confirmation_required"
+    },
+    {
+      "section": "documents",
+      "label": "upload with match confirmation accepted",
+      "ok": true,
+      "detail": "version=2"
+    },
+    {
+      "section": "stale",
+      "label": "stale expected_version rejected",
+      "ok": true,
+      "detail": "code=stale_offer"
+    },
+    {
+      "section": "web_flow",
+      "label": "submit \u2192 pending_approval",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "web_flow",
+      "label": "approve/return \u2192 draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "web_flow",
+      "label": "return \u2192 edit creates new version",
+      "ok": true,
+      "detail": "2\u21923"
+    },
+    {
+      "section": "self_approval",
+      "label": "creator cannot approve when separation policy enabled (policy OFF)",
+      "ok": true,
+      "detail": "code=self_approval_forbidden"
+    },
+    {
+      "section": "web_flow",
+      "label": "separate approver succeeds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "web_flow",
+      "label": "send \u2192 sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "web_flow",
+      "label": "delivery keyed by offer_id+version",
+      "ok": true,
+      "detail": "intentionally_skipped"
+    },
+    {
+      "section": "token",
+      "label": "respond token minted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "hire_gate",
+      "label": "hire blocked before acceptance",
+      "ok": true,
+      "detail": "code=accepted_offer_required"
+    },
+    {
+      "section": "token",
+      "label": "candidate token accept",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "token",
+      "label": "accepted_version pinned to sent version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "token",
+      "label": "one-time use \u2014 second accept rejected",
+      "ok": true,
+      "detail": "code=token_used"
+    },
+    {
+      "section": "hire_gate",
+      "label": "hire available only after accepted offer",
+      "ok": true,
+      "detail": "736d577a-8604-40a9-9ac1-fb354c3c3377"
+    },
+    {
+      "section": "token",
+      "label": "candidate token decline",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "token",
+      "label": "revocation on withdraw",
+      "ok": true,
+      "detail": "code=token_revoked"
+    },
+    {
+      "section": "token",
+      "label": "token expiry enforced",
+      "ok": true,
+      "detail": "code=token_expired"
+    },
+    {
+      "section": "token",
+      "label": "stale/new-version token rejected (version_mismatch)",
+      "ok": true,
+      "detail": "code=version_mismatch"
+    },
+    {
+      "section": "mobile",
+      "label": "advertise approve/return only (no edit/send)",
+      "ok": true,
+      "detail": "['approve', 'return_draft', 'withdraw']"
+    },
+    {
+      "section": "mobile",
+      "label": "advertise record response + withdraw on sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "mobile",
+      "label": "employment_offers capability enabled with V1 actions",
+      "ok": true,
+      "detail": "['read', 'approve', 'return_draft', 'record_accept', 'record_decline', 'withdraw']"
+    },
+    {
+      "section": "mobile",
+      "label": "approve/return path executable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "mobile",
+      "label": "record response executable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "mobile",
+      "label": "withdraw executable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "mobile",
+      "label": "read DTO available",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "ai",
+      "label": "AI cannot create draft",
+      "ok": true,
+      "detail": "code=ai_forbidden"
+    },
+    {
+      "section": "ai",
+      "label": "AI cannot approve",
+      "ok": true,
+      "detail": "code=ai_forbidden"
+    },
+    {
+      "section": "ai",
+      "label": "require_human_actor rejects AI",
+      "ok": true,
+      "detail": "code=ai_forbidden"
+    },
+    {
+      "section": "override",
+      "label": "override without grant denied",
+      "ok": true,
+      "detail": "code=permission_denied"
+    },
+    {
+      "section": "override",
+      "label": "override without reason denied",
+      "ok": true,
+      "detail": "code=override_reason_required"
+    },
+    {
+      "section": "override",
+      "label": "grant-only override with reason allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "override",
+      "label": "override audit recorded",
+      "ok": true,
+      "detail": "hire_override"
+    },
+    {
+      "section": "override",
+      "label": "residual noted: no-offer override lifecycle audit may be missing on this artifact",
+      "ok": true,
+      "detail": "lifecycle_hire_override_rows=0 (0 means known silent-fail residual before prod)"
+    },
+    {
+      "section": "tenant",
+      "label": "offer not visible cross-tenant by get_offer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "tenant",
+      "label": "cross-tenant update rejected",
+      "ok": true,
+      "detail": "code=offer_not_found"
+    },
+    {
+      "section": "override",
+      "label": "hire_override not in owner ROLE_PERMISSIONS defaults",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "override",
+      "label": "OFFER_GRANT_ONLY_PERMISSIONS difference_update present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "self_approval",
+      "label": "no hidden self-approval \u2014 policy remains false after review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "section": "token",
+      "label": "public preview reflects used token",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "side_effects": [
+    "hire-gate fixture app 96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER (no prior accepted offer)",
+    "created offer 736d577a-8604-40a9-9ac1-fb354c3c3377",
+    "decline-path offer 0de56802-7359-4500-b3af-25881f38b561 on 96597485758-WATHEFNI-HR",
+    "revoke-path offer d430caa9-20d9-410e-879a-2c7212477347 on 96598900677-WATHEFNI-HR",
+    "expiry-path offer 122714b7-6cfd-453d-aeba-3241c0418275",
+    "version-mismatch token inserted for offer a77e0ba9-07d9-44c9-a46c-2c6f1ca30c80",
+    "open offer 699c1b6a-cd19-44e2-bea4-a0674a72b6a0 for override audit",
+    "hire_override attempted for synthetic app OFFER-OWNER-OVERRIDE-24c8b7b2 (audit residual check)",
+    "ensured tenant company OWNERREVX"
+  ],
+  "generated_at": "2026-07-18T00:49:08.727526+00:00",
+  "environment": "staging",
+  "production_touched": false,
+  "documents": {
+    "en_pdf": "/opt/wathefni/staging/orchestrator/staging-evidence/offer-1/owner-review/offer-en.pdf",
+    "ar_pdf": "/opt/wathefni/staging/orchestrator/staging-evidence/offer-1/owner-review/offer-ar.pdf",
+    "en_sha256": "175f3e4fc11de4b4449bc4f6a31b7e8ebb38782f7dda8ebc5d6f12638cd633da",
+    "ar_sha256": "8eb651c00868f4b4b3af350b0a272bd1569ecca333b204f806d2c1512c5b752f"
+  }
+}

@@ -1,0 +1,111 @@
+shifts wave2b prod synthetic canary tag=2f680304
+[PASS] wave1 version 1.1.0
+[PASS] wave2 version 2.0.0
+[PASS] wave1 enabled
+[PASS] wave2 enabled
+[PASS] wave2 synthetic_only
+[PASS] wave2 company WATHEFNI
+[PASS] wave2 other company gated
+[PASS] SHW2B marker synthetic
+[PASS] real employee not wave2 synthetic
+[PASS] honesty payroll_money false
+[PASS] honesty leave_balances_mutated false
+[PASS] CAPTURE_INGEST off
+[PASS] create records assignment version
+[PASS] create enqueues reminder
+[PASS] create does not touch leave_balances
+[PASS] create does not touch payroll bank_transfer
+[PASS] wave2 reminder scan wired to claim_due_reminders
+[PASS] wave2 reminder scan exposes terminal failures
+[PASS] wave2 module has no leave_balances SQL
+[PASS] wave2 module has no payroll money calc
+[PASS] db is wathefni
+[PASS] create ok
+[PASS] create returns shift_id
+[PASS] reschedule #1 ok
+[PASS] reschedule #2 ok
+[PASS] stale update denied
+[PASS] version history length >= 3
+[PASS] exactly one current version
+[PASS] priors immutable superseded
+[PASS] current-row version_no matches
+[PASS] current authority start 11:00
+[PASS] reason codes audited
+[PASS] availability request ok
+[PASS] pending availability does not block
+[PASS] availability approve ok
+[PASS] availability approve replay idempotent
+[PASS] availability require_ack mode
+[PASS] availability ack allows create
+[PASS] availability block mode ignores ack
+[PASS] availability warn mode allows create
+[PASS] availability warn attaches warnings
+[PASS] swap fixture requester
+[PASS] swap fixture target
+[PASS] overlap fixture for swap
+[PASS] swap request (overlap case) ok
+[PASS] swap overlap denial
+[PASS] swap leave denial
+[PASS] swap lifecycle denial
+[PASS] swap self-denial
+[PASS] swap approve ok
+[PASS] swap approve replay idempotent
+[PASS] swap reassigned requester shift to B
+[PASS] swap reassigned target shift to A
+[PASS] swap lineage version recorded
+[PASS] swap preserves previous_employee_key
+[PASS] swap reject ok
+[PASS] swap reject replay idempotent
+[PASS] attendance fixtures created
+[PASS] attendance normal match
+[PASS] attendance split without time fail-closed
+[PASS] attendance split with punch time
+[PASS] attendance overnight next-day attribution
+[PASS] reminder fixture created
+[PASS] reminder enqueue idempotent (no duplicate)
+[PASS] reminder claimed once
+[PASS] reminder retry claim
+[PASS] reminder terminal_failed
+[PASS] terminal failure ops visibility
+[PASS] reminder sent status
+[PASS] no duplicate after sent
+[PASS] reschedule-reminder fixture created
+[PASS] reschedule fixture has a pending reminder before reschedule
+[PASS] reschedule for reminder-cancel proof ok
+[PASS] stale reminder lane cancelled on reschedule
+[PASS] fresh reminder lane enqueued on reschedule
+[PASS] ramadan policy upserted
+[PASS] midday policy upserted
+[PASS] ramadan outside effective dates quiet
+[PASS] ramadan inside effective dates warns
+[PASS] midday restriction site hit warns
+[PASS] midday other site not matched
+[PASS] midday block mode denied
+[PASS] ramadan warn allows create
+[PASS] ramadan create carries warnings
+[PASS] midday block denies create
+[PASS] recon subject created
+[PASS] lifecycle recon flags without cancel
+[PASS] no silent lifecycle cancel
+[PASS] leave recon flags without cancel
+[PASS] no silent leave cancel
+[PASS] recon acknowledge audited
+[PASS] recon cancel is audited soft-cancel
+[PASS] recon cancel sets cancelled
+[PASS] recon cancel reason code
+[PASS] gate-check availability request ok
+[PASS] real employee blocked by wave2 synthetic-only gate
+[PASS] gate-blocked decision rolled back (still requested)
+[PASS] lifecycle reconciliation job job_lock or ok
+[PASS] leave reconciliation job job_lock or ok
+[PASS] kill switch disables operator jobs
+[PASS] jobs re-enabled after kill switch
+[PASS] operator job resumes after kill switch cleared
+[PASS] reminder scan dry_run ok
+[PASS] reminder scan exposes terminal_failures
+[PASS] tenant isolation
+[PASS] residual synthetic zero
+[PASS] real assignment fingerprints unchanged
+[PASS] no leftover assignment rows beyond baseline
+
+108 passed, 0 failed

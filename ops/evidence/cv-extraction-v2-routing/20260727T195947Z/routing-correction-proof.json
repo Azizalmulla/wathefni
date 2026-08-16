@@ -1,0 +1,186 @@
+{
+  "stamp": "20260727T195947Z",
+  "checks": {
+    "health_200": true,
+    "docx_uses_ocr_document_ai": true,
+    "docx_same_v2_schema": true,
+    "docx_employment_improved_or_diagnosed": true,
+    "internal_schema_valid": true,
+    "outage_routes_to_internal": true,
+    "internal_does_not_overwrite_stronger_mistral": true,
+    "all_current_share_v2_schema": true,
+    "no_chat_docx_authority": true,
+    "no_duplicate_fact_snapshots": true,
+    "no_duplicate_current_v2": true,
+    "canonical_profile_authority_unchanged": true,
+    "ocr_model_pinned": true,
+    "chat_model_not_latest": true,
+    "rollback_health_200": true,
+    "restore_health_200": true
+  },
+  "health_body": "{\"status\":\"ok\",\"runtime\":\"toolcall_fastapi\",\"environment_binding\":{\"application_environment\":\"production\",\"database_environment\":\"production\",\"database_environment_marker\":\"2646585bbedb\",\"database_logical_name\":\"b1f1a54885f2\",\"database_host\":\"aaf075b7b4bf\",\"match\":true},\"permission_authority\":\"backe",
+  "docx_weak_case": {
+    "app_key": "96598900677-WATHEFNI-FINANCE",
+    "filename": "Aziz_Almulla_Finance_CV.docx",
+    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "before_path": "ocr_document_annotation",
+    "before_employment": 1,
+    "after_path": "ocr_document_annotation",
+    "after_employment": 1,
+    "extractor_version": "mistral-document-ai-v2",
+    "ok": true,
+    "error": null,
+    "improved_or_diagnosed": true
+  },
+  "outage_fallback": {
+    "path": "wathefni_internal_fallback",
+    "extractor_version": "wathefni-internal-v2",
+    "ok": true,
+    "schema": "cv-extraction-v2",
+    "employment": 0,
+    "languages": 2,
+    "is_current_after": false,
+    "not_overwriting_mistral": true
+  },
+  "current_rows": [
+    {
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96555550133-WATHEFNI-ACCOUNTING",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "chat_text",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96566363363-WATHEFNI-IT_MAINTENANCE",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "chat_text",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-ACCOUNTING_EXCEL",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96597485758-WATHEFNI-HR",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96597727743-WATHEFNI-MARKETING_SPECIALIST",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-ACCOUNTING",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-FINANCE",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96598900677-WATHEFNI-HR",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "96599652277-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    },
+    {
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "extractor_version": "mistral-document-ai-v2",
+      "path": "ocr_document_annotation",
+      "schema": "cv-extraction-v2",
+      "status": "ready"
+    }
+  ],
+  "idempotency": {
+    "facts_before": 12,
+    "facts_after": 12,
+    "v2_current_before": 12,
+    "v2_current_after": 12,
+    "duplicate_current_apps": []
+  },
+  "canonical_profile": {
+    "schema_version": "candidate-profile-facts-v2",
+    "publish_flag": true
+  },
+  "benchmark_differences": {
+    "mistral_ocr_path": "ocr_document_annotation",
+    "mistral_stats": {
+      "employment": 1,
+      "volunteer_work": 0,
+      "education": 1,
+      "skills": 7,
+      "languages": 2,
+      "projects": 2,
+      "publications": 0,
+      "certifications": 0,
+      "training_courses": 0,
+      "memberships_activities": 0,
+      "awards_honors": 0,
+      "unmodeled_sections": 1
+    },
+    "internal_stats": {
+      "employment": 0,
+      "volunteer_work": 0,
+      "education": 1,
+      "skills": 0,
+      "languages": 2,
+      "projects": 1,
+      "publications": 0,
+      "certifications": 0,
+      "training_courses": 0,
+      "memberships_activities": 0,
+      "awards_honors": 0,
+      "unmodeled_sections": 1
+    },
+    "employment_delta_internal_minus_mistral": -1
+  },
+  "pinned_models": {
+    "ocr": "mistral-ocr-4-0",
+    "chat_fallback_pin": "mistral-small-2506",
+    "chat_fallback_enabled_default": false
+  },
+  "pass": true,
+  "rollback_restore": {
+    "rollback_health": "200",
+    "restore_health": "200",
+    "v2_enabled_after_restore": true,
+    "publish_after_restore": true
+  }
+}

@@ -1,31 +1,32 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { memo, useCallback, useMemo, useState } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useRouter } from 'expo-router'
 
 import { useI18n, readingEdgeAlign } from '@/i18n'
-import {
-  EditorialHeading,
-  FadeIn,
-  IconBadge,
-  PastelCard,
-  WathefniBloom,
-  Wordmark,
-  type PastelTone,
-} from '@/components/premium'
+import { EditorialHeading, FadeIn, PastelCard, Wordmark } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
-import { SectionTitle, StatusChip } from '@/components/ui'
-import { formatClockTime, formatDate, formatNumber, formatTimeRange, statusLabel, statusTone } from '@/lib/format'
+import { ListRow, SectionHeader, ShowMoreButton, usePagedList } from '@/components/lists'
+import { formatClockTime, formatDate, formatNumber, formatTimeRange, statusLabel } from '@/lib/format'
 import { asModuleDataState, isModuleFactual, type ModuleDataState } from '@/lib/moduleState'
-import { colors, font, radius, spacing, typeScaling } from '@/theme'
+import { colors, font, layout, radius, scheduleComposition, spacing, typeScaling } from '@/theme'
 import type { WorkdayEntry, WorkdayRecorded, WorkdayResponse, WorkdayScheduled } from '@/api/types'
+
+import { AttendanceCountPill, AttendanceStatusMark, ScheduledStatusMark } from './attendancePills'
+import { presenceDates, resolveSelectedDay } from './scheduleDayModel'
+import { ScheduleWeekStrip } from './ScheduleWeekStrip'
+
+/** Root previews only — more stays behind Show more within the fetched window. */
+const UPCOMING_PREVIEW = 5
+const RECENT_PREVIEW = 5
 
 /**
  * One Schedule surface over the Shifts and Attendance authorities.
  *
- * The employee has a single workday, so today's expected schedule and today's recorded
- * attendance are shown together instead of split across two module screens. Every value
- * is the owning module's stored value; this surface adds no clocking, no correction and
- * no derived judgement. An authority that is off or unreadable says so rather than
- * rendering as "nothing scheduled".
+ * Root order: week selector → selected day / Today → Upcoming preview → Recent
+ * attendance with a quiet 30-day Present/Late/Absent line. Day navigation is
+ * client-side over the existing `/app/workday` window only — never a fabricated
+ * archive. Date taps must not re-render Upcoming/Recent (isolated trailing sections).
  */
 export function ScheduleView({
   data,
@@ -38,11 +39,14 @@ export function ScheduleView({
 }) {
   const { t, locale, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
-  const shiftsState = asModuleDataState(data.authority.shifts)
-  const attendanceState = asModuleDataState(data.authority.attendance)
-  const upcomingState = asModuleDataState(data.authority.shifts_upcoming)
-  const entries = data.today.entries
-  const summary = data.window?.summary
+  const [selectedDate, setSelectedDate] = useState(data.date)
+  const windowDays = data.window?.days ?? 30
+  // Stable while the workday payload identity fields are unchanged — not on every parent render.
+  const presence = useMemo(
+    () => presenceDates(data),
+    [data.date, data.today.entries, data.upcoming, data.recent],
+  )
+  const jumpToToday = useCallback(() => setSelectedDate(data.date), [data.date])
 
   return (
     <PageScreen>
@@ -55,137 +59,341 @@ export function ScheduleView({
           <Text style={[styles.eyebrow, align]}>{formatDate(data.date, locale)}</Text>
           <EditorialHeading>{t('schedule.title')}</EditorialHeading>
           <Text style={[styles.subtitle, align]}>{t('schedule.subtitle')}</Text>
-          <WathefniBloom variant="ribbon" style={styles.heroBloom} />
         </FadeIn>
 
-        <View style={styles.section}>
-          <SectionTitle>{t('schedule.today')}</SectionTitle>
-          {entries.length ? (
-            entries.map((entry, index) => (
-              <WorkdayEntryCard
-                key={entry.scheduled?.shift_id || entry.recorded?.attendance_id || `entry-${index}`}
-                entry={entry}
-                attendanceState={attendanceState}
-              />
-            ))
-          ) : (
-            <TodayEmptyCard shiftsState={shiftsState} attendanceState={attendanceState} />
-          )}
-        </View>
+        <ScheduleWeekStrip
+          today={data.date}
+          selectedDate={selectedDate}
+          windowDays={windowDays}
+          presence={presence}
+          onSelectDate={setSelectedDate}
+        />
 
-        {attendanceState !== 'disabled' ? (
-          <View style={styles.section}>
-            <SectionTitle>{t('schedule.recentRecord')}</SectionTitle>
-            {isModuleFactual(attendanceState) ? (
-              <>
-                {summary ? (
-                  <View style={styles.summaryRow}>
-                    <SummaryMetric status="success" label={t('attendance.present')} value={summary.present} />
-                    <SummaryMetric status="warning" label={t('attendance.late')} value={summary.late} />
-                    <SummaryMetric status="danger" label={t('attendance.absent')} value={summary.absent} />
-                  </View>
-                ) : null}
-                <Text style={[styles.windowNote, align]}>
-                  {t('schedule.windowNote', { days: formatNumber(data.window?.days ?? 30, locale, 0) })}
-                </Text>
-                {data.recent?.length ? (
-                  data.recent.map((record, index) => (
-                    <RecordedRow key={record.attendance_id || `${record.date}-${index}`} record={record} />
-                  ))
-                ) : (
-                  <InfoCard icon="time-outline" tone="cream" message={t('schedule.noRecentRecords')} />
-                )}
-              </>
-            ) : (
-              <AuthorityUnavailableCard state={attendanceState} subject={t('schedule.attendanceAuthority')} />
-            )}
-          </View>
-        ) : null}
+        <SelectedDaySection data={data} selectedDate={selectedDate} onJumpToToday={jumpToToday} />
 
-        {shiftsState !== 'disabled' ? (
-          <View style={styles.section}>
-            <SectionTitle>{t('schedule.upcoming')}</SectionTitle>
-            {isModuleFactual(upcomingState) ? (
-              data.upcoming?.length ? (
-                data.upcoming.map((shift, index) => (
-                  <ScheduledCard key={shift.shift_id || `${shift.date}-${index}`} shift={shift} />
-                ))
-              ) : (
-                <InfoCard icon="calendar-outline" tone="cream" message={t('schedule.noUpcoming')} />
-              )
-            ) : (
-              <AuthorityUnavailableCard state={upcomingState} subject={t('schedule.shiftsAuthority')} />
-            )}
-          </View>
-        ) : null}
-
-        {/* The employee cannot clock in or correct a record here; say so once, plainly. */}
-        <PastelCard tone="cream" style={styles.authorityCard}>
-          <View style={styles.authorityRow}>
-            <IconBadge name="shield-checkmark-outline" size={34} />
-            <Text style={[styles.authorityText, styles.flex, align]}>{t('schedule.hrAuthority')}</Text>
-          </View>
-        </PastelCard>
+        {/* Memoized: date taps must not rebuild upcoming/recent lists. */}
+        <ScheduleTrailingSections data={data} />
       </PageScrollView>
     </PageScreen>
   )
 }
 
-/** Today's row: what was expected, and what was recorded against it. */
+const SelectedDaySection = memo(function SelectedDaySection({
+  data,
+  selectedDate,
+  onJumpToToday,
+}: {
+  data: WorkdayResponse
+  selectedDate: string
+  onJumpToToday: () => void
+}) {
+  const { t, locale, isRTL } = useI18n()
+  const selected = useMemo(() => resolveSelectedDay(data, selectedDate), [data, selectedDate])
+  const dayTitle = selected.isToday ? t('schedule.today') : formatDate(selected.date, locale)
+  const shiftsState = asModuleDataState(data.authority.shifts)
+  const attendanceState = asModuleDataState(data.authority.attendance)
+
+  return (
+    <View style={styles.section}>
+      <View style={styles.dayHead}>
+        <Text
+          accessibilityRole="header"
+          maxFontSizeMultiplier={typeScaling.heading}
+          style={[styles.dayTitle, readingEdgeAlign(isRTL)]}
+        >
+          {dayTitle}
+        </Text>
+        {!selected.isToday ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('schedule.backToToday')}
+            hitSlop={8}
+            onPress={onJumpToToday}
+            style={styles.todayJump}
+          >
+            <Text maxFontSizeMultiplier={typeScaling.chip} style={styles.todayJumpText}>
+              {t('schedule.backToToday')}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+      <SelectedDayPanel
+        selected={selected}
+        shiftsState={shiftsState}
+        attendanceState={attendanceState}
+      />
+    </View>
+  )
+})
+
+/**
+ * Upcoming + Recent + HR. Isolated so rapid date selection cannot reconcile
+ * these subtrees on every tap.
+ */
+const ScheduleTrailingSections = memo(function ScheduleTrailingSections({
+  data,
+}: {
+  data: WorkdayResponse
+}) {
+  const { t, locale, isRTL } = useI18n()
+  const router = useRouter()
+  const align = readingEdgeAlign(isRTL)
+  const shiftsState = asModuleDataState(data.authority.shifts)
+  const attendanceState = asModuleDataState(data.authority.attendance)
+  const upcomingState = asModuleDataState(data.authority.shifts_upcoming)
+  const summary = data.window?.summary
+  const upcoming = data.upcoming ?? []
+  const recent = data.recent ?? []
+  const upcomingPage = usePagedList(upcoming, UPCOMING_PREVIEW)
+  const recentPage = usePagedList(recent, RECENT_PREVIEW)
+  const windowDays = data.window?.days ?? 30
+
+  return (
+    <>
+      {shiftsState !== 'disabled' ? (
+        <View style={styles.section}>
+          <SectionHeader title={t('schedule.upcoming')} />
+          {isModuleFactual(upcomingState) ? (
+            upcoming.length ? (
+              <>
+                {upcomingPage.visible.map((shift, index) => (
+                  <ScheduledCard key={shift.shift_id || `${shift.date}-${index}`} shift={shift} />
+                ))}
+                {upcomingPage.hidden ? (
+                  <ShowMoreButton
+                    label={t('common.showMore', {
+                      count: formatNumber(upcomingPage.hidden, locale, 0),
+                    })}
+                    onPress={upcomingPage.showMore}
+                  />
+                ) : null}
+              </>
+            ) : (
+              <CalmNote message={t('schedule.noUpcoming')} />
+            )
+          ) : (
+            <AuthorityUnavailableCard state={upcomingState} subject={t('schedule.shiftsAuthority')} />
+          )}
+        </View>
+      ) : null}
+
+      {attendanceState !== 'disabled' ? (
+        <View style={styles.section}>
+          <SectionHeader title={t('schedule.recentRecord')} />
+          {isModuleFactual(attendanceState) ? (
+            <>
+              <Text style={[styles.windowNote, align]}>
+                {t('schedule.windowNote', { days: formatNumber(windowDays, locale, 0) })}
+              </Text>
+              {summary ? (
+                <WindowSummaryLine
+                  present={summary.present}
+                  late={summary.late}
+                  absent={summary.absent}
+                />
+              ) : null}
+              {recent.length ? (
+                <>
+                  {recentPage.visible.map((record, index) => (
+                    <RecordedRow
+                      key={record.attendance_id || `${record.date}-${index}`}
+                      record={record}
+                    />
+                  ))}
+                  {recentPage.hidden ? (
+                    <ShowMoreButton
+                      label={t('common.showMore', {
+                        count: formatNumber(recentPage.hidden, locale, 0),
+                      })}
+                      onPress={recentPage.showMore}
+                    />
+                  ) : null}
+                </>
+              ) : (
+                <CalmNote message={t('schedule.noRecentRecords')} />
+              )}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('schedule.history.view')}
+                accessibilityHint={t('schedule.history.viewHint')}
+                onPress={() => router.push('/schedule/history')}
+                style={({ pressed }) => [styles.historyLink, pressed && styles.historyLinkPressed]}
+              >
+                <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.historyLinkText, align]}>
+                  {t('schedule.history.view')}
+                </Text>
+                <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={16} color={colors.accent} />
+              </Pressable>
+            </>
+          ) : (
+            <AuthorityUnavailableCard
+              state={attendanceState}
+              subject={t('schedule.attendanceAuthority')}
+            />
+          )}
+        </View>
+      ) : null}
+
+      <Text style={[styles.authorityFootnote, align]}>{t('schedule.hrAuthority')}</Text>
+    </>
+  )
+})
+
+/** Selected-day panel — only facts the current `/app/workday` payload can support. */
+function SelectedDayPanel({
+  selected,
+  shiftsState,
+  attendanceState,
+}: {
+  selected: ReturnType<typeof resolveSelectedDay>
+  shiftsState: ModuleDataState
+  attendanceState: ModuleDataState
+}) {
+  const { t } = useI18n()
+
+  if (!selected.inWindow) {
+    return <CalmNote message={t('schedule.dayOutsideWindow')} />
+  }
+
+  if (selected.isToday) {
+    if (selected.entries.length) {
+      return (
+        <>
+          {selected.entries.map((entry, index) => (
+            <WorkdayEntryCard
+              key={entry.scheduled?.shift_id || entry.recorded?.attendance_id || `today-${index}`}
+              entry={entry}
+              attendanceState={attendanceState}
+              mode="today"
+            />
+          ))}
+        </>
+      )
+    }
+    return <TodayEmptyCard shiftsState={shiftsState} attendanceState={attendanceState} />
+  }
+
+  if (selected.relation === 'future') {
+    if (shiftsState === 'error') {
+      return <StatusNotice message={t('home.dataUnavailable')} danger />
+    }
+    if (shiftsState === 'loading') {
+      return <CalmNote message={t('home.dataLoading')} />
+    }
+    if (shiftsState === 'disabled') {
+      return <CalmNote message={t('schedule.shiftsNotAvailable')} />
+    }
+    if (!selected.entries.length) {
+      return <CalmNote message={t('schedule.nothingOnDay')} />
+    }
+    return (
+      <>
+        {selected.entries.map((entry, index) => (
+          <WorkdayEntryCard
+            key={entry.scheduled?.shift_id || `future-${index}`}
+            entry={entry}
+            attendanceState={attendanceState}
+            mode="future"
+          />
+        ))}
+      </>
+    )
+  }
+
+  // Past day: attendance rows only (shift roster for past days is not in this contract).
+  if (attendanceState === 'error') {
+    return <StatusNotice message={t('home.dataUnavailable')} danger />
+  }
+  if (attendanceState === 'loading') {
+    return <CalmNote message={t('home.dataLoading')} />
+  }
+  if (attendanceState === 'disabled') {
+    return <CalmNote message={t('schedule.attendanceNotAvailable')} />
+  }
+  if (!selected.entries.length) {
+    return <CalmNote message={t('schedule.noRecordOnDay')} />
+  }
+  return (
+    <>
+      {selected.entries.map((entry, index) => (
+        <WorkdayEntryCard
+          key={entry.recorded?.attendance_id || `past-${index}`}
+          entry={entry}
+          attendanceState={attendanceState}
+          mode="past"
+        />
+      ))}
+    </>
+  )
+}
+
+/** One day row: expected and/or recorded, depending on what the contract supplies. */
 function WorkdayEntryCard({
   entry,
   attendanceState,
+  mode,
 }: {
   entry: WorkdayEntry
   attendanceState: ModuleDataState
+  mode: 'today' | 'past' | 'future'
 }) {
   const { t, locale, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
   const { scheduled, recorded } = entry
+  const showExpected = mode === 'today' || mode === 'future' || mode === 'past'
+  const showRecorded = mode === 'today' || mode === 'past'
 
   return (
-    <PastelCard tone="sky" style={styles.entryCard}>
-      <View style={styles.entryBlock}>
-        <Text style={[styles.blockLabel, align]}>{t('schedule.expected')}</Text>
-        {scheduled ? (
-          <>
-            <View style={styles.cardHead}>
-              <Text style={[styles.entryTime, align]}>
-                {formatTimeRange(scheduled.start_time, scheduled.end_time, locale)}
-              </Text>
-              <StatusChip label={statusLabel(scheduled.status, t)} tone={statusTone(scheduled.status)} />
-            </View>
-            {scheduled.location || scheduled.role ? (
-              <View style={styles.metaRow}>
-                <Ionicons name="location-outline" size={16} color={colors.subtle} />
-                <Text style={[styles.supporting, align]}>{scheduled.location || scheduled.role}</Text>
+    <PastelCard tone="sky" style={[styles.entryCard, styles.plannedEntryCard]}>
+      {showExpected ? (
+        <View style={styles.entryBlock}>
+          <Text style={[styles.blockLabel, align]}>{t('schedule.expected')}</Text>
+          {scheduled ? (
+            <>
+              <View style={styles.cardHead}>
+                <Text style={[styles.entryTime, align]}>
+                  {formatTimeRange(scheduled.start_time, scheduled.end_time, locale)}
+                </Text>
+                {mode !== 'future' || scheduled.status ? (
+                  <ScheduledStatusMark label={statusLabel(scheduled.status, t)} />
+                ) : null}
               </View>
-            ) : null}
-            {scheduled.notes ? <Text style={[styles.supporting, align]}>{scheduled.notes}</Text> : null}
-          </>
-        ) : (
-          <Text style={[styles.entryMuted, align]}>{t('schedule.noScheduleForRecord')}</Text>
-        )}
-      </View>
+              {scheduled.location || scheduled.role ? (
+                <View style={styles.metaRow}>
+                  <Ionicons name="location-outline" size={16} color={colors.subtle} />
+                  <Text style={[styles.supporting, align]}>{scheduled.location || scheduled.role}</Text>
+                </View>
+              ) : null}
+              {scheduled.notes ? <Text style={[styles.supporting, align]}>{scheduled.notes}</Text> : null}
+            </>
+          ) : (
+            <Text style={[styles.entryMuted, align]}>
+              {mode === 'past' ? t('schedule.noScheduleForRecord') : t('schedule.nothingOnDay')}
+            </Text>
+          )}
+        </View>
+      ) : null}
 
-      <View style={styles.entryDivider} />
+      {showExpected && showRecorded ? <View style={styles.entryDivider} /> : null}
 
-      <View style={styles.entryBlock}>
-        <Text style={[styles.blockLabel, align]}>{t('schedule.recorded')}</Text>
-        {recorded ? (
-          <RecordedDetail record={recorded} />
-        ) : isModuleFactual(attendanceState) ? (
-          <Text style={[styles.entryMuted, align]}>{t('schedule.noRecordYet')}</Text>
-        ) : (
-          <Text style={[styles.entryMuted, align]}>
-            {attendanceState === 'disabled'
-              ? t('schedule.attendanceNotAvailable')
-              : attendanceState === 'error'
-                ? t('home.dataUnavailable')
-                : t('home.dataLoading')}
-          </Text>
-        )}
-      </View>
+      {showRecorded ? (
+        <View style={styles.entryBlock}>
+          <Text style={[styles.blockLabel, align]}>{t('schedule.recorded')}</Text>
+          {recorded ? (
+            <RecordedDetail record={recorded} />
+          ) : isModuleFactual(attendanceState) ? (
+            <Text style={[styles.entryMuted, align]}>{t('schedule.noRecordYet')}</Text>
+          ) : (
+            <Text style={[styles.entryMuted, align]}>
+              {attendanceState === 'disabled'
+                ? t('schedule.attendanceNotAvailable')
+                : attendanceState === 'error'
+                  ? t('home.dataUnavailable')
+                  : t('home.dataLoading')}
+            </Text>
+          )}
+        </View>
+      ) : null}
     </PastelCard>
   )
 }
@@ -201,7 +409,7 @@ function RecordedDetail({ record }: { record: WorkdayRecorded }) {
             ? `${formatClockTime(record.check_in_at, locale)} – ${formatClockTime(record.check_out_at, locale)}`
             : t('schedule.noTimesRecorded')}
         </Text>
-        <StatusChip label={statusLabel(record.status, t)} tone={statusTone(record.status)} />
+        <AttendanceStatusMark status={record.status} label={statusLabel(record.status, t)} />
       </View>
       {record.late_minutes > 0 ? (
         <Text style={[styles.supporting, align]}>
@@ -219,22 +427,16 @@ function RecordedDetail({ record }: { record: WorkdayRecorded }) {
 }
 
 function ScheduledCard({ shift }: { shift: WorkdayScheduled }) {
-  const { t, locale, isRTL } = useI18n()
-  const align = readingEdgeAlign(isRTL)
+  const { t, locale } = useI18n()
+  const location = shift.location || shift.role
   return (
-    <PastelCard tone="sky" style={styles.shiftCard}>
-      <View style={styles.cardHead}>
-        <Text style={[styles.metaStrong, align]}>{formatDate(shift.date, locale)}</Text>
-        <StatusChip label={statusLabel(shift.status, t)} tone={statusTone(shift.status)} />
-      </View>
-      <Text style={[styles.entryTime, align]}>{formatTimeRange(shift.start_time, shift.end_time, locale)}</Text>
-      {shift.location || shift.role ? (
-        <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={16} color={colors.subtle} />
-          <Text style={[styles.supporting, align]}>{shift.location || shift.role}</Text>
-        </View>
-      ) : null}
-    </PastelCard>
+    <ListRow
+      title={formatDate(shift.date, locale)}
+      subtitle={formatTimeRange(shift.start_time, shift.end_time, locale)}
+      meta={location || null}
+      trailing={<ScheduledStatusMark label={statusLabel(shift.status, t)} />}
+      accessibilityLabel={`${formatDate(shift.date, locale)}. ${formatTimeRange(shift.start_time, shift.end_time, locale)}. ${statusLabel(shift.status, t)}`}
+    />
   )
 }
 
@@ -257,7 +459,7 @@ function RecordedRow({ record }: { record: WorkdayRecorded }) {
           </Text>
         ) : null}
       </View>
-      <StatusChip label={statusLabel(record.status, t)} tone={statusTone(record.status)} />
+      <AttendanceStatusMark status={record.status} label={statusLabel(record.status, t)} />
     </View>
   )
 }
@@ -275,98 +477,87 @@ function TodayEmptyCard({
 }) {
   const { t } = useI18n()
   if (shiftsState === 'error' || attendanceState === 'error') {
-    return <InfoCard icon="cloud-offline-outline" tone="notice" message={t('schedule.todayUnavailable')} />
+    return <StatusNotice message={t('schedule.todayUnavailable')} danger />
   }
   if (shiftsState === 'loading' || attendanceState === 'loading') {
-    return <InfoCard icon="time-outline" tone="cream" message={t('home.dataLoading')} />
+    return <CalmNote message={t('home.dataLoading')} />
   }
   if (shiftsState === 'disabled') {
-    // Attendance only: there is no schedule authority to be empty about.
-    return <InfoCard icon="time-outline" tone="cream" message={t('schedule.noRecordToday')} />
+    return <CalmNote message={t('schedule.noRecordToday')} />
   }
-  return <InfoCard icon="calendar-clear-outline" tone="sky" message={t('schedule.nothingToday')} />
+  return <CalmNote message={t('schedule.nothingToday')} />
+}
+
+/** Cream-ground empty — no bordered white panel (QuietEmpty still paints a surface card). */
+function CalmNote({ message }: { message: string }) {
+  const { isRTL } = useI18n()
+  return (
+    <Text
+      maxFontSizeMultiplier={typeScaling.body}
+      style={[styles.calmNote, readingEdgeAlign(isRTL)]}
+      accessibilityRole="summary"
+    >
+      {message}
+    </Text>
+  )
 }
 
 function AuthorityUnavailableCard({ state, subject }: { state: ModuleDataState; subject: string }) {
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
+  const danger = state === 'error'
   return (
-    <View style={[styles.infoCard, styles.noticeCard, state === 'error' && styles.noticeCardError]}>
-      <View style={styles.authorityRow}>
-        <IconBadge name={state === 'error' ? 'cloud-offline-outline' : 'time-outline'} size={32} />
-        <View style={styles.flex}>
-          <Text style={[styles.infoMessage, align]}>
-            {state === 'error' ? t('home.dataUnavailable') : t('home.dataLoading')}
-          </Text>
-          <Text style={[styles.supporting, align]}>
-            {state === 'error' ? `${subject} · ${t('home.dataUnavailableHint')}` : subject}
-          </Text>
-        </View>
-      </View>
+    <View style={[styles.statusNotice, danger && styles.statusNoticeDanger]}>
+      <Text style={[styles.statusNoticeTitle, align]}>
+        {danger ? t('home.dataUnavailable') : t('home.dataLoading')}
+      </Text>
+      <Text style={[styles.supporting, align]}>
+        {danger ? `${subject} · ${t('home.dataUnavailableHint')}` : subject}
+      </Text>
     </View>
   )
 }
 
-/**
- * `notice` renders on neutral surface with a semantic edge: an unreadable or
- * empty authority is a state, not an ambient brand moment.
- */
-function InfoCard({
-  icon,
-  message,
-  tone,
-}: {
-  icon: keyof typeof Ionicons.glyphMap
-  message: string
-  tone: PastelTone | 'notice'
-}) {
+/** Error / unavailable — neutral surface with a semantic edge, not an ambient card. */
+function StatusNotice({ message, danger }: { message: string; danger?: boolean }) {
   const { isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
-  const body = (
-    <View style={styles.authorityRow}>
-      <IconBadge name={icon} size={32} />
-      <Text
-        maxFontSizeMultiplier={typeScaling.body}
-        style={[styles.infoMessage, styles.flex, align]}
-      >
+  return (
+    <View style={[styles.statusNotice, danger && styles.statusNoticeDanger]}>
+      <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.statusNoticeTitle, align]}>
         {message}
       </Text>
     </View>
   )
-  if (tone === 'notice') {
-    return <View style={[styles.infoCard, styles.noticeCard, styles.noticeCardError]}>{body}</View>
-  }
-  return (
-    <PastelCard tone={tone} style={styles.infoCard}>
-      {body}
-    </PastelCard>
-  )
 }
 
-/**
- * Present / Late / Absent are statuses, so they are neutral tiles with a semantic
- * figure rather than green / yellow / red fills that would collide with the
- * ambient palette used elsewhere on this screen.
- */
-function SummaryMetric({
-  status,
-  label,
-  value,
+/** Three brand count pills for the 30-day window — Home palette, Schedule job. */
+function WindowSummaryLine({
+  present,
+  late,
+  absent,
 }: {
-  status: 'success' | 'warning' | 'danger'
-  label: string
-  value: number
+  present: number
+  late: number
+  absent: number
 }) {
-  const { locale } = useI18n()
-  const fg = status === 'success' ? colors.success : status === 'warning' ? colors.warning : colors.danger
+  const { t, locale, isRTL } = useI18n()
+  const presentLabel = t('attendance.present')
+  const lateLabel = t('attendance.late')
+  const absentLabel = t('attendance.absent')
+  const presentN = formatNumber(present, locale, 0)
+  const lateN = formatNumber(late, locale, 0)
+  const absentN = formatNumber(absent, locale, 0)
+
   return (
-    <View style={styles.summaryMetric} accessibilityLabel={`${label}: ${formatNumber(value, locale, 0)}`}>
-      <Text maxFontSizeMultiplier={typeScaling.heading} style={[styles.summaryValue, { color: fg }]}>
-        {formatNumber(value, locale, 0)}
-      </Text>
-      <Text maxFontSizeMultiplier={typeScaling.body} numberOfLines={2} style={styles.summaryLabel}>
-        {label}
-      </Text>
+    <View
+      style={[styles.summaryLine, isRTL && styles.summaryLineRtl]}
+      accessibilityRole="summary"
+      accessibilityLabel={`${presentN} ${presentLabel}. ${lateN} ${lateLabel}. ${absentN} ${absentLabel}`}
+    >
+      <AttendanceCountPill kind="present" value={presentN} label={presentLabel} />
+      <AttendanceCountPill kind="late" value={lateN} label={lateLabel} />
+      <AttendanceCountPill kind="absent" value={absentN} label={absentLabel} />
     </View>
   )
 }
@@ -374,11 +565,34 @@ function SummaryMetric({
 const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center' },
   hero: { gap: spacing.xs },
-  heroBloom: { marginTop: spacing.xs },
   eyebrow: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700', letterSpacing: 0.4 },
   subtitle: { color: colors.subtle, fontSize: font.small, lineHeight: 20 },
   section: { gap: spacing.sm },
+  dayHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  dayTitle: {
+    flex: 1,
+    color: colors.ink,
+    fontSize: font.h3,
+    fontWeight: '800',
+    lineHeight: 24,
+  },
+  todayJump: {
+    minHeight: layout.touchTarget,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  todayJumpText: {
+    color: colors.accent,
+    fontSize: font.small,
+    fontWeight: '700',
+  },
   entryCard: { gap: spacing.md },
+  plannedEntryCard: { backgroundColor: scheduleComposition.planned.fill },
   entryBlock: { gap: spacing.xs },
   entryDivider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
   blockLabel: { color: colors.subtle, fontSize: font.tiny, fontWeight: '800', letterSpacing: 0.4 },
@@ -386,24 +600,33 @@ const styles = StyleSheet.create({
   entryMuted: { color: colors.subtle, fontSize: font.body, lineHeight: 22, fontWeight: '600' },
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  metaStrong: { color: colors.ink, fontSize: font.small, fontWeight: '700' },
   supporting: { color: colors.subtle, fontSize: font.tiny, lineHeight: 17 },
-  shiftCard: { gap: spacing.xs },
-  summaryRow: { flexDirection: 'row', gap: spacing.sm },
-  summaryMetric: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 2,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xs,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  summaryValue: { fontSize: font.h2, fontWeight: '800' },
-  summaryLabel: { color: colors.subtle, fontSize: font.tiny, fontWeight: '700', textAlign: 'center' },
   windowNote: { color: colors.subtle, fontSize: font.tiny, lineHeight: 17 },
+  calmNote: {
+    color: colors.subtle,
+    fontSize: font.body,
+    lineHeight: 22,
+    fontWeight: '600',
+    paddingVertical: spacing.sm,
+  },
+  summaryLine: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'stretch',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  summaryLineRtl: { flexDirection: 'row-reverse' },
+  historyLink: {
+    minHeight: layout.touchTarget,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  historyLinkPressed: { opacity: 0.7 },
+  historyLinkText: { flex: 1, color: colors.accent, fontSize: font.small, fontWeight: '700' },
   recordRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -414,18 +637,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   recordDate: { color: colors.ink, fontSize: font.small, fontWeight: '700' },
-  infoCard: { paddingVertical: spacing.md },
-  noticeCard: {
+  statusNotice: {
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.xl,
     backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
+    gap: spacing.xs,
   },
-  noticeCardError: { borderWidth: StyleSheet.hairlineWidth * 2, borderColor: colors.danger },
-  infoMessage: { color: colors.ink, fontSize: font.body, lineHeight: 22, fontWeight: '600' },
-  authorityCard: { paddingVertical: spacing.md },
-  authorityRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  authorityText: { color: colors.ink, fontSize: font.small, lineHeight: 19, fontWeight: '600' },
+  statusNoticeDanger: {
+    borderWidth: StyleSheet.hairlineWidth * 2,
+    borderColor: colors.danger,
+  },
+  statusNoticeTitle: { color: colors.ink, fontSize: font.body, lineHeight: 22, fontWeight: '600' },
+  authorityFootnote: { color: colors.subtle, fontSize: font.tiny, lineHeight: 17 },
   flex: { flex: 1 },
 })

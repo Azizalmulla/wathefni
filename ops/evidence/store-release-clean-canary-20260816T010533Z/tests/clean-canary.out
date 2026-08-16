@@ -1,0 +1,19 @@
+    STORE RELEASE — clean Setup canary
+    tenant: QAB45967 base: http://127.0.0.1:8011
+      PASS  operator credentials present
+      PASS  Setup operator login
+      PASS  operator access token issued
+      PASS  Setup creates company
+      PASS  new company bootstrap is not pre-staffed
+      PASS  Setup seeds owner invite
+      PASS  owner invite token returned
+      PASS  owner accepts invite through Setup/auth
+      PASS  owner dashboard login
+      PASS  owner session issued
+      PASS  owner can open company Setup
+      PASS  owner enables Leave through Setup
+      FAIL  clean owner roster create is possible through Setup/HR (no cutover CLI) :: (403, 'module_disabled', 'grant-only employees.manage')
+      NOTE  new-company owners cannot grant themselves employees.* (grant-only, no Setup write path)
+      CLEANUP  QAB45967
+
+    CLEAN_CANARY_FAIL  12 passed, 1 failed

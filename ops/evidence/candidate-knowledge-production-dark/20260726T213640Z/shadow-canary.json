@@ -1,0 +1,501 @@
+{
+  "canary": [
+    {
+      "id": "C1_exact_cv",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "version_id": "44cfbc94-9220-4d11-8af7-fd7823376079",
+      "coverage": [
+        {
+          "section": "canonical_cv",
+          "state": "available",
+          "reason_codes": [
+            "current_ready_version"
+          ],
+          "note": null
+        },
+        {
+          "section": "effective_facts",
+          "state": "source_pipeline_incomplete",
+          "reason_codes": [
+            "snapshot_status:superseded"
+          ],
+          "note": null
+        },
+        {
+          "section": "classifications",
+          "state": "invalidated",
+          "reason_codes": [
+            "all_runs_invalidated"
+          ],
+          "note": null
+        },
+        {
+          "section": "screening_evidence",
+          "state": "not_authorized",
+          "reason_codes": [
+            "phase2_boundary"
+          ],
+          "note": "Phase 3+ reader not enabled in assemble_phase2."
+        },
+        {
+          "section": "assessments",
+          "state": "not_authorized",
+          "reason_codes": [
+            "phase2_boundary"
+          ],
+          "note": "Phase 3+ reader not enabled in assemble_phase2."
+        },
+        {
+          "section": "interviews",
+          "state": "not_authorized",
+          "reason_codes": [
+            "phase2_boundary"
+          ],
+          "note": "Phase 3+ reader not enabled in assemble_phase2."
+        },
+        {
+          "section": "ranking_evaluations",
+          "state": "not_authorized",
+          "reason_codes": [
+            "phase2_boundary"
+          ],
+          "note": "Phase 3+ reader not enabled in assemble_phase2."
+        },
+        {
+          "section": "notes",
+          "state": "not_authorized",
+          "reason_codes": [
+            "phase2_boundary"
+          ],
+          "note": "Phase 3+ reader not enabled in assemble_phase2."
+        }
+      ]
+    },
+    {
+      "id": "C1_shadow_get",
+      "status": "PASS",
+      "text_omitted": true
+    },
+    {
+      "id": "C1_shadow_search",
+      "status": "PASS",
+      "total": 2,
+      "mode": "lexical_only"
+    },
+    {
+      "id": "C2_mariam_surname",
+      "status": "PASS",
+      "code": "candidate_ambiguous"
+    },
+    {
+      "id": "C3_held",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "job_ranking_allowed": false,
+      "ranking_eligible": false,
+      "denial": "held_or_job_ranking_ineligible"
+    },
+    {
+      "id": "C4_long_chunk_present",
+      "status": "PASS",
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "chars": 8468
+    },
+    {
+      "id": "C5_gap_disclosed",
+      "status": "PASS",
+      "app_key": "96550252254-WATHEFNI-SOCIAL_MEDIA_MANAGER",
+      "data_source": "production",
+      "canonical_cv": "not_recorded"
+    },
+    {
+      "id": "C6_governance_probe",
+      "status": "PASS",
+      "rows": 0,
+      "note": "candidate_governance_table_absent"
+    },
+    {
+      "id": "C7_compare_no_winner",
+      "status": "PASS"
+    },
+    {
+      "id": "C8_ranking_shadow",
+      "status": "PASS",
+      "class": "expected_authority_difference",
+      "denial": "held_or_job_ranking_ineligible",
+      "unexplained": []
+    },
+    {
+      "id": "old_vs_new_ai_recruiter",
+      "status": "PASS",
+      "comparisons": [
+        {
+          "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+          "legacy": {
+            "source": "legacy_application_row",
+            "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "has_name": true,
+            "data_source": "production",
+            "canonical_cv_version": null,
+            "coverage_disclosed": false
+          },
+          "new": {
+            "source": "candidate_knowledge_authority",
+            "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "canonical_cv_version": "44cfbc94-9220-4d11-8af7-fd7823376079",
+            "text_omitted_by_policy": true,
+            "coverage": [
+              {
+                "section": "canonical_cv",
+                "state": "available",
+                "reason_codes": [
+                  "current_ready_version"
+                ],
+                "note": null
+              },
+              {
+                "section": "effective_facts",
+                "state": "source_pipeline_incomplete",
+                "reason_codes": [
+                  "snapshot_status:superseded"
+                ],
+                "note": null
+              },
+              {
+                "section": "classifications",
+                "state": "invalidated",
+                "reason_codes": [
+                  "all_runs_invalidated"
+                ],
+                "note": null
+              },
+              {
+                "section": "screening_evidence",
+                "state": "not_authorized",
+                "reason_codes": [
+                  "phase2_boundary"
+                ],
+                "note": "Phase 3+ reader not enabled in assemble_phase2."
+              },
+              {
+                "section": "assessments",
+                "state": "not_authorized",
+                "reason_codes": [
+                  "phase2_boundary"
+                ],
+                "note": "Phase 3+ reader not enabled in assemble_phase2."
+              },
+              {
+                "section": "interviews",
+                "state": "not_authorized",
+                "reason_codes": [
+                  "phase2_boundary"
+                ],
+                "note": "Phase 3+ reader not enabled in assemble_phase2."
+              }
+            ],
+            "job_ranking_allowed": false
+          },
+          "deltas": [
+            {
+              "field": "canonical_cv_version",
+              "class": "expected_authority_enrichment",
+              "legacy": null,
+              "new": "44cfbc94-9220-4d11-8af7-fd7823376079"
+            },
+            {
+              "field": "coverage_disclosure",
+              "class": "expected_authority_enrichment",
+              "legacy": false,
+              "new": true
+            }
+          ],
+          "unexplained": [],
+          "status": "PASS"
+        },
+        {
+          "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+          "legacy": {
+            "source": "legacy_application_row",
+            "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "has_name": true,
+            "data_source": "production",
+            "canonical_cv_version": null,
+            "coverage_disclosed": false
+          },
+          "new": {
+            "source": "candidate_knowledge_authority",
+            "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+            "status": "needs_role",
+            "canonical_cv_version": "c36c0291-ceec-4697-91d8-02e4c108d5b5",
+            "text_omitted_by_policy": true,
+            "coverage": [
+              {
+                "section": "canonical_cv",
+                "state": "available",
+                "reason_codes": [
+                  "current_ready_version"
+                ],
+                "note": null
+              },
+              {
+                "section": "effective_facts",
+                "state": "available",
+                "reason_codes": [
+                  "current_ready_snapshot"
+                ],
+                "note": null
+              },
+              {
+                "section": "classifications",
+                "state": "available",
+                "reason_codes": [
+                  "eligible_non_invalidated_run"
+                ],
+                "note": null
+              },
+              {
+                "section": "screening_evidence",
+                "state": "not_authorized",
+                "reason_codes": [
+                  "phase2_boundary"
+                ],
+                "note": "Phase 3+ reader not enabled in assemble_phase2."
+              },
+              {
+                "section": "assessments",
+                "state": "not_authorized",
+                "reason_codes": [
+                  "phase2_boundary"
+                ],
+                "note": "Phase 3+ reader not enabled in assemble_phase2."
+              },
+              {
+                "section": "interviews",
+                "state": "not_authorized",
+                "reason_codes": [
+                  "phase2_boundary"
+                ],
+                "note": "Phase 3+ reader not enabled in assemble_phase2."
+              }
+            ],
+            "job_ranking_allowed": false
+          },
+          "deltas": [
+            {
+              "field": "canonical_cv_version",
+              "class": "expected_authority_enrichment",
+              "legacy": null,
+              "new": "c36c0291-ceec-4697-91d8-02e4c108d5b5"
+            },
+            {
+              "field": "coverage_disclosure",
+              "class": "expected_authority_enrichment",
+              "legacy": false,
+              "new": true
+            }
+          ],
+          "unexplained": [],
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "C10_audit_fail_closed",
+      "status": "PASS"
+    },
+    {
+      "id": "tenant_isolation",
+      "status": "PASS",
+      "other_company_chunks_in_db": 0,
+      "note": "CK index currently WATHEFNI-only in production-dark"
+    },
+    {
+      "id": "zero_mutation_guards",
+      "status": "PASS"
+    },
+    {
+      "id": "registry_no_live_tools",
+      "status": "PASS"
+    }
+  ],
+  "audit_events": 4,
+  "old_vs_new": [
+    {
+      "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+      "legacy": {
+        "source": "legacy_application_row",
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "has_name": true,
+        "data_source": "production",
+        "canonical_cv_version": null,
+        "coverage_disclosed": false
+      },
+      "new": {
+        "source": "candidate_knowledge_authority",
+        "app_key": "imp-wathefni-06ffffc36d7fd375-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "canonical_cv_version": "44cfbc94-9220-4d11-8af7-fd7823376079",
+        "text_omitted_by_policy": true,
+        "coverage": [
+          {
+            "section": "canonical_cv",
+            "state": "available",
+            "reason_codes": [
+              "current_ready_version"
+            ],
+            "note": null
+          },
+          {
+            "section": "effective_facts",
+            "state": "source_pipeline_incomplete",
+            "reason_codes": [
+              "snapshot_status:superseded"
+            ],
+            "note": null
+          },
+          {
+            "section": "classifications",
+            "state": "invalidated",
+            "reason_codes": [
+              "all_runs_invalidated"
+            ],
+            "note": null
+          },
+          {
+            "section": "screening_evidence",
+            "state": "not_authorized",
+            "reason_codes": [
+              "phase2_boundary"
+            ],
+            "note": "Phase 3+ reader not enabled in assemble_phase2."
+          },
+          {
+            "section": "assessments",
+            "state": "not_authorized",
+            "reason_codes": [
+              "phase2_boundary"
+            ],
+            "note": "Phase 3+ reader not enabled in assemble_phase2."
+          },
+          {
+            "section": "interviews",
+            "state": "not_authorized",
+            "reason_codes": [
+              "phase2_boundary"
+            ],
+            "note": "Phase 3+ reader not enabled in assemble_phase2."
+          }
+        ],
+        "job_ranking_allowed": false
+      },
+      "deltas": [
+        {
+          "field": "canonical_cv_version",
+          "class": "expected_authority_enrichment",
+          "legacy": null,
+          "new": "44cfbc94-9220-4d11-8af7-fd7823376079"
+        },
+        {
+          "field": "coverage_disclosure",
+          "class": "expected_authority_enrichment",
+          "legacy": false,
+          "new": true
+        }
+      ],
+      "unexplained": [],
+      "status": "PASS"
+    },
+    {
+      "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+      "legacy": {
+        "source": "legacy_application_row",
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "has_name": true,
+        "data_source": "production",
+        "canonical_cv_version": null,
+        "coverage_disclosed": false
+      },
+      "new": {
+        "source": "candidate_knowledge_authority",
+        "app_key": "imp-wathefni-837eb9b1bf14506b-WATHEFNI-IMPORT",
+        "status": "needs_role",
+        "canonical_cv_version": "c36c0291-ceec-4697-91d8-02e4c108d5b5",
+        "text_omitted_by_policy": true,
+        "coverage": [
+          {
+            "section": "canonical_cv",
+            "state": "available",
+            "reason_codes": [
+              "current_ready_version"
+            ],
+            "note": null
+          },
+          {
+            "section": "effective_facts",
+            "state": "available",
+            "reason_codes": [
+              "current_ready_snapshot"
+            ],
+            "note": null
+          },
+          {
+            "section": "classifications",
+            "state": "available",
+            "reason_codes": [
+              "eligible_non_invalidated_run"
+            ],
+            "note": null
+          },
+          {
+            "section": "screening_evidence",
+            "state": "not_authorized",
+            "reason_codes": [
+              "phase2_boundary"
+            ],
+            "note": "Phase 3+ reader not enabled in assemble_phase2."
+          },
+          {
+            "section": "assessments",
+            "state": "not_authorized",
+            "reason_codes": [
+              "phase2_boundary"
+            ],
+            "note": "Phase 3+ reader not enabled in assemble_phase2."
+          },
+          {
+            "section": "interviews",
+            "state": "not_authorized",
+            "reason_codes": [
+              "phase2_boundary"
+            ],
+            "note": "Phase 3+ reader not enabled in assemble_phase2."
+          }
+        ],
+        "job_ranking_allowed": false
+      },
+      "deltas": [
+        {
+          "field": "canonical_cv_version",
+          "class": "expected_authority_enrichment",
+          "legacy": null,
+          "new": "c36c0291-ceec-4697-91d8-02e4c108d5b5"
+        },
+        {
+          "field": "coverage_disclosure",
+          "class": "expected_authority_enrichment",
+          "legacy": false,
+          "new": true
+        }
+      ],
+      "unexplained": [],
+      "status": "PASS"
+    }
+  ]
+}

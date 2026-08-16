@@ -1,0 +1,26 @@
+[
+  {
+    "id": "019fd81a-629a-7922-95b0-f9a502cf1c4e",
+    "createdAt": "2026-08-06T17:23:55.674Z",
+    "group": "85f648c9-73a0-4b14-9d8e-838913496a4d",
+    "branch": "canary",
+    "message": "Fix Bank ESS OTA syncLayoutLocale clean 20260806T172002Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "android",
+    "manifestPermalink": "https://u.expo.dev/update/019fd81a-629a-7922-95b0-f9a502cf1c4e",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "5015fb8633af624dbf5bf38a821ba34f59567837"
+  },
+  {
+    "id": "019fd81a-629a-7289-82ce-6207924ecc10",
+    "createdAt": "2026-08-06T17:23:55.674Z",
+    "group": "85f648c9-73a0-4b14-9d8e-838913496a4d",
+    "branch": "canary",
+    "message": "Fix Bank ESS OTA syncLayoutLocale clean 20260806T172002Z (runtime 0.1.0)",
+    "runtimeVersion": "0.1.0",
+    "platform": "ios",
+    "manifestPermalink": "https://u.expo.dev/update/019fd81a-629a-7289-82ce-6207924ecc10",
+    "isRollBackToEmbedded": false,
+    "gitCommitHash": "5015fb8633af624dbf5bf38a821ba34f59567837"
+  }
+]

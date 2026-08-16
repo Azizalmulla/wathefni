@@ -1,0 +1,26 @@
+{
+  "with_m365_env_loaded": true,
+  "providers": {
+    "email": false,
+    "whatsapp": false,
+    "google_calendar": true,
+    "microsoft_calendar": false
+  },
+  "teams_meet": {
+    "status": "enabled_but_not_configured",
+    "offerable": false,
+    "module": "interviews",
+    "provider": "microsoft_teams"
+  },
+  "email": {
+    "status": "enabled_but_not_configured",
+    "offerable": false,
+    "module": "pre_hiring",
+    "provider": "email"
+  },
+  "helper": {
+    "cert_ready": true,
+    "ms_cal": false,
+    "email": false
+  }
+}

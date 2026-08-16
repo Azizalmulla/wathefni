@@ -1,0 +1,19 @@
+PASS queue route
+PASS detail route
+PASS default open API
+PASS no due_at invent
+PASS normalize keeps type/priority/employee
+PASS Mark done action present
+PASS no dismiss/assign action keys
+PASS destinationAvailable tasks
+PASS Inbox includes hr_tasks
+PASS demo gated
+PASS demo multi types
+PASS app.config tasksDemo
+PASS backend resolve + scope load
+PASS capability advertises resolve
+PASS get_hr_task scoped helper
+PASS priorities use mobile_hr_tasks
+PASS hrTasks keys EN+AR
+PASS More body is follow-ups
+hr-tasks-follow-ups: GREEN

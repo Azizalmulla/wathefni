@@ -1,0 +1,10 @@
+{
+  "branch": "canary",
+  "runtimeVersion": "0.1.0",
+  "updateGroupId": "af0c0998-d41b-4f68-a2a2-3fabc06537c0",
+  "androidUpdateId": "019fda6e-1a7a-7bd8-968e-985e420dcd6a",
+  "iosUpdateId": "019fda6e-1a7a-717c-a21b-f72647d7557c",
+  "message": "Auth Wave 2 Phase 4: Forgot PIN + 5-fail reactivation recovery",
+  "dashboard": "https://expo.dev/accounts/abdulazizalmullas-team/projects/aziz/updates/af0c0998-d41b-4f68-a2a2-3fabc06537c0",
+  "priorGroup": "9a9a11be-dc9a-4e01-a1ec-f6f98bc5e2de"
+}

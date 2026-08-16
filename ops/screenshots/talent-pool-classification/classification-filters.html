@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Classification filters</title>
+<style>
+body{font-family:Georgia,serif;background:#f4efe6;color:#1c1915;margin:0;padding:32px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-size:34px;margin:0 0 8px}
+.sub{color:#6b645b;margin-bottom:24px}
+.card{background:#fffaf2;border:1px solid #e4d8c6;border-radius:22px;padding:20px;margin-bottom:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#efe6d8;font-size:12px}
+.badge.ok{background:#d9efe0} .badge.warn{background:#f3e0b5}
+table{width:100%;border-collapse:collapse} td,th{padding:10px;border-bottom:1px solid #eadfce;text-align:left;font-size:14px}
+.chip{background:#e7f0ff;padding:4px 10px;border-radius:999px;font-size:12px}
+.muted{color:#6b645b;font-size:13px}
+</style></head><body><div class='wrap'>
+<p class='sub'>Filter authority disclosure</p>
+<h1>Classification filters</h1>
+<div class='card'>
+  <div class='row'>
+    <span class='badge ok'>Confirmed or High AI (default)</span>
+    <span class='badge'>HR confirmed only</span>
+    <span class='badge'>AI suggested</span>
+    <span class='badge'>Include Medium AI (opt-in)</span>
+  </div>
+  <p class='muted'>Low-confidence suggestions are never promoted. Search reasons stay separate: Matched confirmed classification vs Matched AI-suggested classification.</p>
+  <p class='muted'>Unclassified fixture refusal: insufficient_text_and_facts</p>
+</div>
+</div></body></html>

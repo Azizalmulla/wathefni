@@ -1,0 +1,26 @@
+[
+  {
+    "id": "UI_en-desktop_settings",
+    "result": "PASS",
+    "detail": {
+      "urlPage": "settings",
+      "title": "Settings",
+      "bodyLen": 856,
+      "loginWall": false,
+      "shell": true,
+      "hasSettings": true
+    }
+  },
+  {
+    "id": "UI_en-mobile_settings",
+    "result": "PASS",
+    "detail": {
+      "urlPage": "settings",
+      "title": "Settings",
+      "bodyLen": 146,
+      "loginWall": false,
+      "shell": true,
+      "hasSettings": true
+    }
+  }
+]

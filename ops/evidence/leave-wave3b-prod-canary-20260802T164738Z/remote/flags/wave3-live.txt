@@ -1,0 +1,3 @@
+wave3 3.0.0 enabled True
+honesty {'balances_enforced': False, 'legal_reviewed': False, 'balances_binding': False, 'observe_only': True}
+flags_ok_wave3b=true

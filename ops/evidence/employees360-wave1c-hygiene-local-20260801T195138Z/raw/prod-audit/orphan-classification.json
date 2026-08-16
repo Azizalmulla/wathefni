@@ -1,0 +1,211 @@
+{
+  "employee_key": "WATHEFNI-P0-DUP-1",
+  "message_count": 3,
+  "messages": [
+    {
+      "message_id": "9131f0be-0330-4527-856d-6d254e494faa",
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "flow": "shift",
+      "template_key": "shift_assigned",
+      "criticality": "standard",
+      "sensitivity": "preview",
+      "locale": "en",
+      "target_phone": "96500001001",
+      "target_email": null,
+      "account_id": "WATHEFNI",
+      "variables": {
+        "location": "",
+        "shift_date": "Wednesday, 19 August 2026",
+        "shift_time": "10:00",
+        "company_name": "Wathefni",
+        "employee_name": "Authority P0 Twin"
+      },
+      "body_preview": "You have been scheduled for:\n- Wednesday, 19 August 2026: 10:00-12:00",
+      "body_encrypted": null,
+      "body_key_version": null,
+      "status": "failed",
+      "channel_used": null,
+      "last_error": "session:missing_candidate_conversation_id; template:template_disabled; email:no_employee_email",
+      "attempts": 1,
+      "max_attempts": 6,
+      "attempt_log": [
+        {
+          "at": "2026-07-20T02:26:04.697961+00:00",
+          "status": "failed",
+          "attempt": 1,
+          "channel": null,
+          "reasons": [
+            "session:missing_candidate_conversation_id",
+            "template:template_disabled",
+            "email:no_employee_email"
+          ]
+        }
+      ],
+      "hr_task_id": null,
+      "dedupe_key": "auto:shift:shift_assigned:WATHEFNI-P0-DUP-1:112fca140ce1:2974190",
+      "next_attempt_at": null,
+      "delivered_at": null,
+      "metadata": {},
+      "created_by_phone": null,
+      "created_at": "2026-07-20T02:26:04.682894+00:00",
+      "updated_at": "2026-07-20T02:26:04.698069+00:00"
+    },
+    {
+      "message_id": "593f8836-3a12-43d4-aec2-17c79b9416b6",
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "flow": "shift",
+      "template_key": "shift_assigned",
+      "criticality": "standard",
+      "sensitivity": "preview",
+      "locale": "en",
+      "target_phone": "96500001001",
+      "target_email": null,
+      "account_id": "WATHEFNI",
+      "variables": {
+        "location": "",
+        "shift_date": "Wednesday, 19 August 2026",
+        "shift_time": "10:00",
+        "company_name": "Wathefni",
+        "employee_name": "Authority P0 Twin"
+      },
+      "body_preview": "You have been scheduled for:\n- Wednesday, 19 August 2026: 10:00-12:00",
+      "body_encrypted": null,
+      "body_key_version": null,
+      "status": "delivered_whatsapp",
+      "channel_used": "whatsapp_session",
+      "last_error": null,
+      "attempts": 1,
+      "max_attempts": 6,
+      "attempt_log": [
+        {
+          "at": "2026-07-20T03:57:01.879476+00:00",
+          "status": "delivered_whatsapp",
+          "attempt": 1,
+          "channel": "whatsapp_session",
+          "reasons": []
+        }
+      ],
+      "hr_task_id": null,
+      "dedupe_key": "auto:shift:shift_assigned:WATHEFNI-P0-DUP-1:112fca140ce1:2974199",
+      "next_attempt_at": null,
+      "delivered_at": "2026-07-20T03:57:01.879741+00:00",
+      "metadata": {},
+      "created_by_phone": null,
+      "created_at": "2026-07-20T03:57:01.857205+00:00",
+      "updated_at": "2026-07-20T03:57:01.879741+00:00"
+    },
+    {
+      "message_id": "35be03eb-bae6-4cc5-9153-e9e4291f064e",
+      "company_code": "WATHEFNI",
+      "employee_key": "WATHEFNI-P0-DUP-1",
+      "flow": "leave_decision",
+      "template_key": "leave_request_approved",
+      "criticality": "critical",
+      "sensitivity": "preview",
+      "locale": "en",
+      "target_phone": "96500001001",
+      "target_email": null,
+      "account_id": null,
+      "variables": {
+        "end_date": "2026-09-08",
+        "start_date": "2026-09-08",
+        "company_name": "Wathefni",
+        "employee_name": "Authority P0 Twin"
+      },
+      "body_preview": "Your leave request for 2026-09-08 has been approved.",
+      "body_encrypted": null,
+      "body_key_version": null,
+      "status": "delivered_whatsapp",
+      "channel_used": "whatsapp_session",
+      "last_error": null,
+      "attempts": 1,
+      "max_attempts": 6,
+      "attempt_log": [
+        {
+          "at": "2026-07-20T03:57:02.029544+00:00",
+          "status": "delivered_whatsapp",
+          "attempt": 1,
+          "channel": "whatsapp_session",
+          "reasons": []
+        }
+      ],
+      "hr_task_id": null,
+      "dedupe_key": "leave_decision:817997e2-7220-4c0c-8727-0b38a0139030:approved",
+      "next_attempt_at": null,
+      "delivered_at": "2026-07-20T03:57:02.029648+00:00",
+      "metadata": {},
+      "created_by_phone": null,
+      "created_at": "2026-07-20T03:57:02.025021+00:00",
+      "updated_at": "2026-07-20T03:57:02.029648+00:00"
+    }
+  ],
+  "classification": "synthetic_orphan_quarantine",
+  "confidence": "high",
+  "reasons": [
+    "employee_key 'WATHEFNI-P0-DUP-1' matches synthetic naming pattern",
+    "no employees row exists for this key",
+    "no valid application/attendance/onboarding/doc references found",
+    "3 orphan employee_messages rows remain"
+  ],
+  "synthetic_markers": [
+    "key:P0-DUP"
+  ],
+  "references": {
+    "employees": [],
+    "other_tables": {
+      "applications": [
+        {
+          "n": 0
+        }
+      ],
+      "attendance_records": [
+        {
+          "n": 0
+        }
+      ],
+      "onboarding_items": [
+        {
+          "n": 0
+        }
+      ],
+      "compliance_documents": [
+        {
+          "n": 0
+        }
+      ],
+      "leave_requests": [
+        {
+          "n": 0
+        }
+      ],
+      "shift_assignments": [
+        {
+          "n": 0
+        }
+      ],
+      "employee_documents": [
+        {
+          "n": 0
+        }
+      ],
+      "employee_status_changes": [
+        {
+          "n": 0
+        }
+      ],
+      "employee_sessions": [
+        {
+          "n": 0
+        }
+      ],
+      "employee_app_invites": [
+        {
+          "n": 0
+        }
+      ]
+    }
+  },
+  "proposed_remediation": "quarantine_archive"
+}

@@ -1,0 +1,201 @@
+{
+  "checks": [
+    {
+      "name": "tool_map:onboarding_mark_item",
+      "ok": true,
+      "detail": "onboarding.manage"
+    },
+    {
+      "name": "tool_map:send_onboarding_reminder",
+      "ok": true,
+      "detail": "onboarding.manage"
+    },
+    {
+      "name": "tool_map:cancel_onboarding",
+      "ok": true,
+      "detail": "onboarding.manage"
+    },
+    {
+      "name": "tool_map:reschedule_onboarding",
+      "ok": true,
+      "detail": "onboarding.manage"
+    },
+    {
+      "name": "owner_user_found",
+      "ok": true,
+      "detail": "88b17ca9-aff4-4721-a553-c1b5514ef95f"
+    },
+    {
+      "name": "viewer_user_found",
+      "ok": true,
+      "detail": "viewer"
+    },
+    {
+      "name": "owner_role",
+      "ok": true,
+      "detail": "owner"
+    },
+    {
+      "name": "owner_detail_200",
+      "ok": true,
+      "detail": 200
+    },
+    {
+      "name": "permission_authority_backend_current",
+      "ok": true,
+      "detail": "backend_current"
+    },
+    {
+      "name": "permission_subject_user_id",
+      "ok": true,
+      "detail": "88b17ca9-aff4-4721-a553-c1b5514ef95f"
+    },
+    {
+      "name": "permission_subject_company",
+      "ok": true,
+      "detail": "WATHEFNI"
+    },
+    {
+      "name": "projection_hr_web",
+      "ok": true,
+      "detail": "hr_web"
+    },
+    {
+      "name": "lifecycle_2a",
+      "ok": true,
+      "detail": "2a"
+    },
+    {
+      "name": "dormant_hidden:passport",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dormant_hidden:residence",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dormant_hidden:work_permit",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dormant_hidden:personal_details_form",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dormant_hidden:emergency_contact",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "available_tasks_present",
+      "ok": true,
+      "detail": 27
+    },
+    {
+      "name": "main_smaller_than_catalog",
+      "ok": true,
+      "detail": {
+        "main": 5,
+        "available": 27
+      }
+    },
+    {
+      "name": "main_has:civil_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "main_has:employment_contract",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "main_has:bank_details",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "owner_has_mark_actions",
+      "ok": true,
+      "detail": [
+        "personal_photo",
+        "employment_contract",
+        "offer_letter"
+      ]
+    },
+    {
+      "name": "viewer_detail_status",
+      "ok": true,
+      "detail": 200
+    },
+    {
+      "name": "viewer_no_mutate_actions",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "viewer_authority",
+      "ok": true,
+      "detail": "backend_current"
+    },
+    {
+      "name": "owner_reschedule_succeeds",
+      "ok": false,
+      "detail": {
+        "status": 200,
+        "error": null,
+        "keys": [
+          "ok",
+          "status",
+          "message",
+          "confirmation",
+          "result"
+        ]
+      }
+    },
+    {
+      "name": "viewer_mark_fails_closed",
+      "ok": true,
+      "detail": {
+        "status": 403,
+        "body": {
+          "detail": {
+            "error": "permission_denied",
+            "message": "You do not have access to do that."
+          }
+        }
+      }
+    },
+    {
+      "name": "viewer_cancel_fails_closed",
+      "ok": true,
+      "detail": {
+        "status": 403
+      }
+    },
+    {
+      "name": "tenant_isolation",
+      "ok": true,
+      "detail": {
+        "status": 403
+      }
+    },
+    {
+      "name": "lifecycle_status_parity_shared",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "ok": false,
+  "owner_detail_counts": {
+    "main": 5,
+    "available": 27,
+    "mutable": 3
+  },
+  "owner_user_id": "88b17ca9-aff4-4721-a553-c1b5514ef95f",
+  "viewer_role": "viewer"
+}

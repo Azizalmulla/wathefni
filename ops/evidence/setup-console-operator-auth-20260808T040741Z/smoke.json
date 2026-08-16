@@ -1,0 +1,97 @@
+{
+  "pass": 17,
+  "fail": 0,
+  "checks": [
+    {
+      "status": "PASS",
+      "name": "ttl_contract",
+      "detail": {
+        "access_hours": 8,
+        "refresh_days": 30
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "login_rejects_bad_token",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "login_issues_access_refresh",
+      "detail": {
+        "access_ttl_seconds": 28800,
+        "refresh_ttl_seconds": 2592000
+      }
+    },
+    {
+      "status": "PASS",
+      "name": "session_probe",
+      "detail": "setup_session"
+    },
+    {
+      "status": "PASS",
+      "name": "session_authorizes_setup_api",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "refresh_rotates_tokens",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "old_access_revoked_after_refresh",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "new_access_works",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "logout_revokes",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "revoked_session_rejected",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "revoked_refresh_rejected",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "legacy_operator_token_still_works_for_tooling",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:wathefni_setup_access_token",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:wathefni_setup_refresh_token",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:auth/login",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:auth/refresh",
+      "detail": null
+    },
+    {
+      "status": "PASS",
+      "name": "ui:auth/logout",
+      "detail": null
+    }
+  ]
+}
