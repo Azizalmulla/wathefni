@@ -30,7 +30,9 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.octo-hr.com",
+        "EXPO_PUBLIC_PRIVACY_URL": "https://octo-hr.com/privacy",
+        "EXPO_PUBLIC_SUPPORT_URL": "https://octo-hr.com/support",
         "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "1",
         "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
         "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",
@@ -51,7 +53,9 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.octo-hr.com",
+        "EXPO_PUBLIC_PRIVACY_URL": "https://octo-hr.com/privacy",
+        "EXPO_PUBLIC_SUPPORT_URL": "https://octo-hr.com/support",
         "EXPO_PUBLIC_PUSH_REGISTRATION_ENABLED": "1",
         "EXPO_PUBLIC_LOCAL_PIN_UNLOCK": "1",
         "EXPO_PUBLIC_LOCAL_BIOMETRIC_UNLOCK": "1",

@@ -73,7 +73,7 @@
     {
       "key": "mode_a_entitlement_opt_in",
       "label_en": "Explicit Mode A opt-in",
-      "label_ar": "تفعيل صريح لسلطة وظفني",
+      "label_ar": "تفعيل صريح لسلطة OctoHR",
       "values": ["disabled", "preview_only", "authoritative_allowlisted", "authoritative"],
       "notes": "Required for money_authority=wathefni. Never auto-inferred."
     }

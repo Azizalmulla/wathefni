@@ -148,7 +148,7 @@ def main() -> None:
         app,
         EVIDENCE_COMPANY,
         address=EVIDENCE_UPN,
-        display_name="Wathefni Evidence",
+        display_name="OctoHR Evidence",
         provider="microsoft",
         allow_send=True,
         status="approved",
@@ -170,7 +170,7 @@ def main() -> None:
             "outbound_mode": "microsoft_mailbox",
             "outbound_mailbox_id": str(mb["mailbox_id"]),
             "reply_to": REPLY_TO,
-            "display_name": "Wathefni Evidence",
+        "display_name": "OctoHR Evidence",
             "allow_wathefni_emergency_fallback": False,
         },
         allow_unready_mode=False,
@@ -196,7 +196,7 @@ def main() -> None:
 
     # 4) Approved mailbox sends branded email
     marker = f"hybrid-email-ms-outbound-{uuid.uuid4().hex[:12]}"
-    subject = f"[Wathefni evidence] {marker}"
+    subject = f"[OctoHR evidence] {marker}"
     body = f"Hybrid Email Phase 1 Microsoft outbound evidence.\nmarker={marker}\nreply_to={REPLY_TO}\n"
     sent = mms.send_mail_as_mailbox(
         mailbox=EVIDENCE_UPN,

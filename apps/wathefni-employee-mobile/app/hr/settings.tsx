@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { Alert, Linking } from 'react-native'
 import { useRouter } from 'expo-router'
+import Constants from 'expo-constants'
 
 import { useAuth } from '@hr/auth/AuthProvider'
 import { SettingsView } from '@hr/features/settings/SettingsView'
 import { useLocale as useHrLocale } from '@hr/i18n'
 import { useHrSafeBack } from '@hr/useHrSafeBack'
 import { useI18n } from '@/i18n'
+import { PRIVACY_URL, SUPPORT_URL } from '@/config'
 import { usePrincipalGate } from '@/principals/PrincipalGate'
 
 /**
@@ -53,6 +56,22 @@ export default function SettingsRoute() {
         ? t('biometric.settingsFingerprint')
         : t('biometric.settings')
 
+  const openExternal = async (url: string) => {
+    try {
+      await Linking.openURL(url)
+    } catch {
+      Alert.alert(t('common.error'), t('error.generic'))
+    }
+  }
+
+  const openNotificationSettings = async () => {
+    try {
+      await Linking.openSettings()
+    } catch {
+      Alert.alert(t('common.error'), t('error.generic'))
+    }
+  }
+
   return (
     <SettingsView
       me={me}
@@ -69,6 +88,9 @@ export default function SettingsRoute() {
         await signOutAll()
         await afterSignOut()
       }}
+      onOpenNotificationSettings={openNotificationSettings}
+      onOpenPrivacy={() => openExternal(PRIVACY_URL)}
+      onOpenSupport={() => openExternal(SUPPORT_URL)}
       onSwitchEmployee={
         employeeSession
           ? () =>
@@ -106,6 +128,7 @@ export default function SettingsRoute() {
         }
       }}
       onChangePin={pinEnabled ? () => router.push('/hr/change-pin' as never) : undefined}
+      version={Constants.expoConfig?.version ?? '—'}
     />
   )
 }

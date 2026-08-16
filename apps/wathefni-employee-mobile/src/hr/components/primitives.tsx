@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import {
   ActivityIndicator,
   Animated,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -21,6 +22,7 @@ import { useLocale } from '@hr/i18n'
 import { motion, useReducedMotion } from '@hr/motion'
 import { usePreviewEmbed } from '@hr/preview/PreviewEmbedContext'
 import { colors, radius, shadows, spacing, type as typography } from '@hr/theme'
+import { resolveCompanyBrand, useCompanyBrandIdentity } from '@/branding/CompanyBrand'
 
 export function Screen({
   children,
@@ -92,24 +94,39 @@ export function FadeIn({ children, delay = 0 }: { children: ReactNode; delay?: n
 }
 
 export function Wordmark({ compact = false }: { compact?: boolean }) {
-  const { t, locale, isRTL } = useLocale()
+  const { locale, isRTL } = useLocale()
+  const identity = useCompanyBrandIdentity()
+  const brand = resolveCompanyBrand(identity, locale)
   return (
-    <Text
+    <View
       accessibilityRole="header"
-      accessibilityLabel={t('brand.wordmark')}
-      maxFontSizeMultiplier={1.2}
-      style={[
-        styles.wordmark,
-        compact && styles.wordmarkCompact,
-        {
-          fontFamily: locale === 'ar' ? 'NotoKufiArabic_600SemiBold' : 'Newsreader_600SemiBold',
-          textAlign: isRTL ? 'right' : 'left',
-          writingDirection: isRTL ? 'rtl' : 'ltr',
-        },
-      ]}
+      accessibilityLabel={brand.name}
+      style={[styles.wordmarkRow, isRTL && styles.wordmarkRowRTL]}
     >
-      {t('brand.wordmark')}
-    </Text>
+      {brand.logoUrl ? (
+        <Image
+          accessibilityIgnoresInvertColors
+          accessible={false}
+          source={{ uri: brand.logoUrl }}
+          style={[styles.wordmarkLogo, compact && styles.wordmarkLogoCompact]}
+        />
+      ) : null}
+      <Text
+        maxFontSizeMultiplier={1.2}
+        numberOfLines={1}
+        style={[
+          styles.wordmark,
+          compact && styles.wordmarkCompact,
+          {
+            fontFamily: locale === 'ar' ? 'NotoKufiArabic_600SemiBold' : 'Newsreader_600SemiBold',
+            textAlign: isRTL ? 'right' : 'left',
+            writingDirection: isRTL ? 'rtl' : 'ltr',
+          },
+        ]}
+      >
+        {brand.name}
+      </Text>
+    </View>
   )
 }
 
@@ -586,6 +603,10 @@ const styles = StyleSheet.create({
   hero: { color: colors.ink, fontSize: typography.hero, lineHeight: 43, fontWeight: '500', letterSpacing: -1.1 },
   wordmark: { color: colors.ink, fontSize: 24, lineHeight: 32, letterSpacing: -0.5 },
   wordmarkCompact: { fontSize: 18, lineHeight: 24 },
+  wordmarkRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, maxWidth: '82%' },
+  wordmarkRowRTL: { flexDirection: 'row-reverse' },
+  wordmarkLogo: { width: 34, height: 34, borderRadius: 9, resizeMode: 'contain' },
+  wordmarkLogoCompact: { width: 26, height: 26, borderRadius: 7 },
   workspaceHeader: { alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   headerLeading: { flex: 1, alignItems: 'center', gap: spacing.sm, minWidth: 0 },
   headerBack: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },

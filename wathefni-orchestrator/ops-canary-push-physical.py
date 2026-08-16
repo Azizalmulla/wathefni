@@ -113,13 +113,13 @@ EVENTS = {
         "flow": "bank",
         "template_key": "bank_correction_required",
         "email_subject": "Bank details need attention",
-        "text": "Your bank details need a correction. Please open Bank in the Wathefni app.",
+        "text": "Your bank details need a correction. Please open Bank in the OctoHR app.",
         "variables": lambda: {"deep_link": {"path": "/bank"}},
     },
     "app_activation_should_not_push": {
         "flow": "app_activation",
         "template_key": "app_activation",
-        "email_subject": "Your Wathefni app activation code",
+        "email_subject": "Your OctoHR app activation code",
         "text": "Your WATHEFNI app activation code is 000000. It expires in 24 hours.",
         "variables": lambda: {
             "code": "000000",

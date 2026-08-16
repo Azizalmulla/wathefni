@@ -33750,7 +33750,7 @@ def assessment_public_base_url() -> str:
     return (
         os.environ.get("WATHEFNI_PUBLIC_BASE_URL")
         or os.environ.get("WATHEFNI_APP_BASE_URL")
-        or "https://api.wathefni.ai"
+        or "https://api.octo-hr.com"
     ).rstrip("/")
 
 
@@ -33762,7 +33762,7 @@ def video_interview_public_base_url() -> str:
         or os.environ.get("WATHEFNI_PUBLIC_CANDIDATE_BASE_URL")
         or os.environ.get("WATHEFNI_PUBLIC_BASE_URL")
         or os.environ.get("WATHEFNI_APP_BASE_URL")
-        or "https://api.wathefni.ai"
+        or "https://api.octo-hr.com"
     ).rstrip("/")
 
 
@@ -37593,21 +37593,94 @@ def employee_company_code_for_phone(phone: str | None) -> str | None:
     return None
 
 
-def company_display_name(company_code: str | None) -> str:
-    """Human company name for message bodies (the {company_name} variable).
-    Falls back to the company code so a template never renders a blank name."""
-    company = str(company_code or "").strip().upper()
-    if not company:
+_PUBLIC_PLATFORM_BRAND = "OctoHR"
+_LEGACY_CUSTOMER_BRAND_RE = re.compile(r"\bwathefni\b|وظفني|وظّفني|وثفني|وثّفني", re.IGNORECASE)
+
+
+def _safe_customer_company_name(value: Any) -> str:
+    """Return only a customer-safe tenant display name.
+
+    Company codes remain stable technical identifiers, but must never leak into a
+    customer-facing brand slot. Legacy platform names are also rejected so an old
+    tenant record cannot reintroduce the retired brand at runtime.
+    """
+    name = str(value or "").strip()
+    if not name or _LEGACY_CUSTOMER_BRAND_RE.search(name):
         return ""
+    return name
+
+
+def _safe_customer_logo_url(value: Any) -> str | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
     try:
-        with db_connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT name FROM companies WHERE company_code=%s LIMIT 1", (company,))
-                row = cur.fetchone()
+        parsed = urllib.parse.urlparse(raw)
     except Exception:
-        return company
-    name = str((row or {}).get("name") or "").strip() if row else ""
-    return name or company
+        return None
+    if parsed.scheme.lower() != "https" or not parsed.hostname or parsed.username or parsed.password:
+        return None
+    return raw
+
+
+def mobile_company_identity(company_code: str | None) -> dict[str, Any]:
+    """Tenant-bound mobile brand identity derived only from server authority.
+
+    `company_code` is returned for binding/debug contracts, never as display copy.
+    The existing company and tenant-email settings remain the only sources of
+    truth; this is a presentation projection, not a second branding authority.
+    """
+    company = str(company_code or "").strip().upper()
+    row: dict[str, Any] = {}
+    if company:
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT c.name AS display_name,
+                               s.company_name_en AS display_name_en,
+                               s.company_name_ar AS display_name_ar,
+                               s.logo_url
+                          FROM companies c
+                          LEFT JOIN company_email_settings s
+                            ON s.company_code = c.company_code
+                         WHERE c.company_code=%s
+                         LIMIT 1
+                        """,
+                        (company,),
+                    )
+                    found = cur.fetchone()
+                    row = dict(found) if found else {}
+        except Exception:
+            # Older/test schemas may not yet have the optional email-brand table.
+            # Fall back to the canonical company table without widening tenant scope.
+            try:
+                with db_connect() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT name AS display_name FROM companies WHERE company_code=%s LIMIT 1", (company,))
+                        found = cur.fetchone()
+                        row = dict(found) if found else {}
+            except Exception:
+                row = {}
+    return {
+        "company_code": company,
+        "display_name": _safe_customer_company_name(row.get("display_name")),
+        "display_name_en": _safe_customer_company_name(row.get("display_name_en")),
+        "display_name_ar": _safe_customer_company_name(row.get("display_name_ar")),
+        "logo_url": _safe_customer_logo_url(row.get("logo_url")),
+    }
+
+
+def company_display_name(company_code: str | None) -> str:
+    """Customer-facing company name for messages and generated documents."""
+    identity = mobile_company_identity(company_code)
+    return (
+        identity.get("display_name_en")
+        or identity.get("display_name")
+        or identity.get("display_name_ar")
+        or _PUBLIC_PLATFORM_BRAND
+    )
 
 
 # --- WhatsApp opt-out / suppression -----------------------------------------
@@ -68706,10 +68779,10 @@ def deliver_app_activation_code(
             employee,
             flow="app_activation",
             template_key="app_activation",
-            text=f"Your {company} app activation code is {code}. It expires in {_EMPLOYEE_APP_INVITE_TTL_HOURS} hours.",
+            text=f"Your {company_display_name(company)} app activation code is {code}. It expires in {_EMPLOYEE_APP_INVITE_TTL_HOURS} hours.",
             email_subject="Your OctoHR app activation code",
             company_code=company,
-            variables={"code": code, "company_name": company, "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
+            variables={"code": code, "company_name": company_display_name(company), "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
             subject_key=employee.get("employee_key"),
             dedupe_key=dedupe,
             extra={"invite_id": str(invite_id)} if invite_id else None,
@@ -69542,6 +69615,7 @@ def app_me(context: dict[str, Any] = Depends(employee_app_context)):
         # Preserve the original flattened profile during the client transition.
         **profile,
         "employee": profile,
+        "company_identity": mobile_company_identity(company),
         **capabilities,
         "leave_balances_enabled": capabilities["leave"]["balances_enabled"],
     })

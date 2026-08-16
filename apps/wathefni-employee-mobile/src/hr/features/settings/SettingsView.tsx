@@ -2,13 +2,7 @@ import { useState } from 'react'
 import { Alert, StyleSheet, Switch, Text, View } from 'react-native'
 
 import type { MobileMe } from '@hr/api/types'
-import {
-  operatorRoleLabel,
-  operatorRoleLabelKey,
-  scopeAccessLabelKey,
-  workspaceAccessRows,
-} from '@hr/features/settings/settingsComposition'
-import { HrSessionQueueProbe } from '@hr/features/settings/HrSessionQueueProbe'
+import { operatorRoleLabel, operatorRoleLabelKey } from '@hr/features/settings/settingsComposition'
 import { listAutoLockTimeoutOptions, type AutoLockTimeoutMs } from '@/auth/autoLockPolicy'
 import { PageScreen, PageScrollView } from '@/components/layout'
 import { ListRow, PageBackButton, SectionHeader } from '@/components/lists'
@@ -16,6 +10,7 @@ import { EditorialHeading, FadeIn, Wordmark } from '@/components/premium'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { selectionFeedback, warningFeedback } from '@/native/haptics'
 import { colors, font, spacing, typeScaling } from '@/theme'
+import { resolveCompanyBrand } from '@/branding/CompanyBrand'
 
 type Props = {
   me: MobileMe
@@ -25,7 +20,11 @@ type Props = {
   onRefresh: () => void | Promise<void>
   onSignOut: () => void | Promise<void>
   onSignOutAll: () => void | Promise<void>
+  onOpenNotificationSettings: () => void | Promise<void>
+  onOpenPrivacy: () => void | Promise<void>
+  onOpenSupport: () => void | Promise<void>
   onSwitchEmployee?: () => void | Promise<void>
+  version: string
   pinEnabled?: boolean
   biometricEnabled?: boolean
   biometricPreferenceOn?: boolean
@@ -50,7 +49,11 @@ export function SettingsView({
   onRefresh,
   onSignOut,
   onSignOutAll,
+  onOpenNotificationSettings,
+  onOpenPrivacy,
+  onOpenSupport,
   onSwitchEmployee,
+  version,
   pinEnabled = false,
   biometricEnabled = false,
   biometricPreferenceOn = false,
@@ -64,12 +67,12 @@ export function SettingsView({
 }: Props) {
   const { t, locale, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
+  const companyName = resolveCompanyBrand(me.company_identity, locale).name
   const [refreshing, setRefreshing] = useState(false)
 
   const roleKey = operatorRoleLabelKey(me)
   const labeled = String(me.principal.role_label || '').trim()
   const roleLabel = labeled || (roleKey ? t(roleKey) : operatorRoleLabel(me))
-  const accessRows = workspaceAccessRows(me)
   const localeLabel = locale === 'ar' ? t('hrSettings.localeArabic') : t('hrSettings.localeEnglish')
   const autoLockOptions = listAutoLockTimeoutOptions()
   const showDeviceSecurity = pinEnabled
@@ -138,7 +141,7 @@ export function SettingsView({
           />
           <ListRow
             title={t('hrSettings.company')}
-            subtitle={me.principal.company_code}
+            subtitle={companyName}
             icon="business-outline"
             iconTint={colors.surfaceMuted}
             style={styles.row}
@@ -150,48 +153,6 @@ export function SettingsView({
             iconTint={colors.surfaceMuted}
             style={styles.row}
           />
-        </View>
-
-        <View style={styles.section}>
-          <SectionHeader title={t('hrSettings.sectionProbe')} />
-          <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.footnote, align]}>
-            {t('hrSettings.probeHint')}
-          </Text>
-          <HrSessionQueueProbe />
-        </View>
-
-        <View style={styles.section}>
-          <SectionHeader title={t('hrSettings.sectionAccess')} />
-          <Text maxFontSizeMultiplier={typeScaling.chip} style={[styles.footnote, align]}>
-            {t('hrSettings.accessHint')}
-          </Text>
-          <ListRow
-            title={t('hrSettings.peopleScope')}
-            subtitle={t(scopeAccessLabelKey(me))}
-            icon="people-outline"
-            iconTint={colors.surfaceMuted}
-            style={styles.row}
-          />
-          {accessRows.length === 0 ? (
-            <ListRow
-              title={t('hrSettings.accessNone')}
-              subtitle={t('hrSettings.accessNoneBody')}
-              icon="lock-closed-outline"
-              iconTint={colors.surfaceMuted}
-              style={styles.row}
-            />
-          ) : (
-            accessRows.map((row) => (
-              <ListRow
-                key={row.key}
-                title={t(row.labelKey)}
-                subtitle={t('hrSettings.accessEnabled')}
-                icon={row.key === 'recruiting' ? 'briefcase-outline' : row.key === 'owner' ? 'key-outline' : 'grid-outline'}
-                iconTint={colors.surfaceMuted}
-                style={styles.row}
-              />
-            ))
-          )}
         </View>
 
         {showDeviceSecurity ? (
@@ -283,12 +244,12 @@ export function SettingsView({
             style={styles.row}
           />
           <ListRow
-            title={t('hrSettings.refresh')}
-            subtitle={t('hrSettings.refreshSub')}
-            icon="refresh-outline"
+            title={t('hrSettings.notifications')}
+            subtitle={t('hrSettings.notificationsSub')}
+            icon="notifications-outline"
             iconTint={colors.surfaceMuted}
             showChevron
-            onPress={() => void refresh()}
+            onPress={() => void onOpenNotificationSettings()}
             style={styles.row}
           />
           {onSwitchEmployee ? (
@@ -302,6 +263,28 @@ export function SettingsView({
               style={styles.row}
             />
           ) : null}
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title={t('hrSettings.sectionPrivacySupport')} />
+          <ListRow
+            title={t('hrSettings.privacy')}
+            subtitle={t('hrSettings.privacySub')}
+            icon="shield-checkmark-outline"
+            iconTint={colors.surfaceMuted}
+            showChevron
+            onPress={() => void onOpenPrivacy()}
+            style={styles.row}
+          />
+          <ListRow
+            title={t('hrSettings.support')}
+            subtitle={t('hrSettings.supportSub')}
+            icon="help-circle-outline"
+            iconTint={colors.surfaceMuted}
+            showChevron
+            onPress={() => void onOpenSupport()}
+            style={styles.row}
+          />
         </View>
 
         <View style={styles.section}>
@@ -322,6 +305,17 @@ export function SettingsView({
             iconTint={colors.surfaceMuted}
             showChevron
             onPress={confirmSignOutAll}
+            style={styles.row}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title={t('hrSettings.sectionAbout')} />
+          <ListRow
+            title={t('hrSettings.aboutTitle')}
+            subtitle={t('hrSettings.version', { version })}
+            icon="information-circle-outline"
+            iconTint={colors.surfaceMuted}
             style={styles.row}
           />
         </View>

@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.vercel/
 **/node_modules/
 # Also exclude dependency symlinks named node_modules.
 node_modules

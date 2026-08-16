@@ -32,9 +32,13 @@ check(
     and "normalize_email" not in mode
     and "digits(" not in mode,
 )
-check("employee SecureStore key namespace", "wathefni.session.token" in session_emp)
-check("HR SecureStore key namespace", "wathefni.hr.access_token" in session_hr)
-check("HR namespaces differ from employee", "wathefni.session.token" not in session_hr)
+check("employee SecureStore key namespace", "const ACCESS_KEY = 'wathefni.session.token'" in session_emp)
+check("HR SecureStore key namespace", "const SESSION_BLOB_KEY = 'wathefni.hr.session.v1'" in session_hr)
+check(
+    "HR namespaces differ from employee",
+    "const ACCESS_KEY = 'wathefni.hr.access_token'" in session_hr
+    and "const SESSION_BLOB_KEY = 'wathefni.hr.session.v1'" in session_hr,
+)
 check("HR API allowlist", "/dashboard/mobile/" in client_hr and "unapproved_api_path" in client_hr)
 check("PushLifecycle not imported into HR layout", "PushLifecycle" not in (ROOT / "app/hr/_layout.tsx").read_text())
 check("Employee shell still mounts PushLifecycle", "PushLifecycle" in layout)

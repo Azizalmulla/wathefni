@@ -24,6 +24,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import tempfile
 from datetime import date, datetime
 from decimal import Decimal
@@ -40,6 +41,15 @@ SOURCE_NATIVE_AUTH = "native_authoritative"
 MONEY_EXTERNAL = "external"
 MONEY_WATHEFNI = "wathefni"
 STATUS_SEALED = "sealed"
+_PUBLIC_PLATFORM_BRAND = "OctoHR"
+_LEGACY_CUSTOMER_BRAND_RE = re.compile(r"\bwathefni\b|وظفني|وظّفني|وثفني|وثّفني", re.IGNORECASE)
+
+
+def _customer_company_name(value: Any) -> str:
+    name = str(value or "").strip()
+    if not name or _LEGACY_CUSTOMER_BRAND_RE.search(name):
+        return _PUBLIC_PLATFORM_BRAND
+    return name
 
 
 def _digits(value: Any) -> str:
@@ -544,7 +554,9 @@ def ensure_official_pdf_for_payslip(
     if not resolved_company:
         cur.execute("SELECT name FROM companies WHERE company_code=%s LIMIT 1", (company,))
         crow = cur.fetchone()
-        resolved_company = str((dict(crow) if crow else {}).get("name") or company)
+        resolved_company = _customer_company_name((dict(crow) if crow else {}).get("name"))
+    else:
+        resolved_company = _customer_company_name(resolved_company)
     if not resolved_employee:
         cur.execute(
             "SELECT name, phone FROM employees WHERE company_code=%s AND employee_key=%s LIMIT 1",
@@ -554,7 +566,7 @@ def ensure_official_pdf_for_payslip(
         resolved_employee = str((dict(erow) if erow else {}).get("name") or emp_key)
 
     pdf_bytes = render_official_payslip_pdf_bytes(
-        company_name=resolved_company or company,
+        company_name=resolved_company or _PUBLIC_PLATFORM_BRAND,
         employee_name=resolved_employee or emp_key,
         employee_id=resolved_id,
         payslip=_json_safe(doc),

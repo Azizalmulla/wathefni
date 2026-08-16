@@ -3,7 +3,7 @@
     "name": "OctoHR",
     "slug": "aziz",
     "scheme": "wathefni",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
@@ -28,6 +28,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "ai.wathefni.employee",
       "associatedDomains": [
+        "applinks:api.octo-hr.com",
         "applinks:api.wathefni.ai"
       ],
       "infoPlist": {
@@ -62,6 +63,11 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
+            {
+              "scheme": "https",
+              "host": "api.octo-hr.com",
+              "pathPrefix": "/l"
+            },
             {
               "scheme": "https",
               "host": "api.wathefni.ai",

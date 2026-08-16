@@ -1,7 +1,7 @@
 // Low-level HTTP for the /app/* surface. No business logic, no token state —
 // that lives in AuthProvider. Base URL comes from a public (non-secret) env var.
 
-export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.wathefni.ai').replace(/\/$/, '')
+export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.octo-hr.com').replace(/\/$/, '')
 
 export class ApiError extends Error {
   status: number

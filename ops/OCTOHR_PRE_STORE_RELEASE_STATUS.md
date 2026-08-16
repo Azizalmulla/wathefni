@@ -1,85 +1,55 @@
-# OCTOHR PRE-STORE RELEASE — BLOCKED STATUS
+# OCTOHR PRE-STORE RELEASE — CUTOVER ACCEPTED / FINAL AUTOMATION PENDING
 
-**Date:** 2026-08-16
+**Date:** 2026-08-17
 
 **Requested internal stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`
 
-**Stamp issued:** **no**
+**Stamp issued:** **no — final requested automated gates are still running**
 
-**Authority result:** **BLOCKED — legal/public destinations, authorized Employee bootstrap, physical devices, and the standard Web build are not green**
+**Authority result:** **OCTOHR DOMAIN/BRAND CUTOVER GREEN; AUTHENTICATED EMPLOYEE MATRIX AND FINAL RELEASE HARNESS PENDING**
 
-Frozen HCM/Product/PT authorities were not reopened. HR Web redesign, Analytics redesign, attendance expansion, payment rails, enterprise connectors, and new product features were not started.
+Frozen HCM/Product/PT authorities were not reopened. HR Web redesign, Analytics redesign, and new product work were not started.
 
-## Safe brand work completed locally
+## Accepted production cutover
 
-- Customer-visible mobile Employee/HR copy, HR Web, Setup Console, public pages, communications, new generated artifacts, permission descriptions, browser titles, and release configuration now present `OctoHR` in source.
-- The production display name in `apps/wathefni-employee-mobile/app.json` is `OctoHR` for the existing iOS and Android binary.
-- Stable identity remains unchanged: `ai.wathefni.employee`, the current iOS bundle identity, `WATHEFNI_*` variables, database/migration names, module identifiers, the `wathefni://` scheme, current HTTPS association host, historical evidence, and Git history.
-- The existing abstract mobile icon/splash mark has no old textual wordmark and was preserved. No unapproved replacement logo was invented.
-- New generated assessment display copy maps the historical `Wathefni Ability Assessment` name to `OctoHR Ability Assessment` without mutating stored historical rows.
-- A local bilingual OctoHR support route now exists at `/support` and `/employee-app/support`; the old support mailbox is presented only as a backward-compatible alias.
+- `https://octo-hr.com` is the canonical public OctoHR site.
+- `https://app.octo-hr.com` is the canonical HR Web entry point.
+- `https://api.octo-hr.com` is the canonical production API and governed App/Universal Link host.
+- `https://octo-hr.com/privacy` and `https://octo-hr.com/support` are public HTTP 200 destinations.
+- `wathefni.ai` and `www.wathefni.ai` remain path-compatible public aliases.
+- `api.wathefni.ai` remains a full backward-compatible API/association proxy for already-built clients.
+- Caddy and the orchestrator are healthy after the cutover. The frozen R8 `/ready` payload remains green for environment binding, link signing, delivery, migrations, errors, and failed jobs.
+- DNS/Caddy are frozen after acceptance and must not change again without a genuine regression.
 
-## Brand gates
+## Brand and runtime authority
 
-Source exhaustion gate:
+- Pre-auth and platform/legal/support surfaces use OctoHR.
+- Authenticated tenant-aware Employee and HR surfaces prefer the resolved company display name/logo and fail safely to OctoHR.
+- Stable technical identifiers remain unchanged, including `ai.wathefni.employee`, `WATHEFNI_*` variables, database/migration names, the `wathefni://` scheme, and historical evidence.
+- The source/runtime brand gates report zero unexplained customer-visible `Wathefni`, `WATHEFNI`, or `وظفني` defects.
+- The active production OTA runtime cannot receive the retired 0.3.0 branding update.
+- Android store build `709710c8-70b2-4d88-9666-67a82ec68d33` remains the qualified signed 0.3.1 AAB; stable package and signing identities were not changed.
 
-- `OCTOHR_PUBLIC_BRAND_SCAN_PASS`
-- 0 unexplained customer-visible old-brand occurrences
-- Remaining matches are classified as approved technical identity, approved historical evidence, or backward-compatible URL/email aliases.
+## Current deterministic qualification
 
-Live destination gate: **FAIL**
-
-- Privacy URL: `https://wathefni.ai/employee-app/privacy` redirects to a 200 HTML page, but it has no OctoHR identity, is visibly labelled `Internal Canary`, and exposes the old customer brand.
-- Support URL: `https://api.wathefni.ai/support` returns HTTP 404 because the new route is not deployed.
-- The repository policy at `apps/wathefni-employee-mobile/docs/PRIVACY.md` is explicitly a draft for legal/company review. It was not published or represented as approved.
-- The live Setup Console still presents the old browser title because the local brand bundle has not been deployed.
-
-An approved final OctoHR privacy policy is required before deployment and live requalification. The current draft must not be promoted without owner/legal approval.
-
-## Automated qualification completed
-
-- Functional ledger: **2,093/2,093**; 175 structural, 1,880 contract, 38 live, 0 unowned.
-- Client API contracts: **1,238/1,238** across 48 executable proof owners and 530 literal client paths.
+- Functional coverage ledger: **2,093/2,093**, with **0 unowned**.
+- Client API contracts: **1,238/1,238**.
 - Assistant tools: **28/28**.
-- Dashboard unit regressions: **89 files, 481 tests passed**.
-- Employee mobile TypeScript: PASS.
-- Employee mobile EN/AR accessibility/i18n static gate: **21/21**.
-- R11 EN/AR release-language gate: **53/53**.
-- Modified Python AST and JSON parse gates: PASS.
-- Dashboard Vite production bundle: PASS.
-- Local bilingual public support response: PASS.
-- `PYTHONDONTWRITEBYTECODE=1 ./ops/test-smoke`: **`SMOKE_OK`**.
+- Canonical `api.octo-hr.com` App/Universal Link suite: **89/89**.
+- Legacy `api.wathefni.ai` compatibility suite: **89/89**.
+- Store configuration gate: **34/34**.
+- Latest smoke safety net before the final rerun: **`SMOKE_OK`**.
 
-The standard `npm run build` for HR Web is not green. Its TypeScript stage reports broad pre-existing contract errors in untouched frozen HCM and Setup components (for example `Locale.isAr`, unsupported `Button`/`Badge` variants, and stale component prop shapes). Direct Vite bundling succeeds, but bypassing the required TypeScript stage is not accepted as a release qualification. Those unrelated authorities were not mass-edited merely to obtain green.
+## Remaining authorized closure scope
 
-`./ops/test-release` was not claimed after the brand change: its new live privacy/support gate deterministically fails before a full-pass result, and the local brand code is not deployed.
+Only these automatable gates remain in scope:
 
-## Authenticated Employee gate
+1. authenticated Employee iOS EN and AR;
+2. authenticated Employee Android EN and AR;
+3. final `./ops/test-smoke`;
+4. final `./ops/test-release`;
+5. final canonical/legacy association and store-configuration checks.
 
-The safe provisioner was run against the existing synthetic canary only. It failed closed before creating an activation code because the configured E2E owner still lacks the explicit reviewed `employees.manage` grant.
+The owner explicitly excluded the real-iPhone and real-Android physical checklists from this closure. No physical observation is fabricated or relabelled as a simulator/device result. Missing local simulator runtime or local disk capacity is not a release blocker when the required authenticated flows are proven through the available deterministic UI environment.
 
-- Required bundle: `setup_owner_bootstrap_v1` (`employees.read`, `employees.manage`).
-- Local secrets contain the ordinary HR E2E principal only; no Setup/superadmin credential is present.
-- The Setup Console has no active operator session and requires a platform operator token plus allowlisted phone.
-- No direct database write, self-grant, permission inference, or bypass was used.
-
-Therefore authenticated Employee iOS EN/AR and Android EN/AR remain **UNPROVEN**. Previously green HR Maestro evidence is preserved, but it cannot qualify Employee.
-
-## Physical RP gate
-
-Fresh host evidence: `ops/evidence/store-release-physical-20260816T203808Z/`.
-
-- Connected physical iPhone: **none**.
-- Connected physical Android phone: **none**.
-- Result: **`PHYSICAL_MATRIX=UNPROVEN`**.
-
-No simulator, emulator, source test, or prior verbal statement was substituted for keyboard, PIN, biometrics, local lock, privacy cover, push, HTTPS links, camera, picker/viewer, offline/reconnect, foreground refresh, EN/AR/RTL, logout, or session-isolation observations.
-
-## Exact owner inputs required
-
-1. Supply or explicitly approve final OctoHR privacy-policy content for publication on the existing infrastructure; supply a new canonical OctoHR domain/email only if one is intended now.
-2. Sign in to Setup Console with an authorized platform operator token and allowlisted phone, then create a fresh isolated E2E company/owner through the normal wizard or apply the canonical reviewed bootstrap to the designated E2E owner through the approved superadmin path.
-3. Connect and unlock one real iPhone and one real Android phone with the store-distributed build and complete `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md`.
-4. Authorize a bounded build-debt remediation slice if the standard HR Web TypeScript build must be repaired now; the failures are outside the brand-only change set.
-
-Only after those inputs are available should the local brand changes be deployed, all four authenticated Employee Maestro runs and both physical matrices be executed, and the full smoke/release/association/readiness/convergence/canary suite be rerun. The full-pass stamp remains forbidden until every result is genuinely green.
+The full-pass stamp remains withheld until every gate above is genuinely green and the final evidence/status commit is pushed.

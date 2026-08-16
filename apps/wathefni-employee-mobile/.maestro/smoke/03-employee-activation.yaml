@@ -1,5 +1,5 @@
-# Smoke: Employee phone + activation code → employee home.
-# Requires env: MAESTRO_EMPLOYEE_PHONE (local 8 digits), MAESTRO_EMPLOYEE_CODE
+# Smoke: Employee phone + activation code → PIN setup → employee home.
+# Requires env: MAESTRO_EMPLOYEE_PHONE (local 8 digits), MAESTRO_EMPLOYEE_CODE, MAESTRO_PIN
 # Prefer a freshly provisioned QA invite (Aziz/Talal canary tooling) — codes expire.
 appId: ai.wathefni.employee
 tags:
@@ -26,6 +26,24 @@ tags:
     point: "50%,28%"
 - tapOn:
     id: "e2e.auth.employee.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.pin.root"
+    timeout: 60000
+- inputText: ${MAESTRO_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- waitForAnimationToEnd
+- inputText: ${MAESTRO_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.biometric.notNow"
+    commands:
+      - tapOn:
+          id: "e2e.biometric.notNow"
 - extendedWaitUntil:
     visible:
       id: "e2e.tab.employee.home"

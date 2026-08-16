@@ -14,7 +14,7 @@ from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 BUNDLE_ID = "ai.wathefni.employee"
-LINK_HOST = "api.wathefni.ai"
+LINK_HOST = "api.octo-hr.com"
 CUSTOM_SCHEME = "wathefni"
 STORE_IOS = "https://apps.apple.com/app/wathefni/id0000000000"
 STORE_ANDROID = "https://play.google.com/store/apps/details?id=ai.wathefni.employee"

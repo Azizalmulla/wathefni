@@ -34,6 +34,7 @@ import { EditorialHeading, Wordmark } from '@/components/premium'
 import { StatusChip } from '@/components/ui'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { colors, font, layout, radius, spacing, typeScaling } from '@/theme'
+import { resolveCompanyBrand } from '@/branding/CompanyBrand'
 
 /**
  * People root — directory / search. Not a status dashboard.
@@ -386,7 +387,7 @@ function PeopleEmpty({
   searching: boolean
   onRetry: () => void
 }) {
-  const { t, isRTL } = useI18n()
+  const { t, isRTL, locale } = useI18n()
   const align = readingEdgeAlign(isRTL)
   if (!permitted) {
     return (
@@ -418,7 +419,9 @@ function PeopleEmpty({
         {searching ? t('hrPeople.emptySearch') : t('hrPeople.empty')}
       </Text>
       <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.emptyBody, align]}>
-        {searching ? t('hrPeople.emptySearchBody') : t('hrPeople.emptyBody', { company: me.principal.company_code })}
+        {searching
+          ? t('hrPeople.emptySearchBody')
+          : t('hrPeople.emptyBody', { company: resolveCompanyBrand(me.company_identity, locale).name })}
       </Text>
     </View>
   )

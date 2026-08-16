@@ -387,7 +387,7 @@ def _evaluate_module(
             blocked=True,
             live=True,
             summary_en="External payroll run is available in a controlled way. OctoHR does not process pay money.",
-            summary_ar="تشغيل الرواتب الخارجية متاح بشكل منضبط. وثفني لا يعالج أموال الرواتب.",
+            summary_ar="تشغيل الرواتب الخارجية متاح بشكل منضبط. OctoHR لا يعالج أموال الرواتب.",
             next_action_en="Use External payroll run for setup and exports. Keep payment processing off.",
             next_action_ar="استخدم تشغيل الرواتب الخارجية للإعداد والتصدير. أبقِ معالجة الدفع مغلقة.",
             deep_link=_dashboard_page("payroll"),
@@ -564,7 +564,7 @@ def evaluate_launch_readiness(cur: Any, *, company_code: str = ALLOWED_COMPANY) 
             "ok": False,
             "error": "wave_a_wathefni_only",
             "message_en": "Launch Readiness Wave A is limited to WATHEFNI.",
-            "message_ar": "جاهزية الإطلاق في الموجة A مقتصرة على وثفني.",
+            "message_ar": "جاهزية الإطلاق في الموجة A مقتصرة على بيئة OctoHR الداخلية.",
             "wave_a_version": WAVE_A_VERSION,
         }
 
@@ -574,7 +574,7 @@ def evaluate_launch_readiness(cur: Any, *, company_code: str = ALLOWED_COMPANY) 
             "ok": False,
             "error": "company_missing",
             "message_en": "WATHEFNI company record was not found.",
-            "message_ar": "سجل شركة وثفني غير موجود.",
+            "message_ar": "سجل شركة بيئة OctoHR الداخلية غير موجود.",
             "wave_a_version": WAVE_A_VERSION,
         }
 
@@ -932,7 +932,7 @@ def evaluate_launch_readiness(cur: Any, *, company_code: str = ALLOWED_COMPANY) 
                 "blocked": "ما زالت هناك عوائق إطلاق مهمة. راجع القائمة أدناه.",
                 "setup_required": "ما زالت الأساسيات تحتاج عملاً قبل اعتبار الإطلاق جاهزاً.",
                 "ready_for_canary": "جاهز لتجربة منضبطة، وليس طرحاً واسعاً.",
-                "live_controlled": "وثفني تعمل بوضع إطلاق منضبط.",
+                "live_controlled": "OctoHR تعمل بوضع إطلاق منضبط.",
                 "not_purchased": "لا شيء مشترًى بعد.",
             }.get(overall, "راجع مراحل قائمة التحقق."),
             next_action_en="Work the next action on each important blocker. Do not widen freezes from Setup.",

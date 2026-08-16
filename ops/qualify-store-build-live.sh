@@ -20,7 +20,8 @@ fi
   echo "== staging /health /ready =="
   "${SSH[@]}" 'curl -sS -o /tmp/store-ready.json -w "staging_health=%{http_code}\n" http://127.0.0.1:8011/health; curl -sS -o /tmp/store-ready.json -w "staging_ready=%{http_code}\n" http://127.0.0.1:8011/ready; python3 -c "import json; b=json.load(open(\"/tmp/store-ready.json\")); print(\"staging_ready_status\", b.get(\"status\")); print(\"staging_migrations_ok\", (b.get(\"migrations\") or {}).get(\"ok\"))"'
   echo "== production api /ready (read-only) =="
-  curl -sS -o /tmp/prod-ready.json -w "prod_ready=%{http_code}\n" --max-time 20 https://api.wathefni.ai/ready || echo "prod_ready=UNREACHABLE"
+  curl -sS -o /tmp/prod-ready.json -w "prod_ready=%{http_code}\n" --max-time 20 https://api.octo-hr.com/ready || echo "prod_ready=UNREACHABLE"
+  curl -sS -o /dev/null -w "legacy_prod_ready=%{http_code}\n" --max-time 20 https://api.wathefni.ai/ready || echo "legacy_prod_ready=UNREACHABLE"
   python3 - <<'PY' || true
 import json, pathlib
 p = pathlib.Path("/tmp/prod-ready.json")

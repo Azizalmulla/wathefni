@@ -14,8 +14,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OLD_BRAND = re.compile(r"wathefni\.ai|Wathefni|WATHEFNI|وظفني|وظّفني|وثّفني|وطّفني", re.IGNORECASE)
-NATURAL_OLD_BRAND = re.compile(r"(?<![A-Za-z0-9_])Wathefni(?![A-Za-z0-9_])|وظفني|وظّفني|وثّفني|وطّفني")
+OLD_BRAND = re.compile(r"wathefni\.ai|Wathefni|WATHEFNI|وظفني|وظّفني|وثفني|وثّفني|وطّفني", re.IGNORECASE)
+NATURAL_OLD_BRAND = re.compile(r"(?<![A-Za-z0-9_])Wathefni(?![A-Za-z0-9_])|وظفني|وظّفني|وثفني|وثّفني|وطّفني")
 
 HISTORICAL_PREFIXES = (
     ".cursor/",
@@ -51,6 +51,21 @@ TECHNICAL_LINE_MARKERS = (
     "money_authority = \"wathefni\"",
     "money_authority = 'wathefni'",
     "legacyBatteryName",
+    "OLD_PLATFORM_BRAND",
+    "_LEGACY_CUSTOMER_BRAND_RE",
+)
+
+TECHNICAL_TENANT_MARKERS = (
+    "company",
+    "tenant",
+    "account",
+    "namespace",
+    "schema",
+    "migration",
+    "environment",
+    "env",
+    "allowlist",
+    "canary",
 )
 
 
@@ -66,11 +81,16 @@ def _paths() -> list[str]:
 
 def _historical(path: str) -> bool:
     name = Path(path).name
+    if path in {
+        "apps/wathefni-employee-mobile/docs/PRIVACY.md",
+        "apps/wathefni-employee-mobile/docs/STORE_REVIEW.md",
+    }:
+        return False
     return (
         path.startswith(HISTORICAL_PREFIXES)
         or "/migrations/" in path
         or "/fixtures/" in path
-        or name.startswith(("smoke-test-", "test_", "canary-", "prove-", "migrate-", "ops-"))
+        or name.startswith(("smoke-test-", "test_"))
         or ".test." in name
         or name.endswith(("_test.py", "_FULL_PASS.md", "_FREEZE_AMENDMENT.md"))
         or name in {"AGENTS.md", "README.md"}
@@ -80,11 +100,14 @@ def _historical(path: str) -> bool:
 def _customer_surface(path: str) -> bool:
     if path in {
         "apps/wathefni-employee-mobile/app.json",
+        "apps/wathefni-employee-mobile/docs/PRIVACY.md",
+        "apps/wathefni-employee-mobile/docs/STORE_REVIEW.md",
         "apps/wathefni-dashboard/index.html",
         "apps/wathefni-dashboard/setup-console.html",
     }:
         return True
     if path.startswith((
+        "apps/octohr-public/",
         "apps/wathefni-employee-mobile/app/",
         "apps/wathefni-employee-mobile/locales/",
         "apps/wathefni-employee-mobile/src/",
@@ -128,13 +151,16 @@ def _technical(line: str, match: re.Match[str], *, internal_line: bool = False) 
     before = line[start - 1] if start else ""
     after = line[end] if end < len(line) else ""
     stripped = line.lstrip()
-    if token == "WATHEFNI":
-        return True
     if (before and (before.isalnum() or before == "_")) or (after and (after.isalnum() or after == "_")):
         return True
     if internal_line or stripped.startswith(("#", "//", "/*", "*", "--", "<!--", '"""', "'''")):
         return True
-    return any(marker in line for marker in TECHNICAL_LINE_MARKERS)
+    if any(marker in line for marker in TECHNICAL_LINE_MARKERS):
+        return True
+    if token == "WATHEFNI":
+        lowered = line.lower()
+        return any(marker in lowered for marker in TECHNICAL_TENANT_MARKERS)
+    return False
 
 
 def main() -> int:
@@ -142,6 +168,10 @@ def main() -> int:
     defects: list[str] = []
     scanned_files = 0
     for rel in _paths():
+        historical = _historical(rel)
+        customer = _customer_surface(rel) and not historical
+        if not customer:
+            continue
         path = ROOT / rel
         if not path.is_file() or path.stat().st_size > 5_000_000:
             continue
@@ -153,8 +183,6 @@ def main() -> int:
         if not matches:
             continue
         scanned_files += 1
-        historical = _historical(rel)
-        customer = _customer_surface(rel) and not historical
         python_internal = _python_internal_lines(text) if customer and rel.endswith(".py") else set()
         line_no = 1
         line_start = 0

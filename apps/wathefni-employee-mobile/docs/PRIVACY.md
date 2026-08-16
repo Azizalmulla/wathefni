@@ -1,7 +1,7 @@
-# Wathefni Employee App — Privacy Policy (draft)
+# OctoHR Employee App — Privacy Policy (draft)
 
 > Draft for legal/company review before publishing. Host the final version at a
-> stable public URL (e.g. https://wathefni.ai/employee-app/privacy) and set that
+> stable public URL (`https://octo-hr.com/privacy`) and set that
 > URL in the app's Settings link and in the store listings. Required before any
 > TestFlight / Play testing track.
 
@@ -9,11 +9,11 @@ Last updated: DRAFT
 
 ## Who we are
 
-The Wathefni Employee App ("the app") is provided by Wathefni ("we", "us") to let
-employees of companies that use Wathefni receive notifications and complete simple
+The OctoHR Employee App ("the app") is provided by OctoHR ("we", "us") to let
+employees of companies that use OctoHR receive notifications and complete simple
 HR self-service tasks.
 
-Your employer is the **data controller** of your employment data. Wathefni acts as
+Your employer is the **data controller** of your employment data. OctoHR acts as
 a **data processor** on the employer's behalf. Questions about your data should
 be directed to your employer's HR team; this policy explains what the app itself
 collects and how it is handled.
@@ -58,7 +58,7 @@ The app requests permissions only when you use the related feature:
 ## Data retention
 
 Your data is retained for as long as your employment relationship with the
-company using Wathefni requires, per your employer's policies and applicable law.
+company using OctoHR requires, per your employer's policies and applicable law.
 
 ## Your choices
 
@@ -76,5 +76,5 @@ you can only ever see your own records.
 
 ## Contact
 
-For privacy questions, contact your employer's HR team or Wathefni support at
-support@wathefni.ai.
+For privacy questions, contact your employer's HR team or OctoHR support through
+the support destination linked from the app.

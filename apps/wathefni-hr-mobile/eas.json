@@ -8,14 +8,14 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.octo-hr.com",
         "EXPO_PUBLIC_HR_DESIGN_PREVIEW": "0"
       }
     },
     "design-preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://api.wathefni.ai",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.octo-hr.com",
         "EXPO_PUBLIC_HR_DESIGN_PREVIEW": "1"
       }
     }

@@ -32,6 +32,7 @@ import { StatusChip } from '@/components/ui'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { formatNumber, kuwaitDayPart } from '@/lib/format'
 import { colors, font, homeComposition, layout, radius, spacing, typeScaling } from '@/theme'
+import { resolveCompanyBrand } from '@/branding/CompanyBrand'
 
 /**
  * HR Home — Employee visual composition, HR decision content.
@@ -93,6 +94,7 @@ export function HRHomeParityView({
         : 'home.greetingEvening'
 
   const scopeLabel = me.scope.restricted ? t('hrHome.scopeTeam') : t('hrHome.scopeCompany')
+  const companyName = resolveCompanyBrand(me.company_identity, locale).name
 
   const openDestination = (destination: string) => {
     router.push(toHrPath(destination) as never)
@@ -107,7 +109,7 @@ export function HRHomeParityView({
         onRefresh={onRetry}
       >
         <View style={styles.header}>
-          <Wordmark />
+          <Wordmark showPlatformAttribution />
           <View style={styles.headerActions}>
             <InboxBell
               count={inboxCount}
@@ -135,7 +137,7 @@ export function HRHomeParityView({
             <EditorialHeading>{t('hrHome.heading')}</EditorialHeading>
             <View style={styles.contextChip}>
               <Text maxFontSizeMultiplier={typeScaling.chip} style={styles.contextChipText}>
-                {me.principal.company_code} · {scopeLabel}
+                {companyName} · {scopeLabel}
               </Text>
             </View>
           </View>
@@ -160,7 +162,7 @@ export function HRHomeParityView({
               <View style={styles.caughtUpTop}>
                 <View style={styles.contextChip}>
                   <Text maxFontSizeMultiplier={typeScaling.chip} style={styles.contextChipText}>
-                    {me.principal.company_code}
+                    {companyName}
                   </Text>
                 </View>
                 <AmbientIconTile module="schedule" icon="checkmark-circle-outline" size={sparse ? 40 : 34} />

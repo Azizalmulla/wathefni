@@ -1,4 +1,4 @@
-api.wathefni.ai {
+(octohr_api_surface) {
 	encode gzip
 
 	handle /healthz {
@@ -32,6 +32,20 @@ api.wathefni.ai {
 		reverse_proxy 127.0.0.1:8010
 	}
 
+	# Published legacy app URLs remain useful during the canonical-domain cutover.
+	handle /privacy {
+		redir https://octo-hr.com/privacy 308
+	}
+	handle /support {
+		redir https://octo-hr.com/support 308
+	}
+	handle /employee-app/privacy {
+		redir https://octo-hr.com/privacy 308
+	}
+	handle /employee-app/support {
+		redir https://octo-hr.com/support 308
+	}
+
 	handle /webhook/octopus/wathefni {
 		reverse_proxy 127.0.0.1:18789
 	}
@@ -59,7 +73,7 @@ api.wathefni.ai {
 		reverse_proxy 127.0.0.1:8010
 	}
 
-	# --- Dashboard routing (inverted): static is the small allowlist, backend is the default ---
+	# Keep /dashboard on both API hostnames for existing bookmarks and clients.
 	handle_path /dashboard/assets/* {
 		root * /opt/wathefni/dashboard-dist/assets
 		header Cache-Control "public, max-age=31536000, immutable"
@@ -86,6 +100,49 @@ api.wathefni.ai {
 
 	handle /app* {
 		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle {
+		respond "Not Found" 404
+	}
+}
+
+# Canonical production API. The legacy hostname remains a full proxy because
+# already-published mobile binaries still use it and API mutations must not be redirected.
+api.octo-hr.com, api.wathefni.ai {
+	import octohr_api_surface
+}
+
+# Canonical HR Web entry. The Vite build intentionally retains its stable
+# /dashboard base and uses same-origin /dashboard API requests.
+app.octo-hr.com {
+	encode gzip
+
+	@root path /
+	redir @root /dashboard/ 308
+
+	handle_path /dashboard/assets/* {
+		root * /opt/wathefni/dashboard-dist/assets
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	@dash_shell path /dashboard /dashboard/ /dashboard/index.html /dashboard/favicon.svg
+	handle @dash_shell {
+		uri strip_prefix /dashboard
+		root * /opt/wathefni/dashboard-dist
+		try_files {path} /index.html
+		header Cache-Control "no-store, max-age=0"
+		file_server
+	}
+
+	handle /dashboard/* {
+		reverse_proxy 127.0.0.1:8010
+	}
+
+	handle_path /media/* {
+		root * /var/www/wathefni-media
+		file_server
 	}
 
 	handle {

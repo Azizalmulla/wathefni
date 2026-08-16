@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   ActivityIndicator,
   Animated,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -17,6 +18,7 @@ import { readingEdgeAlign, useI18n } from '@/i18n'
 import { motion, useReducedMotion } from '@/motion'
 import { lightImpactFeedback } from '@/native/haptics'
 import { colors, font, radius, shadows, spacing, typeScaling } from '@/theme'
+import { resolveCompanyBrand, useCompanyBrandIdentity } from '@/branding/CompanyBrand'
 
 /** Ambient brand tones. These carry module identity and warmth, never status. */
 export type PastelTone = 'lilac' | 'butter' | 'pink' | 'olive' | 'sky' | 'cream'
@@ -104,36 +106,58 @@ export function FadeIn({
 export function Wordmark({
   compact = false,
   align,
+  showPlatformAttribution = false,
 }: {
   compact?: boolean
   align?: 'start' | 'center'
+  showPlatformAttribution?: boolean
 }) {
-  const { locale, isRTL } = useI18n()
+  const { locale, isRTL, t } = useI18n()
+  const identity = useCompanyBrandIdentity()
+  const brand = resolveCompanyBrand(identity, locale)
   const arabic = locale === 'ar'
   return (
     <View
       accessibilityRole="header"
-      accessibilityLabel="OctoHR"
+      accessibilityLabel={brand.name}
       style={[
         styles.wordmarkWrap,
         align === 'center' && styles.wordmarkCentered,
         align !== 'center' && (isRTL ? styles.wordmarkEnd : styles.wordmarkStart),
       ]}
     >
-      <Text
-        maxFontSizeMultiplier={1.25}
-        style={[
-          styles.wordmark,
-          compact && styles.wordmarkCompact,
-          {
-            fontFamily: arabic ? wordmarkRules.arabicFont : wordmarkRules.englishFont,
-            letterSpacing: arabic ? wordmarkRules.arabicTracking : wordmarkRules.englishTracking,
-            writingDirection: arabic ? 'rtl' : 'ltr',
-          },
-        ]}
-      >
-        OctoHR
-      </Text>
+      <View style={[styles.brandRow, isRTL && styles.brandRowRTL]}>
+        {brand.logoUrl ? (
+          <Image
+            accessibilityIgnoresInvertColors
+            accessible={false}
+            source={{ uri: brand.logoUrl }}
+            style={[styles.brandLogo, compact && styles.brandLogoCompact]}
+          />
+        ) : null}
+        <View style={styles.brandCopy}>
+          <Text
+            maxFontSizeMultiplier={1.25}
+            numberOfLines={1}
+            style={[
+              styles.wordmark,
+              compact && styles.wordmarkCompact,
+              {
+                fontFamily: arabic ? wordmarkRules.arabicFont : wordmarkRules.englishFont,
+                letterSpacing: arabic ? wordmarkRules.arabicTracking : wordmarkRules.englishTracking,
+                writingDirection: arabic ? 'rtl' : 'ltr',
+              },
+            ]}
+          >
+            {brand.name}
+          </Text>
+          {showPlatformAttribution && brand.isTenantBrand ? (
+            <Text maxFontSizeMultiplier={1.15} style={[styles.platformAttribution, isRTL && styles.platformAttributionRTL]}>
+              {t('brand.poweredBy')}
+            </Text>
+          ) : null}
+        </View>
+      </View>
     </View>
   )
 }
@@ -403,10 +427,15 @@ export function ContentSkeleton({ rows = 3 }: { rows?: number }) {
 }
 
 const styles = StyleSheet.create({
-  wordmarkWrap: { alignSelf: 'flex-start', minHeight: 30, justifyContent: 'center' },
+  wordmarkWrap: { alignSelf: 'flex-start', minHeight: 30, maxWidth: '78%', justifyContent: 'center' },
   wordmarkCentered: { alignSelf: 'center' },
   wordmarkStart: { alignSelf: 'flex-start' },
   wordmarkEnd: { alignSelf: 'flex-end' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minWidth: 0 },
+  brandRowRTL: { flexDirection: 'row-reverse' },
+  brandLogo: { width: 34, height: 34, borderRadius: 9, resizeMode: 'contain' },
+  brandLogoCompact: { width: 26, height: 26, borderRadius: 7 },
+  brandCopy: { flexShrink: 1, minWidth: 0 },
   wordmark: {
     color: colors.ink,
     fontSize: 22,
@@ -414,6 +443,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   wordmarkCompact: { fontSize: 17, lineHeight: 24 },
+  platformAttribution: { color: colors.subtle, fontSize: 10, lineHeight: 13, fontWeight: '600' },
+  platformAttributionRTL: { textAlign: 'right', writingDirection: 'rtl' },
   bloom: { position: 'absolute', overflow: 'hidden' },
   bloomCorner: { width: 108, height: 94, top: -12, right: -6 },
   bloomRibbon: { position: 'relative', width: '100%', height: 58, opacity: 0.82 },

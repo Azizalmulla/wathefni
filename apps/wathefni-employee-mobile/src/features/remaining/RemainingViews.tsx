@@ -15,7 +15,6 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 
 import { useI18n, type AppLocale, readingEdgeAlign, trailingEdgeAlign } from '@/i18n'
 import { listAutoLockTimeoutOptions, type AutoLockTimeoutMs } from '@/auth/autoLockPolicy'
-import type { AutoLockDiagnostics } from '@/auth/autoLockDiagnostics'
 import {
   EditorialHeading,
   FadeIn,
@@ -771,7 +770,6 @@ export function SettingsView({
   canManageAutoLock,
   autoLockTimeoutMs,
   autoLockBusy,
-  autoLockDiagnostics,
   deviceSecurity,
   deviceSecurityLoading,
   version,
@@ -799,7 +797,6 @@ export function SettingsView({
   canManageAutoLock?: boolean
   autoLockTimeoutMs?: AutoLockTimeoutMs
   autoLockBusy?: boolean
-  autoLockDiagnostics?: AutoLockDiagnostics | null
   deviceSecurity?: {
     platform: string
     activatedAt: string | null
@@ -823,21 +820,6 @@ export function SettingsView({
   const { t, isRTL, locale: uiLocale } = useI18n()
   const autoLockOptions = listAutoLockTimeoutOptions()
   const align = readingEdgeAlign(isRTL)
-  const diag = autoLockDiagnostics
-  const formatTs = (ms: number | null | undefined) => {
-    if (ms == null) return '—'
-    try {
-      return new Date(ms).toISOString()
-    } catch {
-      return String(ms)
-    }
-  }
-  const formatTimeout = (timeoutMs: AutoLockTimeoutMs | undefined) => {
-    if (timeoutMs === undefined) return '—'
-    if (timeoutMs == null) return 'never'
-    if (timeoutMs === 0) return 'immediate'
-    return `${timeoutMs} ms`
-  }
   const formatDeviceDate = (iso: string | null | undefined) => {
     if (!iso) return '—'
     try {
@@ -875,39 +857,6 @@ export function SettingsView({
           ))}
         </View>
       </View>
-      {diag ? (
-        <View style={styles.section}>
-          <SectionLabel>{t('autoLock.diagnosticsTitle')}</SectionLabel>
-          <View style={styles.settingsPanel}>
-            <Text style={[styles.diagLine, align]}>{t('autoLock.diagMarker')}: {diag.buildMarker || '—'}</Text>
-            <Text style={[styles.diagLine, align]}>{t('autoLock.diagUpdate')}: {diag.updateId || '—'}</Text>
-            <Text style={[styles.diagLine, align]}>
-              {t('autoLock.diagEnabled')}: {diag.featureEnabled ? 'yes' : `no (master=${diag.masterFlagRaw} key=${diag.employeeKey})`}
-            </Text>
-            <Text style={[styles.diagLine, align]}>
-              {t('autoLock.diagOverlayBio')}: {diag.overlayBiometricEnabled ? 'yes' : `no (flag=${diag.overlayBiometricFlagRaw})`}
-            </Text>
-            <Text style={[styles.diagLine, align]}>
-              {t('autoLock.diagBioFeature')}: {diag.biometricFeatureOn ? 'yes' : 'no'}
-            </Text>
-            <Text style={[styles.diagLine, align]}>
-              {t('autoLock.diagBioPref')}:{' '}
-              {diag.biometricPreferenceOn == null ? '—' : diag.biometricPreferenceOn ? 'yes' : 'no'}
-            </Text>
-            <Text style={[styles.diagLine, align]}>
-              {t('autoLock.diagBioGate')}: {diag.lastBioGateReason || '—'}
-            </Text>
-            <Text style={[styles.diagLine, align]}>{t('autoLock.diagTimeout')}: {formatTimeout(diag.timeoutMs)}</Text>
-            <Text style={[styles.diagLine, align]}>{t('autoLock.diagAway')}: {formatTs(diag.lastAwayAt)}</Text>
-            <Text style={[styles.diagLine, align]}>
-              {t('autoLock.diagElapsed')}: {diag.lastElapsedMs == null ? '—' : `${diag.lastElapsedMs} ms`}
-            </Text>
-            <Text style={[styles.diagLine, align]}>{t('autoLock.diagDecision')}: {diag.lastDecision}</Text>
-            <Text style={[styles.diagLine, align]}>{t('autoLock.diagNeedsUnlock')}: {diag.needsLocalUnlock ? 'yes' : 'no'}</Text>
-            <Text style={[styles.diagLine, align]}>appState: {diag.lastAppState}</Text>
-          </View>
-        </View>
-      ) : null}
       {canManagePush ? (
         <View style={styles.settingsPanel}>
           <View style={styles.settingsRow}>
@@ -1182,7 +1131,6 @@ const styles = StyleSheet.create({
   autoLockRowActive: { backgroundColor: colors.surfaceMuted, borderColor: colors.ink },
   autoLockText: { flex: 1, color: colors.ink, fontSize: font.body, fontWeight: '600' },
   autoLockTextActive: { fontWeight: '800' },
-  diagLine: { color: colors.ink, fontSize: font.tiny, fontWeight: '600', marginBottom: spacing.xs },
   input: { minHeight: 52, backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md, color: colors.ink, fontSize: font.body, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
   multiline: { minHeight: 110, textAlignVertical: 'top' },
   inputWithIcon: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 52, backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: spacing.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },

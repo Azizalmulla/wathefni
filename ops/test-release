@@ -33,6 +33,9 @@ echo "== release: R11 release language =="
 echo "== release: OctoHR public-brand exhaustion =="
 "$PY" "$REPO_ROOT/ops/qualify-octohr-public-brand.py"
 
+echo "== release: OctoHR runtime brand contracts and communications =="
+"$PY" "$REPO_ROOT/ops/qualify-octohr-runtime-brand.py"
+
 echo "== release: OctoHR live privacy and support destinations =="
 "$PY" "$REPO_ROOT/ops/qualify-octohr-public-destinations.py"
 
@@ -40,6 +43,10 @@ echo "== release: store build gate + live /ready =="
 bash "$REPO_ROOT/ops/qualify-store-build-live.sh"
 
 echo "== release: production Universal/App Link associations =="
+allow_blocked env WATHEFNI_APP_LINK_BASE=https://api.octo-hr.com \
+  "$PY" "$REPO_ROOT/ops/e2e/qualify-https-app-links.py"
+
+echo "== release: legacy Universal/App Link host compatibility =="
 allow_blocked env WATHEFNI_APP_LINK_BASE=https://api.wathefni.ai \
   "$PY" "$REPO_ROOT/ops/e2e/qualify-https-app-links.py"
 

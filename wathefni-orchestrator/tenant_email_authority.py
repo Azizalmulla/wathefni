@@ -25,6 +25,14 @@ MAILBOX_STATUSES = ("draft", "pending_admin", "approved", "disabled", "error")
 UX_STATUSES = ("ready", "setup_required", "verifying", "error")
 
 DEFAULT_OPERATIONAL_LOCAL_PARTS = ("careers", "hr", "onboarding", "payroll", "compliance")
+_LEGACY_CUSTOMER_BRAND_RE = re.compile(r"\bwathefni\b|وظفني|وظّفني|وثفني|وثّفني", re.IGNORECASE)
+
+
+def _customer_brand_text(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if not text or _LEGACY_CUSTOMER_BRAND_RE.search(text):
+        return None
+    return text
 
 POSTMARK_DOMAINS_API = "https://api.postmarkapp.com/domains"
 
@@ -459,12 +467,15 @@ def resolve_outbound_sender(
     mode = str(settings.get("outbound_mode") or "wathefni")
     if mode not in OUTBOUND_MODES:
         mode = "wathefni"
+    company_name_en = _customer_brand_text(settings.get("company_name_en"))
+    company_name_ar = _customer_brand_text(settings.get("company_name_ar"))
     branding = {
-        "company_name_en": settings.get("company_name_en"),
-        "company_name_ar": settings.get("company_name_ar"),
-        "logo_url": settings.get("logo_url"),
+        "company_name_en": company_name_en,
+        "company_name_ar": company_name_ar,
+        # Do not pair a legacy-branded tenant record with an old logo.
+        "logo_url": settings.get("logo_url") if company_name_en or company_name_ar else None,
     }
-    display_name = str(settings.get("display_name") or "").strip() or None
+    display_name = _customer_brand_text(settings.get("display_name"))
     reply_to = str(settings.get("reply_to") or "").strip() or global_reply
     emergency = bool(settings.get("allow_wathefni_emergency_fallback"))
 
@@ -597,7 +608,7 @@ def _block_message(reason: str) -> str:
 
 def format_from_header(display_name: str | None, from_address: str) -> str:
     addr = str(from_address or "").strip()
-    name = str(display_name or "").strip()
+    name = _customer_brand_text(display_name) or ""
     if not name:
         return addr
     safe = name.replace('"', "")
@@ -608,11 +619,13 @@ def branding_for_company(legacy: Any, company_code: str | None) -> dict[str, Any
     if not company_code:
         return {}
     settings = get_email_settings(legacy, company_code)
+    company_name_en = _customer_brand_text(settings.get("company_name_en"))
+    company_name_ar = _customer_brand_text(settings.get("company_name_ar"))
     return {
-        "company_name_en": settings.get("company_name_en"),
-        "company_name_ar": settings.get("company_name_ar"),
-        "logo_url": settings.get("logo_url"),
-        "display_name": settings.get("display_name"),
+        "company_name_en": company_name_en,
+        "company_name_ar": company_name_ar,
+        "logo_url": settings.get("logo_url") if company_name_en or company_name_ar else None,
+        "display_name": _customer_brand_text(settings.get("display_name")) or "OctoHR",
     }
 
 

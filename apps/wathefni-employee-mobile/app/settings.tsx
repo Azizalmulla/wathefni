@@ -6,12 +6,6 @@ import Constants from 'expo-constants'
 import * as Notifications from 'expo-notifications'
 
 import { useAuth } from '@/auth/AuthProvider'
-import {
-  getAutoLockDiagnostics,
-  subscribeAutoLockDiagnostics,
-  type AutoLockDiagnostics,
-} from '@/auth/autoLockDiagnostics'
-import { isAutoLockDiagnosticsEnabled } from '@/auth/autoLockPolicy'
 import { useI18n } from '@/i18n'
 import { approvedErrorMessage } from '@/api/errors'
 import {
@@ -51,7 +45,6 @@ export default function SettingsScreen() {
   const [autoLockBusy, setAutoLockBusy] = useState(false)
   const [deletionBusy, setDeletionBusy] = useState(false)
   const [deletionRequested, setDeletionRequested] = useState(false)
-  const [autoLockDiag, setAutoLockDiag] = useState<AutoLockDiagnostics>(() => getAutoLockDiagnostics())
   const [deviceSecurity, setDeviceSecurity] = useState<{
     platform: string
     activatedAt: string | null
@@ -61,11 +54,6 @@ export default function SettingsScreen() {
   const [deviceSecurityLoading, setDeviceSecurityLoading] = useState(true)
   const deletionLock = useRef(false)
   const canRequestDeletion = can('settings', 'request_deletion')
-
-  useEffect(() => {
-    setAutoLockDiag(getAutoLockDiagnostics())
-    return subscribeAutoLockDiagnostics(() => setAutoLockDiag(getAutoLockDiagnostics()))
-  }, [])
 
   useEffect(() => {
     if (PUSH_REGISTRATION_ENABLED) {
@@ -224,7 +212,6 @@ export default function SettingsScreen() {
         canManageAutoLock={autoLockEnabled}
         autoLockTimeoutMs={autoLockTimeoutMs}
         autoLockBusy={autoLockBusy}
-        autoLockDiagnostics={pinEnabled && isAutoLockDiagnosticsEnabled() ? autoLockDiag : null}
         deviceSecurity={deviceSecurity}
         deviceSecurityLoading={deviceSecurityLoading}
         version={Constants.expoConfig?.version ?? '—'}

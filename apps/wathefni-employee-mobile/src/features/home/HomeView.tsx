@@ -187,7 +187,7 @@ export function HomeView({
         contentStyle={[styles.pageContent, sparse ? styles.pageContentSparse : null]}
       >
         <View style={styles.header}>
-          <Wordmark />
+          <Wordmark showPlatformAttribution />
           <View style={styles.headerActions}>
             <InboxBell
               state={inboxState}

@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+from urllib.parse import urlsplit
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -67,14 +68,15 @@ def main() -> int:
     check("registry lists destinations", len(dests) >= 20, len(dests))
     for row in dests:
         https = str(row.get("https") or "")
-        path = https.split("api.wathefni.ai", 1)[-1] if "api.wathefni.ai" in https else ""
+        parsed = urlsplit(https)
+        path = parsed.path if parsed.scheme == "https" and parsed.hostname == "api.octo-hr.com" else ""
         if not path:
             check(f"destination has path {row.get('slug')}", False, https)
             continue
         status, html, _ = http(path)
         check(
             f"{path} serves fallback HTML",
-            status == 200 and "wathefni://" in html and "Open in Wathefni" in html,
+            status == 200 and "wathefni://" in html and "Open in OctoHR" in html,
             status,
         )
         check(f"{path} preserves custom scheme", f"wathefni://{str(row.get('app_path') or '/').lstrip('/')}" in html, html[:120])
@@ -98,12 +100,12 @@ def main() -> int:
             check("AASA has exactly the expected production application identifier", app_ids == [EXPECTED_IOS_APP_ID], app_ids)
         else:
             check(
-                "AASA has a production Wathefni application identifier",
+                "AASA has the stable production application identifier",
                 any(re.fullmatch(r"[A-Z0-9]{10}\.ai\.wathefni\.employee", app_id) for app_id in app_ids),
                 app_ids,
             )
         paths = [row.get("paths") for row in aasa_details if isinstance(row, dict)]
-        check("AASA covers only the registered Wathefni link paths", paths == [["/l", "/l/*"]], paths)
+        check("AASA covers only the registered OctoHR link paths", paths == [["/l", "/l/*"]], paths)
     asset_status, asset_body, asset_type = http("/.well-known/assetlinks.json")
     check("assetlinks is served directly without a redirect", asset_status == 200, asset_status)
     check("assetlinks content type is application/json", "application/json" in asset_type.lower(), asset_type)

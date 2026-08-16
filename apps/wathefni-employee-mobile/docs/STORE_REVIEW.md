@@ -1,6 +1,6 @@
 # Store submission & review checklist (App Store + Play Store)
 
-Pre-submission checklist for the Wathefni Employee App. Owner: release manager.
+Pre-submission checklist for the OctoHR Employee App. Owner: release manager.
 
 ## Blockers (must be done before any testing track)
 

@@ -3,7 +3,7 @@
  * Installed-app intercept lands here; unknown slugs fail closed (null).
  * Custom scheme `wathefni://` remains valid and is handled by Expo Router.
  */
-const HOST = 'api.wathefni.ai'
+const HOSTS = new Set(['api.octo-hr.com', 'api.wathefni.ai'])
 const PREFIX = '/l/'
 
 const EMPLOYEE: Record<string, string> = {
@@ -63,7 +63,7 @@ export function hrefFromHttpsAppLink(url: string | null | undefined): string | n
     const path = `${parsed.host}${parsed.pathname}`.replace(/\/+/g, '/')
     return path.startsWith('/') ? path : `/${path}`
   }
-  if (parsed.protocol !== 'https:' || parsed.hostname !== HOST) return null
+  if (parsed.protocol !== 'https:' || !HOSTS.has(parsed.hostname)) return null
   const pathname = parsed.pathname.replace(/\/+$/, '') || '/'
   if (pathname !== '/l' && !pathname.startsWith(PREFIX)) return null
   const rest = pathname === '/l' ? '' : pathname.slice(PREFIX.length)

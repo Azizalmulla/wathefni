@@ -29,14 +29,19 @@ tags:
       visible: ".*Settings.*"
     commands:
       - tapOn: ".*Settings.*"
-      - extendedWaitUntil:
-          visible: "Language"
+      - scrollUntilVisible:
+          element:
+            text: "Language"
+          direction: DOWN
           timeout: 30000
       - tapOn: "Language"
       - extendedWaitUntil:
-          visible: "اللغة"
+          visible:
+            id: "e2e.pin.root"
           timeout: 60000
-      - tapOn: "رجوع"
+      - inputText: ${MAESTRO_PIN}
+      - tapOn:
+          id: "e2e.pin.continue"
 - extendedWaitUntil:
     visible:
       id: "e2e.tab.hr.more"

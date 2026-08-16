@@ -542,7 +542,7 @@ def main() -> int:
                 shift_id=real_shift_ids[0] if real_shift_ids else None,
                 payload={
                     "headline": f"New shift on {d1.isoformat()}",
-                    "body": f"You have a shift on {d1.isoformat()} from 10:00 to 18:00 (Wathefni controlled rollout canary {TAG}).",
+                "body": f"You have a shift on {d1.isoformat()} from 10:00 to 18:00 (OctoHR controlled rollout canary {TAG}).",
                 },
                 requires_ack=True,
                 dedupe_key=f"w6c|{TAG}|assigned",

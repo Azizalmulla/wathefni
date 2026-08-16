@@ -1007,6 +1007,7 @@ def build_mobile_me_payload(app_mod: Any, context: dict[str, Any]) -> dict[str, 
 
     return {
         "ok": True,
+        "company_identity": app_mod.mobile_company_identity(company),
         "principal": {
             "user_id": public.get("user_id"),
             "company_code": company,

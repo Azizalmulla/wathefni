@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -21,6 +21,7 @@ import { useI18n } from '@/i18n'
 import { colors } from '@/theme'
 import * as Linking from 'expo-linking'
 import { hrefFromHttpsAppLink } from '@/linking/httpsAppLink'
+import { CompanyBrandProvider } from '@/branding/CompanyBrand'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -329,16 +330,23 @@ function HrRuntime() {
       <LocaleProvider initialLocale={locale}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <StatusBar style="dark" />
-            <HrForegroundQueryRefresh />
-            <HRLocalUnlockShell>
-              <AccessGate />
-            </HRLocalUnlockShell>
+            <HrBrandBoundary>
+              <StatusBar style="dark" />
+              <HrForegroundQueryRefresh />
+              <HRLocalUnlockShell>
+                <AccessGate />
+              </HRLocalUnlockShell>
+            </HrBrandBoundary>
           </AuthProvider>
         </QueryClientProvider>
       </LocaleProvider>
     </AppErrorBoundary>
   )
+}
+
+function HrBrandBoundary({ children }: { children: ReactNode }) {
+  const { me } = useAuth()
+  return <CompanyBrandProvider identity={me?.company_identity}>{children}</CompanyBrandProvider>
 }
 
 export default function HrLayout() {

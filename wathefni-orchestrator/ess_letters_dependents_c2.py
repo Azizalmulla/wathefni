@@ -37,6 +37,15 @@ from typing import Any
 PHASE = "ess_letters_dependents_c2"
 CONTRACT_VERSION = "ess_letters_dependents_c2_v1"
 _ON = {"1", "true", "yes", "on"}
+_PUBLIC_PLATFORM_BRAND = "OctoHR"
+_LEGACY_CUSTOMER_BRAND_RE = re.compile(r"\bwathefni\b|وظفني|وظّفني|وثفني|وثّفني", re.IGNORECASE)
+
+
+def _customer_company_name(value: Any) -> str:
+    name = str(value or "").strip()
+    if not name or _LEGACY_CUSTOMER_BRAND_RE.search(name):
+        return _PUBLIC_PLATFORM_BRAND
+    return name
 
 LETTER_TYPES = (
     "salary_certificate",
@@ -823,7 +832,7 @@ def _employee_snapshot(cur: Any, *, company_code: str, employee_key: str) -> dic
     return {
         "employee_key": d.get("employee_key"),
         "company_code": company,
-        "company_name": d.get("company_name") or company,
+        "company_name": _customer_company_name(d.get("company_name")),
         "employee_name": d.get("name"),
         "phone": d.get("phone"),
         "employment_status": d.get("employment_status"),

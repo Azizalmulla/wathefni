@@ -11,8 +11,8 @@ import urllib.request
 from html.parser import HTMLParser
 
 
-DEFAULT_PRIVACY_URL = "https://wathefni.ai/employee-app/privacy"
-DEFAULT_SUPPORT_URL = "https://api.wathefni.ai/support"
+DEFAULT_PRIVACY_URL = "https://octo-hr.com/privacy"
+DEFAULT_SUPPORT_URL = "https://octo-hr.com/support"
 MAX_BYTES = 2_000_000
 OLD_VISIBLE_BRAND = re.compile(r"\bWathefni\b|\bWATHEFNI\b|وظفني|وظّفني|وثّفني|وطّفني")
 URL_OR_EMAIL = re.compile(r"(?:https?://|mailto:)?[^\s<>()\[\]{}\"']*@?wathefni\.ai[^\s<>()\[\]{}\"']*", re.IGNORECASE)

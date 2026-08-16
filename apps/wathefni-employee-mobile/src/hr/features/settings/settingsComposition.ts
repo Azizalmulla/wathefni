@@ -1,4 +1,4 @@
-import type { MobileMe, WorkspaceKey } from '@hr/api/types'
+import type { MobileMe } from '@hr/api/types'
 
 /** Human-readable role — prefer backend role_label; never expose raw capability keys. */
 export function operatorRoleLabel(me: MobileMe): string {
@@ -37,29 +37,4 @@ export function operatorRoleLabelKey(me: MobileMe): string {
     default:
       return me.principal.role_label ? '' : 'hrSettings.roleOperator'
   }
-}
-
-/** Company-wide vs team — no scope binding / configuration_error. */
-export function scopeAccessLabelKey(me: MobileMe): string {
-  return me.scope.restricted ? 'hrSettings.scopeTeam' : 'hrSettings.scopeCompany'
-}
-
-export type WorkspaceAccessRow = {
-  key: WorkspaceKey
-  labelKey: string
-}
-
-/** Relevant enabled workspaces only — human labels, not feature keys. */
-export function workspaceAccessRows(me: MobileMe): WorkspaceAccessRow[] {
-  const rows: WorkspaceAccessRow[] = []
-  if (me.workspaces.hr?.enabled) {
-    rows.push({ key: 'hr', labelKey: 'hrSettings.accessHr' })
-  }
-  if (me.workspaces.recruiting?.enabled) {
-    rows.push({ key: 'recruiting', labelKey: 'hrSettings.accessHiring' })
-  }
-  if (me.workspaces.owner?.enabled) {
-    rows.push({ key: 'owner', labelKey: 'hrSettings.accessOwner' })
-  }
-  return rows
 }

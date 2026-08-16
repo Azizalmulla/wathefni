@@ -1,3 +1,5 @@
+import type { CompanyBrandIdentity } from '@/branding/CompanyBrand'
+
 export type Locale = 'en' | 'ar'
 export type WorkspaceKey = 'hr' | 'recruiting' | 'owner'
 
@@ -17,6 +19,7 @@ export type WorkspaceCapability = {
 
 export type MobileMe = {
   ok: true
+  company_identity: CompanyBrandIdentity
   principal: {
     user_id: string
     company_code: string

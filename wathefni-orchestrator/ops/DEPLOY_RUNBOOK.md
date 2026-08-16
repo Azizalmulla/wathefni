@@ -12,7 +12,7 @@ on an operator machine; the script drives the VPS over ssh/rsync.
 | Database | `wathefni` | `wathefni_staging` (restored from latest backup) |
 | Workspace | `/root/.openclaw/workspaces/company-wathefni` | `/opt/wathefni/staging/workspace` |
 | Delivery | `live` (real email/WhatsApp) | `dry_run` (simulated; never sends) |
-| Access | `https://api.wathefni.ai` (Caddy) | localhost only — **SSH tunnel** |
+| Access | `https://api.octo-hr.com` (Caddy; `api.wathefni.ai` remains a compatibility alias) | localhost only — **SSH tunnel** |
 | Dashboard token | prod token | separate staging token (`postgres.staging.env`) |
 
 Staging is internal-only. Reach it with an SSH tunnel:
@@ -87,7 +87,9 @@ rm -f "$tmp"; systemctl restart wathefni-orchestrator-staging.service
 systemctl is-active wathefni-orchestrator.service wathefni-orchestrator-staging.service caddy
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8010/health     # prod
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8011/health     # staging (or via tunnel)
-curl -s -o /dev/null -w '%{http_code}\n' https://api.wathefni.ai/dashboard
+curl -s -o /dev/null -w '%{http_code}\n' https://app.octo-hr.com/dashboard/
+curl -s -o /dev/null -w '%{http_code}\n' https://api.octo-hr.com/ready
+curl -s -o /dev/null -w '%{http_code}\n' https://api.wathefni.ai/ready  # legacy compatibility
 ```
 
 ## Uptime monitoring (dead-man's switch)

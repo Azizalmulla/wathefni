@@ -1,6 +1,8 @@
 // Mirrors the backend /app/* payload shapes. Keep in sync with the orchestrator's
 // employee-app endpoints in wathefni-orchestrator/app.py.
 
+import type { CompanyBrandIdentity } from '@/branding/CompanyBrand'
+
 export type EmployeeProfile = {
   employee_key: string
   company_code: string
@@ -106,6 +108,7 @@ export type EmployeeFeatureCapability = {
 export type MeResponse = EmployeeProfile & {
   ok: boolean
   employee: EmployeeProfile
+  company_identity: CompanyBrandIdentity
   account_state: 'active'
   app_state: 'available'
   version: string

@@ -2,7 +2,7 @@
   "taxonomy_version": "taxonomy_v1.1.0",
   "immutable": true,
   "label_en": "Wathefni Canonical Talent Taxonomy v1.1",
-  "label_ar": "تصنيف وثفني الأساسي للمواهب الإصدار 1.1",
+  "label_ar": "تصنيف OctoHR الأساسي للمواهب الإصدار 1.1",
   "nodes": [
     {"node_id": "fn.technology", "node_type": "career_function", "label_en": "Technology", "label_ar": "التكنولوجيا", "aliases": ["tech", "it", "software", "engineering", "تقنية", "تكنولوجيا", "برمجيات", "computer science"], "parent_ids": []},
     {"node_id": "fn.hr", "node_type": "career_function", "label_en": "Human Resources", "label_ar": "الموارد البشرية", "aliases": ["hr", "people", "talent", "موارد بشرية", "توظيف"], "parent_ids": []},

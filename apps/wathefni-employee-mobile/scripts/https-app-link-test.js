@@ -44,12 +44,13 @@ function compile() {
 }
 
 const { hrefFromHttpsAppLink } = compile()
-check('leave HTTPS maps to /leave', hrefFromHttpsAppLink('https://api.wathefni.ai/l/leave') === '/leave')
-check('HR people HTTPS maps to /hr/people', hrefFromHttpsAppLink('https://api.wathefni.ai/l/hr/people') === '/hr/people')
+check('canonical leave HTTPS maps to /leave', hrefFromHttpsAppLink('https://api.octo-hr.com/l/leave') === '/leave')
+check('canonical HR people HTTPS maps to /hr/people', hrefFromHttpsAppLink('https://api.octo-hr.com/l/hr/people') === '/hr/people')
+check('legacy leave HTTPS remains supported', hrefFromHttpsAppLink('https://api.wathefni.ai/l/leave') === '/leave')
 check('custom scheme preserved', hrefFromHttpsAppLink('wathefni://leave') === '/leave')
-check('unknown slug fails closed', hrefFromHttpsAppLink('https://api.wathefni.ai/l/not-a-surface') === null)
+check('unknown slug fails closed', hrefFromHttpsAppLink('https://api.octo-hr.com/l/not-a-surface') === null)
 check('wrong host ignored', hrefFromHttpsAppLink('https://example.com/l/leave') === null)
-check('home slug maps to /', hrefFromHttpsAppLink('https://api.wathefni.ai/l') === '/')
+check('home slug maps to /', hrefFromHttpsAppLink('https://api.octo-hr.com/l') === '/')
 
 console.log(`HTTPS_APP_LINK_TEST_${failures.length ? 'FAIL' : 'PASS'}  ${passed} passed, ${failures.length} failed`)
 process.exit(failures.length ? 1 : 0)

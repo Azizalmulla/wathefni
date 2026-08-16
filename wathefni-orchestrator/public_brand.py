@@ -23,7 +23,6 @@ _SUPPORT_HTML = """<!doctype html>
     p { font-size: 17px; line-height: 1.65; }
     section { margin-top: 32px; padding: 24px; border: 2px solid #1c1b19; border-radius: 24px; background: #fff; }
     h2 { margin: 0 0 10px; font-size: 21px; }
-    a.button { display: inline-block; margin-top: 12px; padding: 13px 18px; border-radius: 999px; background: #1c1b19; color: #fff; font-weight: 750; text-decoration: none; }
     .muted { color: #625f59; font-size: 14px; }
     [lang="ar"] { direction: rtl; text-align: right; }
   </style>
@@ -32,18 +31,16 @@ _SUPPORT_HTML = """<!doctype html>
 <main>
   <div class="brand">OctoHR</div>
   <h1>Support</h1>
-  <p>For employment records, company access, or HR decisions, contact your employer's HR team. For help using the OctoHR app, contact OctoHR Support.</p>
+  <p>For employment records, company access, HR decisions, or help using the OctoHR app, contact your employer's HR team. They can escalate platform issues to OctoHR Support.</p>
   <section>
     <h2>App support</h2>
     <p>Tell us which device you use, what you were trying to do, and the error shown. Do not email activation codes, passwords, PINs, Civil IDs, bank details, or other sensitive documents.</p>
-    <a class="button" href="mailto:support@wathefni.ai?subject=OctoHR%20Support">Contact OctoHR Support</a>
-    <p class="muted">The existing support@wathefni.ai mailbox remains a backward-compatible support alias.</p>
+    <p class="muted">Your HR team can include the device type, the action attempted, and the exact error when escalating a platform issue.</p>
   </section>
   <section lang="ar">
     <h2>دعم التطبيق</h2>
-    <p>للسجلات الوظيفية أو صلاحيات الشركة أو قرارات الموارد البشرية، تواصل مع فريق الموارد البشرية لدى جهة عملك. وللمساعدة في استخدام تطبيق OctoHR، تواصل مع دعم OctoHR.</p>
+    <p>للسجلات الوظيفية أو صلاحيات الشركة أو قرارات الموارد البشرية أو المساعدة في استخدام تطبيق OctoHR، تواصل مع فريق الموارد البشرية لدى جهة عملك. ويمكن للفريق تصعيد مشكلات المنصة إلى دعم OctoHR.</p>
     <p>اذكر نوع جهازك وما الذي كنت تحاول تنفيذه ورسالة الخطأ الظاهرة. لا ترسل رموز التفعيل أو كلمات المرور أو الرقم السري أو البطاقة المدنية أو البيانات البنكية أو مستندات حساسة عبر البريد.</p>
-    <a class="button" href="mailto:support@wathefni.ai?subject=OctoHR%20Support">تواصل مع دعم OctoHR</a>
   </section>
 </main>
 </body>

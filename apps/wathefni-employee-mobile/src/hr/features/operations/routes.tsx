@@ -8,6 +8,7 @@ import type { MobileCollection } from '@hr/api/types'
 import { useAuth } from '@hr/auth/AuthProvider'
 import { routeAvailable } from '@hr/capabilities'
 import { toHrPath } from '@hr/navigation'
+import { resolveCompanyBrand } from '@/branding/CompanyBrand'
 import { useHrSafeBack } from '@hr/useHrSafeBack'
 import { useLocale } from '@hr/i18n'
 import { formatDate, formatDateTime } from '@hr/i18n/date'
@@ -47,7 +48,7 @@ function useShell() {
     request,
     locale,
     t,
-    company: me?.principal.company_code || 'WATHEFNI',
+    company: resolveCompanyBrand(me?.company_identity, locale).name,
     refreshMe,
     toggleLocale: () => void setLocale(locale === 'ar' ? 'en' : 'ar'),
   }

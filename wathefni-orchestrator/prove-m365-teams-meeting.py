@@ -39,7 +39,7 @@ def main() -> int:
     record("cert_token_mint", True)
     start = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(hours=9)
     end = start + timedelta(minutes=30)
-    subject = f"Wathefni Teams authority {stamp}"
+    subject = f"OctoHR Teams authority {stamp}"
 
     created = mcal.create_teams_event(
         token=token,

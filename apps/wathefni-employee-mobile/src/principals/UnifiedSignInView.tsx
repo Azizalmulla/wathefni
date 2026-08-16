@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Pressable,
@@ -26,6 +26,13 @@ import { usePrincipalGate } from './PrincipalGate'
 import { savePrincipalModePreference } from './mode'
 
 type SignInMethod = 'phone' | 'work_email'
+
+const EMPLOYEE_SHELL_AUTH_STATES = new Set([
+  'needsPinSetup',
+  'needsBiometricOptIn',
+  'locked',
+  'signedIn',
+])
 
 const unsignedQueryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -59,6 +66,8 @@ function UnifiedSignInHost() {
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const activationInFlightRef = useRef(false)
+  const employeeHandoffInFlightRef = useRef(false)
 
   const [company, setCompany] = useState('')
   const [email, setEmail] = useState('')
@@ -66,13 +75,19 @@ function UnifiedSignInHost() {
   const [hrBusy, setHrBusy] = useState(false)
   const [hrError, setHrError] = useState<string | null>(null)
 
-  // Returning path: employee session just established via activate → open Employee shell.
+  // A verified Employee session may still need local PIN/biometric setup or unlock.
+  // Mount EmployeeShell for every post-auth state so its AuthGate owns those screens.
   useEffect(() => {
-    if (status !== 'signedIn') return
+    if (!EMPLOYEE_SHELL_AUTH_STATES.has(status) || employeeHandoffInFlightRef.current) return
+    employeeHandoffInFlightRef.current = true
     void (async () => {
-      await savePrincipalModePreference('employee')
-      await selectMode('employee')
-      await refreshAvailability()
+      try {
+        await savePrincipalModePreference('employee')
+        await selectMode('employee')
+        await refreshAvailability()
+      } finally {
+        employeeHandoffInFlightRef.current = false
+      }
     })()
   }, [status, selectMode, refreshAvailability])
 
@@ -90,6 +105,8 @@ function UnifiedSignInHost() {
   }
 
   const onPhoneSignIn = async () => {
+    if (activationInFlightRef.current) return
+    activationInFlightRef.current = true
     setError(null)
     setNotice(null)
     setBusy(true)
@@ -98,6 +115,7 @@ function UnifiedSignInHost() {
     } catch (err) {
       setError(approvedErrorMessage(err, t))
     } finally {
+      activationInFlightRef.current = false
       setBusy(false)
     }
   }

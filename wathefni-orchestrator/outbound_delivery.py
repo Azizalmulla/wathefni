@@ -1105,13 +1105,13 @@ def deliver_to_employee(
     variables = dict(variables or {})
     variables.setdefault("employee_name", recipient["name"])
     # {company_name} is a first-class template variable (e.g. onboarding welcome,
-    # and the "[Company] via Wathefni" shared-sender wording). Inject it centrally
+    # and the "[Company] via OctoHR" shared-sender wording). Inject it centrally
     # so every flow gets it without each call site passing it.
     if not variables.get("company_name"):
         try:
             variables["company_name"] = legacy.company_display_name(company)
         except Exception:
-            variables["company_name"] = company
+            variables["company_name"] = "OctoHR"
     subject_key = subject_key or employee_key
 
     entry = catalog_entry(template_key)

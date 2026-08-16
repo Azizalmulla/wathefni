@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Redirect, Slot, Stack, useRouter, useSegments } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -31,6 +31,7 @@ import {
   usePrincipalGate,
 } from '@/principals/PrincipalGate'
 import { UnsignedEntry } from '@/principals/UnifiedSignInView'
+import { CompanyBrandProvider } from '@/branding/CompanyBrand'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -277,17 +278,24 @@ function EmployeeShell() {
     <AppErrorBoundary title={t('error.fatalTitle')} message={t('error.fatalMessage')} retryLabel={t('common.retry')}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <StatusBar style="dark" />
-          {/* HR must not register on /app/push — PushLifecycle stays employee-only. */}
-          <PushLifecycle />
-          <ForegroundQueryRefresh />
-          <LocalUnlockShell>
-            <AuthGate />
-          </LocalUnlockShell>
+          <EmployeeBrandBoundary>
+            <StatusBar style="dark" />
+            {/* HR must not register on /app/push — PushLifecycle stays employee-only. */}
+            <PushLifecycle />
+            <ForegroundQueryRefresh />
+            <LocalUnlockShell>
+              <AuthGate />
+            </LocalUnlockShell>
+          </EmployeeBrandBoundary>
         </AuthProvider>
       </QueryClientProvider>
     </AppErrorBoundary>
   )
+}
+
+function EmployeeBrandBoundary({ children }: { children: ReactNode }) {
+  const { me } = useAuth()
+  return <CompanyBrandProvider identity={me?.company_identity}>{children}</CompanyBrandProvider>
 }
 
 function ModeRedirect() {

@@ -58,8 +58,9 @@ def main() -> int:
         and assetlinks[0]["relation"] == ["delegate_permission/common.handle_all_urls"],
     )
     app_json = (ROOT.parent / "apps" / "wathefni-employee-mobile" / "app.json").read_text(encoding="utf-8")
-    check("iOS associatedDomains lists api.wathefni.ai", "applinks:api.wathefni.ai" in app_json)
-    check("Android intentFilters host api.wathefni.ai", "api.wathefni.ai" in app_json and "pathPrefix" in app_json)
+    check("iOS associatedDomains lists canonical api.octo-hr.com", "applinks:api.octo-hr.com" in app_json)
+    check("iOS associatedDomains preserves api.wathefni.ai", "applinks:api.wathefni.ai" in app_json)
+    check("Android intentFilters include canonical and legacy hosts", all(host in app_json for host in ("api.octo-hr.com", "api.wathefni.ai")) and "pathPrefix" in app_json)
     src = (ROOT / "app.py").read_text(encoding="utf-8")
     emp_layout = (ROOT.parent / "apps" / "wathefni-employee-mobile" / "app" / "_layout.tsx").read_text(encoding="utf-8")
     hr_layout = (ROOT.parent / "apps" / "wathefni-employee-mobile" / "app" / "hr" / "_layout.tsx").read_text(encoding="utf-8")

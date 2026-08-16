@@ -83,16 +83,16 @@ def main() -> int:
     user = urllib.parse.quote(EVIDENCE_UPN)
     now = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(hours=4)
     end = now + timedelta(hours=1)
-    subject = f"Wathefni C6B M365 Evidence {stamp}"
+    subject = f"OctoHR C6B M365 Evidence {stamp}"
 
     create_body = {
         "subject": subject,
-        "body": {"contentType": "text", "content": "Controlled Wathefni Calendar C6B Microsoft evidence event."},
+        "body": {"contentType": "text", "content": "Controlled OctoHR Calendar C6B Microsoft evidence event."},
         "start": {"dateTime": now.strftime("%Y-%m-%dT%H:%M:%S"), "timeZone": "UTC"},
         "end": {"dateTime": end.strftime("%Y-%m-%dT%H:%M:%S"), "timeZone": "UTC"},
         "isOnlineMeeting": True,
         "onlineMeetingProvider": "teamsForBusiness",
-        "location": {"displayName": "Wathefni evidence"},
+        "location": {"displayName": "OctoHR evidence"},
     }
     created = _json_req("POST", f"{GRAPH}/users/{user}/events", token, create_body)
     event = created.get("json") if isinstance(created.get("json"), dict) else {}

@@ -152,6 +152,16 @@ def main() -> int:
         def dashboard_user_public(user):
             return user
 
+        @staticmethod
+        def mobile_company_identity(company):
+            return {
+                "company_code": company,
+                "display_name": "HR1 Capability Co",
+                "display_name_en": "HR1 Capability Co",
+                "display_name_ar": "شركة HR1",
+                "logo_url": None,
+            }
+
     app_mod = _App()
 
     owner_perms = [
@@ -273,6 +283,7 @@ def main() -> int:
         me = om.build_mobile_me_payload(app_mod, owner_ctx)
     check("me.ok", me.get("ok") is True)
     check("me.permission_authority", me.get("permission_authority") == "backend_current")
+    check("me.company_identity is tenant bound", me.get("company_identity", {}).get("company_code") == "HR1CAP")
     check("me.principal.role", me["principal"]["role"] == "owner")
     check("me.workspaces.hr present", "hr" in me["workspaces"])
     check("me.workspaces.recruiting present", "recruiting" in me["workspaces"])

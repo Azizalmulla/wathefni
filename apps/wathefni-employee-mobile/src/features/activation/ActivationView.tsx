@@ -120,7 +120,7 @@ export function ActivationView({
                   onChangeText={onCodeChange}
                   onFocus={() => setCodeFocused(true)}
                   onBlur={() => setCodeFocused(false)}
-                  onSubmitEditing={valid ? onSignIn : undefined}
+                  onSubmitEditing={valid && !busy ? onSignIn : undefined}
                   keyboardType="number-pad"
                   autoComplete="sms-otp"
                   textContentType="oneTimeCode"
@@ -162,7 +162,7 @@ export function ActivationView({
               label={t('auth.signIn')}
               onPress={onSignIn}
               busy={busy}
-              disabled={!valid}
+              disabled={!valid || busy}
               showDirection
             />
             <Pressable

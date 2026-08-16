@@ -39,9 +39,17 @@ def main() -> int:
     store = (eas.get("build") or {}).get("store") or {}
     prod_env = store.get("env") or production.get("env") or {}
 
+    hr_settings = (APP / "src/hr/features/settings/SettingsView.tsx").read_text(encoding="utf-8")
+    employee_settings = (APP / "src/features/remaining/RemainingViews.tsx").read_text(encoding="utf-8")
+    en = json.loads((APP / "src/i18n/en.json").read_text(encoding="utf-8"))
+    ar = json.loads((APP / "src/i18n/ar.json").read_text(encoding="utf-8"))
+
     check("iOS bundleIdentifier is ai.wathefni.employee", ios.get("bundleIdentifier") == "ai.wathefni.employee")
     check("Android package is ai.wathefni.employee", android.get("package") == "ai.wathefni.employee")
-    check("production API is api.wathefni.ai", prod_env.get("EXPO_PUBLIC_API_BASE_URL") == "https://api.wathefni.ai")
+    check("customer-visible app name is OctoHR", expo.get("name") == "OctoHR")
+    check("production API is api.octo-hr.com", prod_env.get("EXPO_PUBLIC_API_BASE_URL") == "https://api.octo-hr.com")
+    check("production privacy URL is canonical", prod_env.get("EXPO_PUBLIC_PRIVACY_URL") == "https://octo-hr.com/privacy")
+    check("production support URL is canonical", prod_env.get("EXPO_PUBLIC_SUPPORT_URL") == "https://octo-hr.com/support")
     check("production API is not staging", "staging" not in str(prod_env.get("EXPO_PUBLIC_API_BASE_URL") or ""))
     check("production release flag is on", prod_env.get("EXPO_PUBLIC_WATHEFNI_PRODUCTION_RELEASE") == "1")
     check("production does not set HR demo flags", not any("DEMO" in k for k in prod_env))
@@ -64,12 +72,18 @@ def main() -> int:
     check("Android store does not request microphone", "android.permission.RECORD_AUDIO" not in (android.get("permissions") or []))
     check("push plugin present", any("expo-notifications" in str(p) for p in expo.get("plugins") or []))
     check("updates URL is Expo", str((expo.get("updates") or {}).get("url") or "").startswith("https://u.expo.dev/"))
-    check("associatedDomains includes api.wathefni.ai", any("applinks:api.wathefni.ai" in str(d) for d in (ios.get("associatedDomains") or [])))
-    check("Android App Links intent filter present", any(
-        (item.get("autoVerify") is True) and any(d.get("host") == "api.wathefni.ai" for d in (item.get("data") or []))
+    associated_domains = set(ios.get("associatedDomains") or [])
+    check("associatedDomains includes canonical host", "applinks:api.octo-hr.com" in associated_domains)
+    check("associatedDomains preserves legacy host", "applinks:api.wathefni.ai" in associated_domains)
+    app_link_hosts = {
+        str(data.get("host") or "")
         for item in (android.get("intentFilters") or [])
-        if isinstance(item, dict)
-    ))
+        if isinstance(item, dict) and item.get("autoVerify") is True
+        for data in (item.get("data") or [])
+        if isinstance(data, dict) and data.get("scheme") == "https" and data.get("pathPrefix") == "/l"
+    }
+    check("Android App Links includes canonical host", "api.octo-hr.com" in app_link_hosts)
+    check("Android App Links preserves legacy host", "api.wathefni.ai" in app_link_hosts)
     # Store distribution is required before Apple/Google submission. Internal
     # canary APK/IPA is not a store build.
     dist = store.get("distribution")
@@ -89,6 +103,23 @@ def main() -> int:
     )
     cfg = (APP / "app.config.js").read_text(encoding="utf-8")
     check("app.config.js refuses demo flags on production release", "production release cannot bake demo flags" in cfg)
+    check(
+        "HR Settings excludes engineering diagnostics",
+        not (APP / "src/hr/features/settings/HrSessionQueueProbe.tsx").exists()
+        and all(
+            token not in hr_settings
+            for token in ("HrSessionQueueProbe", "sectionProbe", "probeHint", "sectionAccess", "accessHint")
+        ),
+    )
+    check(
+        "Employee Settings excludes auto-lock diagnostics panel",
+        "autoLockDiagnostics" not in employee_settings and "diagnosticsTitle" not in employee_settings,
+    )
+    translations = json.dumps({"en": en, "ar": ar}, ensure_ascii=False)
+    check(
+        "customer translations use OctoHR branding",
+        all(token not in translations for token in ("Wathefni", "WATHEFNI", "وظفني", "وثفني")),
+    )
     check("Arabic OS permission locale file present", (APP / "locales" / "ar.json").is_file())
     dev_client_plugin = next(
         (item for item in plugins if isinstance(item, list) and item and item[0] == "expo-dev-client"),

@@ -17,6 +17,7 @@ import {
   WorkspaceHeader,
 } from '@hr/components/primitives'
 import { colors, spacing, type as typography } from '@hr/theme'
+import { resolveCompanyBrand } from '@/branding/CompanyBrand'
 
 export type HomeState =
   | 'ready'
@@ -58,10 +59,11 @@ export function HRHomeView({
     }))
     .filter((section) => section.items.length > 0)
   const scopeLabel = me.scope.restricted ? t('home.scopeRestricted') : t('home.scopeCompany')
+  const companyName = resolveCompanyBrand(me.company_identity, locale).name
 
   return (
     <Screen>
-      <WorkspaceHeader company={me.principal.company_code} scopeLabel={scopeLabel} onLocale={onLocale} />
+      <WorkspaceHeader company={companyName} scopeLabel={scopeLabel} onLocale={onLocale} />
       <FadeIn>
         <EditorialHeading eyebrow={t('home.eyebrow')}>{t('home.title')}</EditorialHeading>
       </FadeIn>
