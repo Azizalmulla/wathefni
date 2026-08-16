@@ -1,0 +1,6 @@
+[
+  "apps/wathefni-employee-mobile/.maestro/smoke/00-unsigned-entry.yaml",
+  "apps/wathefni-employee-mobile/.maestro/smoke/05-method-switch-en.yaml",
+  "apps/wathefni-employee-mobile/.maestro/smoke/01-hr-login.yaml",
+  "apps/wathefni-employee-mobile/.maestro/smoke/02-hr-tabs.yaml"
+]

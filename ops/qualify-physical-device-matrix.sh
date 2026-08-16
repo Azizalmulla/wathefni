@@ -16,7 +16,9 @@ ios_names=""
 android_names=""
 
 if command -v xcrun >/dev/null 2>&1 && [[ -d "$DEVELOPER_DIR" ]]; then
-  ios_names="$(xcrun xctrace list devices 2>/dev/null | awk '/== Devices ==/{p=1;next} /== Simulators ==/{p=0} p && NF' || true)"
+  # Only the connected "Devices" section is physical proof. xctrace also emits
+  # a "Devices Offline" section whose iPhone names must never count as attached.
+  ios_names="$(xcrun xctrace list devices 2>/dev/null | awk '/^== Devices ==$/{p=1;next} /^== /{p=0} p && NF' || true)"
   if echo "$ios_names" | grep -Eqi 'iPhone|iPad'; then
     ios_usb=1
   fi

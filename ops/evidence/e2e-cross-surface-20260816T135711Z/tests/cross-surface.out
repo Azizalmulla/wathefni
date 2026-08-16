@@ -1,0 +1,35 @@
+    E2E cross-surface employee / leave / module convergence
+    tenant: R9EF7EDF3
+      PASS  HR login
+      PASS  HR employee edit commits
+      PASS  employee edit reached canonical row
+      PASS  HR detail sees canonical employee edit
+      PASS  Employee profile sees HR edit
+      PASS  employee request accepted or validated
+      PASS  employee leave list readable
+      PASS  HR sees company leave
+      PASS  HR leave payload stays on this tenant
+      PASS  employee attendance is tenant-scoped or fail-closed
+      PASS  Employee honors canonical leave module disable
+      PASS  HR honors canonical leave module disable
+
+    CROSS_SURFACE_PASS  12 passed, 0 failed
+    CROSS-SURFACE DOMAIN MATRIX  tests=16
+      PASS  Recruiting: smoke-test-prehire-registry-parity.py
+      PASS  Interviews: smoke-test-interview-workflow-live.py
+      PASS  Onboarding: smoke-test-onboarding-dashboard.py
+      PASS  Attendance: smoke-test-attendance-truth-c1.py
+      PASS  Shifts: smoke-test-shift-management.py
+      PASS  Payroll/Payslips: smoke-test-payroll-payslip-wave3.py
+      PASS  Documents: smoke-test-document-hub.py
+      PASS  Performance/OKRs: smoke-test-r5b-performance-surface-db.py
+      PASS  Talent: smoke-test-r5c-talent-surface-db.py
+      PASS  Learning: smoke-test-r5e-learning-surface-db.py
+      PASS  Benefits: smoke-test-r5f-benefits-surface-db.py
+      PASS  Employee Relations: smoke-test-r5g-employee-relations-surface-db.py
+      PASS  Engagement: smoke-test-r5h-engagement-surface-db.py
+      PASS  Compensation Planning: smoke-test-r5i-compensation-planning-surface-db.py
+      PASS  Workforce Planning: smoke-test-r5j-workforce-planning-surface-db.py
+      PASS  Setup/module composition: smoke-test-r6-setup-self-service-db.py
+
+    CROSS_SURFACE_DOMAIN_MATRIX_PASS  16 passed, 0 failed

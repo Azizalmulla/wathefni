@@ -64,7 +64,7 @@ def main() -> int:
     import payroll_payslip_wave3 as w3
 
     h = w3.honesty_payload()
-    check("version", w3.PAYROLL_WAVE3_VERSION == "1.0.0")
+    check("version", w3.PAYROLL_WAVE3_VERSION == "1.3.0")
     check("payment disabled", h.get("payment_processing") == "disabled")
     check("not money", h.get("payslips_as_money") is False)
     check("native non-auth", h.get("native_payslips_authoritative") is False)

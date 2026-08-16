@@ -10,7 +10,7 @@ import { StatusChip } from '@/components/ui'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
 import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
-import { PageBackButton } from '@/components/navigation/PageBackButton'
+import { PageBackButton } from '@/components/lists'
 import { colors, font, spacing, typeScaling } from '@/theme'
 
 type PreboardingResponse = {
@@ -142,9 +142,9 @@ export default function PreboardingScreen() {
 
 const styles = StyleSheet.create({
   nav: { marginBottom: spacing.sm },
-  subtitle: { ...font.body, color: colors.textSecondary, marginTop: spacing.sm },
+  subtitle: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.sm },
   joining: { ...font.bodyStrong, color: colors.textPrimary, marginTop: spacing.md },
-  progress: { ...font.caption, color: colors.textSecondary, marginTop: spacing.xs },
+  progress: { fontSize: font.small, color: colors.textSecondary, marginTop: spacing.xs },
   card: {
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: { ...font.bodyStrong, color: colors.textPrimary },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
-  meta: { ...font.caption, color: colors.textSecondary },
+  meta: { fontSize: font.small, color: colors.textSecondary },
   actionBtn: {
     alignSelf: 'flex-start',
     backgroundColor: colors.surfaceMuted,

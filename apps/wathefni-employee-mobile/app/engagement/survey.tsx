@@ -9,7 +9,6 @@ import { PageScreen, PageScrollView } from '@/components/layout'
 import { ListRow, PageBackButton, QuietEmpty } from '@/components/lists'
 import { EditorialHeading, PremiumButton } from '@/components/premium'
 import { useAppQuery } from '@/lib/hooks'
-import { request } from '@/api/client'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
 
@@ -41,7 +40,7 @@ type Payload = {
 
 export default function EngagementSurveyScreen() {
   const { campaign_id: campaignId } = useLocalSearchParams<{ campaign_id?: string }>()
-  const { hasFeature, can } = useAuth()
+  const { hasFeature, can, request } = useAuth()
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
   const enabled = hasFeature('engagement')
@@ -68,10 +67,10 @@ export default function EngagementSurveyScreen() {
     if (!campaignId || busy) return
     setBusy(true)
     try {
-      await request(`/app/engagement/surveys/${campaignId}/start`, { method: 'POST', body: {} })
+      await request(`/app/engagement/surveys/${campaignId}/start`, { method: 'POST', json: {} })
       await request(`/app/engagement/surveys/${campaignId}/submit`, {
         method: 'POST',
-        body: {
+        json: {
           answers: questions.map((q) => ({
             question_id: q.question_id,
             value_number: answers[String(q.question_id)] ?? q.scale_min ?? 0,

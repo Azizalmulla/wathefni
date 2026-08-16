@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from psycopg2.extras import Json
 
@@ -18,10 +19,25 @@ def main() -> None:
     phone = f"9655599{suffix[:4]}"
     app_key = f"{phone}-WATHEFNI-INTERVIEW-SMOKE-{suffix}"
     event_id = f"interview-smoke-event-{suffix}"
+    permissions = sorted(app.hr_role_permissions("owner"))
     context = {
         "company_code": company,
         "hr_phone": "96597453460",
-        "hr_user": {"phone": "96597453460", "name": "smoke"},
+        "hr_user": {
+            "phone": "96597453460",
+            "name": "smoke",
+            "role": "owner",
+            "status": "active",
+            "company_code": company,
+            "user_id": "interview-smoke-owner",
+        },
+        "access": {"role": "owner", "permissions": permissions},
+        "permissions": permissions,
+        "actor_user_id": "interview-smoke-owner",
+        "actor_role": "owner",
+        "permission_authority": "backend_current",
+        "permission_subject_user_id": "interview-smoke-owner",
+        "permission_subject_company": company,
         "scope": {"restricted": False},
     }
 
@@ -37,19 +53,21 @@ def main() -> None:
                 )
                 cur.execute(
                     """
-                    INSERT INTO applications (app_key, phone, company_code, position_code, position_title, status, current_step, screening_status, raw_json, created_at, updated_at, data_source, data_source_detail)
-                    VALUES (%s,%s,%s,'INTERVIEW_SMOKE','Interview Smoke','shortlisted','interview','complete',%s,CURRENT_DATE,CURRENT_DATE,'production','temporary_interview_smoke')
+                    INSERT INTO applications (app_key, phone, company_code, position_code, position_title, status, current_step, screening_status, cv_received, raw_json, created_at, updated_at, data_source, data_source_detail)
+                    VALUES (%s,%s,%s,'INTERVIEW_SMOKE','Interview Smoke','shortlisted','interview','complete',true,%s,CURRENT_DATE,CURRENT_DATE,'production','temporary_interview_smoke')
                     """,
-                    (app_key, phone, company, Json({"smoke": True})),
+                    (app_key, phone, company, Json({"smoke": True, "cv": {"filename": "smoke-interview.pdf"}})),
                 )
             conn.commit()
 
-        application = app.find_application_by_key(app_key)
+        application = app.find_application_by_key(app_key, company_code=company)
+        scheduled_start = datetime.now(timezone.utc) + timedelta(days=7)
+        scheduled_end = scheduled_start + timedelta(minutes=30)
         interview = app.create_candidate_interview_from_schedule(
             application,
             {
-                "start": "2026-05-18T21:00:00+03:00",
-                "end": "2026-05-18T21:30:00+03:00",
+                "start": scheduled_start.isoformat(),
+                "end": scheduled_end.isoformat(),
                 "result": {
                     "event": {
                         "id": event_id,
@@ -62,9 +80,21 @@ def main() -> None:
             created_by_phone="96597453460",
             source="live_smoke",
         )
-        assert_true(bool(interview and interview["status"] == "scheduled"), "scheduled interview should be created")
+        assert_true(
+            bool(interview and interview["status"] == "scheduled"),
+            f"scheduled interview should be created; result={interview!r}",
+        )
 
-        payload = app.dashboard_prehire_interviews(context=context)
+        payload = app.dashboard_prehire_interviews(
+            status=None,
+            q=phone,
+            role=None,
+            date=None,
+            interviewer=None,
+            limit=100,
+            offset=0,
+            context=context,
+        )
         assert_true(any(item["interview_id"] == interview["interview_id"] for item in payload["interviews"]), "dashboard should list smoke interview")
 
         updated = app.dashboard_prehire_interview_update(
@@ -80,22 +110,30 @@ def main() -> None:
                 notes="Strong communication. Needs Excel follow-up.",
                 status="completed",
                 generate_summary=False,
+                expected_updated_at=updated["interview"]["updated_at"],
             ),
             context=context,
         )
-        assert_true(notes["interview"]["feedback_status"] == "feedback_complete", "notes should mark feedback complete")
-
-        refreshed = app.find_application_by_key(app_key)
+        assert_true(notes["interview"]["notes_status"] == "notes_present", "notes should be present")
         assert_true(
-            (refreshed.get("raw_json") or {}).get("interview", {}).get("feedback_status") == "feedback_complete",
-            "application interview snapshot should update",
+            notes["interview"]["human_feedback_status"] != "feedback_complete",
+            "free-text notes must not fake completed human scorecard feedback",
         )
 
-        token = app.dashboard_configured_token()
-        dashboard_context = app.prehire_dashboard_context(
-            app.dashboard_context(authorization=f"Bearer {token}", x_company_code=company, x_hr_phone="")
+        refreshed = app.find_application_by_key(app_key, company_code=company)
+        snapshot = (refreshed.get("raw_json") or {}).get("interview", {})
+        assert_true(snapshot.get("status") == "completed" and bool(snapshot.get("updated_at")), "application interview snapshot should update")
+
+        endpoint_payload = app.dashboard_prehire_interviews(
+            status=None,
+            q=phone,
+            role=None,
+            date=None,
+            interviewer=None,
+            limit=100,
+            offset=0,
+            context=context,
         )
-        endpoint_payload = app.dashboard_prehire_interviews(context=dashboard_context)
         assert_true(endpoint_payload["company_code"] == company, "dashboard interviews endpoint should authorize and return company payload")
 
         print("live interview scenario passed")

@@ -43,7 +43,7 @@ def main() -> int:
     os.environ["WATHEFNI_EMPLOYEE_APP_REQUIRE_ALLOWLIST"] = "on"
     os.environ["WATHEFNI_EMPLOYEE_APP_REAL_ALLOWLIST"] = EMP_KEY
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
-    print("    E2E cross-surface leave convergence")
+    print("    E2E cross-surface employee / leave / module convergence")
     print(f"    tenant: {COMPANY}")
 
     try:
@@ -157,6 +157,34 @@ def main() -> int:
         check("HR login", login.status_code == 200, login.text[:160])
         hr_token = (login.json() or {}).get("access_token")
         emp_token = app.create_employee_session(COMPANY, EMP_KEY, PHONE_EMP)["token"]
+
+        # Employees: the HR web action updates the canonical employee row, and
+        # both HR detail and Employee profile must immediately project it.
+        marker = f"Convergence {SUFFIX}"
+        before_employee = app.find_employee_by_key(EMP_KEY, company_code=COMPANY) or {}
+        update = client.patch(
+            f"/dashboard/posthire/employees/{EMP_KEY}",
+            headers={"Authorization": f"Bearer {hr_token}"},
+            json={
+                "position_title": marker,
+                "expected_updated_at": app.json_safe(before_employee.get("updated_at")),
+            },
+        )
+        check("HR employee edit commits", update.status_code == 200, update.text[:200])
+        canonical_employee = app.find_employee_by_key(EMP_KEY, company_code=COMPANY) or {}
+        check("employee edit reached canonical row", canonical_employee.get("position_title") == marker, canonical_employee)
+        hr_employee = client.get(
+            f"/dashboard/posthire/employees/{EMP_KEY}",
+            headers={"Authorization": f"Bearer {hr_token}"},
+        )
+        check("HR detail sees canonical employee edit", hr_employee.status_code == 200 and marker in hr_employee.text, hr_employee.text[:200])
+        employee_profile = client.get("/app/profile", headers={"Authorization": f"Bearer {emp_token}"})
+        check(
+            "Employee profile sees HR edit",
+            employee_profile.status_code == 200 and marker in employee_profile.text,
+            employee_profile.text[:200],
+        )
+
         today = date.today()
         req = client.post(
             "/app/leave/request",
@@ -209,6 +237,20 @@ def main() -> int:
                 check("employee payload does not leak another tenant", COMPANY in again.text or EMP_KEY in again.text or leave_id in again.text)
         att = client.get("/app/attendance", headers={"Authorization": f"Bearer {emp_token}"})
         check("employee attendance is tenant-scoped or fail-closed", att.status_code in {200, 403, 404}, att.status_code)
+
+        # Setup/module composition: one canonical module toggle must converge on
+        # every client surface instead of leaving a stale Employee/HR capability.
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE company_modules SET enabled=FALSE, updated_at=now() WHERE company_code=%s AND module_key='leave'",
+                    (COMPANY,),
+                )
+            conn.commit()
+        employee_leave_off = client.get("/app/leave", headers={"Authorization": f"Bearer {emp_token}"})
+        hr_leave_off = client.get("/dashboard/posthire/leave", headers={"Authorization": f"Bearer {hr_token}"})
+        check("Employee honors canonical leave module disable", employee_leave_off.status_code == 403, employee_leave_off.text[:160])
+        check("HR honors canonical leave module disable", hr_leave_off.status_code == 403, hr_leave_off.text[:160])
     finally:
         cleanup()
 

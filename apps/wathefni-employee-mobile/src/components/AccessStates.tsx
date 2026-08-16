@@ -53,12 +53,14 @@ export function FeatureUnavailableState({
   feature,
   reason,
   onRefresh,
+  onBack,
 }: {
   /** Owning feature key(s) — copy reflects the first server-stamped `features.reason`. */
   feature?: EmployeeFeatureKey | readonly EmployeeFeatureKey[]
   /** Optional explicit reason when the caller already read `/app/me` (overrides lookup). */
   reason?: string | null
   onRefresh?: () => void
+  onBack?: () => void
 }) {
   const { t, isRTL } = useI18n()
   const { me } = useAuth()
@@ -80,7 +82,7 @@ export function FeatureUnavailableState({
       isRTL={isRTL}
     >
       {onRefresh ? <PremiumButton label={t('common.retry')} onPress={onRefresh} /> : null}
-      <SecondaryAction label={t('feature.backHome')} onPress={() => router.replace('/(tabs)')} />
+      <SecondaryAction label={t('feature.backHome')} onPress={onBack || (() => router.replace('/(tabs)'))} />
     </AccessShell>
   )
 }

@@ -23,6 +23,8 @@ tags:
     id: "e2e.auth.employee.code"
 - inputText: ${MAESTRO_EMPLOYEE_CODE}
 - tapOn:
+    point: "50%,28%"
+- tapOn:
     id: "e2e.auth.employee.signIn"
 - extendedWaitUntil:
     visible:

@@ -10,7 +10,7 @@ import { StatusChip } from '@/components/ui'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { useAppQuery } from '@/lib/hooks'
 import { useEmployeeSafeBack } from '@/navigation/useEmployeeSafeBack'
-import { PageBackButton } from '@/components/navigation/PageBackButton'
+import { PageBackButton } from '@/components/lists'
 import { colors, font, spacing, typeScaling } from '@/theme'
 
 type ProbationResponse = {
@@ -157,8 +157,8 @@ export default function ProbationScreen() {
 
 const styles = StyleSheet.create({
   nav: { marginBottom: spacing.sm },
-  subtitle: { ...font.body, color: colors.textSecondary, marginTop: spacing.xs },
-  meta: { ...font.caption, color: colors.textSecondary, marginTop: spacing.xs },
+  subtitle: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.xs },
+  meta: { fontSize: font.small, color: colors.textSecondary, marginTop: spacing.xs },
   outcome: { ...font.bodyStrong, color: colors.textPrimary, marginTop: spacing.sm },
   card: {
     borderRadius: 12,

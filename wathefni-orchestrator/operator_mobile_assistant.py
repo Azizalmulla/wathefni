@@ -13,6 +13,8 @@ import time
 import uuid
 from typing import Any
 
+from fastapi import Request
+
 try:
     from pydantic import BaseModel, Field
 
@@ -172,7 +174,7 @@ def _run_mobile_assistant_turn(
 
 
 def register_mobile_assistant_routes(app_mod: Any, *, operator_mobile_context: Any) -> None:
-    from fastapi import Depends, HTTPException, Request
+    from fastapi import Depends, HTTPException
     from fastapi.responses import StreamingResponse
 
     if MobileAssistantChatBody is None:

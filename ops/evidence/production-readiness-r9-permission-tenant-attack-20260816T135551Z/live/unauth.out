@@ -1,0 +1,10 @@
+/dashboard/posthire/employees -> 401
+/dashboard/posthire/leave -> 401
+/dashboard/posthire/payroll -> 401
+/dashboard/performance/workspace -> 401
+/dashboard/talent/workspace -> 401
+/dashboard/employee-relations/workspace -> 401
+/dashboard/setup/company/module-policies -> 401
+/app/me -> 401
+/app/leave -> 401
+LIVE_UNAUTH_OK

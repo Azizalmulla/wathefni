@@ -110,7 +110,16 @@ def main() -> int:
     os.environ["WATHEFNI_ONBOARDING_HR_MUTATE"] = "off"
     gated = registry._onboarding_mark_item_executor(_ctx({"employee_key": "nope", "item_id": ITEM_RECV, "item_status": "received"}))
     check("mark executor blocked while flag OFF", isinstance(gated, dict) and gated.get("error") == "feature_disabled" and gated.get("success") is False)
-    gated_start = registry._onboarding_start_executor(_ctx({"employee_key": "nope"}))
+    original_resolve = app.resolve_employee_for_direct_action
+    try:
+        app.resolve_employee_for_direct_action = lambda *a, **k: {
+            "employee_key": "WATHEFNI-ONBOARDING-GATE-SMOKE",
+            "company_code": "WATHEFNI",
+            "name": "Onboarding Gate Smoke",
+        }
+        gated_start = registry._onboarding_start_executor(_ctx({"employee_key": "WATHEFNI-ONBOARDING-GATE-SMOKE"}))
+    finally:
+        app.resolve_employee_for_direct_action = original_resolve
     check("start executor blocked while flag OFF", isinstance(gated_start, dict) and gated_start.get("error") == "feature_disabled")
     os.environ["WATHEFNI_ONBOARDING_HR_MUTATE"] = "on"
 

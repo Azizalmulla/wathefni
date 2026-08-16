@@ -139,6 +139,6 @@ export function HRPreboardingQueueView() {
 }
 
 const styles = StyleSheet.create({
-  subtitle: { ...font.body, color: colors.textSecondary, marginTop: spacing.sm },
+  subtitle: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 })

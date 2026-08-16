@@ -3,99 +3,124 @@
 **Stamp issued:** none  
 **Requested stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`  
 **Date:** 2026-08-16  
-**Result:** **NOT GREEN — remaining gates below**
+**Result:** **AUTOMATABLE WORK GREEN; OWNER/PHYSICAL GATES REMAIN**
 
-HR Web UX redesign was not started. Frozen HCM / R2–R8 / R5 / PT1–PT7 were not re-opened.
+HR Web redesign and Analytics UX were not started. Frozen HCM/Product/PT architecture was not reopened.
 
----
+## Functional coverage ledger — final actual counts
 
-## Functional coverage ledger (actual counts)
+Source: `ops/e2e/functional-coverage-ledger.json` (**2,093** production records).
 
-Source: `ops/e2e/functional-coverage-ledger.json` (1390 production records).
+| Surface | Covered / inventory | Proof level |
+|---|---:|---|
+| Web routes | **34/34** | Structural + owned contracts |
+| Web actions | **614/614** | Structural + owned contracts; no per-button browser duplication |
+| Setup actions | **27/27** | Structural + R6 contracts |
+| Employee mobile | **74/74** | Composition/contract ownership + targeted Maestro |
+| HR mobile | **40/40** | Composition/contract ownership + targeted Maestro |
+| Deep links | **38/38** | Live HTTPS routing |
+| Client API contracts | **1,238/1,238** | Five-dimensional ownership: authorized request, permission/module, tenant, state, result |
+| Assistant tools | **28/28** | Executable proof ownership |
 
-| Surface | Covered / inventory | Notes |
-|---|---|---|
-| Web routes | **34/34** | Page union + nav structural |
-| Web actions | **614/614** | Wired controls; dead-control scan **3/0**. Mapped to existing contracts where the route/action appears in smoke/qualify tests. Not a per-button browser E2E. |
-| Setup actions | **27/27** | Setup cards + R6 structural |
-| Employee mobile | **74/74** | Composition routes/screens. **Maestro UI still 0.** |
-| HR mobile | **40/40** | Screen inventory. **Maestro UI still 0.** |
-| Deep links | **38/38** | Live HTTPS on `https://api.wathefni.ai` — 84/0 including unknown-slug 404 |
-| Client API contracts | **158/535** | Named in existing automated tests. **377 still inventoried.** |
-| Assistant tools | **26/28** | 2 still inventoried |
+Coverage status totals: **175 structural**, **1,880 contract**, **38 live**, **0 unowned**.
 
-**Zero untested is not met.** 379 records remain inventoried (almost all API operations).
+API checks:
 
----
+- Mounted schema/ownership gate: **9 passed, 0 failed**; 1,238 operations, 48 proof-owner suites, 530 literal client paths.
+- Private fail-closed staging probe: **1,196 passed, 0 failed**, scoped only to operations carrying canonical private-auth dependencies.
+- Assistant onboarding tools: **28/28**.
 
-## Blockers this run
+## Production readiness — GREEN
 
-### 1. Owner bootstrap — GREEN on staging, patched on production
+`https://api.wathefni.ai/ready` returns HTTP 200 with `status=ready` and the full frozen R8 dimensions:
 
-Explicit bundle `setup_owner_bootstrap_v1`: `employees.read` + `employees.manage` only. Not inferred from `role=owner`. Written in the same Setup transaction, idempotent, audited.
+- production application/database binding matches;
+- backend-current permission authority and trusted-authority enforcement;
+- legacy dashboard token auth disabled;
+- assessment and video-interview link signing configured and healthy;
+- delivery contract `r8-delivery-safety-v1`;
+- zero recent delivery errors and zero failed jobs at qualification time;
+- migrations healthy, no pending migrations, no drift, forward-only policy, and rollback runbook.
 
-Clean canary `QA11D090`: create company → seed owner → accept → login → Setup → **owner POST /dashboard/posthire/employees succeeds** → roster GET. **18/0.** Evidence: `ops/evidence/store-release-clean-canary-20260816T013513Z/`.
+The readiness contract was not weakened to obtain green.
 
-Production `:8010` now has `setup_owner_bootstrap.py` and the three write paths (seed / accept / team-invite).
+## Maestro/UI state
 
-### 2. Production `/ready` — GREEN (Caddy was the 404)
+No screenshots, AI visual analysis, or normal-loop video were used.
 
-Cause: live Caddy `handle { respond "Not Found" 404 }` never proxied `/ready` or `/health`. Uvicorn `:8010` already had the handler.
+| Platform | Employee | HR | Language evidence |
+|---|---|---|---|
+| iOS simulator | unsigned entry/method switching PASS; authenticated activation/tabs BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
+| Android emulator | unsigned entry/method switching PASS; authenticated activation/tabs BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
 
-`https://api.wathefni.ai/ready` → **200** `status=ready`, environment_binding.match=true, trusted_authority_enforced=true. `/health` 200.
+Latest complete gate: `ops/evidence/mobile-e2e-gate-20260816T135952Z/` — 4 `MOBILE_PASS`, 6 API spine checks, one honest Employee-session block; HR `SHIP`, Employee `NO-SHIP` solely because activation credentials were absent.
 
-Production payload is the older listener schema (no `link_signing` / `delivery` keys). Staging `/ready` still has the full R8 body. Store URL remains `https://api.wathefni.ai`, not staging.
+The release runner now maps `MOBILE_E2E_EMPLOYEE_PHONE/CODE` before flow selection, so providing those values unlocks the Employee path directly.
 
-### 3. Universal / App Links — HTTP GREEN; device verify blocked on secrets
+## Cross-surface convergence — GREEN
 
-- iOS `associatedDomains`: `applinks:api.wathefni.ai`
-- Android App Links intent filter: `https://api.wathefni.ai/l`
-- Custom scheme `wathefni://` preserved
-- AASA + assetlinks served on production
-- All 38 registered destinations + unknown-slug 404 live
-- Client stashes HTTPS URL until signed in; employee never opens `/hr`; HR only opens `/hr`
-- Module/app disabled and allowlist denial are first-class access states
+- Core canonical convergence: **12 passed, 0 failed**.
+- Domain matrix: **16 passed, 0 failed** across Recruiting, Interviews, Onboarding, Attendance, Shifts, Payroll/Payslips, Documents, Performance/OKRs, Talent, Learning, Benefits, Employee Relations, Engagement, Compensation Planning, Workforce Planning, and Setup/module composition.
+- Employees and Leave are included in the 12-check core convergence proof.
 
-**AASA `details` is empty** until `WATHEFNI_IOS_APP_ID` (Apple Team ID + bundle) is provisioned.  
-**assetlinks is `[]`** until `WATHEFNI_ANDROID_SHA256_CERTS` is provisioned.  
-Installed-app intercept will not verify on a real device until those exist. Store badge IDs in fallback HTML are still placeholders.
+Evidence: `ops/evidence/e2e-cross-surface-20260816T135711Z/`.
 
-### 4. Maestro environment — Java green; runtimes in flight; MOBILE_PASS = 0
+## Full release suite — GREEN within honest blocked-gate semantics
 
-| Piece | State |
-|---|---|
-| Maestro CLI | present (`~/.maestro/bin/maestro`) |
-| Java 17 | **installed** (Homebrew openjdk@17) |
-| simctl / Xcode 26 | present via `DEVELOPER_DIR` |
-| iOS simulator runtime | **downloading** iOS 26.0.1 (8.05 GB) — ~2.6% when last sampled |
-| App on simulator | not installed |
-| Android `adb` / emulator | commandlinetools cask still fetching; no USB device |
-| Physical iPhone / Android | **ABSENT** |
+- `./ops/test-smoke` → `SMOKE_OK`.
+- `./ops/test-release` → `RELEASE_HARNESS_COMPLETED`.
+- R9 tenant/permission attack: **48/48**.
+- R10 measured staging/live performance: **11/11**; live `/health` and `/ready` within budget.
+- R11 EN/AR release language: **53/53**.
+- Store build gate: **26/26**.
+- Clean Setup canary: **18/18**.
+- Final Android release manifest: backup disabled, cleartext disabled, no debug/development scheme, no overlay/microphone/legacy-storage permissions, and only the intended Wathefni scheme + App Link host.
 
-Maestro smoke flows now drop `takeScreenshot` for the store loop. No video. No AI vision.
+Native manifest evidence: `ops/evidence/android-release-manifest-20260816T141100Z/`.
 
----
+`RELEASE_HARNESS_COMPLETED` is not the full-pass stamp: the harness preserves exit code 2 as an explicit owner/device block for association, Employee activation, and physical-device gates.
 
-## Still required before FULL_PASS
+## Owner-dependent association values
 
-1. Finish iOS runtime download, boot a simulator, install `ai.wathefni.employee`, run Employee + HR Maestro (no screenshots).
-2. Finish Android SDK + emulator (or USB device) and run Employee + HR Maestro.
-3. Owner: provision `WATHEFNI_IOS_APP_ID` and `WATHEFNI_ANDROID_SHA256_CERTS` on production, then re-qualify AASA/assetlinks non-empty.
-4. Close **377 inventoried API operations** with cheapest authorized proofs (fail-closed probe is written; a scoping bug blocked the first staging run).
-5. Physical RP on one real iPhone and one real Android — checklist: `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md`. **Never fabricate PASS.**
-6. Optional: promote full R8 `/ready` body (`link_signing`, `delivery`) onto the production app.py listener.
+### Apple
 
----
+1. Sign in at <https://developer.apple.com/account>.
+2. Open **Membership details** and copy the 10-character **Team ID**.
+3. Form `TEAMID.ai.wathefni.employee` and configure it as `WATHEFNI_IOS_APP_ID` in the production `wathefni-orchestrator.service` environment.
 
-## Frozen / preserved (not rerun)
+Apple reference: <https://developer.apple.com/help/glossary/team-id/>.
 
-| Phase | Result |
-|---|---|
-| R9 two-tenant attack | 48/0 |
-| R10 measured performance | no 2.5s blocker |
-| R11 EN/AR catalogs | 53/0 unit |
-| Store build config | 20/0 including associatedDomains |
-| Staging `/ready` | 200 |
-| Cross-surface leave | 12/0 |
+### Android
 
-Do not treat this file as `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`.
+1. Open Play Console and select Wathefni.
+2. Go to **Protected with Play → Play Store distribution → Go to Play app signing**.
+3. In **App signing key certificate**, copy **SHA-256 certificate fingerprint**. Do not use the upload-key fingerprint.
+4. Configure it as `WATHEFNI_ANDROID_SHA256_CERTS` in the production `wathefni-orchestrator.service` environment. Multiple active fingerprints are comma-separated.
+
+Google reference: <https://support.google.com/googleplay/android-developer/answer/9842756?hl=en>.
+
+Shortest production configuration path:
+
+```ini
+# sudo systemctl edit wathefni-orchestrator.service
+[Service]
+Environment="WATHEFNI_IOS_APP_ID=TEAMID.ai.wathefni.employee"
+Environment="WATHEFNI_ANDROID_SHA256_CERTS=AA:BB:...:FF"
+```
+
+Then run `sudo systemctl daemon-reload`, restart `wathefni-orchestrator.service`, and qualify:
+
+```bash
+WATHEFNI_APP_LINK_BASE=https://api.wathefni.ai \
+  wathefni-orchestrator/.venv/bin/python ops/e2e/qualify-https-app-links.py
+```
+
+Current live result: **84 passed, 0 failed, exit 2 OWNER_BLOCKED**. AASA is valid JSON with empty `details`; assetlinks is valid JSON `[]`. After configuration the qualifier requires the exact production bundle suffix and a valid 32-byte SHA-256 fingerprint before returning 0.
+
+## Remaining stop-condition gates
+
+1. Add valid, unconsumed Employee activation credentials to `~/.config/wathefni/e2e.env` (mode 0600), rerun Employee activation/tabs on iOS and Android, and provide an Employee bearer for the five-check employee API spine if available.
+2. Provision both association values and obtain qualifier exit 0 with non-empty AASA/assetlinks.
+3. Execute `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md` on one real iPhone and one real Android phone.
+
+No `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` may be issued before all three are proven.

@@ -17,6 +17,7 @@ export type StatusTone =
   | 'success'
   | 'warning'
   | 'danger'
+  | 'info'
   | 'yellow'
   | 'blue'
   | 'pink'
@@ -52,6 +53,13 @@ const toneStyle: Record<StatusTone, ToneStyle> = {
     bg: colors.surface,
     border: colors.danger,
     icon: 'alert-circle-outline',
+    filled: false,
+  },
+  info: {
+    fg: colors.accent,
+    bg: colors.surface,
+    border: colors.accent,
+    icon: 'information-circle-outline',
     filled: false,
   },
   // Home progress — filled Wathefni pastels (Employee dashboard colour language).

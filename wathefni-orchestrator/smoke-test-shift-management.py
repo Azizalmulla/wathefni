@@ -30,14 +30,15 @@ PASS = 0
 FAIL = 0
 
 
-def check(label: str, condition: bool) -> None:
+def check(label: str, condition: bool, detail: object = None) -> None:
     global PASS, FAIL
     if condition:
         PASS += 1
         print(f"      PASS  {label}")
     else:
         FAIL += 1
-        print(f"      FAIL  {label}")
+        suffix = f" :: {detail}" if detail is not None else ""
+        print(f"      FAIL  {label}{suffix}")
 
 
 def main() -> int:
@@ -95,7 +96,7 @@ def main() -> int:
     app.notify_employee_shift_created = lambda **k: {"ok": True, "stub": True}
 
     sid = str(uuid.uuid4())
-    emp_key = f"{company}-SMOKESHIFT99"
+    emp_key = f"{company}-SHW1-SYNTH|SMOKESHIFT-{uuid.uuid4().hex[:8]}"
     today = app.kuwait_today()
     tomorrow = (today + timedelta(days=1)).isoformat()
 
@@ -116,7 +117,7 @@ def main() -> int:
                        shift_date, start_time, end_time, timezone, status, metadata)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'scheduled',%s)
                     """,
-                    (sid, company, emp_key, "99900000099", "Shift Smoke",
+                    (sid, company, emp_key, "96552900099", "Shift Smoke",
                      today, "09:00", "17:00", "Asia/Kuwait", app.Json({})),
                 )
             conn.commit()
@@ -138,6 +139,20 @@ def main() -> int:
     try:
         insert_shift()
 
+        def shift_page(*, week: int, offset: int = 0, limit: int = 200):
+            return app.dashboard_posthire_shifts(
+                week=week,
+                offset=offset,
+                limit=limit,
+                employee=None,
+                branch_key=None,
+                site_key=None,
+                team_key=None,
+                role=None,
+                view="week",
+                context=owner,
+            )
+
         # RBAC -------------------------------------------------------------
         try:
             app.dashboard_posthire_cancel_shift(sid, context=viewer)
@@ -146,13 +161,21 @@ def main() -> int:
             check("viewer without shifts.manage is denied (cancel)", exc.status_code == 403)
 
         # week navigation --------------------------------------------------
-        this_week = app.dashboard_posthire_shifts(week=0, context=owner)
-        ids_now = {str(s.get("shift_id")) for s in (this_week.get("shifts") or [])}
-        check("week=0 read includes the shift scheduled today", sid in ids_now)
-        far = app.dashboard_posthire_shifts(week=-4, context=owner)
+        this_week = shift_page(week=0)
+        week_rows = list(this_week.get("shifts") or [])
+        total = int(this_week.get("total_count") or len(week_rows))
+        while len(week_rows) < total:
+            page = shift_page(week=0, offset=len(week_rows))
+            rows = list(page.get("shifts") or [])
+            if not rows:
+                break
+            week_rows.extend(rows)
+        ids_now = {str(s.get("shift_id")) for s in week_rows}
+        check("week=0 paged read includes the shift scheduled today", sid in ids_now, {"total": total, "collected": len(week_rows)})
+        far = shift_page(week=-4)
         ids_far = {str(s.get("shift_id")) for s in (far.get("shifts") or [])}
         check("a distant week window excludes today's shift", sid not in ids_far)
-        check("week offset is clamped", app.dashboard_posthire_shifts(week=999, context=owner).get("week") == 26)
+        check("week offset is clamped", shift_page(week=999).get("week") == 26)
 
         # unknown id -------------------------------------------------------
         try:
@@ -167,15 +190,15 @@ def main() -> int:
                 sid,
                 app.ShiftRescheduleRequest(
                     shift_date=tomorrow,
-                    start_time="17:00",
+                    start_time="not-a-clock",
                     end_time="09:00",
                     expected_updated_at=str(shift_row().get("updated_at")),
                 ),
                 context=owner,
             )
-            check("end <= start -> 422", False)
+            check("invalid clock -> 422", False)
         except app.HTTPException as exc:
-            check("end <= start -> 422", exc.status_code == 422)
+            check("invalid clock -> 422", exc.status_code == 422)
 
         # reschedule requires expected_updated_at -------------------------
         try:

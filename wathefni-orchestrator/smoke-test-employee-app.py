@@ -252,7 +252,7 @@ def run_checks(checks: Checks) -> None:
     # --- Flag gate -----------------------------------------------------------
     _flag(False)
     checks.check("flag defaults OFF", lambda: app.employee_app_enabled() is False)
-    checks.check("context denied while flag OFF (503)", lambda: _denied(lambda: app.employee_app_context(authorization="Bearer nope"), 503))
+    checks.check("anonymous context fails auth before flag disclosure (401)", lambda: _denied(lambda: app.employee_app_context(authorization="Bearer nope"), 401))
 
     _flag(True)
     checks.check("flag flips ON", lambda: app.employee_app_enabled() is True)

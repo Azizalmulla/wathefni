@@ -103,13 +103,14 @@ def main() -> int:
     app_json = (EMP / "app.json").read_text(encoding="utf-8")
     check("iOS Face ID usage string exists", "NSFaceIDUsageDescription" in app_json)
     check("camera usage string exists", "NSCameraUsageDescription" in app_json)
-    # Arabic OS permission strings are still English-only (R1 PH). Record as known
-    # store debt, not a silent pass: the string must at least be present and truthful.
+    # Expo locale files place Apple permission strings under `ios`; keeping them
+    # at the shared root is interpreted as invalid Android ExtraTranslation data.
     check("Face ID usage is truthful about PIN fallback", "PIN still works" in app_json)
     locales = EMP / "locales" / "ar.json"
     check("Arabic OS permission strings exist", locales.is_file())
     if locales.is_file():
-        ar_perm = json.loads(locales.read_text(encoding="utf-8"))
+        locale_payload = json.loads(locales.read_text(encoding="utf-8"))
+        ar_perm = locale_payload.get("ios") or {}
         check("Arabic Face ID string is non-English", any(ord(ch) > 127 for ch in str(ar_perm.get("NSFaceIDUsageDescription") or "")))
 
     dash = REPO / "apps" / "wathefni-dashboard" / "src"

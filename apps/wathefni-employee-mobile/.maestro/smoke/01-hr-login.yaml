@@ -1,5 +1,5 @@
-# Smoke: HR work-email sign-in → HR home tab.
-# Requires env: MAESTRO_HR_COMPANY, MAESTRO_HR_EMAIL, MAESTRO_HR_PASSWORD
+# Smoke: HR work-email sign-in → local PIN setup → HR home tab.
+# Requires env: MAESTRO_HR_COMPANY, MAESTRO_HR_EMAIL, MAESTRO_HR_PASSWORD, MAESTRO_PIN
 appId: ai.wathefni.employee
 tags:
   - smoke
@@ -27,7 +27,27 @@ tags:
     id: "e2e.auth.hr.password"
 - inputText: ${MAESTRO_HR_PASSWORD}
 - tapOn:
+    point: "50%,28%"
+- tapOn:
     id: "e2e.auth.hr.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.pin.root"
+    timeout: 60000
+- inputText: ${MAESTRO_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- waitForAnimationToEnd
+- inputText: ${MAESTRO_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.biometric.notNow"
+    commands:
+      - tapOn:
+          id: "e2e.biometric.notNow"
 - extendedWaitUntil:
     visible:
       id: "e2e.tab.hr.home"

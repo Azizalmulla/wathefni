@@ -22,7 +22,10 @@ export const colors = {
   border: '#E5DAC6',
   ink: '#1B1A17',
   text: '#1B1A17',
+  /** Semantic aliases retained for the store-closure feature modules. */
+  textPrimary: '#1B1A17',
   subtle: '#5E5850',
+  textSecondary: '#5E5850',
   navMuted: '#B9B4AA',
   primary: '#1B1A17',
   primaryText: '#FFFFFF',
@@ -133,8 +136,12 @@ export const font = {
   h2: 20,
   h3: 17,
   body: 15,
+  subtitle: 15,
   small: 13,
+  caption: 13,
   tiny: 11.5,
+  bodyStrong: { fontSize: 15, fontWeight: '700' as const },
+  captionStrong: { fontSize: 13, fontWeight: '700' as const },
 }
 
 /**
@@ -147,6 +154,7 @@ export const typeScaling = {
   heading: 1.8,
   body: 2,
   chip: 1.6,
+  caption: 2,
 }
 
 export const shadows = {

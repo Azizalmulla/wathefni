@@ -35,6 +35,10 @@ LEAVE_RECONCILE = Path(__file__).resolve().parent / "reconcile-leave-decision.py
 
 SUITE = os.environ.get("MOBILE_E2E_SUITE", "smoke").strip()  # smoke | bs-smoke | full
 EVID_OVERRIDE = os.environ.get("MOBILE_E2E_EVID", "").strip()
+TARGET_DEVICE = os.environ.get("MOBILE_E2E_DEVICE", "").strip()
+TARGET_PLATFORM = os.environ.get("MOBILE_E2E_PLATFORM", "").strip().lower()
+TARGET_LOCALE = os.environ.get("MOBILE_E2E_LOCALE", "en").strip().lower()
+FLOW_FILTER = os.environ.get("MOBILE_E2E_FLOW_FILTER", "").strip()
 USE_BROWSERSTACK = os.environ.get("MOBILE_E2E_RUNTIME", "").strip().lower() in {"browserstack", "bs"} or (
     bool(os.environ.get("BROWSERSTACK_USERNAME")) and bool(os.environ.get("BROWSERSTACK_ACCESS_KEY"))
     and os.environ.get("MOBILE_E2E_RUNTIME", "auto").strip().lower() != "local"
@@ -46,8 +50,16 @@ def run(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None =
     if env:
         merged.update(env)
     merged.setdefault("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer")
-    path_prefix = f"{Path.home()}/.maestro/bin:/opt/homebrew/opt/openjdk@17/bin:/opt/homebrew/opt/openjdk/bin:/opt/homebrew/bin:"
+    android_root = "/opt/homebrew/share/android-commandlinetools"
+    path_prefix = (
+        f"{Path.home()}/.maestro/bin:/opt/homebrew/opt/openjdk@17/bin:"
+        f"/opt/homebrew/opt/openjdk/bin:{android_root}/platform-tools:"
+        f"{android_root}/emulator:{android_root}/cmdline-tools/latest/bin:"
+        "/opt/homebrew/bin:/usr/local/bin:"
+    )
     merged["PATH"] = path_prefix + merged.get("PATH", "")
+    merged.setdefault("ANDROID_HOME", android_root)
+    merged.setdefault("ANDROID_SDK_ROOT", android_root)
     for candidate in (
         "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home",
         "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home",
@@ -65,6 +77,38 @@ def run(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None =
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n")
+
+
+def redact_maestro_debug_logs(since: float) -> None:
+    """Remove resolved test credentials from Maestro's generated diagnostics."""
+    secrets = {
+        os.environ.get(key, "")
+        for key in (
+            "MAESTRO_HR_COMPANY",
+            "MAESTRO_HR_EMAIL",
+            "MAESTRO_HR_PASSWORD",
+            "MAESTRO_EMPLOYEE_PHONE",
+            "MAESTRO_EMPLOYEE_CODE",
+            "MAESTRO_PIN",
+        )
+        if os.environ.get(key)
+    }
+    debug_root = Path.home() / ".maestro" / "tests"
+    if not secrets or not debug_root.is_dir():
+        return
+    for path in debug_root.rglob("*"):
+        try:
+            if not path.is_file() or path.stat().st_mtime < since - 2:
+                continue
+            raw = path.read_bytes()
+            scrubbed = raw
+            for secret in secrets:
+                scrubbed = scrubbed.replace(secret.encode(), b"[REDACTED]")
+            if scrubbed != raw:
+                path.write_bytes(scrubbed)
+        except (OSError, UnicodeError):
+            # Diagnostics hygiene must not replace the actual gate verdict.
+            continue
 
 
 def flow_files(suite: str) -> list[Path]:
@@ -90,8 +134,30 @@ def flow_files(suite: str) -> list[Path]:
                     selected.append(path)
                 continue
             selected.append(path)
-        return selected
-    return smoke
+        if TARGET_LOCALE == "ar":
+            for locale_flow in sorted((MAESTRO_DIR / "locale").glob("*.yaml")):
+                text = locale_flow.read_text()
+                if "requires_hr_session" in text and not os.environ.get("MAESTRO_HR_EMAIL"):
+                    continue
+                selected.append(locale_flow)
+        # Run every clean/unsigned assertion before authenticated flows. iOS
+        # SecureStore is Keychain-backed and intentionally survives an app-data
+        # clear, so a successful PIN setup must be the final state transition.
+        def flow_order(path: Path) -> tuple[int, str]:
+            name = path.name
+            if name.startswith(("00-", "05-")):
+                return (0, name)
+            if name == "critical-ar.yaml":
+                return (1, name)
+            if name.startswith(("01-", "03-")):
+                return (2, name)
+            if name == "hr-session-ar.yaml":
+                return (4, name)
+            return (3, name)
+
+        ordered = sorted(selected, key=flow_order)
+        return [path for path in ordered if not FLOW_FILTER or FLOW_FILTER in path.name]
+    return [path for path in smoke if not FLOW_FILTER or FLOW_FILTER in path.name]
 
 
 def main() -> int:
@@ -260,20 +326,76 @@ def main() -> int:
             for path in flows:
                 text = path.read_text(encoding="utf-8")
                 stripped = "\n".join(line for line in text.splitlines() if "takeScreenshot" not in line) + "\n"
+                if TARGET_PLATFORM == "android" and TARGET_LOCALE == "ar" and path.name == "critical-ar.yaml":
+                    adb_bin = shutil.which(
+                        "adb",
+                        path=(
+                            "/opt/homebrew/share/android-commandlinetools/platform-tools:"
+                            "/opt/homebrew/bin:/usr/local/bin:" + env.get("PATH", "")
+                        ),
+                    )
+                    # Android clears a package's per-app locale together with app
+                    # data. Prepare a clean state, then re-apply Arabic before
+                    # launching without a second clear from inside Maestro.
+                    if not adb_bin:
+                        matrix.append(
+                            {
+                                "id": f"UI.{path.stem}",
+                                "flow": str(path.relative_to(ROOT)),
+                                "verdict": "BLOCKED",
+                                "detail": "adb unavailable for deterministic Arabic clean-state preparation",
+                            }
+                        )
+                        continue
+                    prep_commands = [
+                        [adb_bin, "-s", TARGET_DEVICE, "shell", "pm", "clear", "ai.wathefni.employee"],
+                        [
+                            adb_bin,
+                            "-s",
+                            TARGET_DEVICE,
+                            "shell",
+                            "cmd",
+                            "locale",
+                            "set-app-locales",
+                            "ai.wathefni.employee",
+                            "--user",
+                            "0",
+                            "--locales",
+                            "ar-KW",
+                        ],
+                    ]
+                    prep_output: list[str] = []
+                    prep_failed = False
+                    for prep_command in prep_commands:
+                        prepared = run(prep_command, cwd=APP, env=env)
+                        prep_output.append(prepared.stdout + prepared.stderr)
+                        prep_failed = prep_failed or prepared.returncode != 0
+                    (ui_dir / "critical-ar.prepare.log").write_text("\n".join(prep_output))
+                    if prep_failed:
+                        matrix.append(
+                            {
+                                "id": f"UI.{path.stem}",
+                                "flow": str(path.relative_to(ROOT)),
+                                "verdict": "FAIL",
+                                "detail": "Android Arabic clean-state preparation failed",
+                            }
+                        )
+                        continue
+                    stripped = stripped.replace("- launchApp:\n    clearState: true", "- launchApp")
                 run_path = dest_dir / path.name
                 run_path.write_text(stripped, encoding="utf-8")
                 out_log = ui_dir / f"{path.stem}.log"
+                maestro_cmd = [maestro_bin]
+                if TARGET_DEVICE:
+                    maestro_cmd.extend(["--device", TARGET_DEVICE])
+                maestro_cmd.extend(["test", str(run_path), "--format", "NOOP"])
+                maestro_started = time.time()
                 proc = run(
-                    [
-                        maestro_bin,
-                        "test",
-                        str(run_path),
-                        "--format",
-                        "NOOP",
-                    ],
+                    maestro_cmd,
                     cwd=APP,
                     env=env,
                 )
+                redact_maestro_debug_logs(maestro_started)
                 out_log.write_text(proc.stdout + ("\n--- stderr ---\n" + proc.stderr if proc.stderr else ""))
                 if proc.returncode == 0:
                     matrix.append(
@@ -281,7 +403,10 @@ def main() -> int:
                             "id": f"UI.{path.stem}",
                             "flow": str(path.relative_to(ROOT)),
                             "verdict": "MOBILE_PASS",
-                            "detail": "Maestro flow passed on real UI runtime",
+                            "detail": (
+                                "Maestro flow passed on real UI runtime"
+                                + (f" ({TARGET_PLATFORM}:{TARGET_DEVICE})" if TARGET_DEVICE else "")
+                            ),
                         }
                     )
                 else:
@@ -356,58 +481,52 @@ def main() -> int:
     if api_fail < 0:
         api_fail = counts.get("FAIL", 0)
 
-    # SHIP rule: need at least unsigned smoke MOBILE_PASS + no UI FAIL + no API FAIL on executed spines
-    # Broad release still needs the full matrix; this gate never invents PASS.
-    # Foundation stop-point: when leave mutation flows are executed, they must MOBILE_PASS + reconcile.
-    ship = False
-    ship_reason = ""
+    # Product verdicts are independent: HR credentials cannot qualify Employee,
+    # and an unsigned launch cannot qualify either authenticated workspace.
+    ui_pass_ids = {r["id"] for r in matrix if r["verdict"] == "MOBILE_PASS"}
+    unsigned_ok = bool({"UI.00-unsigned-entry", "UI.00-launch-unsigned", "UI.browserstack.sessions"} & ui_pass_ids)
+    locale_ok = TARGET_LOCALE != "ar" or "UI.critical-ar" in ui_pass_ids
+    hr_creds = bool(os.environ.get("MAESTRO_HR_EMAIL") or os.environ.get("MOBILE_E2E_HR_EMAIL"))
+    employee_creds = bool(
+        (os.environ.get("MAESTRO_EMPLOYEE_PHONE") or os.environ.get("MOBILE_E2E_EMPLOYEE_PHONE"))
+        and (os.environ.get("MAESTRO_EMPLOYEE_CODE") or os.environ.get("MOBILE_E2E_EMPLOYEE_CODE"))
+    )
+    no_fail = ui_fail == 0 and not any(r.get("verdict") == "FAIL" for r in matrix)
+    hr_ship = no_fail and unsigned_ok and locale_ok and hr_creds and {
+        "UI.01-hr-login",
+        "UI.02-hr-tabs",
+    }.issubset(ui_pass_ids)
+    employee_ship = no_fail and unsigned_ok and locale_ok and employee_creds and {
+        "UI.03-employee-activation",
+        "UI.04-employee-tabs",
+    }.issubset(ui_pass_ids)
+    ship = hr_ship and employee_ship
+    missing: list[str] = []
     if mobile_pass == 0:
-        ship_reason = "MOBILE_PASS=0 (no real UI execution succeeded)"
-    elif ui_fail:
-        ship_reason = f"UI FAIL count={ui_fail}"
-    elif any(r.get("verdict") == "FAIL" for r in matrix):
-        ship_reason = "API or UI FAIL present"
-    else:
-        unsigned_ok = any(
-            r["id"] in {"UI.00-unsigned-entry", "UI.00-launch-unsigned", "UI.browserstack.sessions"}
-            and r["verdict"] == "MOBILE_PASS"
-            for r in matrix
-        )
-        login_ok = any(r["id"] in {"UI.01-hr-login"} and r["verdict"] == "MOBILE_PASS" for r in matrix) or not (
-            os.environ.get("MAESTRO_HR_EMAIL") or os.environ.get("MOBILE_E2E_HR_EMAIL")
-        )
-        leave_approve_executed = any("03-hr-leave-approve" in x for x in executed)
-        leave_reject_executed = any("04-hr-leave-reject" in x for x in executed)
-        leave_approve_ok = (not leave_approve_executed) or any(
-            r["id"] == "UI.03-hr-leave-approve" and r["verdict"] == "MOBILE_PASS" for r in matrix
-        )
-        leave_reject_ok = (not leave_reject_executed) or any(
-            r["id"] == "UI.04-hr-leave-reject" and r["verdict"] == "MOBILE_PASS" for r in matrix
-        )
-        if unsigned_ok and login_ok and leave_approve_ok and leave_reject_ok:
-            ship = True
-            if leave_approve_executed or leave_reject_executed:
-                ship_reason = "Foundation gate green (unsigned + HR auth/tabs + Leave mutations) — expand matrix before broad release"
-            else:
-                ship_reason = "Smoke UI MOBILE_PASS with no FAIL — canary-only; broad release still needs full matrix"
-            if bs_summary.get("dashboard_url"):
-                ship_reason += f" · BS {bs_summary.get('dashboard_url')}"
-        else:
-            missing = []
-            if not unsigned_ok:
-                missing.append("unsigned")
-            if not login_ok:
-                missing.append("hr-login")
-            if not leave_approve_ok:
-                missing.append("leave-approve")
-            if not leave_reject_ok:
-                missing.append("leave-reject")
-            ship_reason = "Missing MOBILE_PASS for: " + ", ".join(missing)
+        missing.append("real UI execution")
+    if not unsigned_ok:
+        missing.append("unsigned entry")
+    if not locale_ok:
+        missing.append("Arabic/RTL critical path")
+    if not hr_creds:
+        missing.append("HR credentials")
+    elif not {"UI.01-hr-login", "UI.02-hr-tabs"}.issubset(ui_pass_ids):
+        missing.append("HR login/tabs")
+    if not employee_creds:
+        missing.append("Employee activation credentials")
+    elif not {"UI.03-employee-activation", "UI.04-employee-tabs"}.issubset(ui_pass_ids):
+        missing.append("Employee activation/tabs")
+    if not no_fail:
+        missing.append("zero FAIL results")
+    ship_reason = "Store smoke matrix green" if ship else "Missing MOBILE_PASS for: " + ", ".join(missing)
 
     verdict = {
         "stamp": stamp,
         "suite": SUITE,
         "runtime": "browserstack" if USE_BROWSERSTACK else "local",
+        "target_device": TARGET_DEVICE or None,
+        "target_platform": TARGET_PLATFORM or None,
+        "target_locale": TARGET_LOCALE,
         "evidence": str(evid.relative_to(ROOT)),
         "host": host,
         "fixtures": fixture_meta,
@@ -421,8 +540,8 @@ def main() -> int:
         else None,
         "counts": counts,
         "MOBILE_PASS": mobile_pass,
-        "hr_mobile": "SHIP" if ship else "NO-SHIP",
-        "employee_mobile": "SHIP" if ship else "NO-SHIP",
+        "hr_mobile": "SHIP" if hr_ship else "NO-SHIP",
+        "employee_mobile": "SHIP" if employee_ship else "NO-SHIP",
         "ship_reason": ship_reason,
         "rule": "API PASS ≠ MOBILE PASS",
         "selected_flows": [str(p.relative_to(ROOT)) for p in flows] if flows else bs_summary.get("execute"),

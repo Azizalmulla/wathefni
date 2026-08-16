@@ -14,18 +14,41 @@ export type AppLocale = 'en' | 'ar'
 
 const LOCALE_KEY = 'wathefni.locale'
 
-function expandFlatTranslations(flat: Record<string, string>): Record<string, unknown> {
+function isTranslationObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function mergeTranslationObjects(
+  existing: Record<string, unknown>,
+  incoming: Record<string, unknown>,
+): Record<string, unknown> {
+  const merged = { ...existing }
+  for (const [key, value] of Object.entries(incoming)) {
+    const current = merged[key]
+    merged[key] =
+      isTranslationObject(current) && isTranslationObject(value)
+        ? mergeTranslationObjects(current, value)
+        : value
+  }
+  return merged
+}
+
+function expandFlatTranslations(flat: Record<string, unknown>): Record<string, unknown> {
   const nested: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(flat)) {
     const parts = key.split('.')
     let cursor = nested
     parts.forEach((part, index) => {
       if (index === parts.length - 1) {
-        cursor[part] = value
+        const current = cursor[part]
+        cursor[part] =
+          isTranslationObject(current) && isTranslationObject(value)
+            ? mergeTranslationObjects(current, value)
+            : value
         return
       }
       const current = cursor[part]
-      if (!current || typeof current !== 'object') cursor[part] = {}
+      if (!isTranslationObject(current)) cursor[part] = {}
       cursor = cursor[part] as Record<string, unknown>
     })
   }
@@ -225,7 +248,7 @@ export function I18nProvider({ initialLocale, children }: { initialLocale: AppLo
         {children}
         {layoutSwitching ? (
           <View style={styles.switchCover} pointerEvents="auto" accessibilityElementsHidden>
-            <ActivityIndicator color={colors.accent} size="large" />
+            <ActivityIndicator testID="e2e.boot.locale-switch" color={colors.accent} size="large" />
           </View>
         ) : null}
       </View>

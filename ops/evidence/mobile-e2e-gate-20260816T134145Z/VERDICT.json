@@ -1,0 +1,101 @@
+{
+  "stamp": "20260816T134145Z",
+  "suite": "smoke",
+  "runtime": "local",
+  "target_device": "emulator-5554",
+  "target_platform": "android",
+  "target_locale": "ar",
+  "evidence": "ops/evidence/mobile-e2e-gate-20260816T134145Z",
+  "host": {
+    "app_id": "ai.wathefni.employee",
+    "target_device": "emulator-5554",
+    "target_platform": "android",
+    "repo_root": "/Users/azizalmulla/Desktop/claw",
+    "maestro_ok": true,
+    "java_ok": true,
+    "simctl_ok": true,
+    "ios_runtime_ok": true,
+    "ios_booted": true,
+    "app_installed_booted": true,
+    "adb_ok": true,
+    "usb_android_device": true,
+    "disk_free_gb": "12",
+    "ui_runtime_ready": true,
+    "blockers": [],
+    "rule": "API PASS \u2260 MOBILE PASS \u2014 ui_runtime_ready=false means MOBILE_PASS stays 0"
+  },
+  "fixtures": {
+    "skipped": true
+  },
+  "leave_reconcile": null,
+  "browserstack": null,
+  "counts": {
+    "MOBILE_PASS": 1,
+    "API_SPINE": 6,
+    "BLOCKED": 1
+  },
+  "MOBILE_PASS": 1,
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "Missing MOBILE_PASS for: unsigned entry, Arabic/RTL critical path, HR login/tabs, Employee activation credentials",
+  "rule": "API PASS \u2260 MOBILE PASS",
+  "selected_flows": [
+    "apps/wathefni-employee-mobile/.maestro/locale/hr-session-ar.yaml"
+  ],
+  "matrix": [
+    {
+      "id": "UI.hr-session-ar",
+      "flow": "apps/wathefni-employee-mobile/.maestro/locale/hr-session-ar.yaml",
+      "verdict": "MOBILE_PASS",
+      "detail": "Maestro flow passed on real UI runtime (android:emulator-5554)"
+    },
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "HR login OK company=WATHEFNI",
+      "http": 200
+    },
+    {
+      "id": "API.hr.me",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/me \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.priorities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/priorities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.leave.requested",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/leave?status=requested&limit=5 \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.assistant.capabilities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/assistant/capabilities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    }
+  ]
+}

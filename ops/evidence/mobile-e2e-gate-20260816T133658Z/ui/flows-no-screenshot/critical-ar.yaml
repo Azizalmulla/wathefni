@@ -1,0 +1,32 @@
+# Arabic/RTL critical unsigned path. Runs only when MOBILE_E2E_LOCALE=ar.
+# Text assertions prove the app consumed the Arabic device locale; stable IDs
+# prove both employee-phone and HR-work-email surfaces remain operable.
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - locale
+  - ar
+  - rtl
+  - employee
+  - hr
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.methodSwitch"
+    timeout: 45000
+- assertVisible: "الهاتف"
+- assertVisible: "بريد العمل"
+- assertVisible:
+    id: "e2e.auth.employee.phone"
+- tapOn:
+    id: "e2e.auth.method.workEmail"
+- assertVisible: "رمز الشركة"
+- assertVisible: "تسجيل الدخول"
+- assertVisible:
+    id: "e2e.auth.hr.company"
+- tapOn:
+    id: "e2e.auth.method.phone"
+- assertVisible:
+    id: "e2e.auth.employee.phone"

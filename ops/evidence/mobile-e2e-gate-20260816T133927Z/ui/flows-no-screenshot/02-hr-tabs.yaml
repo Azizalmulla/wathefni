@@ -1,0 +1,41 @@
+# Smoke: walk HR bottom tabs that are visible for the signed-in operator.
+# Optional tabs (people/inbox/hiring) are tapped only when present — module-off safe.
+# Prerequisite: flow 01-hr-login (or an already signed-in HR session).
+appId: ai.wathefni.employee
+tags:
+  - smoke
+  - hr
+  - tabs
+  - requires_session
+---
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 30000
+- tapOn:
+    id: "e2e.tab.hr.home"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.people"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.people"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.inbox"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.inbox"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.tab.hr.hiring"
+    commands:
+      - tapOn:
+          id: "e2e.tab.hr.hiring"
+- tapOn:
+    id: "e2e.tab.hr.more"
+- tapOn:
+    id: "e2e.tab.hr.home"

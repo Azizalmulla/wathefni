@@ -46063,24 +46063,6 @@ _operator_mobile.register_operator_mobile_routes(sys.modules[__name__])
 _operator_mobile_data.register_operator_mobile_data_routes(sys.modules[__name__])
 _observability_http.register_observability_http(sys.modules[__name__])
 try:
-    import preboarding_http as _preboarding_http
-
-    _preboarding_http.register_preboarding_http(sys.modules[__name__])
-except Exception:
-    pass
-try:
-    import probation_http as _probation_http
-
-    _probation_http.register_probation_http(sys.modules[__name__])
-except Exception:
-    pass
-try:
-    import hr_intelligence_surfaces_http as _hr_intelligence_surfaces_http
-
-    _hr_intelligence_surfaces_http.register_hr_intelligence_surfaces_http(sys.modules[__name__])
-except Exception:
-    pass
-try:
     import unreleased_capability_http as _unreleased_capability_http
 
     _unreleased_capability_http.register_unreleased_capability_failclosed(sys.modules[__name__])
@@ -69100,8 +69082,6 @@ def employee_app_context(
     Resolves the verified employee session and returns an audit-compatible context
     whose identity is fixed to that one employee."""
     ensure_schema()
-    if not employee_app_enabled():
-        raise HTTPException(status_code=503, detail={"error": "employee_app_disabled", "message": "The employee app is not available right now."})
     token = bearer_token(authorization) or str(x_app_token or "").strip()
     sess = employee_by_session(token)
     if not sess:
@@ -69172,6 +69152,11 @@ def employee_app_context(
                     },
                 )
         raise HTTPException(status_code=401, detail={"error": "app_auth_failed", "message": "Please sign in again."})
+    # Authenticate before exposing platform availability. An anonymous request
+    # must fail closed as 401 even while the employee surface is dark-launched;
+    # only a verified active session may learn that the product is unavailable.
+    if not employee_app_enabled():
+        raise HTTPException(status_code=503, detail={"error": "employee_app_disabled", "message": "The employee app is not available right now."})
     company = sess["company_code"]
     lifecycle = company_lifecycle_status(company)
     if lifecycle != "active":
@@ -69230,6 +69215,18 @@ def employee_app_context(
         "hr_phone": "",
         "hr_user": {"role": "employee", "company_code": company, "phone": phone, "name": employee.get("name") or ""},
     }
+
+
+# Preboarding, Probation, and HR Intelligence HTTP depend on dashboard_context,
+# _posthire_read_context, require_employee_app_feature, and employee_app_context.
+# Register them at the same safe point as the other post-hire surface routers.
+import preboarding_http as _preboarding_http
+import probation_http as _probation_http
+import hr_intelligence_surfaces_http as _hr_intelligence_surfaces_http
+
+_preboarding_http.register_preboarding_http(sys.modules[__name__])
+_probation_http.register_probation_http(sys.modules[__name__])
+_hr_intelligence_surfaces_http.register_hr_intelligence_surfaces_http(sys.modules[__name__])
 
 
 # Performance HTTP must register after dashboard_context, _posthire_read_context,
@@ -83008,8 +83005,13 @@ def _unified_candidate_profile_payload(company: str, app_key: str, context: dict
         "cv_truth": candidate_cv_truth(row),
     }
 
+# Legacy local-only compatibility helpers below are intentionally not mounted.
+# The canonical Unified Candidates router above owns these eight method/path
+# pairs and applies the complete feature, entitlement, tenant, and audit rules.
+# Keeping these callables avoids an unrelated historical rewrite while ensuring
+# FastAPI/OpenAPI has one unambiguous production handler per operation.
+
 # local-only: dashboard_prehire_application_fact_review (from checkout L47105-47172)
-@app.post("/dashboard/prehire/applications/{app_key}/facts/review")
 def dashboard_prehire_application_fact_review(
     app_key: str,
     request: dict[str, Any],
@@ -83079,18 +83081,15 @@ def dashboard_prehire_application_fact_review(
     return {"ok": True, "company_code": company, "app_key": app_key, "event": json_safe(event), "preview": False}
 
 # local-only: dashboard_prehire_application_facts (from checkout L47099-47102)
-@app.get("/dashboard/prehire/applications/{app_key}/facts")
 def dashboard_prehire_application_facts(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
     payload = _unified_candidate_profile_payload(context["company_code"], app_key, context)
     return {"company_code": payload["company_code"], "app_key": app_key, "facts": payload["facts"]}
 
 # local-only: dashboard_prehire_application_profile (from checkout L47094-47096)
-@app.get("/dashboard/prehire/applications/{app_key}/profile")
 def dashboard_prehire_application_profile(app_key: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
     return _unified_candidate_profile_payload(context["company_code"], app_key, context)
 
 # local-only: dashboard_prehire_delete_saved_view (from checkout L47221-47236)
-@app.delete("/dashboard/prehire/candidates/saved-views/{view_id}")
 def dashboard_prehire_delete_saved_view(view_id: str, context: dict[str, Any] = Depends(prehire_dashboard_context)):
     import unified_candidates as _uc
 
@@ -83108,7 +83107,6 @@ def dashboard_prehire_delete_saved_view(view_id: str, context: dict[str, Any] = 
     return {"ok": True, "company_code": company, "view_id": view_id}
 
 # local-only: dashboard_prehire_intake_attention (from checkout L47253-47269)
-@app.get("/dashboard/prehire/intake-operations/attention")
 def dashboard_prehire_intake_attention(context: dict[str, Any] = Depends(prehire_dashboard_context)):
     """Lightweight banner count for Candidates page. Does not list candidates."""
     import unified_candidates as _uc
@@ -83127,7 +83125,6 @@ def dashboard_prehire_intake_attention(context: dict[str, Any] = Depends(prehire
     }
 
 # local-only: dashboard_prehire_intake_operations (from checkout L47239-47250)
-@app.get("/dashboard/prehire/intake-operations")
 def dashboard_prehire_intake_operations(context: dict[str, Any] = Depends(prehire_dashboard_context)):
     import unified_candidates as _uc
 
@@ -83141,7 +83138,6 @@ def dashboard_prehire_intake_operations(context: dict[str, Any] = Depends(prehir
     return summary
 
 # local-only: dashboard_prehire_save_view (from checkout L47191-47218)
-@app.post("/dashboard/prehire/candidates/saved-views")
 def dashboard_prehire_save_view(
     request: dict[str, Any],
     context: dict[str, Any] = Depends(prehire_dashboard_context),
@@ -83171,7 +83167,6 @@ def dashboard_prehire_save_view(
     return {"ok": True, "company_code": company, "view": json_safe(view)}
 
 # local-only: dashboard_prehire_saved_views (from checkout L47175-47188)
-@app.get("/dashboard/prehire/candidates/saved-views")
 def dashboard_prehire_saved_views(context: dict[str, Any] = Depends(prehire_dashboard_context)):
     import unified_candidates as _uc
 

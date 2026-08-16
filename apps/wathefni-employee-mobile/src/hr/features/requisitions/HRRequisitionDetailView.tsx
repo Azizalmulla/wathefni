@@ -150,8 +150,8 @@ export function HRRequisitionDetailView() {
 }
 
 const styles = StyleSheet.create({
-  meta: { ...font.body, color: colors.textSecondary, marginTop: spacing.xs },
-  warn: { ...font.body, color: colors.warning, marginTop: spacing.sm },
-  note: { ...font.caption, color: colors.textSecondary, marginTop: spacing.sm },
+  meta: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.xs },
+  warn: { fontSize: font.body, color: colors.warning, marginTop: spacing.sm },
+  note: { fontSize: font.small, color: colors.textSecondary, marginTop: spacing.sm },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 })

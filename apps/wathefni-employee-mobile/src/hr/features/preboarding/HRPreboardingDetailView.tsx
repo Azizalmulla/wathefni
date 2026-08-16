@@ -153,7 +153,7 @@ export function HRPreboardingDetailView() {
 }
 
 const styles = StyleSheet.create({
-  subtitle: { ...font.body, color: colors.textSecondary, marginTop: spacing.sm },
+  subtitle: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.sm },
   itemCard: {
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -164,6 +164,6 @@ const styles = StyleSheet.create({
   },
   itemTitle: { ...font.bodyStrong, color: colors.textPrimary },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
-  meta: { ...font.caption, color: colors.textSecondary },
+  meta: { fontSize: font.small, color: colors.textSecondary },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 })

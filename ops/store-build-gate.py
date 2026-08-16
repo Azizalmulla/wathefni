@@ -34,6 +34,7 @@ def main() -> int:
     expo = app_json["expo"]
     ios = expo.get("ios") or {}
     android = expo.get("android") or {}
+    plugins = expo.get("plugins") or []
     production = (eas.get("build") or {}).get("production") or {}
     store = (eas.get("build") or {}).get("store") or {}
     prod_env = store.get("env") or production.get("env") or {}
@@ -49,6 +50,18 @@ def main() -> int:
     check("photo library usage description present", bool((ios.get("infoPlist") or {}).get("NSPhotoLibraryUsageDescription")))
     check("Android camera permission declared", "android.permission.CAMERA" in (android.get("permissions") or []))
     check("Android biometric permission declared", "android.permission.USE_BIOMETRIC" in (android.get("permissions") or []))
+    blocked_permissions = set(android.get("blockedPermissions") or [])
+    check(
+        "Android store blocks unused/restricted permissions",
+        {
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.RECORD_AUDIO",
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+        }.issubset(blocked_permissions),
+        sorted(blocked_permissions),
+    )
+    check("Android store does not request microphone", "android.permission.RECORD_AUDIO" not in (android.get("permissions") or []))
     check("push plugin present", any("expo-notifications" in str(p) for p in expo.get("plugins") or []))
     check("updates URL is Expo", str((expo.get("updates") or {}).get("url") or "").startswith("https://u.expo.dev/"))
     check("associatedDomains includes api.wathefni.ai", any("applinks:api.wathefni.ai" in str(d) for d in (ios.get("associatedDomains") or [])))
@@ -62,8 +75,10 @@ def main() -> int:
     dist = store.get("distribution")
     android_type = (store.get("android") or {}).get("buildType")
     check("store EAS profile exists", bool(store), "missing build.store")
+    check("store EAS profile is not a development client", store.get("developmentClient") is not True)
+    check("store EAS update channel is production", store.get("channel") == "production", store.get("channel"))
     check(
-        "production EAS profile is store distribution (not internal canary)",
+        "store EAS profile is store distribution (not internal canary)",
         dist == "store",
         f"distribution={dist} android.buildType={android_type}",
     )
@@ -75,6 +90,21 @@ def main() -> int:
     cfg = (APP / "app.config.js").read_text(encoding="utf-8")
     check("app.config.js refuses demo flags on production release", "production release cannot bake demo flags" in cfg)
     check("Arabic OS permission locale file present", (APP / "locales" / "ar.json").is_file())
+    dev_client_plugin = next(
+        (item for item in plugins if isinstance(item, list) and item and item[0] == "expo-dev-client"),
+        None,
+    )
+    check(
+        "development client generated scheme disabled",
+        bool(dev_client_plugin)
+        and isinstance(dev_client_plugin[1] if len(dev_client_plugin) > 1 else None, dict)
+        and dev_client_plugin[1].get("addGeneratedScheme") is False,
+    )
+    check(
+        "Android backup and cleartext security plugin present",
+        "./plugins/withAndroidStoreSecurity" in plugins
+        and (APP / "plugins" / "withAndroidStoreSecurity.js").is_file(),
+    )
 
     print("\n    STORE_BUILD_GATE_PASS" if not FAIL else "\n    STORE_BUILD_GATE_FAIL")
     print(f"    {PASS} passed, {FAIL} failed\n")

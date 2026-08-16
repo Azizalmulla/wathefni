@@ -301,7 +301,9 @@ function Field({
         importantForAutofill="no"
         style={[
           styles.input,
-          { textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' },
+          // Company codes, emails, and passwords are LTR credentials even in
+          // Arabic UI. RTL writing direction can reorder secure Latin input.
+          { textAlign: isRTL ? 'right' : 'left', writingDirection: 'ltr' },
         ]}
       />
     </View>

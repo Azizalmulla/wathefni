@@ -33,6 +33,10 @@ echo "== release: R11 release language =="
 echo "== release: store build gate + live /ready =="
 bash "$REPO_ROOT/ops/qualify-store-build-live.sh"
 
+echo "== release: production Universal/App Link associations =="
+allow_blocked env WATHEFNI_APP_LINK_BASE=https://api.wathefni.ai \
+  "$PY" "$REPO_ROOT/ops/e2e/qualify-https-app-links.py"
+
 echo "== release: cross-surface API convergence (staging DB) =="
 bash "$REPO_ROOT/ops/qualify-cross-surface-convergence.sh"
 

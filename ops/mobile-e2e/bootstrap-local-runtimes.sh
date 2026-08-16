@@ -4,7 +4,9 @@
 set -euo pipefail
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}"
-export PATH="$JAVA_HOME/bin:$HOME/.maestro/bin:/opt/homebrew/bin:$PATH"
+export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetools}"
+export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+export PATH="$JAVA_HOME/bin:$HOME/.maestro/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 export HOMEBREW_NO_AUTO_UPDATE=1
 
 echo "java=$("$JAVA_HOME/bin/java" -version 2>&1 | head -1 || echo missing)"
@@ -28,8 +30,8 @@ fi
 if command -v sdkmanager >/dev/null 2>&1; then
   yes | sdkmanager --licenses >/dev/null || true
   sdkmanager "platform-tools" "emulator" "platforms;android-35" "system-images;android-35;google_apis;arm64-v8a" || echo "SDKMANAGER_FAIL"
-elif [[ -x /opt/homebrew/share/android-commandlinetools/cmdline-tools/latest/bin/sdkmanager ]]; then
-  SM=/opt/homebrew/share/android-commandlinetools/cmdline-tools/latest/bin/sdkmanager
+elif [[ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]]; then
+  SM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
   yes | "$SM" --licenses >/dev/null || true
   "$SM" "platform-tools" "emulator" "platforms;android-35" "system-images;android-35;google_apis;arm64-v8a" || echo "SDKMANAGER_FAIL"
 else

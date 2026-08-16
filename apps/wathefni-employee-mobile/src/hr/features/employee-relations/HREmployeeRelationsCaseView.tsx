@@ -72,7 +72,7 @@ export function HREmployeeRelationsCaseView() {
             </Text>
             <PremiumButton
               label={t('hrEmployeeRelations.acknowledge')}
-              loading={saving}
+              busy={saving}
               onPress={() => {
                 void (async () => {
                   setSaving(true)

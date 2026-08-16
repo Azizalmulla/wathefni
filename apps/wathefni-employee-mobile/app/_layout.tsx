@@ -24,7 +24,7 @@ import { ForegroundQueryRefresh } from '@/lib/refresh'
 import { colors } from '@/theme'
 import { PIN_MAX_FAILED_ATTEMPTS } from '@/auth/pinPolicy'
 import * as Linking from 'expo-linking'
-import { hrefFromHttpsAppLink } from '@/linking/httpsAppLink
+import { hrefFromHttpsAppLink } from '@/linking/httpsAppLink'
 import {
   PrincipalBootSplash,
   PrincipalGateProvider,
@@ -348,7 +348,7 @@ export default function RootLayout() {
   if (!locale || (!fontsLoaded && !fontError)) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={colors.accent} />
+        <ActivityIndicator testID="e2e.boot.locale-font" color={colors.accent} />
       </View>
     )
   }

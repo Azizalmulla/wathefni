@@ -139,6 +139,6 @@ export function HRProbationQueueView() {
 }
 
 const styles = StyleSheet.create({
-  subtitle: { ...font.body, color: colors.textSecondary, marginTop: spacing.xs },
+  subtitle: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 })

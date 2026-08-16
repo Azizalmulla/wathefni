@@ -88,7 +88,7 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
 export function PrincipalBootSplash() {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }}>
-      <ActivityIndicator color={colors.accent} />
+      <ActivityIndicator testID="e2e.boot.principal" color={colors.accent} />
     </View>
   )
 }

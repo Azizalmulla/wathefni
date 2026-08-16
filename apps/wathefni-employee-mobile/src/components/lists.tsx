@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useRouter } from 'expo-router'
 
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { colors, font, layout, radius, spacing, typeScaling } from '@/theme'
@@ -180,13 +181,20 @@ export function ShowMoreButton({ label, onPress }: { label: string; onPress: () 
  * Flat back control shared by pushed screens (history, settings, documents).
  * No elevated pill — the page already has enough chrome.
  */
-export function PageBackButton({ onPress, accessibilityLabel }: { onPress: () => void; accessibilityLabel: string }) {
-  const { isRTL } = useI18n()
+export function PageBackButton({
+  onPress,
+  accessibilityLabel,
+}: {
+  onPress?: () => void
+  accessibilityLabel?: string
+} = {}) {
+  const router = useRouter()
+  const { isRTL, t } = useI18n()
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
+      accessibilityLabel={accessibilityLabel || t('common.back')}
+      onPress={onPress || router.back}
       hitSlop={8}
       style={({ pressed }) => [styles.back, pressed && styles.pressed]}
     >
@@ -201,9 +209,12 @@ export function PageBackButton({ onPress, accessibilityLabel }: { onPress: () =>
  */
 export function QuietEmpty({
   message,
+  title,
   icon,
 }: {
-  message: string
+  message?: string
+  /** Compatibility alias used by the feature modules. */
+  title?: string
   icon?: keyof typeof Ionicons.glyphMap
 }) {
   const { isRTL } = useI18n()
@@ -216,7 +227,7 @@ export function QuietEmpty({
         </View>
       ) : null}
       <Text maxFontSizeMultiplier={typeScaling.body} style={[styles.quietText, align]}>
-        {message}
+        {message || title || ''}
       </Text>
     </View>
   )

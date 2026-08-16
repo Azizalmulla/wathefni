@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-surface leave/attendance/module-disable convergence on staging DB.
+# Cross-surface canonical-truth convergence across the store-release domains.
 set -euo pipefail
 VPS_HOST="${WATHEFNI_VPS_HOST:-root@76.13.63.68}"
 SSH=(ssh -o BatchMode=yes -o ControlMaster=no -o ConnectTimeout=30 "$VPS_HOST")
@@ -11,9 +11,28 @@ REMOTE_STAGE="/tmp/e2e-cross-surface-stage"
 STG=/opt/wathefni/staging/orchestrator
 mkdir -p "$LOCAL_EVID"/{tests,sources}
 cp -a "$REPO_ROOT/ops/e2e/cross-surface-convergence.py" "$LOCAL_EVID/sources/"
+cp -a "$REPO_ROOT/ops/e2e/cross-surface-domain-matrix.py" "$LOCAL_EVID/sources/"
 "${SSH[@]}" "mkdir -p '$REMOTE_STAGE'"
 rsync -az -e "ssh -o BatchMode=yes -o ConnectTimeout=30" \
-  "$REPO_ROOT/ops/e2e/cross-surface-convergence.py" "$VPS_HOST:$REMOTE_STAGE/cross-surface-convergence.py"
+  "$REPO_ROOT/ops/e2e/cross-surface-convergence.py" \
+  "$REPO_ROOT/ops/e2e/cross-surface-domain-matrix.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-prehire-registry-parity.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-interview-workflow-live.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-onboarding-dashboard.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-attendance-truth-c1.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-shift-management.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-payroll-payslip-wave3.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-document-hub.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5b-performance-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5c-talent-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5e-learning-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5f-benefits-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5g-employee-relations-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5h-engagement-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5i-compensation-planning-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r5j-workforce-planning-surface-db.py" \
+  "$REPO_ROOT/wathefni-orchestrator/smoke-test-r6-setup-self-service-db.py" \
+  "$VPS_HOST:$REMOTE_STAGE/"
 "${SSH[@]}" "bash -s" <<REMOTE 2>&1 | tee "$LOCAL_EVID/tests/cross-surface.out"
 set -euo pipefail
 STG=/opt/wathefni/staging/orchestrator
@@ -33,9 +52,12 @@ export WATHEFNI_DELIVERY_MODE=dry_run
 set -a; source "\$WATHEFNI_POSTGRES_ENV"; set +a
 unset DATABASE_URL || true
 "\$PYBIN" '$REMOTE_STAGE/cross-surface-convergence.py'
+WATHEFNI_ORCHESTRATOR_ROOT="\$STG" WATHEFNI_MATRIX_TEST_ROOT="$REMOTE_STAGE" \
+  "\$PYBIN" '$REMOTE_STAGE/cross-surface-domain-matrix.py'
 REMOTE
 echo "EVIDENCE=$LOCAL_EVID"
-if grep -q "CROSS_SURFACE_PASS" "$LOCAL_EVID/tests/cross-surface.out"; then
+if grep -q "CROSS_SURFACE_PASS" "$LOCAL_EVID/tests/cross-surface.out" && \
+   grep -q "CROSS_SURFACE_DOMAIN_MATRIX_PASS" "$LOCAL_EVID/tests/cross-surface.out"; then
   echo CROSS_SURFACE_GREEN
   exit 0
 fi

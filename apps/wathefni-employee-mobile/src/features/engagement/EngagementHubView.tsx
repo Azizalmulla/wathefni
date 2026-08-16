@@ -82,7 +82,7 @@ export function EngagementHubView({ surveys, refreshing, onRefresh }: HubProps) 
 }
 
 const styles = StyleSheet.create({
-  sub: { ...font.body, fontSize: typeScaling.meta, color: colors.textSecondary, marginTop: spacing.sm },
-  section: { ...font.subtitle, marginBottom: spacing.sm },
-  bound: { ...font.body, fontSize: typeScaling.meta, color: colors.textSecondary },
+  sub: { fontSize: font.body, color: colors.textSecondary, marginTop: spacing.sm },
+  section: { fontSize: font.subtitle, marginBottom: spacing.sm },
+  bound: { fontSize: font.body, color: colors.textSecondary },
 })

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -39,6 +40,7 @@ def http(path: str) -> tuple[int, str, str]:
 
 
 def main() -> int:
+    owner_blockers: list[str] = []
     print(f"    HTTPS APP LINKS — live {BASE}")
     code, body, _ = http("/l/registry.json")
     check("registry is reachable", code == 200, code)
@@ -72,6 +74,16 @@ def main() -> int:
     except json.JSONDecodeError:
         aasa = {}
     check("AASA has applinks", isinstance(aasa.get("applinks"), dict), aasa_body[:160])
+    aasa_details = (aasa.get("applinks") or {}).get("details") or []
+    if not aasa_details:
+        owner_blockers.append("WATHEFNI_IOS_APP_ID")
+    else:
+        app_ids = [str(row.get("appID") or "") for row in aasa_details if isinstance(row, dict)]
+        check(
+            "AASA has a production Wathefni application identifier",
+            any(re.fullmatch(r"[A-Z0-9]{10}\.ai\.wathefni\.employee", app_id) for app_id in app_ids),
+            app_ids,
+        )
     asset_status, asset_body, _ = http("/.well-known/assetlinks.json")
     check("assetlinks is served", asset_status == 200, asset_status)
     try:
@@ -79,12 +91,31 @@ def main() -> int:
     except json.JSONDecodeError:
         assets = None
     check("assetlinks is a JSON list", isinstance(assets, list), asset_body[:160])
-    print(f"\n    HTTPS_APP_LINKS_LIVE_{'PASS' if not FAIL else 'FAIL'}  {PASS} passed, {FAIL} failed")
-    if not (aasa.get("applinks") or {}).get("details"):
-        print("      NOTE  AASA details empty until WATHEFNI_IOS_APP_ID is provisioned; device intercept will not verify")
     if not assets:
-        print("      NOTE  assetlinks empty until WATHEFNI_ANDROID_SHA256_CERTS is provisioned; App Links will not verify")
-    return 1 if FAIL else 0
+        owner_blockers.append("WATHEFNI_ANDROID_SHA256_CERTS")
+    else:
+        android_targets = [
+            row.get("target") or {}
+            for row in assets
+            if isinstance(row, dict) and "delegate_permission/common.handle_all_urls" in (row.get("relation") or [])
+        ]
+        fingerprints = [
+            str(value)
+            for target in android_targets
+            if target.get("namespace") == "android_app" and target.get("package_name") == "ai.wathefni.employee"
+            for value in (target.get("sha256_cert_fingerprints") or [])
+        ]
+        check(
+            "assetlinks has the production package and SHA-256 certificate",
+            any(re.fullmatch(r"(?:[0-9A-F]{2}:){31}[0-9A-F]{2}", value.upper()) for value in fingerprints),
+            "malformed or wrong-package association",
+        )
+    print(f"\n    HTTPS_APP_LINKS_LIVE_{'PASS' if not FAIL else 'FAIL'}  {PASS} passed, {FAIL} failed")
+    if owner_blockers:
+        print(f"      OWNER_BLOCKED  provision {', '.join(owner_blockers)}; installed-app intercept cannot verify yet")
+    if FAIL:
+        return 1
+    return 2 if owner_blockers else 0
 
 
 if __name__ == "__main__":

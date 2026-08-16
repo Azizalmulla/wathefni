@@ -101,7 +101,11 @@ def main() -> int:
             module = getattr(spec, "module", None)
             check(f"{name} module is a Pre-Hiring registry module", module in app.PREHIRE_DASHBOARD_REGISTRY_MODULES)
             check(f"{name} resolves through the harness module check", app.posthire_action_module(name) in app.PREHIRE_DASHBOARD_REGISTRY_MODULES)
-    check("PREHIRE_DASHBOARD_REGISTRY_MODULES is the three Pre-Hiring modules", set(app.PREHIRE_DASHBOARD_REGISTRY_MODULES) == {"pre_hiring", "assessments", "video_interviews"})
+    check(
+        "PREHIRE_DASHBOARD_REGISTRY_MODULES is the frozen Pre-Hiring set",
+        set(app.PREHIRE_DASHBOARD_REGISTRY_MODULES)
+        == {"pre_hiring", "assessments", "interviews", "video_interviews"},
+    )
 
     hire_spec = registry.spec_for("hire_candidate")
     check("hire uses the dedicated employee-creating executor", getattr(hire_spec, "executor", None) is registry._hire_candidate_executor)
@@ -300,7 +304,14 @@ def main() -> int:
 
     # --- 7) dry-run delivery is safe ----------------------------------------
     check("delivery is in dry-run for this test", app.delivery_is_dry_run() is True)
-    dry = app.send_octopus_whatsapp(account_id="WATHEFNI", phone="96599338566", text="parity smoke", subject_type="candidate", subject_key="APP-SMOKE")
+    dry = app.send_octopus_whatsapp(
+        account_id="WATHEFNI",
+        phone="96599338566",
+        text="parity smoke",
+        subject_type="candidate",
+        subject_key="APP-SMOKE",
+        company_code="WATHEFNI",
+    )
     check("send returns a simulated dry-run result (no real send)", isinstance(dry, dict) and dry.get("ok") is True and dry.get("dry_run") is True)
 
     # --- 8) isolated DB behaviour: shortlist + idempotent repeat -------------
