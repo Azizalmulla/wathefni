@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "approve_leave_id": "54e55adc-bfa5-4358-96f8-e38826319ecd",
+  "reject_leave_id": "e9df1310-959a-48d7-b035-222c06f7d03f",
+  "approve_start": "2026-09-07",
+  "reject_start": "2026-09-14",
+  "subject_employee_key": "WATHEFNI-96550252254",
+  "fixture_env": "/Users/azizalmulla/.config/wathefni/e2e-fixtures.env",
+  "api_verify_ok": {
+    "approve": true,
+    "reject": true,
+    "approve_status": "requested",
+    "reject_status": "requested",
+    "approve_actions": [
+      "read",
+      "approve",
+      "reject"
+    ],
+    "reject_actions": [
+      "read",
+      "approve",
+      "reject"
+    ]
+  },
+  "evidence": "/Users/azizalmulla/Desktop/claw/ops/evidence/mobile-e2e-gate-20260816T142419Z/fixtures"
+}

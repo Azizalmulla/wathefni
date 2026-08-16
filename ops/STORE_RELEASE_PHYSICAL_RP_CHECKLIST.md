@@ -86,4 +86,4 @@ Mark every cell **PASS**, **FAIL**, or **UNPROVEN**. Any FAIL or UNPROVEN blocks
 | PH-12 | RTL layout, navigation, copy, return to EN | | | | |
 | PH-13 | Sign-out/private-state clearing | | | | |
 
-Current status: **UNPROVEN**. Latest corrected host evidence: `ops/evidence/store-release-physical-20260816T140354Z/` (no connected iPhone or Android phone).
+Current status: **UNPROVEN**. Latest corrected host evidence: `ops/evidence/store-release-physical-20260816T142417Z/` (no connected iPhone or Android phone).

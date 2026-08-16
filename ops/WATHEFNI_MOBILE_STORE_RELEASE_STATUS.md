@@ -53,17 +53,17 @@ No screenshots, AI visual analysis, or normal-loop video were used.
 | iOS simulator | unsigned entry/method switching PASS; authenticated activation/tabs BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
 | Android emulator | unsigned entry/method switching PASS; authenticated activation/tabs BLOCKED | authenticated login/tabs PASS | EN + AR/RTL PASS for available paths |
 
-Latest complete gate: `ops/evidence/mobile-e2e-gate-20260816T135952Z/` — 4 `MOBILE_PASS`, 6 API spine checks, one honest Employee-session block; HR `SHIP`, Employee `NO-SHIP` solely because activation credentials were absent.
+Latest complete gate: `ops/evidence/mobile-e2e-gate-20260816T142419Z/` — 4 `MOBILE_PASS`, 6 API spine checks, one honest Employee-session block; HR `SHIP`, Employee `NO-SHIP` solely because activation credentials were absent.
 
 The release runner now maps `MOBILE_E2E_EMPLOYEE_PHONE/CODE` before flow selection, so providing those values unlocks the Employee path directly.
 
 ## Cross-surface convergence — GREEN
 
-- Core canonical convergence: **12 passed, 0 failed**.
+- Core canonical convergence: **18 passed, 0 failed**.
 - Domain matrix: **16 passed, 0 failed** across Recruiting, Interviews, Onboarding, Attendance, Shifts, Payroll/Payslips, Documents, Performance/OKRs, Talent, Learning, Benefits, Employee Relations, Engagement, Compensation Planning, Workforce Planning, and Setup/module composition.
-- Employees and Leave are included in the 12-check core convergence proof.
+- Employees and Leave are included in the 18-check core convergence proof.
 
-Evidence: `ops/evidence/e2e-cross-surface-20260816T135711Z/`.
+Evidence: `ops/evidence/e2e-cross-surface-20260816T142156Z/`.
 
 ## Full release suite — GREEN within honest blocked-gate semantics
 

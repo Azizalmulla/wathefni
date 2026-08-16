@@ -12,9 +12,9 @@ The GitHub repository is the Wathefni source authority. This handoff continues t
 - Functional coverage ledger: **2,093/2,093 owned**, with zero gaps. Client API contracts are **1,238/1,238** and assistant tools are **28/28**.
 - Mounted API ownership: **9/9** contract checks, covering 1,238 operations, 48 executable proof owners, and 530 literal production client paths.
 - Private API fail-closed probe: **1,196/1,196** staging operations returned the required 401/403 without a principal.
-- Cross-surface convergence: **12/12** canonical employee/leave/module checks plus **16/16** domain suites.
+- Cross-surface convergence: **18/18** canonical employee/leave/module checks plus **16/16** domain suites.
 - Production `https://api.wathefni.ai/ready`: HTTP 200 and `status=ready`; environment binding, trusted authority, link signing, delivery error count, failed jobs, migrations, drift, forward-only policy, and rollback runbook match the frozen R8 contract.
-- Release suite: `./ops/test-smoke` reached `SMOKE_OK`; `./ops/test-release` reached `RELEASE_HARNESS_COMPLETED` after R9 **48/48**, R10 **11/11**, R11 **53/53**, store-build **26/26**, cross-surface **28/28**, and clean Setup canary **18/18**.
+- Release suite: `./ops/test-smoke` reached `SMOKE_OK`; `./ops/test-release` reached `RELEASE_HARNESS_COMPLETED` after R9 **48/48**, R10 **11/11**, R11 **53/53**, store-build **26/26**, cross-surface **34/34**, and clean Setup canary **18/18**.
 - Maestro: authenticated HR EN and AR paths passed on iOS and Android. Employee unsigned EN and AR paths passed on both platforms. Authenticated Employee activation/tabs remain blocked because no valid Employee activation phone/code was available.
 - Production HTTPS link routing is **84/84**. AASA and Digital Asset Links are intentionally owner-blocked because their real production identifiers are not configured.
 - Physical gate: **UNPROVEN**. The corrected host audit saw no connected iPhone or Android phone. No physical PASS is claimed.
@@ -46,20 +46,20 @@ WATHEFNI_APP_LINK_BASE=https://api.wathefni.ai \
 
 ## Latest evidence
 
-- Full automated mobile gate: `ops/evidence/mobile-e2e-gate-20260816T135952Z/`
+- Full automated mobile gate: `ops/evidence/mobile-e2e-gate-20260816T142419Z/`
 - iOS EN: `ops/evidence/mobile-e2e-gate-20260816T132240Z/`
 - iOS HR AR: `ops/evidence/mobile-e2e-gate-20260816T133421Z/`
 - iOS unsigned AR: `ops/evidence/mobile-e2e-gate-20260816T133658Z/`
 - Android EN: `ops/evidence/mobile-e2e-gate-20260816T133927Z/`
 - Android HR AR: `ops/evidence/mobile-e2e-gate-20260816T134145Z/`
 - Android unsigned AR, hardened release artifact: `ops/evidence/mobile-e2e-gate-20260816T135230Z/`
-- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T135551Z/`
-- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T135641Z/`
-- Store build/live readiness: `ops/evidence/store-build-live-20260816T135703Z/`
+- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T142034Z/`
+- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T142113Z/`
+- Store build/live readiness: `ops/evidence/store-build-live-20260816T142129Z/`
 - Android local release manifest: `ops/evidence/android-release-manifest-20260816T141100Z/`
-- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T135711Z/`
-- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T135936Z/`
-- Corrected physical audit: `ops/evidence/store-release-physical-20260816T140354Z/`
+- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T142156Z/`
+- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T142354Z/`
+- Corrected physical audit: `ops/evidence/store-release-physical-20260816T142417Z/`
 
 Status authority: `ops/WATHEFNI_MOBILE_STORE_RELEASE_STATUS.md`. Physical procedure: `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md`.
 

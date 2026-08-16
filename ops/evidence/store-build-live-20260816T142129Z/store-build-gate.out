@@ -1,0 +1,30 @@
+    STORE BUILD GATE
+      PASS  iOS bundleIdentifier is ai.wathefni.employee
+      PASS  Android package is ai.wathefni.employee
+      PASS  production API is api.wathefni.ai
+      PASS  production API is not staging
+      PASS  production release flag is on
+      PASS  production does not set HR demo flags
+      PASS  Face ID usage description present
+      PASS  camera usage description present
+      PASS  photo library usage description present
+      PASS  Android camera permission declared
+      PASS  Android biometric permission declared
+      PASS  Android store blocks unused/restricted permissions
+      PASS  Android store does not request microphone
+      PASS  push plugin present
+      PASS  updates URL is Expo
+      PASS  associatedDomains includes api.wathefni.ai
+      PASS  Android App Links intent filter present
+      PASS  store EAS profile exists
+      PASS  store EAS profile is not a development client
+      PASS  store EAS update channel is production
+      PASS  store EAS profile is store distribution (not internal canary)
+      PASS  Android production buildType is app-bundle
+      PASS  app.config.js refuses demo flags on production release
+      PASS  Arabic OS permission locale file present
+      PASS  development client generated scheme disabled
+      PASS  Android backup and cleartext security plugin present
+
+    STORE_BUILD_GATE_PASS
+    26 passed, 0 failed

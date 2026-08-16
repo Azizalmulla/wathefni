@@ -1,0 +1,60 @@
+{
+  "stamp": "20260816T142613Z",
+  "api_base": "https://api.wathefni.ai",
+  "counts": {
+    "API_SPINE": 6,
+    "BLOCKED": 1
+  },
+  "mobile_pass": 0,
+  "note": "This script never emits MOBILE_PASS. UI driver must open the app.",
+  "rows": [
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "HR login OK company=WATHEFNI",
+      "http": 200
+    },
+    {
+      "id": "API.hr.me",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/me \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.priorities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/priorities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.leave.requested",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/leave?status=requested&limit=5 \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.assistant.capabilities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/assistant/capabilities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    }
+  ]
+}
