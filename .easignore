@@ -1,0 +1,27 @@
+# EAS resolves this monorepo's Git root as the archive root even when invoked
+# from apps/wathefni-employee-mobile. Deny by default so a mobile build never
+# uploads unrelated products, evidence, local secrets, or Git history.
+/*
+!/apps
+!/apps/
+/apps/*
+!/apps/wathefni-employee-mobile
+!/apps/wathefni-employee-mobile/
+
+# Local/generated content inside the mobile project remains excluded after the
+# allowlist above. Production values come from the EAS build profile/environment.
+apps/wathefni-employee-mobile/node_modules
+apps/wathefni-employee-mobile/.expo
+apps/wathefni-employee-mobile/.expo-shared
+apps/wathefni-employee-mobile/dist
+apps/wathefni-employee-mobile/web-build
+apps/wathefni-employee-mobile/coverage
+apps/wathefni-employee-mobile/*.log
+apps/wathefni-employee-mobile/.DS_Store
+apps/wathefni-employee-mobile/npm-debug.*
+apps/wathefni-employee-mobile/.env
+apps/wathefni-employee-mobile/.env.*
+!apps/wathefni-employee-mobile/.env.example
+
+.git
+**/.git
