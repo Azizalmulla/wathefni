@@ -19432,11 +19432,12 @@ def deliver_employee_notification(
     *,
     flow: str,
     template_key: str,
-    text: str,
+    text: str | None,
     email_subject: str,
     account_id: str | None = None,
     company_code: str | None = None,
     variables: dict[str, Any] | None = None,
+    locale: str | None = None,
     subject_key: str | None = None,
     dedupe_key: str | None = None,
     extra: dict[str, Any] | None = None,
@@ -19503,6 +19504,7 @@ def deliver_employee_notification(
         subject_type="employee",
         subject_key=subject_key or employee.get("employee_key"),
         dedupe_key=dedupe_key,
+        locale=locale,
     )
     normalized = {
         "ok": bool(result.get("ok")),
@@ -68774,15 +68776,24 @@ def deliver_app_activation_code(
     # Visibility of older rows is controlled by inbox_hidden, not by blocking insert.
     invite_token = str(invite_id or "").strip() or secrets.token_hex(8)
     dedupe = f"app_activation:{emp_key}:{invite_token}" if emp_key else None
+    profile = employee.get("profile") if isinstance(employee.get("profile"), dict) else {}
+    locale = str(
+        employee.get("locale")
+        or employee.get("language")
+        or profile.get("locale")
+        or profile.get("language")
+        or "en"
+    ).strip().lower()
     try:
         result = deliver_employee_notification(
             employee,
             flow="app_activation",
             template_key="app_activation",
-            text=f"Your {company_display_name(company)} app activation code is {code}. It expires in {_EMPLOYEE_APP_INVITE_TTL_HOURS} hours.",
-            email_subject="Your OctoHR app activation code",
+            text=None,
+            email_subject=_outbound_delivery.activation_email_subject(locale),
             company_code=company,
-            variables={"code": code, "company_name": company_display_name(company), "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
+            locale=locale,
+            variables={"code": code, "expiry_hours": _EMPLOYEE_APP_INVITE_TTL_HOURS},
             subject_key=employee.get("employee_key"),
             dedupe_key=dedupe,
             extra={"invite_id": str(invite_id)} if invite_id else None,

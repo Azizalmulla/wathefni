@@ -388,8 +388,8 @@ TEMPLATE_CATALOG: dict[str, dict[str, Any]] = {
         "label": "App activation code",
         "label_ar": "رمز تفعيل التطبيق",
         "text": {
-            "en": "Hi {employee_name}, your {company_name} app activation code is {code}. It expires in {expiry_hours} hours.",
-            "ar": "مرحباً {employee_name}، رمز تفعيل تطبيق {company_name} هو {code}. ينتهي خلال {expiry_hours} ساعة.",
+            "en": "Hi {employee_name}, your OctoHR activation code is {code}. It expires in {expiry_hours} hours.",
+            "ar": "مرحباً {employee_name}، رمز تفعيل تطبيق OctoHR هو {code}. ينتهي خلال {expiry_hours} ساعة.",
         },
     },
 }
@@ -421,6 +421,11 @@ def catalog_label(template_key: str, locale: str = "en") -> str:
     if label:
         return str(label)
     return str(template_key or "").replace("_", " ").strip().title() or "Message"
+
+
+def activation_email_subject(locale: str | None = None) -> str:
+    """Customer-visible Employee activation subject in the requested locale."""
+    return "رمز تفعيل تطبيق OctoHR" if str(locale or "en").lower().startswith("ar") else "Your OctoHR activation code"
 
 
 

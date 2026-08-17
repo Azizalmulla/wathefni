@@ -40,9 +40,12 @@ No location, contacts, microphone, background location, or advertising ID.
 
 - This is an employer-provisioned B2B app. Accounts are created by the employee's
   HR team, who issue a one-time activation code; there is no open self-registration.
-- Reviewer access: provide a demo company + a test phone number and a freshly
-  issued activation code (generate from the dashboard "Invite to App"), valid for
-  24h. Re-issue if it expires during review.
+- Reviewer access uses the normal production Employee flow. Provide the shared
+  synthetic review company code, the platform-specific reviewer phone number,
+  and access to that reviewer's registered email inbox. The reviewer requests a
+  fresh one-time code in the app, receives it by email, redeems it before expiry,
+  and creates a device-local PIN. Never place a static activation code or PIN in
+  store-review notes.
 - The app is native screens (not a web wrapper).
 - Push is optional; deny the permission and the in-app inbox still shows everything.
 
@@ -52,7 +55,9 @@ No location, contacts, microphone, background location, or advertising ID.
 - Permission prompts without context — permissions are requested just-in-time at
   the relevant action; usage strings are set in `app.json` infoPlist / Android
   permissions.
-- Login wall with no way in for the reviewer — mitigated by the demo-code note above.
+- Login wall with no way in for the reviewer — mitigated by persistent synthetic
+  reviewer identities with independently accessible email inboxes and the normal
+  fresh-code flow described above.
 - Debug logging — `console.*` is stripped from production builds (`babel.config.js`).
 - Sign in with Apple — not required (phone + code is not third-party SSO).
 

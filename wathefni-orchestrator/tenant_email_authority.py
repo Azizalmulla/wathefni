@@ -476,6 +476,11 @@ def resolve_outbound_sender(
         "logo_url": settings.get("logo_url") if company_name_en or company_name_ar else None,
     }
     display_name = _customer_brand_text(settings.get("display_name"))
+    # Activation happens before the tenant workspace is established on-device.
+    # Keep this security-sensitive message under the platform identity even when
+    # a tenant has configured a customer-facing sender display name.
+    if str(purpose or "").strip().lower() == "app_activation":
+        display_name = "OctoHR"
     reply_to = str(settings.get("reply_to") or "").strip() or global_reply
     emergency = bool(settings.get("allow_wathefni_emergency_fallback"))
 

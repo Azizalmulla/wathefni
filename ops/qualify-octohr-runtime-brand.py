@@ -149,10 +149,10 @@ def _audit_tenant_brand_contract(q: Qualification) -> None:
     q.check("identity={me?.company_identity}" in hr_layout, "HR shell binds canonical tenant identity")
     q.check('"company_identity": mobile_company_identity' in app_backend, "Employee /app/me returns tenant identity")
     q.check('"company_identity": app_mod.mobile_company_identity' in hr_backend, "HR /mobile/me returns tenant identity")
-    q.check('email_subject="Your OctoHR app activation code"' in app_backend, "activation email subject uses OctoHR")
+    q.check("activation_email_subject(locale)" in app_backend, "activation email subject uses localized OctoHR authority")
     q.check(
-        'text=f"Your {company_display_name(company)} app activation code is {code}.' in app_backend,
-        "activation body uses the resolved safe company display name",
+        'template_key="app_activation"' in app_backend and "text=None" in app_backend,
+        "activation body uses the localized OctoHR template",
     )
 
     runtime = subprocess.run(
