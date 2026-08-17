@@ -683,14 +683,14 @@ export function HomeErrorView({ onRetry }: { onRetry: () => void }) {
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
   return (
-    <View style={styles.stateScreen}>
+    <PageScreen style={styles.stateScreen}>
       <Wordmark />
       <View style={styles.stateErrorCard}>
         <Text style={[styles.moduleUnavailableText, align]}>{t('home.dataUnavailable')}</Text>
         <Text style={[styles.stateMessage, align]}>{t('home.dataUnavailableHint')}</Text>
         <PremiumButton label={t('common.retry')} onPress={onRetry} />
       </View>
-    </View>
+    </PageScreen>
   )
 }
 

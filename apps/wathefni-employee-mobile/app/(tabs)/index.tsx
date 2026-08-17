@@ -7,6 +7,7 @@ import { useAppQuery } from '@/lib/hooks'
 import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
 import { LoadingState } from '@/components/States'
 import { HomeErrorView, HomeView } from '@/features/home/HomeView'
+import { canFetchEmployeeHome } from '@/features/home/homeQueryPolicy'
 import {
   HOME_ROUTE,
   compositionFromMe,
@@ -17,7 +18,7 @@ import type { HomeResponse } from '@/api/types'
 import { syncInboxBadge } from '@/push/syncInboxBadge'
 
 export default function HomeScreen() {
-  const { me, profile, refreshMe } = useAuth()
+  const { me, profile, refreshMe, status } = useAuth()
   const { locale } = useI18n()
   const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
@@ -27,7 +28,10 @@ export default function HomeScreen() {
   const home = useAppQuery<HomeResponse>(
     ['home', locale],
     `/app/home?locale=${encodeURIComponent(locale)}`,
-    { staleTime: HIGH_CHURN_STALE_MS },
+    {
+      enabled: canFetchEmployeeHome(status),
+      staleTime: HIGH_CHURN_STALE_MS,
+    },
   )
   const data = home.data
 
