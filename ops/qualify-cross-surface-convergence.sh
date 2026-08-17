@@ -12,10 +12,12 @@ STG=/opt/wathefni/staging/orchestrator
 mkdir -p "$LOCAL_EVID"/{tests,sources}
 cp -a "$REPO_ROOT/ops/e2e/cross-surface-convergence.py" "$LOCAL_EVID/sources/"
 cp -a "$REPO_ROOT/ops/e2e/cross-surface-domain-matrix.py" "$LOCAL_EVID/sources/"
+cp -a "$REPO_ROOT/wathefni-orchestrator/public_brand.py" "$LOCAL_EVID/sources/"
 "${SSH[@]}" "mkdir -p '$REMOTE_STAGE'"
 rsync -az -e "ssh -o BatchMode=yes -o ConnectTimeout=30" \
   "$REPO_ROOT/ops/e2e/cross-surface-convergence.py" \
   "$REPO_ROOT/ops/e2e/cross-surface-domain-matrix.py" \
+  "$REPO_ROOT/wathefni-orchestrator/public_brand.py" \
   "$REPO_ROOT/wathefni-orchestrator/smoke-test-prehire-registry-parity.py" \
   "$REPO_ROOT/wathefni-orchestrator/smoke-test-interview-workflow-live.py" \
   "$REPO_ROOT/wathefni-orchestrator/smoke-test-onboarding-dashboard.py" \
@@ -38,6 +40,7 @@ set -euo pipefail
 STG=/opt/wathefni/staging/orchestrator
 PROD=/opt/wathefni/orchestrator
 PYBIN=\$PROD/.venv/bin/python
+cp -a '$REMOTE_STAGE/public_brand.py' "\$STG/"
 export PYTHONPATH="\$STG:\$PROD\${PYTHONPATH:+:\$PYTHONPATH}"
 cd "\$STG"
 export WATHEFNI_ENV=staging

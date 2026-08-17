@@ -24,6 +24,7 @@ FILES=(
   smoke-test-r9-permission-tenant-attack.py
   smoke-test-r9-permission-tenant-attack-db.py
   production_data_safety.py
+  public_brand.py
   setup_console_operator_auth.py
 )
 

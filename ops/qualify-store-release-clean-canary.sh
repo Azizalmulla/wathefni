@@ -13,16 +13,20 @@ STG=/opt/wathefni/staging/orchestrator
 
 mkdir -p "$LOCAL_EVID"/{tests,sources}
 cp -a "$REPO_ROOT/ops/e2e/clean-canary.py" "$LOCAL_EVID/sources/"
+cp -a "$REPO_ROOT/wathefni-orchestrator/public_brand.py" "$LOCAL_EVID/sources/"
 
 "${SSH[@]}" "mkdir -p '$REMOTE_STAGE'"
 rsync -az -e "ssh -o BatchMode=yes -o ConnectTimeout=30" \
-  "$REPO_ROOT/ops/e2e/clean-canary.py" "$VPS_HOST:$REMOTE_STAGE/clean-canary.py"
+  "$REPO_ROOT/ops/e2e/clean-canary.py" \
+  "$REPO_ROOT/wathefni-orchestrator/public_brand.py" \
+  "$VPS_HOST:$REMOTE_STAGE/"
 
 "${SSH[@]}" "bash -s" <<REMOTE 2>&1 | tee "$LOCAL_EVID/tests/clean-canary.out"
 set -euo pipefail
 STG=/opt/wathefni/staging/orchestrator
 PROD=/opt/wathefni/orchestrator
 PYBIN=\$PROD/.venv/bin/python
+cp -a '$REMOTE_STAGE/public_brand.py' "\$STG/"
 export PYTHONPATH="\$STG:\$PROD\${PYTHONPATH:+:\$PYTHONPATH}"
 export WATHEFNI_ENV=staging
 export WATHEFNI_DATA_SAFETY_ACK=non-production

@@ -1,11 +1,11 @@
 # WATHEFNI MOBILE STORE RELEASE — STATUS
 
-> **Current OctoHR pre-store addendum (2026-08-16):** the public-brand source pass is locally complete, but approved privacy content/live privacy and support, the authorized Employee owner bootstrap, physical iPhone/Android RP, and the standard HR Web TypeScript build remain blocked. No full-pass stamp is issued. See `ops/OCTOHR_PRE_STORE_RELEASE_STATUS.md` for the latest authority result. The detailed results below preserve the immediately preceding Wathefni-identity requalification record.
+> **Current OctoHR pre-store addendum (2026-08-17):** the accepted OctoHR domain/brand cutover, privacy/support destinations, final smoke/release harness, store configuration, associations, coverage, convergence, and clean canary are green. The owner excluded physical iPhone/Android checklists from this closure. The authenticated Employee iOS/Android EN/AR matrix remains owner-blocked because the production E2E owner lacks the governed owner-bootstrap grants needed to create one-time activations. No full-pass stamp is issued. See `ops/OCTOHR_PRE_STORE_RELEASE_STATUS.md` for the latest authority result.
 
 **Stamp issued:** none  
 **Requested stamp:** `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS`  
 **Date:** 2026-08-16  
-**Result:** **FINAL REQUALIFICATION BLOCKED: AUTHENTICATED EMPLOYEE AND PHYSICAL RP REMAIN UNPROVEN**
+**Result:** **FINAL REQUALIFICATION BLOCKED: AUTHENTICATED EMPLOYEE IOS/ANDROID EN/AR REMAINS UNPROVEN**
 
 HR Web redesign and Analytics UX were not started. Frozen HCM/Product/PT architecture was not reopened.
 
@@ -94,30 +94,30 @@ The safe activation provisioner uses only the existing `WATHEFNI-9655497001`–`
 - R9 live tenant/permission attack: **48/48**.
 - R10 staging/live measured performance: **11/11**.
 - R11 EN/AR release language: **53/53**.
-- Store build gate: **26/26**.
+- Store build gate: **34/34**.
 - Production associations: **89/89** in the standard harness; **90/90** under exact expected-ID qualification.
 - Cross-surface convergence: **12/12 + 16/16**.
 - Clean Setup canary: **18/18**.
 
 Fresh final-requalification evidence:
 
-- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T175658Z/`.
-- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T175755Z/`.
-- Store build/live readiness: `ops/evidence/store-build-live-20260816T175824Z/`.
-- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T175912Z/`.
-- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T180218Z/`.
+- R9: `ops/evidence/production-readiness-r9-permission-tenant-attack-20260816T234651Z/`.
+- R10: `ops/evidence/production-readiness-r10-measured-performance-20260816T234737Z/`.
+- Store build/live readiness: `ops/evidence/store-build-live-20260816T234806Z/`.
+- Cross-surface: `ops/evidence/e2e-cross-surface-20260816T234859Z/`.
+- Clean Setup canary: `ops/evidence/store-release-clean-canary-20260816T235111Z/`.
 
-`RELEASE_HARNESS_COMPLETED` is not the full-pass stamp. The harness intentionally preserves the Employee owner block and physical evidence requirements.
+`RELEASE_HARNESS_COMPLETED` is not the full-pass stamp. The harness intentionally preserves the Employee owner block and reports physical state honestly even when that matrix is owner-excluded from this closure.
 
-## Physical device gate — UNPROVEN
+## Physical device gate — OWNER-EXCLUDED FROM THIS CLOSURE
 
-The fresh host audit at `ops/evidence/store-release-physical-20260816T180237Z/` found one real iPhone and no real Android phone. Its authority result is `PHYSICAL_MATRIX=DEVICE_PRESENT_BUT_UNRUN`; every RP item remains `UNPROVEN`. A statement that the physical gate is complete is not sufficient release evidence without the required observed matrix and device/build metadata.
+The owner explicitly excluded the real-iPhone and real-Android checklists from this requested closure. No physical result is fabricated or marked PASS. The existing historical `UNPROVEN` state remains unchanged and is not a condition for the requested automation-only decision.
 
-No physical checklist item is marked PASS. Keyboard, PIN, biometrics, local lock, privacy cover, real push, external HTTPS links, camera, file picker/viewer, offline/reconnect, foreground refresh, EN, AR/RTL, and sign-out/session isolation still require observed runs on one real iPhone and one real Android phone.
+No physical checklist item is marked PASS.
 
 ## Exact remaining stop-condition gates
 
-1. Through the existing authorized Setup/superadmin path, apply the canonical `setup_owner_bootstrap_v1` permission bundle (or otherwise grant `employees.manage`) to the WATHEFNI E2E owner. Do not self-grant or bypass the privilege-escalation guard. Then run `ops/mobile-e2e/provision-employee-activation.py` and the Employee activation/tab flows in iOS EN/AR and Android EN/AR; verify the redeemed invite and active session.
-2. Reconnect and keep unlocked one real iPhone and one real Android phone, enable the normal developer/trust prompts, and execute every item in `ops/STORE_RELEASE_PHYSICAL_RP_CHECKLIST.md` with human-observed evidence.
+1. Through the governed Setup operator path, apply the canonical `setup_owner_bootstrap_v1` permission bundle to the configured WATHEFNI E2E owner. Do not self-grant or bypass the privilege-escalation guard.
+2. Run `ops/mobile-e2e/provision-employee-activation.py` with a fresh single-use synthetic activation for each Employee iOS EN, iOS AR, Android EN, and Android AR run against the current release candidate; reconcile the redeemed invite and active Employee session after each run.
 
-No `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` may be issued before both gates are genuinely proven.
+No `WATHEFNI_MOBILE_STORE_RELEASE_FULL_PASS` may be issued before the four authenticated Employee runs are genuinely proven.

@@ -1,0 +1,75 @@
+    PRODUCTION READINESS R9 — live permission / tenant attack (staging DB)
+    tenants: R9A04EDF2 / R9B04EDF2 / R9C04EDF2
+
+    authenticate representative roles
+      PASS  manager scope seeded
+      PASS  employee A1 /app/me 200
+      PASS  employee A1 sees only self
+
+    cross-tenant IDs + direct API
+      PASS  HR A cannot read tenant B employee by key
+      PASS  HR A X-Company-Code B is forbidden
+      PASS  HR A leave list 200
+      PASS  HR A leave list does not include tenant B
+      PASS  HR B leave list 200
+      PASS  HR B leave list does not include tenant A
+
+    employee enumeration
+      PASS  employee token cannot list HR directory
+      PASS  HR token cannot use /app/me
+      PASS  HR A directory includes A1
+      PASS  HR A directory excludes B1
+
+    manager-scope escapes
+      PASS  manager directory includes scoped A1
+      PASS  manager directory excludes out-of-scope A2
+      PASS  manager directory excludes tenant B
+      PASS  manager cannot open out-of-scope A2
+      PASS  manager cannot approve out-of-scope leave
+
+    documents / files
+      PASS  HR A cannot fetch tenant B document
+      PASS  employee A cannot fetch tenant B document
+      PASS  employee B document path is not a cross-tenant 200 leak to A
+
+    exports
+      PASS  viewer payroll read is permitted or denied consistently
+      PASS  manager payroll export list fail-closed without payroll.export
+      PASS  manager cannot mint a payroll export
+      PASS  payroll-sensitive role cannot use prehire report export
+
+    privileged mutation
+      PASS  employee cannot approve leave
+      PASS  payroll operator cannot open Setup
+      PASS  HR admin can open company Setup
+      PASS  owner/admin can open company Setup
+      PASS  company owner cannot use operator Setup on tenant B
+      PASS  payroll operator cannot invite an owner
+
+    payroll / performance / talent / ER sensitive
+      PASS  payroll-sensitive can read payroll
+      PASS  payroll-sensitive cannot open performance workspace
+      PASS  payroll-sensitive cannot open talent workspace
+      PASS  manager cannot open ER workspace
+      PASS  viewer cannot open ER workspace
+      PASS  ER-sensitive HR can open ER or fail closed on entitlement gate
+      PASS  ER workspace for A does not mention tenant B
+      PASS  talent-sensitive HR talent workspace 200 or gated 403
+      PASS  performance-sensitive HR workspace 200 or gated 403
+      PASS  HR A cannot read tenant B talent profile
+
+    module-disabled access
+      PASS  HR C leave is module_disabled
+      PASS  HR C leave error is module_disabled
+      PASS  employee C leave fail-closed when module off
+      PASS  HR C cannot mutate leave while module off
+
+    same-tenant positive controls
+      PASS  HR A can read own leave
+      PASS  employee A can read own leave
+      PASS  employee B /app/me stays on tenant B
+
+    R9_PERMISSION_TENANT_ATTACK_DB_PASS
+    48 passed, 0 failed
+
+STAGING_RC=0

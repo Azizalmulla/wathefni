@@ -1,0 +1,10 @@
+== staging /health /ready ==
+staging_health=200
+staging_ready=200
+staging_ready_status ready
+staging_migrations_ok None
+== production api /ready (read-only) ==
+prod_ready=200
+legacy_prod_ready=200
+prod_ready_status ready
+prod_migrations_ok None

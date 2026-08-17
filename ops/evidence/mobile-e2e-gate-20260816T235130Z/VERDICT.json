@@ -1,0 +1,125 @@
+{
+  "stamp": "20260816T235130Z",
+  "suite": "smoke",
+  "runtime": "local",
+  "target_device": null,
+  "target_platform": null,
+  "target_locale": "en",
+  "evidence": "ops/evidence/mobile-e2e-gate-20260816T235130Z",
+  "host": {
+    "app_id": "ai.wathefni.employee",
+    "target_device": null,
+    "target_platform": null,
+    "repo_root": "/Users/azizalmulla/Desktop/claw",
+    "maestro_ok": true,
+    "java_ok": true,
+    "simctl_ok": true,
+    "ios_runtime_ok": true,
+    "ios_booted": false,
+    "app_installed_booted": false,
+    "adb_ok": true,
+    "usb_android_device": false,
+    "disk_free_gb": "2",
+    "ui_runtime_ready": false,
+    "blockers": [
+      "no_executable_ui_target"
+    ],
+    "rule": "API PASS \u2260 MOBILE PASS \u2014 ui_runtime_ready=false means MOBILE_PASS stays 0"
+  },
+  "fixtures": {
+    "ok": false,
+    "parse_error": true,
+    "rc": 0
+  },
+  "leave_reconcile": null,
+  "browserstack": null,
+  "counts": {
+    "BLOCKED": 5,
+    "API_SPINE": 6
+  },
+  "MOBILE_PASS": 0,
+  "hr_mobile": "NO-SHIP",
+  "employee_mobile": "NO-SHIP",
+  "ship_reason": "Missing MOBILE_PASS for: real UI execution, unsigned entry, HR login/tabs, Employee activation credentials",
+  "rule": "API PASS \u2260 MOBILE PASS",
+  "selected_flows": [
+    "apps/wathefni-employee-mobile/.maestro/smoke/00-unsigned-entry.yaml",
+    "apps/wathefni-employee-mobile/.maestro/smoke/05-method-switch-en.yaml",
+    "apps/wathefni-employee-mobile/.maestro/smoke/01-hr-login.yaml",
+    "apps/wathefni-employee-mobile/.maestro/smoke/02-hr-tabs.yaml"
+  ],
+  "matrix": [
+    {
+      "id": "UI.00-unsigned-entry",
+      "flow": "apps/wathefni-employee-mobile/.maestro/smoke/00-unsigned-entry.yaml",
+      "verdict": "BLOCKED",
+      "detail": "No simulator/device UI runtime ready: no_executable_ui_target"
+    },
+    {
+      "id": "UI.05-method-switch-en",
+      "flow": "apps/wathefni-employee-mobile/.maestro/smoke/05-method-switch-en.yaml",
+      "verdict": "BLOCKED",
+      "detail": "No simulator/device UI runtime ready: no_executable_ui_target"
+    },
+    {
+      "id": "UI.01-hr-login",
+      "flow": "apps/wathefni-employee-mobile/.maestro/smoke/01-hr-login.yaml",
+      "verdict": "BLOCKED",
+      "detail": "No simulator/device UI runtime ready: no_executable_ui_target"
+    },
+    {
+      "id": "UI.02-hr-tabs",
+      "flow": "apps/wathefni-employee-mobile/.maestro/smoke/02-hr-tabs.yaml",
+      "verdict": "BLOCKED",
+      "detail": "No simulator/device UI runtime ready: no_executable_ui_target"
+    },
+    {
+      "id": "API.health",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /healthz \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.login",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "HR login OK company=WATHEFNI",
+      "http": 200
+    },
+    {
+      "id": "API.hr.me",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/me \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.priorities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/priorities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.leave.requested",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/leave?status=requested&limit=5 \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.hr.assistant.capabilities",
+      "surface": "api",
+      "verdict": "API_SPINE",
+      "detail": "GET /dashboard/mobile/assistant/capabilities \u2192 200",
+      "http": 200
+    },
+    {
+      "id": "API.employee.session",
+      "surface": "api",
+      "verdict": "BLOCKED",
+      "detail": "Set MOBILE_E2E_EMPLOYEE_BEARER (from activate) for employee API spine"
+    }
+  ]
+}

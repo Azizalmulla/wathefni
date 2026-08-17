@@ -16,7 +16,7 @@ mkdir -p "$LOCAL_EVID"/{tests,docs,sources,live}
 log() { printf '\n=== %s ===\n' "$*"; }
 if [[ -x "$ORCH_SRC/.venv/bin/python" ]]; then PY="$ORCH_SRC/.venv/bin/python"; else PY="$(command -v python3)"; fi
 
-FILES=(app.py smoke-test-r10-measured-performance.py smoke-test-r10-measured-performance-db.py production_data_safety.py)
+FILES=(app.py smoke-test-r10-measured-performance.py smoke-test-r10-measured-performance-db.py production_data_safety.py public_brand.py)
 
 log "1/4 local R10 contracts"
 cd "$ORCH_SRC"
