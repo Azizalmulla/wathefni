@@ -47,7 +47,7 @@ def _email_env_transport_configured() -> bool:
     if os.environ.get("RESEND_API_KEY") or os.environ.get("SENDGRID_API_KEY"):
         return True
     token = (os.environ.get("WATHEFNI_POSTMARK_SERVER_TOKEN") or "").strip()
-    from_addr = (os.environ.get("WATHEFNI_OUTBOUND_FROM") or "recruitment@wathefni.ai").strip()
+    from_addr = (os.environ.get("WATHEFNI_OUTBOUND_FROM") or "no-reply@octo-hr.com").strip()
     if token and from_addr:
         return True
     provider = (os.environ.get("WATHEFNI_OUTBOUND_EMAIL_PROVIDER") or "").strip().lower()

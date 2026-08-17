@@ -1,7 +1,7 @@
 """Tenant outbound email authority (Phase 1).
 
 Defaults preserve current production behavior:
-- outbound mode wathefni (global Postmark From)
+- outbound mode wathefni (technical mode name; global OctoHR Postmark From)
 - no Microsoft inbound
 - dual-send interview email off when calendar already invited
 
@@ -85,7 +85,7 @@ def postmark_server_configured(legacy: Any | None = None) -> bool:
         except Exception:
             pass
     token = (os.environ.get("WATHEFNI_POSTMARK_SERVER_TOKEN") or "").strip()
-    from_addr = (os.environ.get("WATHEFNI_OUTBOUND_FROM") or "recruitment@wathefni.ai").strip()
+    from_addr = (os.environ.get("WATHEFNI_OUTBOUND_FROM") or "no-reply@octo-hr.com").strip()
     return bool(token and from_addr)
 
 
@@ -404,11 +404,11 @@ def resolve_outbound_sender(
 ) -> dict[str, Any]:
     """Resolve visible From / Reply-To / provider for a send.
 
-    Missing settings / legacy / explicit wathefni ⇒ global Wathefni Postmark.
-    Branded modes never silently switch to Wathefni.
+    Missing settings / legacy / explicit wathefni ⇒ global OctoHR Postmark.
+    Branded modes never silently switch to the global sender.
     If an active branded provider is unavailable:
       - default: fail closed (activatable=False)
-      - optional allow_wathefni_emergency_fallback: send via Wathefni and flag audit
+      - optional allow_wathefni_emergency_fallback: send via OctoHR and flag audit
     """
     company = _company(company_code)
     cfg = None
@@ -418,10 +418,10 @@ def resolve_outbound_sender(
         except Exception:
             cfg = None
     cfg = cfg or {
-        "from_address": (os.environ.get("WATHEFNI_OUTBOUND_FROM") or "recruitment@wathefni.ai").strip(),
-        "reply_to": (os.environ.get("WATHEFNI_OUTBOUND_REPLY_TO") or "").strip(),
+        "from_address": (os.environ.get("WATHEFNI_OUTBOUND_FROM") or "no-reply@octo-hr.com").strip(),
+        "reply_to": (os.environ.get("WATHEFNI_OUTBOUND_REPLY_TO") or "support@octo-hr.com").strip(),
     }
-    global_from = str(cfg.get("from_address") or "recruitment@wathefni.ai").strip()
+    global_from = str(cfg.get("from_address") or "no-reply@octo-hr.com").strip()
     global_reply = str(cfg.get("reply_to") or "").strip() or None
 
     def _wathefni(

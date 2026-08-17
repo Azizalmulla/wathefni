@@ -94,6 +94,7 @@ type AuthContextValue = {
   autoLockTimeoutMs: AutoLockTimeoutMs
   setAutoLockTimeout: (value: AutoLockTimeoutMs) => Promise<void>
   activate: (phone: string, code: string) => Promise<void>
+  reviewSignIn: (username: string, password: string) => Promise<void>
   requestCode: (phone: string) => Promise<void>
   signOut: () => Promise<void>
   /** Seal the Employee session before leaving its principal tree. Never touches HR auth. */
@@ -509,6 +510,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await Promise.all([clearPinMaterial(), clearBiometricPreference()])
           setBiometricPreferenceOn(false)
         }
+        await enterAfterIdentity(loaded.me, loaded.session)
+      } catch (error) {
+        await blockForError(error, 'activate')
+        throw error
+      }
+    },
+    [blockForError, enterAfterIdentity, persist],
+  )
+
+  const reviewSignIn = useCallback(
+    async (username: string, password: string) => {
+      const res = await rawRequest<ActivateResponse>('/app/auth/store-review-login', {
+        method: 'POST',
+        json: {
+          username,
+          password,
+          platform: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : undefined,
+        },
+      })
+      await persist(res.token, res.refresh_token)
+      try {
+        const current = sessionRef.current
+        if (!current) throw new ApiError(401, 'app_auth_failed', 'Please sign in again.')
+        const loaded = await loadCurrentMe(current)
+        // Reviewer login is not activation/new-device recovery. Existing local
+        // PIN material remains principal-bound and must be honored.
         await enterAfterIdentity(loaded.me, loaded.session)
       } catch (error) {
         await blockForError(error, 'activate')
@@ -1014,6 +1041,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       autoLockTimeoutMs,
       setAutoLockTimeout,
       activate,
+      reviewSignIn,
       requestCode,
       signOut,
       sealForPrincipalSwitch,
@@ -1045,6 +1073,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       autoLockTimeoutMs,
       setAutoLockTimeout,
       activate,
+      reviewSignIn,
       requestCode,
       signOut,
       sealForPrincipalSwitch,

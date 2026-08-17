@@ -148,7 +148,7 @@ def deliver_platform_alerts(alerts: list[str], *, captured_at: str) -> dict[str,
         os.environ.get("WATHEFNI_OPS_ALERT_FROM")
         or env.get("WATHEFNI_OPS_ALERT_FROM")
         or pg_env.get("WATHEFNI_OUTBOUND_FROM")
-        or "recruitment@wathefni.ai"
+        or "no-reply@octo-hr.com"
     )
     result["postmark"]["configured"] = bool(token and alert_email)
     if changed and alerts and token and alert_email:
@@ -156,7 +156,7 @@ def deliver_platform_alerts(alerts: list[str], *, captured_at: str) -> dict[str,
         body = {
             "From": from_email,
             "To": alert_email,
-            "Subject": f"[Wathefni platform ops] {len(alerts)} alert(s)",
+            "Subject": f"[OctoHR platform ops] {len(alerts)} alert(s)",
             "TextBody": (
                 f"Platform operations alerts at {captured_at} (not for HR):\n\n"
                 + "\n".join(f"- {a}" for a in alerts)

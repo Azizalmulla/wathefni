@@ -1,19 +1,19 @@
 {
   "generated_from": "source inventory",
   "counts": {
-    "total": 2094,
+    "total": 2097,
     "by_surface": {
       "hr_web": 648,
       "setup": 27,
       "employee_mobile": 75,
       "hr_mobile": 40,
       "deep_link": 38,
-      "api": 1238,
+      "api": 1241,
       "assistant": 28
     },
     "by_status": {
       "structural_covered": 176,
-      "contract_covered": 1880,
+      "contract_covered": 1883,
       "live_covered": 38
     }
   },
@@ -13169,6 +13169,81 @@
       "auth_dependencies": [
         "operator_mobile_context"
       ],
+      "proof_dimensions": [
+        "authorized_domain",
+        "permission_module",
+        "tenant_scope",
+        "state_result",
+        "unauthorized_fail_closed"
+      ]
+    },
+    {
+      "id": "api:get:/auth/store-review-availability",
+      "surface": "api",
+      "module": "store_review_access",
+      "route": "/auth/store-review-availability",
+      "action": "get",
+      "entitlement": "",
+      "permission": "",
+      "prerequisites": "",
+      "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
+      "backend_effect": "store_review_access.store_review_availability",
+      "test_strategy": "route_contract+authorized_domain+fail_closed",
+      "test_id": "wathefni-orchestrator/smoke-test-store-review-access.py",
+      "status": "contract_covered",
+      "source_module": "store_review_access",
+      "endpoint": "store_review_availability",
+      "auth_dependencies": [],
+      "proof_dimensions": [
+        "authorized_domain",
+        "permission_module",
+        "tenant_scope",
+        "state_result",
+        "unauthorized_fail_closed"
+      ]
+    },
+    {
+      "id": "api:post:/app/auth/store-review-login",
+      "surface": "api",
+      "module": "store_review_access",
+      "route": "/app/auth/store-review-login",
+      "action": "post",
+      "entitlement": "",
+      "permission": "",
+      "prerequisites": "",
+      "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
+      "backend_effect": "store_review_access.employee_store_review_login",
+      "test_strategy": "route_contract+authorized_domain+fail_closed",
+      "test_id": "wathefni-orchestrator/smoke-test-employee-app.py",
+      "status": "contract_covered",
+      "source_module": "store_review_access",
+      "endpoint": "employee_store_review_login",
+      "auth_dependencies": [],
+      "proof_dimensions": [
+        "authorized_domain",
+        "permission_module",
+        "tenant_scope",
+        "state_result",
+        "unauthorized_fail_closed"
+      ]
+    },
+    {
+      "id": "api:post:/dashboard/mobile/auth/store-review-login",
+      "surface": "api",
+      "module": "store_review_access",
+      "route": "/dashboard/mobile/auth/store-review-login",
+      "action": "post",
+      "entitlement": "",
+      "permission": "",
+      "prerequisites": "",
+      "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
+      "backend_effect": "store_review_access.hr_store_review_login",
+      "test_strategy": "route_contract+authorized_domain+fail_closed",
+      "test_id": "wathefni-orchestrator/smoke-test-hr3-mobile-data.py",
+      "status": "contract_covered",
+      "source_module": "store_review_access",
+      "endpoint": "hr_store_review_login",
+      "auth_dependencies": [],
       "proof_dimensions": [
         "authorized_domain",
         "permission_module",

@@ -789,14 +789,17 @@ def inbound_postmark_secret() -> str:
 # deploy never silently changes how candidate mail is sent. Google Calendar/Meet is
 # a SEPARATE integration (gog calendar) and is never touched by this layer.
 OUTBOUND_EMAIL_API = "https://api.postmarkapp.com/email"
-DEFAULT_OUTBOUND_FROM = "recruitment@wathefni.ai"
+DEFAULT_OUTBOUND_FROM = "no-reply@octo-hr.com"
+DEFAULT_OUTBOUND_REPLY_TO = "support@octo-hr.com"
+DEFAULT_OUTBOUND_DISPLAY_NAME = "OctoHR"
 
 
 def outbound_postmark_config() -> dict[str, str]:
     return {
         "server_token": (os.environ.get("WATHEFNI_POSTMARK_SERVER_TOKEN") or "").strip(),
         "from_address": (os.environ.get("WATHEFNI_OUTBOUND_FROM") or DEFAULT_OUTBOUND_FROM).strip(),
-        "reply_to": (os.environ.get("WATHEFNI_OUTBOUND_REPLY_TO") or "").strip(),
+        "reply_to": (os.environ.get("WATHEFNI_OUTBOUND_REPLY_TO") or DEFAULT_OUTBOUND_REPLY_TO).strip(),
+        "display_name": (os.environ.get("WATHEFNI_OUTBOUND_DISPLAY_NAME") or DEFAULT_OUTBOUND_DISPLAY_NAME).strip(),
         "message_stream": (os.environ.get("WATHEFNI_POSTMARK_MESSAGE_STREAM") or "outbound").strip(),
     }
 
@@ -36880,7 +36883,7 @@ def send_email_via_postmark(
     try:
         import tenant_email_authority as _tea
 
-        from_header = _tea.format_from_header(display_name, addr)
+        from_header = _tea.format_from_header(display_name or cfg.get("display_name"), addr)
     except Exception:
         from_header = addr
     message: dict[str, Any] = {
@@ -46142,6 +46145,9 @@ def dashboard_auth_logout(authorization: str | None = Header(default=None), x_da
 # HR-1: Wathefni HR operator mobile auth + /dashboard/mobile/me (backend-only).
 # Registered here so routes precede the SPA catch-all at /dashboard/{asset_path:path}.
 _operator_mobile.register_operator_mobile_routes(sys.modules[__name__])
+import store_review_access as _store_review_access
+
+_store_review_access.register_store_review_routes(sys.modules[__name__])
 _operator_mobile_data.register_operator_mobile_data_routes(sys.modules[__name__])
 _observability_http.register_observability_http(sys.modules[__name__])
 try:
@@ -63059,7 +63065,12 @@ def resolve_intake_address(cur: Any, recipient: str | None, mailbox_hash: str | 
 
 
 def privacy_mailbox_address() -> str:
-    return (os.environ.get("WATHEFNI_PRIVACY_MAILBOX") or "privacy@wathefni.ai").strip().lower()
+    return (os.environ.get("WATHEFNI_PRIVACY_MAILBOX") or "privacy@octo-hr.com").strip().lower()
+
+
+def privacy_mailbox_aliases() -> set[str]:
+    """Canonical privacy mailbox plus the legacy inbound-compatible alias."""
+    return {privacy_mailbox_address(), "privacy@wathefni.ai"}
 
 
 def privacy_mailbox_monitor_recipients() -> list[str]:
@@ -63074,14 +63085,17 @@ def privacy_mailbox_monitor_recipients() -> list[str]:
 
 
 def _privacy_recipient_match(recipient: str | None) -> bool:
-    target = privacy_mailbox_address()
     value = normalize_email(recipient)
     if not value:
         return False
-    if value == target:
-        return True
-    # Postmark may wrap "Name <privacy@wathefni.ai>"
-    return f"<{target}>" in str(recipient or "").lower() or value.endswith(f"+{target.split('@', 1)[0]}@{target.split('@', 1)[-1]}")
+    raw = str(recipient or "").lower()
+    for target in privacy_mailbox_aliases():
+        if value == target or f"<{target}>" in raw:
+            return True
+        local, domain = target.split("@", 1)
+        if value.endswith(f"+{local}@{domain}"):
+            return True
+    return False
 
 
 def _extract_privacy_test_token(subject: str | None, text_body: str | None) -> str | None:
@@ -63178,7 +63192,7 @@ def process_privacy_mailbox_inbound(payload: dict[str, Any]) -> dict[str, Any]:
 
     forwards: list[dict[str, Any]] = []
     if not sensitive:
-        forward_subject = f"[privacy@wathefni.ai] {subject or '(no subject)'}"
+        forward_subject = f"[OctoHR privacy] {subject or '(no subject)'}"
         forward_body = (
             "OctoHR privacy mailbox inbound copy (non-sensitive metadata forward).\n\n"
             f"Mailbox: {privacy_mailbox_address()}\n"
@@ -63186,7 +63200,7 @@ def process_privacy_mailbox_inbound(payload: dict[str, Any]) -> dict[str, Any]:
             f"Subject: {subject or ''}\n"
             f"Test token: {test_token or '(none)'}\n"
             f"Event: {event_id}\n\n"
-            "If this is a mailbox monitoring test, reply to privacy@wathefni.ai with:\n"
+            "If this is a mailbox monitoring test, reply to privacy@octo-hr.com with:\n"
             f"RECEIVED {test_token or 'PHASE8C-PRIVACY-TEST'}\n"
         )
         for monitor in privacy_mailbox_monitor_recipients():

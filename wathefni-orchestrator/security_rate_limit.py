@@ -82,6 +82,15 @@ _BASE_POLICIES: dict[str, RateLimitPolicy] = {
         dimensions=("source", "identity"),
         description="HR web dashboard password login (brute force / spray / enumeration).",
     ),
+    "store_review_login": RateLimitPolicy(
+        key="store_review_login",
+        limit=8,
+        window_seconds=15 * 60,
+        lock_seconds=15 * 60,
+        mode=MODE_FAILURE,
+        dimensions=("source", "identity"),
+        description="Fixed-identity store reviewer login (tenant-pinned and default-off).",
+    ),
     "setup_operator_login": RateLimitPolicy(
         key="setup_operator_login",
         limit=5,

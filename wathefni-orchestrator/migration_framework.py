@@ -21,6 +21,7 @@ ROLLBACK_RUNBOOK = "wathefni-orchestrator/ops/RESTORE_RUNBOOK.md"
 REQUIRED_RELATIONS = [
     LEDGER_TABLE,
     "wathefni_error_events",
+    "store_review_access_audit",
 ]
 
 

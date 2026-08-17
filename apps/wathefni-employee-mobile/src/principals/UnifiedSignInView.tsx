@@ -22,7 +22,8 @@ import { EditorialHeading, FadeIn, PremiumButton, Wordmark } from '@/components/
 import { colors, font, layout, radius, spacing } from '@/theme'
 import { usePrincipalGate } from './PrincipalGate'
 
-type SignInMethod = 'phone' | 'work_email'
+type SignInMethod = 'phone' | 'work_email' | 'store_review'
+type ReviewPrincipal = 'employee' | 'hr'
 
 const EMPLOYEE_SHELL_AUTH_STATES = new Set([
   'needsPinSetup',
@@ -43,7 +44,7 @@ export function UnsignedEntry() {
 }
 
 function UnifiedSignInHost() {
-  const { status, activate, requestCode } = useAuth()
+  const { status, activate, reviewSignIn, requestCode } = useAuth()
   const { selectMode } = usePrincipalGate()
   const { t } = useI18n()
   const [method, setMethod] = useState<SignInMethod>('phone')
@@ -60,6 +61,26 @@ function UnifiedSignInHost() {
   const [password, setPassword] = useState('')
   const [hrBusy, setHrBusy] = useState(false)
   const [hrError, setHrError] = useState<string | null>(null)
+  const [reviewAvailable, setReviewAvailable] = useState(false)
+  const [reviewPrincipal, setReviewPrincipal] = useState<ReviewPrincipal>('employee')
+  const [reviewUsername, setReviewUsername] = useState('')
+  const [reviewPassword, setReviewPassword] = useState('')
+  const [reviewBusy, setReviewBusy] = useState(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    void rawRequest<{ available?: boolean }>('/auth/store-review-availability')
+      .then((response) => {
+        if (active) setReviewAvailable(response.available === true)
+      })
+      .catch(() => {
+        if (active) setReviewAvailable(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   // A verified Employee session may still need local PIN/biometric setup or unlock.
   // Mount EmployeeShell for every post-auth state so its AuthGate owns those screens.
@@ -138,10 +159,42 @@ function UnifiedSignInHost() {
     }
   }
 
+  const onStoreReviewSignIn = async () => {
+    if (reviewBusy) return
+    setReviewBusy(true)
+    setReviewError(null)
+    try {
+      if (reviewPrincipal === 'employee') {
+        await reviewSignIn(reviewUsername.trim(), reviewPassword)
+        return
+      }
+      const response = await rawRequest<AuthResponse>('/dashboard/mobile/auth/store-review-login', {
+        method: 'POST',
+        json: { username: reviewUsername.trim(), password: reviewPassword },
+      })
+      await saveOperatorSession({
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
+        companyCode: response.me.principal.company_code,
+        expiresAt: response.expires_at,
+      })
+      const switched = await selectMode('hr')
+      if (!switched) setReviewError(t('principal.transitionError'))
+    } catch (caught) {
+      setReviewError(
+        caught instanceof ApiError && caught.code === 'network_error'
+          ? t('auth.offline')
+          : t('auth.storeReviewError'),
+      )
+    } finally {
+      setReviewBusy(false)
+    }
+  }
+
   if (method === 'phone') {
     return (
       <ActivationView
-        headerSlot={<MethodSwitch method={method} onChange={setMethod} />}
+        headerSlot={<MethodSwitch method={method} onChange={setMethod} reviewAvailable={reviewAvailable} />}
         phone={phone}
         code={code}
         busy={busy}
@@ -162,6 +215,75 @@ function UnifiedSignInHost() {
     )
   }
 
+  if (method === 'store_review' && reviewAvailable) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView behavior={keyboardSafeBehavior()} style={styles.flex}>
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+            showsVerticalScrollIndicator={false}
+          >
+            <MethodSwitch method={method} onChange={setMethod} reviewAvailable={reviewAvailable} />
+            <View style={styles.wordmarkRow}>
+              <Wordmark />
+            </View>
+            <FadeIn style={styles.hero}>
+              <Text style={styles.eyebrow}>{t('auth.storeReviewEyebrow')}</Text>
+              <EditorialHeading>{t('auth.storeReviewTitle')}</EditorialHeading>
+              <Text style={styles.subtitle}>{t('auth.storeReviewSubtitle')}</Text>
+            </FadeIn>
+            <View style={styles.form}>
+              <View style={styles.switchRow} testID="e2e.auth.review.principalSwitch">
+                {(['employee', 'hr'] as ReviewPrincipal[]).map((principal) => (
+                  <Pressable
+                    key={principal}
+                    testID={`e2e.auth.review.principal.${principal}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: reviewPrincipal === principal }}
+                    onPress={() => setReviewPrincipal(principal)}
+                    style={[styles.switchChip, reviewPrincipal === principal && styles.switchChipOn]}
+                  >
+                    <Text style={[styles.switchText, reviewPrincipal === principal && styles.switchTextOn]}>
+                      {t(principal === 'employee' ? 'auth.employeeApp' : 'auth.hrWorkspace')}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Field
+                testID="e2e.auth.review.username"
+                label={t('auth.reviewUsername')}
+                value={reviewUsername}
+                onChange={setReviewUsername}
+                keyboardType="email-address"
+              />
+              <Field
+                testID="e2e.auth.review.password"
+                label={t('auth.password')}
+                value={reviewPassword}
+                onChange={setReviewPassword}
+                secure
+              />
+              {reviewError ? (
+                <Text accessibilityRole="alert" style={styles.error} testID="e2e.auth.review.error">
+                  {reviewError}
+                </Text>
+              ) : null}
+              <PremiumButton
+                testID="e2e.auth.review.signIn"
+                label={t('auth.signIn')}
+                busy={reviewBusy}
+                disabled={!reviewUsername.trim() || !reviewPassword || reviewBusy}
+                onPress={() => void onStoreReviewSignIn()}
+              />
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    )
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={keyboardSafeBehavior()} style={styles.flex}>
@@ -171,7 +293,7 @@ function UnifiedSignInHost() {
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
         >
-          <MethodSwitch method={method} onChange={setMethod} />
+          <MethodSwitch method={method} onChange={setMethod} reviewAvailable={reviewAvailable} />
           <View style={styles.wordmarkRow}>
             <Wordmark />
           </View>
@@ -229,9 +351,11 @@ function UnifiedSignInHost() {
 function MethodSwitch({
   method,
   onChange,
+  reviewAvailable = false,
 }: {
   method: SignInMethod
   onChange: (next: SignInMethod) => void
+  reviewAvailable?: boolean
 }) {
   const { t, isRTL } = useI18n()
   return (
@@ -248,6 +372,19 @@ function MethodSwitch({
             {t('auth.methodPhone')}
           </Text>
         </Pressable>
+        {reviewAvailable ? (
+          <Pressable
+            testID="e2e.auth.method.storeReview"
+            accessibilityRole="button"
+            accessibilityState={{ selected: method === 'store_review' }}
+            onPress={() => onChange('store_review')}
+            style={[styles.switchChip, method === 'store_review' && styles.switchChipOn]}
+          >
+            <Text style={[styles.switchText, method === 'store_review' && styles.switchTextOn]}>
+              {t('auth.methodStoreReview')}
+            </Text>
+          </Pressable>
+        ) : null}
         <Pressable
           testID="e2e.auth.method.workEmail"
           accessibilityRole="button"
