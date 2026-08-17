@@ -195,6 +195,12 @@ check(
     and "status === 'needsPinSetup'" in root_layout
     and "principalOverlayStyle" in root_layout,
 )
+check(
+    "Employee AuthGate overlays fill the native viewport without exposing the mounted route",
+    "...StyleSheet.absoluteFillObject" in root_layout
+    and "inset: 0" not in root_layout
+    and "ActivityIndicator, Alert, StyleSheet, View" in root_layout,
+)
 
 failed = [name for name, ok in checks if not ok]
 print(f"\n{len(checks) - len(failed)}/{len(checks)} passed")

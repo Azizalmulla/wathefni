@@ -4,7 +4,7 @@ import { Stack, useRouter, useSegments } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { ActivityIndicator, Alert, View } from 'react-native'
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native'
 import { useFonts } from 'expo-font'
 import { Newsreader_600SemiBold } from '@expo-google-fonts/newsreader/600SemiBold'
 import { NotoKufiArabic_600SemiBold } from '@expo-google-fonts/noto-kufi-arabic/600SemiBold'
@@ -46,8 +46,8 @@ const queryClient = new QueryClient({
 })
 
 const principalOverlayStyle = {
+  ...StyleSheet.absoluteFillObject,
   position: 'absolute' as const,
-  inset: 0,
   zIndex: 20,
   backgroundColor: colors.bg,
 }
