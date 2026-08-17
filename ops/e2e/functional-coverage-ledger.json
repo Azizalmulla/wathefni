@@ -1,18 +1,18 @@
 {
   "generated_from": "source inventory",
   "counts": {
-    "total": 2093,
+    "total": 2094,
     "by_surface": {
       "hr_web": 648,
       "setup": 27,
-      "employee_mobile": 74,
+      "employee_mobile": 75,
       "hr_mobile": 40,
       "deep_link": 38,
       "api": 1238,
       "assistant": 28
     },
     "by_status": {
-      "structural_covered": 175,
+      "structural_covered": 176,
       "contract_covered": 1880,
       "live_covered": 38
     }
@@ -10658,6 +10658,21 @@
       "surface": "employee_mobile",
       "module": "settings",
       "route": "/settings",
+      "action": "screen",
+      "entitlement": "",
+      "permission": "",
+      "prerequisites": "",
+      "expected_result": "",
+      "backend_effect": "",
+      "test_strategy": "structural",
+      "test_id": "apps/wathefni-employee-mobile/scripts/composition-shapes-test.js",
+      "status": "structural_covered"
+    },
+    {
+      "id": "employee:file:",
+      "surface": "employee_mobile",
+      "module": "home",
+      "route": "",
       "action": "screen",
       "entitlement": "",
       "permission": "",

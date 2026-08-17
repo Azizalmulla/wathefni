@@ -9,6 +9,7 @@ import { EditorialHeading, FadeIn, Wordmark } from '@/components/premium'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { usePrincipalGate } from '@/principals/PrincipalGate'
 import { colors, font, radius, spacing, typeScaling } from '@/theme'
+import { recordPrincipalDiagnostic } from '@/principals/principalDiagnostics'
 
 /**
  * More — long-term modular workspace launcher.
@@ -21,6 +22,7 @@ export function HRMoreLauncherView() {
   const align = readingEdgeAlign(isRTL)
   const {
     employeeSession,
+    hrSession,
     transition,
     selectMode,
     clearTransitionError,
@@ -88,38 +90,42 @@ export function HRMoreLauncherView() {
             onPress={() => router.push('/hr/settings' as never)}
             style={styles.row}
           />
-          {employeeSession ? (
-            <>
-              <ListRow
-                testID="e2e.principal.switch.employee"
-                title={
-                  transition.status === 'switching'
-                    ? t('principal.switchingEmployee')
-                    : t('hrMore.switchEmployee')
-                }
-                subtitle={t('hrMore.switchEmployeeBody')}
-                icon="swap-horizontal-outline"
-                iconTint={colors.surfaceMuted}
-                showChevron={transition.status !== 'switching'}
-                disabled={transition.status === 'switching'}
-                onPress={() => {
-                  clearTransitionError()
-                  void selectMode('employee')
-                }}
-                style={styles.row}
-              />
-              {transition.status === 'error' && transition.to === 'employee' ? (
-                <Text
-                  testID="e2e.principal.switch.error"
-                  accessibilityRole="alert"
-                  maxFontSizeMultiplier={typeScaling.body}
-                  style={[styles.switchError, align]}
-                >
-                  {t('principal.transitionError')}
-                </Text>
-              ) : null}
-            </>
-          ) : null}
+          <>
+            <ListRow
+              testID="e2e.principal.switch.employee"
+              title={
+                transition.status === 'switching'
+                  ? t('principal.switchingEmployee')
+                  : t('hrMore.switchEmployee')
+              }
+              subtitle={t('hrMore.switchEmployeeBody')}
+              icon="swap-horizontal-outline"
+              iconTint={colors.surfaceMuted}
+              showChevron={transition.status !== 'switching'}
+              disabled={transition.status === 'switching'}
+              onPress={() => {
+                recordPrincipalDiagnostic({
+                  event: 'switch_tap',
+                  target: 'employee',
+                  employeeSession,
+                  hrSession,
+                })
+                clearTransitionError()
+                void selectMode('employee')
+              }}
+              style={styles.row}
+            />
+            {transition.status === 'error' && transition.to === 'employee' ? (
+              <Text
+                testID="e2e.principal.switch.error"
+                accessibilityRole="alert"
+                maxFontSizeMultiplier={typeScaling.body}
+                style={[styles.switchError, align]}
+              >
+                {t('principal.transitionError')}
+              </Text>
+            ) : null}
+          </>
           <ListRow
             testID="e2e.hr.signOut"
             title={t('hrMore.signOut')}

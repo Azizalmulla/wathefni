@@ -9,10 +9,9 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { keyboardSafeBehavior } from '@/components/keyboardSafe'
-import { AuthProvider, useAuth } from '@/auth/AuthProvider'
+import { useAuth } from '@/auth/AuthProvider'
 import { ActivationView } from '@/features/activation/ActivationView'
 import { useI18n } from '@/i18n'
 import { approvedErrorMessage } from '@/api/errors'
@@ -32,10 +31,6 @@ const EMPLOYEE_SHELL_AUTH_STATES = new Set([
   'signedIn',
 ])
 
-const unsignedQueryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, staleTime: 30_000, refetchOnWindowFocus: false } },
-})
-
 /**
  * Single Wathefni sign-in entry.
  *
@@ -44,13 +39,7 @@ const unsignedQueryClient = new QueryClient({
  * or guess from email/phone matching.
  */
 export function UnsignedEntry() {
-  return (
-    <QueryClientProvider client={unsignedQueryClient}>
-      <AuthProvider>
-        <UnifiedSignInHost />
-      </AuthProvider>
-    </QueryClientProvider>
-  )
+  return <UnifiedSignInHost />
 }
 
 function UnifiedSignInHost() {

@@ -11,6 +11,7 @@ session_emp = (ROOT / "src/auth/session.ts").read_text(encoding="utf-8")
 session_hr = (ROOT / "src/hr/auth/session.ts").read_text(encoding="utf-8")
 client_hr = (ROOT / "src/hr/api/client.ts").read_text(encoding="utf-8")
 layout = (ROOT / "app/_layout.tsx").read_text(encoding="utf-8")
+index_route = (ROOT / "app/index.tsx").read_text(encoding="utf-8")
 unified = (ROOT / "src/principals/UnifiedSignInView.tsx").read_text(encoding="utf-8")
 gate = (ROOT / "src/principals/PrincipalGate.tsx").read_text(encoding="utf-8")
 freeze = Path("/Users/azizalmulla/Desktop/claw/docs/ADMIN_MOBILE_SCOPE_FREEZE.md").read_text(
@@ -54,10 +55,16 @@ check("HR routes under /hr", (ROOT / "app/hr/(tabs)/index.tsx").is_file())
 check("ai.wathefni.hr retired marker", (ROOT.parent / "wathefni-hr-mobile/SHIP_RETIRED.md").is_file())
 check("no startup principal chooser", "PrincipalEntryView" not in layout and "PrincipalSwitcherView" not in layout)
 check("app.config forces HR workspace on eas update", "EXPO_PUBLIC_HR_WORKSPACE_ENABLED" in (ROOT / "app.config.js").read_text())
-check("ModeRedirect mounts UnsignedEntry", "UnsignedEntry" in layout and 'shell.kind === \'unsigned\'' in layout)
 check(
-    "HR shell waits for /hr before Slot",
-    "Redirect" in layout and "segments[0] !== 'hr'" in layout and "<Slot" in layout,
+    "stable root index mounts unsigned entry",
+    "UnsignedEntry" in index_route and "StableRootNavigator" in layout,
+)
+check(
+    "root controller routes HR without replacing the root navigator",
+    "PrincipalRouteController" in layout
+    and "canonicalRouteForTarget" in layout
+    and "targetRouteIsMounted" in layout
+    and "function ModeRedirect" not in layout,
 )
 check("HR shell removed unsafe HrShellHost stack", "function HrShellHost" not in layout)
 check(
@@ -65,7 +72,7 @@ check(
     "selectMode('hr')" in unified
     and "useRouter" not in unified
     and "router.replace(" not in gate
-    and "waitForPrincipalMount" in gate
+    and "savePendingPrincipalTransition(pending)" in gate
     and "acknowledgePrincipalMounted" in gate
     and "setShell({ kind: mode })" in gate,
 )

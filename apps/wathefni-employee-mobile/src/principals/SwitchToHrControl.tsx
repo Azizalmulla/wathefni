@@ -1,25 +1,51 @@
+import { useRef, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 
+import { useAuth } from '@/auth/AuthProvider'
 import { usePrincipalGate } from '@/principals/PrincipalGate'
 import { hrWorkspaceEnabled } from '@/principals/mode'
 import { useI18n, readingEdgeAlign } from '@/i18n'
 import { colors, font, spacing } from '@/theme'
+import { recordPrincipalDiagnostic } from '@/principals/principalDiagnostics'
 
 export function SwitchToHrControl() {
   const enabled = hrWorkspaceEnabled()
   // PrincipalGateProvider wraps the whole app; when HR flag is off the control hides.
   const gate = usePrincipalGate()
+  const { sealForPrincipalSwitch } = useAuth()
   const { t, isRTL } = useI18n()
+  const [preparing, setPreparing] = useState(false)
+  const pressInFlight = useRef(false)
   if (!enabled) return null
-  const busy = gate.transition.status === 'switching'
+  const busy = preparing || gate.transition.status === 'switching'
   const failed = gate.transition.status === 'error' && gate.transition.to === 'hr'
   return (
     <View>
       <Pressable
         testID="e2e.principal.switch.hr"
         onPress={() => {
+          if (pressInFlight.current) return
+          pressInFlight.current = true
+          setPreparing(true)
+          recordPrincipalDiagnostic({
+            event: 'switch_tap',
+            target: 'hr',
+            employeeSession: gate.employeeSession,
+            hrSession: gate.hrSession,
+          })
           gate.clearTransitionError()
-          void gate.selectMode('hr')
+          // Start the controlled transition first so the Employee lock gate is
+          // suppressed in this event turn, then seal only the Employee
+          // request-capable session. HR SecureStore/PIN state is untouched.
+          const transition = gate.selectMode('hr', sealForPrincipalSwitch)
+          void (async () => {
+            try {
+              await transition
+            } finally {
+              pressInFlight.current = false
+              setPreparing(false)
+            }
+          })()
         }}
         disabled={busy}
         style={{

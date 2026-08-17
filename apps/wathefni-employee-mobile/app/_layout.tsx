@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Redirect, Slot, Stack, useRouter, useSegments } from 'expo-router'
+import { Stack, useRouter, useSegments } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -31,12 +31,26 @@ import {
   PrincipalMountAck,
   usePrincipalGate,
 } from '@/principals/PrincipalGate'
-import { UnsignedEntry } from '@/principals/UnifiedSignInView'
 import { CompanyBrandProvider } from '@/branding/CompanyBrand'
+import {
+  canonicalRouteForTarget,
+  targetRouteIsMounted,
+} from '@/principals/transitionModel'
+import {
+  principalRouteLabel,
+  recordPrincipalDiagnostic,
+} from '@/principals/principalDiagnostics'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000, refetchOnWindowFocus: false } },
 })
+
+const principalOverlayStyle = {
+  position: 'absolute' as const,
+  inset: 0,
+  zIndex: 20,
+  backgroundColor: colors.bg,
+}
 
 function AuthGate() {
   const {
@@ -52,7 +66,8 @@ function AuthGate() {
     biometricEnabled,
     biometricKind,
   } = useAuth()
-  const { refreshAvailability } = usePrincipalGate()
+  const gate = usePrincipalGate()
+  const { refreshAvailability } = gate
   const { t, syncLayoutLocale } = useI18n()
   const segments = useSegments()
   const router = useRouter()
@@ -61,6 +76,11 @@ function AuthGate() {
   const [bioBusy, setBioBusy] = useState(false)
   const pendingHttpsHref = useRef<string | null>(null)
   const consumedHttpsHref = useRef<string | null>(null)
+  const activePrincipal = gate.pendingTarget || gate.shell?.kind || null
+  const employeeActive =
+    activePrincipal === 'employee' &&
+    !(gate.transition.status === 'switching' && gate.transition.to === 'hr')
+  const route = principalRouteLabel(segments)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -68,6 +88,7 @@ function AuthGate() {
   }, [status, syncLayoutLocale])
 
   useEffect(() => {
+    if (!employeeActive) return
     if (
       status === 'loading' ||
       status === 'blocked' ||
@@ -77,20 +98,16 @@ function AuthGate() {
     ) {
       return
     }
-    // Employee principal must never host HR routes — hard redirect (no silent skip).
-    if (segments[0] === 'hr') {
-      router.replace('/(tabs)')
-      return
-    }
     const inAuthGroup = segments[0] === '(auth)'
     if (status === 'signedOut' && !inAuthGroup) {
       router.replace('/(auth)/activate')
     } else if (status === 'signedIn' && inAuthGroup) {
       router.replace('/(tabs)')
     }
-  }, [status, segments, router])
+  }, [employeeActive, status, segments, router])
 
   useEffect(() => {
+    if (!employeeActive) return
     const capture = (url: string | null) => {
       const href = hrefFromHttpsAppLink(url)
       if (!href || href.startsWith('/hr')) return
@@ -106,18 +123,20 @@ function AuthGate() {
     void Linking.getInitialURL().then(capture)
     const sub = Linking.addEventListener('url', (event) => capture(event.url))
     return () => sub.remove()
-  }, [status, router])
+  }, [employeeActive, status, router])
 
   useEffect(() => {
+    if (!employeeActive) return
     if (status !== 'signedIn' || !pendingHttpsHref.current) return
     const href = pendingHttpsHref.current
     pendingHttpsHref.current = null
     if (consumedHttpsHref.current === href) return
     consumedHttpsHref.current = href
     router.push(href as never)
-  }, [status, router])
+  }, [employeeActive, status, router])
 
   useEffect(() => {
+    if (!employeeActive) return
     if (status !== 'signedIn') return
     let cancelled = false
     void (async () => {
@@ -130,11 +149,25 @@ function AuthGate() {
     return () => {
       cancelled = true
     }
-  }, [status, t])
+  }, [employeeActive, status, t])
+
+  useEffect(() => {
+    if (!employeeActive || status !== 'locked') return
+    recordPrincipalDiagnostic({
+      event: 'lock_gate_rendered',
+      target: 'employee',
+      route,
+      employeeSession: gate.employeeSession,
+      hrSession: gate.hrSession,
+      lockPrincipal: 'employee',
+    })
+  }, [employeeActive, gate.employeeSession, gate.hrSession, route, status])
+
+  if (!employeeActive) return null
 
   if (status === 'loading') {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <View style={principalOverlayStyle}>
         <LoadingState />
       </View>
     )
@@ -142,7 +175,7 @@ function AuthGate() {
 
   if (status === 'needsPinSetup') {
     return (
-      <View style={{ flex: 1 }} testID="e2e.auth.employee.pinSetup">
+      <View style={principalOverlayStyle} testID="e2e.auth.employee.pinSetup">
         <CreatePinFlow
           busy={pinBusy}
           onCreate={async (pin) => {
@@ -161,39 +194,41 @@ function AuthGate() {
 
   if (status === 'needsBiometricOptIn') {
     return (
-      <BiometricOptInView
-        kind={biometricKind}
-        busy={bioBusy}
-        onEnable={() => {
-          void (async () => {
-            setBioBusy(true)
-            try {
-              await finishBiometricOptIn(true, {
-                promptMessage: t('biometric.unlockPrompt'),
-                cancelLabel: t('common.cancel'),
-              })
-            } finally {
-              setBioBusy(false)
-            }
-          })()
-        }}
-        onSkip={() => {
-          void (async () => {
-            setBioBusy(true)
-            try {
-              await finishBiometricOptIn(false)
-            } finally {
-              setBioBusy(false)
-            }
-          })()
-        }}
-      />
+      <View style={principalOverlayStyle}>
+        <BiometricOptInView
+          kind={biometricKind}
+          busy={bioBusy}
+          onEnable={() => {
+            void (async () => {
+              setBioBusy(true)
+              try {
+                await finishBiometricOptIn(true, {
+                  promptMessage: t('biometric.unlockPrompt'),
+                  cancelLabel: t('common.cancel'),
+                })
+              } finally {
+                setBioBusy(false)
+              }
+            })()
+          }}
+          onSkip={() => {
+            void (async () => {
+              setBioBusy(true)
+              try {
+                await finishBiometricOptIn(false)
+              } finally {
+                setBioBusy(false)
+              }
+            })()
+          }}
+        />
+      </View>
     )
   }
 
   if (status === 'locked') {
     return (
-      <View style={{ flex: 1 }} testID="e2e.auth.employee.locked">
+      <View style={principalOverlayStyle} testID="e2e.auth.employee.locked">
         <UnlockWithBiometricGate
           biometricFeatureOn={biometricEnabled}
           busy={pinBusy}
@@ -224,33 +259,85 @@ function AuthGate() {
 
   if (status === 'blocked' && accessState !== 'active') {
     return (
-      <AccessStateScreen
-        state={accessState}
-        onRetry={() => void refreshMe()}
-        onSignOut={() => void signOut().then(() => refreshAvailability())}
-      />
+      <View style={principalOverlayStyle}>
+        <AccessStateScreen
+          state={accessState}
+          onRetry={() => void refreshMe()}
+          onSignOut={() => void signOut().then(() => refreshAvailability())}
+        />
+      </View>
     )
   }
 
-  // Auth-only tree: signed-out must not keep authenticated routes in the navigator.
-  if (status === 'signedOut') {
-    return (
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          title: '',
-          headerTitle: '',
-          headerBackVisible: false,
-          contentStyle: { backgroundColor: colors.bg },
-          gestureEnabled: false,
-          animation: 'none',
-        }}
-      >
-        <Stack.Screen name="(auth)" options={{ headerShown: false, gestureEnabled: false }} />
-      </Stack>
-    )
-  }
+  return null
+}
 
+function EmployeeBrandBoundary({ children }: { children: ReactNode }) {
+  const { me } = useAuth()
+  return <CompanyBrandProvider identity={me?.company_identity}>{children}</CompanyBrandProvider>
+}
+
+function PrincipalRouteController() {
+  const gate = usePrincipalGate()
+  const segments = useSegments()
+  const segmentList = segments as string[]
+  const router = useRouter()
+  const route = principalRouteLabel(segments)
+  const target = gate.pendingTarget || gate.shell?.kind || null
+
+  useEffect(() => {
+    recordPrincipalDiagnostic({
+      event: 'route_observed',
+      target: target === 'employee' || target === 'hr' ? target : undefined,
+      route,
+      employeeSession: gate.employeeSession,
+      hrSession: gate.hrSession,
+    })
+  }, [gate.employeeSession, gate.hrSession, route, target])
+
+  useEffect(() => {
+    if (!gate.ready || !target) return
+    if (target === 'unsigned') {
+      if (segmentList.length === 0 || !segmentList[0] || segmentList[0] === 'index') return
+      recordPrincipalDiagnostic({
+        event: 'route_replace',
+        route: '/',
+        employeeSession: gate.employeeSession,
+        hrSession: gate.hrSession,
+      })
+      router.replace('/' as never)
+      return
+    }
+
+    const availability = {
+      employeeSession: gate.employeeSession,
+      hrSession: gate.hrSession,
+    }
+    const canonical = canonicalRouteForTarget(target, availability)
+    const mounted = targetRouteIsMounted(target, availability, segmentList)
+    const transitioning = gate.transition.status === 'switching'
+    const wrongPrincipal = target === 'hr' ? segmentList[0] !== 'hr' : segmentList[0] === 'hr'
+    const missingSessionRoute =
+      target === 'hr'
+        ? !gate.hrSession && !(segmentList[0] === 'hr' && segmentList[1] === 'sign-in')
+        : !gate.employeeSession && segmentList[0] !== '(auth)'
+
+    if ((transitioning && !mounted) || wrongPrincipal || missingSessionRoute) {
+      recordPrincipalDiagnostic({
+        event: 'route_replace',
+        target,
+        route: canonical,
+        employeeSession: gate.employeeSession,
+        hrSession: gate.hrSession,
+      })
+      router.replace(canonical as never)
+    }
+  }, [gate, router, segmentList, target])
+
+  return null
+}
+
+function StableRootNavigator() {
   return (
     <Stack
       screenOptions={{
@@ -261,123 +348,89 @@ function AuthGate() {
         contentStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade_from_bottom' }} />
-      <Stack.Screen name="bank" options={{ headerShown: false }} />
-      <Stack.Screen name="documents" options={{ headerShown: false }} />
-      <Stack.Screen name="notifications" options={{ headerShown: false }} />
-      <Stack.Screen name="settings" options={{ headerShown: false }} />
-      <Stack.Screen name="change-pin" options={{ headerShown: false }} />
-      <Stack.Screen name="privacy-support" options={{ headerShown: false }} />
-      <Stack.Screen name="leave/request" options={{ headerShown: false, presentation: 'modal' }} />
-      <Stack.Screen name="leave/history" options={{ headerShown: false }} />
-      <Stack.Screen name="schedule/history" options={{ headerShown: false }} />
-      {/* HR routes mount only under shell.kind === 'hr' via ModeRedirect Slot — never here. */}
+      <Stack.Screen name="index" options={{ animation: 'none', gestureEnabled: false }} />
+      <Stack.Screen name="(auth)" options={{ animation: 'none', gestureEnabled: false }} />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="hr" options={{ animation: 'none', gestureEnabled: false }} />
+      <Stack.Screen name="onboarding" options={{ animation: 'fade_from_bottom' }} />
+      <Stack.Screen name="bank" />
+      <Stack.Screen name="documents" />
+      <Stack.Screen name="notifications" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="change-pin" />
+      <Stack.Screen name="privacy-support" />
+      <Stack.Screen name="leave/request" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="leave/history" />
+      <Stack.Screen name="schedule/history" />
     </Stack>
   )
 }
 
-function EmployeeShell() {
-  const { t } = useI18n()
+function EmployeePrincipalMountAck() {
+  const { status } = useAuth()
+  const gate = usePrincipalGate()
+  const segments = useSegments()
+  const route = principalRouteLabel(segments)
+  const ready =
+    status !== 'loading' &&
+    targetRouteIsMounted(
+      'employee',
+      { employeeSession: gate.employeeSession, hrSession: gate.hrSession },
+      segments,
+    )
+
   return (
-    <AppErrorBoundary title={t('error.fatalTitle')} message={t('error.fatalMessage')} retryLabel={t('common.retry')}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <PrincipalMountAck mode="employee" />
-          <EmployeeBrandBoundary>
-            <StatusBar style="dark" />
-            {/* HR must not register on /app/push — PushLifecycle stays employee-only. */}
-            <PushLifecycle />
-            <ForegroundQueryRefresh />
-            <LocalUnlockShell>
-              <AuthGate />
-            </LocalUnlockShell>
-          </EmployeeBrandBoundary>
-        </AuthProvider>
-      </QueryClientProvider>
-    </AppErrorBoundary>
+    <PrincipalMountAck
+      mode="employee"
+      ready={ready}
+      route={route}
+      lockPrincipal={status === 'locked' ? 'employee' : null}
+    />
   )
 }
 
-function EmployeeBrandBoundary({ children }: { children: ReactNode }) {
-  const { me } = useAuth()
-  return <CompanyBrandProvider identity={me?.company_identity}>{children}</CompanyBrandProvider>
+function EmployeeOnlyLifecycle() {
+  const gate = usePrincipalGate()
+  const active = gate.pendingTarget || gate.shell?.kind
+  if (active !== 'employee' || gate.transition.status === 'switching') return null
+  return (
+    <>
+      {/* HR must never register through the Employee /app/push namespace. */}
+      <PushLifecycle />
+      <ForegroundQueryRefresh />
+    </>
+  )
 }
 
-function ModeRedirect() {
-  const { ready, shell, employeeSession, transition } = usePrincipalGate()
-  const segments = useSegments()
+function StablePrincipalFrame() {
+  const gate = usePrincipalGate()
+  const { t } = useI18n()
 
-  if (!ready || !shell) return <PrincipalBootSplash />
-
-  // A principal transition owns the whole frame. Keep the outgoing principal
-  // unmounted, drive the target route declaratively, then mount only the target
-  // provider. PrincipalMountAck ends the transition after that provider exists.
-  if (transition.status === 'switching') {
-    if (shell.kind !== transition.to) return <PrincipalBootSplash />
-
-    if (transition.to === 'hr') {
-      if (segments[0] !== 'hr') {
-        return (
-          <>
-            <Redirect href="/hr" />
-            <PrincipalBootSplash />
-          </>
-        )
-      }
-      return <Slot />
-    }
-
-    const employeeHref = employeeSession ? '/(tabs)' : '/(auth)/activate'
-    const employeeRouteReady = employeeSession
-      ? segments[0] === '(tabs)'
-      : segments[0] === '(auth)'
-    if (!employeeRouteReady) {
-      return (
-        <>
-          <Redirect href={employeeHref} />
-          <PrincipalBootSplash />
-        </>
-      )
-    }
-    return <EmployeeShell />
-  }
-
-  // No startup principal chooser. Workspace comes from authenticated sessions.
-  if (shell.kind === 'unsigned') {
-    return <UnsignedEntry />
-  }
-
-  if (shell.kind === 'hr') {
-    // Post Work-email auth the URL is often still `/` because UnsignedEntry has no
-    // navigator. Mounting a root Stack on that URL focuses Employee `(tabs)` /
-    // `+not-found` without Employee AuthProvider → fatal:
-    //   Error: useAuth must be used within AuthProvider
-    //   at TabsLayout (app/(tabs)/_layout.tsx)
-    // Guard: never Slot until the route is already under /hr.
-    if (segments[0] !== 'hr') {
-      return (
-        <>
-          <Redirect href="/hr" />
-          <PrincipalBootSplash />
-        </>
-      )
-    }
-    return <Slot />
-  }
-
-  // Employee principal: synchronous hard-deny of /hr/* (no async race, no flag skip).
-  if (segments[0] === 'hr') {
-    return (
-      <>
-        <Redirect href="/(tabs)" />
-        <PrincipalBootSplash />
-      </>
-    )
-  }
-
-  return <EmployeeShell />
+  return (
+    <AppErrorBoundary
+      title={t('error.fatalTitle')}
+      message={t('error.fatalMessage')}
+      retryLabel={t('common.retry')}
+    >
+      <EmployeeBrandBoundary>
+        <StatusBar style="dark" />
+        <EmployeeOnlyLifecycle />
+        <LocalUnlockShell>
+          <View style={{ flex: 1, backgroundColor: colors.bg }}>
+            <PrincipalRouteController />
+            <EmployeePrincipalMountAck />
+            <StableRootNavigator />
+            <AuthGate />
+            {!gate.ready ? (
+              <View style={principalOverlayStyle}>
+                <PrincipalBootSplash />
+              </View>
+            ) : null}
+          </View>
+        </LocalUnlockShell>
+      </EmployeeBrandBoundary>
+    </AppErrorBoundary>
+  )
 }
 
 export default function RootLayout() {
@@ -405,7 +458,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <I18nProvider initialLocale={locale}>
         <PrincipalGateProvider>
-          <ModeRedirect />
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <StablePrincipalFrame />
+            </AuthProvider>
+          </QueryClientProvider>
         </PrincipalGateProvider>
       </I18nProvider>
     </SafeAreaProvider>

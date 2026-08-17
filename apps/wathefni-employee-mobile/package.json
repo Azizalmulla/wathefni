@@ -16,6 +16,7 @@
     "e2e:gate": "python3 ../../ops/mobile-e2e/run-release-gate.py",
     "e2e:browserstack": "python3 ../../ops/mobile-e2e/run-browserstack-maestro.py",
     "e2e:verify-ids": "python3 scripts/verify-mobile-e2e-testids.py",
+    "test:principal-switch": "node --experimental-strip-types scripts/principal-transition-regression-test.mjs",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },

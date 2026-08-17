@@ -22,6 +22,8 @@ import { colors } from '@/theme'
 import * as Linking from 'expo-linking'
 import { hrefFromHttpsAppLink } from '@/linking/httpsAppLink'
 import { CompanyBrandProvider } from '@/branding/CompanyBrand'
+import { targetRouteIsMounted } from '@/principals/transitionModel'
+import { principalRouteLabel, recordPrincipalDiagnostic } from '@/principals/principalDiagnostics'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,6 +60,7 @@ function AccessGate() {
   const {
     selectMode,
     employeeSession,
+    hrSession,
     transition,
     clearTransitionError,
     refreshAvailability,
@@ -67,6 +70,7 @@ function AccessGate() {
   const [bioBusy, setBioBusy] = useState(false)
   const pendingHttpsHref = useRef<string | null>(null)
   const consumedHttpsHref = useRef<string | null>(null)
+  const route = principalRouteLabel(segments)
 
   useEffect(() => {
     if (
@@ -110,6 +114,18 @@ function AccessGate() {
     consumedHttpsHref.current = href
     router.push(href as never)
   }, [status, router])
+
+  useEffect(() => {
+    if (status !== 'locked') return
+    recordPrincipalDiagnostic({
+      event: 'lock_gate_rendered',
+      target: 'hr',
+      route,
+      employeeSession,
+      hrSession,
+      lockPrincipal: 'hr',
+    })
+  }, [employeeSession, hrSession, route, status])
 
   if (status === 'loading') {
     return (
@@ -252,30 +268,36 @@ function AccessGate() {
                     : 'lock-closed-outline'
           }
         />
-        {employeeSession ? (
-          <StatePanel
-            title={tApp('principal.switchEmployee')}
-            body={
-              transition.status === 'error' && transition.to === 'employee'
-                ? tApp('principal.transitionError')
-                : tApp('principal.employeeSessionAvailable')
-            }
-            action={
-              transition.status === 'switching'
-                ? tApp('principal.switchingEmployee')
-                : tApp('principal.openEmployee')
-            }
-            onAction={
-              transition.status === 'switching'
-                ? undefined
-                : () => {
-                    clearTransitionError()
-                    void selectMode('employee')
-                  }
-            }
-            icon="people-outline"
-          />
-        ) : null}
+        <StatePanel
+          title={tApp('principal.switchEmployee')}
+          body={
+            transition.status === 'error' && transition.to === 'employee'
+              ? tApp('principal.transitionError')
+              : employeeSession
+                ? tApp('principal.employeeSessionAvailable')
+                : tApp('auth.phoneSubtitle')
+          }
+          action={
+            transition.status === 'switching'
+              ? tApp('principal.switchingEmployee')
+              : tApp('principal.openEmployee')
+          }
+          onAction={
+            transition.status === 'switching'
+              ? undefined
+              : () => {
+                  recordPrincipalDiagnostic({
+                    event: 'switch_tap',
+                    target: 'employee',
+                    employeeSession,
+                    hrSession,
+                  })
+                  clearTransitionError()
+                  void selectMode('employee')
+                }
+          }
+          icon="people-outline"
+        />
         <StatePanel
           title={t('settings.signOut')}
           body={t('state.signOutBody')}
@@ -350,7 +372,7 @@ function HrRuntime() {
       <LocaleProvider initialLocale={locale}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <PrincipalMountAck mode="hr" />
+            <HrPrincipalMountAck />
             <HrBrandBoundary>
               <StatusBar style="dark" />
               <HrForegroundQueryRefresh />
@@ -362,6 +384,28 @@ function HrRuntime() {
         </QueryClientProvider>
       </LocaleProvider>
     </AppErrorBoundary>
+  )
+}
+
+function HrPrincipalMountAck() {
+  const { status } = useAuth()
+  const gate = usePrincipalGate()
+  const segments = useSegments()
+  const route = principalRouteLabel(segments)
+  const ready =
+    status !== 'loading' &&
+    targetRouteIsMounted(
+      'hr',
+      { employeeSession: gate.employeeSession, hrSession: gate.hrSession },
+      segments,
+    )
+  return (
+    <PrincipalMountAck
+      mode="hr"
+      ready={ready}
+      route={route}
+      lockPrincipal={status === 'locked' ? 'hr' : null}
+    />
   )
 }
 

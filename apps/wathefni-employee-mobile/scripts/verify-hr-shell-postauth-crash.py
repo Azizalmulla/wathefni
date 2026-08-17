@@ -35,15 +35,15 @@ def check(name: str, ok: bool) -> None:
 
 check("employee tabs call useAuth", "useAuth()" in tabs)
 check("useAuth throws outside provider", "useAuth must be used within AuthProvider" in auth)
-check("HR path uses Redirect guard", "Redirect" in layout and "segments[0] !== 'hr'" in layout)
-check("HR path mounts Slot only on /hr", "<Slot" in layout)
+check("root navigator is stable", "function StableRootNavigator" in layout and "<StableRootNavigator />" in layout)
+check("HR path uses persistent route controller", "PrincipalRouteController" in layout and "canonicalRouteForTarget" in layout)
 check("unsafe HrShellHost removed", "function HrShellHost" not in layout)
 check(
     "work email uses provider-owned atomic HR route/shell transition",
     "selectMode('hr')" in unified
     and "useRouter" not in unified
     and "router.replace(" not in gate
-    and "waitForPrincipalMount" in gate
+    and "savePendingPrincipalTransition(pending)" in gate
     and "acknowledgePrincipalMounted" in gate
     and "setShell({ kind: mode })" in gate,
 )
@@ -53,7 +53,4 @@ print()
 print(f"{len(checks) - len(failed)}/{len(checks)} passed")
 if failed:
     raise SystemExit(1)
-print(
-    "FIRST_FAILING_MODULE=app/(tabs)/_layout.tsx :: useAuth outside AuthProvider "
-    "(post-auth shell swap on non-/hr URL)"
-)
+print("HR_SHELL_PROVIDER_TOPOLOGY=STABLE_ROOT_PASS")

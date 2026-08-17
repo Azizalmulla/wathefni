@@ -96,6 +96,8 @@ type AuthContextValue = {
   activate: (phone: string, code: string) => Promise<void>
   requestCode: (phone: string) => Promise<void>
   signOut: () => Promise<void>
+  /** Seal the Employee session before leaving its principal tree. Never touches HR auth. */
+  sealForPrincipalSwitch: () => Promise<void>
   refreshMe: () => Promise<boolean>
   createLocalPin: (pin: string) => Promise<void>
   unlockWithPin: (pin: string) => Promise<{ ok: boolean; lockedOut: boolean; failedAttempts: number }>
@@ -796,6 +798,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('signedOut')
   }, [clearLocalAuthMaterial])
 
+  const sealForPrincipalSwitch = useCallback(async () => {
+    // Keep the Employee SecureStore session intact, but remove it from the
+    // request-capable in-memory slot before another principal is mounted.
+    // Returning to Employee must go through the Employee PIN namespace.
+    if (!isLocalPinMasterEnabled()) return
+    const [stored, pin] = await Promise.all([loadSession(), loadPinRecord()])
+    const current = sessionRef.current || sealedSessionRef.current || stored
+    if (!current || !pin) return
+    sealedSessionRef.current = current
+    sessionRef.current = null
+    setUnlockEmployeeKey(pin.employeeKey)
+    setAccessState('active')
+    setStatus('locked')
+  }, [])
+
   const request = useCallback(
     async <T,>(path: string, opts: { method?: 'GET' | 'POST'; json?: unknown; body?: FormData; signal?: AbortSignal } = {}): Promise<T> => {
       const current = sessionRef.current
@@ -999,6 +1016,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       activate,
       requestCode,
       signOut,
+      sealForPrincipalSwitch,
       refreshMe,
       createLocalPin,
       unlockWithPin,
@@ -1029,6 +1047,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       activate,
       requestCode,
       signOut,
+      sealForPrincipalSwitch,
       refreshMe,
       createLocalPin,
       unlockWithPin,

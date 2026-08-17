@@ -14,6 +14,15 @@ import Constants from 'expo-constants'
 export type PrincipalMode = 'employee' | 'hr'
 
 const MODE_KEY = 'wathefni.principal.mode'
+const PENDING_TRANSITION_KEY = 'wathefni.principal.pending-transition.v1'
+
+export type PendingPrincipalTransition = {
+  id: string
+  from: PrincipalMode | null
+  to: PrincipalMode
+  previousPreference: PrincipalMode | null
+  startedAt: number
+}
 
 /** When both principals are signed in and no preference exists, open Employee. */
 export const DEFAULT_DUAL_MODE: PrincipalMode = 'employee'
@@ -41,7 +50,9 @@ export async function loadPrincipalModePreference(): Promise<PrincipalMode | nul
     const value = await AsyncStorage.getItem(MODE_KEY)
     if (value === 'employee' || value === 'hr') return value
     return null
-  } catch {
+  } catch (error) {
+    // Preference is presentation-only; auth/session authority remains intact.
+    void error
     return null
   }
 }
@@ -52,6 +63,41 @@ export async function savePrincipalModePreference(mode: PrincipalMode): Promise<
 
 export async function clearPrincipalModePreference(): Promise<void> {
   await AsyncStorage.removeItem(MODE_KEY)
+}
+
+export async function loadPendingPrincipalTransition(): Promise<PendingPrincipalTransition | null> {
+  const raw = await AsyncStorage.getItem(PENDING_TRANSITION_KEY)
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as Partial<PendingPrincipalTransition>
+    if (
+      typeof parsed.id !== 'string' ||
+      !parsed.id ||
+      (parsed.from !== null && parsed.from !== 'employee' && parsed.from !== 'hr') ||
+      (parsed.to !== 'employee' && parsed.to !== 'hr') ||
+      (parsed.previousPreference !== null &&
+        parsed.previousPreference !== 'employee' &&
+        parsed.previousPreference !== 'hr') ||
+      typeof parsed.startedAt !== 'number' ||
+      !Number.isFinite(parsed.startedAt)
+    ) {
+      throw new Error('principal_transition_invalid_record')
+    }
+    return parsed as PendingPrincipalTransition
+  } catch (error) {
+    await AsyncStorage.removeItem(PENDING_TRANSITION_KEY)
+    throw error
+  }
+}
+
+export async function savePendingPrincipalTransition(
+  transition: PendingPrincipalTransition,
+): Promise<void> {
+  await AsyncStorage.setItem(PENDING_TRANSITION_KEY, JSON.stringify(transition))
+}
+
+export async function clearPendingPrincipalTransition(): Promise<void> {
+  await AsyncStorage.removeItem(PENDING_TRANSITION_KEY)
 }
 
 export type PrincipalAvailability = {

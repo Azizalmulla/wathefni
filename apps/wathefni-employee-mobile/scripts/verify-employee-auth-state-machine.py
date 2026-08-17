@@ -115,7 +115,7 @@ check(
 )
 check(
     "HR and Employee shell switching remains session-aware",
-    "selectMode('hr')" in switch_hr
+    "selectMode('hr', sealForPrincipalSwitch)" in switch_hr
     and "employeeSession" in hr_settings
     and "selectMode('employee')" in hr_settings
     and "resolveShell" in mode
@@ -126,21 +126,27 @@ check(
     "principal transition is single-flight with mount acknowledgement, rollback, and error",
     "transitionPromiseRef" in principal_gate
     and "if (transitionPromiseRef.current) return transitionPromiseRef.current" in principal_gate
-    and "waitForPrincipalMount" in principal_gate
+    and "savePendingPrincipalTransition(pending)" in principal_gate
+    and "loadPendingPrincipalTransition()" in principal_gate
     and "acknowledgePrincipalMounted" in principal_gate
     and "principal_transition_mount_timeout" in principal_gate
     and "router.replace" not in principal_gate
-    and "setShell(previousShell)" in principal_gate
+    and "rollbackTransition" in principal_gate
     and "clearPrincipalModePreference" in principal_gate
-    and "principal_transition_failed" in principal_gate,
+    and "principal_transition_failed" in principal_gate
+    and "catch {}" not in principal_gate,
 )
 check(
-    "target principal provider mounts before transition completes",
-    '<PrincipalMountAck mode="employee" />' in root_layout
-    and '<PrincipalMountAck mode="hr" />' in hr_layout
-    and "if (transition.status === 'switching')" in root_layout
-    and "return <Slot />" in root_layout
-    and "return <EmployeeShell />" in root_layout,
+    "stable root navigator survives target provider topology changes",
+    "function StableRootNavigator" in root_layout
+    and "<StableRootNavigator />" in root_layout
+    and "<PrincipalGateProvider>" in root_layout
+    and "<AuthProvider>" in root_layout
+    and "function EmployeePrincipalMountAck" in root_layout
+    and "function HrPrincipalMountAck" in hr_layout
+    and 'mode="employee"' in root_layout
+    and 'mode="hr"' in hr_layout
+    and "function ModeRedirect" not in root_layout,
 )
 check(
     "outgoing local locks suppress during principal transition",
@@ -182,7 +188,13 @@ check(
     "HR Maestro covers login, PIN, biometric choice, and HR shell",
     all(marker in hr_flow for marker in ("e2e.auth.hr.signIn", "e2e.pin.root", "e2e.biometric.notNow", "e2e.tab.hr.home")),
 )
-check("Employee AuthGate owns local post-auth screens", "<EmployeeShell />" in root_layout and "status === 'needsPinSetup'" in root_layout)
+check(
+    "Employee AuthGate overlays local post-auth screens without replacing root navigator",
+    "<StableRootNavigator />" in root_layout
+    and "<AuthGate />" in root_layout
+    and "status === 'needsPinSetup'" in root_layout
+    and "principalOverlayStyle" in root_layout,
+)
 
 failed = [name for name, ok in checks if not ok]
 print(f"\n{len(checks) - len(failed)}/{len(checks)} passed")

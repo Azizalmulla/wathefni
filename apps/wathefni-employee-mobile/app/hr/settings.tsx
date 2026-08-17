@@ -10,6 +10,7 @@ import { useHrSafeBack } from '@hr/useHrSafeBack'
 import { useI18n } from '@/i18n'
 import { PRIVACY_URL, SUPPORT_URL } from '@/config'
 import { usePrincipalGate } from '@/principals/PrincipalGate'
+import { recordPrincipalDiagnostic } from '@/principals/principalDiagnostics'
 
 /**
  * Settings route — operator + device session + local Device Security.
@@ -33,6 +34,7 @@ export default function SettingsRoute() {
   const { setLocale: setHrLocale } = useHrLocale()
   const {
     employeeSession,
+    hrSession,
     transition,
     selectMode,
     clearTransitionError,
@@ -96,14 +98,17 @@ export default function SettingsRoute() {
       onOpenNotificationSettings={openNotificationSettings}
       onOpenPrivacy={() => openExternal(PRIVACY_URL)}
       onOpenSupport={() => openExternal(SUPPORT_URL)}
-      onSwitchEmployee={
-        employeeSession
-          ? () =>
-              void (async () => {
-                clearTransitionError()
-                await selectMode('employee')
-              })()
-          : undefined
+      onSwitchEmployee={() =>
+        void (async () => {
+          recordPrincipalDiagnostic({
+            event: 'switch_tap',
+            target: 'employee',
+            employeeSession,
+            hrSession,
+          })
+          clearTransitionError()
+          await selectMode('employee')
+        })()
       }
       principalSwitchBusy={transition.status === 'switching'}
       principalSwitchError={

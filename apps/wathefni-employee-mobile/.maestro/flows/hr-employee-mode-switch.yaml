@@ -313,3 +313,22 @@ tags:
     visible:
       id: "e2e.tab.hr.home"
     timeout: 60000
+
+# Employee is now signed out while HR remains authenticated. An explicit HR →
+# Employee switch must honor the Employee target and open activation; it must
+# not fall back to HR merely because the HR session still exists.
+- tapOn:
+    id: "e2e.tab.hr.more"
+- scrollUntilVisible:
+    element:
+      id: "e2e.principal.switch.employee"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.principal.switch.employee"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.method.phone"
+    timeout: 60000
+- assertNotVisible:
+    id: "e2e.auth.hr.locked"

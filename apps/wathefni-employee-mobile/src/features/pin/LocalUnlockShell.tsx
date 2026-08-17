@@ -43,7 +43,7 @@ function employeeKeyFromAuth(
 
 export function LocalUnlockShell({ children }: Props) {
   const { status, profile, me, autoLockTimeoutMs, refreshMe } = useAuth()
-  const { transition } = usePrincipalGate()
+  const { transition, pendingTarget, shell } = usePrincipalGate()
   const queryClient = useQueryClient()
   const [needsLocalUnlock, setNeedsLocalUnlock] = useState(false)
   const [privacyCover, setPrivacyCover] = useState(false)
@@ -59,12 +59,14 @@ export function LocalUnlockShell({ children }: Props) {
   const employeeKeyRef = useRef('')
   const needsUnlockRef = useRef(false)
   const principalTransitionRef = useRef(false)
+  const principalActiveRef = useRef(false)
 
   timeoutMsRef.current = autoLockTimeoutMs
   statusRef.current = status
   employeeKeyRef.current = employeeKeyFromAuth(me, profile)
   needsUnlockRef.current = needsLocalUnlock
   principalTransitionRef.current = transition.status === 'switching'
+  principalActiveRef.current = (pendingTarget || shell?.kind) === 'employee'
 
   const syncDiagnostics = useCallback(
     (partial: Parameters<typeof patchAutoLockDiagnostics>[0] = {}) => {
@@ -108,7 +110,7 @@ export function LocalUnlockShell({ children }: Props) {
   }, [queryClient, syncDiagnostics])
 
   useEffect(() => {
-    if (transition.status === 'switching') {
+    if (transition.status === 'switching' || (pendingTarget || shell?.kind) !== 'employee') {
       needsUnlockRef.current = false
       setNeedsLocalUnlock(false)
       setPrivacyCover(false)
@@ -121,7 +123,7 @@ export function LocalUnlockShell({ children }: Props) {
         lastDecision: 'principal_transition',
       })
     }
-  }, [transition.status, syncDiagnostics])
+  }, [pendingTarget, shell?.kind, transition.status, syncDiagnostics])
 
   useEffect(() => {
     if (status !== 'signedIn') {
@@ -144,7 +146,7 @@ export function LocalUnlockShell({ children }: Props) {
       try {
         const prev = appStateRef.current
         appStateRef.current = next
-        if (principalTransitionRef.current) {
+        if (principalTransitionRef.current || !principalActiveRef.current) {
           needsUnlockRef.current = false
           awayStartedAtRef.current = null
           enteredBackgroundRef.current = false
@@ -152,7 +154,7 @@ export function LocalUnlockShell({ children }: Props) {
           setPrivacyCover(false)
           syncDiagnostics({
             lastAppState: `${prev}->${next}`,
-            lastDecision: 'principal_transition',
+            lastDecision: principalTransitionRef.current ? 'principal_transition' : 'not_signed_in',
             needsLocalUnlock: false,
             enteredBackground: false,
             lastAwayAt: null,
@@ -267,8 +269,8 @@ export function LocalUnlockShell({ children }: Props) {
     <View style={styles.fill} collapsable={false} testID={AUTO_LOCK_BUILD_MARKER}>
       {/* Children (AuthGate + Stack) stay mounted for the entire unlock cycle. */}
       {children}
-      {privacyCover && !needsLocalUnlock ? <PrivacyCover /> : null}
-      {needsLocalUnlock && status === 'signedIn' ? (
+      {principalActiveRef.current && privacyCover && !needsLocalUnlock ? <PrivacyCover /> : null}
+      {principalActiveRef.current && needsLocalUnlock && status === 'signedIn' ? (
         <LocalUnlockOverlay onUnlocked={dismissUnlock} />
       ) : null}
     </View>
