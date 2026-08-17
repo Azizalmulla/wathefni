@@ -23,6 +23,7 @@ layout = (ROOT / "app/_layout.tsx").read_text(encoding="utf-8")
 tabs = (ROOT / "app/(tabs)/_layout.tsx").read_text(encoding="utf-8")
 unified = (ROOT / "src/principals/UnifiedSignInView.tsx").read_text(encoding="utf-8")
 auth = (ROOT / "src/auth/AuthProvider.tsx").read_text(encoding="utf-8")
+gate = (ROOT / "src/principals/PrincipalGate.tsx").read_text(encoding="utf-8")
 
 checks: list[tuple[str, bool]] = []
 
@@ -37,7 +38,13 @@ check("useAuth throws outside provider", "useAuth must be used within AuthProvid
 check("HR path uses Redirect guard", "Redirect" in layout and "segments[0] !== 'hr'" in layout)
 check("HR path mounts Slot only on /hr", "<Slot" in layout)
 check("unsafe HrShellHost removed", "function HrShellHost" not in layout)
-check("work email replace /hr before selectMode", "router.replace('/hr')" in unified)
+check(
+    "work email uses provider-owned atomic HR route/shell transition",
+    "selectMode('hr')" in unified
+    and "useRouter" not in unified
+    and "router.replace(" in gate
+    and "setShell({ kind: mode })" in gate,
+)
 
 failed = [name for name, ok in checks if not ok]
 print()

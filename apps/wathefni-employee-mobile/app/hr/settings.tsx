@@ -31,7 +31,13 @@ export default function SettingsRoute() {
   } = useAuth()
   const { locale, setLocale, t } = useI18n()
   const { setLocale: setHrLocale } = useHrLocale()
-  const { employeeSession, selectMode, refreshAvailability } = usePrincipalGate()
+  const {
+    employeeSession,
+    transition,
+    selectMode,
+    clearTransitionError,
+    refreshAvailability,
+  } = usePrincipalGate()
   const router = useRouter()
   const onBack = useHrSafeBack()
   const [biometricBusy, setBiometricBusy] = useState(false)
@@ -46,7 +52,6 @@ export default function SettingsRoute() {
 
   const afterSignOut = async () => {
     await refreshAvailability()
-    router.replace('/hr/sign-in')
   }
 
   const biometricLabel =
@@ -95,11 +100,16 @@ export default function SettingsRoute() {
         employeeSession
           ? () =>
               void (async () => {
+                clearTransitionError()
                 await selectMode('employee')
-                await refreshAvailability()
-                router.replace('/(tabs)')
               })()
           : undefined
+      }
+      principalSwitchBusy={transition.status === 'switching'}
+      principalSwitchError={
+        transition.status === 'error' && transition.to === 'employee'
+          ? t('principal.transitionError')
+          : null
       }
       pinEnabled={pinEnabled}
       biometricEnabled={biometricEnabled}

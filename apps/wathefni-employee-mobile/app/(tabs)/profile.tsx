@@ -7,10 +7,12 @@ import { HIGH_CHURN_STALE_MS } from '@/lib/employeeSoftRefresh'
 import { LoadingState } from '@/components/States'
 import { ProfileView } from '@/features/profile/ProfileView'
 import type { ProfileResponse } from '@/api/types'
+import { usePrincipalGate } from '@/principals/PrincipalGate'
 
 export default function ProfileScreen() {
   const { profile: meProfile, signOut, hasFeature, refreshMe } = useAuth()
   const router = useRouter()
+  const { refreshAvailability } = usePrincipalGate()
   const [refreshing, setRefreshing] = useState(false)
 
   // Richer Profile uses /app/profile — /app/me stays the compact auth/entitlement contract.
@@ -42,7 +44,7 @@ export default function ProfileScreen() {
       onPreboarding={hasFeature('preboarding') ? () => router.push('/preboarding') : undefined}
       onProbation={hasFeature('probation') ? () => router.push('/probation') : undefined}
       onPrivacySupport={() => router.push('/privacy-support')}
-      onSignOut={() => void signOut()}
+      onSignOut={() => void signOut().then(() => refreshAvailability())}
     />
   )
 }

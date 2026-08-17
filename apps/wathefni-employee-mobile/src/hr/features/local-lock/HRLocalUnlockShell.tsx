@@ -16,11 +16,13 @@ import {
 import { operatorPrincipalKey } from '@hr/auth/localLock/principalKey'
 import { softRefreshHrSurfaces } from '@hr/lib/hrRefresh'
 import { HRLocalUnlockOverlay, HRPrivacyCover } from '@hr/features/local-lock/HRLocalUnlockOverlay'
+import { usePrincipalGate } from '@/principals/PrincipalGate'
 
 type Props = { children: ReactNode }
 
 export function HRLocalUnlockShell({ children }: Props) {
   const { status, me, autoLockTimeoutMs, refreshMe } = useAuth()
+  const { transition } = usePrincipalGate()
   const queryClient = useQueryClient()
   const [needsLocalUnlock, setNeedsLocalUnlock] = useState(false)
   const [privacyCover, setPrivacyCover] = useState(false)
@@ -35,11 +37,13 @@ export function HRLocalUnlockShell({ children }: Props) {
   const statusRef = useRef(status)
   const principalKeyRef = useRef('')
   const needsUnlockRef = useRef(false)
+  const principalTransitionRef = useRef(false)
 
   timeoutMsRef.current = autoLockTimeoutMs
   statusRef.current = status
   principalKeyRef.current = operatorPrincipalKey(me)
   needsUnlockRef.current = needsLocalUnlock
+  principalTransitionRef.current = transition.status === 'switching'
 
   const dismissUnlock = useCallback(() => {
     needsUnlockRef.current = false
@@ -49,6 +53,16 @@ export function HRLocalUnlockShell({ children }: Props) {
     void queryClient.invalidateQueries({ refetchType: 'none' })
     void softRefreshHrSurfaces(queryClient, refreshMeRef.current)
   }, [queryClient])
+
+  useEffect(() => {
+    if (transition.status === 'switching') {
+      needsUnlockRef.current = false
+      setNeedsLocalUnlock(false)
+      setPrivacyCover(false)
+      awayStartedAtRef.current = null
+      enteredBackgroundRef.current = false
+    }
+  }, [transition.status])
 
   useEffect(() => {
     if (status !== 'signedIn') {
@@ -66,6 +80,14 @@ export function HRLocalUnlockShell({ children }: Props) {
         const prev = appStateRef.current
         appStateRef.current = next
         void prev
+        if (principalTransitionRef.current) {
+          needsUnlockRef.current = false
+          awayStartedAtRef.current = null
+          enteredBackgroundRef.current = false
+          setNeedsLocalUnlock(false)
+          setPrivacyCover(false)
+          return
+        }
         const key = principalKeyRef.current
         const master = isLocalAutoLockMasterEnabled()
         const feature = isHrLocalAutoLockEnabledFor(key)

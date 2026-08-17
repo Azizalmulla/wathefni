@@ -48,16 +48,17 @@ export function SignInView({
       </View>
       <EditorialHeading>{t('auth.title')}</EditorialHeading>
       <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.subtitle')}</Text>
-      <View style={styles.form}>
-        <Field label={t('auth.company')} value={company} onChange={setCompany} autoCapitalize="characters" isRTL={isRTL} />
-        <Field label={t('auth.email')} value={email} onChange={setEmail} keyboardType="email-address" isRTL={isRTL} />
-        <Field label={t('auth.password')} value={password} onChange={setPassword} secure isRTL={isRTL} />
+      <View style={styles.form} testID="e2e.auth.hr.routeSignIn">
+        <Field testID="e2e.auth.hr.company" label={t('auth.company')} value={company} onChange={setCompany} autoCapitalize="characters" isRTL={isRTL} />
+        <Field testID="e2e.auth.hr.email" label={t('auth.email')} value={email} onChange={setEmail} keyboardType="email-address" isRTL={isRTL} />
+        <Field testID="e2e.auth.hr.password" label={t('auth.password')} value={password} onChange={setPassword} secure isRTL={isRTL} />
         {error ? <Text accessibilityRole="alert" style={[styles.error, { textAlign: isRTL ? 'right' : 'left' }]}>{error}</Text> : null}
         <ActionButton
           label={t('auth.signIn')}
           loading={loading}
           disabled={!email.trim() || password.length < 1 || !company.trim()}
           onPress={() => void submit()}
+          testID="e2e.auth.hr.signIn"
         />
       </View>
     </Screen>
@@ -72,6 +73,7 @@ function Field({
   keyboardType,
   autoCapitalize = 'none',
   isRTL,
+  testID,
 }: {
   label: string
   value: string
@@ -80,11 +82,13 @@ function Field({
   keyboardType?: 'email-address'
   autoCapitalize?: 'none' | 'characters'
   isRTL: boolean
+  testID?: string
 }) {
   return (
     <View style={styles.field}>
       <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
       <TextInput
+        testID={testID}
         accessibilityLabel={label}
         value={value}
         onChangeText={onChange}

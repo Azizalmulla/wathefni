@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { keyboardSafeBehavior } from '@/components/keyboardSafe'
@@ -23,7 +22,6 @@ import { saveOperatorSession } from '@hr/auth/session'
 import { EditorialHeading, FadeIn, PremiumButton, Wordmark } from '@/components/premium'
 import { colors, font, layout, radius, spacing } from '@/theme'
 import { usePrincipalGate } from './PrincipalGate'
-import { savePrincipalModePreference } from './mode'
 
 type SignInMethod = 'phone' | 'work_email'
 
@@ -57,8 +55,7 @@ export function UnsignedEntry() {
 
 function UnifiedSignInHost() {
   const { status, activate, requestCode } = useAuth()
-  const { selectMode, refreshAvailability } = usePrincipalGate()
-  const router = useRouter()
+  const { selectMode } = usePrincipalGate()
   const { t } = useI18n()
   const [method, setMethod] = useState<SignInMethod>('phone')
   const [phone, setPhone] = useState('')
@@ -82,14 +79,13 @@ function UnifiedSignInHost() {
     employeeHandoffInFlightRef.current = true
     void (async () => {
       try {
-        await savePrincipalModePreference('employee')
-        await selectMode('employee')
-        await refreshAvailability()
+        const switched = await selectMode('employee')
+        if (!switched) setError(t('principal.transitionError'))
       } finally {
         employeeHandoffInFlightRef.current = false
       }
     })()
-  }, [status, selectMode, refreshAvailability])
+  }, [status, selectMode, t])
 
   const onRequestCode = async () => {
     setError(null)
@@ -138,12 +134,8 @@ function UnifiedSignInHost() {
         companyCode: response.me.principal.company_code,
         expiresAt: response.expires_at,
       })
-      await savePrincipalModePreference('hr')
-      // Land on /hr before swapping shells so Slot never mounts Employee routes
-      // on `/` (which previously resolved `(tabs)` without AuthProvider).
-      router.replace('/hr')
-      await selectMode('hr')
-      await refreshAvailability()
+      const switched = await selectMode('hr')
+      if (!switched) setHrError(t('principal.transitionError'))
     } catch (caught) {
       setHrError(
         caught instanceof ApiError && caught.code === 'rate_limited'

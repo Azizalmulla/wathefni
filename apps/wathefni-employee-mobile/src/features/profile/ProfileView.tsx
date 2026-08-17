@@ -180,9 +180,20 @@ export function ProfileView({
 
         <View style={styles.section}>
           <SectionHeader title={t('profile.account')} />
-          <MenuRow icon="settings-outline" label={t('settings.title')} onPress={onSettings} />
+          <MenuRow
+            testID="e2e.employee.openSettings"
+            icon="settings-outline"
+            label={t('settings.title')}
+            onPress={onSettings}
+          />
           <MenuRow icon="help-circle-outline" label={t('remaining.privacySupportTitle')} onPress={onPrivacySupport} />
-          <MenuRow icon="log-out-outline" label={t('auth.signOut')} onPress={onSignOut} danger />
+          <MenuRow
+            testID="e2e.employee.signOut"
+            icon="log-out-outline"
+            label={t('auth.signOut')}
+            onPress={onSignOut}
+            danger
+          />
         </View>
       </PageScrollView>
     </PageScreen>
@@ -285,15 +296,18 @@ function MenuRow({
   label,
   onPress,
   danger = false,
+  testID,
 }: {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   onPress: () => void
   danger?: boolean
+  testID?: string
 }) {
   const { isRTL } = useI18n()
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}

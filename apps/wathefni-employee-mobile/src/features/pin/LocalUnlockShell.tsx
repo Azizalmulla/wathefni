@@ -22,6 +22,7 @@ import { PIN_UNLOCK_BUILD_MARKER } from '@/auth/pinPolicy'
 import { patchAutoLockDiagnostics } from '@/auth/autoLockDiagnostics'
 import { LocalUnlockOverlay, PrivacyCover } from '@/features/pin/LocalUnlockOverlay'
 import { softRefreshEmployeeSurfaces } from '@/lib/employeeSoftRefresh'
+import { usePrincipalGate } from '@/principals/PrincipalGate'
 
 // Keep Auth Wave 2 bake markers reachable so HBC inspection can prove OTA flags.
 void PIN_UNLOCK_BUILD_MARKER
@@ -42,6 +43,7 @@ function employeeKeyFromAuth(
 
 export function LocalUnlockShell({ children }: Props) {
   const { status, profile, me, autoLockTimeoutMs, refreshMe } = useAuth()
+  const { transition } = usePrincipalGate()
   const queryClient = useQueryClient()
   const [needsLocalUnlock, setNeedsLocalUnlock] = useState(false)
   const [privacyCover, setPrivacyCover] = useState(false)
@@ -56,11 +58,13 @@ export function LocalUnlockShell({ children }: Props) {
   const statusRef = useRef(status)
   const employeeKeyRef = useRef('')
   const needsUnlockRef = useRef(false)
+  const principalTransitionRef = useRef(false)
 
   timeoutMsRef.current = autoLockTimeoutMs
   statusRef.current = status
   employeeKeyRef.current = employeeKeyFromAuth(me, profile)
   needsUnlockRef.current = needsLocalUnlock
+  principalTransitionRef.current = transition.status === 'switching'
 
   const syncDiagnostics = useCallback(
     (partial: Parameters<typeof patchAutoLockDiagnostics>[0] = {}) => {
@@ -104,6 +108,22 @@ export function LocalUnlockShell({ children }: Props) {
   }, [queryClient, syncDiagnostics])
 
   useEffect(() => {
+    if (transition.status === 'switching') {
+      needsUnlockRef.current = false
+      setNeedsLocalUnlock(false)
+      setPrivacyCover(false)
+      awayStartedAtRef.current = null
+      enteredBackgroundRef.current = false
+      syncDiagnostics({
+        needsLocalUnlock: false,
+        enteredBackground: false,
+        lastAwayAt: null,
+        lastDecision: 'principal_transition',
+      })
+    }
+  }, [transition.status, syncDiagnostics])
+
+  useEffect(() => {
     if (status !== 'signedIn') {
       needsUnlockRef.current = false
       setNeedsLocalUnlock(false)
@@ -124,6 +144,21 @@ export function LocalUnlockShell({ children }: Props) {
       try {
         const prev = appStateRef.current
         appStateRef.current = next
+        if (principalTransitionRef.current) {
+          needsUnlockRef.current = false
+          awayStartedAtRef.current = null
+          enteredBackgroundRef.current = false
+          setNeedsLocalUnlock(false)
+          setPrivacyCover(false)
+          syncDiagnostics({
+            lastAppState: `${prev}->${next}`,
+            lastDecision: 'principal_transition',
+            needsLocalUnlock: false,
+            enteredBackground: false,
+            lastAwayAt: null,
+          })
+          return
+        }
         const key = employeeKeyRef.current
         const master = isLocalAutoLockMasterEnabled()
         const feature = isLocalAutoLockEnabledFor(key)

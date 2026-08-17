@@ -20,6 +20,7 @@ import { isPushOptedOut, setPushOptedOut } from '@/push/preferences'
 import { syncInboxBadge } from '@/push/syncInboxBadge'
 import { SettingsView } from '@/features/remaining/RemainingViews'
 import { SwitchToHrControl } from '@/principals/SwitchToHrControl'
+import { usePrincipalGate } from '@/principals/PrincipalGate'
 
 export default function SettingsScreen() {
   const { t, locale, setLocale } = useI18n()
@@ -38,6 +39,7 @@ export default function SettingsScreen() {
     setAutoLockTimeout,
   } = useAuth()
   const router = useRouter()
+  const { refreshAvailability } = usePrincipalGate()
   const onBack = useEmployeeSafeBack()
   const [pushOn, setPushOn] = useState(false)
   const [pushBusy, setPushBusy] = useState(false)
@@ -162,7 +164,7 @@ export default function SettingsScreen() {
         text: t('deviceSecurity.signOutDevice'),
         style: 'destructive',
         onPress: () => {
-          void signOut()
+          void signOut().then(() => refreshAvailability())
         },
       },
     ])

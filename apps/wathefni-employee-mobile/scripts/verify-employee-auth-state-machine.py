@@ -33,6 +33,10 @@ hr_session = read("src/hr/auth/session.ts")
 hr_auth = read("src/hr/auth/AuthProvider.tsx")
 switch_hr = read("src/principals/SwitchToHrControl.tsx")
 hr_settings = read("app/hr/settings.tsx")
+employee_lock_shell = read("src/features/pin/LocalUnlockShell.tsx")
+hr_lock_shell = read("src/hr/features/local-lock/HRLocalUnlockShell.tsx")
+principal_flow = read(".maestro/flows/hr-employee-mode-switch.yaml")
+e2e_secrets = read("../../ops/mobile-e2e/load_secrets.py")
 employee_flow = read(".maestro/smoke/03-employee-activation.yaml")
 employee_tabs_flow = read(".maestro/smoke/04-employee-tabs.yaml")
 hr_flow = read(".maestro/smoke/01-hr-login.yaml")
@@ -44,10 +48,10 @@ ar = json.loads(read("src/i18n/ar.json"))
 for state in ("needsPinSetup", "needsBiometricOptIn", "locked", "signedIn"):
     check(f"unsigned handoff admits {state}", f"'{state}'" in unified.split("EMPLOYEE_SHELL_AUTH_STATES", 1)[1].split("])", 1)[0])
 check(
-    "post-auth state selects and refreshes Employee shell",
+    "post-auth state enters provider-owned Employee transition",
     "EMPLOYEE_SHELL_AUTH_STATES.has(status)" in unified
     and "selectMode('employee')" in unified
-    and "refreshAvailability()" in unified,
+    and "savePrincipalModePreference('employee')" not in unified,
 )
 check(
     "activation is single-flight across button and keyboard",
@@ -98,9 +102,8 @@ check(
 
 # HR authority and principal isolation/switching
 check(
-    "HR login selects HR shell",
+    "HR login enters provider-owned HR transition",
     "/dashboard/mobile/auth/login" in unified
-    and "router.replace('/hr')" in unified
     and "selectMode('hr')" in unified,
 )
 check(
@@ -117,6 +120,32 @@ check(
     and "resolveShell" in mode
     and "loadSession()" in principal_gate
     and "loadOperatorSession()" in principal_gate,
+)
+check(
+    "principal transition is single-flight with explicit rollback and error",
+    "transitionPromiseRef" in principal_gate
+    and "if (transitionPromiseRef.current) return transitionPromiseRef.current" in principal_gate
+    and "setShell(previousShell)" in principal_gate
+    and "clearPrincipalModePreference" in principal_gate
+    and "principal_transition_failed" in principal_gate,
+)
+check(
+    "outgoing local locks suppress during principal transition",
+    "principalTransitionRef.current" in employee_lock_shell
+    and "principal_transition" in employee_lock_shell
+    and "principalTransitionRef.current" in hr_lock_shell,
+)
+check(
+    "runtime Maestro replaces the principal TODO with cross-PIN and logout isolation",
+    "TODO" not in principal_flow
+    and "MAESTRO_EMPLOYEE_PIN" in principal_flow
+    and "MAESTRO_HR_PIN" in principal_flow
+    and "e2e.auth.employee.locked" in principal_flow
+    and "e2e.auth.hr.locked" in principal_flow
+    and "e2e.pin.error" in principal_flow
+    and "e2e.hr.signOut" in principal_flow
+    and "e2e.employee.signOut" in principal_flow
+    and 'MAESTRO_HR_PIN"] == os.environ["MAESTRO_EMPLOYEE_PIN' in e2e_secrets,
 )
 check(
     "HR local auth keeps its independent lock state machine",

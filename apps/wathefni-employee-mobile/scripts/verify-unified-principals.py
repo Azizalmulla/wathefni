@@ -12,6 +12,7 @@ session_hr = (ROOT / "src/hr/auth/session.ts").read_text(encoding="utf-8")
 client_hr = (ROOT / "src/hr/api/client.ts").read_text(encoding="utf-8")
 layout = (ROOT / "app/_layout.tsx").read_text(encoding="utf-8")
 unified = (ROOT / "src/principals/UnifiedSignInView.tsx").read_text(encoding="utf-8")
+gate = (ROOT / "src/principals/PrincipalGate.tsx").read_text(encoding="utf-8")
 freeze = Path("/Users/azizalmulla/Desktop/claw/docs/ADMIN_MOBILE_SCOPE_FREEZE.md").read_text(
     encoding="utf-8"
 )
@@ -59,7 +60,13 @@ check(
     "Redirect" in layout and "segments[0] !== 'hr'" in layout and "<Slot" in layout,
 )
 check("HR shell removed unsafe HrShellHost stack", "function HrShellHost" not in layout)
-check("Work email navigates to /hr before shell swap", 'router.replace(\'/hr\')' in unified)
+check(
+    "Work email delegates atomic HR route/shell transition to PrincipalGate",
+    "selectMode('hr')" in unified
+    and "useRouter" not in unified
+    and "router.replace(" in gate
+    and "setShell({ kind: mode })" in gate,
+)
 check("no identity probe on sign-in", "dashboard_user_by_email" not in unified and "/app/me" not in unified)
 check("work email uses operator login only", "/dashboard/mobile/auth/login" in unified)
 

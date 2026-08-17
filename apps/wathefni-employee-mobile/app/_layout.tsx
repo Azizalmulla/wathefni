@@ -51,6 +51,7 @@ function AuthGate() {
     biometricEnabled,
     biometricKind,
   } = useAuth()
+  const { refreshAvailability } = usePrincipalGate()
   const { t, syncLayoutLocale } = useI18n()
   const segments = useSegments()
   const router = useRouter()
@@ -140,18 +141,20 @@ function AuthGate() {
 
   if (status === 'needsPinSetup') {
     return (
-      <CreatePinFlow
-        busy={pinBusy}
-        onCreate={async (pin) => {
-          setPinBusy(true)
-          setPinError(null)
-          try {
-            await createLocalPin(pin)
-          } finally {
-            setPinBusy(false)
-          }
-        }}
-      />
+      <View style={{ flex: 1 }} testID="e2e.auth.employee.pinSetup">
+        <CreatePinFlow
+          busy={pinBusy}
+          onCreate={async (pin) => {
+            setPinBusy(true)
+            setPinError(null)
+            try {
+              await createLocalPin(pin)
+            } finally {
+              setPinBusy(false)
+            }
+          }}
+        />
+      </View>
     )
   }
 
@@ -189,30 +192,32 @@ function AuthGate() {
 
   if (status === 'locked') {
     return (
-      <UnlockWithBiometricGate
-        biometricFeatureOn={biometricEnabled}
-        busy={pinBusy}
-        error={pinError}
-        onUnlockBiometric={unlockWithBiometric}
-        onForgotPin={() => {
-          void recoverPinByReactivation()
-        }}
-        onUnlockPin={(pin) => {
-          void (async () => {
-            setPinBusy(true)
-            setPinError(null)
-            try {
-              const result = await unlockWithPin(pin)
-              if (!result.ok && !result.lockedOut) {
-                const left = Math.max(0, PIN_MAX_FAILED_ATTEMPTS - result.failedAttempts)
-                setPinError(left > 0 ? t('pin.wrongWithTries', { count: left }) : t('pin.wrong'))
+      <View style={{ flex: 1 }} testID="e2e.auth.employee.locked">
+        <UnlockWithBiometricGate
+          biometricFeatureOn={biometricEnabled}
+          busy={pinBusy}
+          error={pinError}
+          onUnlockBiometric={unlockWithBiometric}
+          onForgotPin={() => {
+            void recoverPinByReactivation()
+          }}
+          onUnlockPin={(pin) => {
+            void (async () => {
+              setPinBusy(true)
+              setPinError(null)
+              try {
+                const result = await unlockWithPin(pin)
+                if (!result.ok && !result.lockedOut) {
+                  const left = Math.max(0, PIN_MAX_FAILED_ATTEMPTS - result.failedAttempts)
+                  setPinError(left > 0 ? t('pin.wrongWithTries', { count: left }) : t('pin.wrong'))
+                }
+              } finally {
+                setPinBusy(false)
               }
-            } finally {
-              setPinBusy(false)
-            }
-          })()
-        }}
-      />
+            })()
+          }}
+        />
+      </View>
     )
   }
 
@@ -221,7 +226,7 @@ function AuthGate() {
       <AccessStateScreen
         state={accessState}
         onRetry={() => void refreshMe()}
-        onSignOut={() => void signOut()}
+        onSignOut={() => void signOut().then(() => refreshAvailability())}
       />
     )
   }
@@ -299,10 +304,15 @@ function EmployeeBrandBoundary({ children }: { children: ReactNode }) {
 }
 
 function ModeRedirect() {
-  const { ready, shell } = usePrincipalGate()
+  const { ready, shell, transition } = usePrincipalGate()
   const segments = useSegments()
 
   if (!ready || !shell) return <PrincipalBootSplash />
+
+  // A principal transition owns the whole frame. Unmounting the outgoing auth
+  // and navigation tree here prevents its local-lock overlay from winning the
+  // handoff while the target session and route are being resolved.
+  if (transition.status === 'switching') return <PrincipalBootSplash />
 
   // No startup principal chooser. Workspace comes from authenticated sessions.
   if (shell.kind === 'unsigned') {

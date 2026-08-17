@@ -92,6 +92,8 @@ def redact_maestro_debug_logs(since: float) -> None:
             "MAESTRO_EMPLOYEE_PHONE",
             "MAESTRO_EMPLOYEE_CODE",
             "MAESTRO_PIN",
+            "MAESTRO_EMPLOYEE_PIN",
+            "MAESTRO_HR_PIN",
         )
         if os.environ.get(key)
     }
@@ -159,7 +161,8 @@ def flow_files(suite: str) -> list[Path]:
 
         ordered = sorted(selected, key=flow_order)
         return [path for path in ordered if not FLOW_FILTER or FLOW_FILTER in path.name]
-    return [path for path in smoke if not FLOW_FILTER or FLOW_FILTER in path.name]
+    full = smoke + sorted((MAESTRO_DIR / "flows").glob("*.yaml"))
+    return [path for path in full if not FLOW_FILTER or FLOW_FILTER in path.name]
 
 
 def main() -> int:
@@ -508,12 +511,13 @@ def main() -> int:
         (os.environ.get("MAESTRO_EMPLOYEE_PHONE") or os.environ.get("MOBILE_E2E_EMPLOYEE_PHONE"))
         and (os.environ.get("MAESTRO_EMPLOYEE_CODE") or os.environ.get("MOBILE_E2E_EMPLOYEE_CODE"))
     )
+    principal_switch_ok = SUITE != "full" or "UI.hr-employee-mode-switch" in ui_pass_ids
     no_fail = ui_fail == 0 and not any(r.get("verdict") == "FAIL" for r in matrix)
-    hr_ship = no_fail and unsigned_ok and locale_ok and hr_creds and {
+    hr_ship = no_fail and unsigned_ok and locale_ok and principal_switch_ok and hr_creds and {
         "UI.01-hr-login",
         "UI.02-hr-tabs",
     }.issubset(ui_pass_ids)
-    employee_ship = no_fail and unsigned_ok and locale_ok and employee_creds and {
+    employee_ship = no_fail and unsigned_ok and locale_ok and principal_switch_ok and employee_creds and {
         "UI.03-employee-activation",
         "UI.04-employee-tabs",
     }.issubset(ui_pass_ids)
@@ -533,6 +537,8 @@ def main() -> int:
         missing.append("Employee activation credentials")
     elif not {"UI.03-employee-activation", "UI.04-employee-tabs"}.issubset(ui_pass_ids):
         missing.append("Employee activation/tabs")
+    if not principal_switch_ok:
+        missing.append("HR↔Employee runtime principal isolation")
     if not no_fail:
         missing.append("zero FAIL results")
     ship_reason = "Store smoke matrix green" if ship else "Missing MOBILE_PASS for: " + ", ".join(missing)

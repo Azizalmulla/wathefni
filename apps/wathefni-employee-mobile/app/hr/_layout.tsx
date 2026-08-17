@@ -55,7 +55,13 @@ function AccessGate() {
   const { t: tApp } = useI18n()
   const router = useRouter()
   const segments = useSegments()
-  const { selectMode, employeeSession, refreshAvailability } = usePrincipalGate()
+  const {
+    selectMode,
+    employeeSession,
+    transition,
+    clearTransitionError,
+    refreshAvailability,
+  } = usePrincipalGate()
   const [pinBusy, setPinBusy] = useState(false)
   const [pinError, setPinError] = useState<string | null>(null)
   const [bioBusy, setBioBusy] = useState(false)
@@ -115,18 +121,20 @@ function AccessGate() {
 
   if (status === 'needsPinSetup') {
     return (
-      <CreatePinFlow
-        busy={pinBusy}
-        onCreate={async (pin) => {
-          setPinBusy(true)
-          setPinError(null)
-          try {
-            await createLocalPin(pin)
-          } finally {
-            setPinBusy(false)
-          }
-        }}
-      />
+      <View style={{ flex: 1 }} testID="e2e.auth.hr.pinSetup">
+        <CreatePinFlow
+          busy={pinBusy}
+          onCreate={async (pin) => {
+            setPinBusy(true)
+            setPinError(null)
+            try {
+              await createLocalPin(pin)
+            } finally {
+              setPinBusy(false)
+            }
+          }}
+        />
+      </View>
     )
   }
 
@@ -160,36 +168,38 @@ function AccessGate() {
 
   if (status === 'locked') {
     return (
-      <UnlockWithBiometricGate
-        biometricFeatureOn={biometricEnabled}
-        busy={pinBusy}
-        error={pinError}
-        forgotTitleKey="hrPin.forgotTitle"
-        forgotConfirmKey="hrPin.forgotConfirm"
-        shouldAttempt={shouldAttemptHrBiometricUnlock}
-        promptUnlock={promptBiometricUnlock}
-        onUnlockPin={(pin) => {
-          void (async () => {
-            setPinBusy(true)
-            setPinError(null)
-            try {
-              const result = await unlockWithPin(pin)
-              if (!result.ok && !result.lockedOut) {
-                const left = Math.max(0, PIN_MAX_FAILED_ATTEMPTS - result.failedAttempts)
-                setPinError(
-                  left > 0 ? tApp('pin.wrongWithTries', { count: left }) : tApp('pin.wrong'),
-                )
+      <View style={{ flex: 1 }} testID="e2e.auth.hr.locked">
+        <UnlockWithBiometricGate
+          biometricFeatureOn={biometricEnabled}
+          busy={pinBusy}
+          error={pinError}
+          forgotTitleKey="hrPin.forgotTitle"
+          forgotConfirmKey="hrPin.forgotConfirm"
+          shouldAttempt={shouldAttemptHrBiometricUnlock}
+          promptUnlock={promptBiometricUnlock}
+          onUnlockPin={(pin) => {
+            void (async () => {
+              setPinBusy(true)
+              setPinError(null)
+              try {
+                const result = await unlockWithPin(pin)
+                if (!result.ok && !result.lockedOut) {
+                  const left = Math.max(0, PIN_MAX_FAILED_ATTEMPTS - result.failedAttempts)
+                  setPinError(
+                    left > 0 ? tApp('pin.wrongWithTries', { count: left }) : tApp('pin.wrong'),
+                  )
+                }
+              } finally {
+                setPinBusy(false)
               }
-            } finally {
-              setPinBusy(false)
-            }
-          })()
-        }}
-        onUnlockBiometric={async () => unlockWithBiometric()}
-        onForgotPin={() => {
-          void recoverLocalLockByReauth()
-        }}
-      />
+            })()
+          }}
+          onUnlockBiometric={async () => unlockWithBiometric()}
+          onForgotPin={() => {
+            void recoverLocalLockByReauth()
+          }}
+        />
+      </View>
     )
   }
 
@@ -244,15 +254,25 @@ function AccessGate() {
         />
         {employeeSession ? (
           <StatePanel
-            title="Switch to Employee"
-            body="Your employee session is still signed in on this device."
-            action="Open Employee"
-            onAction={() => {
-              void (async () => {
-                await selectMode('employee')
-                await refreshAvailability()
-              })()
-            }}
+            title={tApp('principal.switchEmployee')}
+            body={
+              transition.status === 'error' && transition.to === 'employee'
+                ? tApp('principal.transitionError')
+                : tApp('principal.employeeSessionAvailable')
+            }
+            action={
+              transition.status === 'switching'
+                ? tApp('principal.switchingEmployee')
+                : tApp('principal.openEmployee')
+            }
+            onAction={
+              transition.status === 'switching'
+                ? undefined
+                : () => {
+                    clearTransitionError()
+                    void selectMode('employee')
+                  }
+            }
             icon="people-outline"
           />
         ) : null}

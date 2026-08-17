@@ -24,6 +24,8 @@ type Props = {
   onOpenPrivacy: () => void | Promise<void>
   onOpenSupport: () => void | Promise<void>
   onSwitchEmployee?: () => void | Promise<void>
+  principalSwitchBusy?: boolean
+  principalSwitchError?: string | null
   version: string
   pinEnabled?: boolean
   biometricEnabled?: boolean
@@ -53,6 +55,8 @@ export function SettingsView({
   onOpenPrivacy,
   onOpenSupport,
   onSwitchEmployee,
+  principalSwitchBusy = false,
+  principalSwitchError,
   version,
   pinEnabled = false,
   biometricEnabled = false,
@@ -253,15 +257,33 @@ export function SettingsView({
             style={styles.row}
           />
           {onSwitchEmployee ? (
-            <ListRow
-              title={t('hrSettings.switchEmployee')}
-              subtitle={t('hrSettings.switchEmployeeSub')}
-              icon="swap-horizontal-outline"
-              iconTint={colors.surfaceMuted}
-              showChevron
-              onPress={() => void onSwitchEmployee()}
-              style={styles.row}
-            />
+            <>
+              <ListRow
+                testID="e2e.principal.switch.employee"
+                title={
+                  principalSwitchBusy
+                    ? t('principal.switchingEmployee')
+                    : t('hrSettings.switchEmployee')
+                }
+                subtitle={t('hrSettings.switchEmployeeSub')}
+                icon="swap-horizontal-outline"
+                iconTint={colors.surfaceMuted}
+                showChevron={!principalSwitchBusy}
+                disabled={principalSwitchBusy}
+                onPress={() => void onSwitchEmployee()}
+                style={styles.row}
+              />
+              {principalSwitchError ? (
+                <Text
+                  testID="e2e.principal.switch.error"
+                  accessibilityRole="alert"
+                  maxFontSizeMultiplier={typeScaling.body}
+                  style={[styles.transitionError, align]}
+                >
+                  {principalSwitchError}
+                </Text>
+              ) : null}
+            </>
           ) : null}
         </View>
 
@@ -354,4 +376,5 @@ const styles = StyleSheet.create({
   switchSub: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
   footnote: { color: colors.subtle, fontSize: font.tiny },
   webNote: { color: colors.subtle, fontSize: font.tiny, lineHeight: 18, paddingBottom: spacing.lg },
+  transitionError: { color: colors.danger, fontSize: font.small, lineHeight: 18 },
 })

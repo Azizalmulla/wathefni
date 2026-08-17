@@ -19,7 +19,13 @@ export function HRMoreLauncherView() {
   const { me, signOut } = useAuth()
   const { t, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
-  const { employeeSession, selectMode, refreshAvailability } = usePrincipalGate()
+  const {
+    employeeSession,
+    transition,
+    selectMode,
+    clearTransitionError,
+    refreshAvailability,
+  } = usePrincipalGate()
   const modules = moreModulesFor(me)
 
   if (!me) return null
@@ -83,23 +89,39 @@ export function HRMoreLauncherView() {
             style={styles.row}
           />
           {employeeSession ? (
-            <ListRow
-              title={t('hrMore.switchEmployee')}
-              subtitle={t('hrMore.switchEmployeeBody')}
-              icon="swap-horizontal-outline"
-              iconTint={colors.surfaceMuted}
-              showChevron
-              onPress={() => {
-                void (async () => {
-                  await selectMode('employee')
-                  await refreshAvailability()
-                  router.replace('/(tabs)')
-                })()
-              }}
-              style={styles.row}
-            />
+            <>
+              <ListRow
+                testID="e2e.principal.switch.employee"
+                title={
+                  transition.status === 'switching'
+                    ? t('principal.switchingEmployee')
+                    : t('hrMore.switchEmployee')
+                }
+                subtitle={t('hrMore.switchEmployeeBody')}
+                icon="swap-horizontal-outline"
+                iconTint={colors.surfaceMuted}
+                showChevron={transition.status !== 'switching'}
+                disabled={transition.status === 'switching'}
+                onPress={() => {
+                  clearTransitionError()
+                  void selectMode('employee')
+                }}
+                style={styles.row}
+              />
+              {transition.status === 'error' && transition.to === 'employee' ? (
+                <Text
+                  testID="e2e.principal.switch.error"
+                  accessibilityRole="alert"
+                  maxFontSizeMultiplier={typeScaling.body}
+                  style={[styles.switchError, align]}
+                >
+                  {t('principal.transitionError')}
+                </Text>
+              ) : null}
+            </>
           ) : null}
           <ListRow
+            testID="e2e.hr.signOut"
             title={t('hrMore.signOut')}
             subtitle={t('hrMore.signOutBody')}
             icon="log-out-outline"
@@ -143,5 +165,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
   },
   emptyTitle: { color: colors.ink, fontSize: font.body, fontWeight: '700' },
+  switchError: { color: colors.danger, fontSize: font.small, lineHeight: 18 },
   emptyBody: { color: colors.subtle, fontSize: font.small, lineHeight: 20 },
 })

@@ -4,12 +4,11 @@ import { usePrincipalGate } from '@/principals/PrincipalGate'
 
 export default function SignInRoute() {
   const { signIn } = useAuth()
-  const { refreshAvailability, selectMode } = usePrincipalGate()
+  const { refreshAvailability } = usePrincipalGate()
   return (
     <SignInView
       onSignIn={async (email, password, companyCode) => {
         await signIn(email, password, companyCode)
-        await selectMode('hr')
         await refreshAvailability()
       }}
     />

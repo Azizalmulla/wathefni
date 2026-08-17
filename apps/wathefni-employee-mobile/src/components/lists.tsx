@@ -36,6 +36,8 @@ export function ListRow({
   onPress,
   accessibilityLabel,
   accessibilityHint,
+  testID,
+  disabled = false,
   children,
   style,
 }: {
@@ -51,6 +53,8 @@ export function ListRow({
   onPress?: () => void
   accessibilityLabel?: string
   accessibilityHint?: string
+  testID?: string
+  disabled?: boolean
   children?: ReactNode
   style?: StyleProp<ViewStyle>
 }) {
@@ -95,11 +99,14 @@ export function ListRow({
   if (!onPress) return body
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
       onPress={onPress}
-      style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+      disabled={disabled}
+      style={({ pressed }) => [pressed && styles.pressed, disabled && styles.disabled]}
     >
       {body}
     </Pressable>
@@ -277,6 +284,7 @@ const styles = StyleSheet.create({
   meta: { color: colors.subtle, fontSize: font.tiny, lineHeight: 16 },
   trailing: { alignItems: 'flex-end' },
   pressed: { opacity: 0.85 },
+  disabled: { opacity: 0.55 },
   sectionHead: {
     flexDirection: 'row',
     alignItems: 'center',

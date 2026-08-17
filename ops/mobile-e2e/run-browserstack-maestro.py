@@ -133,6 +133,8 @@ def env_for_maestro() -> dict[str, str]:
         "MOBILE_E2E_HR_PASSWORD": "MAESTRO_HR_PASSWORD",
         "MOBILE_E2E_EMPLOYEE_PHONE": "MAESTRO_EMPLOYEE_PHONE",
         "MOBILE_E2E_EMPLOYEE_CODE": "MAESTRO_EMPLOYEE_CODE",
+        "MOBILE_E2E_EMPLOYEE_PIN": "MAESTRO_EMPLOYEE_PIN",
+        "MOBILE_E2E_HR_PIN": "MAESTRO_HR_PIN",
         "MOBILE_E2E_LEAVE_ID": "MAESTRO_LEAVE_ID",
         "MOBILE_E2E_LEAVE_APPROVE_ID": "MAESTRO_LEAVE_ID",
         "MOBILE_E2E_LEAVE_REJECT_ID": "MAESTRO_LEAVE_REJECT_ID",
@@ -151,6 +153,8 @@ def env_for_maestro() -> dict[str, str]:
         "MAESTRO_LEAVE_ID",
         "MAESTRO_LEAVE_REJECT_ID",
         "MAESTRO_PIN",
+        "MAESTRO_EMPLOYEE_PIN",
+        "MAESTRO_HR_PIN",
         "MAESTRO_HR_EMAIL_LOCAL",
         "MAESTRO_HR_EMAIL_DOMAIN",
     ):
@@ -158,6 +162,10 @@ def env_for_maestro() -> dict[str, str]:
             out[key] = os.environ[key]
     out.setdefault("MAESTRO_HR_COMPANY", "WATHEFNI")
     out.setdefault("MAESTRO_PIN", "246810")
+    out.setdefault("MAESTRO_EMPLOYEE_PIN", out["MAESTRO_PIN"])
+    out.setdefault("MAESTRO_HR_PIN", "864209")
+    if out["MAESTRO_HR_PIN"] == out["MAESTRO_EMPLOYEE_PIN"]:
+        out["MAESTRO_HR_PIN"] = "975310"
     # Split email for reliable iOS Maestro input (avoids domain corruption)
     email = out.get("MAESTRO_HR_EMAIL") or ""
     if email and "@" in email:
@@ -310,7 +318,11 @@ def selected_bs_flows() -> tuple[Path, list[str]]:
                 names.append("04-hr-leave-reject.yaml")
         execute = [f"bs-smoke/{n}" for n in names]
         return directory, execute
-    execute = [f"bs-smoke/{p.name}" for p in sorted(directory.glob("*.yaml")) if not p.name.startswith("_")]
+    directory = MAESTRO_DIR / "flows"
+    execute = [f"flows/{p.name}" for p in sorted(directory.glob("*.yaml")) if not p.name.startswith("_")]
+    flow_filter = os.environ.get("MOBILE_E2E_FLOW_FILTER", "").strip()
+    if flow_filter:
+        execute = [path for path in execute if flow_filter in Path(path).name]
     return directory, execute
 
 

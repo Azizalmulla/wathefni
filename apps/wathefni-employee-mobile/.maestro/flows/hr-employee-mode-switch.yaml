@@ -1,12 +1,315 @@
-# Placeholder: HR ↔ Employee principal mode switch.
-# Not part of smoke. Will FAIL until dual-principal session exists — do not treat as PASS.
+# Runtime principal-isolation qualification. Run on a clean install with a fresh
+# Employee activation plus governed HR credentials. The flow is ID-driven and
+# runs unchanged under EN/LTR and AR/RTL on both iOS and Android.
+# Required env: MAESTRO_EMPLOYEE_PHONE, MAESTRO_EMPLOYEE_CODE,
+# MAESTRO_EMPLOYEE_PIN, MAESTRO_HR_COMPANY, MAESTRO_HR_EMAIL_LOCAL,
+# MAESTRO_HR_EMAIL_DOMAIN, MAESTRO_HR_PASSWORD, MAESTRO_HR_PIN.
 appId: ai.wathefni.employee
 tags:
   - full
   - principals
-  - requires_session
-  - needs_dual_principal
+  - employee
+  - hr
+  - auth
+  - en_ar
+  - ios_android
+  - requires_credentials
 ---
+# Establish Employee session + Employee-only PIN.
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.method.phone"
+    timeout: 45000
+- tapOn:
+    id: "e2e.auth.employee.phone"
+- inputText: ${MAESTRO_EMPLOYEE_PHONE}
+- tapOn:
+    id: "e2e.auth.employee.code"
+- inputText: ${MAESTRO_EMPLOYEE_CODE}
+- tapOn:
+    point: "50%,28%"
+- tapOn:
+    id: "e2e.auth.employee.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.employee.pinSetup"
+    timeout: 60000
+- inputText: ${MAESTRO_EMPLOYEE_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- waitForAnimationToEnd
+- inputText: ${MAESTRO_EMPLOYEE_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.biometric.notNow"
+    commands:
+      - tapOn:
+          id: "e2e.biometric.notNow"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.employee.home"
+    timeout: 60000
+
+# Employee -> HR without an HR session. A rapid second tap must join the same
+# transition, and the result must be HR sign-in rather than Employee PIN.
+- tapOn:
+    id: "e2e.tab.employee.profile"
+- scrollUntilVisible:
+    element:
+      id: "e2e.employee.openSettings"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.employee.openSettings"
+- scrollUntilVisible:
+    element:
+      id: "e2e.principal.switch.hr"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.principal.switch.hr"
+- tapOn:
+    id: "e2e.principal.switch.hr"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.hr.routeSignIn"
+    timeout: 60000
+- assertNotVisible:
+    id: "e2e.auth.employee.locked"
+
+# Establish HR session + a different HR-only PIN.
+- tapOn:
+    id: "e2e.auth.hr.company"
+- inputText: ${MAESTRO_HR_COMPANY}
+- tapOn:
+    id: "e2e.auth.hr.email"
+- inputText: ${MAESTRO_HR_EMAIL_LOCAL}
+- inputText: "@"
+- inputText: ${MAESTRO_HR_EMAIL_DOMAIN}
+- tapOn:
+    id: "e2e.auth.hr.password"
+- inputText: ${MAESTRO_HR_PASSWORD}
+- tapOn:
+    point: "50%,28%"
+- tapOn:
+    id: "e2e.auth.hr.signIn"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.hr.pinSetup"
+    timeout: 60000
+- inputText: ${MAESTRO_HR_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- waitForAnimationToEnd
+- inputText: ${MAESTRO_HR_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.biometric.notNow"
+    commands:
+      - tapOn:
+          id: "e2e.biometric.notNow"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000
+
+# HR -> Employee with an existing Employee session. HR PIN must fail on the
+# Employee lock; the Employee PIN then unlocks only Employee.
+- tapOn:
+    id: "e2e.tab.hr.more"
+- scrollUntilVisible:
+    element:
+      id: "e2e.principal.switch.employee"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.principal.switch.employee"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.employee.locked"
+    timeout: 60000
+- inputText: ${MAESTRO_HR_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
 - assertVisible:
-    id: "e2e.tab.hr.home"
-# TODO: mode switcher → Employee shell → back to HR without session bleed
+    id: "e2e.pin.error"
+- tapOn:
+    id: "e2e.pin.input"
+- eraseText
+- inputText: ${MAESTRO_EMPLOYEE_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.employee.home"
+    timeout: 60000
+
+# Employee -> HR with an existing HR session. Employee PIN must fail on the HR
+# lock; the HR PIN then unlocks only HR.
+- tapOn:
+    id: "e2e.tab.employee.profile"
+- scrollUntilVisible:
+    element:
+      id: "e2e.employee.openSettings"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.employee.openSettings"
+- scrollUntilVisible:
+    element:
+      id: "e2e.principal.switch.hr"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.principal.switch.hr"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.hr.locked"
+    timeout: 60000
+- inputText: ${MAESTRO_EMPLOYEE_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- assertVisible:
+    id: "e2e.pin.error"
+- tapOn:
+    id: "e2e.pin.input"
+- eraseText
+- inputText: ${MAESTRO_HR_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000
+
+# Logging HR out must preserve, but not authenticate, the Employee session. The
+# Employee principal cold-mounts and still requires its own PIN.
+- tapOn:
+    id: "e2e.tab.hr.more"
+- scrollUntilVisible:
+    element:
+      id: "e2e.hr.signOut"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.hr.signOut"
+- runFlow:
+    when:
+      visible: "Sign out"
+    commands:
+      - tapOn: "Sign out"
+- runFlow:
+    when:
+      visible: "تسجيل الخروج"
+    commands:
+      - tapOn: "تسجيل الخروج"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.employee.locked"
+    timeout: 60000
+- inputText: ${MAESTRO_EMPLOYEE_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.employee.home"
+    timeout: 60000
+
+# Re-establish HR, switch back to Employee, then log Employee out. HR remains
+# present but cold-locked; Employee logout cannot unlock or erase it.
+- tapOn:
+    id: "e2e.tab.employee.profile"
+- scrollUntilVisible:
+    element:
+      id: "e2e.employee.openSettings"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.employee.openSettings"
+- scrollUntilVisible:
+    element:
+      id: "e2e.principal.switch.hr"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.principal.switch.hr"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.hr.routeSignIn"
+    timeout: 60000
+- tapOn:
+    id: "e2e.auth.hr.company"
+- inputText: ${MAESTRO_HR_COMPANY}
+- tapOn:
+    id: "e2e.auth.hr.email"
+- inputText: ${MAESTRO_HR_EMAIL_LOCAL}
+- inputText: "@"
+- inputText: ${MAESTRO_HR_EMAIL_DOMAIN}
+- tapOn:
+    id: "e2e.auth.hr.password"
+- inputText: ${MAESTRO_HR_PASSWORD}
+- tapOn:
+    point: "50%,28%"
+- tapOn:
+    id: "e2e.auth.hr.signIn"
+- runFlow:
+    when:
+      visible:
+        id: "e2e.auth.hr.locked"
+    commands:
+      - inputText: ${MAESTRO_HR_PIN}
+      - tapOn:
+          id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000
+- tapOn:
+    id: "e2e.tab.hr.more"
+- scrollUntilVisible:
+    element:
+      id: "e2e.principal.switch.employee"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.principal.switch.employee"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.employee.locked"
+    timeout: 60000
+- inputText: ${MAESTRO_EMPLOYEE_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.employee.home"
+    timeout: 60000
+- tapOn:
+    id: "e2e.tab.employee.profile"
+- scrollUntilVisible:
+    element:
+      id: "e2e.employee.signOut"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "e2e.employee.signOut"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.auth.hr.locked"
+    timeout: 60000
+- inputText: ${MAESTRO_HR_PIN}
+- tapOn:
+    id: "e2e.pin.continue"
+- extendedWaitUntil:
+    visible:
+      id: "e2e.tab.hr.home"
+    timeout: 60000

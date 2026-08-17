@@ -20,7 +20,12 @@ export type AutoLockDiagnostics = {
   lastAwayAt: number | null
   lastResumeAt: number | null
   lastElapsedMs: number | null
-  lastDecision: LocalUnlockDecisionReason | 'n/a' | 'feature_off' | 'not_signed_in'
+  lastDecision:
+    | LocalUnlockDecisionReason
+    | 'n/a'
+    | 'feature_off'
+    | 'not_signed_in'
+    | 'principal_transition'
   lastAppState: string
   needsLocalUnlock: boolean
   enteredBackground: boolean

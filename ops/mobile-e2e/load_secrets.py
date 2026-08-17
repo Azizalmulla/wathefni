@@ -62,6 +62,8 @@ def load_secrets(*, override: bool = True) -> list[str]:
         "MOBILE_E2E_HR_PASSWORD": "MAESTRO_HR_PASSWORD",
         "MOBILE_E2E_EMPLOYEE_PHONE": "MAESTRO_EMPLOYEE_PHONE",
         "MOBILE_E2E_EMPLOYEE_CODE": "MAESTRO_EMPLOYEE_CODE",
+        "MOBILE_E2E_EMPLOYEE_PIN": "MAESTRO_EMPLOYEE_PIN",
+        "MOBILE_E2E_HR_PIN": "MAESTRO_HR_PIN",
         "MOBILE_E2E_LEAVE_ID": "MAESTRO_LEAVE_ID",
         "MOBILE_E2E_LEAVE_APPROVE_ID": "MAESTRO_LEAVE_ID",
         "MOBILE_E2E_LEAVE_REJECT_ID": "MAESTRO_LEAVE_REJECT_ID",
@@ -74,6 +76,12 @@ def load_secrets(*, override: bool = True) -> list[str]:
         os.environ.setdefault("MAESTRO_HR_COMPANY", os.environ.get("MOBILE_E2E_HR_COMPANY") or "WATHEFNI")
     if not os.environ.get("MAESTRO_PIN"):
         os.environ.setdefault("MAESTRO_PIN", "246810")
+    os.environ.setdefault("MAESTRO_EMPLOYEE_PIN", os.environ["MAESTRO_PIN"])
+    # Principal-isolation qualification needs intentionally different local PINs.
+    # These are device-local test inputs, never backend credentials.
+    os.environ.setdefault("MAESTRO_HR_PIN", "864209")
+    if os.environ["MAESTRO_HR_PIN"] == os.environ["MAESTRO_EMPLOYEE_PIN"]:
+        os.environ["MAESTRO_HR_PIN"] = "975310"
     return loaded
 
 

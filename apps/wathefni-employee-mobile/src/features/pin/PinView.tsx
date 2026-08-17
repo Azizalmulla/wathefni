@@ -132,7 +132,12 @@ export function PinView({ mode, busy = false, error = null, onSubmit, onCancel, 
                 }}
               />
               {error ? (
-                <Text style={[styles.error, align]} maxFontSizeMultiplier={1.25}>
+                <Text
+                  testID="e2e.pin.error"
+                  accessibilityRole="alert"
+                  style={[styles.error, align]}
+                  maxFontSizeMultiplier={1.25}
+                >
                   {error}
                 </Text>
               ) : null}
