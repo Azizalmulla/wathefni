@@ -61,6 +61,20 @@
 		reverse_proxy 127.0.0.1:8010
 	}
 
+	# Store-review authentication is isolated in the application authority.
+	# Keep these exact routes explicit so the root availability probe is not
+	# swallowed by the API host's final 404 while /app* and /dashboard/* retain
+	# their existing compatibility behavior.
+	handle /auth/store-review-availability {
+		reverse_proxy 127.0.0.1:8010
+	}
+	handle /app/auth/store-review-login {
+		reverse_proxy 127.0.0.1:8010
+	}
+	handle /dashboard/mobile/auth/store-review-login {
+		reverse_proxy 127.0.0.1:8010
+	}
+
 	handle /assessment* {
 		reverse_proxy 127.0.0.1:8010
 	}

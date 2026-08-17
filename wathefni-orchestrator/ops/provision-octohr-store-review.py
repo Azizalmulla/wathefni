@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """Provision the one production store-review tenant and its synthetic dataset.
 
-This is deliberately not generic fixture tooling.  It is hard-pinned to
-OCTOHR-STORE-REVIEW, refuses to replace any existing company, writes
-reviewer passwords only to owner-only files, and gives the normal session and
-authorization authorities the same rows they use for every other tenant.
+This is deliberately not generic fixture tooling. It is hard-pinned to
+OCTOHR-STORE-REVIEW, refuses to reconcile any company not bearing its exact
+synthetic marker, writes new reviewer passwords only to owner-only files, and
+gives the normal session and authorization authorities the same rows they use
+for every other tenant.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import secrets
 import sys
+import tempfile
 import uuid
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
@@ -68,6 +71,9 @@ for name in (
     "WATHEFNI_LEARNING_C2",
     "WATHEFNI_BENEFITS_C3",
     "WATHEFNI_ENGAGEMENT_C5",
+    "WATHEFNI_PAYROLL_WAVE1",
+    "WATHEFNI_PAYROLL_WAVE2A",
+    "WATHEFNI_PAYROLL_WAVE3",
 ):
     os.environ.setdefault(name, "on")
 for name in (
@@ -76,6 +82,21 @@ for name in (
     "WATHEFNI_LEARNING_COMPANIES",
     "WATHEFNI_BENEFITS_COMPANIES",
     "WATHEFNI_ENGAGEMENT_COMPANIES",
+    "WATHEFNI_PAYROLL_WAVE1_COMPANIES",
+    "WATHEFNI_PAYROLL_WAVE2A_COMPANIES",
+    "WATHEFNI_PAYROLL_WAVE3_COMPANIES",
+):
+    os.environ.setdefault(name, COMPANY)
+for name in (
+    "WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_ONLY",
+    "WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_ONLY",
+    "WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_ONLY",
+):
+    os.environ.setdefault(name, "on")
+for name in (
+    "WATHEFNI_PAYROLL_WAVE1_SYNTHETIC_KEY_MARKERS",
+    "WATHEFNI_PAYROLL_WAVE2A_SYNTHETIC_KEY_MARKERS",
+    "WATHEFNI_PAYROLL_WAVE3_SYNTHETIC_KEY_MARKERS",
 ):
     os.environ.setdefault(name, COMPANY)
 os.environ.setdefault("WATHEFNI_SCHEMA_APPLY", "1")
@@ -84,6 +105,8 @@ import app as legacy  # noqa: E402
 import benefits_administration_c3 as benefits  # noqa: E402
 import engagement_c5 as engagement  # noqa: E402
 import learning_development_c2 as learning  # noqa: E402
+import payroll_authority_wave1 as payroll_authority  # noqa: E402
+import payroll_external_adapter_wave2a as payroll_external  # noqa: E402
 import payroll_payslip_wave3 as payslips  # noqa: E402
 import performance_goals_c1 as performance  # noqa: E402
 import talent_profile_c5 as talent  # noqa: E402
@@ -94,6 +117,11 @@ def _args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument(
+        "--reconcile-existing",
+        action="store_true",
+        help="Reconcile only the existing marker-owned synthetic tenant without rotating reviewer credentials.",
+    )
     parser.add_argument("--credentials-file", type=Path)
     parser.add_argument("--owner-file", type=Path)
     parser.add_argument("--report-file", type=Path)
@@ -142,11 +170,17 @@ def _existing_company(cur: Any) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
-def _guard_company(cur: Any) -> None:
+def _guard_company(cur: Any, *, reconcile_existing: bool) -> None:
     row = _existing_company(cur)
     if not row:
+        if reconcile_existing:
+            raise RuntimeError("store_review_company_missing_for_reconcile")
         return
-    raise RuntimeError("store_review_company_already_exists")
+    metadata = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+    if not reconcile_existing:
+        raise RuntimeError("store_review_company_already_exists")
+    if metadata.get("provisioner") != MARKER or metadata.get("synthetic_only") is not True:
+        raise RuntimeError("existing_company_not_owned_by_store_review_provisioner")
 
 
 def _upsert_company_and_modules(cur: Any) -> None:
@@ -223,7 +257,7 @@ def _upsert_hr_users(cur: Any) -> None:
             VALUES (%s,%s,%s,%s,%s,'admin','active',%s,now(),%s,now(),now())
             ON CONFLICT (user_id) DO UPDATE SET
               company_code=EXCLUDED.company_code, email=EXCLUDED.email, name=EXCLUDED.name,
-              phone=EXCLUDED.phone, role='admin', status='active', password_hash=EXCLUDED.password_hash,
+              phone=EXCLUDED.phone, role='admin', status='active',
               metadata=EXCLUDED.metadata, disabled_at=NULL, updated_at=now()
             """,
             (
@@ -344,53 +378,320 @@ def _seed_onboarding_documents_notifications(cur: Any) -> None:
             )
 
 
-def _seed_payslips(cur: Any) -> None:
-    payslips.ensure_payroll_wave3_schema(cur)
-    for key, _phone, _name, _email, _title, app_access in SYNTHETIC_EMPLOYEES:
+def _seed_employee_documents(cur: Any) -> None:
+    """Store a real synthetic document through the canonical file authority."""
+    pdf_bytes = (
+        b"%PDF-1.4\n"
+        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+        b"2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n"
+        b"3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R>>endobj\n"
+        b"4 0 obj<</Length 83>>stream\nBT /F1 14 Tf 72 720 Td (Synthetic OctoHR store review employment letter) Tj ET\nendstream endobj\n"
+        b"xref\n0 5\n0000000000 65535 f \ntrailer<</Root 1 0 R/Size 5>>\nstartxref\n0\n%%EOF\n"
+    )
+    checksum = hashlib.sha256(pdf_bytes).hexdigest()
+    for key, phone, _name, _email, _title, app_access in SYNTHETIC_EMPLOYEES:
         if not app_access:
             continue
-        cur.execute(
-            "DELETE FROM payroll_payslip_documents WHERE company_code=%s AND employee_key=%s AND document_payload->>'provisioner'=%s",
-            (COMPANY, key, MARKER),
+        temp_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(prefix="octohr-review-", suffix=".pdf", delete=False) as handle:
+                handle.write(pdf_bytes)
+                temp_path = Path(handle.name)
+            stored = legacy.store_subject_file(
+                company_code=COMPANY,
+                owner_phone=phone,
+                subject_type="employee",
+                subject_key=key,
+                file_kind="employee_document",
+                source_path=temp_path,
+                mime_type="application/pdf",
+                checksum=checksum,
+            )
+            if not stored.get("ok"):
+                raise RuntimeError(f"review_document_storage_failed:{stored.get('storage_error') or 'unknown'}")
+            legacy.upsert_file_registry(
+                cur,
+                company_code=COMPANY,
+                owner_phone=phone,
+                subject_type="employee",
+                subject_key=key,
+                file_kind="employee_document",
+                document_type="employment_letter",
+                original_filename="synthetic-employment-letter.pdf",
+                source_path=None,
+                local_path=str((stored.get("metadata") or {}).get("local_path") or "") or None,
+                storage_result=stored,
+                metadata={
+                    "provisioner": MARKER,
+                    "synthetic_only": True,
+                    "label": "Employment letter",
+                    "label_ar": "خطاب التوظيف",
+                },
+            )
+        finally:
+            if temp_path and temp_path.exists():
+                temp_path.unlink()
+
+
+def _approved_review_contract(cur: Any, *, employee_key: str) -> dict[str, Any]:
+    cur.execute(
+        """
+        SELECT contract_id::text
+        FROM payroll_compensation_contracts
+        WHERE company_code=%s AND employee_key=%s AND status='approved'
+          AND metadata->>'provisioner'=%s
+        ORDER BY effective_from DESC, created_at DESC
+        LIMIT 1
+        """,
+        (COMPANY, employee_key, MARKER),
+    )
+    existing = cur.fetchone()
+    if existing:
+        contract = payroll_authority.get_contract(
+            cur, company_code=COMPANY, contract_id=str(dict(existing)["contract_id"])
         )
-        for months_ago in (1, 2, 3):
-            end = date.today().replace(day=1) - timedelta(days=1)
-            end = (end.replace(day=1) - timedelta(days=1)) if months_ago > 1 else end
-            if months_ago > 2:
-                end = end.replace(day=1) - timedelta(days=1)
-            start = end.replace(day=1)
-            payslip_id = str(uuid.uuid4())
-            earnings = 1250
-            deductions = 92.5
+        if contract:
+            return contract
+    created = _expect(
+        "payroll contract draft",
+        payroll_authority.create_contract_draft(
+            cur,
+            company_code=COMPANY,
+            employee_key=employee_key,
+            effective_from=date(2024, 7, 1),
+            components=[
+                {
+                    "component_kind": "earning",
+                    "code": "BASIC",
+                    "label_en": "Basic salary",
+                    "label_ar": "الراتب الأساسي",
+                    "amount": 1000,
+                    "amount_unit": "monthly",
+                    "is_basic": True,
+                    "sort_order": 10,
+                },
+                {
+                    "component_kind": "allowance",
+                    "code": "HOUSING",
+                    "label_en": "Housing allowance",
+                    "label_ar": "بدل السكن",
+                    "amount": 250,
+                    "amount_unit": "monthly",
+                    "sort_order": 20,
+                },
+                {
+                    "component_kind": "deduction",
+                    "code": "SOCIAL_INSURANCE",
+                    "label_en": "Social insurance",
+                    "label_ar": "التأمينات الاجتماعية",
+                    "amount": 92.5,
+                    "amount_unit": "monthly",
+                    "sort_order": 30,
+                },
+            ],
+            actor_phone=ACTOR,
+            reason=f"{MARKER}:canonical_contract",
+            metadata={"provisioner": MARKER, "synthetic_only": True},
+        ),
+    )["contract"]
+    return _expect(
+        "payroll contract approval",
+        payroll_authority.approve_contract(
+            cur,
+            company_code=COMPANY,
+            contract_id=str(created["contract_id"]),
+            actor_phone="96500000998",
+            reason=f"{MARKER}:canonical_contract_approval",
+            expected_row_version=int(created.get("row_version") or 1),
+        ),
+    )["contract"]
+
+
+def _payroll_period(cur: Any, *, period_start: date, period_end: date) -> dict[str, Any]:
+    cur.execute(
+        """
+        SELECT * FROM payroll_periods
+        WHERE company_code=%s AND period_start=%s AND period_end=%s
+        """,
+        (COMPANY, period_start, period_end),
+    )
+    existing = cur.fetchone()
+    if existing:
+        return dict(existing)
+    return _expect(
+        "payroll period",
+        payroll_authority.create_period(
+            cur,
+            company_code=COMPANY,
+            period_start=period_start,
+            period_end=period_end,
+            attendance_input_source="legacy_records",
+            actor_phone=ACTOR,
+            reason=f"{MARKER}:canonical_period",
+        ),
+    )["period"]
+
+
+def _seed_payslips(cur: Any) -> None:
+    """Create released review payslips only through the frozen payroll authorities."""
+    payroll_authority.ensure_payroll_wave1_schema(cur)
+    payroll_external.ensure_payroll_wave2a_schema(cur)
+    payslips.ensure_payroll_wave3_schema(cur)
+    _expect(
+        "external payroll mode",
+        payroll_authority.set_payroll_mode(
+            cur,
+            company_code=COMPANY,
+            mode="external",
+            attendance_input_source="legacy_records",
+            actor_phone=ACTOR,
+            reason=f"{MARKER}:external_money_authority",
+        ),
+    )
+    review_people = [row for row in SYNTHETIC_EMPLOYEES if row[5]]
+    contracts = [
+        _approved_review_contract(cur, employee_key=employee_key)
+        for employee_key, _phone, _name, _email, _title, _access in review_people
+    ]
+    employees = [
+        {"employee_key": employee_key, "phone": phone, "name": name}
+        for employee_key, phone, name, _email, _title, _access in review_people
+    ]
+
+    # Preserve the old direct-seed rows as revoked history; never hard-delete.
+    cur.execute(
+        """
+        SELECT payslip_id::text
+        FROM payroll_payslip_documents
+        WHERE company_code=%s AND status='active'
+          AND document_payload->>'provisioner'=%s
+        """,
+        (COMPANY, MARKER),
+    )
+    for row in cur.fetchall():
+        _expect(
+            "revoke legacy review payslip",
+            payslips.revoke_payslip(
+                cur,
+                company_code=COMPANY,
+                payslip_id=str(dict(row)["payslip_id"]),
+                actor_phone=ACTOR,
+                reason=f"{MARKER}:replace_direct_seed_with_canonical_authority",
+            ),
+        )
+
+    first_this_month = date.today().replace(day=1)
+    for months_ago in (1, 2, 3):
+        period_end = first_this_month - timedelta(days=1)
+        for _ in range(months_ago - 1):
+            period_end = period_end.replace(day=1) - timedelta(days=1)
+        period_start = period_end.replace(day=1)
+        period = _payroll_period(cur, period_start=period_start, period_end=period_end)
+        external_run_id = f"OCTOHR-REVIEW-{period_end.strftime('%Y%m')}"
+        exported = _expect(
+            "payroll external export",
+            payroll_external.create_external_export(
+                cur,
+                company_code=COMPANY,
+                period=period,
+                employees=employees,
+                contracts=contracts,
+                attendance=[{"employee_key": row[0], "worked_minutes": 9600} for row in review_people],
+                leave_classifications=[
+                    {"employee_key": row[0], "leave_type": "annual", "classification": "paid"}
+                    for row in review_people
+                ],
+                actor_phone=ACTOR,
+                reason=f"{MARKER}:canonical_export:{period_end.isoformat()}",
+                external_run_id=external_run_id,
+            ),
+        )
+        export_run = exported["export_run"]
+        export_payload = export_run.get("payload") or {}
+        if isinstance(export_payload, str):
+            export_payload = json.loads(export_payload)
+        if not export_payload:
             cur.execute(
-                """
-                INSERT INTO payroll_payslip_documents
-                  (payslip_id,company_code,employee_key,source_kind,source_run_id,period_start,period_end,
-                   version_number,status,content_fingerprint,money_authority,authoritative_label,
-                   employee_visibility,employee_released_at,currency,totals_earnings,totals_deductions,
-                   totals_net,document_payload,created_at)
-                VALUES (%s,%s,%s,'external_import',%s,%s,%s,1,'active',%s,'external',
-                        'Synthetic review payroll','released',now(),'KWD',%s,%s,%s,%s,now())
-                """,
-                (
-                    payslip_id, COMPANY, key, str(uuid.uuid4()), start, end,
-                    f"{MARKER}:{key}:{end.isoformat()}", earnings, deductions, earnings - deductions,
-                    Json({"provisioner": MARKER, "synthetic_only": True}),
+                "SELECT payload FROM payroll_adapter_export_runs WHERE export_run_id=%s",
+                (str(export_run["export_run_id"]),),
+            )
+            export_payload = dict(cur.fetchone())["payload"]
+        result_csv = payroll_external.build_synthetic_result_csv(
+            export_payload=export_payload,
+            external_run_id=external_run_id,
+        )
+        imported = _expect(
+            "payroll external import",
+            payroll_external.import_external_results(
+                cur,
+                company_code=COMPANY,
+                export_run_id=str(export_run["export_run_id"]),
+                csv_text=result_csv,
+                actor_phone="96500000998",
+                reason=f"{MARKER}:canonical_import:{period_end.isoformat()}",
+                expected_input_fingerprint=str(exported["input_fingerprint"]),
+            ),
+        )
+        import_run = imported["import_run"]
+        reconciliation = _expect(
+            "payroll export/import reconciliation",
+            payroll_external.reconcile_export_import(
+                cur,
+                company_code=COMPANY,
+                export_run_id=str(export_run["export_run_id"]),
+                import_run_id=str(import_run["import_run_id"]),
+                actor_phone="96500000998",
+                reason=f"{MARKER}:canonical_reconciliation:{period_end.isoformat()}",
+            ),
+        )
+        if reconciliation.get("has_differences"):
+            raise RuntimeError("review_payroll_reconciliation_has_differences")
+        for employee_key, _phone, _name, _email, _title, _access in review_people:
+            generated = _expect(
+                "payslip generation",
+                payslips.generate_external_payslip(
+                    cur,
+                    company_code=COMPANY,
+                    import_run_id=str(import_run["import_run_id"]),
+                    employee_key=employee_key,
+                    actor_phone=ACTOR,
+                    reason=f"{MARKER}:canonical_payslip_generation",
                 ),
             )
-            for kind, code, label_en, label_ar, amount, sort in (
-                ("basic", "BASIC", "Basic salary", "الراتب الأساسي", 1000, 10),
-                ("allowance", "HOUSING", "Housing allowance", "بدل السكن", 250, 20),
-                ("deduction", "PIFSS", "Social insurance", "التأمينات", -92.5, 30),
-            ):
-                cur.execute(
-                    """
-                    INSERT INTO payroll_payslip_lines
-                      (payslip_id,company_code,employee_key,line_kind,code,label_en,label_ar,amount,currency,sort_order)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'KWD',%s)
-                    """,
-                    (payslip_id, COMPANY, key, kind, code, label_en, label_ar, amount, sort),
-                )
+            _expect(
+                "payslip release",
+                payslips.release_payslip_to_employee(
+                    cur,
+                    company_code=COMPANY,
+                    payslip_id=str(generated["payslip"]["payslip_id"]),
+                    actor_phone="96500000998",
+                    reason=f"{MARKER}:explicit_employee_release",
+                ),
+            )
+        if str(period.get("status")) == "open":
+            period = _expect(
+                "payroll period lock",
+                payroll_authority.lock_period(
+                    cur,
+                    company_code=COMPANY,
+                    period_id=str(period["period_id"]),
+                    actor_phone="96500000998",
+                    reason=f"{MARKER}:period_finalization",
+                    expected_row_version=int(period.get("row_version") or 1),
+                ),
+            )["period"]
+        if str(period.get("status")) == "locked":
+            _expect(
+                "payroll period close",
+                payroll_authority.close_period(
+                    cur,
+                    company_code=COMPANY,
+                    period_id=str(period["period_id"]),
+                    actor_phone="96500000998",
+                    reason=f"{MARKER}:period_finalization",
+                    expected_row_version=int(period.get("row_version") or 1),
+                ),
+            )
 
 
 def _seed_posthire(cur: Any) -> dict[str, Any]:
@@ -594,11 +895,11 @@ def main() -> int:
         args.apple_instructions_file,
         args.google_instructions_file,
     )
-    if args.apply and any(path is None for path in output_paths):
+    if args.apply and not args.reconcile_existing and any(path is None for path in output_paths):
         raise SystemExit("--apply requires all secure output file paths")
-    if args.apply and args.credentials_file.resolve() == args.owner_file.resolve():
+    if args.apply and not args.reconcile_existing and args.credentials_file.resolve() == args.owner_file.resolve():
         raise SystemExit("hashed server config and owner credential file must be different")
-    if args.apply:
+    if args.apply and not args.reconcile_existing:
         _write_credentials(
             args.credentials_file,
             args.owner_file,
@@ -608,14 +909,23 @@ def main() -> int:
     with legacy.db_connect() as conn:
         try:
             with conn.cursor() as cur:
-                _guard_company(cur)
+                _guard_company(cur, reconcile_existing=args.reconcile_existing)
                 _upsert_company_and_modules(cur)
                 _upsert_employees(cur)
                 _upsert_hr_users(cur)
                 _seed_workday(cur)
                 _seed_onboarding_documents_notifications(cur)
+                if args.apply:
+                    _seed_employee_documents(cur)
                 _seed_payslips(cur)
-                posthire = _seed_posthire(cur)
+                # Existing review tenants already carry canonical post-hire
+                # history. Reconciliation must not duplicate it. New tenants
+                # receive the full data set once through the frozen authorities.
+                posthire = (
+                    {"preserved_existing": True, "provisioner": MARKER}
+                    if args.reconcile_existing
+                    else _seed_posthire(cur)
+                )
             if args.validate_only:
                 conn.rollback()
             else:
@@ -638,9 +948,12 @@ def main() -> int:
         "posthire": posthire,
         "passwords_in_report": False,
         "secure_store_instruction_files": 2,
+        "credentials_rotated": not args.reconcile_existing,
+        "reconciled_existing": bool(args.reconcile_existing),
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
-    _secure_write(args.report_file, report)
+    if args.report_file:
+        _secure_write(args.report_file, report)
     print(json.dumps(report, sort_keys=True))
     return 0
 

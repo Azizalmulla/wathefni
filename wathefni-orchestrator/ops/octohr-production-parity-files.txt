@@ -1,0 +1,32 @@
+# Exact Python dependency closure missing from the 2026-08-18 production VPS.
+# Paths are relative to wathefni-orchestrator/. Keep this list narrow.
+benefits_administration_c3.py
+benefits_http.py
+benefits_surfaces.py
+capability_readiness.py
+engagement_c5.py
+engagement_http.py
+engagement_surfaces.py
+hr_intelligence_registry_c1.py
+job_architecture_c1.py
+learning_development_c2.py
+learning_http.py
+learning_surfaces.py
+okr_operating_pt1.py
+performance_calibration_c4.py
+performance_feedback_c3.py
+performance_goals_c1.py
+performance_http.py
+performance_reviews_c2.py
+performance_surfaces.py
+setup_console_effective_state.py
+talent_evidence_index_pt1.py
+talent_http.py
+talent_map_pt4.py
+talent_models_pt2.py
+talent_profile_c5.py
+talent_role_fit_pt3.py
+talent_succession_c6.py
+talent_succession_intel_pt5.py
+talent_surfaces.py
+talent_trajectory_pt6.py
