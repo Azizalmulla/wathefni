@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import { createContext, useContext } from 'react'
-import { usePathname, useRouter } from 'expo-router'
 
 import { loadSession } from '@/auth/session'
 import { loadOperatorSession } from '@hr/auth/session'
@@ -28,6 +27,7 @@ type PrincipalGateValue = {
   hrSession: boolean
   transition: PrincipalTransition
   selectMode: (mode: PrincipalMode) => Promise<boolean>
+  acknowledgePrincipalMounted: (mode: PrincipalMode) => void
   clearTransitionError: () => void
   refreshAvailability: () => Promise<void>
 }
@@ -51,14 +51,16 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
     to: null,
     error: null,
   })
-  const router = useRouter()
-  const pathname = usePathname()
   const shellRef = useRef<ResolvedShell | null>(null)
-  const pathnameRef = useRef(pathname)
   const transitionPromiseRef = useRef<Promise<boolean> | null>(null)
+  const mountAckRef = useRef<{
+    mode: PrincipalMode
+    resolve: () => void
+    reject: (error: Error) => void
+    timer: ReturnType<typeof setTimeout>
+  } | null>(null)
 
   shellRef.current = shell
-  pathnameRef.current = pathname
 
   const refreshAvailability = useCallback(async () => {
     if (!hrWorkspaceEnabled()) {
@@ -88,6 +90,35 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
     void refreshAvailability()
   }, [refreshAvailability])
 
+  useEffect(
+    () => () => {
+      if (!mountAckRef.current) return
+      clearTimeout(mountAckRef.current.timer)
+      mountAckRef.current.reject(new Error('principal_transition_unmounted'))
+      mountAckRef.current = null
+    },
+    [],
+  )
+
+  const waitForPrincipalMount = useCallback((mode: PrincipalMode): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        if (mountAckRef.current?.mode !== mode) return
+        mountAckRef.current = null
+        reject(new Error('principal_transition_mount_timeout'))
+      }, 10_000)
+      mountAckRef.current = { mode, resolve, reject, timer }
+    })
+  }, [])
+
+  const acknowledgePrincipalMounted = useCallback((mode: PrincipalMode) => {
+    const pending = mountAckRef.current
+    if (!pending || pending.mode !== mode) return
+    clearTimeout(pending.timer)
+    mountAckRef.current = null
+    pending.resolve()
+  }, [])
+
   const selectMode = useCallback(
     (mode: PrincipalMode): Promise<boolean> => {
       // Rapid repeated taps join the one authoritative transition. They never
@@ -100,7 +131,6 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
           previousShell?.kind === 'employee' || previousShell?.kind === 'hr'
             ? previousShell.kind
             : null
-        const previousPath = pathnameRef.current
         let previousPreference: PrincipalMode | null = null
         let preferenceLoaded = false
 
@@ -128,25 +158,23 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
 
           setEmployeeSession(availability.employeeSession)
           setHrSession(availability.hrSession)
+          const mounted = waitForPrincipalMount(mode)
           setShell({ kind: mode })
 
-          // Each target AuthProvider validates only its own SecureStore session.
-          // Missing/stale sessions therefore land on that principal's sign-in;
-          // valid sessions enter that principal's independent local-lock state.
-          router.replace(
-            (mode === 'hr'
-              ? '/hr'
-              : availability.employeeSession
-                ? '/(tabs)'
-                : '/(auth)/activate') as never,
-          )
+          // ModeRedirect owns the route declaratively while the transition is
+          // active. Do not report success until the target AuthProvider has
+          // actually mounted under its own session/PIN namespace.
+          await mounted
           setTransition({ status: 'idle', from: null, to: null, error: null })
           return true
         } catch {
+          if (mountAckRef.current) {
+            clearTimeout(mountAckRef.current.timer)
+            mountAckRef.current = null
+          }
           // Roll back shell, route and UX preference. Session/PIN material is
           // deliberately untouched and remains isolated in each namespace.
           setShell(previousShell)
-          if (previousPath) router.replace(previousPath as never)
           if (preferenceLoaded) {
             try {
               if (previousPreference) await savePrincipalModePreference(previousPreference)
@@ -172,7 +200,7 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
       transitionPromiseRef.current = promise
       return promise
     },
-    [router],
+    [waitForPrincipalMount],
   )
 
   const clearTransitionError = useCallback(() => {
@@ -191,6 +219,7 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
       hrSession,
       transition,
       selectMode,
+      acknowledgePrincipalMounted,
       clearTransitionError,
       refreshAvailability,
     }),
@@ -201,12 +230,23 @@ export function PrincipalGateProvider({ children }: { children: ReactNode }) {
       hrSession,
       transition,
       selectMode,
+      acknowledgePrincipalMounted,
       clearTransitionError,
       refreshAvailability,
     ],
   )
 
   return <PrincipalGateContext.Provider value={value}>{children}</PrincipalGateContext.Provider>
+}
+
+export function PrincipalMountAck({ mode }: { mode: PrincipalMode }) {
+  const { transition, acknowledgePrincipalMounted } = usePrincipalGate()
+  useEffect(() => {
+    if (transition.status === 'switching' && transition.to === mode) {
+      acknowledgePrincipalMounted(mode)
+    }
+  }, [acknowledgePrincipalMounted, mode, transition])
+  return null
 }
 
 export function PrincipalBootSplash() {

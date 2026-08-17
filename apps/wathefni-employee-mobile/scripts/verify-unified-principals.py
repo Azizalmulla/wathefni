@@ -64,7 +64,9 @@ check(
     "Work email delegates atomic HR route/shell transition to PrincipalGate",
     "selectMode('hr')" in unified
     and "useRouter" not in unified
-    and "router.replace(" in gate
+    and "router.replace(" not in gate
+    and "waitForPrincipalMount" in gate
+    and "acknowledgePrincipalMounted" in gate
     and "setShell({ kind: mode })" in gate,
 )
 check("no identity probe on sign-in", "dashboard_user_by_email" not in unified and "/app/me" not in unified)

@@ -42,7 +42,9 @@ check(
     "work email uses provider-owned atomic HR route/shell transition",
     "selectMode('hr')" in unified
     and "useRouter" not in unified
-    and "router.replace(" in gate
+    and "router.replace(" not in gate
+    and "waitForPrincipalMount" in gate
+    and "acknowledgePrincipalMounted" in gate
     and "setShell({ kind: mode })" in gate,
 )
 

@@ -31,6 +31,7 @@ mode = read("src/principals/mode.ts")
 employee_session = read("src/auth/session.ts")
 hr_session = read("src/hr/auth/session.ts")
 hr_auth = read("src/hr/auth/AuthProvider.tsx")
+hr_layout = read("app/hr/_layout.tsx")
 switch_hr = read("src/principals/SwitchToHrControl.tsx")
 hr_settings = read("app/hr/settings.tsx")
 employee_lock_shell = read("src/features/pin/LocalUnlockShell.tsx")
@@ -122,12 +123,24 @@ check(
     and "loadOperatorSession()" in principal_gate,
 )
 check(
-    "principal transition is single-flight with explicit rollback and error",
+    "principal transition is single-flight with mount acknowledgement, rollback, and error",
     "transitionPromiseRef" in principal_gate
     and "if (transitionPromiseRef.current) return transitionPromiseRef.current" in principal_gate
+    and "waitForPrincipalMount" in principal_gate
+    and "acknowledgePrincipalMounted" in principal_gate
+    and "principal_transition_mount_timeout" in principal_gate
+    and "router.replace" not in principal_gate
     and "setShell(previousShell)" in principal_gate
     and "clearPrincipalModePreference" in principal_gate
     and "principal_transition_failed" in principal_gate,
+)
+check(
+    "target principal provider mounts before transition completes",
+    '<PrincipalMountAck mode="employee" />' in root_layout
+    and '<PrincipalMountAck mode="hr" />' in hr_layout
+    and "if (transition.status === 'switching')" in root_layout
+    and "return <Slot />" in root_layout
+    and "return <EmployeeShell />" in root_layout,
 )
 check(
     "outgoing local locks suppress during principal transition",

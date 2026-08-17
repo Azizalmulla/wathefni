@@ -16,7 +16,7 @@ import { BiometricOptInView } from '@/features/pin/BiometricOptInView'
 import { UnlockWithBiometricGate } from '@/features/pin/UnlockWithBiometricGate'
 import { shouldAttemptHrBiometricUnlock, promptBiometricUnlock } from '@hr/auth/localLock/hrBiometricAuth'
 import { PIN_MAX_FAILED_ATTEMPTS } from '@/auth/pinPolicy'
-import { usePrincipalGate } from '@/principals/PrincipalGate'
+import { PrincipalMountAck, usePrincipalGate } from '@/principals/PrincipalGate'
 import { useI18n } from '@/i18n'
 import { colors } from '@/theme'
 import * as Linking from 'expo-linking'
@@ -350,6 +350,7 @@ function HrRuntime() {
       <LocaleProvider initialLocale={locale}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
+            <PrincipalMountAck mode="hr" />
             <HrBrandBoundary>
               <StatusBar style="dark" />
               <HrForegroundQueryRefresh />

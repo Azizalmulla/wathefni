@@ -28,6 +28,7 @@ import { hrefFromHttpsAppLink } from '@/linking/httpsAppLink'
 import {
   PrincipalBootSplash,
   PrincipalGateProvider,
+  PrincipalMountAck,
   usePrincipalGate,
 } from '@/principals/PrincipalGate'
 import { UnsignedEntry } from '@/principals/UnifiedSignInView'
@@ -283,6 +284,7 @@ function EmployeeShell() {
     <AppErrorBoundary title={t('error.fatalTitle')} message={t('error.fatalMessage')} retryLabel={t('common.retry')}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <PrincipalMountAck mode="employee" />
           <EmployeeBrandBoundary>
             <StatusBar style="dark" />
             {/* HR must not register on /app/push — PushLifecycle stays employee-only. */}
@@ -304,15 +306,43 @@ function EmployeeBrandBoundary({ children }: { children: ReactNode }) {
 }
 
 function ModeRedirect() {
-  const { ready, shell, transition } = usePrincipalGate()
+  const { ready, shell, employeeSession, transition } = usePrincipalGate()
   const segments = useSegments()
 
   if (!ready || !shell) return <PrincipalBootSplash />
 
-  // A principal transition owns the whole frame. Unmounting the outgoing auth
-  // and navigation tree here prevents its local-lock overlay from winning the
-  // handoff while the target session and route are being resolved.
-  if (transition.status === 'switching') return <PrincipalBootSplash />
+  // A principal transition owns the whole frame. Keep the outgoing principal
+  // unmounted, drive the target route declaratively, then mount only the target
+  // provider. PrincipalMountAck ends the transition after that provider exists.
+  if (transition.status === 'switching') {
+    if (shell.kind !== transition.to) return <PrincipalBootSplash />
+
+    if (transition.to === 'hr') {
+      if (segments[0] !== 'hr') {
+        return (
+          <>
+            <Redirect href="/hr" />
+            <PrincipalBootSplash />
+          </>
+        )
+      }
+      return <Slot />
+    }
+
+    const employeeHref = employeeSession ? '/(tabs)' : '/(auth)/activate'
+    const employeeRouteReady = employeeSession
+      ? segments[0] === '(tabs)'
+      : segments[0] === '(auth)'
+    if (!employeeRouteReady) {
+      return (
+        <>
+          <Redirect href={employeeHref} />
+          <PrincipalBootSplash />
+        </>
+      )
+    }
+    return <EmployeeShell />
+  }
 
   // No startup principal chooser. Workspace comes from authenticated sessions.
   if (shell.kind === 'unsigned') {
