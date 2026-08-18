@@ -1113,6 +1113,11 @@ def register_operator_mobile_routes(app_mod: Any) -> None:
 
         return build_operator_mobile_context(app_mod, row, session_id=str(row.get("session_id") or ""))
 
+    # Downstream HR-mobile route adapters must authenticate with the native
+    # operator session namespace, never the browser dashboard session. Expose
+    # the dependency on the application module before those adapters register.
+    app_mod.operator_mobile_context = operator_mobile_context
+
     @app_mod.app.post("/dashboard/mobile/auth/login")
     def mobile_auth_login(request: MobileLoginRequest):  # type: ignore[valid-type]
         app_mod.ensure_schema()
@@ -1195,5 +1200,5 @@ def register_operator_mobile_routes(app_mod: Any) -> None:
 
     register_mobile_assistant_routes(app_mod, operator_mobile_context=operator_mobile_context)
 
-    # Expose dependency for tests.
+    # Expose dependency for tests and compatibility callers.
     register_operator_mobile_routes.operator_mobile_context = operator_mobile_context  # type: ignore[attr-defined]

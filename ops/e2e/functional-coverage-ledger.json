@@ -24477,7 +24477,7 @@
       "module": "performance_http",
       "route": "/dashboard/mobile/performance",
       "action": "get",
-      "entitlement": "dashboard_context",
+      "entitlement": "operator_mobile_context",
       "permission": "",
       "prerequisites": "",
       "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
@@ -24488,7 +24488,7 @@
       "source_module": "performance_http",
       "endpoint": "dashboard_mobile_performance_queue",
       "auth_dependencies": [
-        "dashboard_context"
+        "operator_mobile_context"
       ],
       "proof_dimensions": [
         "authorized_domain",
@@ -24504,7 +24504,7 @@
       "module": "performance_http",
       "route": "/dashboard/mobile/performance/reviews/{review_id}",
       "action": "get",
-      "entitlement": "dashboard_context",
+      "entitlement": "operator_mobile_context",
       "permission": "",
       "prerequisites": "",
       "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
@@ -24515,7 +24515,7 @@
       "source_module": "performance_http",
       "endpoint": "dashboard_mobile_performance_review",
       "auth_dependencies": [
-        "dashboard_context"
+        "operator_mobile_context"
       ],
       "proof_dimensions": [
         "authorized_domain",
@@ -24531,7 +24531,7 @@
       "module": "performance_http",
       "route": "/dashboard/mobile/performance/reviews/{review_id}/submit",
       "action": "post",
-      "entitlement": "dashboard_context",
+      "entitlement": "operator_mobile_context",
       "permission": "",
       "prerequisites": "",
       "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
@@ -24542,7 +24542,7 @@
       "source_module": "performance_http",
       "endpoint": "dashboard_mobile_performance_submit",
       "auth_dependencies": [
-        "dashboard_context"
+        "operator_mobile_context"
       ],
       "proof_dimensions": [
         "authorized_domain",

@@ -282,6 +282,7 @@ def _as_date(value: str | None) -> date | None:
 def register_performance_http(app_mod: Any) -> None:
     app = app_mod.app
     dashboard_context = app_mod.dashboard_context
+    operator_mobile_context = app_mod.operator_mobile_context
     employee_app_context = app_mod.employee_app_context
     db_connect = app_mod.db_connect
     json_safe = app_mod.json_safe
@@ -1283,7 +1284,7 @@ def register_performance_http(app_mod: Any) -> None:
     def dashboard_mobile_performance_queue(
         offset: int = 0,
         limit: int = 30,
-        context: dict[str, Any] = Depends(dashboard_context),
+        context: dict[str, Any] = Depends(operator_mobile_context),
     ):
         company = _company(context)
         payload = _run(
@@ -1325,7 +1326,7 @@ def register_performance_http(app_mod: Any) -> None:
 
     @app.get("/dashboard/mobile/performance/reviews/{review_id}")
     def dashboard_mobile_performance_review(
-        review_id: str, context: dict[str, Any] = Depends(dashboard_context)
+        review_id: str, context: dict[str, Any] = Depends(operator_mobile_context)
     ):
         company = _company(context)
         return _run(
@@ -1341,7 +1342,7 @@ def register_performance_http(app_mod: Any) -> None:
 
     @app.post("/dashboard/mobile/performance/reviews/{review_id}/submit")
     def dashboard_mobile_performance_submit(
-        review_id: str, body: ReviewSubmitBody, context: dict[str, Any] = Depends(dashboard_context)
+        review_id: str, body: ReviewSubmitBody, context: dict[str, Any] = Depends(operator_mobile_context)
     ):
         return dashboard_performance_submit_review(review_id, body, context)
 

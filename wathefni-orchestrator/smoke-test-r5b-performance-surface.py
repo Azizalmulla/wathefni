@@ -94,6 +94,9 @@ def main() -> int:
         check(f"HTTP exposes {path}", path in http_src)
     check("HTTP never accepts client company authority as write", "X-Company-Code" not in http_src)
     check("HTTP uses dashboard_context", "dashboard_context" in http_src)
+    check("HR Mobile uses operator session context", "operator_mobile_context = app_mod.operator_mobile_context" in http_src)
+    mobile_http_src = http_src[http_src.index('@app.get("/dashboard/mobile/performance")'):http_src.index("# --- Employee App")]
+    check("HR Mobile never uses browser dashboard context", "Depends(dashboard_context)" not in mobile_http_src)
     check("HTTP uses employee_app_context", "employee_app_context" in http_src)
 
     emp_comp = (MOBILE / "src" / "composition" / "employeeAppComposition.ts").read_text(encoding="utf-8")
