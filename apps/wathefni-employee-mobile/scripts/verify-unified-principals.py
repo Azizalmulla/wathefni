@@ -42,6 +42,15 @@ check(
     and "const SESSION_BLOB_KEY = 'wathefni.hr.session.v1'" in session_hr,
 )
 check("HR API allowlist", "/dashboard/mobile/" in client_hr and "unapproved_api_path" in client_hr)
+check(
+    "Store Review availability uses public client without weakening HR allowlist",
+    "rawRequest as publicRawRequest" in unified
+    and "rawRequest as hrRawRequest" in unified
+    and "publicRawRequest<{ available?: boolean }>('/auth/store-review-availability')" in unified
+    and "hrRawRequest<AuthResponse>('/dashboard/mobile/auth/login'" in unified
+    and "hrRawRequest<AuthResponse>('/dashboard/mobile/auth/store-review-login'" in unified
+    and "if (!path.startsWith('/dashboard/mobile/'))" in client_hr,
+)
 check("PushLifecycle not imported into HR layout", "PushLifecycle" not in (ROOT / "app/hr/_layout.tsx").read_text())
 check("Employee shell still mounts PushLifecycle", "PushLifecycle" in layout)
 check("HR workspace flag gate", "EXPO_PUBLIC_HR_WORKSPACE_ENABLED" in mode)

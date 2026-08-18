@@ -12,10 +12,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { keyboardSafeBehavior } from '@/components/keyboardSafe'
 import { useAuth } from '@/auth/AuthProvider'
+import { rawRequest as publicRawRequest } from '@/api/client'
 import { ActivationView } from '@/features/activation/ActivationView'
 import { useI18n } from '@/i18n'
 import { approvedErrorMessage } from '@/api/errors'
-import { ApiError, rawRequest } from '@hr/api/client'
+import { ApiError, rawRequest as hrRawRequest } from '@hr/api/client'
 import type { AuthResponse } from '@hr/api/types'
 import { saveOperatorSession } from '@hr/auth/session'
 import { EditorialHeading, FadeIn, PremiumButton, Wordmark } from '@/components/premium'
@@ -70,7 +71,7 @@ function UnifiedSignInHost() {
 
   useEffect(() => {
     let active = true
-    void rawRequest<{ available?: boolean }>('/auth/store-review-availability')
+    void publicRawRequest<{ available?: boolean }>('/auth/store-review-availability')
       .then((response) => {
         if (active) setReviewAvailable(response.available === true)
       })
@@ -130,7 +131,7 @@ function UnifiedSignInHost() {
     setHrBusy(true)
     setHrError(null)
     try {
-      const response = await rawRequest<AuthResponse>('/dashboard/mobile/auth/login', {
+      const response = await hrRawRequest<AuthResponse>('/dashboard/mobile/auth/login', {
         method: 'POST',
         json: {
           email: email.trim(),
@@ -168,7 +169,7 @@ function UnifiedSignInHost() {
         await reviewSignIn(reviewUsername.trim(), reviewPassword)
         return
       }
-      const response = await rawRequest<AuthResponse>('/dashboard/mobile/auth/store-review-login', {
+      const response = await hrRawRequest<AuthResponse>('/dashboard/mobile/auth/store-review-login', {
         method: 'POST',
         json: { username: reviewUsername.trim(), password: reviewPassword },
       })
