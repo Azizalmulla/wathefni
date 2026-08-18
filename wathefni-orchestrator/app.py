@@ -68582,6 +68582,13 @@ class EmployeeDeletionRequestBody(BaseModel):
     reason: str | None = None
 
 
+class PublicEmployeeDeletionRequestBody(BaseModel):
+    company_code: str = Field(min_length=2, max_length=64)
+    identity: str = Field(min_length=3, max_length=254)
+    reason: str | None = Field(default=None, max_length=500)
+    confirmed: bool
+
+
 def _app_code_generate() -> str:
     return "".join(secrets.choice("0123456789") for _ in range(_EMPLOYEE_APP_CODE_DIGITS))
 
@@ -73285,16 +73292,24 @@ def app_push_unregister(body: EmployeePushUnregisterBody, context: dict[str, Any
     return {"ok": True}
 
 
-@app.post("/app/account/request-deletion")
-def app_account_request_deletion(body: EmployeeDeletionRequestBody, context: dict[str, Any] = Depends(employee_app_context)):
-    # Store policy requirement: an in-app account-deletion path. The employer is the
-    # data controller, so this raises a visible HR task for handling rather than
-    # self-destructing employment records.
-    company = context["company_code"]
-    key = context["employee_key"]
-    employee = context["employee"]
-    require_employee_app_feature(context, "settings", action="request_deletion")
-    reason = (body.reason or "").strip()[:500] or None
+def create_employee_account_deletion_request(
+    *,
+    company_code: str,
+    employee_key: str,
+    employee: dict[str, Any],
+    reason: str | None,
+    channel: Literal["employee_app", "public_web"],
+    audit_context: dict[str, Any],
+) -> dict[str, Any]:
+    """Canonical employee-account deletion-request write authority.
+
+    Both the authenticated app and the public store-policy web resource converge
+    here. This creates an idempotent HR task; it never destroys statutory
+    employment records, consumes an activation code, or creates an app session.
+    """
+    company = str(company_code or "").strip().upper()
+    key = str(employee_key or "").strip()
+    clean_reason = str(reason or "").strip()[:500] or None
     created = False
     with db_connect() as conn:
         with conn.cursor() as cur:
@@ -73328,21 +73343,207 @@ def app_account_request_deletion(body: EmployeeDeletionRequestBody, context: dic
                         company,
                         key,
                         f"Account deletion requested by {employee.get('name') or 'an employee'}",
-                        reason or "Employee requested account/data deletion from the mobile app.",
-                        Json({"requested_at": now_iso(), "channel": "employee_app"}),
+                        clean_reason or (
+                            "Employee requested account/data deletion from the public OctoHR web form."
+                            if channel == "public_web"
+                            else "Employee requested account/data deletion from the mobile app."
+                        ),
+                        Json({"requested_at": now_iso(), "channel": channel}),
                     ),
                 )
                 row = cur.fetchone()
                 created = True
         conn.commit()
     if created:
-        record_admin_audit(context, "employee_account_deletion_requested", summary="Employee requested account deletion from the app.", target_type="employee", target=key, details={"reason_provided": bool(reason)})
+        record_admin_audit(
+            audit_context,
+            "employee_account_deletion_requested",
+            summary="Employee requested account deletion.",
+            target_type="employee",
+            target=key,
+            details={"reason_provided": bool(clean_reason), "channel": channel},
+        )
     return {
         "ok": True,
         "idempotent": not created,
         "task_id": str(row["task_id"]) if row else None,
         "message": "Your request has been sent to your HR team.",
     }
+
+
+@app.post("/app/account/request-deletion")
+def app_account_request_deletion(body: EmployeeDeletionRequestBody, context: dict[str, Any] = Depends(employee_app_context)):
+    # Store policy requirement: an in-app account-deletion path. The employer is the
+    # data controller, so this raises a visible HR task for handling rather than
+    # self-destructing employment records.
+    require_employee_app_feature(context, "settings", action="request_deletion")
+    return create_employee_account_deletion_request(
+        company_code=context["company_code"],
+        employee_key=context["employee_key"],
+        employee=context["employee"],
+        reason=body.reason,
+        channel="employee_app",
+        audit_context=context,
+    )
+
+
+_PUBLIC_ACCOUNT_DELETION_ORIGINS = {
+    "https://octo-hr.com",
+    "https://www.octo-hr.com",
+}
+_PUBLIC_ACCOUNT_DELETION_GENERIC = {
+    "ok": True,
+    "message": (
+        "If the details match an OctoHR employee account, the deletion request "
+        "has been sent to the employer's HR team."
+    ),
+}
+
+
+def _public_account_deletion_cors(request: Request) -> dict[str, str]:
+    origin = str(request.headers.get("origin") or "").strip()
+    if origin and origin not in _PUBLIC_ACCOUNT_DELETION_ORIGINS:
+        raise HTTPException(
+            status_code=403,
+            detail={"error": "origin_not_allowed", "message": "This request origin is not allowed."},
+        )
+    headers = {
+        "Cache-Control": "no-store",
+        "Vary": "Origin",
+    }
+    if origin:
+        headers.update(
+            {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type",
+            }
+        )
+    return headers
+
+
+@app.options("/public/account-deletion/request")
+def public_account_deletion_preflight(http_request: Request):
+    return Response(status_code=204, headers=_public_account_deletion_cors(http_request))
+
+
+@app.post("/public/account-deletion/request")
+def public_account_deletion_request(body: PublicEmployeeDeletionRequestBody, http_request: Request):
+    """Public, tenant-pinned adapter onto the canonical deletion-request task.
+
+    Responses deliberately do not reveal whether a company, email, phone, or
+    employee account exists. A matching Employee-app account creates the
+    same HR task as the in-app action; a non-match returns identical public copy.
+    """
+    # Keep this adapter self-contained when it is composed into the production
+    # compatibility app, whose import prelude intentionally differs from the
+    # tracked authority module.
+    from fastapi.responses import JSONResponse as PublicDeleteJSONResponse
+    import security_rate_limit as public_delete_rate_limit
+    import sys as public_delete_sys
+
+    headers = _public_account_deletion_cors(http_request)
+    if body.confirmed is not True:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "confirmation_required", "message": "Please confirm the deletion request."},
+            headers=headers,
+        )
+    raw_company = str(body.company_code or "").strip().upper()
+    company = raw_company if re.fullmatch(r"[A-Z0-9_-]{2,64}", raw_company) else ""
+    identity = str(body.identity or "").strip().lower()
+    identity_phone = digits(identity)
+    identity_digest = public_delete_rate_limit.principal_digest(f"{company}|{identity}")
+    public_delete_rate_limit.consume(
+        public_delete_sys.modules[__name__],
+        "public_account_deletion",
+        route="/public/account-deletion/request",
+        dimensions={
+            "source": public_delete_rate_limit.client_source(http_request),
+            "identity": identity_digest,
+        },
+        company_code=company or None,
+    )
+
+    employee: dict[str, Any] | None = None
+    if company and ("@" in identity or identity_phone):
+        try:
+            with db_connect() as conn:
+                with conn.cursor() as cur:
+                    # Deletion intake must remain available after employment,
+                    # company suspension, or Employee-module disablement. Those
+                    # lifecycle gates govern product access, not privacy rights.
+                    cur.execute("SELECT 1 FROM companies WHERE company_code=%s LIMIT 1", (company,))
+                    if cur.fetchone():
+                        cur.execute(
+                            """
+                            SELECT *
+                              FROM employees
+                             WHERE company_code=%s
+                               AND (
+                                 lower(trim(coalesce(email, '')))=%s
+                                 OR (%s <> '' AND regexp_replace(coalesce(phone, ''), '[^0-9]', '', 'g')=%s)
+                               )
+                             ORDER BY employee_key
+                             LIMIT 2
+                            """,
+                            (company, identity, identity_phone, identity_phone),
+                        )
+                        matches = [dict(row) for row in cur.fetchall()]
+                        if len(matches) == 1:
+                            candidate = matches[0]
+                            cur.execute(
+                                """
+                                SELECT EXISTS (
+                                  SELECT 1 FROM employee_app_invites
+                                   WHERE company_code=%s AND employee_key=%s
+                                  UNION ALL
+                                  SELECT 1 FROM employee_sessions
+                                   WHERE company_code=%s AND employee_key=%s
+                                ) AS has_account
+                                """,
+                                (company, candidate["employee_key"], company, candidate["employee_key"]),
+                            )
+                            if bool((cur.fetchone() or {}).get("has_account")):
+                                employee = candidate
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error("public account deletion lookup unavailable: %s", type(exc).__name__)
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "account_deletion_temporarily_unavailable",
+                    "message": "The deletion request service is temporarily unavailable. Please try again.",
+                },
+                headers=headers,
+            ) from exc
+
+    if employee:
+        try:
+            create_employee_account_deletion_request(
+                company_code=company,
+                employee_key=str(employee.get("employee_key") or ""),
+                employee=employee,
+                reason=body.reason,
+                channel="public_web",
+                audit_context={
+                    "company_code": company,
+                    "actor_role": "employee_public_request",
+                    "requested_by": "public_account_deletion_form",
+                },
+            )
+        except Exception as exc:
+            logger.error("public account deletion task creation unavailable: %s", type(exc).__name__)
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "account_deletion_temporarily_unavailable",
+                    "message": "The deletion request service is temporarily unavailable. Please try again.",
+                },
+                headers=headers,
+            ) from exc
+    return PublicDeleteJSONResponse(_PUBLIC_ACCOUNT_DELETION_GENERIC, headers=headers)
 
 
 # --- Dashboard side: HR provisions an app invite ----------------------------

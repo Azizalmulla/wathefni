@@ -59,6 +59,7 @@ PREAUTH_EXACT = {
     ("GET", "/auth/store-review-availability"),
     ("POST", "/app/auth/store-review-login"),
     ("POST", "/dashboard/mobile/auth/store-review-login"),
+    ("POST", "/public/account-deletion/request"),
 }
 PUBLIC_PREFIXES = (
     "/health",

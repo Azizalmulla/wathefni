@@ -127,6 +127,15 @@ _BASE_POLICIES: dict[str, RateLimitPolicy] = {
         dimensions=("source",),
         description="First-party client crash ingest (R8).",
     ),
+    "public_account_deletion": RateLimitPolicy(
+        key="public_account_deletion",
+        limit=5,
+        window_seconds=15 * 60,
+        lock_seconds=30 * 60,
+        mode=MODE_REQUEST,
+        dimensions=("source", "identity"),
+        description="Public employee account/data deletion request initiation.",
+    ),
 }
 
 # Per-dimension limit multipliers: a shared office NAT should not lock out on the

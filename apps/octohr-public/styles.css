@@ -151,6 +151,40 @@ h1 {
 .document .meta { margin-top: 18px; font-size: 14px; }
 .document section { padding-top: 1px; }
 
+.deletion-page { max-width: 900px; }
+.deletion-page .lead { margin-bottom: 38px; }
+.request-card {
+  margin: 34px 0 54px;
+  padding: 30px;
+  border: 2px solid var(--ink);
+  border-radius: 28px;
+  background: var(--surface);
+}
+.request-card h2 { margin-top: 0; }
+.request-card form { display: grid; gap: 10px; margin-top: 24px; }
+.request-card label { margin-top: 10px; font-size: 14px; font-weight: 800; }
+.request-card label > span[lang="ar"] { color: var(--muted); font-weight: 650; }
+.request-card input[type="text"],
+.request-card textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fffdfa;
+  color: var(--ink);
+  font: inherit;
+}
+.request-card input:focus-visible,
+.request-card textarea:focus-visible { outline: 3px solid rgba(214, 112, 165, .35); border-color: var(--ink); }
+.confirmation { display: flex; align-items: flex-start; gap: 12px; color: var(--muted); line-height: 1.55; }
+.confirmation input { width: 20px; height: 20px; flex: 0 0 auto; margin-top: 2px; accent-color: var(--ink); }
+.submit-button { width: fit-content; margin-top: 12px; cursor: pointer; }
+.submit-button:disabled { cursor: wait; opacity: .62; }
+.form-status { min-height: 1.7em; margin: 8px 0 0; font-weight: 700; }
+.form-status[data-kind="success"] { color: #176b3a; }
+.form-status[data-kind="error"] { color: #9a2f27; }
+.deletion-arabic { margin-bottom: 42px; }
+
 footer {
   display: flex;
   justify-content: space-between;
@@ -172,4 +206,6 @@ footer {
   .feature { padding: 28px 0; }
   .feature + .feature { padding-left: 0; border-top: 1px solid var(--line); border-left: 0; }
   footer { flex-direction: column; }
+  .request-card { padding: 22px; }
+  .submit-button { width: 100%; }
 }

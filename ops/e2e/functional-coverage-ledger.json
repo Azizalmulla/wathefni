@@ -1,19 +1,19 @@
 {
   "generated_from": "source inventory",
   "counts": {
-    "total": 2097,
+    "total": 2098,
     "by_surface": {
       "hr_web": 648,
       "setup": 27,
       "employee_mobile": 75,
       "hr_mobile": 40,
       "deep_link": 38,
-      "api": 1241,
+      "api": 1242,
       "assistant": 28
     },
     "by_status": {
       "structural_covered": 176,
-      "contract_covered": 1883,
+      "contract_covered": 1884,
       "live_covered": 38
     }
   },
@@ -38765,6 +38765,31 @@
       "auth_dependencies": [
         "employee_app_context"
       ],
+      "proof_dimensions": [
+        "authorized_domain",
+        "permission_module",
+        "tenant_scope",
+        "state_result",
+        "unauthorized_fail_closed"
+      ]
+    },
+    {
+      "id": "api:post:/public/account-deletion/request",
+      "surface": "api",
+      "module": "app",
+      "route": "/public/account-deletion/request",
+      "action": "post",
+      "entitlement": "",
+      "permission": "",
+      "prerequisites": "",
+      "expected_result": "Authorized request reaches the canonical domain contract; invalid tenant/module/permission fails closed",
+      "backend_effect": "app.public_account_deletion_request",
+      "test_strategy": "route_contract+authorized_domain+fail_closed",
+      "test_id": "wathefni-orchestrator/test_public_account_deletion_contract.py",
+      "status": "contract_covered",
+      "source_module": "app",
+      "endpoint": "public_account_deletion_request",
+      "auth_dependencies": [],
       "proof_dimensions": [
         "authorized_domain",
         "permission_module",

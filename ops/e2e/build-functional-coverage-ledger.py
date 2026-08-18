@@ -224,6 +224,7 @@ API_SOURCE_PROOFS = {
 
 
 API_PATH_PROOFS = (
+    ("/public/account-deletion/request", "wathefni-orchestrator/test_public_account_deletion_contract.py"),
     ("/ready", "wathefni-orchestrator/smoke-test-r8-delivery-safety.py"),
     ("/health", "wathefni-orchestrator/smoke-test-r8-delivery-safety.py"),
     ("/setup-console", "wathefni-orchestrator/smoke-test-setup-console.py"),

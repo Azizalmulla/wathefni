@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Request deletion of an OctoHR employee account and associated personal data without using the mobile app." />
+  <link rel="canonical" href="https://octo-hr.com/delete-account" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/delete-account.js" defer></script>
+  <title>Delete your account — OctoHR</title>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <a class="brand" href="/" aria-label="OctoHR home"><span class="mark" aria-hidden="true">O</span>OctoHR</a>
+      <nav aria-label="Primary navigation"><a href="/privacy">Privacy</a><a href="/support">Support</a></nav>
+    </header>
+
+    <main class="document deletion-page">
+      <p class="eyebrow">OctoHR employee account</p>
+      <h1>Delete your account and data</h1>
+      <p class="lead">You can initiate an account and personal-data deletion request here without opening the OctoHR app. Your request is sent to the HR team that controls your company workspace.</p>
+
+      <section class="request-card" aria-labelledby="request-title">
+        <h2 id="request-title">Submit a deletion request</h2>
+        <p>Use the company code and work email address or phone number registered with your OctoHR Employee account. To protect account privacy, the confirmation does not reveal whether an account exists.</p>
+
+        <form id="deletion-request-form" novalidate>
+          <label for="company-code">Company code <span lang="ar" dir="rtl">رمز الشركة</span></label>
+          <input id="company-code" name="company_code" type="text" autocomplete="organization" maxlength="64" required />
+
+          <label for="identity">Work email or phone <span lang="ar" dir="rtl">البريد الإلكتروني للعمل أو رقم الهاتف</span></label>
+          <input id="identity" name="identity" type="text" autocomplete="username" maxlength="254" required />
+
+          <label for="reason">Additional details (optional) <span lang="ar" dir="rtl">تفاصيل إضافية (اختياري)</span></label>
+          <textarea id="reason" name="reason" maxlength="500" rows="4" placeholder="For example, tell HR whether you are also requesting deletion of uploaded documents."></textarea>
+
+          <label class="confirmation" for="confirmed">
+            <input id="confirmed" name="confirmed" type="checkbox" required />
+            <span>I request deletion of my OctoHR employee account and associated personal data, subject to the retention requirements explained below.<br /><span lang="ar" dir="rtl">أطلب حذف حساب الموظف في OctoHR والبيانات الشخصية المرتبطة به، مع مراعاة متطلبات الاحتفاظ الموضحة أدناه.</span></span>
+          </label>
+
+          <button class="button submit-button" type="submit">Submit deletion request</button>
+          <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section>
+        <h2>What happens next</h2>
+        <ol>
+          <li>If the details match an OctoHR Employee account, one idempotent deletion task is created for the correct company's HR team.</li>
+          <li>Your employer verifies the request and determines which employment records must be retained. Submitting this form does not immediately erase statutory records.</li>
+          <li>When the request is approved and completed, account access is deactivated and data that is not subject to a retention requirement is deleted or irreversibly anonymized. HR will provide the applicable verification steps, expected completion timing, and retention outcome.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Data deleted or deactivated</h2>
+        <p>When your employer completes an approved request, the requested deletion scope includes revoking or deleting OctoHR access sessions, refresh credentials, push-notification tokens, and app-device access. Profile/contact data, uploaded copies, support data, and other personal data are deleted or irreversibly anonymized when they are no longer required for employment administration, security, legal obligations, or a live dispute.</p>
+      </section>
+
+      <section>
+        <h2>Data that may be retained</h2>
+        <p>Your employer is the data controller. It may need to retain core employment records such as contracts and personnel-file documents, payroll and payslip records, attendance and leave history, approvals, and security/audit evidence.</p>
+        <p>For Kuwait private-sector workspaces, OctoHR's configured baseline prevents automatic purging of governed personnel records for at least <strong>365 days after employment ends</strong>. A longer period applies when required by the employer's documented retention policy, payroll or tax obligations, an investigation, a legal hold, or an active claim. Records under a legal hold are kept until the hold or claim is resolved and the applicable retention period has ended. Your HR team can provide the exact policy that applies to your employment record.</p>
+      </section>
+
+      <section class="arabic deletion-arabic" lang="ar" dir="rtl">
+        <h2>طلب حذف الحساب والبيانات</h2>
+        <p>يمكنك تقديم الطلب من هذه الصفحة دون استخدام التطبيق. يُرسل الطلب إلى فريق الموارد البشرية في شركتك للتحقق منه. بعد الموافقة، يتم إلغاء جلسات الدخول ورموز الجهاز وحذف أو إخفاء هوية البيانات التي لا يلزم الاحتفاظ بها. قد تحتفظ الشركة بسجلات التوظيف والرواتب والحضور والإجازات والموافقات وسجلات التدقيق وفق سياستها والقانون. في مساحات العمل الخاصة بالقطاع الأهلي في الكويت، يمنع الإعداد الأساسي الحذف التلقائي للسجلات المنظمة لمدة لا تقل عن 365 يوماً بعد انتهاء العمل، وقد تطول المدة عند وجود التزام قانوني أو مطالبة أو حجز قانوني.</p>
+      </section>
+
+      <section>
+        <h2>Need help?</h2>
+        <p>Contact your employer's HR team about the request or the records it must retain. For OctoHR privacy questions, email <a href="mailto:privacy@octo-hr.com">privacy@octo-hr.com</a>. For product support, visit <a href="/support">OctoHR Support</a>.</p>
+      </section>
+    </main>
+
+    <footer><span>© 2026 OctoHR</span><div class="footer-links"><a href="/privacy">Privacy</a><a href="/support">Support</a></div></footer>
+  </div>
+</body>
+</html>

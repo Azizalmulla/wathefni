@@ -28,6 +28,16 @@ def route_functions(path: Path) -> dict[str, tuple[str, str]]:
     return routes
 
 
+def function_source(path: Path, name: str) -> str:
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    lines = source.splitlines()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            return "\n".join(lines[node.lineno - 1 : node.end_lineno])
+    raise AssertionError(f"Missing function {name} in {path}")
+
+
 class InteractionAuthorityContracts(unittest.TestCase):
     def test_attendance_ops_use_read_and_manage_permissions(self) -> None:
         routes = route_functions(ROOT / "attendance_ops_http.py")
@@ -62,8 +72,25 @@ class InteractionAuthorityContracts(unittest.TestCase):
             'require_employee_app_feature(context, "settings", action="request_deletion")',
             body,
         )
-        self.assertIn("pg_advisory_xact_lock", body)
-        self.assertIn("task_type='account_deletion_request'", body)
+        self.assertIn("create_employee_account_deletion_request", body)
+        authority = function_source(ROOT / "app.py", "create_employee_account_deletion_request")
+        self.assertIn("pg_advisory_xact_lock", authority)
+        self.assertIn("task_type='account_deletion_request'", authority)
+
+    def test_public_account_deletion_converges_on_tenant_scoped_authority(self) -> None:
+        routes = route_functions(ROOT / "app.py")
+        _, body = routes["/public/account-deletion/request"]
+        self.assertIn("create_employee_account_deletion_request", body)
+        self.assertIn("SELECT 1 FROM companies WHERE company_code=%s", body)
+        self.assertIn("WHERE company_code=%s", body)
+        self.assertIn("FROM employee_app_invites", body)
+        self.assertIn("FROM employee_sessions", body)
+        self.assertIn("len(matches) == 1", body)
+        self.assertIn("_PUBLIC_ACCOUNT_DELETION_GENERIC", body)
+        self.assertNotIn("_employee_app_company_gate", body)
+        self.assertNotIn("_employee_app_runtime_access", body)
+        self.assertNotIn("employee_app_activate", body)
+        self.assertNotIn("INSERT INTO employee_sessions", body)
 
 
 if __name__ == "__main__":

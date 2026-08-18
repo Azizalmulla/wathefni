@@ -61,6 +61,14 @@
 		reverse_proxy 127.0.0.1:8010
 	}
 
+	# Google Play's public account-deletion resource posts through this narrow
+	# unauthenticated adapter. The application enforces origin, rate-limit,
+	# tenant, identity, and anti-enumeration controls before creating the same
+	# canonical HR task used by the authenticated Employee app.
+	handle /public/account-deletion/request {
+		reverse_proxy 127.0.0.1:8010
+	}
+
 	# Store-review authentication is isolated in the application authority.
 	# Keep these exact routes explicit so the root availability probe is not
 	# swallowed by the API host's final 404 while /app* and /dashboard/* retain
