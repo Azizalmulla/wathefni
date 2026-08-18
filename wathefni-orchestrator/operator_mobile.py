@@ -979,6 +979,29 @@ def _scope_metadata(scope: dict[str, Any], role: str) -> dict[str, Any]:
     }
 
 
+def _mobile_company_identity(app_mod: Any, company: str) -> dict[str, Any]:
+    """Project tenant identity through the newest available app authority.
+
+    Production compatibility may temporarily expose the older canonical
+    ``company_profile_payload`` without the newer mobile projection helper.
+    Keep the adapter tenant-bound and avoid making the HR session depend on a
+    wholesale monolith replacement.
+    """
+    mobile_identity = getattr(app_mod, "mobile_company_identity", None)
+    if callable(mobile_identity):
+        return mobile_identity(company)
+    profile_reader = getattr(app_mod, "company_profile_payload", None)
+    profile = profile_reader(company) if callable(profile_reader) else {}
+    display_name = str((profile or {}).get("name") or "").strip()
+    return {
+        "company_code": company,
+        "display_name": display_name,
+        "display_name_en": "",
+        "display_name_ar": "",
+        "logo_url": None,
+    }
+
+
 def build_mobile_me_payload(app_mod: Any, context: dict[str, Any]) -> dict[str, Any]:
     public = context.get("hr_user") if isinstance(context.get("hr_user"), dict) else app_mod.dashboard_user_public(context.get("actor"))
     company = context["company_code"]
@@ -1007,7 +1030,7 @@ def build_mobile_me_payload(app_mod: Any, context: dict[str, Any]) -> dict[str, 
 
     return {
         "ok": True,
-        "company_identity": app_mod.mobile_company_identity(company),
+        "company_identity": _mobile_company_identity(app_mod, company),
         "principal": {
             "user_id": public.get("user_id"),
             "company_code": company,

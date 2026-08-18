@@ -99,6 +99,10 @@ def main() -> int:
     check("HR Mobile never uses browser dashboard context", "Depends(dashboard_context)" not in mobile_http_src)
     check("HTTP uses employee_app_context", "employee_app_context" in http_src)
 
+    operator_src = (ROOT / "operator_mobile.py").read_text(encoding="utf-8")
+    check("HR Mobile company identity supports reconciled production monolith", "company_profile_payload" in operator_src)
+    check("HR Mobile company identity remains tenant-bound", '"company_code": company' in operator_src)
+
     emp_comp = (MOBILE / "src" / "composition" / "employeeAppComposition.ts").read_text(encoding="utf-8")
     check("employee composition has performance", "'performance'" in emp_comp or '"performance"' in emp_comp)
     check("employee hub exists", (MOBILE / "app" / "performance" / "index.tsx").is_file())
