@@ -44,8 +44,10 @@ dependency closure is tracked in
 already-frozen authority and the normal role + module + company-scoped guards.
 
 The initial production gates are tenant-scoped to `OCTOHR-STORE-REVIEW` in
+`ops/systemd/octohr-production-parity.env`, loaded last by
 `ops/systemd/octohr-production-parity.conf`. Existing `WATHEFNI` Payroll canary allowlists and synthetic
-markers are explicitly retained while the synthetic review tenant is appended.
+markers are explicitly retained while the synthetic review tenant is appended. The separate Postmark
+secret EnvironmentFile is referenced by the drop-in but is not tracked in Git.
 
 ## Routing and review access
 
@@ -80,7 +82,42 @@ and employee-release authority; no frontend fallback or invented payroll respons
 - Frozen surface regressions: Performance 56/56, Talent 62/62, Learning 78/78, Benefits 92/92, Engagement 97/97
 - Store-review access regression: 15/15
 - App-link regression: 20/20
-- Production deployment and live parity proof: pending the narrow deployment
-- Postmark live EN + AR delivery: pending secure Server API token availability
+- Production deployment: complete from Git checkpoint `49398b1d`; no wholesale `app.py` replacement
+- Generated production hashes:
+  - `app.py`: `e497590c645ce635be9014ada247209fe855b66fb7a6d0cad5b9b64a906a2e3f`
+  - `module_catalog.py`: `31bca651721d4f908e7dfabd1e47e870670632075ec10b284a391db9049be75a`
+  - Caddy: `b984b6435be8497f226b51d0912bbbe3dbd7c9b7808aaaf10029bcd3f2b3c094`
+- Frozen dependency closure: 30/30 production files byte-identical to Git
+- App-link adapter and store-review adapter: both byte-identical to Git
+- Non-secret production parity env and systemd drop-in: both byte-identical to Git
+- Live route graph: 933 routes; intake/app-link/review markers present; Employee route counts are
+  Performance 12, Talent 5, Learning 7, Benefits 7, Engagement 4
+- Public health/readiness: `/health` 200 `ok`; `/ready` 200 `ready`
+- R8 readiness: migration versions 1 and 2 applied, no pending migration, no drift, failed jobs 0,
+  recent error events 0, delivery contract `r8-delivery-safety-v1`, link signing green
+- Public associations: Apple AASA 200 with one app detail; Android Asset Links 200 with one statement
+- Review kill switch OFF proof: all review login routes returned the generic unavailable response
+- Review kill switch restored ON: only the fixed Apple/Google × HR/Employee matrix authenticated;
+  arbitrary identity and cross-principal attempts were denied
+- Review dataset API proof: all 12 requested domains returned 200 with populated synthetic records.
+  The released Employee views included shifts, attendance, leave, payslips, documents, onboarding,
+  notifications, Performance/OKRs, Talent, Learning, Benefits, and Engagement.
+- Canonical payslip proof: `/app/payslips` returned three released synthetic payslips for the qualified
+  reviewer identity after Wave 1 → Wave 2A → Wave 3 generation/release; no frontend fallback was used
+- Postmark runtime: provider `postmark`, token present through the owner-only secret file, canonical
+  sender `OctoHR <no-reply@octo-hr.com>`
+- Postmark live delivery: separate EN and AR messages were accepted on the non-sandbox production
+  server, used the canonical sender, and both recorded a `Delivered` event
+- Customer-visible email branding regressions: EN + AR activation and general email scans pass with
+  canonical support/privacy addresses and zero unexplained Wathefni/وظفني branding
+- Unexplained production application code drift: **0**
 
-This record must be updated with the deployed hashes and live production proofs before final store builds.
+## Remaining production-only differences
+
+| Observed difference | Classification | Explanation |
+|---|---|---|
+| Active systemd/Caddy installation paths and service process environment | Deployment configuration | Reproduced from the tracked Caddy, drop-in, and non-secret env files |
+| Postmark token, database/session material, reviewer credential hashes and owner passwords | Secret | Owner-only files; intentionally excluded from Git and logs |
+| Review tenant rows, released synthetic payroll records, file objects, audit rows, logs, caches, bytecode, backups | Generated/runtime state | Created through tracked canonical authorities or by the running platform |
+| Production `app.py` and module catalog composite | Deployment configuration | Deterministically reproduced by the fail-closed tracked patcher from the recorded accepted base hashes; generated hashes match this record |
+| Unexplained code drift | Unexplained code drift | **None (0)** |
