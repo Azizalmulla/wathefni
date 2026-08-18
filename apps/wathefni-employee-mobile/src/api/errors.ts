@@ -71,6 +71,10 @@ export function approvedErrorMessage(error: unknown, t: Translate): string {
       return t('feature.unavailable.message')
     case 'leave_type_not_available':
       return t('leave.typeUnavailable')
+    case 'leave_already_started':
+      return t('leave.cancelAlreadyStarted')
+    case 'leave_already_taken':
+      return t('leave.cancelAlreadyTaken')
     case 'unsupported_file_type':
       return t('upload.unsupportedType')
     case 'empty_file':

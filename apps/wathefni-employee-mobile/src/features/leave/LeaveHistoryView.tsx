@@ -11,7 +11,7 @@ import { FeatureUnavailableState } from '@/components/AccessStates'
 import { EditorialHeading, FadeIn } from '@/components/premium'
 import { PageScreen, PageScrollView } from '@/components/layout'
 import { ListRow, PageBackButton, ShowMoreButton } from '@/components/lists'
-import { isLeaveCancellableStatus } from '@/features/leave/leaveRequests'
+import { canCancelLeaveRequest, leavePresentationStatus } from '@/features/leave/leaveRequests'
 import { LeaveStatusMark } from '@/features/leave/leaveStatusPills'
 import { formatDateRange, kuwaitToday, statusLabel } from '@/lib/format'
 import { selectionFeedback } from '@/native/haptics'
@@ -255,15 +255,16 @@ export function LeaveHistoryView({
             {rows.map((request) => {
               const dates = formatDateRange(request.start_date, request.end_date, locale)
               const type = request.leave_type ? leaveTypeLabel(request.leave_type, t) : null
-              const status = statusLabel(request.status, t)
-              const cancellable = canCancel && isLeaveCancellableStatus(request.status)
+              const presentationStatus = leavePresentationStatus(request)
+              const status = statusLabel(presentationStatus, t)
+              const cancellable = canCancel && canCancelLeaveRequest(request)
               return (
                 <ListRow
                   key={request.leave_id}
                   title={type || dates}
                   subtitle={type ? dates : null}
                   meta={request.reason}
-                  trailing={<LeaveStatusMark status={request.status} label={status} />}
+                  trailing={<LeaveStatusMark status={presentationStatus} label={status} />}
                   accessibilityLabel={`${type ? `${type}. ` : ''}${dates}. ${status}`}
                 >
                   {cancellable ? (

@@ -8,9 +8,6 @@
 
 import type { LeaveRequestRow } from '@/api/types'
 
-/** Statuses the cancel endpoint still accepts (must stay aligned with backend). */
-export const LEAVE_CANCELLABLE_STATUSES = ['requested', 'approved'] as const
-
 const HISTORY_STATUSES = new Set([
   'cancelled',
   'canceled',
@@ -27,9 +24,13 @@ export function leaveStatusKey(status: string | null | undefined): string {
     .toLowerCase()
 }
 
-export function isLeaveCancellableStatus(status: string | null | undefined): boolean {
-  const key = leaveStatusKey(status)
-  return (LEAVE_CANCELLABLE_STATUSES as readonly string[]).includes(key)
+export function leavePresentationStatus(request: LeaveRequestRow): string {
+  return leaveStatusKey(request.presentation_status || request.status)
+}
+
+/** Backend read-projection authority. No status/date inference is allowed here. */
+export function canCancelLeaveRequest(request: LeaveRequestRow): boolean {
+  return request.can_cancel === true && (request.allowed_actions ?? []).includes('cancel')
 }
 
 export function isLeaveHistoryStatus(status: string | null | undefined): boolean {
@@ -41,8 +42,8 @@ export function isLeaveHistoryStatus(status: string | null | undefined): boolean
  * then by start date ascending so the next absence reads first.
  */
 function compareCurrent(a: LeaveRequestRow, b: LeaveRequestRow): number {
-  const aNeed = leaveStatusKey(a.status) === 'requested' ? 0 : 1
-  const bNeed = leaveStatusKey(b.status) === 'requested' ? 0 : 1
+  const aNeed = leavePresentationStatus(a) === 'requested' ? 0 : 1
+  const bNeed = leavePresentationStatus(b) === 'requested' ? 0 : 1
   if (aNeed !== bNeed) return aNeed - bNeed
   return String(a.start_date || '').localeCompare(String(b.start_date || ''))
 }
@@ -68,7 +69,7 @@ export function partitionLeaveRequests(requests: LeaveRequestRow[] | null | unde
   const current: LeaveRequestRow[] = []
   const history: LeaveRequestRow[] = []
   for (const row of requests ?? []) {
-    if (isLeaveHistoryStatus(row.status)) history.push(row)
+    if (isLeaveHistoryStatus(leavePresentationStatus(row))) history.push(row)
     else current.push(row)
   }
   current.sort(compareCurrent)

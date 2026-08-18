@@ -22,6 +22,9 @@ os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_HOST", "127.0.0.1")
 os.environ.setdefault("WATHEFNI_EXPECTED_DATABASE_PORT", "5432")
 os.environ.setdefault("WATHEFNI_EMPLOYEE_APP", "on")
 os.environ.setdefault("WATHEFNI_SCHEMA_APPLY", "0")
+os.environ.setdefault("WATHEFNI_LEAVE_WORKFLOW_WAVE3", "on")
+os.environ.setdefault("WATHEFNI_LEAVE_WAVE4", "on")
+os.environ.setdefault("WATHEFNI_LEAVE_REAL_DECISION_GATE", "off")
 
 import app as legacy  # noqa: E402
 import employee_app_access as access  # noqa: E402
@@ -223,6 +226,33 @@ def main() -> int:
         # Peer isolation seed
         peer_id = seed_leave(key_b, start=today - timedelta(days=10), status="cancelled")
 
+        # Kuwait-local cancellation projection boundaries. These remain stored
+        # as approved; only the read presentation changes for completed leave.
+        future_approved_id = seed_leave(
+            key_a,
+            start=today + timedelta(days=1),
+            status="approved",
+            reason=f"{TAG}-future-approved",
+        )
+        starts_today_id = seed_leave(
+            key_a,
+            start=today,
+            end=today + timedelta(days=1),
+            status="approved",
+            reason=f"{TAG}-starts-today",
+        )
+        past_approved_id = seed_leave(
+            key_a,
+            start=today - timedelta(days=2),
+            end=today - timedelta(days=1),
+            status="approved",
+            reason=f"{TAG}-past-approved",
+        )
+        seeded_ids.extend((future_approved_id, starts_today_id, past_approved_id))
+        seeded_by_status.setdefault("approved", []).extend(
+            (future_approved_id, starts_today_id, past_approved_id)
+        )
+
         # Pages of 2
         p1 = history(key_a, limit=2)
         check("page1 has_more", p1.get("has_more") is True)
@@ -267,6 +297,30 @@ def main() -> int:
         check(
             "status values preserved",
             all(r.get("status") == "cancelled" for r in cancelled["requests"]),
+        )
+        approved = history(key_a, limit=100, status="approved")
+        approved_by_id = {row["leave_id"]: row for row in approved.get("requests") or []}
+        check(
+            "future approved projects canonical cancel authority",
+            approved_by_id.get(future_approved_id, {}).get("can_cancel") is True
+            and approved_by_id.get(future_approved_id, {}).get("allowed_actions") == ["cancel"]
+            and approved_by_id.get(future_approved_id, {}).get("presentation_status") == "approved",
+        )
+        check(
+            "starts-today is blocked using Kuwait-local policy",
+            approved_by_id.get(starts_today_id, {}).get("can_cancel") is False
+            and approved_by_id.get(starts_today_id, {}).get("temporal_state") == "in_progress"
+            and approved_by_id.get(starts_today_id, {}).get("cancel_block_reason") == "leave_already_started",
+        )
+        check("approved filter excludes derived completed", past_approved_id not in approved_by_id)
+        completed = history(key_a, limit=100, status="completed")
+        completed_by_id = {row["leave_id"]: row for row in completed.get("requests") or []}
+        check(
+            "past approved is derived Completed without rewriting canonical status",
+            completed_by_id.get(past_approved_id, {}).get("status") == "approved"
+            and completed_by_id.get(past_approved_id, {}).get("presentation_status") == "completed"
+            and completed_by_id.get(past_approved_id, {}).get("can_cancel") is False
+            and completed_by_id.get(past_approved_id, {}).get("cancel_block_reason") == "leave_already_taken",
         )
 
         # Year / range

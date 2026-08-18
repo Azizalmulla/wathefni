@@ -543,6 +543,19 @@ def main() -> int:
         check("already taken denied", taken_cancel.get("error") == "leave_already_taken", taken_cancel)
         started_cancel = app.cancel_leave_request({"leave_id": started["leave_id"]}, company_code=company, created_by_phone=hr_phone)
         check("already started denied", started_cancel.get("error") == "leave_already_started", started_cancel)
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT leave_id, status FROM leave_requests WHERE leave_id IN (%s,%s)",
+                    (taken["leave_id"], started["leave_id"]),
+                )
+                blocked_rows = {str(row["leave_id"]): str(row["status"]) for row in cur.fetchall()}
+        check(
+            "blocked temporal cancellations do not mutate canonical approval",
+            blocked_rows.get(str(taken["leave_id"])) == "approved"
+            and blocked_rows.get(str(started["leave_id"])) == "approved",
+            blocked_rows,
+        )
 
         # Unpaid — no money in handoff
         unpaid_day = wd_day + timedelta(days=2)

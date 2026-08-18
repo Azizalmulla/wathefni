@@ -467,12 +467,12 @@ def main() -> None:
         and "leave.historyAll.loadOlder" in leave_history,
     )
     check(
-        "leave authority is untouched: cancel still gated by the same capability",
+        "leave cancel UI consumes backend-projected action authority",
         "canCancel" in remaining
-        and "isLeaveCancellableStatus" in remaining
-        and "LEAVE_CANCELLABLE_STATUSES" in read("src/features/leave/leaveRequests.ts")
-        and "requested" in read("src/features/leave/leaveRequests.ts")
-        and "approved" in read("src/features/leave/leaveRequests.ts"),
+        and "canCancelLeaveRequest" in remaining
+        and "allowed_actions" in read("src/features/leave/leaveRequests.ts")
+        and "request.can_cancel === true" in read("src/features/leave/leaveRequests.ts")
+        and "new Date" not in read("src/features/leave/leaveRequests.ts"),
     )
 
     # --- 7. Payslips

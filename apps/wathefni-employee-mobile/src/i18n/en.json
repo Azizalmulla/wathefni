@@ -648,6 +648,8 @@
   "leave.reason": "Reason (optional)",
   "leave.submitted": "Leave request submitted",
   "leave.cancelled": "Leave request cancelled",
+  "leave.cancelAlreadyStarted": "This leave has already started and can no longer be cancelled.",
+  "leave.cancelAlreadyTaken": "This leave has already been completed and can no longer be cancelled.",
   "leave.typeAnnual": "Annual",
   "leave.typeSick": "Sick",
   "leave.typeOther": "Other leave",

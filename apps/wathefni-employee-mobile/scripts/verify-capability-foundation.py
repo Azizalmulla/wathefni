@@ -399,7 +399,8 @@ def main() -> None:
         and "status" in leave_history_view
         and "balances" not in leave_history_view
         and "PastelCard" not in leave_history_view
-        and "isLeaveCancellableStatus" in leave_history_view,
+        and "canCancelLeaveRequest" in leave_history_view
+        and "leavePresentationStatus" in leave_history_view,
     )
     check("documents do not read secure-store tokens directly", "loadSession" not in documents and "downloadFile" in documents)
     check(

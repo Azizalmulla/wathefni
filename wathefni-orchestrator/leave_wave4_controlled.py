@@ -112,7 +112,73 @@ def real_decision_denied(
     }
 
 
-def enrich_leave_row_for_ui(row: dict[str, Any], *, as_of: date | None = None) -> dict[str, Any]:
+def cancel_policy_projection(
+    row: dict[str, Any],
+    *,
+    actor_phone: str | None,
+    is_self: bool,
+    is_synthetic_subject: bool,
+    action_enabled: bool = True,
+    allow_cancel_started: bool = False,
+    as_of: date | None = None,
+) -> dict[str, Any]:
+    """Project the same cancel policy used by the mutation onto a Leave read.
+
+    This is the canonical eligibility authority for clients.  It deliberately
+    preserves the stored workflow status while exposing Kuwait-local temporal
+    state and allowed actions.  Clients must not reconstruct this decision from
+    device time or from ``status`` alone.
+    """
+    import leave_workflow_wave3 as w3
+
+    status = str(row.get("status") or "").strip().lower()
+    if as_of is None:
+        as_of = datetime.now(tz=KUWAIT_TZ).date()
+    try:
+        temporal_state = w3.classify_leave_temporal_state(row, as_of=as_of)
+    except Exception:
+        temporal_state = "unknown"
+
+    denial_code: str | None = None
+    if not action_enabled:
+        denial_code = "leave_cancel_not_available"
+    elif status not in {"requested", "approved"}:
+        denial_code = "leave_not_cancellable"
+    elif status == "approved" or not is_self:
+        real_denied = real_decision_denied(
+            leave=row,
+            actor_phone=actor_phone,
+            is_synthetic_subject=is_synthetic_subject,
+        )
+        if real_denied:
+            denial_code = str(real_denied.get("error") or "leave_cancel_not_available")
+
+    if denial_code is None and status == "approved" and w3.leave_workflow_wave3_enabled():
+        if temporal_state == "completed":
+            denial_code = "leave_already_taken"
+        elif temporal_state == "in_progress" and not allow_cancel_started:
+            denial_code = "leave_already_started"
+
+    can_cancel = denial_code is None
+    presentation_status = "completed" if status == "approved" and temporal_state == "completed" else status
+    return {
+        "temporal_state": temporal_state,
+        "presentation_status": presentation_status,
+        "can_cancel": can_cancel,
+        "allowed_actions": ["cancel"] if can_cancel else [],
+        "cancel_block_reason": denial_code,
+    }
+
+
+def enrich_leave_row_for_ui(
+    row: dict[str, Any],
+    *,
+    as_of: date | None = None,
+    actor_phone: str | None = None,
+    is_self: bool = True,
+    is_synthetic_subject: bool = False,
+    cancel_action_enabled: bool = True,
+) -> dict[str, Any]:
     """Add presentation helpers without mutating balance enforcement."""
     import leave_workflow_wave3 as w3
 
@@ -132,17 +198,22 @@ def enrich_leave_row_for_ui(row: dict[str, Any], *, as_of: date | None = None) -
     out["payroll_owns_unpaid_money"] = out["is_unpaid"]
     if as_of is None:
         as_of = datetime.now(tz=KUWAIT_TZ).date()
-    try:
-        out["temporal_state"] = w3.classify_leave_temporal_state(out, as_of=as_of)
-    except Exception:
-        out["temporal_state"] = "unknown"
+    cancel_projection = cancel_policy_projection(
+        out,
+        actor_phone=actor_phone,
+        is_self=is_self,
+        is_synthetic_subject=is_synthetic_subject,
+        action_enabled=cancel_action_enabled,
+        as_of=as_of,
+    )
+    out.update(cancel_projection)
     # Next action hint for queue UX
     status = str(out.get("status") or "")
     if status in {"requested", "needs_review"}:
         out["next_action"] = "decide"
     elif status == "needs_info":
         out["next_action"] = "await_resubmit"
-    elif status == "approved" and out.get("temporal_state") == "future":
+    elif status == "approved" and out.get("can_cancel"):
         out["next_action"] = "may_cancel"
     else:
         out["next_action"] = None

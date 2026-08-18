@@ -18669,36 +18669,31 @@ def cancel_leave_request(action: dict[str, Any], *, company_code: str | None, cr
     if expected_version == -1:
         return {"ok": False, "error": "invalid_expected_row_version", "action": action}
     was_approved = str(leave.get("status") or "") == "approved"
-    # Wave 4: real leave cancel-by-others / cancel-approved requires allowlisted HR/manager
-    if was_approved or not is_self:
-        synth = _leave_authority.is_leave_synthetic_employee(
-            leave, employee_key=str(leave.get("employee_key") or ""), phone=str(leave.get("employee_phone") or "")
-        )
-        real_denied = _leave_w4.real_decision_denied(
-            leave=leave, actor_phone=created_by_phone, is_synthetic_subject=synth
-        )
-        if real_denied:
-            return {**real_denied, "leave": json_safe(leave), "action": action}
-    temporal = "future"
-    if _leave_w3.leave_workflow_wave3_enabled() and was_approved:
-        temporal = _leave_w3.classify_leave_temporal_state(leave, as_of=kuwait_today())
-        if temporal == "completed":
-            return {
-                "ok": False,
-                "error": "leave_already_taken",
-                "temporal_state": temporal,
-                "leave": json_safe(leave),
-                "action": action,
-            }
-        if temporal == "in_progress" and not action.get("allow_cancel_started"):
-            return {
-                "ok": False,
-                "error": "leave_already_started",
-                "temporal_state": temporal,
-                "leave": json_safe(leave),
-                "action": action,
-                "hint": "Set allow_cancel_started=true for explicit HR cancel-after-start with audit + balance reversal",
-            }
+    synth = _leave_authority.is_leave_synthetic_employee(
+        leave, employee_key=str(leave.get("employee_key") or ""), phone=str(leave.get("employee_phone") or "")
+    )
+    cancel_policy = _leave_w4.cancel_policy_projection(
+        leave,
+        actor_phone=created_by_phone,
+        is_self=is_self,
+        is_synthetic_subject=synth,
+        action_enabled=True,
+        allow_cancel_started=bool(action.get("allow_cancel_started")),
+        as_of=kuwait_today(),
+    )
+    temporal = str(cancel_policy.get("temporal_state") or "future")
+    blocked = cancel_policy.get("cancel_block_reason")
+    if blocked:
+        response = {
+            "ok": False,
+            "error": blocked,
+            "temporal_state": temporal,
+            "leave": json_safe(leave),
+            "action": action,
+        }
+        if blocked == "leave_already_started":
+            response["hint"] = "Set allow_cancel_started=true for explicit HR cancel-after-start with audit + balance reversal"
+        return response
     with db_connect() as conn:
         with conn.cursor() as cur:
             _leave_authority.ensure_leave_authority_wave1_schema(cur)
@@ -69781,7 +69776,8 @@ def _employee_leave_request_rows(
 ) -> list[dict[str, Any]]:
     cur.execute(
         """
-        SELECT leave_id, start_date, end_date, leave_type, status, reason, requested_at, decided_at
+        SELECT leave_id, employee_key, employee_phone, start_date, end_date,
+               leave_type, status, reason, requested_at, decided_at
         FROM leave_requests
         WHERE company_code=%s AND employee_key=%s
         ORDER BY start_date DESC
@@ -69841,9 +69837,20 @@ def decode_leave_history_cursor(token: str | None) -> dict[str, str] | None:
     return {"d": day, "id": lid}
 
 
-def _employee_leave_request_entry(row: dict[str, Any]) -> dict[str, Any]:
-    """Same field set as `/app/leave` request rows — no invented balance/policy facts."""
-    return {
+def _employee_leave_request_entry(
+    row: dict[str, Any],
+    *,
+    actor_phone: str | None,
+    cancel_action_enabled: bool,
+    as_of: date,
+) -> dict[str, Any]:
+    """Employee Leave read projection over canonical workflow state.
+
+    Stored ``status`` remains untouched for audit/history.  Cancellation
+    eligibility and temporal presentation come from the same Kuwait-local
+    policy helper used by the mutation; the client is not a policy authority.
+    """
+    stored = {
         "leave_id": str(row.get("leave_id") or "") or None,
         "start_date": row.get("start_date"),
         "end_date": row.get("end_date"),
@@ -69853,6 +69860,20 @@ def _employee_leave_request_entry(row: dict[str, Any]) -> dict[str, Any]:
         "requested_at": row.get("requested_at"),
         "decided_at": row.get("decided_at"),
     }
+    synthetic = _leave_authority.is_leave_synthetic_employee(
+        row,
+        employee_key=str(row.get("employee_key") or ""),
+        phone=str(row.get("employee_phone") or ""),
+    )
+    policy = _leave_w4.cancel_policy_projection(
+        row,
+        actor_phone=actor_phone,
+        is_self=True,
+        is_synthetic_subject=synthetic,
+        action_enabled=cancel_action_enabled,
+        as_of=as_of,
+    )
+    return {**stored, **policy}
 
 
 def _employee_leave_history_page(
@@ -69865,6 +69886,7 @@ def _employee_leave_history_page(
     date_from: date | None = None,
     date_to: date | None = None,
     status: str | None = None,
+    as_of: date | None = None,
 ) -> dict[str, Any]:
     """Keyset page of leave requests, newest start_date first.
 
@@ -69873,12 +69895,26 @@ def _employee_leave_history_page(
     the silent `/app/leave` hard cap.
     """
     page_size = max(1, min(int(limit or _LEAVE_HISTORY_DEFAULT_LIMIT), _LEAVE_HISTORY_MAX_LIMIT))
+    policy_day = as_of or datetime.now(tz=KUWAIT_TZ).date()
     decoded = decode_leave_history_cursor(cursor)
     params: list[Any] = [company_code, employee_key]
     clauses = ["company_code=%s", "employee_key=%s"]
     if status is not None:
-        clauses.append("lower(status)=%s")
-        params.append(status)
+        if status == "completed":
+            clauses.append(
+                "(lower(status)='completed' OR (lower(status)='approved' AND COALESCE(end_date,start_date) < %s))"
+            )
+            params.append(policy_day)
+        elif status == "approved":
+            clauses.append("lower(status)='approved' AND COALESCE(end_date,start_date) >= %s")
+            params.append(policy_day)
+        elif status in {"cancelled", "canceled"}:
+            clauses.append("lower(status) IN ('cancelled','canceled')")
+        elif status in {"rejected", "denied"}:
+            clauses.append("lower(status) IN ('rejected','denied')")
+        else:
+            clauses.append("lower(status)=%s")
+            params.append(status)
     if date_from is not None:
         clauses.append("start_date >= %s")
         params.append(date_from)
@@ -69896,7 +69932,8 @@ def _employee_leave_history_page(
     params.append(page_size + 1)
     cur.execute(
         f"""
-        SELECT leave_id, start_date, end_date, leave_type, status, reason, requested_at, decided_at
+        SELECT leave_id, employee_key, employee_phone, start_date, end_date,
+               leave_type, status, reason, requested_at, decided_at
         FROM leave_requests
         WHERE {' AND '.join(clauses)}
         ORDER BY start_date DESC, leave_id::text DESC
@@ -70985,11 +71022,22 @@ def app_onboarding_item_versions(item_id: str, context: dict[str, Any] = Depends
 def app_leave(context: dict[str, Any] = Depends(employee_app_context)):
     company = context["company_code"]
     key = context["employee_key"]
-    require_employee_app_feature(context, "leave")
+    feature = require_employee_app_feature(context, "leave")
+    cancel_action_enabled = "cancel" in set(feature.get("actions") or ())
+    as_of = kuwait_today()
     requests: list[dict[str, Any]] = []
     with db_connect() as conn:
         with conn.cursor() as cur:
-            requests = _employee_leave_request_rows(cur, company_code=company, employee_key=key)
+            rows = _employee_leave_request_rows(cur, company_code=company, employee_key=key)
+            requests = [
+                _employee_leave_request_entry(
+                    row,
+                    actor_phone=context.get("phone"),
+                    cancel_action_enabled=cancel_action_enabled,
+                    as_of=as_of,
+                )
+                for row in rows
+            ]
     balances = leave_balances_for_employee(company, key) if leave_balances_enabled() else []
     return json_safe({
         "ok": True,
@@ -71023,7 +71071,9 @@ def app_leave_history(
     """
     company = context["company_code"]
     key = context["employee_key"]
-    require_employee_app_feature(context, "leave")
+    feature = require_employee_app_feature(context, "leave")
+    cancel_action_enabled = "cancel" in set(feature.get("actions") or ())
+    as_of = kuwait_today()
     locale_s = locale if isinstance(locale, str) else None
     cursor_s = cursor if isinstance(cursor, str) else None
     date_from_s = date_from if isinstance(date_from, str) else None
@@ -71087,6 +71137,7 @@ def app_leave_history(
                     date_from=bound_from,
                     date_to=bound_to,
                     status=status_filter,
+                    as_of=as_of,
                 )
             except Exception:
                 logger.exception("leave history read failed employee=%s", key)
@@ -71096,7 +71147,15 @@ def app_leave_history(
                 ) from None
         conn.commit()
 
-    items = [_employee_leave_request_entry(row) for row in (page.get("requests") or [])]
+    items = [
+        _employee_leave_request_entry(
+            row,
+            actor_phone=context.get("phone"),
+            cancel_action_enabled=cancel_action_enabled,
+            as_of=as_of,
+        )
+        for row in (page.get("requests") or [])
+    ]
     return json_safe(
         {
             "ok": True,

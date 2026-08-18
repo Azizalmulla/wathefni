@@ -393,6 +393,14 @@ export type LeaveRequestRow = {
   reason: string | null
   requested_at: string | null
   decided_at: string | null
+  /** Kuwait-local backend read projection; never recompute from device time. */
+  temporal_state: 'future' | 'in_progress' | 'completed' | 'unknown'
+  /** Derived display state. The stored canonical `status` remains unchanged. */
+  presentation_status: string
+  /** Canonical action authority projected by the backend. */
+  can_cancel: boolean
+  allowed_actions: string[]
+  cancel_block_reason?: string | null
 }
 
 export type LeaveResponse = {

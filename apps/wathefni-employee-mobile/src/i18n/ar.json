@@ -648,6 +648,8 @@
   "leave.reason": "السبب (اختياري)",
   "leave.submitted": "تم إرسال طلب الإجازة",
   "leave.cancelled": "تم إلغاء طلب الإجازة",
+  "leave.cancelAlreadyStarted": "بدأت هذه الإجازة بالفعل ولم يعد من الممكن إلغاؤها.",
+  "leave.cancelAlreadyTaken": "انتهت هذه الإجازة بالفعل ولم يعد من الممكن إلغاؤها.",
   "leave.typeAnnual": "سنوية",
   "leave.typeSick": "مرضية",
   "leave.typeOther": "إجازة أخرى",

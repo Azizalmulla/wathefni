@@ -38,7 +38,8 @@ import {
   type LeaveBalanceFact,
 } from '@/features/leave/leaveBalance'
 import {
-  isLeaveCancellableStatus,
+  canCancelLeaveRequest,
+  leavePresentationStatus,
   partitionLeaveRequests,
 } from '@/features/leave/leaveRequests'
 import { LeaveStatusMark } from '@/features/leave/leaveStatusPills'
@@ -438,17 +439,18 @@ function LeaveRequestRowItem({
 }) {
   const { t, locale, isRTL } = useI18n()
   const align = readingEdgeAlign(isRTL)
-  // Cancel rules match `/app/leave/{id}/cancel`: capability + requested|approved only.
-  const cancellable = canCancel && isLeaveCancellableStatus(request.status)
+  // Action eligibility comes only from the canonical backend read projection.
+  const cancellable = canCancel && canCancelLeaveRequest(request)
   const dates = formatDateRange(request.start_date, request.end_date, locale)
   const type = request.leave_type ? leaveTypeLabel(request.leave_type, t) : null
-  const status = statusLabel(request.status, t)
+  const presentationStatus = leavePresentationStatus(request)
+  const status = statusLabel(presentationStatus, t)
   return (
     <ListRow
       title={type || dates}
       subtitle={type ? dates : null}
       meta={request.reason}
-      trailing={<LeaveStatusMark status={request.status} label={status} />}
+      trailing={<LeaveStatusMark status={presentationStatus} label={status} />}
       accessibilityLabel={`${type ? `${type}. ` : ''}${dates}. ${status}`}
     >
       {cancellable ? (
