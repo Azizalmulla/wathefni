@@ -12,6 +12,7 @@ session_hr = (ROOT / "src/hr/auth/session.ts").read_text(encoding="utf-8")
 client_hr = (ROOT / "src/hr/api/client.ts").read_text(encoding="utf-8")
 layout = (ROOT / "app/_layout.tsx").read_text(encoding="utf-8")
 index_route = (ROOT / "app/index.tsx").read_text(encoding="utf-8")
+activate_route = (ROOT / "app/(auth)/activate.tsx").read_text(encoding="utf-8")
 unified = (ROOT / "src/principals/UnifiedSignInView.tsx").read_text(encoding="utf-8")
 gate = (ROOT / "src/principals/PrincipalGate.tsx").read_text(encoding="utf-8")
 freeze = Path("/Users/azizalmulla/Desktop/claw/docs/ADMIN_MOBILE_SCOPE_FREEZE.md").read_text(
@@ -67,6 +68,10 @@ check("app.config forces HR workspace on eas update", "EXPO_PUBLIC_HR_WORKSPACE_
 check(
     "stable root index mounts unsigned entry",
     "UnsignedEntry" in index_route and "StableRootNavigator" in layout,
+)
+check(
+    "employee no-session route preserves unified sign-in methods",
+    "UnsignedEntry" in activate_route and "ActivationView" not in activate_route,
 )
 check(
     "root controller routes HR without replacing the root navigator",
