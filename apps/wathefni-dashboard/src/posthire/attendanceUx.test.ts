@@ -24,6 +24,39 @@ describe('attendanceUx Wave 4 helpers', () => {
     expect(ar).toMatch(/مستبعد/)
   })
 
+  it('prefers a server life_state when the backend already emitted one', () => {
+    expect(
+      attendanceLifeState({
+        status: 'completed',
+        late_minutes: 12,
+        life_state: 'approved',
+        metadata: { exception_state: 'missing_check_out' },
+      }),
+    ).toBe('approved')
+  })
+
+  it('uses a server payroll exclusion sentence when present', () => {
+    expect(
+      payrollExclusionReason(
+        { payroll_exclusion_reason: 'Payroll locked this period.', metadata: { exception_state: 'missing_check_in' } },
+        'en',
+      ),
+    ).toBe('Payroll locked this period.')
+  })
+
+  it('prefers locale-specific payroll exclusion sentences from the backend', () => {
+    expect(
+      payrollExclusionReason(
+        {
+          payroll_exclusion_reason: 'Excluded from Payroll: Missing check-in. Complete the correction, then approve the day.',
+          payroll_exclusion_reason_en: 'Excluded from Payroll: Missing check-in. Complete the correction, then approve the day.',
+          payroll_exclusion_reason_ar: 'مستبعد من الرواتب: دخول ناقص. أكمل التصحيح ثم اعتمد اليوم.',
+        },
+        'ar',
+      ),
+    ).toBe('مستبعد من الرواتب: دخول ناقص. أكمل التصحيح ثم اعتمد اليوم.')
+  })
+
   it('labels approve-ready separately from applied', () => {
     expect(caseStatusLabel('approved', 'en')).toMatch(/ready to apply/i)
     expect(caseStatusLabel('applied', 'en')).toBe('Applied')

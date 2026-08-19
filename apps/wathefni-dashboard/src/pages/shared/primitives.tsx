@@ -21,7 +21,7 @@ export function MetricGrid({
         const Tag = interactive ? 'button' : 'section'
         return (
           <Tag
-            className={`rounded-[1.35rem] border border-line/55 bg-panel/70 p-4 text-left shadow-[0_10px_28px_rgba(24,20,15,0.035)]${interactive ? ' cursor-pointer transition hover:border-line' : ''}`}
+            className={`rounded-[1.35rem] border border-line/55 bg-panel/70 p-4 text-start shadow-[0_10px_28px_rgba(24,20,15,0.035)]${interactive ? ' cursor-pointer transition hover:border-line' : ''}`}
             key={metric.label}
             onClick={metric.onClick}
             type={interactive ? 'button' : undefined}

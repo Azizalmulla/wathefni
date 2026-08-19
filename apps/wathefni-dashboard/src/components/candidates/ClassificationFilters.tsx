@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/field'
+import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
 
 export type ClassificationAuthorityFilter =
   | 'confirmed_or_high_ai'
@@ -208,6 +209,9 @@ export function ClassificationFilterBar({
   dimensions = [],
   locale = 'en',
   deprecatedNodes = [],
+  taxonomyLoading = false,
+  taxonomyError = false,
+  onRetryTaxonomy,
 }: {
   value: ClassificationFiltersState
   onChange: (next: ClassificationFiltersState) => void
@@ -215,8 +219,17 @@ export function ClassificationFilterBar({
   dimensions?: TaxonomyDimension[]
   locale?: 'en' | 'ar'
   deprecatedNodes?: Array<{ node_id: string; message?: string }>
+  taxonomyLoading?: boolean
+  taxonomyError?: boolean
+  onRetryTaxonomy?: () => void
 }) {
   if (!enabled) return null
+
+  const taxonomyState = resolveListDataState({
+    loading: taxonomyLoading,
+    error: taxonomyError,
+    itemCount: dimensions.length,
+  })
 
   const selectedChips = Object.entries(value.dimensionNodes).flatMap(([dimension, ids]) =>
     ids.map((nodeId) => ({ dimension, nodeId })),
@@ -229,6 +242,22 @@ export function ClassificationFilterBar({
       <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">
         {locale === 'ar' ? 'مرشحات الخبرة' : 'Expertise filters'}
       </div>
+      {taxonomyState !== 'ready' ? (
+        <ResourceState
+          kind={taxonomyState === 'empty' ? 'empty' : taxonomyState}
+          locale={locale}
+          title={
+            taxonomyState === 'empty'
+              ? locale === 'ar'
+                ? 'لا توجد أبعاد تصنيف بعد'
+                : 'No classification dimensions yet'
+              : undefined
+          }
+          onRetry={onRetryTaxonomy}
+          retrying={taxonomyLoading}
+          testId="classification-taxonomy-state"
+        />
+      ) : (
       <div className="flex flex-wrap gap-3">
         {CLASSIFICATION_DIMENSIONS.map((dimension) => (
           <DimensionSelector
@@ -246,6 +275,7 @@ export function ClassificationFilterBar({
           />
         ))}
       </div>
+      )}
       <div className="flex flex-wrap gap-2">
         <select
           className="h-10 rounded-full border border-line/60 bg-white/80 px-3 text-sm"
@@ -321,22 +351,31 @@ export function useTaxonomyDimensionsLoader(
   loader: () => Promise<{ dimensions?: TaxonomyDimension[] }>,
 ) {
   const [dimensions, setDimensions] = useState<TaxonomyDimension[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
   useEffect(() => {
     if (!enabled) {
       setDimensions([])
+      setLoading(false)
+      setError(false)
       return
     }
     let cancelled = false
+    setLoading(true)
+    setError(false)
     void loader()
       .then((payload) => {
         if (!cancelled) setDimensions(payload.dimensions || [])
       })
       .catch(() => {
-        if (!cancelled) setDimensions([])
+        if (!cancelled) setError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
       })
     return () => {
       cancelled = true
     }
   }, [enabled, loader])
-  return dimensions
+  return { dimensions, loading, error }
 }

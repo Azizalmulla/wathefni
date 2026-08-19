@@ -103,7 +103,7 @@ describe('workspaceCapability composition matrix', () => {
     expect(recruiter.pageAllowed('assessments')).toBe(false)
   })
 
-  test('compliance-only owner still gets Employees via admin soft gate', () => {
+  test('compliance-only owner does not get Employees without employees.read', () => {
     const authority = resolveWorkspaceAuthority({
       enabledModules: ['compliance'],
       access: {
@@ -112,13 +112,25 @@ describe('workspaceCapability composition matrix', () => {
       },
       catalog,
     })
-    expect(authority.pageAllowed('employees')).toBe(true)
+    expect(authority.pageAllowed('employees')).toBe(false)
     expect(authority.pageAllowed('compliance')).toBe(true)
     expect(authority.pageAllowed('overview')).toBe(false)
     expect(authority.navGroups.map((g) => g.group)).toEqual(['posthire', 'settings'])
   })
 
-  test('empty permissions fail closed for the Employees admin soft gate', () => {
+  test('compliance-only actor with employees.read can open Employees', () => {
+    const authority = resolveWorkspaceAuthority({
+      enabledModules: ['compliance'],
+      access: {
+        role: 'owner',
+        permissions: ['compliance.read', 'employees.read', 'users.manage', 'settings.manage'],
+      },
+      catalog,
+    })
+    expect(authority.pageAllowed('employees')).toBe(true)
+  })
+
+  test('empty permissions fail closed for Employees', () => {
     const authority = resolveWorkspaceAuthority({
       enabledModules: ['compliance'],
       access: { role: 'viewer', permissions: [] },
@@ -201,5 +213,17 @@ describe('workspaceCapability composition matrix', () => {
     expect(owner.overview.showRolePriority).toBe(true)
     expect(viewer.overview.showWorkQueue).toBe(false)
     expect(viewer.overview.showRolePriority).toBe(false)
+  })
+
+  test('missing enabled_modules fails closed instead of enabling prehire', () => {
+    const authority = resolveWorkspaceAuthority({
+      enabledModules: undefined,
+      access: { role: 'owner', permissions: ROLE_PERMISSIONS_FIXTURE.owner },
+      catalog,
+    })
+    expect(authority.pageAllowed('overview')).toBe(false)
+    expect(authority.pageAllowed('jobs')).toBe(false)
+    expect(authority.pageAllowed('payroll')).toBe(false)
+    expect(authority.pageAllowed('employees')).toBe(false)
   })
 })

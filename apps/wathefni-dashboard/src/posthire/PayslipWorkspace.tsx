@@ -215,7 +215,7 @@ export function PayslipWorkspace({ access, permissions, onNotice, onAccessIssue 
               className="mt-1 w-full rounded-lg border border-line/80 bg-white px-3 py-2 text-[13px] text-text"
               value={employeeKey}
               onChange={(e) => setEmployeeKey(e.target.value)}
-              placeholder="WATHEFNI-PYW1-…"
+              placeholder={isAr ? 'مثال: EMP-…' : 'e.g. EMP-…'}
             />
           </label>
           <label className="block text-[12px] text-subtle">

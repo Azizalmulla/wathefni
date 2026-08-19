@@ -86,6 +86,8 @@ import type {
   RemediationQueueResponse,
 } from '@/types'
 
+import { readStoredRecruitingLocale } from '@/lib/dashboardLocale'
+
 type DashboardErrorDetail = {
   error?: string
   message?: string
@@ -114,7 +116,7 @@ export class DashboardApiError extends Error {
 
 function dashboardRequestFailedMessage(): string {
   try {
-    if (globalThis.localStorage?.getItem('wathefni_recruiting_locale') === 'ar') {
+    if (readStoredRecruitingLocale() === 'ar') {
       return 'تعذر إكمال طلب لوحة التحكم.'
     }
   } catch {
@@ -4866,6 +4868,25 @@ export function getTalentWorkspace(access: DashboardAccess) {
 export function getTalentProfiles(access: DashboardAccess) {
   return request<{ profiles?: Array<Record<string, unknown>>; total?: number }>(
     '/dashboard/posthire/talent/profiles',
+    access,
+  )
+}
+
+export function getTalentReviews(access: DashboardAccess) {
+  return request<{ reviews?: Array<Record<string, unknown>> }>('/dashboard/posthire/talent/reviews', access)
+}
+
+export function getTalentSuccession(access: DashboardAccess) {
+  return request<{
+    critical_roles?: Array<Record<string, unknown>>
+    plans?: Array<Record<string, unknown>>
+    uncovered?: Array<Record<string, unknown>>
+  }>('/dashboard/posthire/talent/succession', access)
+}
+
+export function getTalentNineBox(access: DashboardAccess) {
+  return request<{ enabled?: boolean; configs?: Array<Record<string, unknown>> }>(
+    '/dashboard/posthire/talent/nine-box',
     access,
   )
 }

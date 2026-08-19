@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
 import {
   connectGoogleEnterprise,
   connectMicrosoftEnterprise,
@@ -55,10 +56,14 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
   const isAr = locale === 'ar'
   const advanced = variant === 'advanced'
   const [platformIntegrations, setPlatformIntegrations] = useState<PlatformCompanyIntegration[]>([])
+  const [integrationsLoading, setIntegrationsLoading] = useState(true)
+  const [integrationsError, setIntegrationsError] = useState(false)
   const [hideCandidateNames, setHideCandidateNames] = useState(true)
   const [connectProvider, setConnectProvider] = useState<'google_workspace' | 'microsoft_365' | null>(null)
   const [connectMode, setConnectMode] = useState<'enterprise_app' | 'enterprise_dwd' | 'oauth_delegated' | null>(null)
   const [checklist, setChecklist] = useState<Record<string, unknown> | null>(null)
+  const [checklistError, setChecklistError] = useState(false)
+  const [checklistLoading, setChecklistLoading] = useState(false)
   const [connectBusy, setConnectBusy] = useState(false)
   const [m365Tenant, setM365Tenant] = useState('')
   const [m365ClientId, setM365ClientId] = useState('')
@@ -78,17 +83,51 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
 
   useEffect(() => {
     let cancelled = false
+    setIntegrationsLoading(true)
+    setIntegrationsError(false)
     void getPlatformIntegrations(access)
       .then((res) => {
         if (!cancelled) setPlatformIntegrations(res.integrations || [])
       })
       .catch(() => {
-        if (!cancelled) setPlatformIntegrations([])
+        if (!cancelled) setIntegrationsError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setIntegrationsLoading(false)
       })
     return () => {
       cancelled = true
     }
   }, [access])
+
+  const integrationsState = resolveListDataState({
+    loading: integrationsLoading,
+    error: integrationsError,
+    itemCount: platformIntegrations.length,
+  })
+
+  const renderIntegrationsList = (emptyCopy: string) => {
+    if (integrationsState !== 'ready') {
+      return (
+        <ResourceState
+          kind={integrationsState === 'empty' ? 'empty' : integrationsState}
+          locale={isAr ? 'ar' : 'en'}
+          title={integrationsState === 'empty' ? emptyCopy : undefined}
+          onRetry={() => {
+            setIntegrationsLoading(true)
+            setIntegrationsError(false)
+            void getPlatformIntegrations(access)
+              .then((res) => setPlatformIntegrations(res.integrations || []))
+              .catch(() => setIntegrationsError(true))
+              .finally(() => setIntegrationsLoading(false))
+          }}
+          retrying={integrationsLoading}
+          testId="platform-integrations-state"
+        />
+      )
+    }
+    return null
+  }
 
   if (advanced) {
     return (
@@ -127,8 +166,8 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
           <p className="mt-1 text-[12.5px] text-muted">
             {isAr ? 'معرّفات داخلية وحالات خام للمساعدة في الدعم.' : 'Internal identifiers and raw states for support troubleshooting.'}
           </p>
-          {platformIntegrations.length === 0 ? (
-            <p className="mt-3 text-sm text-muted">{isAr ? 'لا اتصالات منصة بعد.' : 'No platform connections yet.'}</p>
+          {integrationsState !== 'ready' ? (
+            renderIntegrationsList(isAr ? 'لا اتصالات منصة بعد.' : 'No platform connections yet.')
           ) : (
             <ul className="mt-3 space-y-2">
               {platformIntegrations.map((integ) => (
@@ -295,9 +334,18 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
               onClick={() => {
                 const mode = connectProvider === 'microsoft_365' ? 'enterprise_app' : 'enterprise_dwd'
                 setConnectMode(mode)
+                setChecklistLoading(true)
+                setChecklistError(false)
                 void getPlatformIntegrationChecklist(access, connectProvider, mode)
-                  .then((res) => setChecklist(res.checklist || null))
-                  .catch(() => setChecklist(null))
+                  .then((res) => {
+                    setChecklistError(false)
+                    setChecklist(res.checklist || null)
+                  })
+                  .catch(() => {
+                    setChecklist(null)
+                    setChecklistError(true)
+                  })
+                  .finally(() => setChecklistLoading(false))
               }}
             >
               {isAr ? 'اتصال مُدار من تقنية المعلومات' : 'IT-managed company connection'}
@@ -307,9 +355,18 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
               variant={connectMode === 'oauth_delegated' ? 'default' : 'secondary'}
               onClick={() => {
                 setConnectMode('oauth_delegated')
+                setChecklistLoading(true)
+                setChecklistError(false)
                 void getPlatformIntegrationChecklist(access, connectProvider, 'oauth_delegated')
-                  .then((res) => setChecklist(res.checklist || null))
-                  .catch(() => setChecklist(null))
+                  .then((res) => {
+                    setChecklistError(false)
+                    setChecklist(res.checklist || null)
+                  })
+                  .catch(() => {
+                    setChecklist(null)
+                    setChecklistError(true)
+                  })
+                  .finally(() => setChecklistLoading(false))
               }}
             >
               {isAr ? 'اتصال سريع بحسابك' : 'Quick account connection'}
@@ -317,7 +374,13 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
           </div>
         ) : null}
 
-        {checklist ? (
+        {checklistLoading || checklistError ? (
+          <ResourceState
+            kind={checklistError ? 'error' : 'loading'}
+            locale={isAr ? 'ar' : 'en'}
+            testId="platform-integration-checklist-state"
+          />
+        ) : checklist ? (
           <details className="rounded-lg border border-line/40 bg-white/80 p-3 text-sm">
             <summary className="cursor-pointer font-medium text-ink">{isAr ? 'دليل الإعداد' : 'Setup guide'}</summary>
             <p className="mb-2 mt-2 text-xs text-muted">{(checklist.required_admin_role as string) || ''}</p>
@@ -447,7 +510,9 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
         ) : null}
       </div>
 
-      {platformIntegrations.length > 0 ? (
+      {integrationsState !== 'ready' ? (
+        renderIntegrationsList(isAr ? 'لا اتصالات بعد — ابدأ بالربط أعلاه.' : 'No connections yet — start with Connect above.')
+      ) : (
         <ul className="space-y-2">
           {platformIntegrations.map((integ) => (
             <li key={integ.integration_id} className="rounded-xl border border-line/50 bg-white px-3 py-2 text-sm">
@@ -487,8 +552,6 @@ export function PlatformIntegrationsPanel({ access, locale = 'en', onNotice, var
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-sm text-muted">{isAr ? 'لا اتصالات بعد — ابدأ بالربط أعلاه.' : 'No connections yet — start with Connect above.'}</p>
       )}
     </div>
   )

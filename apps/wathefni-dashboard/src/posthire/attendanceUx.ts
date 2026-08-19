@@ -12,6 +12,22 @@ export type AttendanceLifeState =
   | 'absent'
   | 'on_leave'
 
+const ATTENDANCE_LIFE_STATES: readonly AttendanceLifeState[] = [
+  'captured',
+  'incomplete',
+  'needs_review',
+  'approved',
+  'disputed',
+  'locked',
+  'absent',
+  'on_leave',
+]
+
+function asLifeState(value: unknown): AttendanceLifeState | null {
+  const key = String(value || '').trim().toLowerCase()
+  return (ATTENDANCE_LIFE_STATES as readonly string[]).includes(key) ? (key as AttendanceLifeState) : null
+}
+
 export function attendanceLifeState(row: {
   status?: string | null
   late_minutes?: number | null
@@ -20,9 +36,12 @@ export function attendanceLifeState(row: {
   approval_status?: string | null
   payroll_eligible?: boolean | null
   payroll_locked?: boolean | null
+  life_state?: string | null
   metadata?: Record<string, unknown> | null
 }): AttendanceLifeState {
   const meta = row.metadata || {}
+  const provided = asLifeState(row.life_state ?? meta.life_state)
+  if (provided) return provided
   const exception = String(row.exception_state || meta.exception_state || 'none')
   const approval = String(row.approval_status || meta.approval_status || '').toLowerCase()
   const status = String(row.status || '').toLowerCase()
@@ -72,11 +91,21 @@ export function payrollExclusionReason(
     approval_status?: string | null
     payroll_eligible?: boolean | null
     payroll_locked?: boolean | null
+    payroll_exclusion_reason?: string | null
+    payroll_exclusion_reason_en?: string | null
+    payroll_exclusion_reason_ar?: string | null
     metadata?: Record<string, unknown> | null
   },
   locale: AttendanceLocale,
 ): string | null {
   const meta = row.metadata || {}
+  const localized =
+    locale === 'ar'
+      ? String(row.payroll_exclusion_reason_ar || meta.payroll_exclusion_reason_ar || '').trim()
+      : String(row.payroll_exclusion_reason_en || meta.payroll_exclusion_reason_en || '').trim()
+  if (localized) return localized
+  const provided = String(row.payroll_exclusion_reason || meta.payroll_exclusion_reason || '').trim()
+  if (provided) return provided
   const eligible = row.payroll_eligible ?? meta.payroll_eligible
   const locked = Boolean(row.payroll_locked || meta.payroll_locked)
   const exception = String(row.exception_state || meta.exception_state || 'none')

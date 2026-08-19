@@ -1,17 +1,23 @@
 import type { DashboardTeamUser, DashboardUserAccess } from '@/types'
 
-export function hasDashboardPermission(access: DashboardUserAccess | null | undefined, permission: string) {
-  return Boolean(access?.permissions?.includes(permission))
+export function hasActorPermission(permissions: readonly string[] | null | undefined, permission: string) {
+  const requested = String(permission || '').trim()
+  if (!requested || !Array.isArray(permissions) || permissions.length === 0) return false
+  if (permissions.includes('*:*')) return true
+  return permissions.includes(requested)
 }
 
+export function hasDashboardPermission(access: DashboardUserAccess | null | undefined, permission: string) {
+  return hasActorPermission(access?.permissions, permission)
+}
+
+/**
+ * Jobs UI visibility. Bootstrap emits explicit `jobs.*` via the backend expander
+ * in `prehire_jobs.expand_effective_jobs_permissions`. The client does not
+ * re-derive Jobs access from settings.manage or prehire.read.
+ */
 export function hasJobsPermission(access: DashboardUserAccess | null | undefined, permission: string) {
-  if (hasDashboardPermission(access, permission)) return true
-  // Temporary compatibility: existing administrators with settings.manage keep Jobs mutation access.
-  if (['jobs.create', 'jobs.edit', 'jobs.publish', 'jobs.close'].includes(permission) && hasDashboardPermission(access, 'settings.manage')) {
-    return true
-  }
-  if (permission === 'jobs.read' && hasDashboardPermission(access, 'prehire.read')) return true
-  return false
+  return hasDashboardPermission(access, permission)
 }
 
 const PERMISSION_CAPABILITY_LABELS: Record<string, string> = {
@@ -85,7 +91,7 @@ export function currentUserTeamRow(access: DashboardUserAccess | null | undefine
   if (!user?.user_id || !user.email) return null
   return {
     user_id: user.user_id,
-    company_code: user.company_code || 'WATHEFNI',
+    company_code: user.company_code || '',
     email: user.email,
     name: user.name,
     phone: user.phone,

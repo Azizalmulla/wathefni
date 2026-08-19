@@ -150,6 +150,10 @@ describe('Settings Email sending Communications', () => {
     expect(src).toContain('position_code')
     expect(src).toContain('Also send an email with calendar invitations')
     expect(src).toContain('Allow OctoHR emergency fallback')
+    expect(src).not.toContain("|| 'WATHEFNI'")
+    expect(src).not.toContain('Send through Wathefni')
+    expect(src).not.toContain('Wathefni')
+    expect(src).not.toContain('واثقني')
     expect(src).not.toContain('service principal')
     expect(src).not.toContain('RBAC')
     expect(src).not.toContain('Mail.Send')
@@ -183,12 +187,33 @@ describe('Settings Email sending Communications', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Email sending').length).toBeGreaterThan(0)
     })
-    expect(screen.getByText('Send through Wathefni')).toBeInTheDocument()
+    expect(screen.getByText('Send through OctoHR')).toBeInTheDocument()
+    expect(screen.queryByText('Send through Wathefni')).not.toBeInTheDocument()
     expect(screen.getByText('Send from our Microsoft mailbox')).toBeInTheDocument()
     expect(screen.getByText('Send from our company domain')).toBeInTheDocument()
     expect(screen.getByText('Email & document intake')).toBeInTheDocument()
     expect(screen.getByText('acme@inbound.wathefni.ai')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Setup guide'))
+    expect(screen.getByText('Forward CVs to your OctoHR intake address.')).toBeInTheDocument()
+    expect(screen.getByText('Forward CVs to OctoHR.')).toBeInTheDocument()
+    expect(screen.queryByText(/Wathefni|واثقني|وظفني/)).not.toBeInTheDocument()
     expect(screen.queryByText(/service principal/i)).not.toBeInTheDocument()
+  })
+
+  test('does not invent WATHEFNI when the company code is empty', () => {
+    renderWithProviders(
+      <SettingsPage
+        {...settingsBase}
+        access={{ ...access, companyCode: '' }}
+        userAccess={{
+          ...userAccess(),
+          user: { ...userAccess().user, company_code: '' },
+        }}
+      />,
+    )
+    expect(screen.getByTestId('settings-workspace')).toBeInTheDocument()
+    expect(screen.queryByText('WATHEFNI')).not.toBeInTheDocument()
+    expect(screen.getByText('Not loaded yet')).toBeInTheDocument()
   })
 
   test('AR locale uses RTL on communications cards', async () => {

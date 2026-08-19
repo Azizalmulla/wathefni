@@ -77,7 +77,13 @@ import {
   updateInterviewStatus,
   saveCandidateSavedView,
 } from '@/lib/api'
-import { accessIssueFromError, type AccessIssue } from '@/lib/access'
+import { accessIssueFromError, accessIssueMessage, type AccessIssue } from '@/lib/access'
+import { authCopy, type AuthCopyKey } from '@/lib/authCopy'
+import {
+  applyDocumentLocale,
+  persistRecruitingLocale,
+  readStoredRecruitingLocale,
+} from '@/lib/dashboardLocale'
 import { qk, stableFiltersKey, tenantRoot } from '@/lib/query/keys'
 import { syncSelectedApplication, useDashboardServerState } from '@/lib/query/useDashboardServerState'
 import {
@@ -141,7 +147,7 @@ import type {
   RankingResponse,
   SetupReadinessResponse,
 } from '@/types'
-import { AccessVerificationPage, NeedsSettings } from '@/pages/ShellStates'
+import { AccessVerificationPage, AuthSessionResolvingPage, NeedsSettings } from '@/pages/ShellStates'
 import { PageSkeleton } from '@/pages/PageSkeleton'
 import {
   LazyAdminAIPage,
@@ -160,7 +166,7 @@ import {
   LazySettingsPage,
 } from '@/pages/lazy'
 import { OverviewPage } from '@/pages/OverviewPage'
-import { hasDashboardPermission, hasJobsPermission } from '@/pages/shared/access'
+import { hasDashboardPermission } from '@/pages/shared/access'
 import {
   assessmentModuleEnabled,
   candidateName,
@@ -289,7 +295,7 @@ function storedAccess(): DashboardAccess {
   return {
     token: localStorage.getItem('wathefni_dashboard_token') || '',
     hrPhone: localStorage.getItem('wathefni_hr_phone') || '',
-    companyCode: localStorage.getItem('wathefni_company_code') || 'WATHEFNI',
+    companyCode: localStorage.getItem('wathefni_company_code') || '',
     email: localStorage.getItem('wathefni_dashboard_email') || '',
     password: '',
   }
@@ -299,7 +305,7 @@ function normalizedAccess(access: DashboardAccess): DashboardAccess {
   return {
     token: access.token.trim(),
     hrPhone: access.hrPhone.trim(),
-    companyCode: access.companyCode.trim().toUpperCase() || 'WATHEFNI',
+    companyCode: access.companyCode.trim().toUpperCase(),
     email: access.email?.trim() || '',
     password: access.password || '',
   }
@@ -380,21 +386,23 @@ function dashboardInviteLink(token: string) {
 
 function initialAccessIssue() {
   const saved = normalizedAccess(storedAccess())
-  return !saved.token || !saved.companyCode ? missingAccessIssue(saved) : null
+  return !saved.token || !saved.companyCode ? missingAccessIssue(saved, readStoredRecruitingLocale()) : null
 }
 
-function missingAccessIssue(access: DashboardAccess): AccessIssue {
+function missingAccessIssue(access: DashboardAccess, locale: RecruitingLocale = 'en'): AccessIssue {
   if (!access.token.trim()) {
     return {
       code: 'dashboard_auth_failed',
-      title: 'Sign in to OctoHR',
-      description: 'Use your workspace email and password to open the company dashboard.',
+      title: authCopy(locale, 'authSignInTitle'),
+      description: authCopy(locale, 'authSignInDescription'),
+      copyKey: 'authSignInDescription',
     }
   }
   return {
     code: 'dashboard_company_required',
-    title: 'Sign in to OctoHR',
-    description: 'Add your company code once so OctoHR can verify the workspace before loading hiring data.',
+    title: authCopy(locale, 'authSignInTitle'),
+    description: authCopy(locale, 'authCompanyRequired'),
+    copyKey: 'authCompanyRequired',
   }
 }
 
@@ -407,9 +415,15 @@ function App() {
     return 'overview'
   })
   const [lastWorkPage, setLastWorkPage] = useState<Page>('overview')
-  const [recruitingLocale, setRecruitingLocale] = useState<RecruitingLocale>(() =>
-    localStorage.getItem('wathefni_recruiting_locale') === 'ar' ? 'ar' : 'en',
-  )
+  const [recruitingLocale, setRecruitingLocale] = useState<RecruitingLocale>(() => readStoredRecruitingLocale())
+  const changeRecruitingLocale = useCallback((next: RecruitingLocale) => {
+    persistRecruitingLocale(next)
+    applyDocumentLocale(next)
+    setRecruitingLocale(next)
+  }, [])
+  useEffect(() => {
+    applyDocumentLocale(recruitingLocale)
+  }, [recruitingLocale])
   const [ranking, setRanking] = useState<RankingResponse | null>(null)
   const [rankingError, setRankingError] = useState(false)
   const [rankingBusy, setRankingBusy] = useState(false)
@@ -495,7 +509,7 @@ function App() {
   const [runningAction, setRunningAction] = useState<string | null>(null)
   const [importReloadKey, setImportReloadKey] = useState(0)
   const [lastSendResult, setLastSendResult] = useState<OutboundSendResult | null>(null)
-  const [notice, setNoticeState] = useState<{ text: string; tone: 'info' | 'success' | 'error' }>(() => ({
+  const [notice, setNoticeState] = useState<{ text: string; tone: 'info' | 'success' | 'error'; copyKey?: AuthCopyKey }>(() => ({
     text: initialAccessIssue()?.title || (access.token ? 'Loading saved dashboard access...' : 'Access verification required.'),
     tone: 'info',
   }))
@@ -518,6 +532,13 @@ function App() {
   }, [])
   const setNoticeErr = useCallback((text: string) => setNotice(text, 'error'), [setNotice])
   const setNoticeOk = useCallback((text: string) => setNotice(text, 'success'), [setNotice])
+  const setNoticeErrKey = useCallback((key: AuthCopyKey) => {
+    if (noticeTimer.current) {
+      window.clearTimeout(noticeTimer.current)
+      noticeTimer.current = null
+    }
+    setNoticeState({ text: authCopy(recruitingLocale, key), tone: 'error', copyKey: key })
+  }, [recruitingLocale])
   const [accessIssue, setAccessIssue] = useState<AccessIssue | null>(() => initialAccessIssue())
   const handleAccessIssue = useCallback((issue: AccessIssue) => {
     setAccessIssue(issue)
@@ -568,9 +589,13 @@ function App() {
     unifiedCandidatesEnabled,
     classificationUiEnabled,
     classificationDimensions,
+    classificationTaxonomyLoading,
+    classificationTaxonomyError,
+    retryClassificationTaxonomy,
     savedViews,
     jobsData,
     jobsLoading,
+    jobsError: jobsListError,
     allPositions,
     interviews,
     interviewsQuery,
@@ -636,7 +661,7 @@ function App() {
     const error = summaryQuery.error || bootstrapQuery.error
     if (!summaryQuery.isError && !bootstrapQuery.isError) return
     if (!error) return
-    const issue = accessIssueFromError(error)
+    const issue = accessIssueFromError(error, recruitingLocale)
     if (issue) {
       handleAccessIssue(issue)
       setNotice(issue.title)
@@ -646,6 +671,7 @@ function App() {
     bootstrapQuery.error,
     bootstrapQuery.isError,
     handleAccessIssue,
+    recruitingLocale,
     setNotice,
     summaryQuery.error,
     summaryQuery.isError,
@@ -722,10 +748,10 @@ function App() {
   const canManageAssessments = hasDashboardPermission(userAccess, 'assessment.manage')
   const canExportReports = hasDashboardPermission(userAccess, 'report.export')
   const canManageWorkspace = hasDashboardPermission(userAccess, 'users.manage')
-  const canCreateJobs = hasJobsPermission(userAccess, 'jobs.create')
-  const canEditJobs = hasJobsPermission(userAccess, 'jobs.edit')
-  const canPublishJobs = hasJobsPermission(userAccess, 'jobs.publish')
-  const canCloseJobs = hasJobsPermission(userAccess, 'jobs.close')
+  const canCreateJobs = hasDashboardPermission(userAccess, 'jobs.create')
+  const canEditJobs = hasDashboardPermission(userAccess, 'jobs.edit')
+  const canPublishJobs = hasDashboardPermission(userAccess, 'jobs.publish')
+  const canCloseJobs = hasDashboardPermission(userAccess, 'jobs.close')
   // Position pickers (candidate filter, CV-import assignment, ranking, overview
   // breakdown) need the FULL roster of jobs, not just the top 25 by activity
   // that `summary.positions` carries for the dashboard glance. Loaded via its
@@ -1116,7 +1142,7 @@ function App() {
     async (nextAccess = access) => {
       const effectiveAccess = normalizedAccess(nextAccess)
       if (!effectiveAccess.token || !effectiveAccess.companyCode) {
-        const issue = missingAccessIssue(effectiveAccess)
+        const issue = missingAccessIssue(effectiveAccess, recruitingLocale)
         setAccessIssue(issue)
         setNotice(issue.title)
         return
@@ -1374,7 +1400,13 @@ function App() {
     const nextAccess = normalizedAccess(access)
     if (inviteToken.trim()) {
       if (!acceptName.trim() || acceptPassword.length < 8) {
-        setNoticeErr('Enter your name and a password with at least 8 characters.')
+        setAccessIssue({
+          code: 'invite_validation',
+          title: authCopy(recruitingLocale, 'authAcceptInvite'),
+          description: authCopy(recruitingLocale, 'authInviteNamePassword'),
+          copyKey: 'authInviteNamePassword',
+        })
+        setNoticeErrKey('authInviteNamePassword')
         return
       }
       setBusy(true)
@@ -1400,25 +1432,47 @@ function App() {
         window.history.replaceState({}, '', window.location.pathname)
         setAccessIssue(null)
         setAccess(loggedInAccess)
-        setNoticeOk('Invite accepted. You’re signed in.')
+        setNoticeOk(authCopy(recruitingLocale, 'authInviteAccepted'))
         await refreshEverything(loggedInAccess)
         await loadTeam(loggedInAccess)
       } catch (error) {
-        setNoticeErr(friendlyDashboardError(error, 'Could not accept invite.'))
+        const issue = accessIssueFromError(error, recruitingLocale)
+        if (issue) {
+          setAccessIssue(issue)
+          setNoticeErr(accessIssueMessage(issue, recruitingLocale))
+        } else {
+          setNoticeErr(
+            friendlyDashboardError(error, authCopy(recruitingLocale, 'authCouldNotAcceptInvite'), recruitingLocale),
+          )
+        }
       } finally {
         setBusy(false)
       }
       return
     }
-    if ((!nextAccess.email || !nextAccess.password) && (!nextAccess.token || !nextAccess.companyCode)) {
-      const issue = missingAccessIssue(nextAccess)
+    const hasPasswordLogin = Boolean(nextAccess.email && nextAccess.password)
+    if (hasPasswordLogin && !nextAccess.companyCode) {
+      setAccessIssue({
+        code: 'dashboard_company_required',
+        title: authCopy(recruitingLocale, 'authSignInTitle'),
+        description: authCopy(recruitingLocale, 'authCompanyRequired'),
+        copyKey: 'authCompanyRequired',
+      })
+      setNoticeErrKey('authCompanyRequired')
+      return
+    }
+    if (!hasPasswordLogin) {
+      const issue = missingAccessIssue({ ...nextAccess, token: '' }, recruitingLocale)
       setAccessIssue(issue)
-      setNotice(issue.title)
       return
     }
     setBusy(true)
     try {
-      const login = await loginDashboard(nextAccess)
+      const login = await loginDashboard({
+        ...nextAccess,
+        token: '',
+        hrPhone: '',
+      })
       const loggedInAccess = normalizedAccess({
         ...nextAccess,
         token: login.access_token,
@@ -1434,7 +1488,7 @@ function App() {
       setChatConversationId(nextChatId)
       setAccessIssue(null)
       setAccess(loggedInAccess)
-      setNoticeOk('You’re signed in.')
+      setNoticeOk(authCopy(recruitingLocale, 'authSignedIn'))
       await loadChatSessions(loggedInAccess)
       await refreshEverything(loggedInAccess)
       await loadTeam(loggedInAccess)
@@ -1445,12 +1499,21 @@ function App() {
       const wasPasswordLogin = Boolean(nextAccess.email && nextAccess.password)
       const unauthorized = error instanceof DashboardApiError && (error.status === 401 || error.code === 'dashboard_auth_failed')
       if (wasPasswordLogin && unauthorized) {
-        setAccessIssue({ code: 'dashboard_auth_failed', title: 'Sign in to OctoHR', description: 'Incorrect email or password. Please try again.' })
-        setNoticeErr('Incorrect email or password. Please try again.')
+        setAccessIssue({
+          code: 'dashboard_auth_failed',
+          title: authCopy(recruitingLocale, 'authSignInTitle'),
+          description: authCopy(recruitingLocale, 'authIncorrectCredentials'),
+          copyKey: 'authIncorrectCredentials',
+        })
+        setNoticeErrKey('authIncorrectCredentials')
       } else {
-        const issue = accessIssueFromError(error) || { code: 'dashboard_auth_failed', title: 'Verify your access', description: friendlyDashboardError(error, 'Access needs to be verified.') }
+        const issue = accessIssueFromError(error, recruitingLocale) || {
+          code: 'dashboard_auth_failed',
+          title: authCopy(recruitingLocale, 'authSignInTitle'),
+          description: friendlyDashboardError(error, authCopy(recruitingLocale, 'authCouldNotSignIn'), recruitingLocale),
+        }
         setAccessIssue(issue)
-        setNotice(issue.title)
+        setNoticeErr(issue.description)
       }
     } finally {
       setBusy(false)
@@ -1536,7 +1599,7 @@ function App() {
       localStorage.removeItem('wathefni_hr_phone')
       localStorage.removeItem('wathefni_dashboard_email')
       localStorage.removeItem('wathefni_company_code')
-      const nextAccess = normalizedAccess({ token: '', hrPhone: '', companyCode: 'WATHEFNI', email: '', password: '' })
+      const nextAccess = normalizedAccess({ token: '', hrPhone: '', companyCode: '', email: '', password: '' })
       setAccess(nextAccess)
       queryClient.clear()
       bootNoticeShownRef.current = false
@@ -2171,6 +2234,54 @@ function App() {
                   ? 'eval'
                   : 'portfolio'
 
+  const pendingSessionAuthIssue =
+    (bootstrapQuery.isError ? accessIssueFromError(bootstrapQuery.error, recruitingLocale) : null)
+    || (summaryQuery.isError ? accessIssueFromError(summaryQuery.error, recruitingLocale) : null)
+  const resolvedAccessIssue =
+    accessIssue
+    || pendingSessionAuthIssue
+    || (showingInviteAcceptance || (access.token.trim() && access.companyCode.trim())
+      ? null
+      : missingAccessIssue(access, recruitingLocale))
+  const sessionValidated = Boolean(
+    (bootstrapQuery.isSuccess && bootstrapQuery.data)
+    || (bootstrapQuery.isSuccess && !bootstrapQuery.data && (summaryQuery.isFetched || summaryQuery.isError))
+    || (bootstrapQuery.isError && !accessIssueFromError(bootstrapQuery.error)),
+  )
+
+  if (showingInviteAcceptance || resolvedAccessIssue) {
+    return (
+      <AccessVerificationPage
+        access={access}
+        accessIssue={
+          resolvedAccessIssue || {
+            code: 'invite_pending',
+            title: authCopy(recruitingLocale, 'authAcceptInvite'),
+            description: authCopy(recruitingLocale, 'authInviteDescription'),
+            copyKey: 'authInviteDescription',
+          }
+        }
+        acceptName={acceptName}
+        acceptPassword={acceptPassword}
+        acceptPhone={acceptPhone}
+        busy={busy}
+        inviteToken={inviteToken}
+        locale={recruitingLocale}
+        notice={notice}
+        onLocaleChange={changeRecruitingLocale}
+        onVerify={saveAccess}
+        setAcceptName={setAcceptName}
+        setAcceptPassword={setAcceptPassword}
+        setAcceptPhone={setAcceptPhone}
+        setAccess={setAccess}
+      />
+    )
+  }
+
+  if (!sessionValidated) {
+    return <AuthSessionResolvingPage locale={recruitingLocale} onLocaleChange={changeRecruitingLocale} />
+  }
+
   return (
     <main
       className={
@@ -2186,7 +2297,7 @@ function App() {
           className={
             useFramedShell
               ? 'wf-sidebar-scroll flex shrink-0 flex-col min-w-0 max-w-full overflow-x-clip bg-wf-sidebar p-3 text-white lg:h-dvh lg:w-[210px] lg:overflow-y-auto lg:overflow-x-hidden lg:p-4'
-              : 'wf-sidebar-scroll flex shrink-0 flex-col border-r border-line/55 bg-panel/72 p-5 text-text shadow-[14px_0_44px_rgba(24,20,15,0.03)] backdrop-blur-2xl lg:h-dvh lg:w-[260px] lg:overflow-y-auto lg:overflow-x-hidden'
+              : 'wf-sidebar-scroll flex shrink-0 flex-col border-e border-line/55 bg-panel/72 p-5 text-text shadow-[14px_0_44px_rgba(24,20,15,0.03)] backdrop-blur-2xl lg:h-dvh lg:w-[260px] lg:overflow-y-auto lg:overflow-x-hidden'
           }
           data-testid="app-sidebar"
           dir={recruitingLocale === 'ar' ? 'rtl' : 'ltr'}
@@ -2274,7 +2385,7 @@ function App() {
                           const isActive = activePage === item.id
                           return (
                             <button
-                              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm ${
+                              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-start text-sm ${
                                 isActive ? 'bg-white/12 font-semibold text-white' : 'text-white/70 hover:bg-white/8 hover:text-white'
                               }`}
                               key={item.id}
@@ -2333,7 +2444,7 @@ function App() {
                       return (
                         <button
                           aria-current={isActive ? 'page' : undefined}
-                          className={`flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-left transition duration-200 ease-out ${
+                          className={`flex h-11 w-full min-w-0 items-center gap-3 rounded-2xl px-3.5 text-start transition duration-200 ease-out ${
                             useFramedShell
                               ? isActive
                                 ? "bg-white/12 font-semibold text-white ring-1 ring-white/25 before:h-1.5 before:w-1.5 before:rounded-full before:bg-wf-accent-active before:content-['']"
@@ -2395,65 +2506,42 @@ function App() {
             className={cn(
               'mb-6 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between',
               pagePersonality === 'chat' || pagePersonality === 'spatial' ? 'mb-2 shrink-0 border-0 pb-0' : 'border-b border-line/40 pb-5',
-              (accessIssue || showingInviteAcceptance) && 'mb-9 gap-5 border-b border-line/50 pb-8 xl:items-center',
             )}
           >
             <div>
               {pagePersonality !== 'spatial' ? (
               <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">
-                {accessIssue || showingInviteAcceptance
+                {isPostHirePage(activePage)
                   ? recruitingLocale === 'ar'
-                    ? 'الوصول'
-                    : 'Access'
-                  : isPostHirePage(activePage)
+                    ? 'ما بعد التوظيف'
+                    : 'Post-Hire'
+                  : activePage === 'settings' || activePage === 'activity' || activePage === 'notifications'
                     ? recruitingLocale === 'ar'
-                      ? 'ما بعد التوظيف'
-                      : 'Post-Hire'
-                    : activePage === 'settings' || activePage === 'activity' || activePage === 'notifications'
-                      ? recruitingLocale === 'ar'
-                        ? 'مساحة العمل'
-                        : 'Workspace'
-                      : recruitingLocale === 'ar'
-                        ? 'ما قبل التوظيف'
-                        : 'Pre-hiring'}
+                      ? 'مساحة العمل'
+                      : 'Workspace'
+                    : recruitingLocale === 'ar'
+                      ? 'ما قبل التوظيف'
+                      : 'Pre-hiring'}
               </div>
               ) : null}
               <h1
                 className={cn(
                   'max-w-5xl font-semibold tracking-[-0.045em] text-text',
                   pagePersonality === 'spatial' ? 'mt-0 text-2xl lg:text-[1.75rem]' : 'mt-2',
-                  accessIssue || showingInviteAcceptance
-                    ? 'mt-3 text-4xl tracking-[-0.055em] lg:text-5xl'
-                    : pagePersonality === 'quiet'
-                      ? 'text-3xl lg:text-4xl'
-                      : pagePersonality === 'chat'
-                        ? 'text-2xl lg:text-3xl'
+                  pagePersonality === 'quiet'
+                    ? 'text-3xl lg:text-4xl'
+                    : pagePersonality === 'chat'
+                      ? 'text-2xl lg:text-3xl'
                       : pagePersonality === 'spatial'
                         ? ''
                         : 'text-3xl lg:text-[2.35rem]',
                 )}
               >
-                {showingInviteAcceptance
-                  ? recruitingLocale === 'ar'
-                    ? 'أكمل دعوة واثقني'
-                    : 'Complete your OctoHR invite'
-                  : accessIssue
-                  ? recruitingLocale === 'ar'
-                    ? 'تحقق من وصولك إلى واثقني'
-                    : 'Verify your OctoHR access'
-                  : pageTitle}
+                {pageTitle}
               </h1>
-              {(accessIssue || showingInviteAcceptance || pagePersonality !== 'chat') ? (
-              <p className={cn('max-w-3xl text-subtle/90', accessIssue || showingInviteAcceptance ? 'mt-4 text-[15px] leading-7' : pagePersonality === 'spatial' ? 'mt-1 max-w-xl text-[13px] leading-5' : 'mt-2 max-w-2xl text-[14px] leading-6')}>
-                {showingInviteAcceptance
-                  ? recruitingLocale === 'ar'
-                    ? 'أنشئ تسجيل الدخول لمساحة العمل للانضمام إلى شركة واثقني هذه.'
-                    : 'Create your workspace login to join this OctoHR company workspace.'
-                  : accessIssue
-                  ? recruitingLocale === 'ar'
-                    ? 'سجّل الدخول بحساب مساحة العمل، أو استخدم رمز وصول احتياطي فقط عند الحاجة للإعداد أو الاستعادة.'
-                    : 'Sign in with your workspace account, or use a backup access code only if you need to set up or recover the workspace.'
-                  : pageSubtitle}
+              {pagePersonality !== 'chat' ? (
+              <p className={cn('max-w-3xl text-subtle/90', pagePersonality === 'spatial' ? 'mt-1 max-w-xl text-[13px] leading-5' : 'mt-2 max-w-2xl text-[14px] leading-6')}>
+                {pageSubtitle}
               </p>
               ) : null}
             </div>
@@ -2484,7 +2572,7 @@ function App() {
                       type="button"
                       onClick={() => setNotice('')}
                       aria-label={recruitingLocale === 'ar' ? 'إخفاء' : 'Dismiss'}
-                      className="-mr-1 ml-0.5 rounded-full px-1 text-rose-500/80 hover:text-rose-700"
+                      className="-me-1 ms-0.5 rounded-full px-1 text-rose-500/80 hover:text-rose-700"
                     >
                       ×
                     </button>
@@ -2512,7 +2600,7 @@ function App() {
           {activePage === 'overview' && notice.text ? (
             <div
               className={cn(
-                'fixed right-6 top-6 z-50 flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium shadow-[0_12px_32px_rgba(35,33,29,0.16)] backdrop-blur-xl',
+                'fixed end-6 top-6 z-50 flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium shadow-[0_12px_32px_rgba(35,33,29,0.16)] backdrop-blur-xl',
                 notice.tone === 'success'
                   ? 'border-emerald-300/60 bg-emerald-50/90 text-emerald-800'
                   : notice.tone === 'error'
@@ -2526,22 +2614,7 @@ function App() {
             </div>
           ) : null}
 
-          {showingInviteAcceptance || accessIssue ? (
-            <AccessVerificationPage
-              access={access}
-              accessIssue={accessIssue || { code: 'invite_pending', title: 'Complete your OctoHR invite', description: 'Create your workspace login. Your assigned role will apply after you accept the invite.' }}
-              acceptName={acceptName}
-              acceptPassword={acceptPassword}
-              acceptPhone={acceptPhone}
-              busy={busy}
-              inviteToken={inviteToken}
-              onVerify={saveAccess}
-              setAcceptName={setAcceptName}
-              setAcceptPassword={setAcceptPassword}
-              setAcceptPhone={setAcceptPhone}
-              setAccess={setAccess}
-            />
-          ) : activePage !== 'settings' && !access.token.trim() ? (
+          {activePage !== 'settings' && !access.token.trim() ? (
             <NeedsSettings onOpenSettings={() => openPage('settings')} />
           ) : activePage !== 'settings' && !dashboardLoaded ? (
             <PageSkeleton />
@@ -2583,10 +2656,7 @@ function App() {
                     ?? ['owner', 'hr_admin', 'hr_manager', 'company_admin'].includes(String(userAccess?.user?.role || '')),
                   )}
                   locale={recruitingLocale}
-                  onLocaleChange={(next) => {
-                    setRecruitingLocale(next)
-                    localStorage.setItem('wathefni_recruiting_locale', next)
-                  }}
+                  onLocaleChange={changeRecruitingLocale}
                   onOpenCandidate={openCandidateByKey}
                   onOpenFollowUps={viewFollowUpCandidates}
                   onOpenPendingAssessments={viewPendingAssessmentCandidates}
@@ -2655,6 +2725,8 @@ function App() {
                     departmentFilter={jobsDepartmentFilter}
                     jobsData={jobsData}
                     loading={jobsLoading}
+                    listError={Boolean(jobsListError)}
+                    onRetryList={() => void server.jobsQuery.refetch()}
                     loadingMore={jobsLoadingMore}
                     locale={recruitingLocale}
                     locationFilter={jobsLocationFilter}
@@ -2670,10 +2742,7 @@ function App() {
                     onDeadlineFilterChange={setJobsDeadlineFilter}
                     onDepartmentFilterChange={setJobsDepartmentFilter}
                     onLoadMore={loadMoreJobs}
-                    onLocaleChange={(next) => {
-                      setRecruitingLocale(next)
-                      localStorage.setItem('wathefni_recruiting_locale', next)
-                    }}
+                    onLocaleChange={changeRecruitingLocale}
                     onLocationFilterChange={setJobsLocationFilter}
                     onQueryChange={setJobsQuery}
                     onRemainingOnlyChange={setJobsRemainingOnly}
@@ -2705,11 +2774,7 @@ function App() {
                     access={access}
                     locale={recruitingLocale}
                     unifiedEnabled={unifiedCandidatesEnabled}
-                    onLocale={() => {
-                      const next = recruitingLocale === 'ar' ? 'en' : 'ar'
-                      localStorage.setItem('wathefni_recruiting_locale', next)
-                      setRecruitingLocale(next)
-                    }}
+                    onLocale={() => changeRecruitingLocale(recruitingLocale === 'ar' ? 'en' : 'ar')}
                     onAccessIssue={handleAccessIssue}
                     heldReloadKey={importReloadKey}
                     onHeldChanged={() => {
@@ -2778,6 +2843,9 @@ function App() {
                     classificationFilters={classificationFilters}
                     classificationDimensions={classificationDimensions}
                     classificationDeprecatedNodes={classificationDeprecatedNodes}
+                    classificationTaxonomyError={classificationTaxonomyError}
+                    classificationTaxonomyLoading={classificationTaxonomyLoading}
+                    onRetryClassificationTaxonomy={() => void retryClassificationTaxonomy()}
                     onClassificationFiltersChange={(next) => {
                       setCandidateOffset(0)
                       setClassificationFilters(next)
@@ -2808,11 +2876,7 @@ function App() {
                   <LazyInterviewsPage
                     access={access}
                     locale={recruitingLocale}
-                    onLocale={() => {
-                      const next = recruitingLocale === 'ar' ? 'en' : 'ar'
-                      localStorage.setItem('wathefni_recruiting_locale', next)
-                      setRecruitingLocale(next)
-                    }}
+                    onLocale={() => changeRecruitingLocale(recruitingLocale === 'ar' ? 'en' : 'ar')}
                     busy={interviewsRefreshing}
                     listLoading={interviewsLoading}
                     listError={Boolean(interviewsError)}
@@ -3138,6 +3202,7 @@ function App() {
                     actionItems={notifications?.action_items || []}
                     enabledModules={enabledNotificationModules}
                     notifications={notifications?.notifications || []}
+                    notificationsFeedError={Boolean(server.notificationsError)}
                     onNavigate={openPage}
                     posthireEnabled={anyPosthireModuleEnabled(moduleState)}
                   />

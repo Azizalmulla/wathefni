@@ -25,6 +25,7 @@ import {
 } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -163,7 +164,7 @@ export function PerformanceWorkspace({
   onNotice,
   onAccessIssue,
 }: PerformanceWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -172,8 +173,8 @@ export function PerformanceWorkspace({
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<PerformanceWorkspacePayload | null>(null)
 
-  const canCalibrate = permissions.includes('performance.calibrate') || role === 'owner'
-  const canManage = permissions.includes('performance.manage') || role === 'owner'
+  const canCalibrate = hasActorPermission(permissions, 'performance.calibrate')
+  const canManage = hasActorPermission(permissions, 'performance.manage')
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -381,6 +382,7 @@ function GoalsPane({
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([])
   const [openId, setOpenId] = useState<string | null>(null)
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null)
+  const [detailError, setDetailError] = useState(false)
   const [title, setTitle] = useState('')
   const [owner, setOwner] = useState('')
   const [krTitle, setKrTitle] = useState('')
@@ -404,7 +406,6 @@ function GoalsPane({
       if (active?.cycle_id) setCycleId(String(active.cycle_id))
     } catch {
       setError(true)
-      setRows([])
       onNotice(isAr ? 'تعذّر تحميل الأهداف' : 'Could not load goals', 'error')
     } finally {
       setLoading(false)
@@ -417,9 +418,11 @@ function GoalsPane({
 
   const open = async (id: string) => {
     setOpenId(id)
+    setDetailError(false)
     try {
       setDetail(await getPerformanceObjective(access, id))
     } catch {
+      setDetailError(true)
       onNotice(isAr ? 'تعذّر تحميل التفاصيل' : 'Could not load objective', 'error')
     }
   }
@@ -604,6 +607,11 @@ function GoalsPane({
                   {t.progress}: {pct == null ? t.unknownProgress : `${pct}%`}
                 </div>
               </button>
+              {openId === id && detailError ? (
+                <div className="mt-3">
+                  <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} />
+                </div>
+              ) : null}
               {openId === id && detail ? (
                 <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
                   {krs.map((kr) => (
@@ -707,6 +715,7 @@ function ReviewsPane({
   const [cycles, setCycles] = useState<Array<Record<string, unknown>>>([])
   const [openId, setOpenId] = useState<string | null>(null)
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null)
+  const [detailError, setDetailError] = useState(false)
   const [cycleName, setCycleName] = useState('')
   const [rating, setRating] = useState('3')
   const [rationale, setRationale] = useState('')
@@ -722,7 +731,6 @@ function ReviewsPane({
       setCycles(cycleData.cycles || [])
     } catch {
       setError(true)
-      setRows([])
       onNotice(isAr ? 'تعذّر تحميل المراجعات' : 'Could not load reviews', 'error')
     } finally {
       setLoading(false)
@@ -849,7 +857,10 @@ function ReviewsPane({
             <div key={id} className="rounded-xl border border-border/70 p-4">
               <button type="button" className="w-full text-start" onClick={() => {
                 setOpenId(id)
-                void getPerformanceReview(access, id).then(setDetail).catch(() => setDetail(null))
+                setDetailError(false)
+                void getPerformanceReview(access, id)
+                  .then(setDetail)
+                  .catch(() => setDetailError(true))
               }}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="font-medium">
@@ -859,6 +870,11 @@ function ReviewsPane({
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">{String(row.subject_employee_key || '')}</div>
               </button>
+              {openId === id && detailError ? (
+                <div className="mt-3">
+                  <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} />
+                </div>
+              ) : null}
               {openId === id && detail ? (
                 <div className="mt-3 space-y-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
                   <div>self {String((layers.self as Record<string, unknown> | undefined)?.overall_rating_value ?? '—')}</div>
@@ -963,6 +979,7 @@ function CalibrationPane({
   const [forbidden, setForbidden] = useState(false)
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([])
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null)
+  const [detailError, setDetailError] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -975,7 +992,6 @@ function CalibrationPane({
     } catch (err) {
       if (err instanceof DashboardApiError && err.status === 403) setForbidden(true)
       else setError(true)
-      setRows([])
     } finally {
       setLoading(false)
     }
@@ -1004,11 +1020,12 @@ function CalibrationPane({
           type="button"
           key={String(row.session_id)}
           className={cn('w-full rounded-xl border border-border/70 p-4 text-start')}
-          onClick={() =>
+          onClick={() => {
+            setDetailError(false)
             void getPerformanceCalibrationDetail(access, String(row.session_id))
               .then(setDetail)
-              .catch(() => setDetail(null))
-          }
+              .catch(() => setDetailError(true))
+          }}
         >
           <div className="font-medium">{isAr ? String(row.name_ar || row.name_en || '') : String(row.name_en || '')}</div>
           <div className="mt-1 flex flex-wrap gap-2 text-sm text-muted-foreground">
@@ -1020,6 +1037,7 @@ function CalibrationPane({
           </div>
         </button>
       ))}
+      {detailError ? <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} /> : null}
       {detail ? (
         <div className="rounded-xl border border-border/70 p-4 text-sm text-muted-foreground">
           <div>
@@ -1067,7 +1085,6 @@ function DevelopmentPane({
       setCheckIns(ci.check_ins || [])
     } catch {
       setError(true)
-      setRows([])
     } finally {
       setLoading(false)
     }

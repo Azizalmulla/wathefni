@@ -14,6 +14,7 @@ function renderCandidates(opts: {
   onFilters?: (next: CandidateFilters) => void
   access?: DashboardAccess
   importButton?: ReactNode
+  listError?: boolean
 }) {
   let filters = opts.filters || {
     ...EMPTY_CANDIDATE_FILTERS,
@@ -37,6 +38,8 @@ function renderCandidates(opts: {
       filters={filters}
       importButton={opts.importButton}
       locale={opts.locale}
+      listError={opts.listError}
+      listLoading={false}
       onLocale={() => undefined}
       onSaveView={async () => undefined}
       onSelect={() => undefined}
@@ -180,5 +183,13 @@ describe('CandidatesPage Wave 4 filter UX', () => {
     })
     expect(screen.getByRole('button', { name: 'Filters (3)' })).toBeInTheDocument()
     expect(screen.getByTestId('candidates-active-filter-chips').querySelectorAll('[data-testid^="candidate-filter-chip-"]')).toHaveLength(3)
+  })
+
+  test('list request failure renders error, not a fake empty candidate list', () => {
+    renderCandidates({ locale: 'en', listError: true, filters: { ...EMPTY_CANDIDATE_FILTERS } })
+    const state = screen.getByTestId('candidates-list-error')
+    expect(state).toHaveAttribute('role', 'alert')
+    expect(state).toHaveTextContent(/not an empty result/i)
+    expect(screen.queryByText(/No candidates match/i)).not.toBeInTheDocument()
   })
 })

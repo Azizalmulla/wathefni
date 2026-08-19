@@ -1388,6 +1388,7 @@ export type RankingPresentation = {
     value?: number | null
     label?: string
     reason?: string
+    components?: Record<string, { value?: number; max?: number; weight?: number; label?: string }>
   }
   explanation?: string
   verdict?: string
@@ -1414,6 +1415,7 @@ export type RankingDecision = {
   gaps?: string[]
   missing_evidence?: string[]
   component_scores?: Record<string, number | null>
+  component_score_meta?: Record<string, { value?: number | null; max?: number; weight?: number; label?: string }>
   recommended_next_action?: string
   evidence_references?: string[]
   run_freshness?: string
@@ -2521,6 +2523,11 @@ export type PosthireAttendanceRow = {
   scheduled_start?: string | null
   scheduled_end?: string | null
   notes?: string | null
+  /** Backend attendance life-state when the row already carries it. */
+  life_state?: string | null
+  payroll_exclusion_reason?: string | null
+  payroll_exclusion_reason_en?: string | null
+  payroll_exclusion_reason_ar?: string | null
   metadata?: {
     exception_state?: string | null
     approval_status?: string | null

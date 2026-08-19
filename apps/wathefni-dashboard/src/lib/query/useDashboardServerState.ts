@@ -21,6 +21,7 @@ import {
 } from '@/lib/query/hooks'
 import { invalidate } from '@/lib/query/invalidation'
 import { accessReady } from '@/lib/query/fetchers'
+import { resolvePrehireAuthority } from '@/lib/query/prehireAuthority'
 import {
   dashboardPerfMarkCachedPaint,
   dashboardPerfMarkInteractionStart,
@@ -141,29 +142,45 @@ export function useDashboardServerState(opts: {
   const bootstrapSettled = bootstrapQuery.isFetched || bootstrapQuery.isError
   const workspaceBootstrap = (bootstrapQuery.data ?? null) as DashboardBootstrapResponse | null
   const bootstrapMissing = bootstrapQuery.data === null && bootstrapQuery.isSuccess
-  const hasPrehire =
-    !bootstrapSettled
-      ? true
-      : bootstrapMissing
-        ? true
-        : Boolean(workspaceBootstrap?.enabled_modules?.includes('pre_hiring'))
+  const prehireAuthority = resolvePrehireAuthority({
+    bootstrapSettled,
+    bootstrapError: bootstrapQuery.isError,
+    bootstrapMissing,
+    bootstrapEnabledModules: Array.isArray(workspaceBootstrap?.enabled_modules)
+      ? workspaceBootstrap.enabled_modules
+      : null,
+    summaryEnabledModules: null,
+  })
+  const fetchSummary = ready && prehireAuthority.fetchSummary
 
-  const coreEnabled = ready && bootstrapSettled && hasPrehire
+  const summaryQuery = useSummaryQuery(access, fetchSummary)
+  const hasPrehire = resolvePrehireAuthority({
+    bootstrapSettled,
+    bootstrapError: bootstrapQuery.isError,
+    bootstrapMissing,
+    bootstrapEnabledModules: Array.isArray(workspaceBootstrap?.enabled_modules)
+      ? workspaceBootstrap.enabled_modules
+      : null,
+    summaryEnabledModules: Array.isArray(summaryQuery.data?.enabled_modules)
+      ? summaryQuery.data.enabled_modules
+      : null,
+  }).hasPrehire
+  const coreEnabled = ready && hasPrehire
   const alertsOnly =
     ready && bootstrapSettled && !hasPrehire && Boolean(workspaceBootstrap)
 
-  const summaryQuery = useSummaryQuery(access, coreEnabled)
   // Alerts stay on personal scope. My/Company work-queue scope lives in OverviewPage
   // so toggling does not re-render the App shell.
   const notificationsQuery = useNotificationsQuery(
     access,
     'mine',
-    coreEnabled || alertsOnly,
+    coreEnabled || alertsOnly || (ready && bootstrapMissing && fetchSummary),
   )
 
   const overviewInteractive = Boolean(
     (coreEnabled && summaryQuery.data && notificationsQuery.data)
-    || (alertsOnly && notificationsQuery.data),
+    || (alertsOnly && notificationsQuery.data)
+    || (bootstrapMissing && summaryQuery.data && notificationsQuery.data && !hasPrehire),
   )
 
   useEffect(() => {
@@ -184,12 +201,7 @@ export function useDashboardServerState(opts: {
   }, [access, client, page])
 
   const moduleState = workspaceBootstrap || summaryQuery.data || null
-  const prehireOn = (() => {
-    if (!hasPrehire) return false
-    const mods = (moduleState as { enabled_modules?: string[] } | null)?.enabled_modules
-    if (mods) return mods.includes('pre_hiring')
-    return Boolean(summaryQuery.data)
-  })()
+  const prehireOn = hasPrehire
 
   const assessmentsOn = assessmentModuleEnabled(moduleState, summaryQuery.data)
 
@@ -343,6 +355,7 @@ export function useDashboardServerState(opts: {
     summaryQuery,
     notifications: notificationsQuery.data ?? null,
     notificationsQuery,
+    notificationsError: notificationsQuery.isError && !notificationsQuery.data,
     assessmentConfig: assessmentConfigQuery.data ?? null,
     applications: applicationsQuery.applications,
     applicationsQuery,
@@ -355,10 +368,14 @@ export function useDashboardServerState(opts: {
     unifiedCandidatesEnabled: unifiedOn,
     classificationUiEnabled: classificationOn,
     classificationDimensions: features.taxonomy.data?.dimensions || [],
+    classificationTaxonomyLoading: features.taxonomy.isPending && !features.taxonomy.data,
+    classificationTaxonomyError: features.taxonomy.isError && !features.taxonomy.data,
+    retryClassificationTaxonomy: () => features.taxonomy.refetch(),
     savedViews: features.views.data?.views || [],
     jobsData: jobsQuery.data ?? null,
     jobsQuery,
     jobsLoading: jobsQuery.isPending && !jobsQuery.data,
+    jobsError: jobsQuery.isError && !jobsQuery.data,
     jobsRefreshing: jobsQuery.isFetching && Boolean(jobsQuery.data),
     allPositions,
     interviews: interviewsQuery.data ?? null,

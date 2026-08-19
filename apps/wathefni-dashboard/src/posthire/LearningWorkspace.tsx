@@ -3,7 +3,7 @@
  * Assignment ≠ enrollment ≠ attendance ≠ completion ≠ certification.
  * Performance / Talent / Job Architecture are optional enrichments.
  */
-import { Loader2, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
@@ -23,6 +23,7 @@ import {
   type LearningWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -139,7 +140,7 @@ export function LearningWorkspace({
   onNotice,
   onAccessIssue,
 }: LearningWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -163,9 +164,9 @@ export function LearningWorkspace({
   const [reason, setReason] = useState('')
   const [evidence, setEvidence] = useState('')
 
-  const canManage = permissions.includes('learning.manage') || role === 'owner'
-  const canAssign = permissions.includes('learning.assign') || canManage
-  const canApprove = permissions.includes('learning.approve') || canManage
+  const canManage = hasActorPermission(permissions, 'learning.manage')
+  const canAssign = hasActorPermission(permissions, 'learning.assign') || canManage
+  const canApprove = hasActorPermission(permissions, 'learning.approve') || canManage
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -256,7 +257,17 @@ export function LearningWorkspace({
   })
 
   function tabEmpty(label: string, count: number) {
-    if (tabError) return <p className="text-sm text-destructive">{t.loadError}</p>
+    if (tabError) {
+      return (
+        <ResourceState
+          kind="error"
+          locale={isAr ? 'ar' : 'en'}
+          title={t.loadError}
+          onRetry={() => void loadTab()}
+          testId="learning-tab-state"
+        />
+      )
+    }
     if (tabReady && count === 0) return <p className="text-sm text-muted-foreground">{label}</p>
     return null
   }
@@ -300,16 +311,30 @@ export function LearningWorkspace({
         </Button>
       </div>
 
-      <ResourceState
-        state={state}
-        testId="learning-workspace-state"
-        labels={{
-          forbidden: t.forbidden,
-          unavailable: t.unavailable,
-          empty: t.emptyAssignments,
-          error: isAr ? 'تعذر تحميل التعلم' : 'Could not load Learning',
-        }}
-      >
+      {state !== 'ready' ? (
+        <ResourceState
+          kind={state}
+          locale={isAr ? 'ar' : 'en'}
+          title={
+            state === 'forbidden'
+              ? t.forbidden
+              : state === 'unavailable'
+                ? t.unavailable
+                : state === 'empty'
+                  ? t.emptyAssignments
+                  : state === 'error'
+                    ? isAr
+                      ? 'تعذر تحميل التعلم'
+                      : 'Could not load Learning'
+                    : undefined
+          }
+          detail={state === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => void load()}
+          retrying={loading}
+          testId="learning-workspace-state"
+        />
+      ) : (
+        <>
         <div className="flex flex-wrap gap-2">
           {tabs.map((item) => (
             <Button key={item.id} type="button" variant={tab === item.id ? 'default' : 'outline'} onClick={() => setTab(item.id)}>
@@ -546,12 +571,8 @@ export function LearningWorkspace({
             <p className="text-xs text-muted-foreground">{t.config}</p>
           </div>
         ) : null}
-      </ResourceState>
-      {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-        </div>
-      ) : null}
+        </>
+      )}
     </div>
   )
 }

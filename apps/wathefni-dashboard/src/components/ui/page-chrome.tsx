@@ -21,7 +21,7 @@ export function PageIntro({
   actions?: ReactNode
 }) {
   return (
-    <div className={cn('flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between', className)} dir={dir}>
+    <div className={cn('flex flex-col gap-3 text-start xl:flex-row xl:items-end xl:justify-between', className)} dir={dir}>
       <div>
         {eyebrow ? <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-mist">{eyebrow}</div> : null}
         <h2

@@ -220,6 +220,14 @@ describe('JobsPage minimal desktop table', () => {
     expect(screen.getByText('No openings match these filters.')).toBeInTheDocument()
   })
 
+  test('API failure shows error, not a fake empty jobs list', () => {
+    renderWithProviders(
+      <JobsPage {...baseProps} jobsData={null} listError locale="en" />,
+    )
+    expect(screen.getByTestId('jobs-list-error')).toHaveTextContent(/not an empty result/i)
+    expect(screen.queryByText(/No job openings yet/i)).not.toBeInTheDocument()
+  })
+
   test('Arabic RTL desktop headers and capacity', () => {
     renderWithProviders(
       <JobsPage

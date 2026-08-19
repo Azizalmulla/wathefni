@@ -124,10 +124,8 @@ export function assessmentQueueActionLabel(
 
 export function queuePrimaryAction(cohortKey?: string | null, allowed?: string[] | null): 'send' | 'resend' | 'view' {
   const allowedSet = new Set(allowed || [])
-  const tab = assessmentTabForCohort(cohortKey)
-  if (allowedSet.has('send_assessment') || tab === 'send') return 'send'
-  if (allowedSet.has('resend_assessment') || tab === 'resend' || tab === 'delivery_failed' || tab === 'sent_pending') {
-    return 'resend'
-  }
+  void cohortKey
+  if (allowedSet.has('send_assessment')) return 'send'
+  if (allowedSet.has('resend_assessment')) return 'resend'
   return 'view'
 }

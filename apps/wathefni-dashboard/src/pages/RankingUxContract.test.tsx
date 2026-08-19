@@ -23,6 +23,7 @@ describe('Ranking page UX contract', () => {
     expect(src).toContain("state_running")
     expect(src).toContain("state_stale")
     expect(src).toContain("state_failed")
+    expect(src).toContain("state_failed_previous")
     expect(src).toContain("state_none_rankable")
   })
 

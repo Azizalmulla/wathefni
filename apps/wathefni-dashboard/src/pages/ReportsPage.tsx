@@ -9,6 +9,7 @@ import {
 import { type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/pages/shared/primitives'
+import { ResourceState } from '@/pages/shared/dataState'
 import type { PrehireReportsResponse } from '@/types'
 
 function reportsCopy(locale: RecruitingLocale | undefined, key: string): string {
@@ -202,7 +203,14 @@ export function ReportsPage({
     )
   }
   if (reportsError && !reports) {
-    return <EmptyState text={reportsCopy(locale, 'error')} />
+    return (
+      <ResourceState
+        kind="error"
+        locale={locale === 'ar' ? 'ar' : 'en'}
+        title={reportsCopy(locale, 'error')}
+        testId="reports-page-state"
+      />
+    )
   }
   if (!reports) {
     return (

@@ -34,6 +34,7 @@ import {
   type IntelligenceOverview,
   type TrendResponse,
 } from '@/lib/intelligenceApi'
+import { ResourceState } from '@/pages/shared/dataState'
 import { cn } from '@/lib/utils'
 import { useEmployees360Locale, WorkflowEmpty } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
@@ -414,6 +415,7 @@ export function IntelligenceWorkspace({
   const [selected, setSelected] = useState<IntelligenceDefinition | null>(null)
   const [detail, setDetail] = useState<DetailState>({ metric: null, trend: null, drill: null })
   const [detailBusy, setDetailBusy] = useState(false)
+  const [detailError, setDetailError] = useState(false)
   const [drillOffset, setDrillOffset] = useState(0)
   const [segmentDimension, setSegmentDimension] = useState('department')
   const [segmentValue, setSegmentValue] = useState('')
@@ -473,6 +475,7 @@ export function IntelligenceWorkspace({
 
   const loadDetail = useCallback(async (definition: IntelligenceDefinition, offset = 0) => {
     setDetailBusy(true)
+    setDetailError(false)
     try {
       const query = { semantic_key: definition.semantic_key, lang: locale, actor_role: role, time_window: {} }
       const [metric, trend, drill] = await Promise.all([
@@ -483,6 +486,7 @@ export function IntelligenceWorkspace({
       setDetail({ metric, trend, drill })
       setDrillOffset(offset)
     } catch (caught) {
+      setDetailError(true)
       reportError(caught, c.loadFailed)
     } finally {
       setDetailBusy(false)
@@ -567,9 +571,13 @@ export function IntelligenceWorkspace({
 
   if (error) {
     return (
-      <WorkflowEmpty
+      <ResourceState
+        kind="error"
+        locale={isAr ? 'ar' : 'en'}
         title={c.loadFailed}
-        action={<Button variant="secondary" onClick={() => void load()}>{c.refresh}</Button>}
+        onRetry={() => void load()}
+        retrying={refreshing}
+        testId="intelligence-workspace-state"
       />
     )
   }
@@ -655,7 +663,16 @@ export function IntelligenceWorkspace({
         </section>
       ))}
 
-      {selected ? (
+      {selected && detailError ? (
+        <ResourceState
+          kind="error"
+          locale={isAr ? 'ar' : 'en'}
+          title={c.loadFailed}
+          onRetry={() => void loadDetail(selected)}
+          retrying={detailBusy}
+          testId="intelligence-detail-state"
+        />
+      ) : selected ? (
         <DetailPanel
           selected={selected}
           detail={detail}

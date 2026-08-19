@@ -1,13 +1,14 @@
 import { type HTMLAttributes, type ReactNode } from 'react'
 
 import { StatusPill } from '@/components/ui/page-chrome'
+import { readStoredRecruitingLocale } from '@/lib/dashboardLocale'
 import { cn } from '@/lib/utils'
 
 export type Locale = 'en' | 'ar'
 
 export function useEmployees360Locale(): Locale {
-  if (typeof document === 'undefined') return 'en'
-  return document.documentElement.lang === 'ar' || localStorage.getItem('wathefni_recruiting_locale') === 'ar' ? 'ar' : 'en'
+  if (typeof document !== 'undefined' && document.documentElement.lang === 'ar') return 'ar'
+  return readStoredRecruitingLocale()
 }
 
 export function MaskedField({

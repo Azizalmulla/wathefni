@@ -28,6 +28,7 @@ import {
   type WorkforcePlanningWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -152,7 +153,7 @@ export function WorkforcePlanningWorkspace({
   onNotice,
   onAccessIssue,
 }: WorkforcePlanningWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -182,10 +183,14 @@ export function WorkforcePlanningWorkspace({
   const [demandType, setDemandType] = useState('new_headcount')
   const [reasonEn, setReasonEn] = useState('')
 
-  const canManage = permissions.includes('workforce_planning.manage') || permissions.includes('workforce_planning.plan') || role === 'owner'
-  const canApprove = permissions.includes('workforce_planning.approve') || permissions.includes('workforce_planning.manage')
-  const canExecute = permissions.includes('workforce_planning.execute') || permissions.includes('workforce_planning.manage')
-  const canCost = permissions.includes('workforce_planning.cost') || permissions.includes('workforce_planning.manage')
+  const canManage =
+    hasActorPermission(permissions, 'workforce_planning.manage') || hasActorPermission(permissions, 'workforce_planning.plan')
+  const canApprove =
+    hasActorPermission(permissions, 'workforce_planning.approve') || hasActorPermission(permissions, 'workforce_planning.manage')
+  const canExecute =
+    hasActorPermission(permissions, 'workforce_planning.execute') || hasActorPermission(permissions, 'workforce_planning.manage')
+  const canCost =
+    hasActorPermission(permissions, 'workforce_planning.cost') || hasActorPermission(permissions, 'workforce_planning.manage')
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -306,7 +311,7 @@ export function WorkforcePlanningWorkspace({
     forbidden,
     unavailable,
     loading,
-    error: error || tabError,
+    error,
     itemCount: loading ? 0 : itemCount,
   })
 
@@ -341,12 +346,27 @@ export function WorkforcePlanningWorkspace({
           {t.refresh}
         </Button>
       </div>
-      <ResourceState
-        state={state}
-        labels={{ forbidden: t.forbidden, unavailable: t.unavailable, empty: t.emptyHint, error: t.loadError }}
-        testId="workforce-planning-workspace-state"
-      />
-      {!forbidden && !unavailable && !error && (
+      {state !== 'ready' ? (
+        <ResourceState
+          kind={state}
+          locale={isAr ? 'ar' : 'en'}
+          title={
+            state === 'forbidden'
+              ? t.forbidden
+              : state === 'unavailable'
+                ? t.unavailable
+                : state === 'empty'
+                  ? t.emptyPlans
+                  : state === 'error'
+                    ? t.loadError
+                    : undefined
+          }
+          detail={state === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => void load()}
+          retrying={loading}
+          testId="workforce-planning-workspace-state"
+        />
+      ) : (
         <>
           <div className="flex flex-wrap gap-2">
             {tabs.map((id) => (
@@ -355,6 +375,15 @@ export function WorkforcePlanningWorkspace({
               </Button>
             ))}
           </div>
+          {tabError ? (
+            <ResourceState
+              kind="error"
+              locale={isAr ? 'ar' : 'en'}
+              title={t.loadError}
+              onRetry={() => void loadTab()}
+              testId="workforce-planning-tab-state"
+            />
+          ) : null}
           {tab === 'overview' && counts && (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
@@ -385,7 +414,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {managerOnly && tab === 'demand' && (
             <div className="space-y-2">
-              {demand.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyDemand}</p> : null}
+              {!tabError && demand.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyDemand}</p> : null}
               {demand.map((row) => (
                 <div key={String(row.demand_id)} className="rounded-lg border p-3 text-sm">
                   <div className="font-medium">{String(row.demand_type)}</div>
@@ -429,7 +458,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {!managerOnly && tab === 'plan' && (
             <div className="space-y-2">
-              {plans.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyPlans}</p> : null}
+              {!tabError && plans.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyPlans}</p> : null}
               {plans.map((row) => (
                 <button
                   key={String(row.plan_id)}
@@ -470,7 +499,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {!managerOnly && tab === 'scenarios' && (
             <div className="space-y-2">
-              {scenarios.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyScenarios}</p> : null}
+              {!tabError && scenarios.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyScenarios}</p> : null}
               {scenarios.map((row) => (
                 <button
                   key={String(row.scenario_id)}
@@ -515,7 +544,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {!managerOnly && tab === 'demand' && (
             <div className="space-y-2">
-              {demand.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyDemand}</p> : null}
+              {!tabError && demand.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyDemand}</p> : null}
               {demand.map((row) => (
                 <div key={String(row.demand_id)} className="rounded-lg border p-3 text-sm">
                   <div className="font-medium">{String(row.type_label_en)} / {String(row.type_label_ar)}</div>
@@ -558,7 +587,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {!managerOnly && tab === 'approvals' && (
             <div className="space-y-2">
-              {approvals.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyApprovals}</p> : null}
+              {!tabError && approvals.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyApprovals}</p> : null}
               {approvals.map((row) => (
                 <div key={String(row.approval_id)} className="rounded-lg border p-3 text-sm">
                   {String(row.decision)} · {String(row.approver_key)}
@@ -582,7 +611,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {!managerOnly && tab === 'execution' && (
             <div className="space-y-2">
-              {handoffs.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyExecution}</p> : null}
+              {!tabError && handoffs.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyExecution}</p> : null}
               {handoffs.map((row) => (
                 <div key={String(row.handoff_id)} className="rounded-lg border p-3 text-sm">
                   {String(row.target_authority)} · {String(row.status)}
@@ -592,7 +621,7 @@ export function WorkforcePlanningWorkspace({
           )}
           {!managerOnly && tab === 'history' && (
             <div className="space-y-2">
-              {history.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyHistory}</p> : null}
+              {!tabError && history.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyHistory}</p> : null}
               {history.map((row, idx) => (
                 <div key={`${String(row.action)}-${idx}`} className="rounded-lg border p-3 text-sm">
                   {String(row.action)} · {String(row.entity_type || '')}

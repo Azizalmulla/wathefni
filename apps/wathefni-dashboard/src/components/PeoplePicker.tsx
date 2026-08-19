@@ -38,19 +38,21 @@ export function PeoplePicker({
   const [people, setPeople] = useState<TeamPerson[]>([])
   const [selected, setSelected] = useState<TeamPerson | null>(null)
   const [busy, setBusy] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     const handle = window.setTimeout(() => {
       setBusy(true)
+      setLoadError(false)
       void getTeamPeople(access, { purpose, q: query || undefined, limit: 40 })
         .then((payload) => {
           if (cancelled) return
           setPeople(Array.isArray(payload.people) ? payload.people : [])
         })
         .catch(() => {
-          if (!cancelled) setPeople([])
+          if (!cancelled) setLoadError(true)
         })
         .finally(() => {
           if (!cancelled) setBusy(false)
@@ -127,7 +129,11 @@ export function PeoplePicker({
                 <div className="text-xs text-subtle">{person.role_label || person.role}</div>
               </button>
             ))}
-            {!busy && people.length === 0 ? (
+            {loadError ? (
+              <div className="px-3 py-2 text-xs text-rose-800" role="alert" data-testid="people-picker-error">
+                {isAr ? 'تعذّر تحميل الأشخاص. هذه ليست قائمة فارغة.' : 'Could not load people. This is not an empty result.'}
+              </div>
+            ) : !busy && people.length === 0 ? (
               <div className="px-3 py-2 text-xs text-subtle">{isAr ? 'لا يوجد أعضاء مؤهلون' : 'No eligible people'}</div>
             ) : null}
             {busy ? <div className="px-3 py-2 text-xs text-subtle">{isAr ? 'جارٍ التحميل…' : 'Loading…'}</div> : null}

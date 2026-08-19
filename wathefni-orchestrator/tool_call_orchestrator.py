@@ -754,19 +754,16 @@ def _access_not_linked(tool_name: str, required_permission: str | None, scope: d
 
 def _tool_allowed(tool_name: str, scope: dict[str, Any]) -> tuple[bool, str | None]:
     required = TOOL_PERMISSION_MAP.get(tool_name, "prehire.read")
-    permissions = {str(item) for item in scope.get("permissions") or []}
-    if not permissions:
+    raw_permissions = {str(item) for item in scope.get("permissions") or [] if str(item).strip()}
+    if not raw_permissions:
         if _strict_whatsapp_perms() and not _is_read_only_permission(required):
             # Fail closed: an unlinked / no-role identity cannot run mutating tools.
             return False, required
         # Flag off, or a read-only tool: keep legacy admin-capable behaviour.
         return True, required
-    if required in permissions:
-        return True, required
-    # Temporary Jobs compatibility (matches dashboard_has_jobs_permission).
-    if required == "jobs.read" and "prehire.read" in permissions:
-        return True, required
-    if required in {"jobs.create", "jobs.edit", "jobs.publish", "jobs.close"} and "settings.manage" in permissions:
+    from jobs_permission_expand import expand_effective_jobs_permissions
+    permissions = expand_effective_jobs_permissions(raw_permissions)
+    if "*:*" in permissions or required in permissions:
         return True, required
     return False, required
 
@@ -789,7 +786,10 @@ def _visible_tools(tools: list[dict[str, Any]], scope: dict[str, Any]) -> list[d
 
     legacy = _legacy()
     company = scope.get("company_id")
-    permissions = {str(item) for item in scope.get("permissions") or [] if str(item).strip()}
+    from jobs_permission_expand import expand_effective_jobs_permissions
+    permissions = expand_effective_jobs_permissions(
+        {str(item) for item in scope.get("permissions") or [] if str(item).strip()}
+    )
     module_enabled_cache: dict[str, bool] = {}
 
     def module_enabled(module_key: str) -> bool:
@@ -813,7 +813,7 @@ def _visible_tools(tools: list[dict[str, Any]], scope: dict[str, Any]) -> list[d
             continue
         if module_key in TOOLCALL_GATED_MODULES:
             required = TOOL_PERMISSION_MAP.get(name)
-            if permissions and required and required not in permissions:
+            if permissions and required and required not in permissions and "*:*" not in permissions:
                 continue
             if not permissions and _strict_whatsapp_perms() and required and not _is_read_only_permission(required):
                 # Strict mode: don't even offer mutating post-hire tools to an unlinked identity.

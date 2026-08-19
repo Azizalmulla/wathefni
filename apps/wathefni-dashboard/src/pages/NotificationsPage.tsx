@@ -434,6 +434,7 @@ export function NotificationsPage({
   notifications,
   onNavigate,
   posthireEnabled = false,
+  notificationsFeedError = false,
 }: {
   access?: DashboardAccess
   permissions?: string[]
@@ -447,6 +448,7 @@ export function NotificationsPage({
   notifications: NotificationRow[]
   onNavigate: (page: Page) => void
   posthireEnabled?: boolean
+  notificationsFeedError?: boolean
 }) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
@@ -638,7 +640,11 @@ export function NotificationsPage({
               : 'See which employee communications failed or need follow-up, why delivery failed, and the safest next action.'}
           </p>
           <p className="text-[12px] text-subtle/80" data-alerts-summary>
-            {counts.live
+            {error || notificationsFeedError
+              ? isAr
+                ? 'تعذر تحميل بعض مشاكل التسليم'
+                : 'Some delivery issues could not be loaded'
+              : counts.live
               ? isAr
                 ? `${counts.live} مشكلة تسليم تحتاج انتباهاً`
                 : `${counts.live} delivery issue${counts.live === 1 ? '' : 's'} need attention`
@@ -678,17 +684,16 @@ export function NotificationsPage({
       ) : null}
 
       {loading && liveIssues.length === 0 ? (
-        <div className="flex items-center gap-2 text-[13px] text-subtle" data-alerts-loading>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {isAr ? 'جارٍ التحميل…' : 'Loading…'}
-        </div>
-      ) : error ? (
-        <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50/70 px-4 py-3 text-[13px] text-rose-800" data-alerts-error>
-          {error}
-          <Button className="ms-3" size="sm" variant="secondary" onClick={() => void reload()}>
-            {isAr ? 'إعادة المحاولة' : 'Retry'}
-          </Button>
-        </div>
+        <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="alerts-delivery-state" />
+      ) : error || notificationsFeedError ? (
+        <ResourceState
+          kind="error"
+          locale={isAr ? 'ar' : 'en'}
+          title={error || undefined}
+          onRetry={() => void reload()}
+          retrying={loading || refreshing}
+          testId="alerts-delivery-state"
+        />
       ) : filtered.length === 0 ? (
         <div data-alerts-empty>
           <EmptyState

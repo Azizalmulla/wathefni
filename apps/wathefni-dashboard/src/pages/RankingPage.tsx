@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, ScoreBreakdown } from '@/pages/shared/primitives'
+import { ResourceState } from '@/pages/shared/dataState'
 import { stageLabel } from '@/pages/shared/format'
 import type { ApplicationSummary, PositionSummary, RankingCandidate, RankingResponse } from '@/types'
 
@@ -153,7 +154,7 @@ export function RankingPage({
               {isAr ? 'نتائج الترتيب' : 'Ranked candidates'}
               {selectedPosition ? ` · ${selectedPosition.position_title || selectedPosition.position_code}` : ''}
             </CardTitle>
-            {ranking && !needsRun && rankPosition ? (
+            {ranking && !needsRun && rankPosition && !rankingError ? (
               <div className="mt-3 space-y-2">
                 <div className="flex flex-wrap gap-2 text-xs">
                   <Badge tone="default">
@@ -176,29 +177,42 @@ export function RankingPage({
             ) : null}
           </CardHeader>
           <CardContent className="space-y-3">
-            {stateBanner ? (
+            {stateBanner && !rankingError ? (
               <div
                 className={cn(
                   'rounded-xl border px-3 py-2 text-sm',
-                  rankingError
-                    ? 'border-rose-200 bg-rose-50 text-rose-800'
-                    : stale
-                      ? 'border-amber-200 bg-amber-50 text-amber-900'
-                      : 'border-[#e8dfd0] bg-white/50 text-[#716a5e]',
+                  stale
+                    ? 'border-amber-200 bg-amber-50 text-amber-900'
+                    : 'border-[#e8dfd0] bg-white/50 text-[#716a5e]',
                 )}
               >
                 {stateBanner}
               </div>
             ) : null}
 
-            {ranking?.comparison?.title ? (
+            {rankingError ? (
+              <ResourceState
+                kind="error"
+                locale={locale === 'ar' ? 'ar' : 'en'}
+                title={
+                  hasCandidates
+                    ? rankingCopy(locale, 'state_failed_previous')
+                    : rankingCopy(locale, 'state_failed')
+                }
+                onRetry={runRanking}
+                retrying={busy}
+                testId="ranking-list-state"
+              />
+            ) : null}
+
+            {!rankingError && ranking?.comparison?.title ? (
               <div className="rounded-2xl border border-[#e8dfd0] bg-white/45 p-4">
                 <div className="text-sm font-semibold text-[#23211d]">{ranking.comparison.title}</div>
                 {ranking.comparison.detail ? <div className="mt-1 text-sm text-[#716a5e]">{ranking.comparison.detail}</div> : null}
               </div>
             ) : null}
 
-            {ranking?.role_profile ? (
+            {!rankingError && ranking?.role_profile ? (
               <div className="rounded-2xl border border-[#e8dfd0] bg-white/45 p-4">
                 <div className="text-sm font-semibold text-[#23211d]">
                   {rankingCopy(locale, 'fit_profile')}: {ranking.role_profile.label || rankingCopy(locale, 'fit_profile')}
@@ -207,18 +221,35 @@ export function RankingPage({
               </div>
             ) : null}
 
-            {(ranking?.candidates || []).map((candidate, index) => (
-              <RankingCandidateCard
-                assessmentEnabled={assessmentEnabled}
-                candidate={candidate}
-                index={index}
-                key={candidate.app_key}
-                locale={locale}
-                onSelect={onSelect}
-              />
-            ))}
+            {rankingError && hasCandidates ? (
+              <div className="space-y-3 opacity-80" data-testid="ranking-previous">
+                {(ranking?.candidates || []).map((candidate, index) => (
+                  <RankingCandidateCard
+                    assessmentEnabled={assessmentEnabled}
+                    candidate={candidate}
+                    index={index}
+                    key={candidate.app_key}
+                    locale={locale}
+                    onSelect={onSelect}
+                  />
+                ))}
+              </div>
+            ) : !rankingError ? (
+              (ranking?.candidates || []).map((candidate, index) => (
+                <RankingCandidateCard
+                  assessmentEnabled={assessmentEnabled}
+                  candidate={candidate}
+                  index={index}
+                  key={candidate.app_key}
+                  locale={locale}
+                  onSelect={onSelect}
+                />
+              ))
+            ) : null}
 
-            {!hasCandidates ? <EmptyState text={emptyText} /> : null}
+            {!rankingError && !hasCandidates ? (
+              <EmptyState text={emptyText} />
+            ) : null}
           </CardContent>
         </Card>
       </RankingProfiler>

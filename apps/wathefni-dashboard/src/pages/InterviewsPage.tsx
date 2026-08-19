@@ -28,6 +28,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input, Textarea } from '@/components/ui/field'
+import { resolveAllowedActions } from '@/lib/allowedActions'
 import { EmptyState } from '@/pages/shared/primitives'
 import { ResourceState } from '@/pages/shared/dataState'
 import {
@@ -885,11 +886,7 @@ export function InterviewDetailDrawer({
   const isVideo = presentation?.display?.is_async ?? interview.interview_type === 'async_video'
   const videoStatus = asyncVideoDisplayStatus(interview)
   const mainStatus = presentation?.progress_label || presentation?.display?.status_label || facetStatusLabel(interview.status, locale)
-  const allowedActions = new Set(interview.allowed_actions || [])
-  for (const action of presentation?.allowed_actions || []) allowedActions.add(action)
-  for (const action of Array.from(allowedActions)) {
-    if (presentation?.allowed_actions && !presentation.allowed_actions.includes(action)) allowedActions.delete(action)
-  }
+  const allowedActions = new Set(resolveAllowedActions(interview.allowed_actions, presentation?.allowed_actions))
   const roleLabel = interview.position_title || interview.position_code || 'Role'
   const scheduleLabel = presentation?.display?.show_datetime && presentation.date_time
     ? formatDateTime(presentation.date_time)
@@ -937,7 +934,7 @@ export function InterviewDetailDrawer({
             </Button>
             <InterviewActions
               access={access}
-              allowed={presentation?.allowed_actions || []}
+              allowed={[...allowedActions]}
               busy={busy}
               interview={interview}
               locale={locale}

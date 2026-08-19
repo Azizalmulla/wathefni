@@ -40,6 +40,7 @@ import {
   payrollExclusionReason,
 } from '@/posthire/attendanceUx'
 import { cn } from '@/lib/utils'
+import { ResourceState } from '@/pages/shared/dataState'
 
 type NoticeFn = (message: string, tone?: 'success' | 'error' | 'info') => void
 
@@ -315,6 +316,7 @@ export function AttendanceOpsPanel({
         const issue = accessIssueFromError(err)
         if (issue) {
           onAccessIssue?.(issue)
+          setError(friendlyError(err, t.loading))
           return
         }
         if (err instanceof DashboardApiError && (err.status === 404 || err.status === 403)) {
@@ -565,25 +567,17 @@ export function AttendanceOpsPanel({
 
   if (!canManage) {
     return (
-      <Card className="border-[#e8dfd0] bg-[#fffdf8]" data-testid="attendance-ops" dir={isAr ? 'rtl' : 'ltr'}>
-        <CardHeader>
-          <CardTitle>{t.title}</CardTitle>
-          <CardDescription>{t.permission}</CardDescription>
-        </CardHeader>
-      </Card>
+      <div data-testid="attendance-ops" dir={isAr ? 'rtl' : 'ltr'}>
+        <ResourceState kind="forbidden" locale={isAr ? 'ar' : 'en'} title={t.permission} testId="attendance-ops-state" />
+      </div>
     )
   }
 
   if (disabled) {
     return (
-      <Card className="border-[#e8dfd0] bg-[#fffdf8]/80" data-testid="attendance-ops" dir={isAr ? 'rtl' : 'ltr'}>
-        <CardHeader className="flex flex-row items-center justify-between gap-3">
-          <div>
-            <CardTitle className="text-[16px]">{t.title}</CardTitle>
-            <CardDescription>{t.disabled}</CardDescription>
-          </div>
-        </CardHeader>
-      </Card>
+      <div data-testid="attendance-ops" dir={isAr ? 'rtl' : 'ltr'}>
+        <ResourceState kind="unavailable" locale={isAr ? 'ar' : 'en'} title={t.disabled} testId="attendance-ops-state" />
+      </div>
     )
   }
 
@@ -603,11 +597,16 @@ export function AttendanceOpsPanel({
         <div className="space-y-4 px-5 pb-5">
           {stale ? <ConflictBanner detail={t.stale} locale={locale} action={<Button size="sm" variant="secondary" onClick={() => void load(true)}>{t.refresh}</Button>} /> : null}
           {loading ? (
-            <div className="flex items-center gap-2 py-8 text-[13px] text-subtle">
-              <Loader2 className="h-4 w-4 animate-spin" /> {t.loading}
-            </div>
+            <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="attendance-ops-state" />
           ) : error ? (
-            <ConflictBanner title={locale === 'ar' ? 'تعذر التحميل' : 'Could not load'} detail={error} locale={locale} action={<Button size="sm" onClick={() => void load()}>{t.refresh}</Button>} />
+            <ResourceState
+              kind="error"
+              locale={isAr ? 'ar' : 'en'}
+              title={error}
+              onRetry={() => void load()}
+              retrying={loading || refreshing}
+              testId="attendance-ops-state"
+            />
           ) : (
             <>
               {!compact ? (

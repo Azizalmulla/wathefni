@@ -181,16 +181,6 @@ def _any_perm_ok(perms: set[str], required: list[str] | None) -> bool:
     return any(_perm_ok(perms, p) for p in required)
 
 
-def _jobs_ok(perms: set[str], required: str | None) -> bool:
-    if not required:
-        return True
-    if _perm_ok(perms, required):
-        return True
-    if required == "jobs.read" and _perm_ok(perms, "prehire.read"):
-        return True
-    return False
-
-
 def _module_ok(enabled: set[str], surface: dict[str, Any]) -> bool:
     sid = surface["id"]
     if sid == "nav.employees":
@@ -212,7 +202,7 @@ def resolve_surface(surface: dict[str, Any], enabled: set[str], perms: set[str])
         row["status"] = "module_off"
         row["offerable"] = False
         return row
-    if surface.get("jobs_permission") and not _jobs_ok(perms, surface["jobs_permission"]):
+    if surface.get("jobs_permission") and not _perm_ok(perms, surface["jobs_permission"]):
         row["status"] = "permission_denied"
         row["offerable"] = False
         return row
@@ -252,19 +242,6 @@ def resolve_workspace_authority(modules: list[str], role: str) -> dict[str, Any]
     perms = set(OWNER_PERMISSIONS if role == "owner" else RECRUITER_PERMISSIONS)
     surfaces = {s["id"]: resolve_surface(s, enabled, perms) for s in WORKSPACE_SURFACES}
 
-    # Employees soft gate: people modules + admin workspace perms unlock directory.
-    emp = surfaces.get("nav.employees")
-    if emp and not emp["offerable"]:
-        people_on = bool(enabled & PEOPLE_MODULES)
-        admin_workspace = bool(
-            perms
-            & {"employees.read", "settings.manage", "users.manage", "*:*"}
-        ) or not perms
-        if people_on and admin_workspace:
-            surfaces["nav.employees"] = {**emp, "status": "available", "offerable": True}
-        elif people_on:
-            surfaces["nav.employees"] = {**emp, "status": "permission_denied", "offerable": False}
-
     # Move Assistant into posthire group when pre_hiring is off.
     ai = surfaces.get("nav.ai")
     if ai and ai.get("offerable") and "pre_hiring" not in enabled:
@@ -300,13 +277,7 @@ def action_inbox_has_entitled_source(enabled: set[str], perms: set[str]) -> bool
         return True
     if "compliance" in enabled and _perm_ok(perms, "compliance.read"):
         return True
-    if enabled & PEOPLE_MODULES and (
-        _perm_ok(perms, "employees.read")
-        or _perm_ok(perms, "settings.manage")
-        or _perm_ok(perms, "users.manage")
-        or "*:*" in perms
-        or not perms
-    ):
+    if enabled & PEOPLE_MODULES and _perm_ok(perms, "employees.read"):
         return True
     return False
 

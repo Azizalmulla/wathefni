@@ -447,23 +447,7 @@ def main() -> int:
     check("daily board seed rows >= 8", len(mine) >= 8, len(mine))
 
     def life_state(row: dict) -> str:
-        meta = row.get("metadata") or {}
-        if meta.get("payroll_locked") or row.get("payroll_locked"):
-            return "locked"
-        approval = str(row.get("approval_status") or meta.get("approval_status") or "").lower()
-        status = str(row.get("status") or "").lower()
-        if approval == "disputed" or status == "disputed":
-            return "disputed"
-        if approval == "approved":
-            return "approved"
-        if status == "absent":
-            return "absent"
-        exc = str(meta.get("exception_state") or "none")
-        if exc and exc != "none":
-            return "incomplete"
-        if int(row.get("late_minutes") or 0) > 0 or int(row.get("early_leave_minutes") or meta.get("early_leave_minutes") or 0) > 0:
-            return "needs_review"
-        return "captured"
+        return str(row.get("life_state") or auth.attendance_life_state(row) or "")
 
     counts = {"approved": 0, "incomplete": 0, "absent": 0, "disputed": 0, "locked": 0, "needs_review": 0, "captured": 0}
     exclusion_checks = []

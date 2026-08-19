@@ -84,10 +84,7 @@ function useExternalPayrollData(access: DashboardAccess, onAccessIssue?: (issue:
     } catch (err) {
       if (requestId !== requestIdRef.current) return
       const issue = accessIssueFromError(err)
-      if (issue) {
-        onAccessIssue?.(issue)
-        return
-      }
+      if (issue) onAccessIssue?.(issue)
       setError(friendlyError(err, payrollExternalCopy(locale).loading, locale))
     } finally {
       if (requestId === requestIdRef.current) setRefreshing(false)

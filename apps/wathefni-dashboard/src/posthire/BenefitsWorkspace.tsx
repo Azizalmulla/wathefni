@@ -2,7 +2,7 @@
  * R5F Benefits workspace — thin client over frozen Wave 6 C3.
  * Eligible ≠ enrolled ≠ coverage active ≠ provider confirmed ≠ payroll deducted.
  */
-import { Loader2, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
@@ -22,6 +22,7 @@ import {
   type BenefitsWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -126,7 +127,7 @@ export function BenefitsWorkspace({
   onNotice,
   onAccessIssue,
 }: BenefitsWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -149,8 +150,8 @@ export function BenefitsWorkspace({
   const [planId, setPlanId] = useState('')
   const [reason, setReason] = useState('')
 
-  const canManage = permissions.includes('benefits.manage') || role === 'owner'
-  const canEnroll = permissions.includes('benefits.enroll') || canManage
+  const canManage = hasActorPermission(permissions, 'benefits.manage')
+  const canEnroll = hasActorPermission(permissions, 'benefits.enroll') || canManage
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -200,7 +201,7 @@ export function BenefitsWorkspace({
       } else if (tab === 'contributions') {
         const [contrib, handoff] = await Promise.all([
           getBenefitsContributions(access),
-          getBenefitsHandoffs(access).catch(() => ({ handoffs: [] })),
+          getBenefitsHandoffs(access),
         ])
         setContributions(contrib.contributions || [])
         setHandoffs(handoff.handoffs || [])
@@ -230,7 +231,17 @@ export function BenefitsWorkspace({
   })
 
   function tabEmpty(label: string, count: number) {
-    if (tabError) return <p className="text-sm text-destructive">{t.loadError}</p>
+    if (tabError) {
+      return (
+        <ResourceState
+          kind="error"
+          locale={isAr ? 'ar' : 'en'}
+          title={t.loadError}
+          onRetry={() => void loadTab()}
+          testId="benefits-tab-state"
+        />
+      )
+    }
     if (tabReady && count === 0) return <p className="text-sm text-muted-foreground">{label}</p>
     return null
   }
@@ -273,16 +284,30 @@ export function BenefitsWorkspace({
         </Button>
       </div>
 
-      <ResourceState
-        state={state}
-        testId="benefits-workspace-state"
-        labels={{
-          forbidden: t.forbidden,
-          unavailable: t.unavailable,
-          empty: t.emptyEnroll,
-          error: isAr ? 'تعذر تحميل المزايا' : 'Could not load Benefits',
-        }}
-      >
+      {state !== 'ready' ? (
+        <ResourceState
+          kind={state}
+          locale={isAr ? 'ar' : 'en'}
+          title={
+            state === 'forbidden'
+              ? t.forbidden
+              : state === 'unavailable'
+                ? t.unavailable
+                : state === 'empty'
+                  ? t.emptyEnroll
+                  : state === 'error'
+                    ? isAr
+                      ? 'تعذر تحميل المزايا'
+                      : 'Could not load Benefits'
+                    : undefined
+          }
+          detail={state === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => void load()}
+          retrying={loading}
+          testId="benefits-workspace-state"
+        />
+      ) : (
+        <>
         <div className="flex flex-wrap gap-2">
           {tabs.map((item) => (
             <Button key={item.id} type="button" variant={tab === item.id ? 'default' : 'outline'} onClick={() => setTab(item.id)}>
@@ -491,12 +516,8 @@ export function BenefitsWorkspace({
             </ul>
           </section>
         ) : null}
-      </ResourceState>
-      {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-        </div>
-      ) : null}
+        </>
+      )}
     </div>
   )
 }

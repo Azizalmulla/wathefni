@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { History, Loader2 } from 'lucide-react'
+import { History } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
@@ -7,6 +7,7 @@ import { getEmployeeOrgHistory } from '@/lib/api'
 import type { DashboardAccess, OrgHistoryRow } from '@/types'
 
 import { RecordEpoch, useEmployees360Locale, WorkflowEmpty } from './chrome'
+import { ResourceState } from '@/pages/shared/dataState'
 
 function epochForRow(row: OrgHistoryRow, today = new Date().toISOString().slice(0, 10)): 'current' | 'scheduled' | 'historical' {
   const from = String(row.effective_from || '').slice(0, 10)
@@ -30,6 +31,7 @@ export function AssignmentHistoryPanel({
   const [rows, setRows] = useState<OrgHistoryRow[]>([])
   const [loading, setLoading] = useState(true)
   const [unavailable, setUnavailable] = useState(false)
+  const [error, setError] = useState(false)
   const hasRowsRef = useRef(false)
 
   const load = useCallback(async () => {
@@ -41,15 +43,15 @@ export function AssignmentHistoryPanel({
       setRows(next)
       hasRowsRef.current = next.length > 0
       setUnavailable(false)
+      setError(false)
     } catch (err) {
       const anyErr = err as { detail?: { error?: string }; status?: number }
       if (anyErr?.detail?.error === 'org_v4_disabled' || anyErr?.status === 403) {
         setUnavailable(true)
-        setRows([])
-        hasRowsRef.current = false
       } else {
         const issue = accessIssueFromError(err)
         if (issue) onAccessIssue(issue)
+        setError(true)
       }
     } finally {
       setLoading(false)
@@ -79,9 +81,9 @@ export function AssignmentHistoryPanel({
       </CardHeader>
       <CardContent>
         {loading && rows.length === 0 ? (
-          <div className="flex justify-center py-8 text-mist">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
+          <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="assignment-history-state" />
+        ) : error ? (
+          <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={() => void load()} retrying={loading} testId="assignment-history-state" />
         ) : rows.length === 0 ? (
           <WorkflowEmpty
             className="py-8"

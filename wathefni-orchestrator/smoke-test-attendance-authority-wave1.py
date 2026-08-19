@@ -317,8 +317,9 @@ def main() -> int:
 
     # --- compatibility read shape ---
     compat = auth.projection_to_compat_record(approved["projection"])
-    for field in ("attendance_id", "company_code", "employee_key", "attendance_date", "status", "check_in_at", "check_out_at", "late_minutes", "early_leave_minutes", "metadata"):
+    for field in ("attendance_id", "company_code", "employee_key", "attendance_date", "status", "check_in_at", "check_out_at", "late_minutes", "early_leave_minutes", "metadata", "life_state", "payroll_exclusion_reason"):
         check(f"compat has {field}", field in compat)
+    check("approved compat life_state", compat.get("life_state") == "approved", compat.get("life_state"))
 
     # --- punches never overwritten ---
     punches = svc10.store.list_punches(company_code="ATTW1", employee_key="ATTW1-E1", work_date=pd, shift_key=auth.shift_key_of(psh["shift_id"]))

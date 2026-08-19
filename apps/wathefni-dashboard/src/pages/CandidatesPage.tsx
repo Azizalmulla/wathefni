@@ -32,6 +32,7 @@ import {
 import { recruitingCopy, type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { cn } from '@/lib/utils'
 import { EmptyState } from '@/pages/shared/primitives'
+import { ResourceState } from '@/pages/shared/dataState'
 import type { ApplicationSummary, CandidateFilters, DashboardAccess, PositionSummary } from '@/types'
 
 export function candidateAdvancedFilterCount(filters: CandidateFilters) {
@@ -83,9 +84,12 @@ function SpecialistFiltersForm({
   classificationDimensions,
   classificationEnabled,
   classificationFilters,
+  classificationTaxonomyError = false,
+  classificationTaxonomyLoading = false,
   filters,
   locale,
   onClassificationFiltersChange,
+  onRetryClassificationTaxonomy,
   updateFilter,
   unifiedEnabled,
 }: {
@@ -94,9 +98,12 @@ function SpecialistFiltersForm({
   classificationDimensions: TaxonomyDimension[]
   classificationEnabled: boolean
   classificationFilters: ClassificationFiltersState
+  classificationTaxonomyError?: boolean
+  classificationTaxonomyLoading?: boolean
   filters: CandidateFilters
   locale: RecruitingLocale
   onClassificationFiltersChange?: (next: ClassificationFiltersState) => void
+  onRetryClassificationTaxonomy?: () => void
   updateFilter: (key: keyof CandidateFilters, value: string) => void
   unifiedEnabled: boolean
 }) {
@@ -108,6 +115,9 @@ function SpecialistFiltersForm({
         enabled={Boolean(unifiedEnabled && classificationEnabled)}
         locale={locale === 'ar' ? 'ar' : 'en'}
         onChange={(next) => onClassificationFiltersChange?.(next)}
+        onRetryTaxonomy={onRetryClassificationTaxonomy}
+        taxonomyError={classificationTaxonomyError}
+        taxonomyLoading={classificationTaxonomyLoading}
         value={classificationFilters}
       />
       <div className="grid gap-3 sm:grid-cols-2">
@@ -208,11 +218,14 @@ function CandidatesFilterOverlay({
   classificationDimensions,
   classificationEnabled,
   classificationFilters,
+  classificationTaxonomyError = false,
+  classificationTaxonomyLoading = false,
   filters,
   locale,
   onClearAll,
   onClose,
   onClassificationFiltersChange,
+  onRetryClassificationTaxonomy,
   open,
   updateFilter,
   unifiedEnabled,
@@ -223,11 +236,14 @@ function CandidatesFilterOverlay({
   classificationDimensions: TaxonomyDimension[]
   classificationEnabled: boolean
   classificationFilters: ClassificationFiltersState
+  classificationTaxonomyError?: boolean
+  classificationTaxonomyLoading?: boolean
   filters: CandidateFilters
   locale: RecruitingLocale
   onClearAll: () => void
   onClose: () => void
   onClassificationFiltersChange?: (next: ClassificationFiltersState) => void
+  onRetryClassificationTaxonomy?: () => void
   open: boolean
   updateFilter: (key: keyof CandidateFilters, value: string) => void
   unifiedEnabled: boolean
@@ -282,9 +298,12 @@ function CandidatesFilterOverlay({
             classificationDimensions={classificationDimensions}
             classificationEnabled={classificationEnabled}
             classificationFilters={classificationFilters}
+            classificationTaxonomyError={classificationTaxonomyError}
+            classificationTaxonomyLoading={classificationTaxonomyLoading}
             filters={filters}
             locale={locale}
             onClassificationFiltersChange={onClassificationFiltersChange}
+            onRetryClassificationTaxonomy={onRetryClassificationTaxonomy}
             updateFilter={updateFilter}
             unifiedEnabled={unifiedEnabled}
           />
@@ -340,7 +359,10 @@ export function CandidatesPage({
   classificationFilters = DEFAULT_CLASSIFICATION_FILTERS,
   classificationDimensions = [],
   classificationDeprecatedNodes = [],
+  classificationTaxonomyError = false,
+  classificationTaxonomyLoading = false,
   onClassificationFiltersChange,
+  onRetryClassificationTaxonomy,
   showRestrictedView = false,
   hasMoreApplications = false,
   loadingMoreApplications = false,
@@ -380,7 +402,10 @@ export function CandidatesPage({
   classificationFilters?: ClassificationFiltersState
   classificationDimensions?: TaxonomyDimension[]
   classificationDeprecatedNodes?: Array<{ node_id: string; message?: string }>
+  classificationTaxonomyError?: boolean
+  classificationTaxonomyLoading?: boolean
   onClassificationFiltersChange?: (next: ClassificationFiltersState) => void
+  onRetryClassificationTaxonomy?: () => void
   showRestrictedView?: boolean
   hasMoreApplications?: boolean
   loadingMoreApplications?: boolean
@@ -628,31 +653,14 @@ export function CandidatesPage({
               <div className="h-40 animate-pulse rounded-2xl bg-white/55" />
             </div>
           ) : listError ? (
-            <div
-              className="rounded-[1.5rem] border border-rose-200/80 bg-rose-50/70 p-5 text-sm leading-6 text-rose-900"
-              data-testid="candidates-list-error"
-              role="alert"
-            >
-              <div className="font-semibold">
-                {locale === 'ar' ? 'تعذّر تحميل المرشحين' : 'Could not load candidates'}
-              </div>
-              <p className="mt-1 text-rose-800/90">
-                {locale === 'ar'
-                  ? 'فشل طلب قائمة المرشحين. هذه ليست قائمة فارغة — حاول مرة أخرى.'
-                  : 'The candidates request failed. This is not an empty list — try again.'}
-              </p>
-              <div className="mt-4">
-                <Button disabled={busy} onClick={() => onRetryList?.()} size="sm" type="button">
-                  {busy
-                    ? locale === 'ar'
-                      ? 'جاري إعادة المحاولة…'
-                      : 'Retrying…'
-                    : locale === 'ar'
-                      ? 'إعادة المحاولة'
-                      : 'Retry'}
-                </Button>
-              </div>
-            </div>
+            <ResourceState
+              kind="error"
+              locale={locale === 'ar' ? 'ar' : 'en'}
+              title={locale === 'ar' ? 'تعذّر تحميل المرشحين' : 'Could not load candidates'}
+              onRetry={onRetryList}
+              retrying={busy}
+              testId="candidates-list-error"
+            />
           ) : pagePeople.length === 0 ? (
             <EmptyState
               text={
@@ -748,9 +756,12 @@ export function CandidatesPage({
         classificationDimensions={classificationDimensions}
         classificationEnabled={classificationEnabled}
         classificationFilters={classificationFilters}
+        classificationTaxonomyError={classificationTaxonomyError}
+        classificationTaxonomyLoading={classificationTaxonomyLoading}
         filters={filters}
         locale={locale}
         onClassificationFiltersChange={onClassificationFiltersChange}
+        onRetryClassificationTaxonomy={onRetryClassificationTaxonomy}
         onClearAll={clearAllSpecialistFilters}
         onClose={() => setFiltersOpen(false)}
         open={filtersOpen}

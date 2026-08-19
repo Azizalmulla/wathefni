@@ -1,5 +1,6 @@
 import { DashboardApiError } from '@/lib/api'
 import { accessIssueFromError } from '@/lib/access'
+import { customerVisibleBrandCopy } from '@/lib/publicBrand'
 import { type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { rankingDecisionFor } from '@/lib/rankingPresentation'
 import type {
@@ -70,6 +71,10 @@ export function stageLabel(value: string | null | undefined) {
 }
 
 export function friendlyDashboardError(error: unknown, fallback: string, locale: RecruitingLocale = 'en') {
+  return customerVisibleBrandCopy(resolveFriendlyDashboardError(error, fallback, locale))
+}
+
+function resolveFriendlyDashboardError(error: unknown, fallback: string, locale: RecruitingLocale = 'en') {
   const concurrencyMessage = locale === 'ar'
     ? 'تم تحديث هذا السجل بواسطة مستخدم آخر. راجع أحدث نسخة قبل الحفظ.'
     : 'This was updated by another user. Review the latest version before saving.'

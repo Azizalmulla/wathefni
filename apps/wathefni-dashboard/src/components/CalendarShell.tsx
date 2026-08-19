@@ -1572,7 +1572,7 @@ export function CalendarShell({
             <span
               className="inline-flex max-w-[14rem] items-center gap-1.5 truncate rounded-full bg-wf-accent-review-soft/70 px-2 py-1 text-[10px] font-medium text-wf-accent-review-ink"
               data-calendar-populated-preview-banner
-              title={isAr ? 'معاينة كاناري WATHEFNI' : 'WATHEFNI canary preview'}
+              title={isAr ? 'معاينة تقويم تجريبية' : 'Sample calendar preview'}
             >
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-wf-accent-review-ink/70" aria-hidden />
               {isAr ? 'معاينة' : 'Preview'}

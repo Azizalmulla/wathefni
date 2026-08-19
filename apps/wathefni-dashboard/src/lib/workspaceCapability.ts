@@ -14,7 +14,7 @@ import {
   type ModuleWorkspaceCatalog,
 } from '@/lib/moduleWorkspace'
 import { ALERTS_DELIVERY_MANAGE_PERMISSIONS } from '@/lib/alertsDeliveryAccess'
-import { hasDashboardPermission, hasJobsPermission } from '@/pages/shared/access'
+import { hasDashboardPermission } from '@/pages/shared/access'
 
 export type SurfaceStatus =
   | 'available'
@@ -507,7 +507,7 @@ export function resolveSurface(
   if (!moduleOk(enabledModules, surface, catalog)) {
     return { ...surface, status: 'module_off', offerable: false }
   }
-  if (surface.jobsPermission && !hasJobsPermission(access, surface.jobsPermission as 'jobs.read')) {
+  if (surface.jobsPermission && !hasDashboardPermission(access, surface.jobsPermission)) {
     return { ...surface, status: 'permission_denied', offerable: false }
   }
   if (surface.permission && !permOk(access, surface.permission)) {
@@ -586,24 +586,6 @@ export function resolveWorkspaceAuthority(args: {
         status: 'permission_denied',
         offerable: false,
       }
-    }
-  }
-
-  // Employees: people modules unlock the directory for workspace admins
-  // (settings/users manage) even when employees.read is omitted from a slim
-  // owner fixture. Recruiters without employees.read stay gated out.
-  if (surfaces['nav.employees'] && !surfaces['nav.employees'].offerable) {
-    const peopleOn = anyPeopleModuleEnabled(enabled, args.catalog)
-    const perms = new Set(permissions)
-    const adminWorkspace =
-      perms.has('employees.read') ||
-      perms.has('settings.manage') ||
-      perms.has('users.manage') ||
-      perms.has('*:*')
-    if (peopleOn && adminWorkspace) {
-      surfaces['nav.employees'] = { ...surfaces['nav.employees'], status: 'available', offerable: true }
-    } else if (peopleOn) {
-      surfaces['nav.employees'] = { ...surfaces['nav.employees'], status: 'permission_denied', offerable: false }
     }
   }
 

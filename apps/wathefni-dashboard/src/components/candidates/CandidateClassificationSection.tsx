@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Loader2 } from 'lucide-react'
 
 import type { DashboardAccess } from '@/types'
 import {
@@ -13,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/field'
 import type { TaxonomyNodeOption } from '@/components/candidates/ClassificationFilters'
+import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
 
 type ClassificationSection = {
   status?: string
@@ -64,6 +64,7 @@ export function CandidateClassificationSection({
   const confirm = useConfirm()
   const [section, setSection] = useState<ClassificationSection | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -71,10 +72,13 @@ export function CandidateClassificationSection({
   const [correctFrom, setCorrectFrom] = useState('')
   const [correctTo, setCorrectTo] = useState('')
   const [taxonomyNodes, setTaxonomyNodes] = useState<TaxonomyNodeOption[]>([])
+  const [taxonomyLoading, setTaxonomyLoading] = useState(false)
+  const [taxonomyError, setTaxonomyError] = useState(false)
 
   const refresh = async (runsOffset = 0) => {
     if (!enabled) return
     setLoading(true)
+    setError(false)
     try {
       const payload = await getApplicationClassification(access, appKey, {
         runs_offset: runsOffset,
@@ -85,10 +89,11 @@ export function CandidateClassificationSection({
       const issue = accessIssueFromError(err)
       if (issue) {
         onAccessIssue?.(issue)
+        setError(true)
         return
       }
-      setMessage('Classification unavailable for this tenant or flag.')
-      setSection(null)
+      setMessage('')
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -101,13 +106,20 @@ export function CandidateClassificationSection({
 
   useEffect(() => {
     if (!enabled) return
+    setTaxonomyLoading(true)
+    setTaxonomyError(false)
     void getTalentPoolClassificationTaxonomy(access)
       .then((payload) => {
         const nodes = (payload.dimensions || []).flatMap((dimension) => dimension.nodes || [])
         setTaxonomyNodes(nodes)
       })
-      .catch(() => setTaxonomyNodes([]))
-  }, [access, enabled])
+      .catch((err) => {
+        const issue = accessIssueFromError(err)
+        if (issue) onAccessIssue?.(issue)
+        setTaxonomyError(true)
+      })
+      .finally(() => setTaxonomyLoading(false))
+  }, [access, enabled, onAccessIssue])
 
   const nodeOptions = useMemo(() => {
     const q = ''
@@ -154,6 +166,16 @@ export function CandidateClassificationSection({
 
   const statusLabel = displayBand(section?.status)
   const currency = String(section?.currency || (section?.current_run ? 'current' : 'unclassified'))
+  const sectionState = resolveListDataState({
+    loading,
+    error,
+    itemCount: section ? 1 : 0,
+  })
+  const taxonomyState = resolveListDataState({
+    loading: taxonomyLoading,
+    error: taxonomyError,
+    itemCount: taxonomyNodes.length || (section ? 1 : 0),
+  })
 
   return (
     <section className="mt-5 rounded-[1.45rem] border border-white/70 bg-white/58 p-4" data-testid="candidate-classification-section">
@@ -169,13 +191,20 @@ export function CandidateClassificationSection({
         </Button>
       </div>
 
-      {loading ? (
-        <div className="mt-3 flex items-center gap-2 text-sm text-subtle">
-          <Loader2 className="animate-spin" size={16} /> Loading classification…
+      {sectionState !== 'ready' ? (
+        <div className="mt-3">
+          <ResourceState
+            kind={sectionState === 'empty' ? 'empty' : sectionState}
+            locale={locale === 'ar' ? 'ar' : 'en'}
+            title={sectionState === 'empty' ? 'No classification recorded yet' : undefined}
+            onRetry={() => void refresh()}
+            retrying={loading}
+            testId="candidate-classification-state"
+          />
         </div>
       ) : null}
 
-      {section ? (
+      {section && sectionState === 'ready' ? (
         <div className="mt-3 space-y-4">
           <div className="flex flex-wrap gap-2">
             <Badge tone="muted">{statusLabel}</Badge>
@@ -255,6 +284,16 @@ export function CandidateClassificationSection({
 
           <div className="rounded-xl border border-line/40 bg-white/40 p-3" data-testid="classification-add-correct">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-subtle">HR add / correct</div>
+            {taxonomyState === 'error' || taxonomyState === 'loading' ? (
+              <div className="mt-2">
+                <ResourceState
+                  kind={taxonomyState}
+                  locale={locale === 'ar' ? 'ar' : 'en'}
+                  testId="candidate-classification-taxonomy-state"
+                />
+              </div>
+            ) : (
+              <>
             <div className="mt-2 flex flex-wrap gap-2">
               <select
                 className="h-10 min-w-[14rem] rounded-full border border-line/60 bg-white/80 px-3 text-sm"
@@ -315,6 +354,8 @@ export function CandidateClassificationSection({
                 Correct
               </Button>
             </div>
+              </>
+            )}
           </div>
 
           {section.rejected_node_ids?.length ? (

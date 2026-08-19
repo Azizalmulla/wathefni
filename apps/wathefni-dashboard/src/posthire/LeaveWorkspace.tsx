@@ -157,10 +157,7 @@ function useLeaveData(
     } catch (err) {
       if (requestId !== requestIdRef.current) return
       const issue = accessIssueFromError(err)
-      if (issue) {
-        onAccessIssue?.(issue)
-        return
-      }
+      if (issue) onAccessIssue?.(issue)
       setError(friendlyError(err, leaveCopy(locale).retry, locale))
     } finally {
       if (requestId === requestIdRef.current) setRefreshing(false)
@@ -354,10 +351,7 @@ function FileLeaveModal({
       })
       .catch((err) => {
         const issue = accessIssueFromError(err)
-        if (issue) {
-          onAccessIssue?.(issue)
-          return
-        }
+        if (issue) onAccessIssue?.(issue)
         setError(friendlyError(err, c.retry, locale))
       })
       .finally(() => {

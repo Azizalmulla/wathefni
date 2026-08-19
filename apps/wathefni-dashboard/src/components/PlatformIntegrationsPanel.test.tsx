@@ -66,7 +66,7 @@ describe('Settings Platform Integrations authority', () => {
   test('source dual-gates Platform Integrations on settings.manage and calendar.sync', () => {
     const src = readFileSync(resolve(__dirname, '../pages/SettingsPage.tsx'), 'utf8')
     expect(src).toContain('PlatformIntegrationsPanel')
-    expect(src).toContain("hasDashboardPermission(userAccess, 'settings.manage')")
+    expect(src).toContain('settingsIntegrationsEnabled === true')
     expect(src).toContain("hasDashboardPermission(userAccess, 'calendar.sync')")
     expect(src).toContain('canManagePlatformIntegrations')
     expect(src).toContain('variant="integrations"')
@@ -89,6 +89,7 @@ describe('Settings Platform Integrations authority', () => {
     renderWithProviders(
       <SettingsPage
         {...settingsBase}
+        settingsIntegrationsEnabled
         userAccess={userAccess(['settings.manage', 'calendar.sync', 'users.manage'], 'owner')}
       />,
     )
@@ -115,6 +116,7 @@ describe('Settings Platform Integrations authority', () => {
     renderWithProviders(
       <SettingsPage
         {...settingsBase}
+        settingsIntegrationsEnabled
         userAccess={userAccess(['settings.manage', 'calendar.manage', 'calendar.company', 'audit.read'], 'hr_admin')}
       />,
     )
@@ -124,6 +126,21 @@ describe('Settings Platform Integrations authority', () => {
     expect(screen.getByRole('tab', { name: /^Advanced$/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Connect Microsoft 365/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Ensure legacy operator/i })).not.toBeInTheDocument()
+  })
+
+  test('Settings integrations stay hidden when workspace authority is omitted', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ ok: true })))
+
+    renderWithProviders(
+      <SettingsPage
+        {...settingsBase}
+        userAccess={userAccess(['settings.manage', 'calendar.sync', 'users.manage'], 'owner')}
+      />,
+    )
+
+    expect(await screen.findByRole('tab', { name: /^My account$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: /^Integrations$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: /^Advanced$/i })).not.toBeInTheDocument()
   })
 
   test('integrations variant hides legacy tools; advanced variant exposes them', async () => {
@@ -149,5 +166,28 @@ describe('Settings Platform Integrations authority', () => {
     rerender(<PlatformIntegrationsPanel access={access} locale="en" variant="advanced" />)
     expect(await screen.findByRole('button', { name: /Prepare backup calendar connection/i })).toBeInTheDocument()
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+  })
+
+  test('integrations request failure renders error, not a fake empty connections list', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const path = String(input)
+        if (path.includes('/dashboard/platform/integrations')) {
+          return jsonResponse({ detail: { error: 'upstream_failed' } }, 500)
+        }
+        if (path.includes('/dashboard/calendar/sync/connections')) {
+          return jsonResponse({ ok: true, connections: [], count: 0 })
+        }
+        return jsonResponse({ ok: true })
+      }),
+    )
+
+    renderWithProviders(<PlatformIntegrationsPanel access={access} locale="en" variant="integrations" />)
+
+    const state = await screen.findByTestId('platform-integrations-state')
+    expect(state).toHaveAttribute('role', 'alert')
+    expect(state).toHaveTextContent(/not an empty result/i)
+    expect(screen.queryByText(/No connections yet/i)).not.toBeInTheDocument()
   })
 })

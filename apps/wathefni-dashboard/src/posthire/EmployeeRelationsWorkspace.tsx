@@ -20,6 +20,7 @@ import {
   type EmployeeRelationsWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -118,7 +119,7 @@ export function EmployeeRelationsWorkspace({
   onNotice,
   onAccessIssue,
 }: EmployeeRelationsWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -138,12 +139,12 @@ export function EmployeeRelationsWorkspace({
   const [investigatorKey, setInvestigatorKey] = useState('')
   const [reason, setReason] = useState('')
 
-  const canManage = permissions.includes('er.manage') || role === 'owner'
-  const canInvestigate = permissions.includes('er.investigate') || canManage
-  const canDecide = permissions.includes('er.decide') || canManage
+  const canManage = hasActorPermission(permissions, 'er.manage')
+  const canInvestigate = hasActorPermission(permissions, 'er.investigate') || canManage
+  const canDecide = hasActorPermission(permissions, 'er.decide') || canManage
   const managerOnly = String(role || '').toLowerCase() === 'manager'
   const hasErAuthority =
-    permissions.includes('er.read') || canManage || canInvestigate || canDecide
+    hasActorPermission(permissions, 'er.read') || canManage || canInvestigate || canDecide
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -219,7 +220,17 @@ export function EmployeeRelationsWorkspace({
   })
 
   function tabEmpty(label: string, count: number) {
-    if (tabError) return <p className="text-sm text-destructive">{t.loadError}</p>
+    if (tabError) {
+      return (
+        <ResourceState
+          kind="error"
+          locale={isAr ? 'ar' : 'en'}
+          title={t.loadError}
+          onRetry={() => void loadTab()}
+          testId="employee-relations-tab-state"
+        />
+      )
+    }
     if (tabReady && count === 0) return <p className="text-sm text-muted-foreground">{label}</p>
     return null
   }
@@ -261,16 +272,30 @@ export function EmployeeRelationsWorkspace({
         </Button>
       </div>
 
-      <ResourceState
-        state={state}
-        testId="employee-relations-workspace-state"
-        labels={{
-          forbidden: t.forbidden,
-          unavailable: t.unavailable,
-          empty: t.emptyCases,
-          error: isAr ? 'تعذر تحميل علاقات الموظفين' : 'Could not load Employee Relations',
-        }}
-      >
+      {state !== 'ready' ? (
+        <ResourceState
+          kind={state}
+          locale={isAr ? 'ar' : 'en'}
+          title={
+            state === 'forbidden'
+              ? t.forbidden
+              : state === 'unavailable'
+                ? t.unavailable
+                : state === 'empty'
+                  ? t.emptyCases
+                  : state === 'error'
+                    ? isAr
+                      ? 'تعذر تحميل علاقات الموظفين'
+                      : 'Could not load Employee Relations'
+                    : undefined
+          }
+          detail={state === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => void load()}
+          retrying={loading}
+          testId="employee-relations-workspace-state"
+        />
+      ) : (
+        <>
         <div className="flex flex-wrap gap-2">
           {tabs.map((item) => (
             <Button key={item.id} type="button" variant={tab === item.id ? 'default' : 'outline'} onClick={() => setTab(item.id)}>
@@ -441,7 +466,15 @@ export function EmployeeRelationsWorkspace({
                 </Button>
               </div>
             ) : null}
-            {tabError ? <p className="text-sm text-destructive">{t.loadError}</p> : null}
+            {tabError ? (
+              <ResourceState
+                kind="error"
+                locale={isAr ? 'ar' : 'en'}
+                title={t.loadError}
+                onRetry={() => void loadTab()}
+                testId="employee-relations-tab-state"
+              />
+            ) : null}
             {detail ? (
               <div className="space-y-2 rounded-lg border border-border/70 p-3 text-sm">
                 <div>{t.intake}: {String((detail.intake as Record<string, unknown> | undefined)?.source || '')}</div>
@@ -479,7 +512,8 @@ export function EmployeeRelationsWorkspace({
             </ul>
           </section>
         ) : null}
-      </ResourceState>
+        </>
+      )}
     </div>
   )
 }

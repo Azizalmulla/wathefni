@@ -165,11 +165,12 @@ export function actionInboxHasEntitledSource(args: {
 }): boolean {
   const enabled = enabledModuleSet(args.enabledModules)
   const perms = new Set((args.permissions || []).map(String))
-  const permOk = (p: string) => perms.has(p) || perms.has('*:*') || perms.size === 0
+  // Wave 4: empty / missing permissions fail closed. `*:*` is the backend wildcard.
+  const permOk = (p: string) => perms.has(p) || perms.has('*:*')
   if (enabled.has('analytics') && permOk('analytics.read')) return true
   if (enabled.has('compliance') && permOk('compliance.read')) return true
   if (anyPeopleModuleEnabled(args.enabledModules, args.catalog)) {
-    if (permOk('employees.read') || permOk('settings.manage') || permOk('users.manage')) return true
+    if (permOk('employees.read')) return true
   }
   return false
 }

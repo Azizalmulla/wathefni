@@ -13,17 +13,21 @@ import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import {
   DashboardApiError,
   getTalentEvidenceIndex,
-  getTalentModels,
-  getTalentRoleFitSets,
   getTalentMap,
+  getTalentModels,
+  getTalentNineBox,
   getTalentProfile,
   getTalentProfiles,
+  getTalentReviews,
+  getTalentRoleFitSets,
   getTalentSlate,
+  getTalentSuccession,
   getTalentWorkspace,
   postTalentJson,
   type TalentWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -167,21 +171,29 @@ export function TalentWorkspace({
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<TalentWorkspacePayload | null>(null)
   const [people, setPeople] = useState<Array<Record<string, unknown>>>([])
+  const [peopleLoading, setPeopleLoading] = useState(false)
+  const [peopleError, setPeopleError] = useState(false)
   const [reviews, setReviews] = useState<Array<Record<string, unknown>>>([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [reviewsError, setReviewsError] = useState(false)
   const [succession, setSuccession] = useState<{
     critical_roles?: Array<Record<string, unknown>>
     plans?: Array<Record<string, unknown>>
     uncovered?: Array<Record<string, unknown>>
   } | null>(null)
+  const [successionLoading, setSuccessionLoading] = useState(false)
+  const [successionError, setSuccessionError] = useState(false)
   const [nine, setNine] = useState<{ enabled?: boolean; configs?: Array<Record<string, unknown>> } | null>(null)
+  const [nineLoading, setNineLoading] = useState(false)
+  const [nineError, setNineError] = useState(false)
   const [empKey, setEmpKey] = useState('')
   const [title, setTitle] = useState('')
   const [rationale, setRationale] = useState('')
 
-  const canManage = permissions.includes('talent.manage') || role === 'owner'
-  const canSensitive = permissions.includes('talent.sensitive') || role === 'owner'
-  const canReview = permissions.includes('talent.review') || role === 'owner'
-  const canSuccession = permissions.includes('talent.succession') || role === 'owner'
+  const canManage = hasActorPermission(permissions, 'talent.manage')
+  const canSensitive = hasActorPermission(permissions, 'talent.sensitive')
+  const canReview = hasActorPermission(permissions, 'talent.review')
+  const canSuccession = hasActorPermission(permissions, 'talent.succession')
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -242,46 +254,72 @@ export function TalentWorkspace({
     return items
   }, [canReview, canSuccession, managerOnly, t])
 
-  async function loadPeople() {
+  const loadPeople = useCallback(async () => {
+    setPeopleLoading(true)
+    setPeopleError(false)
     try {
       const data = await getTalentProfiles(access)
       setPeople(data.profiles || [])
     } catch (err) {
-      if (err instanceof DashboardApiError && err.status >= 500) onNotice(isAr ? 'تعذّر التحميل' : 'Could not load', 'error')
+      const issue = accessIssueFromError(err)
+      if (issue) onAccessIssue?.(issue)
+      setPeopleError(true)
+    } finally {
+      setPeopleLoading(false)
     }
-  }
+  }, [access, onAccessIssue])
+
+  const loadReviews = useCallback(async () => {
+    setReviewsLoading(true)
+    setReviewsError(false)
+    try {
+      const data = await getTalentReviews(access)
+      setReviews(data.reviews || [])
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) onAccessIssue?.(issue)
+      setReviewsError(true)
+    } finally {
+      setReviewsLoading(false)
+    }
+  }, [access, onAccessIssue])
+
+  const loadSuccession = useCallback(async () => {
+    setSuccessionLoading(true)
+    setSuccessionError(false)
+    try {
+      const data = await getTalentSuccession(access)
+      setSuccession(data)
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) onAccessIssue?.(issue)
+      setSuccessionError(true)
+    } finally {
+      setSuccessionLoading(false)
+    }
+  }, [access, onAccessIssue])
+
+  const loadNine = useCallback(async () => {
+    setNineLoading(true)
+    setNineError(false)
+    try {
+      const data = await getTalentNineBox(access)
+      setNine(data)
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) onAccessIssue?.(issue)
+      setNineError(true)
+    } finally {
+      setNineLoading(false)
+    }
+  }, [access, onAccessIssue])
 
   useEffect(() => {
     if (tab === 'people') void loadPeople()
-    if (tab === 'reviews' && canReview) {
-      import('@/lib/api').then(({ request }) =>
-        request<{ reviews?: Array<Record<string, unknown>> }>('/dashboard/posthire/talent/reviews', access)
-          .then((data) => setReviews(data.reviews || []))
-          .catch(() => setReviews([])),
-      )
-    }
-    if (tab === 'succession' && canSuccession) {
-      import('@/lib/api').then(({ request }) =>
-        request<{
-          critical_roles?: Array<Record<string, unknown>>
-          plans?: Array<Record<string, unknown>>
-          uncovered?: Array<Record<string, unknown>>
-        }>('/dashboard/posthire/talent/succession', access)
-          .then((data) => setSuccession(data))
-          .catch(() => setSuccession(null)),
-      )
-    }
-    if (tab === 'ninebox') {
-      import('@/lib/api').then(({ request }) =>
-        request<{ enabled?: boolean; configs?: Array<Record<string, unknown>> }>(
-          '/dashboard/posthire/talent/nine-box',
-          access,
-        )
-          .then((data) => setNine(data))
-          .catch(() => setNine({ enabled: false, configs: [] })),
-      )
-    }
-  }, [access, canReview, canSuccession, tab])
+    if (tab === 'reviews' && canReview) void loadReviews()
+    if (tab === 'succession' && canSuccession) void loadSuccession()
+    if (tab === 'ninebox') void loadNine()
+  }, [tab, canReview, canSuccession, loadPeople, loadReviews, loadSuccession, loadNine])
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'} className="space-y-5">
@@ -359,8 +397,11 @@ export function TalentWorkspace({
               rationale={rationale}
               setRationale={setRationale}
               people={people}
+              peopleLoading={peopleLoading}
+              peopleError={peopleError}
               access={access}
               onNotice={onNotice}
+              onAccessIssue={onAccessIssue}
               onReload={() => void loadPeople()}
             />
           ) : null}
@@ -368,21 +409,28 @@ export function TalentWorkspace({
           {tab === 'reviews' && canReview ? (
             <ReviewsPanel
               t={t}
+              isAr={isAr}
               canManage={canManage}
               reviews={reviews}
+              reviewsLoading={reviewsLoading}
+              reviewsError={reviewsError}
               empKey={empKey}
               setEmpKey={setEmpKey}
               title={title}
               setTitle={setTitle}
               access={access}
               onNotice={onNotice}
+              onRetry={() => void loadReviews()}
             />
           ) : null}
 
           {tab === 'succession' && canSuccession ? (
             <SuccessionPanel
               t={t}
+              isAr={isAr}
               succession={succession}
+              successionLoading={successionLoading}
+              successionError={successionError}
               empKey={empKey}
               setEmpKey={setEmpKey}
               title={title}
@@ -391,6 +439,7 @@ export function TalentWorkspace({
               setRationale={setRationale}
               access={access}
               onNotice={onNotice}
+              onRetry={() => void loadSuccession()}
             />
           ) : null}
 
@@ -413,17 +462,35 @@ export function TalentWorkspace({
 
           {tab === 'ninebox' ? (
             <div className="space-y-3">
-              {!nine?.enabled || !nine.configs?.length ? (
-                <ResourceState kind="empty" locale={isAr ? 'ar' : 'en'} title={t.emptyNine} detail={t.emptyHint} />
-              ) : (
-                <ul className="space-y-2">
-                  {nine.configs.map((cfg) => (
-                    <li key={String(cfg.config_id)} className="rounded-xl border border-border/70 p-3 text-sm">
-                      {String(cfg.name_en || cfg.config_id)} · {t.project}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {(() => {
+                const nineState = resolveListDataState({
+                  loading: nineLoading,
+                  error: nineError,
+                  itemCount: nine?.configs?.length || 0,
+                })
+                if (nineState !== 'ready') {
+                  return (
+                    <ResourceState
+                      kind={nineState === 'empty' ? 'empty' : nineState}
+                      locale={isAr ? 'ar' : 'en'}
+                      title={nineState === 'empty' ? t.emptyNine : undefined}
+                      detail={nineState === 'empty' ? t.emptyHint : undefined}
+                      onRetry={() => void loadNine()}
+                      retrying={nineLoading}
+                      testId="talent-ninebox-state"
+                    />
+                  )
+                }
+                return (
+                  <ul className="space-y-2">
+                    {nine!.configs!.map((cfg) => (
+                      <li key={String(cfg.config_id)} className="rounded-xl border border-border/70 p-3 text-sm">
+                        {String(cfg.name_en || cfg.config_id)} · {t.project}
+                      </li>
+                    ))}
+                  </ul>
+                )
+              })()}
             </div>
           ) : null}
         </>
@@ -444,8 +511,11 @@ function PeoplePanel({
   rationale,
   setRationale,
   people,
+  peopleLoading,
+  peopleError,
   access,
   onNotice,
+  onAccessIssue,
   onReload,
 }: {
   t: ReturnType<typeof copy>
@@ -459,13 +529,23 @@ function PeoplePanel({
   rationale: string
   setRationale: (v: string) => void
   people: Array<Record<string, unknown>>
+  peopleLoading: boolean
+  peopleError: boolean
   access: DashboardAccess
   onNotice: NoticeFn
+  onAccessIssue?: (issue: AccessIssue) => void
   onReload: () => void
 }) {
   const [open, setOpen] = useState<string | null>(null)
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null)
   const [evidence, setEvidence] = useState<Array<Record<string, unknown>>>([])
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState(false)
+  const peopleState = resolveListDataState({
+    loading: peopleLoading,
+    error: peopleError,
+    itemCount: people.length,
+  })
 
   return (
     <div className="space-y-3">
@@ -532,8 +612,16 @@ function PeoplePanel({
       {canSensitive ? (
         <Textarea value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder={t.rationale} />
       ) : null}
-      {people.length === 0 ? (
-        <ResourceState kind="empty" locale={isAr ? 'ar' : 'en'} title={t.emptyPeople} detail={t.emptyHint} />
+      {peopleState !== 'ready' ? (
+        <ResourceState
+          kind={peopleState === 'empty' ? 'empty' : peopleState}
+          locale={isAr ? 'ar' : 'en'}
+          title={peopleState === 'empty' ? t.emptyPeople : undefined}
+          detail={peopleState === 'empty' ? t.emptyHint : undefined}
+          onRetry={onReload}
+          retrying={peopleLoading}
+          testId="talent-people-state"
+        />
       ) : (
         <ul className="space-y-2">
           {people.map((row) => {
@@ -545,15 +633,40 @@ function PeoplePanel({
                   className="text-start font-medium"
                   onClick={() => {
                     setOpen(key)
-                    void getTalentProfile(access, key).then(setDetail).catch(() => setDetail(null))
-                    void getTalentEvidenceIndex(access, key)
-                      .then((data) => setEvidence(data.evidence || []))
-                      .catch(() => setEvidence([]))
+                    setDetail(null)
+                    setEvidence([])
+                    setDetailError(false)
+                    setDetailLoading(true)
+                    void Promise.all([
+                      getTalentProfile(access, key),
+                      getTalentEvidenceIndex(access, key),
+                    ])
+                      .then(([profile, index]) => {
+                        setDetail(profile)
+                        setEvidence(index.evidence || [])
+                      })
+                      .catch((err) => {
+                        const issue = accessIssueFromError(err)
+                        if (issue) onAccessIssue?.(issue)
+                        setDetailError(true)
+                      })
+                      .finally(() => setDetailLoading(false))
                   }}
                 >
                   {key}
                 </button>
-                {open === key && detail ? (
+                {open === key ? (
+                  detailLoading ? (
+                    <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="talent-profile-detail-state" />
+                  ) : detailError ? (
+                    <div className="mt-2">
+                      <ResourceState
+                        kind="error"
+                        locale={isAr ? 'ar' : 'en'}
+                        testId="talent-profile-detail-state"
+                      />
+                    </div>
+                  ) : detail ? (
                   <div className="mt-2 space-y-2">
                     <pre className="overflow-auto text-xs text-muted-foreground">
                       {JSON.stringify(
@@ -581,6 +694,7 @@ function PeoplePanel({
                       </div>
                     ) : null}
                   </div>
+                  ) : null
                 ) : null}
               </li>
             )
@@ -593,25 +707,38 @@ function PeoplePanel({
 
 function ReviewsPanel({
   t,
+  isAr,
   canManage,
   reviews,
+  reviewsLoading,
+  reviewsError,
   empKey,
   setEmpKey,
   title,
   setTitle,
   access,
   onNotice,
+  onRetry,
 }: {
   t: ReturnType<typeof copy>
+  isAr: boolean
   canManage: boolean
   reviews: Array<Record<string, unknown>>
+  reviewsLoading: boolean
+  reviewsError: boolean
   empKey: string
   setEmpKey: (v: string) => void
   title: string
   setTitle: (v: string) => void
   access: DashboardAccess
   onNotice: NoticeFn
+  onRetry: () => void
 }) {
+  const reviewsState = resolveListDataState({
+    loading: reviewsLoading,
+    error: reviewsError,
+    itemCount: reviews.length,
+  })
   return (
     <div className="space-y-3">
       {canManage ? (
@@ -643,8 +770,16 @@ function ReviewsPanel({
           </Button>
         </div>
       ) : null}
-      {reviews.length === 0 ? (
-        <ResourceState kind="empty" locale="en" title={t.emptyReviews} detail={t.emptyHint} />
+      {reviewsState !== 'ready' ? (
+        <ResourceState
+          kind={reviewsState === 'empty' ? 'empty' : reviewsState}
+          locale={isAr ? 'ar' : 'en'}
+          title={reviewsState === 'empty' ? t.emptyReviews : undefined}
+          detail={reviewsState === 'empty' ? t.emptyHint : undefined}
+          onRetry={onRetry}
+          retrying={reviewsLoading}
+          testId="talent-reviews-state"
+        />
       ) : (
         <ul className="space-y-2">
           {reviews.map((row) => (
@@ -660,7 +795,10 @@ function ReviewsPanel({
 
 function SuccessionPanel({
   t,
+  isAr,
   succession,
+  successionLoading,
+  successionError,
   empKey,
   setEmpKey,
   title,
@@ -669,13 +807,17 @@ function SuccessionPanel({
   setRationale,
   access,
   onNotice,
+  onRetry,
 }: {
   t: ReturnType<typeof copy>
+  isAr: boolean
   succession: {
     critical_roles?: Array<Record<string, unknown>>
     plans?: Array<Record<string, unknown>>
     uncovered?: Array<Record<string, unknown>>
   } | null
+  successionLoading: boolean
+  successionError: boolean
   empKey: string
   setEmpKey: (v: string) => void
   title: string
@@ -684,7 +826,13 @@ function SuccessionPanel({
   setRationale: (v: string) => void
   access: DashboardAccess
   onNotice: NoticeFn
+  onRetry: () => void
 }) {
+  const successionState = resolveListDataState({
+    loading: successionLoading,
+    error: successionError,
+    itemCount: succession?.plans?.length || 0,
+  })
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
@@ -729,8 +877,16 @@ function SuccessionPanel({
           {t.nominate}
         </Button>
       </div>
-      {(succession?.plans || []).length === 0 ? (
-        <ResourceState kind="empty" locale="en" title={t.emptySuccession} detail={t.emptyHint} />
+      {successionState !== 'ready' ? (
+        <ResourceState
+          kind={successionState === 'empty' ? 'empty' : successionState}
+          locale={isAr ? 'ar' : 'en'}
+          title={successionState === 'empty' ? t.emptySuccession : undefined}
+          detail={successionState === 'empty' ? t.emptyHint : undefined}
+          onRetry={onRetry}
+          retrying={successionLoading}
+          testId="talent-succession-state"
+        />
       ) : (
         <ul className="space-y-2">
           {(succession?.plans || []).map((plan) => (
@@ -774,16 +930,23 @@ function ModelsPane({
 }) {
   const [models, setModels] = useState<Array<Record<string, unknown>>>([])
   const [why, setWhy] = useState<Record<string, unknown> | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-  const reload = () => {
+  const reload = useCallback(() => {
+    setLoading(true)
+    setError(false)
     void getTalentModels(access)
       .then((data) => setModels(data.models || []))
-      .catch(() => setModels([]))
-  }
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
+  }, [access])
 
   useEffect(() => {
     reload()
-  }, [access])
+  }, [reload])
+
+  const modelsState = resolveListDataState({ loading, error, itemCount: models.length })
 
   return (
     <div className="space-y-3">
@@ -848,8 +1011,15 @@ function ModelsPane({
           </Button>
         </div>
       ) : null}
-      {models.length === 0 ? (
-        <ResourceState kind="empty" locale={isAr ? 'ar' : 'en'} title={t.emptyHint} />
+      {modelsState !== 'ready' ? (
+        <ResourceState
+          kind={modelsState === 'empty' ? 'empty' : modelsState}
+          locale={isAr ? 'ar' : 'en'}
+          title={modelsState === 'empty' ? t.emptyHint : undefined}
+          onRetry={reload}
+          retrying={loading}
+          testId="talent-models-state"
+        />
       ) : (
         <ul className="space-y-2">
           {models.map((model) => (
@@ -890,16 +1060,23 @@ function RoleFitPane({
   const [sets, setSets] = useState<Array<Record<string, unknown>>>([])
   const [why, setWhy] = useState<Record<string, unknown> | null>(null)
   const [roleKey, setRoleKey] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-  const reload = () => {
+  const reload = useCallback(() => {
+    setLoading(true)
+    setError(false)
     void getTalentRoleFitSets(access)
       .then((data) => setSets(data.sets || []))
-      .catch(() => setSets([]))
-  }
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
+  }, [access])
 
   useEffect(() => {
     reload()
-  }, [access])
+  }, [reload])
+
+  const setsState = resolveListDataState({ loading, error, itemCount: sets.length })
 
   return (
     <div className="space-y-3">
@@ -970,8 +1147,15 @@ function RoleFitPane({
           </Button>
         </div>
       ) : null}
-      {sets.length === 0 ? (
-        <ResourceState kind="empty" locale={isAr ? 'ar' : 'en'} title={t.emptyHint} />
+      {setsState !== 'ready' ? (
+        <ResourceState
+          kind={setsState === 'empty' ? 'empty' : setsState}
+          locale={isAr ? 'ar' : 'en'}
+          title={setsState === 'empty' ? t.emptyHint : undefined}
+          onRetry={reload}
+          retrying={loading}
+          testId="talent-rolefit-state"
+        />
       ) : (
         <ul className="space-y-2">
           {sets.map((item) => (
@@ -1004,15 +1188,22 @@ function MapPane({
   const [lens, setLens] = useState('perf_x_potential')
   const [payload, setPayload] = useState<Record<string, unknown> | null>(null)
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [reloadToken, setReloadToken] = useState(0)
 
   useEffect(() => {
+    setLoading(true)
+    setError(false)
     void getTalentMap(access, lens)
       .then((data) => setPayload(data))
-      .catch(() => setPayload(null))
-  }, [access, lens])
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
+  }, [access, lens, reloadToken])
 
   const placements = (payload?.placements as Array<Record<string, unknown>>) || []
   const lenses = (payload?.lenses as Array<Record<string, unknown>>) || []
+  const mapState = resolveListDataState({ loading, error, itemCount: placements.length })
 
   return (
     <div className="space-y-3" dir={isAr ? 'rtl' : 'ltr'}>
@@ -1029,7 +1220,9 @@ function MapPane({
         >
           {(lenses.length
             ? lenses
-            : [{ id: 'perf_x_potential', label_en: 'Performance × Potential', label_ar: 'الأداء × الإمكانات' }]
+            : error
+              ? []
+              : [{ id: 'perf_x_potential', label_en: 'Performance × Potential', label_ar: 'الأداء × الإمكانات' }]
           ).map((item) => (
             <option key={String(item.id)} value={String(item.id)}>
               {isAr ? String(item.label_ar || item.label_en || '') : String(item.label_en || item.id)}
@@ -1037,8 +1230,15 @@ function MapPane({
           ))}
         </select>
       </label>
-      {placements.length === 0 ? (
-        <ResourceState kind="empty" locale={isAr ? 'ar' : 'en'} title={t.emptyHint} />
+      {mapState !== 'ready' ? (
+        <ResourceState
+          kind={mapState === 'empty' ? 'empty' : mapState}
+          locale={isAr ? 'ar' : 'en'}
+          title={mapState === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => setReloadToken((n) => n + 1)}
+          retrying={loading}
+          testId="talent-map-state"
+        />
       ) : (
         <ul className="space-y-2">
           {placements.map((place) => (

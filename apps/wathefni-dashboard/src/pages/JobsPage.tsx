@@ -8,6 +8,7 @@ import { LoadMoreBar } from '@/components/ui/load-more-bar'
 import { SearchInput } from '@/components/ui/search-input'
 import { jobIsExternallyShareable, recruitingCopy, type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { EmptyState } from '@/pages/shared/primitives'
+import { ResourceState } from '@/pages/shared/dataState'
 import { normalizedJobStatus } from '@/pages/shared/format'
 import type { PositionsResponse, PositionSummary } from '@/types'
 
@@ -306,6 +307,8 @@ export function JobsPage({
   departmentFilter,
   jobsData,
   loading = false,
+  listError = false,
+  onRetryList,
   loadingMore,
   locale,
   locationFilter,
@@ -332,6 +335,8 @@ export function JobsPage({
   departmentFilter: string
   jobsData: PositionsResponse | null
   loading?: boolean
+  listError?: boolean
+  onRetryList?: () => void
   loadingMore: boolean
   locale: RecruitingLocale
   locationFilter: string
@@ -442,6 +447,18 @@ export function JobsPage({
           ))}
         </div>
         <JobsDesktopSkeleton />
+      </div>
+    )
+  } else if (listError) {
+    listBody = (
+      <div className="p-4">
+        <ResourceState
+          kind="error"
+          locale={locale === 'ar' ? 'ar' : 'en'}
+          onRetry={onRetryList}
+          retrying={loading}
+          testId="jobs-list-error"
+        />
       </div>
     )
   } else if (positions.length === 0) {

@@ -58,6 +58,7 @@ export function rankingDecisionFor(candidate: RankingCandidate): RankingDecision
     gaps: asTextList(presentation?.gaps || candidate.gpt_evaluation?.gaps, 4),
     missing_evidence: asTextList(presentation?.missing || candidate.gpt_evaluation?.gaps, 4),
     component_scores: candidate.component_scores || candidate.score_breakdown || {},
+    component_score_meta: score?.components,
     recommended_next_action:
       presentation?.recommended_next_step || candidate.gpt_evaluation?.recommended_next_step || undefined,
     evidence_references: asTextList(presentation?.evidence_highlights || candidate.evidence, 5),
@@ -89,12 +90,14 @@ export function rankingComponentRows(
     if (raw == null || raw === undefined) return []
     const value = Number(raw)
     if (!Number.isFinite(value)) return []
+    const meta = decision.component_score_meta?.[item.key]
+    const max = Number(meta?.max)
     return [
       {
         key: item.key,
-        label: locale === 'ar' ? item.labelAr : item.labelEn,
+        label: meta?.label || (locale === 'ar' ? item.labelAr : item.labelEn),
         value,
-        max: item.max,
+        max: Number.isFinite(max) && max > 0 ? max : item.max,
         group: item.group,
       },
     ]

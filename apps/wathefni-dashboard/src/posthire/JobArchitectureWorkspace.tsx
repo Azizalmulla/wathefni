@@ -23,6 +23,7 @@ import {
   type JobArchitectureWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -164,7 +165,6 @@ function labelOf(row: Record<string, unknown>, isAr: boolean): string {
 export function JobArchitectureWorkspace({
   access,
   permissions,
-  role,
   onNotice,
   onAccessIssue,
 }: JobArchitectureWorkspaceProps) {
@@ -197,9 +197,9 @@ export function JobArchitectureWorkspace({
   const [mappedType, setMappedType] = useState('job_profile')
   const [mappedId, setMappedId] = useState('')
 
-  const canManage = permissions.includes('job_architecture.manage') || role === 'owner'
-  const canMap = permissions.includes('job_architecture.mapping') || role === 'owner'
-  const canPublish = permissions.includes('job_architecture.publish') || canManage
+  const canManage = hasActorPermission(permissions, 'job_architecture.manage')
+  const canMap = hasActorPermission(permissions, 'job_architecture.mapping') || canManage
+  const canPublish = hasActorPermission(permissions, 'job_architecture.publish') || canManage
 
   const load = useCallback(async () => {
     setLoading(true)

@@ -61,6 +61,8 @@ describe('Shifts Wave 1 IA refinement contract', () => {
   it('uses governed compact org filters and quieter Refresh', () => {
     expect(shiftsSrc).toContain('getEmployeeOrgUnits')
     expect(shiftsSrc).toContain('data-shifts-filters')
+    expect(shiftsSrc).toContain('shifts-org-units-filter-state')
+    expect(shiftsSrc).not.toMatch(/catch\s*\{[\s\S]{0,80}setOrgUnits\(\[\]\)/)
     expect(shiftsSrc).toContain('allBranches')
     expect(shiftsSrc).toContain('allSites')
     expect(shiftsSrc).toContain('allTeams')

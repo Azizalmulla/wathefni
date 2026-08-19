@@ -25,6 +25,7 @@ import {
   type CompensationPlanningWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -141,7 +142,7 @@ export function CompensationPlanningWorkspace({
   onNotice,
   onAccessIssue,
 }: CompensationPlanningWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -167,11 +168,11 @@ export function CompensationPlanningWorkspace({
   const [originalRecId, setOriginalRecId] = useState('')
   const [decisionId, setDecisionId] = useState('')
 
-  const canManage = permissions.includes('comp_planning.manage') || role === 'owner'
-  const canRecommend = permissions.includes('comp_planning.recommend') || canManage
-  const canCalibrate = permissions.includes('comp_planning.calibrate') || canManage
-  const canApprove = permissions.includes('comp_planning.approve') || canManage
-  const canFinalize = permissions.includes('comp_planning.finalize') || canManage
+  const canManage = hasActorPermission(permissions, 'comp_planning.manage')
+  const canRecommend = hasActorPermission(permissions, 'comp_planning.recommend') || canManage
+  const canCalibrate = hasActorPermission(permissions, 'comp_planning.calibrate') || canManage
+  const canApprove = hasActorPermission(permissions, 'comp_planning.approve') || canManage
+  const canFinalize = hasActorPermission(permissions, 'comp_planning.finalize') || canManage
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -312,12 +313,27 @@ export function CompensationPlanningWorkspace({
           {t.refresh}
         </Button>
       </div>
-      <ResourceState
-        state={state}
-        labels={{ forbidden: t.forbidden, unavailable: t.unavailable, empty: t.emptyHint, error: t.loadError }}
-        testId="compensation-planning-workspace-state"
-      />
-      {!forbidden && !unavailable && !error && (
+      {state !== 'ready' ? (
+        <ResourceState
+          kind={state}
+          locale={isAr ? 'ar' : 'en'}
+          title={
+            state === 'forbidden'
+              ? t.forbidden
+              : state === 'unavailable'
+                ? t.unavailable
+                : state === 'empty'
+                  ? t.emptyCycles
+                  : state === 'error'
+                    ? t.loadError
+                    : undefined
+          }
+          detail={state === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => void load()}
+          retrying={loading}
+          testId="compensation-planning-workspace-state"
+        />
+      ) : (
         <>
           <div className="flex flex-wrap gap-2">
             {tabs.map((id) => (
@@ -384,7 +400,15 @@ export function CompensationPlanningWorkspace({
                   </Button>
                 </div>
               )}
-              {tabError ? <p className="text-sm text-destructive">{t.loadError}</p> : null}
+              {tabError ? (
+                <ResourceState
+                  kind="error"
+                  locale={isAr ? 'ar' : 'en'}
+                  title={t.loadError}
+                  onRetry={() => void loadTab()}
+                  testId="compensation-planning-tab-state"
+                />
+              ) : null}
               {tabReady && cycles.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptyCycles}</p> : null}
               {cycles.map((row) => (
                 <div key={String(row.cycle_id)} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">

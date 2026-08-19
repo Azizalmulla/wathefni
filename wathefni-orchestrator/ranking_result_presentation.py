@@ -586,6 +586,30 @@ def _numeric_score_presentation(
     }
 
 
+def _component_score_contract(item: dict[str, Any], *, locale: str) -> dict[str, dict[str, Any]]:
+    """Additive max/weight contract. Numeric component_scores stay unchanged."""
+    lang = normalize_locale(locale)
+    raw = item.get("component_scores")
+    if not isinstance(raw, dict):
+        raw = item.get("score_breakdown")
+    components = raw if isinstance(raw, dict) else {}
+    out: dict[str, dict[str, Any]] = {}
+    for key, (label_en, label_ar, maximum) in _COMPONENTS.items():
+        if key not in components:
+            continue
+        try:
+            value = float(components.get(key))
+        except (TypeError, ValueError):
+            continue
+        out[key] = {
+            "value": value,
+            "max": float(maximum),
+            "weight": float(maximum),
+            "label": label_ar if lang == "ar" else label_en,
+        }
+    return out
+
+
 def _component_presentation(item: dict[str, Any], *, locale: str) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     lang = normalize_locale(locale)
     raw = item.get("component_scores")
@@ -1387,6 +1411,7 @@ def present_candidate(
         stale=stale,
         locale=lang,
     )
+    score["components"] = _component_score_contract(item, locale=lang)
     strengths, evidence_sections = _component_presentation(item, locale=lang)
     codes = _display_missing_codes(item)
     missing_labels = list(dict.fromkeys(missing_reason_label(code, locale=lang) for code in codes))
@@ -1641,6 +1666,11 @@ def build_ranking_decision(
         "gaps": gaps,
         "missing_evidence": list(presentation.get("missing") or [])[:5],
         "component_scores": components,
+        "component_score_meta": (
+            score.get("components")
+            if isinstance(score.get("components"), dict)
+            else _component_score_contract(item, locale=lang)
+        ),
         "recommended_next_action": presentation.get("recommended_next_step"),
         "evidence_references": evidence_refs,
         "run_freshness": freshness,

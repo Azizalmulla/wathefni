@@ -9,6 +9,7 @@ const appSrc = readFileSync(resolve(root, 'App.tsx'), 'utf8')
 describe('Calendar Wave 1c final visual closure', () => {
   it('uses one shell title path without Wathefni Calendar hierarchy', () => {
     expect(calendarSrc).not.toContain('Wathefni Calendar')
+    expect(calendarSrc).not.toContain('WATHEFNI canary')
     expect(calendarSrc).toContain('data-calendar-wave1c')
     expect(calendarSrc).toContain('data-calendar-populated-preview-banner')
     expect(appSrc).toContain("pagePersonality === 'spatial' ? 'h-8 w-8 px-0")

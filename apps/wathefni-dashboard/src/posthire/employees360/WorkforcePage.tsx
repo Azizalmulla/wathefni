@@ -37,6 +37,7 @@ import {
 import { FRESHNESS_MS } from '@/lib/query/freshness'
 import { useVisibilitySoftPoll } from '@/lib/query/useVisibilitySoftPoll'
 import { cn } from '@/lib/utils'
+import { ResourceState } from '@/pages/shared/dataState'
 import type {
   DashboardAccess,
   EssRequestRow,
@@ -366,12 +367,12 @@ function OrganizationPanel({
         const issue = accessIssueFromError(err)
         if (issue) {
           onAccessIssue(issue)
+          setError(friendlyError(err, isAr ? 'تعذر تحميل الهيكل' : 'Could not load organization'))
           return
         }
         const anyErr = err as { detail?: { error?: string } }
         if (anyErr?.detail?.error === 'org_v4_disabled') {
           setDisabled(true)
-          setUnits([])
         } else {
           setError(friendlyError(err, isAr ? 'تعذر تحميل الهيكل' : 'Could not load organization'))
         }
@@ -570,11 +571,9 @@ function OrganizationPanel({
           />
         ) : null}
         {loading ? (
-          <div className="flex justify-center py-16 text-mist">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
+          <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="organization-units-state" />
         ) : error ? (
-          <ConflictBanner detail={error} locale={locale} />
+          <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} title={error} onRetry={() => void load()} retrying={loading} testId="organization-units-state" />
         ) : !canView ? null : units.length === 0 ? (
           <WorkflowEmpty
             icon={<Building2 className="h-5 w-5" />}
@@ -1137,6 +1136,7 @@ function RequestsPanel({
   const confirm = useConfirm()
   const [requests, setRequests] = useState<EssRequestRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [filter, setFilter] = useState('')
   const [essOff, setEssOff] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
@@ -1150,17 +1150,18 @@ function RequestsPanel({
     try {
       await getEmployeeEssPolicy(access)
       setEssOff(false)
+      setError(false)
       const res = await listEmployeeEssRequests(access)
       setRequests(Array.isArray(res.requests) ? res.requests : [])
     } catch (err) {
       const anyErr = err as { detail?: { error?: string } }
       if (anyErr?.detail?.error === 'ess_v5_disabled') {
         setEssOff(true)
-        setRequests([])
       } else {
         const issue = accessIssueFromError(err)
         if (issue) onAccessIssue(issue)
         else onNotice(friendlyError(err, 'Could not load ESS requests'), 'error')
+        setError(true)
       }
     } finally {
       setLoading(false)
@@ -1233,9 +1234,9 @@ function RequestsPanel({
       </div>
 
       {loading && requests.length === 0 ? (
-        <div className="flex justify-center py-16 text-mist">
-          <Loader2 className="h-6 w-6 animate-spin" />
-        </div>
+        <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="ess-requests-state" />
+      ) : error ? (
+        <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={() => void load()} retrying={loading} testId="ess-requests-state" />
       ) : filtered.length === 0 ? (
         <WorkflowEmpty icon={<Users className="h-5 w-5" />} title={isAr ? 'لا طلبات' : 'No self-service requests'} />
       ) : (

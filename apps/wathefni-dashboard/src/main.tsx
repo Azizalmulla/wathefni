@@ -7,8 +7,10 @@ import { ConfirmProvider } from '@/components/ConfirmDialog'
 import { dashboardQueryClient } from '@/lib/query/client'
 import { installDashboardPerfGlobals } from '@/lib/perf/dashboardPerf'
 import { reportClientError } from '@/lib/reportClientError'
+import { applyDocumentLocale, readStoredRecruitingLocale } from '@/lib/dashboardLocale'
 
 installDashboardPerfGlobals()
+applyDocumentLocale(readStoredRecruitingLocale())
 
 // A single thrown render error must never blank the whole dashboard. This catches
 // it and shows a calm recovery message instead of an empty page.

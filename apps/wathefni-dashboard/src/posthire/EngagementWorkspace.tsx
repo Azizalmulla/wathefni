@@ -21,6 +21,7 @@ import {
   type EngagementWorkspacePayload,
 } from '@/lib/api'
 import { ResourceState, resolveListDataState } from '@/pages/shared/dataState'
+import { hasActorPermission } from '@/pages/shared/access'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
 
@@ -113,7 +114,7 @@ export function EngagementWorkspace({
   onNotice,
   onAccessIssue,
 }: EngagementWorkspaceProps) {
-  const { isAr } = useEmployees360Locale()
+  const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
@@ -133,9 +134,9 @@ export function EngagementWorkspace({
   const [audience, setAudience] = useState('')
   const [selectedCampaign, setSelectedCampaign] = useState('')
 
-  const canManage = permissions.includes('engagement.manage') || role === 'owner'
-  const canLaunch = permissions.includes('engagement.launch') || canManage
-  const canActions = permissions.includes('engagement.actions') || canManage
+  const canManage = hasActorPermission(permissions, 'engagement.manage')
+  const canLaunch = hasActorPermission(permissions, 'engagement.launch') || canManage
+  const canActions = hasActorPermission(permissions, 'engagement.actions') || canManage
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
@@ -256,12 +257,27 @@ export function EngagementWorkspace({
           {t.refresh}
         </Button>
       </div>
-      <ResourceState
-        state={state}
-        labels={{ forbidden: t.forbidden, unavailable: t.unavailable, empty: t.emptyHint, error: t.loadError }}
-        testId="engagement-workspace-state"
-      />
-      {!forbidden && !unavailable && !error && (
+      {state !== 'ready' ? (
+        <ResourceState
+          kind={state}
+          locale={isAr ? 'ar' : 'en'}
+          title={
+            state === 'forbidden'
+              ? t.forbidden
+              : state === 'unavailable'
+                ? t.unavailable
+                : state === 'empty'
+                  ? t.emptySurveys
+                  : state === 'error'
+                    ? t.loadError
+                    : undefined
+          }
+          detail={state === 'empty' ? t.emptyHint : undefined}
+          onRetry={() => void load()}
+          retrying={loading}
+          testId="engagement-workspace-state"
+        />
+      ) : (
         <>
           <div className="flex flex-wrap gap-2">
             {tabs.map((id) => (
@@ -323,7 +339,15 @@ export function EngagementWorkspace({
                   </Button>
                 </div>
               )}
-              {tabError ? <p className="text-sm text-destructive">{t.loadError}</p> : null}
+              {tabError ? (
+                <ResourceState
+                  kind="error"
+                  locale={isAr ? 'ar' : 'en'}
+                  title={t.loadError}
+                  onRetry={() => void loadTab()}
+                  testId="engagement-tab-state"
+                />
+              ) : null}
               {tabReady && campaigns.length === 0 ? <p className="text-sm text-muted-foreground">{t.emptySurveys}</p> : null}
               {campaigns.map((row) => (
                 <div key={String(row.campaign_id)} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">

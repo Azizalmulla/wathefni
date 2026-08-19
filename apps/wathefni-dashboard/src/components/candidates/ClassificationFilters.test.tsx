@@ -98,4 +98,17 @@ describe('ClassificationFilterBar', () => {
     expect(screen.getByTestId('classification-filter-bar')).not.toHaveTextContent('taxonomy node IDs')
     expect(screen.getByTestId('classification-filter-bar')).not.toHaveTextContent(' · tenant')
   })
+
+  it('taxonomy request failure renders error, not empty dimension selectors', () => {
+    render(
+      <ClassificationFilterBar
+        enabled
+        taxonomyError
+        onChange={() => undefined}
+        value={DEFAULT_CLASSIFICATION_FILTERS}
+      />,
+    )
+    expect(screen.getByTestId('classification-taxonomy-state')).toHaveTextContent(/not an empty result/i)
+    expect(screen.queryByTestId('classification-filter-career_area')).toBeNull()
+  })
 })

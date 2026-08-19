@@ -23,9 +23,12 @@ describe('assessmentCohorts', () => {
     expect(copy.button).toBe('Resend assessment')
   })
 
-  test('primary action prefers backend allowed actions', () => {
+  test('primary action prefers backend allowed actions and fails closed without them', () => {
     expect(queuePrimaryAction('assessment_ready_to_send', ['send_assessment'])).toBe('send')
     expect(queuePrimaryAction('assessment_delivery_failed', ['resend_assessment'])).toBe('resend')
     expect(queuePrimaryAction('assessment_in_progress', ['view_assessment'])).toBe('view')
+    expect(queuePrimaryAction('assessment_ready_to_send', [])).toBe('view')
+    expect(queuePrimaryAction('assessment_ready_to_send')).toBe('view')
+    expect(queuePrimaryAction('assessment_resend_needed', ['view_assessment'])).toBe('view')
   })
 })

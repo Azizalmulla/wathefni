@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Activity, AlertTriangle, ChevronDown, ChevronUp, Download, Loader2, RotateCcw, Search, ShieldAlert } from 'lucide-react'
+import { Activity, ChevronDown, ChevronUp, Download, Loader2, RotateCcw, Search, ShieldAlert } from 'lucide-react'
 
 import { DashboardApiError, downloadCompanyActivityCsv, getCompanyActivity } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input, Select } from '@/components/ui/field'
 import { cn } from '@/lib/utils'
+import { ResourceState } from '@/pages/shared/dataState'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { ActivityActorOption, ActivityItem, ActivityResponse, DashboardAccess } from '@/types'
 
@@ -255,12 +256,11 @@ export function ActivityLog({
         const issue = accessIssueFromError(err)
         if (issue) {
           onAccessIssue?.(issue)
+          setError(isAr ? 'تعذر تحميل سجل النشاط. حاول مرة أخرى.' : 'We couldn’t load the activity log right now. Please try again.')
           return
         }
         if (err instanceof DashboardApiError && err.status === 403) {
           setPermissionDenied(true)
-          setItems([])
-          setMeta(null)
           return
         }
         setError(isAr ? 'تعذر تحميل سجل النشاط. حاول مرة أخرى.' : 'We couldn’t load the activity log right now. Please try again.')
@@ -475,12 +475,6 @@ export function ActivityLog({
         </div>
       ) : null}
 
-      {error ? (
-        <div className="flex items-start gap-2 rounded-2xl border border-rose-200/70 bg-rose-50/70 px-4 py-2.5 text-sm text-rose-700" data-activity-error>
-          <AlertTriangle className="mt-0.5 shrink-0" size={16} /> <span>{error}</span>
-        </div>
-      ) : null}
-
       {refreshing && items.length > 0 ? (
         <div className="flex h-7 items-center gap-2 text-xs text-subtle" data-activity-refreshing aria-live="polite">
           <Loader2 className="animate-spin" size={14} /> {isAr ? 'جارٍ التحديث…' : 'Updating…'}
@@ -488,8 +482,17 @@ export function ActivityLog({
       ) : null}
 
       {loading ? (
-        <div className="flex items-center gap-2 py-8 text-sm text-subtle" data-activity-loading>
-          <Loader2 className="animate-spin" size={16} /> {isAr ? 'جارٍ تحميل النشاط…' : 'Loading activity…'}
+        <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} testId="activity-list-state" />
+      ) : error ? (
+        <div data-activity-error>
+          <ResourceState
+            kind="error"
+            locale={isAr ? 'ar' : 'en'}
+            title={error}
+            onRetry={() => void load(0, false)}
+            retrying={loading}
+            testId="activity-list-state"
+          />
         </div>
       ) : visibleItems.length === 0 ? (
         <div className="rounded-[1.25rem] border border-line/60 bg-white/45 px-4 py-10 text-center" data-activity-empty>

@@ -643,9 +643,176 @@ def project_day_from_punches(
     )
 
 
+ATTENDANCE_LIFE_STATES = (
+    "captured",
+    "incomplete",
+    "needs_review",
+    "approved",
+    "disputed",
+    "locked",
+    "absent",
+    "on_leave",
+)
+
+_EXCEPTION_EXCLUSION_LABELS = {
+    "missing_check_in": ("Missing check-in", "دخول ناقص"),
+    "missing_check_out": ("Missing check-out", "خروج ناقص"),
+    "ambiguous_punches": ("Ambiguous punches", "بصمات غامضة"),
+    "incomplete_session": ("Incomplete session", "جلسة غير مكتملة"),
+}
+
+
+def _attendance_row_meta(row: dict[str, Any] | None) -> dict[str, Any]:
+    data = row if isinstance(row, dict) else {}
+    meta = data.get("metadata")
+    if isinstance(meta, str):
+        try:
+            import json
+            parsed = json.loads(meta)
+            meta = parsed if isinstance(parsed, dict) else {}
+        except Exception:
+            meta = {}
+    return meta if isinstance(meta, dict) else {}
+
+
+def derive_attendance_life_state(row: dict[str, Any] | None) -> str:
+    """Canonical attendance life-state from fields this API already owns."""
+    data = row if isinstance(row, dict) else {}
+    meta = _attendance_row_meta(data)
+    exception = str(data.get("exception_state") or meta.get("exception_state") or "none")
+    approval = str(data.get("approval_status") or meta.get("approval_status") or "").lower()
+    status = str(data.get("status") or "").lower()
+    locked = bool(data.get("payroll_locked") or meta.get("payroll_locked"))
+    if locked:
+        return "locked"
+    if approval == "disputed" or status == "disputed":
+        return "disputed"
+    if approval == "approved":
+        return "approved"
+    if status == "approved_leave":
+        return "on_leave"
+    if status == "absent":
+        return "absent"
+    if exception and exception != "none":
+        return "incomplete"
+    late = int(data.get("late_minutes") or 0)
+    early = int(data.get("early_leave_minutes") or meta.get("early_leave_minutes") or 0)
+    if approval == "rejected" or late > 0 or early > 0:
+        return "needs_review"
+    if status in {"incomplete", "void"}:
+        return "incomplete"
+    return "captured"
+
+
+def attendance_life_state(row: dict[str, Any] | None) -> str:
+    data = row if isinstance(row, dict) else {}
+    meta = _attendance_row_meta(data)
+    provided = str(data.get("life_state") or meta.get("life_state") or "").strip().lower()
+    if provided in ATTENDANCE_LIFE_STATES:
+        return provided
+    return derive_attendance_life_state(data)
+
+
+def derive_payroll_exclusion_reasons(row: dict[str, Any] | None) -> tuple[str | None, str | None]:
+    """Return (en, ar) payroll exclusion sentences, or (None, None) when eligible."""
+    data = row if isinstance(row, dict) else {}
+    meta = _attendance_row_meta(data)
+    eligible = data.get("payroll_eligible")
+    if eligible is None:
+        eligible = meta.get("payroll_eligible")
+    locked = bool(data.get("payroll_locked") or meta.get("payroll_locked"))
+    exception = str(data.get("exception_state") or meta.get("exception_state") or "none")
+    approval = str(data.get("approval_status") or meta.get("approval_status") or "").lower()
+    status = str(data.get("status") or "").lower()
+    if locked:
+        return (
+            "This period is locked in Payroll — attendance cannot be changed.",
+            "الفترة مقفلة في كشف الرواتب — لا يمكن تعديل الحضور.",
+        )
+    if eligible is True and approval == "approved":
+        return None, None
+    if approval == "disputed":
+        return (
+            "Excluded from Payroll because this day is disputed until resolved.",
+            "مستبعد من الرواتب لأن السجل متنازع عليه حتى يتم الحل.",
+        )
+    if exception and exception != "none":
+        kind_en, kind_ar = _EXCEPTION_EXCLUSION_LABELS.get(
+            exception,
+            (exception.replace("_", " "), exception),
+        )
+        return (
+            f"Excluded from Payroll: {kind_en}. Complete the correction, then approve the day.",
+            f"مستبعد من الرواتب: {kind_ar}. أكمل التصحيح ثم اعتمد اليوم.",
+        )
+    if status in {"incomplete", "absent"}:
+        return (
+            "Excluded from Payroll until the record is reviewed and approved.",
+            "مستبعد من الرواتب حتى يُراجع ويُعتمد السجل.",
+        )
+    if approval != "approved":
+        return (
+            "Excluded from Payroll until attendance is approved.",
+            "مستبعد من الرواتب حتى يتم اعتماد الحضور.",
+        )
+    if eligible is False:
+        return (
+            "Excluded from Payroll for this day.",
+            "مستبعد من الرواتب لهذا اليوم.",
+        )
+    return None, None
+
+
+def payroll_exclusion_reason(row: dict[str, Any] | None, locale: str = "en") -> str | None:
+    data = row if isinstance(row, dict) else {}
+    meta = _attendance_row_meta(data)
+    lang = "ar" if str(locale or "").strip().lower().startswith("ar") else "en"
+    if lang == "ar":
+        provided = str(
+            data.get("payroll_exclusion_reason_ar")
+            or meta.get("payroll_exclusion_reason_ar")
+            or ""
+        ).strip()
+        if provided:
+            return provided
+    provided = str(
+        data.get("payroll_exclusion_reason_en")
+        or meta.get("payroll_exclusion_reason_en")
+        or data.get("payroll_exclusion_reason")
+        or meta.get("payroll_exclusion_reason")
+        or ""
+    ).strip()
+    if provided:
+        return provided
+    en, ar = derive_payroll_exclusion_reasons(data)
+    return ar if lang == "ar" else en
+
+
+def attach_attendance_life_contract(row: dict[str, Any] | None) -> dict[str, Any]:
+    """Stamp canonical life_state / payroll exclusion onto an attendance row."""
+    data = row if isinstance(row, dict) else {}
+    meta = dict(_attendance_row_meta(data))
+    life = derive_attendance_life_state(data)
+    en, ar = derive_payroll_exclusion_reasons(data)
+    data["life_state"] = life
+    data["payroll_exclusion_reason"] = en
+    data["payroll_exclusion_reason_en"] = en
+    data["payroll_exclusion_reason_ar"] = ar
+    meta["life_state"] = life
+    meta["payroll_exclusion_reason"] = en
+    meta["payroll_exclusion_reason_en"] = en
+    meta["payroll_exclusion_reason_ar"] = ar
+    data["metadata"] = meta
+    return data
+
+
 def projection_to_compat_record(proj: dict[str, Any]) -> dict[str, Any]:
     """Map a day projection to the legacy attendance_records shape for clients."""
-    return {
+    proj_meta = proj.get("metadata") if isinstance(proj.get("metadata"), dict) else {}
+    payroll_locked = proj.get("payroll_locked")
+    if payroll_locked is None:
+        payroll_locked = proj_meta.get("payroll_locked")
+    record = {
         "attendance_id": proj.get("projection_id") or proj.get("attendance_id"),
         "company_code": proj.get("company_code"),
         "employee_key": proj.get("employee_key"),
@@ -660,15 +827,20 @@ def projection_to_compat_record(proj: dict[str, Any]) -> dict[str, Any]:
         "status": proj.get("status"),
         "late_minutes": int(proj.get("late_minutes") or 0),
         "early_leave_minutes": int(proj.get("early_leave_minutes") or 0),
-        "notes": (proj.get("metadata") or {}).get("notes") if isinstance(proj.get("metadata"), dict) else proj.get("notes"),
-        "source_text": (proj.get("metadata") or {}).get("source_text") if isinstance(proj.get("metadata"), dict) else None,
+        "notes": proj_meta.get("notes") if proj_meta else proj.get("notes"),
+        "source_text": proj_meta.get("source_text") if proj_meta else None,
+        "approval_status": proj.get("approval_status"),
+        "payroll_eligible": proj.get("payroll_eligible"),
+        "payroll_locked": payroll_locked,
+        "exception_state": proj.get("exception_state"),
         "metadata": {
-            **(proj.get("metadata") if isinstance(proj.get("metadata"), dict) else {}),
+            **proj_meta,
             "authority": AUTHORITY_VERSION,
             "projection_version": proj.get("version"),
             "exception_state": proj.get("exception_state"),
             "approval_status": proj.get("approval_status"),
             "payroll_eligible": proj.get("payroll_eligible"),
+            "payroll_locked": payroll_locked,
             "sessions": proj.get("sessions") or [],
             "breaks": proj.get("breaks") or [],
             "worked_minutes": proj.get("worked_minutes"),
@@ -678,6 +850,7 @@ def projection_to_compat_record(proj: dict[str, Any]) -> dict[str, Any]:
         "created_at": proj.get("created_at"),
         "updated_at": proj.get("updated_at"),
     }
+    return attach_attendance_life_contract(record)
 
 
 # ---------------------------------------------------------------------------

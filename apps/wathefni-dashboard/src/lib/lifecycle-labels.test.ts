@@ -76,7 +76,9 @@ describe('canonical recruiting lifecycle labels', () => {
     const appSource = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8')
     const interviewsSource = readFileSync(resolve(__dirname, '../pages/InterviewsPage.tsx'), 'utf8')
     expect(appSource).toContain("const allowedActions = new Set(candidate.allowed_actions || [])")
-    expect(interviewsSource).toContain("const allowedActions = new Set(interview.allowed_actions || [])")
+    expect(interviewsSource).toContain('resolveAllowedActions(interview.allowed_actions, presentation?.allowed_actions)')
+    expect(interviewsSource).not.toContain('allowedActions.add(action)')
+    expect(interviewsSource).not.toContain('allowedActions.delete(action)')
   })
 
   test('shortlist, reject and hire keep explicit confirmation', () => {

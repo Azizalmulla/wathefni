@@ -7178,14 +7178,8 @@ KNOWN_DASHBOARD_PERMISSIONS = set().union(
 
 
 def dashboard_has_jobs_permission(context: dict[str, Any], permission: str) -> bool:
-    """Jobs permissions with temporary settings.manage compatibility for admins."""
-    if dashboard_context_has_permission(context, permission):
-        return True
-    if permission in _prehire_jobs.SETTINGS_MANAGE_COMPAT_JOBS and dashboard_context_has_permission(context, "settings.manage"):
-        return True
-    if permission == "jobs.read" and dashboard_context_has_permission(context, "prehire.read"):
-        return True
-    return False
+    """Jobs permission check. Compatibility expansion lives in context_permissions."""
+    return dashboard_context_has_permission(context, permission)
 
 
 def require_jobs_permission(context: dict[str, Any], permission: str) -> str:
@@ -7374,7 +7368,7 @@ def dashboard_effective_permissions_for_user(
     company = str(data.get("company_code") or "").strip().upper()
     user_id = str(data.get("user_id") or "").strip()
     if not company or not user_id:
-        return sorted(permissions)
+        return sorted(_prehire_jobs.expand_effective_jobs_permissions(permissions))
 
     def _load(cursor: Any) -> None:
         cursor.execute(
@@ -7402,7 +7396,7 @@ def dashboard_effective_permissions_for_user(
         # An unavailable/malformed grant store must never manufacture employee
         # authority. Existing role scopes remain available for compatibility.
         logger.warning("dashboard permission grant lookup failed closed", exc_info=True)
-    return sorted(permissions)
+    return sorted(_prehire_jobs.expand_effective_jobs_permissions(permissions))
 
 
 def dashboard_access_payload(hr_user: dict[str, Any] | None) -> dict[str, Any]:
@@ -7463,7 +7457,9 @@ def context_permissions(context: dict[str, Any] | None, role_key: str | None = N
     permissions = data.get("permissions")
     if not isinstance(permissions, list):
         permissions = access.get("permissions") if isinstance(access.get("permissions"), list) else []
-    return {str(item) for item in permissions or [] if str(item).strip()}
+    return _prehire_jobs.expand_effective_jobs_permissions(
+        {str(item) for item in permissions or [] if str(item).strip()}
+    )
 
 
 def entitlement_denied(
@@ -21628,6 +21624,9 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
                     rows = [r for r in rows if str(r.get("status") or "") == status_filter]
             total_count = len(rows)
             page = rows[offset : offset + row_limit]
+            for row in page:
+                if isinstance(row, dict):
+                    _attendance_authority.attach_attendance_life_contract(row)
             return {
                 "ok": True,
                 "company_code": company,
@@ -21702,6 +21701,7 @@ def list_attendance(action: dict[str, Any], *, company_code: str | None) -> dict
     total_count = int(rows[0]["_total_count"]) if rows else 0
     for row in rows:
         row.pop("_total_count", None)
+        _attendance_authority.attach_attendance_life_contract(row)
     has_more = (offset + len(rows)) < total_count
     return {
         "ok": True,
@@ -66220,7 +66220,12 @@ def dashboard_prehire_video_interview(
 def dashboard_context_has_permission(context: dict[str, Any], permission: str) -> bool:
     """Soft, fail-closed check against a backend-authoritative permission set."""
     requested = str(permission or "").strip()
-    return bool(requested and requested in context_permissions(context))
+    if not requested:
+        return False
+    perms = context_permissions(context)
+    if "*:*" in perms:
+        return True
+    return requested in perms
 
 
 def posthire_employee_card(row: dict[str, Any]) -> dict[str, Any]:

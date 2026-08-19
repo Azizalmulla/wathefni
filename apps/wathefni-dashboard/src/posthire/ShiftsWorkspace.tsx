@@ -52,6 +52,7 @@ import {
   transitionScheduleVersion,
   upsertCoverageRule,
 } from '@/lib/api'
+import { ResourceState } from '@/pages/shared/dataState'
 import { cn } from '@/lib/utils'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import {
@@ -439,6 +440,8 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
   const [orgAdvancedOpen, setOrgAdvancedOpen] = useState(false)
   const [rotationsLoaded, setRotationsLoaded] = useState(false)
   const [orgUnits, setOrgUnits] = useState<OrgUnitRow[]>([])
+  const [orgUnitsLoading, setOrgUnitsLoading] = useState(true)
+  const [orgUnitsError, setOrgUnitsError] = useState(false)
   const [filters, setFilters] = useState({ employee: '', branch_key: '', site_key: '', team_key: '', role: '', status: '' })
   const [debouncedEmployee, setDebouncedEmployee] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -620,20 +623,24 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
     advancedOpen,
   ])
 
-  useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const res = await getEmployeeOrgUnits(access)
-        if (!cancelled) setOrgUnits(Array.isArray(res.units) ? res.units : [])
-      } catch {
-        if (!cancelled) setOrgUnits([])
-      }
-    })()
-    return () => {
-      cancelled = true
+  const loadOrgUnits = useCallback(async () => {
+    setOrgUnitsLoading(true)
+    try {
+      const res = await getEmployeeOrgUnits(access)
+      setOrgUnits(Array.isArray(res.units) ? res.units : [])
+      setOrgUnitsError(false)
+    } catch (err) {
+      const issue = accessIssueFromError(err)
+      if (issue) onAccessIssue?.(issue)
+      setOrgUnitsError(true)
+    } finally {
+      setOrgUnitsLoading(false)
     }
-  }, [access])
+  }, [access, onAccessIssue])
+
+  useEffect(() => {
+    void loadOrgUnits()
+  }, [loadOrgUnits])
 
   const branchUnits = useMemo(
     () => orgUnits.filter((u) => String(u.unit_type || '').toLowerCase() === 'branch'),
@@ -1362,18 +1369,22 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
               value={filters.employee}
               onChange={(e) => setFilters((f) => ({ ...f, employee: e.target.value }))}
             />
-            <select
-              className="hidden h-7 max-w-[10rem] border-0 border-s border-wf-ink/10 bg-transparent px-2 text-[11px] text-ink outline-none sm:block"
-              value={unitSelectValue(teamUnits, filters.team_key)}
-              onChange={(e) => setFilters((f) => ({ ...f, team_key: e.target.value }))}
-            >
-              <option value="">{c.allTeams}</option>
-              {teamUnits.map((u) => (
-                <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
+            {!orgUnitsError || orgUnits.length > 0 ? (
+              <select
+                className="hidden h-7 max-w-[10rem] border-0 border-s border-wf-ink/10 bg-transparent px-2 text-[11px] text-ink outline-none sm:block"
+                value={unitSelectValue(teamUnits, filters.team_key)}
+                onChange={(e) => setFilters((f) => ({ ...f, team_key: e.target.value }))}
+                disabled={orgUnitsError || orgUnitsLoading}
+                aria-invalid={orgUnitsError || undefined}
+              >
+                <option value="">{c.allTeams}</option>
+                {teamUnits.map((u) => (
+                  <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
+                    {u.name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <button
               type="button"
               className="h-7 rounded-[0.55rem] px-2.5 text-[11px] font-semibold text-muted hover:bg-wf-canvas/65 hover:text-ink"
@@ -1386,6 +1397,18 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                 : ''}
             </button>
           </div>
+
+          {orgUnitsError ? (
+            <div className="mt-1.5">
+              <ResourceState
+                kind="error"
+                locale={isAr ? 'ar' : 'en'}
+                onRetry={() => void loadOrgUnits()}
+                retrying={orgUnitsLoading}
+                testId="shifts-org-units-filter-state"
+              />
+            </div>
+          ) : null}
 
           {[filters.branch_key, filters.site_key, filters.team_key, filters.status].some(Boolean) ? (
             <div className="mt-1.5 flex flex-wrap gap-1.5" data-shifts-active-filters>
@@ -1421,42 +1444,49 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
               className="absolute end-0 top-11 z-20 grid w-full max-w-xl grid-cols-1 gap-2 rounded-[1rem] bg-wf-surface-raised p-3 shadow-[0_18px_45px_rgba(35,33,29,0.14)] ring-1 ring-wf-ink/[0.08] sm:grid-cols-2"
               data-shifts-advanced-filters
             >
-              <select
-                className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink"
-                value={unitSelectValue(branchUnits, filters.branch_key)}
-                onChange={(e) => setFilters((f) => ({ ...f, branch_key: e.target.value }))}
-              >
-                <option value="">{c.allBranches}</option>
-                {branchUnits.map((u) => (
-                  <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink"
-                value={unitSelectValue(siteUnits, filters.site_key)}
-                onChange={(e) => setFilters((f) => ({ ...f, site_key: e.target.value }))}
-              >
-                <option value="">{c.allSites}</option>
-                {siteUnits.map((u) => (
-                  <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink sm:hidden"
-                value={unitSelectValue(teamUnits, filters.team_key)}
-                onChange={(e) => setFilters((f) => ({ ...f, team_key: e.target.value }))}
-              >
-                <option value="">{c.allTeams}</option>
-                {teamUnits.map((u) => (
-                  <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
+              {orgUnitsError && orgUnits.length === 0 ? null : (
+                <>
+                  <select
+                    className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink"
+                    value={unitSelectValue(branchUnits, filters.branch_key)}
+                    onChange={(e) => setFilters((f) => ({ ...f, branch_key: e.target.value }))}
+                    disabled={orgUnitsError || orgUnitsLoading}
+                  >
+                    <option value="">{c.allBranches}</option>
+                    {branchUnits.map((u) => (
+                      <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink"
+                    value={unitSelectValue(siteUnits, filters.site_key)}
+                    onChange={(e) => setFilters((f) => ({ ...f, site_key: e.target.value }))}
+                    disabled={orgUnitsError || orgUnitsLoading}
+                  >
+                    <option value="">{c.allSites}</option>
+                    {siteUnits.map((u) => (
+                      <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink sm:hidden"
+                    value={unitSelectValue(teamUnits, filters.team_key)}
+                    onChange={(e) => setFilters((f) => ({ ...f, team_key: e.target.value }))}
+                    disabled={orgUnitsError || orgUnitsLoading}
+                  >
+                    <option value="">{c.allTeams}</option>
+                    {teamUnits.map((u) => (
+                      <option key={u.org_unit_id} value={u.unit_key || u.org_unit_id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
               <select
                 className="h-9 rounded-[0.65rem] border border-wf-ink/10 bg-wf-surface px-3 text-[12px] text-ink"
                 value={filters.status}
@@ -2352,6 +2382,17 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                   <div className="mb-3 flex items-baseline justify-between">
                     <h3 className="text-[12px] font-semibold text-ink">{isAr ? 'الهيكل التنظيمي' : 'Organization'}</h3>
                   </div>
+                  {orgUnitsError ? (
+                    <div className="mb-3">
+                      <ResourceState
+                        kind="error"
+                        locale={isAr ? 'ar' : 'en'}
+                        onRetry={() => void loadOrgUnits()}
+                        retrying={orgUnitsLoading}
+                        testId="shifts-org-units-composer-state"
+                      />
+                    </div>
+                  ) : null}
                   <div className="grid grid-cols-2 gap-2.5">
                     {orgFieldPrimary.branch ? (
                       <label className="block space-y-1 text-[11px] font-medium text-muted">
@@ -2566,6 +2607,17 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                   <div className="mb-3 flex items-baseline justify-between">
                     <h3 className="text-[12px] font-semibold text-ink">{isAr ? 'الهيكل التنظيمي' : 'Organization'}</h3>
                   </div>
+                  {orgUnitsError ? (
+                    <div className="mb-3">
+                      <ResourceState
+                        kind="error"
+                        locale={isAr ? 'ar' : 'en'}
+                        onRetry={() => void loadOrgUnits()}
+                        retrying={orgUnitsLoading}
+                        testId="shifts-org-units-edit-state"
+                      />
+                    </div>
+                  ) : null}
                   <div className="grid grid-cols-2 gap-2.5">
                   {(
                     [

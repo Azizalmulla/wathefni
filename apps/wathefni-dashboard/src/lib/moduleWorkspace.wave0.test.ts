@@ -133,6 +133,27 @@ describe('module-aware shell wave0 focused landing', () => {
         catalog,
       }),
     ).toBe(false)
+    expect(
+      actionInboxHasEntitledSource({
+        enabledModules: ['leave'],
+        permissions: [],
+        catalog,
+      }),
+    ).toBe(false)
+    expect(
+      actionInboxHasEntitledSource({
+        enabledModules: ['leave'],
+        permissions: ['settings.manage', 'users.manage'],
+        catalog,
+      }),
+    ).toBe(false)
+    expect(
+      actionInboxHasEntitledSource({
+        enabledModules: ['leave'],
+        permissions: ['*:*'],
+        catalog,
+      }),
+    ).toBe(true)
   })
 
   test('alerts delivery keeps post-hire rows when pre_hiring off', () => {

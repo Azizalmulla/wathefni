@@ -16,6 +16,8 @@ from zoneinfo import ZoneInfo
 
 from psycopg2.extras import Json
 
+from jobs_permission_expand import SETTINGS_MANAGE_COMPAT_JOBS, expand_effective_jobs_permissions
+
 JOB_STATUSES = ("draft", "open", "paused", "closed")
 ACCEPTING_APPLICATIONS_STATUS = "open"
 JOB_VISIBILITIES = ("public", "share_only", "internal")
@@ -49,12 +51,6 @@ JOBS_PERMISSIONS = (
     "jobs.edit",
     "jobs.publish",
     "jobs.close",
-)
-
-# Temporary compatibility: settings.manage implies these mutation scopes for
-# existing administrators until grants are explicitly migrated.
-SETTINGS_MANAGE_COMPAT_JOBS = frozenset(
-    {"jobs.create", "jobs.edit", "jobs.publish", "jobs.close"}
 )
 
 SCHEMA_SQL = """

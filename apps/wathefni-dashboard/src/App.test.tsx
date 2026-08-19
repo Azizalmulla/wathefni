@@ -102,10 +102,167 @@ describe('dashboard initial load', () => {
 
     renderApp()
 
-    expect(await screen.findByRole('heading', { name: 'Sign in to OctoHR' })).toBeInTheDocument()
+    expect(screen.getByTestId('octohr-auth-resolving')).toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-shell')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    expect(screen.getByTestId('octohr-auth-surface')).toBeInTheDocument()
     expect(screen.getByText(/session expired/i)).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Backup access code')).toBeInTheDocument()
-    expect(screen.getByText('Sign in')).toBeInTheDocument()
+    expect(screen.queryByTestId('octohr-auth-resolving')).not.toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Backup access code')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-nav-skeleton')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Company code')).toHaveValue('WATHEFNI')
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
+  })
+
+  test('stored session does not mount workspace chrome until validation succeeds', async () => {
+    localStorage.setItem('wathefni_dashboard_token', 'saved-token')
+    localStorage.setItem('wathefni_hr_phone', '96555511122')
+    localStorage.setItem('wathefni_company_code', 'WATHEFNI')
+
+    let release!: () => void
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      await held
+      const payload = responseFor(String(input))
+      if (!payload) return jsonResponse({ detail: `Unexpected path ${String(input)}` }, 404)
+      return jsonResponse(payload)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+
+    expect(screen.getByTestId('octohr-auth-resolving')).toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-shell')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-nav-skeleton')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Sign in' })).not.toBeInTheDocument()
+
+    release()
+    await screen.findByText('What needs attention today')
+    expect(screen.getByTestId('app-sidebar')).toBeInTheDocument()
+    expect(screen.queryByTestId('octohr-auth-resolving')).not.toBeInTheDocument()
+  })
+
+  test('unsigned visit is a dedicated OctoHR sign-in without workspace chrome', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => jsonResponse({ detail: `Unexpected path ${String(input)}` }, 500))
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    expect(screen.getByTestId('octohr-auth-surface')).toBeInTheDocument()
+    expect(screen.getAllByText('OctoHR').length).toBeGreaterThan(0)
+    expect(screen.queryByText(/Wathefni|واثقني/i)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-shell')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-nav-skeleton')).not.toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Backup access code')).not.toBeInTheDocument()
+    expect(screen.queryByText('Workspace Access')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Company code')).toHaveValue('')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  test('password login posts typed company code and does not send a leftover token', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === '/dashboard/auth/login') {
+        expect(init?.method).toBe('POST')
+        return jsonResponse({
+          access_token: 'new-token',
+          company_code: 'ACME',
+          user: { email: 'hr@acme.com', name: 'HR', role: 'owner', status: 'active' },
+        })
+      }
+      const payload = responseFor(String(input))
+      if (!payload) return jsonResponse({ detail: `Unexpected path ${String(input)}` }, 404)
+      return jsonResponse(payload)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+    fireEvent.change(screen.getByLabelText('Work email'), { target: { value: 'hr@acme.com' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret-pass' } })
+    fireEvent.change(screen.getByLabelText('Company code'), { target: { value: 'acme' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+
+    await waitFor(() => {
+      const loginCall = fetchMock.mock.calls.find(([input]) => String(input) === '/dashboard/auth/login')
+      expect(loginCall).toBeDefined()
+      const body = JSON.parse(String((loginCall?.[1] as RequestInit | undefined)?.body || '{}'))
+      expect(body).toEqual({
+        email: 'hr@acme.com',
+        password: 'secret-pass',
+        company_code: 'ACME',
+        token: null,
+        hr_phone: null,
+      })
+    })
+  })
+
+  test('invite acceptance is a dedicated OctoHR surface without sidebar or explainer', async () => {
+    window.history.replaceState({}, '', '/dashboard?invite=invite-token')
+    try {
+      renderApp()
+      expect(await screen.findByRole('heading', { name: 'Accept your invite' })).toBeInTheDocument()
+      expect(screen.getByTestId('octohr-auth-surface')).toBeInTheDocument()
+      expect(screen.getAllByText('OctoHR').length).toBeGreaterThan(0)
+      expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+      expect(screen.queryByText('What Happens Next')).not.toBeInTheDocument()
+      expect(screen.queryByText(/WhatsApp/i)).not.toBeInTheDocument()
+      expect(screen.getByLabelText('Phone (optional)')).toBeInTheDocument()
+    } finally {
+      window.history.replaceState({}, '', '/dashboard')
+    }
+  })
+
+  test('stored Arabic locale signs in bilingually and syncs document lang/dir', async () => {
+    localStorage.setItem('wathefni_recruiting_locale', 'ar')
+    renderApp()
+
+    expect(await screen.findByRole('heading', { name: 'تسجيل الدخول' })).toBeInTheDocument()
+    expect(screen.getByTestId('octohr-auth-surface')).toHaveAttribute('dir', 'rtl')
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe('ar')
+      expect(document.documentElement.dir).toBe('rtl')
+    })
+    expect(screen.getByLabelText('رمز الشركة')).toHaveValue('')
+    expect(screen.queryByText(/Wathefni|واثقني/i)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('octohr-auth-locale'))
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe('en')
+      expect(document.documentElement.dir).toBe('ltr')
+    })
+    expect(localStorage.getItem('wathefni_recruiting_locale')).toBe('en')
+  })
+
+  test('Arabic session expiry stays on the auth surface without workspace chrome', async () => {
+    localStorage.setItem('wathefni_dashboard_token', 'old-token')
+    localStorage.setItem('wathefni_company_code', 'WATHEFNI')
+    localStorage.setItem('wathefni_recruiting_locale', 'ar')
+    const fetchMock = vi.fn(async () =>
+      jsonResponse(
+        {
+          detail: {
+            error: 'dashboard_auth_failed',
+            message: 'The dashboard token was rejected.',
+          },
+        },
+        401,
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+    expect(await screen.findByRole('heading', { name: 'تسجيل الدخول' })).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.')
+    expect(screen.queryByTestId('app-sidebar')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('رمز الشركة')).toHaveValue('WATHEFNI')
   })
 
   test('hides assessment navigation when the module is disabled', async () => {
@@ -266,7 +423,7 @@ describe('dashboard initial load', () => {
           module_catalog: [],
           access: {
             role: 'owner',
-            permissions: ['compliance.read', 'compliance.manage', 'users.manage', 'settings.manage'],
+            permissions: ['compliance.read', 'compliance.manage', 'employees.read', 'users.manage', 'settings.manage'],
             user: { company_code: 'POSTHIREONLY', role: 'owner', status: 'active', email: 'owner@example.com' },
           },
           user: { company_code: 'POSTHIREONLY', role: 'owner', status: 'active', email: 'owner@example.com' },
@@ -287,7 +444,7 @@ describe('dashboard initial load', () => {
 
     renderApp()
 
-    // Compliance-only bootstrap lands on Compliance; Employees stays offerable via admin soft gate.
+    // Compliance-only bootstrap lands on Compliance; Employees stays offerable via employees.read.
     expect((await screen.findAllByRole('heading', { name: 'Compliance' })).length).toBeGreaterThan(0)
     expect(screen.getByTestId('mobile-active-route-chip')).toHaveTextContent('Compliance')
     fireEvent.click(screen.getByTestId('mobile-nav-more'))
@@ -298,6 +455,46 @@ describe('dashboard initial load', () => {
     await waitFor(() => expect(calledPaths(fetchMock)).toContain('/dashboard/bootstrap'))
     expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/summary')
     expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/applications?limit=50&offset=0&sort=newest')
+  })
+
+  test('bootstrap-dark does not invent pre_hiring or fetch candidate lists', async () => {
+    localStorage.setItem('wathefni_dashboard_token', 'saved-token')
+    localStorage.removeItem('wathefni_hr_phone')
+    localStorage.setItem('wathefni_company_code', 'BOOTDARK')
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input)
+      if (path === '/dashboard/bootstrap') {
+        return jsonResponse({ detail: 'workspace boot off' }, 404)
+      }
+      if (path === '/dashboard/prehire/summary') {
+        return jsonResponse({
+          company_code: 'BOOTDARK',
+          enabled_modules: ['compliance'],
+          access: {
+            role: 'owner',
+            permissions: ['compliance.read', 'compliance.manage'],
+            user: { company_code: 'BOOTDARK', role: 'owner', status: 'active', email: 'owner@example.com' },
+          },
+        })
+      }
+      if (path.startsWith('/dashboard/prehire/notifications')) {
+        return jsonResponse({ company_code: 'BOOTDARK', enabled_modules: ['compliance'], notifications: [], action_items: [] })
+      }
+      if (path === '/dashboard/setup/readiness') {
+        return jsonResponse({ company_code: 'BOOTDARK', ready: true, steps: [] })
+      }
+      return jsonResponse({ detail: `Unexpected path ${path}` }, 404)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+
+    expect((await screen.findAllByRole('heading', { name: 'Compliance' })).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: 'Overview' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Jobs' })).not.toBeInTheDocument()
+    await waitFor(() => expect(calledPaths(fetchMock)).toContain('/dashboard/prehire/summary'))
+    expect(calledPaths(fetchMock).some((path) => path.startsWith('/dashboard/prehire/applications'))).toBe(false)
   })
 })
 

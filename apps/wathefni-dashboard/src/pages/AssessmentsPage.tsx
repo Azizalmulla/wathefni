@@ -23,6 +23,7 @@ import {
   dashboardPerfMarkNetworkComplete,
   dashboardPerfMarkProfilerCommit,
 } from '@/lib/perf/dashboardPerf'
+import { customerVisibleBatteryName } from '@/lib/publicBrand'
 import { type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { AssessmentAttemptWorkspace, AssessmentReportPage, type AssessmentReportPresentation } from '@/components/assessments/AssessmentReportPage'
 import { AttemptRow, ReportRow, SendRow } from '@/components/assessments/AssessmentRows'
@@ -31,6 +32,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadMoreBar } from '@/components/ui/load-more-bar'
 import { EmptyState, Info } from '@/pages/shared/primitives'
+import { ResourceState } from '@/pages/shared/dataState'
 import {
   assessmentQueue,
   assessmentSetupIsReady,
@@ -102,7 +104,7 @@ export function AssessmentsPage({
   onResendAttempt,
   onReviewAttempt,
   onRecalculateNorms,
-  onRefresh: _onRefresh,
+  onRefresh,
   onSendAssessment,
   onResendAssessment,
   onSetOffset,
@@ -172,9 +174,7 @@ export function AssessmentsPage({
   const competencyCount = Object.keys(config?.framework?.competencies || {}).length
   const sections = Object.keys(itemBank?.section_totals || {}).map(stageLabel).join(', ') || (isAr ? 'القدرة + الحكم العملي' : 'Ability + workplace judgment')
   const questionCount = itemBank?.total_items || 22
-  const legacyBatteryName = 'Wathefni Ability Assessment'
-  const configuredBatteryName = String(config?.battery?.name || 'OctoHR Ability Assessment')
-  const batteryName = configuredBatteryName === legacyBatteryName ? 'OctoHR Ability Assessment' : configuredBatteryName
+  const batteryName = customerVisibleBatteryName(String(config?.battery?.name || 'OctoHR Ability Assessment'))
   const batteryVersion = String(config?.battery?.version || 'v1')
   const cohortTabs: Array<{ key: string }> = [
     { key: 'assessment_ready_to_send' },
@@ -390,7 +390,7 @@ export function AssessmentsPage({
             </CardHeader>
             <CardContent>
               {queueError ? (
-                <EmptyState text={isAr ? 'تعذّر تحميل قائمة الإرسال.' : 'Could not load the send queue.'} />
+                <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={onRefresh} testId="assessments-queue-state" />
               ) : queueLoading && !queue.length ? (
                 <div className="flex items-center gap-2 text-sm text-inherit opacity-75">
                   <Loader2 className="animate-spin" size={16} />
@@ -510,7 +510,7 @@ export function AssessmentsPage({
             </CardHeader>
             <CardContent>
               {attemptsError ? (
-                <EmptyState text={isAr ? 'تعذّر تحميل المحاولات.' : 'Could not load attempts.'} />
+                <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={onRefresh} testId="assessments-attempts-state" />
               ) : attemptsLoading && !attempts.length ? (
                 <div className="flex items-center gap-2 text-sm text-[#716a5e]">
                   <Loader2 className="animate-spin" size={16} />
@@ -580,7 +580,7 @@ export function AssessmentsPage({
             </CardHeader>
             <CardContent>
               {attemptsError ? (
-                <EmptyState text={isAr ? 'تعذّر تحميل التقارير.' : 'Could not load reports.'} />
+                <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={onRefresh} testId="assessments-reports-state" />
               ) : attemptsLoading && !attempts.length ? (
                 <div className="flex items-center gap-2 text-sm text-[#716a5e]">
                   <Loader2 className="animate-spin" size={16} />

@@ -77,6 +77,7 @@ export type RankingCopyKey =
   | 'state_running'
   | 'state_stale'
   | 'state_failed'
+  | 'state_failed_previous'
   | 'state_none_rankable'
   | 'state_empty_ranked'
   | 'open_profile'
@@ -116,6 +117,8 @@ const EN: Record<RankingCopyKey, string> = {
   state_running: 'Ranking in progress…',
   state_stale: 'This result may be out of date. Re-rank to refresh.',
   state_failed: 'Ranking could not be loaded. Try Run ranking again.',
+  state_failed_previous:
+    'Fresh ranking could not be loaded. Results below are previous, not a new ranking.',
   state_none_rankable:
     'There are matching applications, but none are ready for review order yet (missing evidence or not rankable).',
   state_empty_ranked: 'No ranked candidates in the current result.',
@@ -157,6 +160,7 @@ const AR: Record<RankingCopyKey, string> = {
   state_running: 'جاري الترتيب…',
   state_stale: 'قد تكون هذه النتيجة قديمة. أعد الترتيب للتحديث.',
   state_failed: 'تعذّر تحميل الترتيب. حاول تشغيل الترتيب مرة أخرى.',
+  state_failed_previous: 'تعذّر تحميل ترتيب محدّث. النتائج أدناه سابقة وليست ترتيباً جديداً.',
   state_none_rankable: 'توجد طلبات مطابقة، لكن لا أحد جاهزاً لترتيب المراجعة بعد (أدلة ناقصة أو غير قابل للترتيب).',
   state_empty_ranked: 'لا يوجد مرشحون في نتيجة الترتيب الحالية.',
   open_profile: 'فتح الملف',

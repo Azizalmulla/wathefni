@@ -27,6 +27,7 @@ import {
   updateImportSettings,
   updateMailbox,
 } from '@/lib/api'
+import { customerVisibleBrandCopy } from '@/lib/publicBrand'
 import { type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { cn, formatDateTime } from '@/lib/utils'
 import { friendlyDashboardError, stageLabel } from '@/pages/shared/format'
@@ -38,6 +39,7 @@ import {
   ROLE_LABELS_UI,
 } from '@/pages/shared/access'
 import { Info } from '@/pages/shared/primitives'
+import { ResourceState } from '@/pages/shared/dataState'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type {
   DashboardAccess,
@@ -103,10 +105,11 @@ export function SettingsPage({
   userAccess: DashboardUserAccess | null
   positions?: PositionSummary[]
 }) {
-  const canManageUsers =
-    settingsTeamEnabled ?? hasDashboardPermission(userAccess, 'users.manage')
-  const canManageSettings =
-    settingsIntegrationsEnabled ?? hasDashboardPermission(userAccess, 'settings.manage')
+  // Team / integrations visibility is owned by workspace authority in App.tsx
+  // (`settings.team` → users.manage, `settings.integrations` → settings.manage).
+  // Missing props fail closed; do not re-derive grants from the access list here.
+  const canManageUsers = settingsTeamEnabled === true
+  const canManageSettings = settingsIntegrationsEnabled === true
   const canSyncCalendar = hasDashboardPermission(userAccess, 'calendar.sync')
   const canManagePlatformIntegrations = canManageSettings && canSyncCalendar
   const account = userAccess?.user
@@ -115,6 +118,7 @@ export function SettingsPage({
   const displayedTeamUsers = team?.users?.length ? team.users : fallbackUser ? [fallbackUser] : []
   const confirm = useConfirm()
   const [visibilityPolicy, setVisibilityPolicy] = useState<string | null>(null)
+  const [visibilityLoadError, setVisibilityLoadError] = useState(false)
   const [visibilityVersion, setVisibilityVersion] = useState<number | null>(null)
   const [visibilityUpdatedAt, setVisibilityUpdatedAt] = useState<string | null>(null)
   const [visibilityUpdatedBy, setVisibilityUpdatedBy] = useState<string | null>(null)
@@ -141,9 +145,10 @@ export function SettingsPage({
         setVisibilityVersion(typeof payload.version === 'number' ? payload.version : null)
         setVisibilityUpdatedAt(payload.updated_at ? String(payload.updated_at) : null)
         setVisibilityUpdatedBy(payload.last_updated_by ? String(payload.last_updated_by) : null)
+        setVisibilityLoadError(false)
       })
       .catch(() => {
-        if (!cancelled) setVisibilityPolicy('shared_company')
+        if (!cancelled) setVisibilityLoadError(true)
       })
     return () => {
       cancelled = true
@@ -238,7 +243,7 @@ export function SettingsPage({
                 <Info label={isAr ? 'الاسم' : 'Name'} value={account?.name || (isAr ? 'لم يُحمّل بعد' : 'Not loaded yet')} />
                 <Info label={isAr ? 'البريد' : 'Email'} value={account?.email || access.email || (isAr ? 'لم يُحمّل بعد' : 'Not loaded yet')} />
                 <Info label={isAr ? 'الدور' : 'Role'} value={(account?.role && ROLE_LABELS_UI[account.role]) || userAccess?.role_label || account?.role_label || (isAr ? 'لم يُحمّل بعد' : 'Not loaded yet')} />
-                <Info label={isAr ? 'الشركة' : 'Company'} value={account?.company_code || access.companyCode || 'WATHEFNI'} />
+                <Info label={isAr ? 'الشركة' : 'Company'} value={account?.company_code || access.companyCode || (isAr ? 'لم يُحمّل بعد' : 'Not loaded yet')} />
                 <Info label={isAr ? 'الحالة' : 'Status'} value={account?.status ? stageLabel(account.status) : (isAr ? 'لم يُحمّل بعد' : 'Not loaded yet')} />
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -453,18 +458,39 @@ export function SettingsPage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Select
-                  disabled={visibilityBusy || visibilityPolicy == null}
-                  onChange={(event) => void saveVisibilityPolicy(event.target.value)}
-                  value={visibilityPolicy ?? ''}
-                >
-                  {visibilityPolicy == null ? (
-                    <option value="">{isAr ? 'جاري التحميل…' : 'Loading…'}</option>
-                  ) : null}
-                  <option value="shared_company">{isAr ? 'مشترك على مستوى الشركة' : 'Shared company'}</option>
-                  <option value="assigned_only">{isAr ? 'المسند فقط' : 'Assigned only'}</option>
-                  <option value="hybrid">{isAr ? 'هجين (ملخص عام / تفاصيل مسندة)' : 'Hybrid (company summary / assigned detail)'}</option>
-                </Select>
+                {visibilityLoadError ? (
+                  <ResourceState
+                    kind="error"
+                    locale={isAr ? 'ar' : 'en'}
+                    title={isAr ? 'تعذّر تحميل سياسة الظهور' : 'Could not load hiring visibility'}
+                    onRetry={() => {
+                      setVisibilityLoadError(false)
+                      void getPrehireVisibilityPolicy(access)
+                        .then((payload) => {
+                          setVisibilityPolicy(String(payload.prehire_visibility_policy || 'shared_company'))
+                          setVisibilityVersion(typeof payload.version === 'number' ? payload.version : null)
+                          setVisibilityUpdatedAt(payload.updated_at ? String(payload.updated_at) : null)
+                          setVisibilityUpdatedBy(payload.last_updated_by ? String(payload.last_updated_by) : null)
+                          setVisibilityLoadError(false)
+                        })
+                        .catch(() => setVisibilityLoadError(true))
+                    }}
+                    testId="hiring-visibility-state"
+                  />
+                ) : (
+                  <Select
+                    disabled={visibilityBusy || visibilityPolicy == null}
+                    onChange={(event) => void saveVisibilityPolicy(event.target.value)}
+                    value={visibilityPolicy ?? ''}
+                  >
+                    {visibilityPolicy == null ? (
+                      <option value="">{isAr ? 'جاري التحميل…' : 'Loading…'}</option>
+                    ) : null}
+                    <option value="shared_company">{isAr ? 'مشترك على مستوى الشركة' : 'Shared company'}</option>
+                    <option value="assigned_only">{isAr ? 'المسند فقط' : 'Assigned only'}</option>
+                    <option value="hybrid">{isAr ? 'هجين (ملخص عام / تفاصيل مسندة)' : 'Hybrid (company summary / assigned detail)'}</option>
+                  </Select>
+                )}
                 {(visibilityUpdatedBy || visibilityUpdatedAt) ? (
                   <p className="text-[11px] text-subtle">
                     {isAr ? 'آخر تحديث' : 'Last updated'}
@@ -674,7 +700,7 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
               {isAr ? 'كيف يرسل OctoHR رسائل المرشحين والموظفين؟' : 'How should OctoHR send candidate and employee emails?'}
             </CardDescription>
           </div>
-          {view ? <Badge tone={statusTone(view.status)}>{view.status_label}</Badge> : null}
+          {view ? <Badge tone={statusTone(view.status)}>{customerVisibleBrandCopy(view.status_label)}</Badge> : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-4" dir={isAr ? 'rtl' : 'ltr'}>
@@ -714,7 +740,7 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-text">
-                        <span>{choice.title}</span>
+                        <span>{customerVisibleBrandCopy(choice.title)}</span>
                         {choice.recommended ? <Badge tone="success">{isAr ? 'موصى به' : 'Recommended'}</Badge> : null}
                         <Badge tone={statusTone(choice.status)}>
                           {choice.status === 'ready'
@@ -734,7 +760,7 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
                                   : 'Setup required'}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-xs text-subtle">{choice.description}</p>
+                      <p className="mt-1 text-xs text-subtle">{customerVisibleBrandCopy(choice.description)}</p>
                     </div>
                   </label>
                 )
@@ -820,12 +846,12 @@ function EmailSendingCard({ access, locale }: { access: DashboardAccess; locale:
               </div>
             ) : null}
 
-            {view.hr_notice ? <p className="text-xs text-amber-800">{view.hr_notice}</p> : null}
+            {view.hr_notice ? <p className="text-xs text-amber-800">{customerVisibleBrandCopy(view.hr_notice)}</p> : null}
 
             {view.primary_action ? (
               <Button type="button" disabled={busy} onClick={() => void runPrimary()}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {view.primary_action.label}
+                {customerVisibleBrandCopy(view.primary_action.label)}
               </Button>
             ) : null}
           </>
@@ -1014,7 +1040,7 @@ function EmailDocumentIntakeCard({
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="min-w-0 space-y-1">
                           <code className="font-medium break-all">{row.address}</code>
-                          {row.label ? <div className="text-xs text-subtle">{row.label}</div> : null}
+                          {row.label ? <div className="text-xs text-subtle">{customerVisibleBrandCopy(row.label)}</div> : null}
                           <div className="flex flex-wrap items-center gap-2 text-xs">
                             <Badge tone={hold.tone}>{hold.label}</Badge>
                             <span className="text-subtle">
@@ -1120,11 +1146,11 @@ function EmailDocumentIntakeCard({
               {isAr ? 'دليل الإعداد' : 'Setup guide'}
             </summary>
             <div className="mt-2 space-y-2">
-              {instructions ? <p className="text-xs leading-5 text-subtle">{instructions}</p> : null}
+              {instructions ? <p className="text-xs leading-5 text-subtle">{customerVisibleBrandCopy(instructions)}</p> : null}
               {steps.length ? (
                 <ol className="list-decimal space-y-1 ps-4 text-xs leading-5 text-subtle">
                   {steps.map((step) => (
-                    <li key={step}>{step}</li>
+                    <li key={step}>{customerVisibleBrandCopy(step)}</li>
                   ))}
                 </ol>
               ) : null}
@@ -1222,8 +1248,10 @@ function IntakeSettingsCard({ access, locale = 'en' }: { access: DashboardAccess
 function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; locale: RecruitingLocale }) {
   const isAr = locale === 'ar'
   const [feature, setFeature] = useState<MailboxFeatureStatus | null>(null)
+  const [featureError, setFeatureError] = useState(false)
   const [connection, setConnection] = useState<MailboxConnection | null>(null)
   const [labels, setLabels] = useState<string[]>([])
+  const [labelsError, setLabelsError] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<{ tone: 'success' | 'warning'; text: string } | null>(null)
   const confirm = useConfirm()
@@ -1233,8 +1261,9 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
       const data = await getMailboxConnections(access)
       setFeature(data.feature)
       setConnection(data.connections[0] || null)
+      setFeatureError(false)
     } catch {
-      setFeature(null)
+      setFeatureError(true)
     }
   }, [access])
 
@@ -1273,8 +1302,9 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
     try {
       const data = await getMailboxLabels(access, mailboxId)
       setLabels(data.labels)
+      setLabelsError(false)
     } catch {
-      setLabels([])
+      setLabelsError(true)
       setNotice({
         tone: 'warning',
         text: isAr ? 'أعد ربط الصندوق لتحميل المجلدات.' : 'Reconnect the mailbox to load folders.',
@@ -1288,6 +1318,16 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
   }, [connection?.mailbox_id, connection?.status, connection?.has_credentials, loadLabels])
 
   // Hidden unless premium flag + OAuth ready (fail-closed). Forwarding remains default.
+  if (featureError) {
+    return (
+      <ResourceState
+        kind="error"
+        locale={isAr ? 'ar' : 'en'}
+        onRetry={() => void reload()}
+        testId="mailbox-feature-state"
+      />
+    )
+  }
   if (!feature?.enabled) return null
 
   const connect = async () => {
@@ -1466,7 +1506,7 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
             </div>
             <Badge tone={connected ? 'success' : needsReconnect ? 'danger' : 'warning'}>
               {connection
-                ? connection.status_label
+                ? customerVisibleBrandCopy(connection.status_label)
                 : isAr
                   ? 'غير متصل'
                   : 'Not connected'}
@@ -1500,6 +1540,15 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
                   <span className="text-xs uppercase tracking-wide text-subtle">
                     {isAr ? 'المجلد / التسمية للقراءة' : 'Folder / label to read'}
                   </span>
+                  {labelsError ? (
+                    <ResourceState
+                      kind="error"
+                      locale={isAr ? 'ar' : 'en'}
+                      onRetry={() => connection && void loadLabels(connection.mailbox_id)}
+                      retrying={busy}
+                      testId="mailbox-labels-state"
+                    />
+                  ) : (
                   <Select disabled={busy} onChange={(event) => void setLabel(event.target.value)} value={connection.label_filter || ''}>
                     <option value="">{isAr ? 'كل البريد (غير مستحسن)' : 'All mail (not recommended)'}</option>
                     {connection.label_filter && !labels.includes(connection.label_filter) ? (
@@ -1511,6 +1560,7 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
                       </option>
                     ))}
                   </Select>
+                  )}
                 </label>
                 <Button disabled={busy} onClick={checkNow} variant="secondary">
                   {busy ? <Loader2 className="animate-spin" size={16} /> : null}
