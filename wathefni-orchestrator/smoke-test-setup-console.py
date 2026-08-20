@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
 import sys
 import tempfile
 from pathlib import Path
@@ -156,6 +157,53 @@ def main() -> int:
                 "/dashboard/superadmin/setup/companies",
                 headers={"Authorization": f"Bearer {OPERATOR_TOKEN}"},
             ).status_code == 401,
+        )
+
+        import setup_console_operator_auth as setup_auth
+
+        operator_email = "aziz.operator.smoke@octo-hr.test"
+        operator_password = f"Smoke-operator-{secrets.token_urlsafe(12)}"
+        with app.db_connect() as conn:
+            with conn.cursor() as cur:
+                setup_auth.upsert_operator(
+                    cur,
+                    email=operator_email,
+                    password=operator_password,
+                    actor_phone=ADMIN_PHONE,
+                )
+            conn.commit()
+
+        unknown_login = client.post(
+            "/dashboard/superadmin/setup/auth/login",
+            json={"email": "nobody@octo-hr.test", "password": "not-the-operator-password"},
+        )
+        wrong_password = client.post(
+            "/dashboard/superadmin/setup/auth/login",
+            json={"email": operator_email, "password": "not-the-operator-password"},
+        )
+        check(
+            "unknown operator email and wrong password are indistinguishable",
+            unknown_login.status_code == 401
+            and wrong_password.status_code == 401
+            and unknown_login.text == wrong_password.text,
+        )
+        issued = client.post(
+            "/dashboard/superadmin/setup/auth/login",
+            json={"email": operator_email, "password": operator_password},
+        )
+        issued_body = issued.json() if issued.headers.get("content-type", "").startswith("application/json") else {}
+        check(
+            "operator email and password issue the existing Setup session",
+            issued.status_code == 200 and bool(issued_body.get("access_token")) and bool(issued_body.get("refresh_token")),
+        )
+        check("session remains bound to the allowlisted operator phone", issued_body.get("phone") == ADMIN_PHONE)
+        session_headers = {
+            "Authorization": f"Bearer {issued_body.get('access_token')}",
+            "X-HR-Phone": ADMIN_PHONE,
+        }
+        check(
+            "password session authorizes Setup Console APIs",
+            client.get("/dashboard/superadmin/setup/companies", headers=session_headers).status_code == 200,
         )
 
         original_dist = app.DASHBOARD_DIST_PATH

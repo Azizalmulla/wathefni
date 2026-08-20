@@ -33,6 +33,12 @@ def _fail(name: str, detail: Any = None) -> None:
     print(f"FAIL  {name}: {detail}")
 
 
+def _load_password_creds() -> tuple[str, str]:
+    email = (os.environ.get("WATHEFNI_SETUP_OPERATOR_EMAIL") or "").strip()
+    password = os.environ.get("WATHEFNI_SETUP_OPERATOR_PASSWORD") or ""
+    return email, password
+
+
 def _load_creds() -> tuple[str, str]:
     token = (os.environ.get("WATHEFNI_SETUP_TOKEN") or "").strip()
     phone = (os.environ.get("WATHEFNI_SETUP_PHONE") or "").strip()
@@ -102,34 +108,41 @@ def main() -> int:
         _fail("ttl_contract", {"access": str(auth.ACCESS_TTL), "refresh": str(auth.REFRESH_TTL)})
 
     operator_token, phone = _load_creds()
-    if not operator_token or not phone:
-        _fail("credentials_missing")
-        return _finish()
+    email, password = _load_password_creds()
+    if not email or not password:
+        if operator_token and phone:
+            _fail("password_credentials_missing")
+            # Legacy bearer tooling can still be proved below if token env is present.
+        else:
+            _fail("credentials_missing")
+            return _finish()
 
-    # Bad login
-    bad_status, _ = _req(
-        "POST",
-        "/dashboard/superadmin/setup/auth/login",
-        body={"operator_token": "definitely-wrong-token-value", "phone": phone},
-    )
-    if bad_status == 401:
-        _ok("login_rejects_bad_token")
-    else:
-        _fail("login_rejects_bad_token", bad_status)
+    if email and password:
+        bad_status, _ = _req(
+            "POST",
+            "/dashboard/superadmin/setup/auth/login",
+            body={"email": email, "password": "definitely-wrong-password-value"},
+        )
+        if bad_status == 401:
+            _ok("login_rejects_bad_password")
+        else:
+            _fail("login_rejects_bad_password", bad_status)
 
-    # Good login
-    status, login = _req(
-        "POST",
-        "/dashboard/superadmin/setup/auth/login",
-        body={"operator_token": operator_token, "phone": phone},
-    )
-    if status == 200 and login.get("access_token") and login.get("refresh_token"):
-        _ok("login_issues_access_refresh", {
-            "access_ttl_seconds": login.get("access_ttl_seconds"),
-            "refresh_ttl_seconds": login.get("refresh_ttl_seconds"),
-        })
+        status, login = _req(
+            "POST",
+            "/dashboard/superadmin/setup/auth/login",
+            body={"email": email, "password": password},
+        )
+        if status == 200 and login.get("access_token") and login.get("refresh_token"):
+            _ok("login_issues_access_refresh", {
+                "access_ttl_seconds": login.get("access_ttl_seconds"),
+                "refresh_ttl_seconds": login.get("refresh_ttl_seconds"),
+            })
+        else:
+            _fail("login_issues_access_refresh", {"status": status, "body": login})
+            return _finish()
     else:
-        _fail("login_issues_access_refresh", {"status": status, "body": login})
+        _fail("login_issues_access_refresh", "password credentials missing")
         return _finish()
 
     access = str(login["access_token"])

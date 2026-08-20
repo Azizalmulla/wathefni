@@ -57,6 +57,9 @@ USER_A_PASSWORD = f"R2-valid-password-{uuid.uuid4().hex[:12]}"
 OPERATOR_PHONE = f"96555{random.randrange(10 ** 6):06d}"
 UNKNOWN_OPERATOR_PHONE = f"96554{random.randrange(10 ** 6):06d}"
 OPERATOR_TOKEN = f"r2-operator-{uuid.uuid4().hex}"
+OPERATOR_EMAIL = f"ops.{SUFFIX.lower()}@r2security.test"
+UNKNOWN_OPERATOR_EMAIL = f"unknown.{SUFFIX.lower()}@r2security.test"
+OPERATOR_PASSWORD = f"R2-operator-password-{uuid.uuid4().hex[:12]}"
 
 
 def check(label: str, condition: bool, detail: object = None) -> None:
@@ -86,6 +89,7 @@ def _configure_env() -> None:
     os.environ["WATHEFNI_SETUP_CONSOLE_ENABLED"] = "1"
     os.environ["WATHEFNI_SETUP_OPERATOR_CREDENTIALS"] = json.dumps({OPERATOR_PHONE: OPERATOR_TOKEN})
     os.environ["WATHEFNI_PLATFORM_ADMIN_PHONES"] = OPERATOR_PHONE
+    os.environ["WATHEFNI_PLATFORM_ADMINS"] = OPERATOR_PHONE
     os.environ.setdefault("WATHEFNI_DELIVERY_MODE", "dry_run")
 
 
@@ -143,6 +147,14 @@ def seed(app) -> None:
                 ON CONFLICT (user_id) DO NOTHING
                 """,
                 (str(uuid.uuid4()), CO_A, USER_A_EMAIL, app.dashboard_password_hash(USER_A_PASSWORD)),
+            )
+            import setup_console_operator_auth as setup_auth
+
+            setup_auth.upsert_operator(
+                cur,
+                email=OPERATOR_EMAIL,
+                password=OPERATOR_PASSWORD,
+                actor_phone=OPERATOR_PHONE,
             )
             try:
                 import tenant_email_authority as tea
@@ -384,18 +396,18 @@ def login_throttle(client, app) -> None:
     check("successful login clears the failure counter", ok.status_code == 200 and "token" in ok.text)
 
     print("\n    P0-3 — Setup Console operator login throttling")
-    bad_phone = client.post(
+    unknown_email = client.post(
         "/dashboard/superadmin/setup/auth/login",
-        json={"phone": UNKNOWN_OPERATOR_PHONE, "operator_token": "wrong-operator-token"},
+        json={"email": UNKNOWN_OPERATOR_EMAIL, "password": "wrong-operator-password"},
     )
-    bad_token = client.post(
+    wrong_password = client.post(
         "/dashboard/superadmin/setup/auth/login",
-        json={"phone": OPERATOR_PHONE, "operator_token": "wrong-operator-token"},
+        json={"email": OPERATOR_EMAIL, "password": "wrong-operator-password"},
     )
     check(
-        "unknown operator and wrong token are indistinguishable",
-        bad_phone.status_code == bad_token.status_code == 401 and bad_phone.text == bad_token.text,
-        (bad_phone.status_code, bad_token.status_code),
+        "unknown operator email and wrong password are indistinguishable",
+        unknown_email.status_code == wrong_password.status_code == 401 and unknown_email.text == wrong_password.text,
+        (unknown_email.status_code, wrong_password.status_code),
     )
 
     setup_limit = app._rate_limit.policy("setup_operator_login").limit
@@ -403,7 +415,7 @@ def login_throttle(client, app) -> None:
     for _ in range(setup_limit + 3):
         r = client.post(
             "/dashboard/superadmin/setup/auth/login",
-            json={"phone": OPERATOR_PHONE, "operator_token": "wrong-operator-token"},
+            json={"email": OPERATOR_EMAIL, "password": "wrong-operator-password"},
         )
         if r.status_code == 429:
             saw_429 = True

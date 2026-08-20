@@ -18,6 +18,7 @@ export type SetupAuthLoginResponse = {
   access_token: string
   refresh_token: string
   phone: string
+  email?: string
   expires_at?: string
   refresh_expires_at?: string
   access_ttl_seconds?: number
@@ -73,16 +74,16 @@ export function credentialsFromSession(session: SetupSession): SetupCredentials 
 
 let refreshInFlight: Promise<SetupSession | null> | null = null
 
-export async function loginWithOperatorSecret(input: {
-  operatorToken: string
-  phone: string
+export async function loginWithOperatorPassword(input: {
+  email: string
+  password: string
 }): Promise<SetupSession> {
   const response = await fetch('/dashboard/superadmin/setup/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
-      operator_token: input.operatorToken.trim(),
-      phone: input.phone.trim(),
+      email: input.email.trim(),
+      password: input.password,
     }),
   })
   const payload = (await response.json().catch(() => ({}))) as SetupAuthLoginResponse & {

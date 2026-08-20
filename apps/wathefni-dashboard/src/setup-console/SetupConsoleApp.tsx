@@ -6,7 +6,6 @@ import {
   ChevronRight,
   CircleAlert,
   Clipboard,
-  KeyRound,
   Link2,
   Loader2,
   LogOut,
@@ -54,7 +53,7 @@ import {
 import {
   clearStoredSession,
   credentialsFromSession,
-  loginWithOperatorSecret,
+  loginWithOperatorPassword,
   logoutSetupSession,
   probeSetupSession,
   readStoredSession,
@@ -339,9 +338,9 @@ export default function SetupConsoleApp() {
     return (
       <ConnectScreen
         onConnect={async (next) => {
-          const session = await loginWithOperatorSecret({
-            operatorToken: next.token,
-            phone: next.phone,
+          const session = await loginWithOperatorPassword({
+            email: next.email,
+            password: next.password,
           })
           setCredentials(credentialsFromSession(session))
         }}
@@ -353,7 +352,7 @@ export default function SetupConsoleApp() {
   async function disconnect() {
     const approved = await confirm({
       title: 'Sign out of Setup Console?',
-      body: 'This revokes the saved operator session on this browser. You will need the operator token again to reconnect.',
+      body: 'This signs you out of Setup Console on this browser.',
       confirmLabel: 'Sign out',
       destructive: true,
     })
@@ -648,63 +647,56 @@ export default function SetupConsoleApp() {
 function ConnectScreen({
   onConnect,
 }: {
-  onConnect: (credentials: SetupCredentials) => Promise<void>
+  onConnect: (credentials: { email: string; password: string }) => Promise<void>
 }) {
-  const [token, setToken] = useState('')
-  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [working, setWorking] = useState(false)
   const [error, setError] = useState('')
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-12">
-      <Card className="w-full max-w-lg p-8">
-        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-text text-white shadow-soft">
-          <KeyRound className="h-5 w-5" aria-hidden="true" />
+      <Card className="w-full max-w-md p-8" data-testid="setup-console-admin-signin">
+        <div className="mb-8">
+          <p className="text-2xl font-semibold tracking-[-0.045em]">OctoHR</p>
+          <CardTitle className="mt-6 text-xl">Admin sign-in</CardTitle>
+          <CardDescription className="mt-2">Setup Console</CardDescription>
         </div>
-        <CardHeader>
-          <CardTitle className="text-xl">Operator login — Setup Console</CardTitle>
-          <CardDescription>
-            This is not the HR dashboard. Company Admins sign in at /dashboard with email and password.
-            A dashboard owner session is rejected here. Platform operators sign in with the operator
-            token and an allowlisted phone. The session is saved in this browser until it expires or
-            you sign out.
-          </CardDescription>
-        </CardHeader>
         <form
           className="space-y-4"
           onSubmit={(event) => {
             event.preventDefault()
-            if (!token.trim() || !phone.trim() || working) return
+            if (!email.trim() || !password || working) return
             setWorking(true)
             setError('')
-            void onConnect({ token, phone })
+            void onConnect({ email, password })
               .catch((connectError) => setError(messageFrom(connectError)))
               .finally(() => setWorking(false))
           }}
         >
-          <Field label="Operator token" htmlFor="operator-token">
+          <Field label="Email" htmlFor="operator-email">
             <Input
-              id="operator-token"
-              type="password"
-              autoComplete="off"
-              value={token}
-              onChange={(event) => setToken(event.target.value)}
+              id="operator-email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               required
             />
           </Field>
-          <Field label="Authorised operator phone" htmlFor="operator-phone" hint="Include country code.">
+          <Field label="Password" htmlFor="operator-password">
             <Input
-              id="operator-phone"
-              type="tel"
-              autoComplete="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
+              id="operator-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
               required
             />
           </Field>
           {error ? <p className="text-sm text-rose-700">{error}</p> : null}
-          <Button className="w-full" type="submit" disabled={!token.trim() || !phone.trim() || working}>
-            {working ? 'Signing in…' : 'Connect securely'}
+          <Button className="w-full" type="submit" disabled={!email.trim() || !password || working}>
+            {working ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
       </Card>

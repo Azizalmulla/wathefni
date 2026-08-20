@@ -3339,6 +3339,12 @@ def _ensure_schema_impl() -> None:
             import tenant_email_authority as _tenant_email_authority
 
             _tenant_email_authority.ensure_schema(cur)
+            try:
+                import setup_console_operator_auth as _setup_operator_auth
+
+                _setup_operator_auth.ensure_schema(cur)
+            except Exception:
+                pass
             _onboarding_wave2.ensure_onboarding_wave2_schema(cur)
             _attendance_authority.ensure_attendance_authority_schema(cur)
             import attendance_authority_postgres as _attendance_authority_pg
@@ -47375,16 +47381,23 @@ def setup_operator_credentials() -> dict[str, str]:
     }
 
 
-def _setup_console_operator_context_payload(phone: str, *, auth_source: str) -> dict[str, Any]:
+def _setup_console_operator_context_payload(phone: str, *, auth_source: str, email: str = "") -> dict[str, Any]:
+    actor_email = str(email or "").strip().lower()
     return {
         "is_platform_admin": True,
         "actor_phone": phone,
         "hr_phone": phone,
         "actor_user_id": f"platform_admin:{phone}",
-        "actor_email": "",
+        "actor_email": actor_email,
         "actor_role": "platform_admin",
         "auth_source": auth_source,
-        "hr_user": {"phone": phone, "role": "platform_admin", "name": "OctoHR Platform Admin", "status": "active"},
+        "hr_user": {
+            "phone": phone,
+            "email": actor_email,
+            "role": "platform_admin",
+            "name": "OctoHR Platform Admin",
+            "status": "active",
+        },
     }
 
 
@@ -47395,7 +47408,7 @@ def superadmin_context(
     """Platform-admin gate for the Setup Console. Fail-closed at every step.
 
     Accepts either:
-    - opaque Setup Console access session (preferred; issued by /auth/login), or
+    - opaque Setup Console access session (preferred; issued after email/password login), or
     - legacy operator token + allowlisted phone (smoke / tooling compatibility).
     """
     ensure_schema()
@@ -47407,7 +47420,7 @@ def superadmin_context(
         raise HTTPException(status_code=401, detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."})
     allow = platform_admin_phones()
 
-    # Preferred: persistent access session issued after operator-token login.
+    # Preferred: persistent access session issued after operator password login.
     try:
         import setup_console_operator_auth as _setup_auth
 
@@ -47424,7 +47437,20 @@ def superadmin_context(
             # Operator must still be allowlisted in credentials map (revocation via env).
             if session_phone not in setup_operator_credentials():
                 raise HTTPException(status_code=401, detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."})
-            return _setup_console_operator_context_payload(session_phone, auth_source="setup_session")
+            metadata = sess.get("metadata") if isinstance(sess.get("metadata"), dict) else {}
+            if not metadata:
+                raw_meta = sess.get("metadata")
+                if isinstance(raw_meta, str) and raw_meta.strip():
+                    try:
+                        parsed_meta = json.loads(raw_meta)
+                    except Exception:
+                        parsed_meta = {}
+                    metadata = parsed_meta if isinstance(parsed_meta, dict) else {}
+            return _setup_console_operator_context_payload(
+                session_phone,
+                auth_source="setup_session",
+                email=str(metadata.get("email") or ""),
+            )
     except HTTPException:
         raise
     except Exception:
@@ -47442,8 +47468,8 @@ def superadmin_context(
 
 
 class SetupOperatorLoginRequest(BaseModel):
-    operator_token: str = Field(min_length=8, max_length=4000)
-    phone: str = Field(min_length=6, max_length=32)
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=8, max_length=512)
 
 
 class SetupOperatorRefreshRequest(BaseModel):
@@ -47456,28 +47482,37 @@ class SetupOperatorLogoutRequest(BaseModel):
 
 @app.post("/dashboard/superadmin/setup/auth/login")
 def setup_console_operator_login(request: SetupOperatorLoginRequest, http_request: Request):
-    """Exchange operator token + allowlisted phone for access/refresh session.
+    """Exchange private operator email + password for the existing access/refresh session.
 
-    R2: throttled on both network source and operator identity. This is the
-    highest-privilege login surface in the platform, so the lock window is longer
-    than the HR dashboard's.
+    Operators are stored in the Setup Console operator table, not the HR company
+    account directory. R2 throttles both network source and operator identity.
     """
     ensure_schema()
     if not setup_console_enabled():
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found."})
-    phone = digits(request.phone)
+    import setup_console_operator_auth as _setup_auth
+
+    email = _setup_auth.normalize_email(request.email)
+    password = str(request.password or "")
     route = "/dashboard/superadmin/setup/auth/login"
     source = _rate_limit.client_source(http_request)
-    dimensions = {"source": source, "identity": f"operator|{phone}"}
+    dimensions = {"source": source, "identity": f"operator|{email or 'invalid'}"}
     _rate_limit.guard(_security_host(), "setup_operator_login", route=route, dimensions=dimensions)
 
-    provided = str(request.operator_token or "").strip()
-    configured = setup_operator_credentials().get(phone) or ""
+    operator = None
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            operator = _setup_auth.lookup_operator_by_email(cur, email)
+        conn.commit()
+    stored = str((operator or {}).get("password_hash") or "").strip()
+    verified = _setup_auth.password_ok(password, stored or _setup_auth.DUMMY_PASSWORD_HASH)
+    phone = digits((operator or {}).get("actor_phone"))
     allow = platform_admin_phones()
-    credentials_ok = bool(phone and configured and provided and hmac.compare_digest(provided, configured))
-    if not credentials_ok or not allow or phone not in allow:
-        # One response for "unknown operator", "wrong token", and "not a platform
-        # admin" so this endpoint cannot be used to discover operator phones.
+    active = bool(operator) and str((operator or {}).get("status") or "") == "active"
+    allowlisted = bool(phone and allow and phone in allow and phone in setup_operator_credentials())
+    if not (verified and active and allowlisted):
+        # One response for unknown email, wrong password, disabled operator, and
+        # missing platform-admin allowlist so this endpoint cannot enumerate accounts.
         _rate_limit.record_failure(
             _security_host(),
             "setup_operator_login",
@@ -47490,11 +47525,11 @@ def setup_console_operator_login(request: SetupOperatorLoginRequest, http_reques
             detail={"error": "operator_auth_failed", "message": "Platform admin access was rejected."},
         )
     _rate_limit.reset(_security_host(), "setup_operator_login", dimensions=dimensions)
-    import setup_console_operator_auth as _setup_auth
 
     with db_connect() as conn:
         with conn.cursor() as cur:
-            payload = _setup_auth.create_session(cur, actor_phone=phone)
+            payload = _setup_auth.create_session(cur, actor_phone=phone, actor_email=email)
+            _setup_auth.mark_operator_login(cur, (operator or {}).get("operator_id"))
         conn.commit()
     return payload
 
@@ -47550,6 +47585,7 @@ def setup_console_operator_session(superadmin: dict[str, Any] = Depends(superadm
         "ok": True,
         "phase": "setup_console_operator_auth",
         "phone": superadmin.get("actor_phone"),
+        "email": superadmin.get("actor_email") or "",
         "auth_source": superadmin.get("auth_source"),
         "is_platform_admin": True,
     }

@@ -42,19 +42,23 @@ describe('setup console', () => {
     vi.unstubAllGlobals()
     window.history.replaceState({}, '', '/')
   })
-  test('exchanges operator secret for a persistent session and loads companies', async () => {
+  test('exchanges operator email and password for a persistent session and loads companies', async () => {
     const fetchMock = mockSetupApi()
     renderConsole()
 
-    const tokenInput = await screen.findByLabelText('Operator token')
-    expect(tokenInput).toHaveAttribute('type', 'password')
-    expect(screen.getByText(/This is not the HR dashboard/i)).toBeInTheDocument()
-    expect(screen.getByText(/dashboard owner session is rejected/i)).toBeInTheDocument()
-    fireEvent.change(tokenInput, { target: { value: ' operator-secret ' } })
-    fireEvent.change(screen.getByLabelText('Authorised operator phone'), {
-      target: { value: ' 96590000000 ' },
+    const emailInput = await screen.findByLabelText('Email')
+    expect(emailInput).toHaveAttribute('type', 'email')
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password')
+    expect(screen.getByRole('heading', { name: 'Admin sign-in' })).toBeInTheDocument()
+    expect(screen.getByText('Setup Console')).toBeInTheDocument()
+    expect(screen.getByText('OctoHR')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Operator token')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Authorised operator phone')).not.toBeInTheDocument()
+    fireEvent.change(emailInput, { target: { value: ' aziz@example.com ' } })
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'operator-password' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Connect securely' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
     await screen.findByRole('heading', { name: 'Companies' })
     await screen.findByRole('button', { name: /Acme Company/ })
@@ -68,8 +72,8 @@ describe('setup console', () => {
       String(input).includes('/dashboard/superadmin/setup/auth/login'),
     )
     expect(JSON.parse(String(loginCall?.[1]?.body))).toEqual({
-      operator_token: 'operator-secret',
-      phone: '96590000000',
+      email: 'aziz@example.com',
+      password: 'operator-password',
     })
 
     const listCall = fetchMock.mock.calls.find(([input]) =>
@@ -89,7 +93,8 @@ describe('setup console', () => {
     renderConsole()
 
     await screen.findByRole('button', { name: /Acme Company/ }, { timeout: 8000 })
-    expect(screen.queryByLabelText('Operator token')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Email')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Password')).not.toBeInTheDocument()
     const sessionCall = fetchMock.mock.calls.find(([input]) => String(input).includes('/auth/session'))
     expect(authHeader(sessionCall?.[1])).toBe('Bearer saved-access-token')
     const listCall = fetchMock.mock.calls.find(([input]) => String(input).includes('/companies?q='))
@@ -322,12 +327,12 @@ function mockSetupApi() {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input)
     if (path.includes('/dashboard/superadmin/setup/auth/login') && init?.method === 'POST') {
-      const body = JSON.parse(String(init.body || '{}')) as { phone?: string }
       return jsonResponse({
         ok: true,
         access_token: 'access-session-token',
         refresh_token: 'refresh-session-token',
-        phone: String(body.phone || '').trim(),
+        phone: '96590000000',
+        email: 'aziz@example.com',
         expires_at: new Date(Date.now() + 8 * 3600_000).toISOString(),
         refresh_expires_at: new Date(Date.now() + 30 * 86400_000).toISOString(),
         access_ttl_seconds: 28800,
