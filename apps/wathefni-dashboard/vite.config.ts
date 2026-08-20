@@ -1,12 +1,34 @@
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import type { Connect, ViteDevServer } from 'vite'
 import { defineConfig } from 'vitest/config'
+
+function setupConsoleCanonicalUrl() {
+  const rewrite: Connect.NextHandleFunction = (req, _res, next) => {
+    const raw = req.url || ''
+    const [pathName, query] = raw.split('?')
+    const clean = (pathName || '').replace(/\/+$/, '') || '/'
+    if (clean === '/setup-console' || clean === '/setup-console.html') {
+      req.url = `/dashboard/setup-console.html${query ? `?${query}` : ''}`
+    }
+    next()
+  }
+  return {
+    name: 'setup-console-canonical-url',
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use(rewrite)
+    },
+    configurePreviewServer(server: ViteDevServer) {
+      server.middlewares.use(rewrite)
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   base: '/dashboard/',
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), setupConsoleCanonicalUrl()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

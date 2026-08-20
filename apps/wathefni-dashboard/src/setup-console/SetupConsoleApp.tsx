@@ -26,6 +26,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -47,7 +48,6 @@ import {
   saveChannelAccount,
   SetupConsoleApiError,
   updateCompanyLifecycle,
-  updateCompanyModules,
   updateCompanyProfile,
   updateCompanySettings,
 } from './api'
@@ -64,6 +64,7 @@ import {
 import { CompanyControlPage } from './CompanyControlPage'
 import { EmployeeAppAccessPolicyCard } from './EmployeeAppAccessPolicyCard'
 import { LaunchReadinessPage } from './LaunchReadinessPage'
+import { ModulesAccessCard } from './ModulesAccessCard'
 import { OnboardingWizard } from './OnboardingWizard'
 import { OwnershipDeepLinksCard } from './OwnershipDeepLinksCard'
 import { IntegrationsCatalogCard } from './IntegrationsCatalogCard'
@@ -84,7 +85,6 @@ import { NotificationDeliveryPoliciesCard } from './NotificationDeliveryPolicies
 import { PayrollSetupCard } from './PayrollSetupCard'
 import { TeamAccessCard } from './TeamAccessCard'
 import type {
-  AvailableModule,
   ChannelAccountInput,
   ChannelPolicy,
   CompanyCreateInput,
@@ -92,19 +92,18 @@ import type {
   CompanyLifecycleStatus,
   CompanyProfileInput,
   CompanySummary,
-  ModuleBundle,
   OwnerInput,
   SetupCredentials,
 } from './types'
 import {
-  applyBundleModules,
-  deriveAppSurfaces,
-  expandHardDependencies,
-  removeModuleWithDependents,
-  softRecommendations,
-} from './moduleGuidance'
+  readCompanyParam,
+  viewFromLocation,
+  writeSetupConsoleLocation,
+  type WorkspaceView,
+} from './urlState'
 
 const PAGE_SIZE = 20
+const SEARCH_DEBOUNCE_MS = 250
 
 function messageFrom(error: unknown) {
   return error instanceof Error ? error.message : 'Something interrupted this request. Please try again.'
@@ -151,13 +150,10 @@ export default function SetupConsoleApp() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState('')
   const [includeInactive, setIncludeInactive] = useState(false)
-  const [workspaceView, setWorkspaceView] = useState<'launch' | 'classic' | 'wizard' | 'control'>(() => {
-    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : ''
-    if (hash.startsWith('classic-') || hash === 'classic-ownership') return 'classic'
-    if (hash === 'control') return 'control'
-    return 'launch'
-  })
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>(() => viewFromLocation())
   const [uiLocale, setUiLocale] = useState<'en' | 'ar'>('en')
+  const workspaceViewRef = useRef(workspaceView)
+  workspaceViewRef.current = workspaceView
 
   const loadCompanies = useCallback(
     async (access: SetupCredentials, searchQuery = query, pageOffset = offset, showInactive = includeInactive) => {
@@ -242,6 +238,18 @@ export default function SetupConsoleApp() {
   }, [])
 
   useEffect(() => {
+    function syncViewFromLocation() {
+      setWorkspaceView(viewFromLocation())
+    }
+    window.addEventListener('hashchange', syncViewFromLocation)
+    window.addEventListener('popstate', syncViewFromLocation)
+    return () => {
+      window.removeEventListener('hashchange', syncViewFromLocation)
+      window.removeEventListener('popstate', syncViewFromLocation)
+    }
+  }, [])
+
+  useEffect(() => {
     if (credentials) queueMicrotask(() => void loadCompanies(credentials))
   }, [credentials, loadCompanies])
 
@@ -255,18 +263,21 @@ export default function SetupConsoleApp() {
     return () => window.clearTimeout(timer)
   }, [workspaceView, detailLoading, selectedCode, detail])
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const next = queryInput.trim()
+      if (next === query) return
+      setOffset(0)
+      setQuery(next)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [queryInput, query])
+
   const selectCompany = useCallback(
     async (companyCode: string) => {
       if (!credentials) return
       setSelectedCode(companyCode)
-      const hash = window.location.hash.replace(/^#/, '')
-      setWorkspaceView(
-        hash.startsWith('classic-') || hash === 'classic-ownership'
-          ? 'classic'
-          : hash === 'control'
-            ? 'control'
-            : 'launch',
-      )
+      writeSetupConsoleLocation({ company: companyCode, view: workspaceViewRef.current })
       setDetail(null)
       setDetailLoading(true)
       setError('')
@@ -280,6 +291,27 @@ export default function SetupConsoleApp() {
     },
     [credentials],
   )
+
+  useEffect(() => {
+    if (selectedCode) writeSetupConsoleLocation({ company: selectedCode, view: workspaceView })
+  }, [selectedCode, workspaceView])
+
+  useEffect(() => {
+    if (!credentials) return
+    const fromUrl = readCompanyParam()
+    if (!fromUrl) return
+    if (selectedCode === fromUrl) return
+    const visible = companies.some((company) => company.company_code === fromUrl)
+    if (visible) {
+      void selectCompany(fromUrl)
+      return
+    }
+    if (query !== fromUrl) {
+      setQueryInput(fromUrl)
+      setQuery(fromUrl)
+      setOffset(0)
+    }
+  }, [companies, credentials, query, selectCompany, selectedCode])
 
   const refreshDetail = useCallback(async () => {
     if (!credentials || !selectedCode) return
@@ -331,6 +363,7 @@ export default function SetupConsoleApp() {
     setCompanies([])
     setDetail(null)
     setSelectedCode('')
+    writeSetupConsoleLocation({ company: '', view: 'modules' })
   }
 
   async function handleCreated(input: CompanyCreateInput) {
@@ -351,8 +384,16 @@ export default function SetupConsoleApp() {
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">OctoHR</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">OctoHR operator workspace</p>
               <h1 className="text-lg font-semibold tracking-[-0.025em]">Setup Console</h1>
+              {selectedCode ? (
+                <p className="mt-1 text-sm text-subtle">
+                  Selected company <span className="font-semibold text-text">{detail?.readiness?.name || selectedCode}</span>
+                  <span className="ml-2 font-mono text-xs uppercase tracking-[0.08em]">{selectedCode}</span>
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-subtle">Select a company to manage modules and provisioning.</p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -384,7 +425,9 @@ export default function SetupConsoleApp() {
           <Card className="p-5">
             <CardHeader className="mb-4 pb-4">
               <CardTitle>Companies</CardTitle>
-              <CardDescription>Find and select a company to review its provisioning.</CardDescription>
+              <CardDescription>
+                Search as you type. Company selection stays in the URL as ?company=CODE.
+              </CardDescription>
             </CardHeader>
             <form
               className="flex gap-2"
@@ -401,6 +444,7 @@ export default function SetupConsoleApp() {
                 value={queryInput}
                 onChange={(event) => setQueryInput(event.target.value)}
                 placeholder="Name or company code"
+                autoComplete="off"
               />
               <Button type="submit" size="sm" className="h-11 w-11 px-0" aria-label="Search companies">
                 <Search className="h-4 w-4" aria-hidden="true" />
@@ -497,6 +541,14 @@ export default function SetupConsoleApp() {
             <CardContent className="flex flex-wrap gap-2 py-4">
               <Button
                 size="sm"
+                variant={workspaceView === 'modules' ? 'default' : 'ghost'}
+                disabled={!selectedCode}
+                onClick={() => setWorkspaceView('modules')}
+              >
+                {uiLocale === 'ar' ? 'الوحدات والوصول' : 'Modules & Access'}
+              </Button>
+              <Button
+                size="sm"
                 variant={workspaceView === 'launch' ? 'default' : 'ghost'}
                 disabled={!selectedCode}
                 onClick={() => setWorkspaceView('launch')}
@@ -520,6 +572,31 @@ export default function SetupConsoleApp() {
             </CardContent>
           </Card>
           {error ? <ErrorNotice message={error} /> : null}
+          {workspaceView === 'modules' ? (
+            <>
+              {detailLoading && !detail ? (
+                <Card className="flex min-h-72 items-center justify-center">
+                  <LoadingLine label="Loading modules and access" />
+                </Card>
+              ) : null}
+              {!selectedCode && !detailLoading ? <EmptySelection /> : null}
+              {selectedCode && detail ? (
+                <ModulesAccessCard
+                  key={detail.available_modules.map((module) => `${module.key}:${module.configured}:${module.usable}:${module.effective}`).join('|')}
+                  credentials={credentials}
+                  companyCode={selectedCode}
+                  locale={uiLocale}
+                  modules={detail.available_modules}
+                  bundles={detail.module_bundles || detail.module_guidance?.bundles || []}
+                  onChanged={async () => {
+                    await refreshDetail()
+                    await loadCompanies(credentials)
+                  }}
+                  onError={(nextError) => setError(messageFrom(nextError))}
+                />
+              ) : null}
+            </>
+          ) : null}
           {workspaceView === 'launch' && selectedCode ? (
             <LaunchReadinessPage credentials={connectedCredentials} companyCode={selectedCode} locale={uiLocale} />
           ) : null}
@@ -557,6 +634,7 @@ export default function SetupConsoleApp() {
                 await loadCompanies(credentials)
               }}
               onError={(nextError) => setError(messageFrom(nextError))}
+              onOpenModules={() => setWorkspaceView('modules')}
             />
           ) : null}
             </>
@@ -584,10 +662,12 @@ function ConnectScreen({
           <KeyRound className="h-5 w-5" aria-hidden="true" />
         </div>
         <CardHeader>
-          <CardTitle className="text-xl">Connect to Setup Console</CardTitle>
+          <CardTitle className="text-xl">Operator login — Setup Console</CardTitle>
           <CardDescription>
-            Sign in once with your platform operator token and allowlisted phone. A session is saved in
-            this browser and restored automatically until it expires or you sign out.
+            This is not the HR dashboard. Company Admins sign in at /dashboard with email and password.
+            A dashboard owner session is rejected here. Platform operators sign in with the operator
+            token and an allowlisted phone. The session is saved in this browser until it expires or
+            you sign out.
           </CardDescription>
         </CardHeader>
         <form
@@ -740,6 +820,7 @@ function CompanyWorkspace({
   onRefresh,
   onChanged,
   onError,
+  onOpenModules,
 }: {
   credentials: SetupCredentials
   detail: CompanyDetailResponse
@@ -749,6 +830,7 @@ function CompanyWorkspace({
   onRefresh: () => Promise<void>
   onChanged: () => Promise<void>
   onError: (error: unknown) => void
+  onOpenModules: () => void
 }) {
   const readiness = detail?.readiness
   const availableModules = Array.isArray(detail?.available_modules) ? detail.available_modules : []
@@ -800,15 +882,21 @@ function CompanyWorkspace({
           onChanged={onChanged}
           onError={onError}
         />
-        <ModulesCard
-          key={availableModules.map((module) => `${module.key}:${module.configured}:${module.effective}`).join('|')}
-          credentials={credentials}
-          companyCode={companyCode}
-          modules={availableModules}
-          bundles={detail.module_bundles || detail.module_guidance?.bundles || []}
-          onChanged={onChanged}
-          onError={onError}
-        />
+        <Card id="classic-modules-redirect">
+          <CardHeader>
+            <CardTitle>{locale === 'ar' ? 'الوحدات والوصول' : 'Modules & Access'}</CardTitle>
+            <CardDescription>
+              {locale === 'ar'
+                ? 'تفعيل الوحدات والحالة الفعلية انتقلت إلى تبويب الوحدات والوصول.'
+                : 'Module entitlements and honest runtime status now live on the Modules & Access tab.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button type="button" size="sm" onClick={onOpenModules}>
+              {locale === 'ar' ? 'فتح الوحدات والوصول' : 'Open Modules & Access'}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       <EmployeeAppAccessPolicyCard
@@ -1238,245 +1326,6 @@ function ProfileCard({
   )
 }
 
-function ModulesCard({
-  credentials,
-  companyCode,
-  modules,
-  bundles,
-  onChanged,
-  onError,
-}: {
-  credentials: SetupCredentials
-  companyCode: string
-  modules: AvailableModule[]
-  bundles: ModuleBundle[]
-  onChanged: () => Promise<void>
-  onError: (error: unknown) => void
-}) {
-  const [selected, setSelected] = useState(() => modules.filter((module) => module.configured).map((module) => module.key))
-  const [notices, setNotices] = useState<string[]>([])
-  const [working, setWorking] = useState(false)
-
-  const grouped = useMemo(() => {
-    return modules.reduce<Record<string, AvailableModule[]>>((groups, module) => {
-      const suite = module.suite || 'Other'
-      groups[suite] = [...(groups[suite] || []), module]
-      return groups
-    }, {})
-  }, [modules])
-
-  const recommendations = useMemo(() => softRecommendations(selected, modules), [selected, modules])
-  const appSurfaces = useMemo(() => deriveAppSurfaces(selected, modules), [selected, modules])
-  const employeeAppSelected = selected.includes('employee_app')
-  const employeeAppModule = modules.find((module) => module.key === 'employee_app')
-
-  function toggleModule(key: string, checked: boolean) {
-    if (checked) {
-      const result = expandHardDependencies([...selected, key], modules)
-      setSelected(result.selected)
-      setNotices(result.notices)
-      return
-    }
-    const result = removeModuleWithDependents(selected, modules, key)
-    setSelected(result.selected)
-    setNotices(result.notices)
-  }
-
-  function applyBundle(bundle: ModuleBundle) {
-    const result = applyBundleModules(selected, modules, bundle)
-    setSelected(result.selected)
-    setNotices([
-      `Applied ${bundle.label}.`,
-      ...result.notices,
-    ])
-  }
-
-  function addRecommended(key: string) {
-    const result = expandHardDependencies([...selected, key], modules)
-    setSelected(result.selected)
-    setNotices(result.notices.length ? result.notices : [`Added ${modules.find((module) => module.key === key)?.label || key}.`])
-  }
-
-  async function save() {
-    setWorking(true)
-    try {
-      const result = expandHardDependencies(selected, modules)
-      setSelected(result.selected)
-      if (result.notices.length) setNotices(result.notices)
-      await updateCompanyModules(credentials, companyCode, result.selected)
-      await onChanged()
-    } catch (saveError) {
-      onError(saveError)
-    } finally {
-      setWorking(false)
-    }
-  }
-
-  return (
-    <Card id="classic-modules" data-ownership="module_entitlements">
-      <CardHeader>
-        <CardTitle>What this company uses</CardTitle>
-        <CardDescription>
-          Enable product areas for this company. Hard dependencies are auto-included. Soft recommendations never block save.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        {bundles.length > 0 ? (
-          <section className="space-y-2">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-subtle">Module bundles</h3>
-            <div className="flex flex-wrap gap-2">
-              {bundles.map((bundle) => (
-                <Button
-                  key={bundle.id}
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  disabled={working}
-                  title={bundle.description}
-                  onClick={() => applyBundle(bundle)}
-                >
-                  Apply {bundle.label}
-                </Button>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {notices.length > 0 ? (
-          <div role="status" className="space-y-1 rounded-2xl border border-amber-200/70 bg-amber-50/70 p-3 text-xs leading-5 text-amber-950">
-            {notices.map((notice) => (
-              <p key={notice}>{notice}</p>
-            ))}
-          </div>
-        ) : null}
-
-        {recommendations.length > 0 ? (
-          <section className="space-y-2">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-subtle">Recommended with selection</h3>
-            <div className="flex flex-wrap gap-2">
-              {recommendations.map((item) => (
-                <button
-                  key={`${item.from}:${item.key}`}
-                  type="button"
-                  disabled={working}
-                  className="rounded-full border border-line/70 bg-white/70 px-3 py-1.5 text-left text-xs text-text transition hover:border-accent/40"
-                  title={item.copy || `${item.fromLabel} recommends ${item.label}`}
-                  onClick={() => addRecommended(item.key)}
-                >
-                  + {item.label}
-                  <span className="ml-1 text-subtle">for {item.fromLabel}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-[11px] leading-4 text-subtle">Recommendations are optional. You can leave them off or remove them after applying a bundle.</p>
-          </section>
-        ) : null}
-
-        {Object.entries(grouped).map(([suite, suiteModules]) => (
-          <fieldset key={suite}>
-            <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-subtle">
-              {humanize(suite)}
-            </legend>
-            <div className="space-y-2">
-              {suiteModules.map((module) => {
-                const unavailable = !module.platform_available
-                const isSelected = selected.includes(module.key)
-                return (
-                  <label
-                    key={module.key}
-                    className={cn(
-                      'flex items-start justify-between gap-4 rounded-2xl border border-line/55 bg-white/45 p-3.5',
-                      unavailable && 'border-dashed',
-                    )}
-                  >
-                    <span className="flex min-w-0 items-start gap-3">
-                      <input
-                        type="checkbox"
-                        className="mt-1 h-4 w-4 accent-[#c89445]"
-                        checked={isSelected}
-                        disabled={working}
-                        onChange={(event) => toggleModule(module.key, event.target.checked)}
-                      />
-                      <span>
-                        <span className="block text-sm font-medium">{module.label || humanize(module.key)}</span>
-                        <span className="mt-1 block text-xs text-subtle">
-                          {module.audience ? `Audience: ${humanize(module.audience)}` : module.key}
-                        </span>
-                        {module.depends_on?.length ? (
-                          <span className="mt-1 block text-xs text-amber-800">
-                            Requires {(module.depends_on_labels || module.depends_on).join(', ')}
-                          </span>
-                        ) : null}
-                        {module.recommendation_copy ? (
-                          <span className="mt-1 block text-xs text-subtle">{module.recommendation_copy}</span>
-                        ) : null}
-                      </span>
-                    </span>
-                    <span className="flex shrink-0 flex-wrap justify-end gap-1.5">
-                      <Badge tone={module.platform_available ? 'success' : 'muted'}>
-                        Platform {module.platform_available ? 'available' : 'unavailable'}
-                      </Badge>
-                      <Badge
-                        tone={
-                          module.key === 'employee_app' && isSelected && unavailable
-                            ? 'warning'
-                            : module.effective
-                              ? 'success'
-                              : module.configured && unavailable
-                                ? 'warning'
-                                : 'muted'
-                        }
-                      >
-                        {module.key === 'employee_app' && isSelected && unavailable
-                          ? 'Configured, awaiting platform activation'
-                          : module.effective
-                            ? 'Effective'
-                            : module.configured && unavailable
-                              ? 'Configured, awaiting activation'
-                              : 'Not enabled'}
-                      </Badge>
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
-        ))}
-
-        {employeeAppSelected ? (
-          <section className="rounded-2xl border border-sky-200/70 bg-sky-50/40 p-4">
-            <h3 className="text-sm font-semibold">Employee App surface preview</h3>
-            <p className="mt-1 text-xs leading-5 text-subtle">
-              {employeeAppModule && !employeeAppModule.platform_available
-                ? 'Configured, awaiting platform activation. Surfaces below appear when WATHEFNI_EMPLOYEE_APP is ON.'
-                : 'Surfaces implied by the currently selected modules.'}
-            </p>
-            {appSurfaces.length === 0 ? (
-              <p className="mt-3 text-xs text-subtle">No module surfaces selected yet. Payroll remains HR-dashboard-first for V1.</p>
-            ) : (
-              <ul className="mt-3 space-y-1.5">
-                {appSurfaces.map((surface) => (
-                  <li key={`${surface.module_key}:${surface.surface_key}`} className="text-xs text-text">
-                    {surface.label || humanize(surface.surface_key)}
-                    <span className="text-subtle"> · {humanize(surface.module_key)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        ) : null}
-
-        <div className="flex justify-end">
-          <Button size="sm" type="button" onClick={() => void save()} disabled={working}>
-            {working ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save modules
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 const CHANNEL_SECTIONS: Array<{ key: keyof ChannelPolicy; title: string; description: string }> = [
   { key: 'pre_hiring', title: 'Pre-hiring channel', description: 'Candidate recruitment conversations.' },
   { key: 'post_hiring', title: 'Post-hiring channel', description: 'Employee service conversations.' },
@@ -1877,7 +1726,8 @@ function EmptySelection() {
         </div>
         <h2 className="mt-5 text-lg font-semibold">Select a company</h2>
         <p className="mt-2 text-sm leading-6 text-subtle">
-          Choose a company from the list, or create one, to manage its provisioning.
+          Choose a company from the list, or create one. Module entitlements open on Modules & Access
+          and stay in the URL as ?company=CODE.
         </p>
       </div>
     </Card>

@@ -64,7 +64,7 @@ def main() -> int:
     # Source-level anchor expectations (launch readiness module)
     src = (ROOT / "setup_console_wave_a_launch_readiness.py").read_text(encoding="utf-8")
     for needle in (
-        '/setup-console#classic-modules',
+        '/setup-console?view=modules',
         '/setup-console#classic-profile',
         '/setup-console#classic-channels',
         '/setup-console#classic-owner',
@@ -96,6 +96,9 @@ def main() -> int:
                 _fail(f"frontend_ownership_key:{key}")
 
         setup_app = setup_app_file.read_text(encoding="utf-8")
+        modules_card = dash / "setup-console" / "ModulesAccessCard.tsx"
+        if modules_card.is_file():
+            setup_app += modules_card.read_text(encoding="utf-8")
         for anchor in (
             'id="classic-profile"',
             'id="classic-modules"',

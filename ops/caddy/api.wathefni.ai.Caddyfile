@@ -143,6 +143,14 @@ app.octo-hr.com {
 	@root path /
 	redir @root /dashboard/ 308
 
+	@setup_console path /setup-console /setup-console/ /setup-console.html
+	handle @setup_console {
+		root * /opt/wathefni/dashboard-dist
+		rewrite * /setup-console.html
+		header Cache-Control "no-store, max-age=0"
+		file_server
+	}
+
 	handle_path /dashboard/assets/* {
 		root * /opt/wathefni/dashboard-dist/assets
 		header Cache-Control "public, max-age=31536000, immutable"

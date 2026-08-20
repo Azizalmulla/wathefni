@@ -4,8 +4,15 @@ export type SetupEffectiveState = {
   effective_state?: string
   usable?: boolean
   stored_enabled?: boolean
+  can_enable?: boolean
   label_en?: string
   label_ar?: string
+  required_permission?: string | null
+  blockers?: Array<{
+    code?: string
+    message_en?: string
+    message_ar?: string
+  }>
   deployment?: {
     reason_code?: string
     message_en?: string
@@ -53,6 +60,8 @@ export function SetupEffectiveStateBanner({
 }
 
 export function canEnableFromState(state: SetupEffectiveState | null | undefined) {
+  if (state?.can_enable === true) return true
+  if (state?.can_enable === false) return false
   const key = String(state?.effective_state || '')
   return key === 'available_disabled' || key === 'enabled_usable' || key === 'not_entitled'
 }

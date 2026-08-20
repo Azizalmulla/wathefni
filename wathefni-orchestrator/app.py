@@ -3537,6 +3537,60 @@ def dashboard_module_catalog_payload(company_code: str | None) -> list[dict[str,
     return payload
 
 
+def _setup_http_namespace_registered(namespace: str) -> bool:
+    prefix = str(namespace or "").rstrip("/")
+    if not prefix:
+        return False
+    for route in app.routes:
+        path = str(getattr(route, "path", "") or "")
+        if path == prefix or path.startswith(prefix + "/") or path.startswith(prefix + "{"):
+            return True
+    return False
+
+
+def setup_module_http_registered(module_key: str) -> bool | None:
+    import capability_readiness as _cap_ready
+
+    cap = _cap_ready.capability_for_setup_module_key(module_key)
+    spec = _cap_ready.spec_for(cap) if cap else None
+    if spec is None or not spec.http_namespaces:
+        return None
+    return any(_setup_http_namespace_registered(ns) for ns in spec.http_namespaces)
+
+
+def setup_company_principal_permits_module(company_code: str, module_key: str, users: list[dict[str, Any]] | None) -> bool | None:
+    import setup_console_effective_state as _eff
+
+    permission = _eff.MODULE_READ_PERMISSIONS.get(normalize_module_key(module_key) or str(module_key or "").strip().lower())
+    if not permission:
+        return None
+    active: list[dict[str, Any]] = []
+    for user in users or []:
+        if not isinstance(user, dict):
+            continue
+        status = str(user.get("status") or "active").strip().lower()
+        if status in {"inactive", "deactivated", "disabled", "removed", "blocked", "invited"}:
+            continue
+        active.append(user)
+    if not active:
+        return None
+    for user in active:
+        perms = {str(item) for item in (user.get("permissions") or []) if str(item).strip()}
+        if not perms:
+            perms = set(
+                dashboard_effective_permissions_for_user(
+                    {
+                        "role": user.get("role"),
+                        "company_code": str(company_code or "").strip().upper(),
+                        "user_id": str(user.get("user_id") or "").strip(),
+                    }
+                )
+            )
+        if permission in perms or "*" in perms:
+            return True
+    return False
+
+
 def setup_console_module_guidance(company_code: str | None, selected_modules: list[str] | None = None) -> dict[str, Any]:
     selected = list(selected_modules) if selected_modules is not None else sorted(configured_company_modules(company_code))
     return {
@@ -42998,8 +43052,7 @@ if($('opToken').value && $('opPhone').value) loadCompanies();
 </html>"""
 
 
-@app.get("/setup-console", response_class=HTMLResponse)
-def setup_console_page():
+def _setup_console_page_response():
     if not setup_console_enabled():
         raise HTTPException(status_code=404, detail={"error": "not_found", "message": "Not found."})
     if setup_console_v2_enabled():
@@ -43013,6 +43066,16 @@ def setup_console_page():
             response.headers["Cache-Control"] = "no-store, max-age=0"
             return response
     return HTMLResponse(SETUP_CONSOLE_HTML, headers={"Cache-Control": "no-store, max-age=0"})
+
+
+@app.get("/setup-console", response_class=HTMLResponse)
+def setup_console_page():
+    return _setup_console_page_response()
+
+
+@app.get("/setup-console/", response_class=HTMLResponse)
+def setup_console_page_slash():
+    return _setup_console_page_response()
 
 
 PREHIRE_DASHBOARD_ACTION_TYPES = [
@@ -48016,7 +48079,23 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
                 (company,),
             )
             users = [dashboard_user_public(dict(row)) for row in cur.fetchall()]
-    available_modules = dashboard_module_catalog_payload(company)
+    import setup_console_effective_state as _eff
+
+    raw_modules = dashboard_module_catalog_payload(company)
+    http_registered_by_key = {
+        str(item.get("key") or ""): setup_module_http_registered(str(item.get("key") or ""))
+        for item in raw_modules
+    }
+    principal_permitted_by_key = {
+        str(item.get("key") or ""): setup_company_principal_permits_module(company, str(item.get("key") or ""), users)
+        for item in raw_modules
+    }
+    available_modules = _eff.annotate_setup_catalog(
+        company,
+        raw_modules,
+        principal_permitted_by_key=principal_permitted_by_key,
+        http_registered_by_key=http_registered_by_key,
+    )
     configured = [item["key"] for item in available_modules if item.get("configured")]
     return {
         "readiness": setup_console_company_readiness(company),
@@ -48027,6 +48106,7 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
         "channel_policy": setup_console_channel_policy(company),
         "channel_account": setup_console_channel_account(company),
         "email_admin": _setup_email_admin_snapshot(company),
+        "effective_state_honesty": _eff.honesty_payload(),
     }
 
 
@@ -48493,6 +48573,39 @@ def setup_console_set_modules(company_code: str, request: SetupModulesRequest, s
     profile = company_profile_payload(company)
     if "payroll" in requested and not profile.get("currency"):
         raise HTTPException(status_code=422, detail={"error": "company_currency_required", "message": "Complete the company currency before enabling Payroll."})
+    import setup_console_effective_state as _eff_modules
+
+    unusable_enables: list[dict[str, Any]] = []
+    for key in requested:
+        if key in currently_enabled:
+            continue
+        annotated = _eff_modules.annotate_catalog_module(
+            key,
+            {
+                "key": key,
+                "configured": False,
+                "platform_available": module_platform_available(key),
+            },
+            company_code=company,
+            http_registered=setup_module_http_registered(key),
+        )
+        if key != "employee_app" and not annotated.get("can_enable"):
+            unusable_enables.append(
+                {
+                    "module": key,
+                    "effective_state": (annotated.get("effective_state") or {}).get("effective_state"),
+                    "blockers": (annotated.get("effective_state") or {}).get("blockers") or annotated.get("blockers") or [],
+                }
+            )
+    if unusable_enables:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "cannot_enable_unusable",
+                "message": "A selected module cannot become usable in this deployment, so it was not enabled.",
+                "modules": unusable_enables,
+            },
+        )
     existing_tz = profile.get("timezone") or _company_setup.DEFAULT_TIMEZONE
     payroll_defaults = default_payroll_policy(company) if "payroll" in requested else None
     employee_app_invalidated = {

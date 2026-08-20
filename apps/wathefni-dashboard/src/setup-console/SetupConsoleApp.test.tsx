@@ -13,9 +13,13 @@ function renderConsole() {
   )
 }
 
-/** Company select defaults to Launch readiness; classic cards live under Classic setup. */
-async function selectCompanyClassicSetup(companyName = /Acme Company/) {
+/** Selecting a company opens Modules & Access; classic cards stay under Classic setup. */
+async function selectCompany(companyName = /Acme Company/) {
   fireEvent.click(await screen.findByRole('button', { name: companyName }, { timeout: 8000 }))
+}
+
+async function selectCompanyClassicSetup(companyName = /Acme Company/) {
+  await selectCompany(companyName)
   fireEvent.click(await screen.findByRole('button', { name: 'Classic setup' }))
 }
 
@@ -36,6 +40,7 @@ describe('setup console', () => {
     localStorage.clear()
     sessionStorage.clear()
     vi.unstubAllGlobals()
+    window.history.replaceState({}, '', '/')
   })
   test('exchanges operator secret for a persistent session and loads companies', async () => {
     const fetchMock = mockSetupApi()
@@ -43,6 +48,8 @@ describe('setup console', () => {
 
     const tokenInput = await screen.findByLabelText('Operator token')
     expect(tokenInput).toHaveAttribute('type', 'password')
+    expect(screen.getByText(/This is not the HR dashboard/i)).toBeInTheDocument()
+    expect(screen.getByText(/dashboard owner session is rejected/i)).toBeInTheDocument()
     fireEvent.change(tokenInput, { target: { value: ' operator-secret ' } })
     fireEvent.change(screen.getByLabelText('Authorised operator phone'), {
       target: { value: ' 96590000000 ' },
@@ -89,6 +96,19 @@ describe('setup console', () => {
     expect(authHeader(listCall?.[1])).toBe('Bearer saved-access-token')
   })
 
+  test('searches companies as you type without requiring the search button', async () => {
+    seedSession()
+    const fetchMock = mockSetupApi()
+    renderConsole()
+    await screen.findByRole('heading', { name: 'Companies' }, { timeout: 8000 })
+    fireEvent.change(screen.getByPlaceholderText('Name or company code'), { target: { value: 'WATHEFNI' } })
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([input]) => String(input).includes('q=WATHEFNI')),
+      ).toBe(true)
+    })
+  })
+
   test(
     'groups modules, keeps employee app selectable behind its platform gate, and separates channels',
     async () => {
@@ -97,19 +117,27 @@ describe('setup console', () => {
     renderConsole()
 
     await screen.findByRole('heading', { name: 'Companies' }, { timeout: 8000 })
-    await selectCompanyClassicSetup()
+    await selectCompany()
 
-    expect(await screen.findByRole('heading', { name: 'What this company uses' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Modules & Access' })).toBeInTheDocument()
+    expect(window.location.search).toContain('company=ACME')
     expect(screen.getByText('Pre Hire')).toBeInTheDocument()
     expect(screen.getByText('Post Hire')).toBeInTheDocument()
+    expect(screen.getByText(/Selected company/i)).toBeInTheDocument()
 
     const employeeRow = screen.getByText('Employee App').closest('label')
     expect(employeeRow).not.toBeNull()
     expect(within(employeeRow!).getByRole('checkbox')).toBeEnabled()
-    expect(within(employeeRow!).getByText('Platform unavailable')).toBeInTheDocument()
-    expect(within(employeeRow!).getByText('Not enabled')).toBeInTheDocument()
+    expect(employeeRow!.querySelector('[data-effective-state="unavailable_deployment"]')).not.toBeNull()
+
+    const performanceRow = screen.getByText('Performance').closest('label')
+    expect(performanceRow).not.toBeNull()
+    expect(within(performanceRow!).getByRole('checkbox')).toBeDisabled()
+    expect(within(performanceRow!).getByText(/Blocked by a deployment allowlist/i)).toBeInTheDocument()
 
     expect(screen.getByRole('button', { name: /Apply Hiring Assessment Suite/ })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Classic setup' }))
     expect(screen.getByRole('heading', { name: 'Company WhatsApp Business account' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'HR-user WhatsApp identity' })).toBeInTheDocument()
     expect(screen.getByText(/shared provider account and sender/i)).toBeInTheDocument()
@@ -134,8 +162,8 @@ describe('setup console', () => {
     renderConsole()
 
     await screen.findByRole('heading', { name: 'Companies' }, { timeout: 8000 })
-    await selectCompanyClassicSetup()
-    await screen.findByRole('heading', { name: 'What this company uses' })
+    await selectCompany()
+    await screen.findByRole('heading', { name: 'Modules & Access' })
 
     const preHiringRow = screen.getByText('Pre-Hiring').closest('label')
     fireEvent.click(within(preHiringRow!).getByRole('checkbox'))
@@ -469,8 +497,53 @@ function companyDetail(path: string) {
         configured: false,
         platform_available: false,
         effective: false,
+        can_enable: false,
+        can_select: true,
+        usable: false,
+        stored_enabled: false,
         app_surface_key: 'inbox',
         app_surface_label: 'In-app inbox and push',
+        effective_state: {
+          effective_state: 'unavailable_deployment',
+          usable: false,
+          stored_enabled: false,
+          can_enable: false,
+          label_en: 'Unavailable in this deployment',
+          deployment: {
+            reason_code: 'unavailable_deployment',
+            message_en: 'Unavailable in this deployment.',
+          },
+        },
+      },
+      {
+        key: 'performance',
+        label: 'Performance',
+        suite: 'post_hire',
+        audience: 'employee',
+        configured: false,
+        platform_available: true,
+        effective: false,
+        can_enable: false,
+        can_select: false,
+        usable: false,
+        stored_enabled: false,
+        effective_state: {
+          effective_state: 'unavailable_deployment',
+          usable: false,
+          stored_enabled: false,
+          can_enable: false,
+          label_en: 'Unavailable in this deployment',
+          deployment: {
+            reason_code: 'pilot_allowlist',
+            message_en: 'Blocked by a deployment allowlist or pilot gate.',
+          },
+          blockers: [
+            {
+              code: 'pilot_allowlist',
+              message_en: 'Blocked by a deployment allowlist or pilot gate.',
+            },
+          ],
+        },
       },
     ],
     module_bundles: [

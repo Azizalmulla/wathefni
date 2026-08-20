@@ -52,6 +52,8 @@ export type SetupReadiness = {
   [key: string]: unknown
 }
 
+import type { SetupEffectiveState } from './SetupEffectiveStateBanner'
+
 export type AvailableModule = {
   key: string
   label: string
@@ -67,6 +69,13 @@ export type AvailableModule = {
   app_surface_label?: string | null
   depends_on_labels?: string[]
   recommended_with_labels?: string[]
+  can_enable?: boolean
+  can_select?: boolean
+  usable?: boolean
+  stored_enabled?: boolean
+  customer_facing_state?: string
+  effective_state?: SetupEffectiveState
+  required_permission?: string | null
 }
 
 export type ModuleBundle = {

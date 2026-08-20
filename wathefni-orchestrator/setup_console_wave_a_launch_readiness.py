@@ -273,7 +273,7 @@ def _evaluate_module(
             summary_ar="غير مضمّن في الوحدات المشتراة لهذه الشركة.",
             next_action_en="Add this module only if the commercial package includes it.",
             next_action_ar="أضف هذه الوحدة فقط إذا كانت ضمن الباقة التجارية.",
-            deep_link="/setup-console#classic-modules",
+            deep_link="/setup-console?view=modules",
             evidence={"module_key": key},
         )
 
@@ -291,7 +291,7 @@ def _evaluate_module(
             summary_ar="مشتراة لكنها متوقفة. الاستخدام التفاعلي معلّق.",
             next_action_en="Review pause impact, then resume only when operations are ready.",
             next_action_ar="راجع أثر الإيقاف، ثم استأنف فقط عندما تكون العمليات جاهزة.",
-            deep_link="/setup-console#classic-modules",
+            deep_link="/setup-console?view=modules",
             evidence={"module_key": key, "paused": True},
         )
 

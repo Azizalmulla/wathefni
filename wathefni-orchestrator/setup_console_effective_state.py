@@ -63,6 +63,34 @@ _DEPLOYMENT_ERRORS = {
     "kill_switch",
     "runtime_flag",
     "company_allowlist",
+    "http_not_registered",
+    "not_deployed",
+}
+
+# Domain runtime_gate_for_company loaders for catalog SKUs. Analytics stays
+# Wave 1 — do not bind it to Intelligence C1, which would lie about a live surface.
+_CATALOG_RUNTIME_GATES = {
+    "performance": "performance_goals_c1",
+    "talent": "talent_profile_c5",
+    "learning": "learning_development_c2",
+    "benefits": "benefits_administration_c3",
+    "employee_relations": "employee_relations_c4",
+    "engagement": "engagement_c5",
+    "comp_planning": "compensation_planning_c6",
+    "workforce_planning": "workforce_planning_c7",
+}
+
+MODULE_READ_PERMISSIONS = {
+    "performance": "performance.read",
+    "talent": "talent.read",
+    "learning": "learning.read",
+    "benefits": "benefits.read",
+    "employee_relations": "er.read",
+    "engagement": "engagement.read",
+    "comp_planning": "comp_planning.read",
+    "workforce_planning": "workforce_planning.read",
+    "analytics": "analytics.read",
+    "job_architecture": "job_architecture.read",
 }
 
 _DEPENDENCY_ERRORS = {
@@ -107,12 +135,35 @@ def public_deployment_reason(runtime_gate: Mapping[str, Any] | None) -> dict[str
             "message_ar": "متاح في هذا النشر.",
         }
     err = str(gate.get("error") or gate.get("gate") or "unavailable").strip().lower()
+    gate_kind = str(gate.get("gate") or "").strip().lower()
     if err in _DEPENDENCY_ERRORS or "ja_" in err:
         return {
             "deployment_available": True,
             "reason_code": "dependency_unmet",
             "message_en": "Job Architecture must be enabled first.",
             "message_ar": "يجب تفعيل هيكل الوظائف أولاً.",
+        }
+    if (
+        gate_kind == "not_deployed"
+        or err in {"http_not_registered", "not_deployed"}
+    ):
+        return {
+            "deployment_available": False,
+            "reason_code": "not_deployed",
+            "message_en": "Not deployed in this environment.",
+            "message_ar": "غير منشور في هذه البيئة.",
+        }
+    if (
+        gate_kind == "company_allowlist"
+        or err == "company_allowlist"
+        or "not_allowlisted" in err
+        or "allowlist" in err
+    ):
+        return {
+            "deployment_available": False,
+            "reason_code": "pilot_allowlist",
+            "message_en": "Blocked by a deployment allowlist or pilot gate.",
+            "message_ar": "محظور بقائمة سماح أو بوابة تجريبية.",
         }
     return {
         "deployment_available": False,
@@ -212,8 +263,59 @@ def resolve_effective_state(
     if stored and state in {"unavailable_deployment", "dependency_unmet", "not_released", "not_permitted"}:
         usable = False
 
+    blockers: list[dict[str, str]] = []
+    if principal_permitted is False:
+        blockers.append(
+            {
+                "code": "not_permitted",
+                "message_en": "No company administrator has permission to use this module.",
+                "message_ar": "لا يملك أي مسؤول في الشركة صلاحية استخدام هذه الوحدة.",
+            }
+        )
+    if not released:
+        blockers.append(
+            {
+                "code": "not_released",
+                "message_en": "Not released for customer enablement.",
+                "message_ar": "غير مُصدَر لتفعيل العملاء.",
+            }
+        )
+    reason_code = str(public.get("reason_code") or "")
+    if not deployment_ok and reason_code == "pilot_allowlist":
+        blockers.append(
+            {
+                "code": "pilot_allowlist",
+                "message_en": str(public.get("message_en") or "Blocked by a deployment allowlist or pilot gate."),
+                "message_ar": str(public.get("message_ar") or ""),
+            }
+        )
+    elif not deployment_ok and reason_code == "not_deployed":
+        blockers.append(
+            {
+                "code": "not_deployed",
+                "message_en": str(public.get("message_en") or "Not deployed in this environment."),
+                "message_ar": str(public.get("message_ar") or ""),
+            }
+        )
+    elif not deployment_ok:
+        blockers.append(
+            {
+                "code": "unavailable_deployment",
+                "message_en": str(public.get("message_en") or "Unavailable in this deployment."),
+                "message_ar": str(public.get("message_ar") or ""),
+            }
+        )
+    if dep_unmet:
+        blockers.append(
+            {
+                "code": "dependency_unmet",
+                "message_en": str(public.get("message_en") or "Job Architecture must be enabled first."),
+                "message_ar": str(public.get("message_ar") or ""),
+            }
+        )
+
     cap = _capability_key(key)
-    return {
+    payload = {
         "ok": True,
         "phase": PHASE,
         "contract_version": CONTRACT_VERSION,
@@ -230,9 +332,13 @@ def resolve_effective_state(
         "label_en": state_label(state, lang="en"),
         "label_ar": state_label(state, lang="ar"),
         "deployment": public,
+        "blockers": blockers,
         "never_enabled_when_unusable": True,
         "readiness": ready.readiness_payload(cap) if cap else None,
+        "required_permission": MODULE_READ_PERMISSIONS.get(normalize_module_key(key) or key),
     }
+    payload["can_enable"] = can_become_usable(payload)
+    return payload
 
 
 def annotate_with_effective_state(
@@ -240,9 +346,15 @@ def annotate_with_effective_state(
     payload: Mapping[str, Any] | None,
     *,
     principal_permitted: bool | None = None,
+    company_entitled: bool | None = None,
 ) -> dict[str, Any]:
     out = dict(payload or {})
-    state = resolve_effective_state(module_key, out, principal_permitted=principal_permitted)
+    state = resolve_effective_state(
+        module_key,
+        out,
+        principal_permitted=principal_permitted,
+        company_entitled=company_entitled,
+    )
     out["effective_state"] = state
     out["stored_enabled"] = state["stored_enabled"]
     out["usable"] = state["usable"]
@@ -265,4 +377,108 @@ def honesty_payload() -> dict[str, Any]:
         "stored_enabled_does_not_imply_usable": True,
         "enabled_never_shown_when_runtime_unavailable": True,
         "env_names_never_exposed": True,
+        "setup_console_modules_access": True,
     }
+
+
+def can_become_usable(state: Mapping[str, Any] | None) -> bool:
+    """True only when turning the catalog entitlement on would yield enabled_usable."""
+    body = dict(state or {})
+    key = str(body.get("effective_state") or "")
+    if key == "enabled_usable":
+        return True
+    if key not in {"available_disabled", "not_entitled"}:
+        return False
+    if body.get("principal_permitted") is False:
+        return False
+    return bool(body.get("product_released")) and bool(body.get("deployment_available")) and bool(body.get("dependency_ok"))
+
+
+def catalog_runtime_gate_for_company(
+    module_key: str,
+    company_code: str | None,
+    *,
+    platform_available: bool = True,
+    http_registered: bool | None = None,
+) -> dict[str, Any]:
+    """Build a runtime_gate for a catalog SKU without exposing env names."""
+    key = normalize_module_key(module_key) or str(module_key or "").strip().lower()
+    if http_registered is False:
+        return {"ok": False, "error": "http_not_registered", "gate": "not_deployed"}
+    if platform_available is False:
+        return {"ok": False, "error": "kill_switch", "gate": "runtime_flag"}
+    loader = _CATALOG_RUNTIME_GATES.get(key)
+    if loader:
+        try:
+            mod = __import__(loader, fromlist=["runtime_gate_for_company"])
+            gate = mod.runtime_gate_for_company(company_code)
+            if isinstance(gate, dict):
+                return gate
+        except Exception:
+            return {"ok": False, "error": "http_not_registered", "gate": "not_deployed"}
+    return {"ok": True, "enabled": True}
+
+
+def annotate_catalog_module(
+    module_key: str,
+    item: Mapping[str, Any] | None,
+    *,
+    company_code: str | None = None,
+    principal_permitted: bool | None = None,
+    http_registered: bool | None = None,
+) -> dict[str, Any]:
+    """Attach canonical effective_state to a Setup catalog row."""
+    body = dict(item or {})
+    key = normalize_module_key(module_key or body.get("key")) or str(module_key or "").strip().lower()
+    stored = bool(body.get("configured") or body.get("stored_enabled") or body.get("enabled"))
+    platform_available = True if "platform_available" not in body else bool(body.get("platform_available"))
+    gate = catalog_runtime_gate_for_company(
+        key,
+        company_code,
+        platform_available=platform_available,
+        http_registered=http_registered,
+    )
+    annotated = annotate_with_effective_state(
+        key,
+        {
+            **body,
+            "stored_enabled": stored,
+            "enabled": stored,
+            "runtime_gate": gate,
+        },
+        principal_permitted=principal_permitted,
+        company_entitled=stored,
+    )
+    state = dict(annotated.get("effective_state") or {})
+    customer_facing = str(annotated.get("customer_facing_state") or "")
+    annotated["effective"] = bool(state.get("usable"))
+    annotated["configured"] = stored
+    annotated["can_enable"] = bool(state.get("can_enable"))
+    annotated["can_select"] = bool(state.get("can_enable")) or (key == "employee_app")
+    if customer_facing == "enabled" and not state.get("usable"):
+        annotated["customer_facing_state"] = "unavailable"
+    return annotated
+
+
+def annotate_setup_catalog(
+    company_code: str | None,
+    items: list[Mapping[str, Any]] | None,
+    *,
+    principal_permitted_by_key: Mapping[str, bool | None] | None = None,
+    http_registered_by_key: Mapping[str, bool | None] | None = None,
+) -> list[dict[str, Any]]:
+    permitted = dict(principal_permitted_by_key or {})
+    registered = dict(http_registered_by_key or {})
+    out: list[dict[str, Any]] = []
+    for item in items or []:
+        key = str((item or {}).get("key") or "").strip().lower()
+        out.append(
+            annotate_catalog_module(
+                key,
+                item,
+                company_code=company_code,
+                principal_permitted=permitted.get(key),
+                http_registered=registered.get(key),
+            )
+        )
+    return out
