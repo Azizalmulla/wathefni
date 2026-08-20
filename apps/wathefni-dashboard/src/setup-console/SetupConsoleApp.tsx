@@ -2,6 +2,7 @@ import {
   Archive,
   Building2,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleAlert,
@@ -61,27 +62,12 @@ import {
   type SetupSession,
 } from './session'
 import { CompanyControlPage } from './CompanyControlPage'
-import { EmployeeAppAccessPolicyCard } from './EmployeeAppAccessPolicyCard'
 import { LaunchReadinessPage } from './LaunchReadinessPage'
 import { ModulesAccessCard } from './ModulesAccessCard'
 import { OnboardingWizard } from './OnboardingWizard'
 import { OwnershipDeepLinksCard } from './OwnershipDeepLinksCard'
 import { IntegrationsCatalogCard } from './IntegrationsCatalogCard'
-import { ModuleCompanyPoliciesCard } from './ModuleCompanyPoliciesCard'
-import { Wave1HireReadyPoliciesCard } from './Wave1HireReadyPoliciesCard'
-import { Wave2WorkforceTruthPoliciesCard } from './Wave2WorkforceTruthPoliciesCard'
-import { Wave3EmployeeLifecyclePoliciesCard } from './Wave3EmployeeLifecyclePoliciesCard'
-import { Wave4PerformancePoliciesCard, Wave4TalentPoliciesCard } from './Wave4PerformanceTalentPoliciesCard'
-import { Wave6JobArchitecturePoliciesCard } from './Wave6JobArchitecturePoliciesCard'
-import { Wave6LearningPoliciesCard } from './Wave6LearningPoliciesCard'
-import { Wave6BenefitsPoliciesCard } from './Wave6BenefitsPoliciesCard'
-import { Wave6EmployeeRelationsPoliciesCard } from './Wave6EmployeeRelationsPoliciesCard'
-import { Wave6EngagementPoliciesCard } from './Wave6EngagementPoliciesCard'
-import { Wave6CompensationPlanningPoliciesCard } from './Wave6CompensationPlanningPoliciesCard'
-import { Wave6WorkforcePlanningPoliciesCard } from './Wave6WorkforcePlanningPoliciesCard'
-import { Wave5HrIntelligencePoliciesCard } from './Wave5HrIntelligencePoliciesCard'
-import { NotificationDeliveryPoliciesCard } from './NotificationDeliveryPoliciesCard'
-import { PayrollSetupCard } from './PayrollSetupCard'
+import { PoliciesWorkflowsPage } from './PoliciesWorkflowsPage'
 import { TeamAccessCard } from './TeamAccessCard'
 import type {
   ChannelAccountInput,
@@ -149,6 +135,8 @@ export default function SetupConsoleApp() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState('')
   const [includeInactive, setIncludeInactive] = useState(false)
+  const [companyPickerOpen, setCompanyPickerOpen] = useState(() => !readCompanyParam())
+  const [createCompanyOpen, setCreateCompanyOpen] = useState(false)
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>(() => viewFromLocation())
   const [uiLocale, setUiLocale] = useState<'en' | 'ar'>('en')
   const workspaceViewRef = useRef(workspaceView)
@@ -229,6 +217,8 @@ export default function SetupConsoleApp() {
         setCompanies([])
         setDetail(null)
         setSelectedCode('')
+        setCompanyPickerOpen(true)
+        setCreateCompanyOpen(false)
       }
     })
     return () => {
@@ -253,7 +243,7 @@ export default function SetupConsoleApp() {
   }, [credentials, loadCompanies])
 
   useEffect(() => {
-    if (workspaceView !== 'classic' || detailLoading) return
+    if ((workspaceView !== 'classic' && workspaceView !== 'policies') || detailLoading) return
     const hash = window.location.hash.replace(/^#/, '')
     if (!hash) return
     const timer = window.setTimeout(() => {
@@ -276,6 +266,8 @@ export default function SetupConsoleApp() {
     async (companyCode: string) => {
       if (!credentials) return
       setSelectedCode(companyCode)
+      setCompanyPickerOpen(false)
+      setCreateCompanyOpen(false)
       writeSetupConsoleLocation({ company: companyCode, view: workspaceViewRef.current })
       setDetail(null)
       setDetailLoading(true)
@@ -362,6 +354,7 @@ export default function SetupConsoleApp() {
     setCompanies([])
     setDetail(null)
     setSelectedCode('')
+    setCompanyPickerOpen(true)
     writeSetupConsoleLocation({ company: '', view: 'modules' })
   }
 
@@ -375,27 +368,80 @@ export default function SetupConsoleApp() {
   }
 
   return (
-    <div className="min-h-screen text-text">
+    <div className="min-h-screen text-text" data-testid="setup-console-root" dir={uiLocale === 'ar' ? 'rtl' : 'ltr'} lang={uiLocale}>
       <header className="border-b border-line/60 bg-panel/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-4 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-text text-white shadow-soft">
-              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 px-5 py-3 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-text text-white shadow-soft">
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-subtle">OctoHR operator workspace</p>
-              <h1 className="text-lg font-semibold tracking-[-0.025em]">Setup Console</h1>
-              {selectedCode ? (
-                <p className="mt-1 text-sm text-subtle">
-                  Selected company <span className="font-semibold text-text">{detail?.readiness?.name || selectedCode}</span>
-                  <span className="ml-2 font-mono text-xs uppercase tracking-[0.08em]">{selectedCode}</span>
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-subtle">Select a company to manage modules and provisioning.</p>
-              )}
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-subtle">OctoHR operator workspace</p>
+              <h1 className="text-base font-semibold tracking-[-0.025em]">Setup Console</h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              className="flex min-w-0 max-w-full items-center gap-2 rounded-full border border-line/70 bg-white/70 px-3 py-1.5 text-left text-sm transition hover:border-accent/40"
+              aria-expanded={companyPickerOpen}
+              onClick={() => {
+                setCompanyPickerOpen((open) => !open)
+                setCreateCompanyOpen(false)
+              }}
+            >
+              <Building2 className="h-3.5 w-3.5 shrink-0 text-subtle" aria-hidden="true" />
+              {selectedCode ? (
+                <span className="min-w-0 truncate">
+                  Selected company <span className="font-semibold">{detail?.readiness?.name || selectedCode}</span>
+                  <span className="ms-2 font-mono text-xs uppercase tracking-[0.08em] text-subtle">{selectedCode}</span>
+                </span>
+              ) : (
+                <span className="text-subtle">Select a company</span>
+              )}
+              <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 text-subtle transition', companyPickerOpen && 'rotate-180')} aria-hidden="true" />
+            </button>
+            <Button
+              size="sm"
+              variant={createCompanyOpen ? 'default' : 'secondary'}
+              onClick={() => {
+                setCreateCompanyOpen((open) => !open)
+                setCompanyPickerOpen(false)
+              }}
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Create company
+            </Button>
+            {selectedCode && workspaceView !== 'modules' ? (
+              <Button size="sm" variant="ghost" onClick={() => setWorkspaceView('modules')}>
+                {uiLocale === 'ar' ? 'الوحدات والوصول' : 'Modules & Access'}
+              </Button>
+            ) : null}
+            {selectedCode ? (
+              <>
+                <Button
+                  size="sm"
+                  variant={workspaceView === 'policies' ? 'default' : 'ghost'}
+                  onClick={() => setWorkspaceView('policies')}
+                >
+                  {uiLocale === 'ar' ? 'السياسات ومسارات العمل' : 'Policies & Workflows'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={workspaceView === 'launch' ? 'default' : 'ghost'}
+                  onClick={() => setWorkspaceView('launch')}
+                >
+                  {uiLocale === 'ar' ? 'جاهزية الإطلاق' : 'Launch readiness'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={workspaceView === 'control' ? 'default' : 'ghost'}
+                  onClick={() => setWorkspaceView('control')}
+                >
+                  {uiLocale === 'ar' ? 'تحكم الشركة' : 'Company control'}
+                </Button>
+              </>
+            ) : null}
             <Button
               variant={uiLocale === 'en' ? 'default' : 'ghost'}
               size="sm"
@@ -419,17 +465,14 @@ export default function SetupConsoleApp() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-[1500px] gap-6 px-5 py-7 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
-        <aside className="space-y-5">
-          <Card className="p-5">
-            <CardHeader className="mb-4 pb-4">
+      <main className="mx-auto max-w-[1200px] space-y-4 px-5 py-5 lg:px-8">
+        {companyPickerOpen ? (
+          <Card className="p-4">
+            <CardHeader className="mb-3 pb-0">
               <CardTitle>Companies</CardTitle>
-              <CardDescription>
-                Search as you type. Company selection stays in the URL as ?company=CODE.
-              </CardDescription>
             </CardHeader>
             <form
-              className="flex gap-2"
+              className="mt-3 flex gap-2"
               onSubmit={(event) => {
                 event.preventDefault()
                 setOffset(0)
@@ -449,8 +492,7 @@ export default function SetupConsoleApp() {
                 <Search className="h-4 w-4" aria-hidden="true" />
               </Button>
             </form>
-
-            <label className="mt-3 flex items-center gap-2 text-xs text-subtle">
+            <label className="mt-2 flex items-center gap-2 text-xs text-subtle">
               <input
                 type="checkbox"
                 checked={includeInactive}
@@ -461,13 +503,10 @@ export default function SetupConsoleApp() {
               />
               Show disabled and archived
             </label>
-
-            <div className="mt-4 min-h-24 space-y-2" aria-busy={listLoading}>
+            <div className="mt-3 max-h-72 divide-y divide-line/50 overflow-auto rounded-2xl border border-line/55" aria-busy={listLoading}>
               {listLoading ? <LoadingLine label="Loading companies" /> : null}
               {!listLoading && companies.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-line p-4 text-center text-sm text-subtle">
-                  No companies match this search.
-                </p>
+                <p className="p-4 text-center text-sm text-subtle">No companies match this search.</p>
               ) : null}
               {!listLoading
                 ? companies.map((company) => {
@@ -478,34 +517,29 @@ export default function SetupConsoleApp() {
                         key={code}
                         type="button"
                         className={cn(
-                          'w-full rounded-2xl border px-4 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-                          selectedCode === code
-                            ? 'border-accent/45 bg-accent-soft/65 shadow-soft'
-                            : 'border-line/60 bg-white/45 hover:border-accent/25 hover:bg-white/75',
+                          'flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition hover:bg-accent-soft/50',
+                          selectedCode === code && 'bg-accent-soft/65',
                         )}
                         onClick={() => void selectCompany(code)}
                       >
-                        <span className="flex items-start justify-between gap-3">
-                          <span>
-                            <span className="block text-sm font-semibold">{company.name || code}</span>
-                            <span className="mt-0.5 block text-xs text-subtle">{code}</span>
-                          </span>
-                          <span className="flex flex-col items-end gap-1">
-                            <Badge tone={lifecycleBadgeTone(status)}>{lifecycleLabel(status)}</Badge>
-                            {status === 'active' && typeof company.ready === 'boolean' ? (
-                              <Badge tone={company.ready ? 'success' : 'warning'}>
-                                {company.ready ? 'Ready' : 'In progress'}
-                              </Badge>
-                            ) : null}
-                          </span>
+                        <span className="min-w-0">
+                          <span className="font-semibold">{company.name || code}</span>
+                          <span className="ms-2 font-mono text-xs uppercase tracking-[0.08em] text-subtle">{code}</span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1">
+                          <Badge tone={lifecycleBadgeTone(status)}>{lifecycleLabel(status)}</Badge>
+                          {status === 'active' && typeof company.ready === 'boolean' ? (
+                            <Badge tone={company.ready ? 'success' : 'warning'}>
+                              {company.ready ? 'Ready' : 'In progress'}
+                            </Badge>
+                          ) : null}
                         </span>
                       </button>
                     )
                   })
                 : null}
             </div>
-
-            <div className="mt-4 flex items-center justify-between border-t border-line/50 pt-4">
+            <div className="mt-3 flex items-center justify-between">
               <Button
                 type="button"
                 variant="ghost"
@@ -531,46 +565,11 @@ export default function SetupConsoleApp() {
               </Button>
             </div>
           </Card>
+        ) : null}
 
-          <CreateCompanyCard onCreate={handleCreated} />
-        </aside>
+        {createCompanyOpen ? <CreateCompanyCard onCreate={handleCreated} /> : null}
 
-        <section className="min-w-0 space-y-4">
-          <Card>
-            <CardContent className="flex flex-wrap gap-2 py-4">
-              <Button
-                size="sm"
-                variant={workspaceView === 'modules' ? 'default' : 'ghost'}
-                disabled={!selectedCode}
-                onClick={() => setWorkspaceView('modules')}
-              >
-                {uiLocale === 'ar' ? 'الوحدات والوصول' : 'Modules & Access'}
-              </Button>
-              <Button
-                size="sm"
-                variant={workspaceView === 'launch' ? 'default' : 'ghost'}
-                disabled={!selectedCode}
-                onClick={() => setWorkspaceView('launch')}
-              >
-                {uiLocale === 'ar' ? 'جاهزية الإطلاق' : 'Launch readiness'}
-              </Button>
-              <Button size="sm" variant={workspaceView === 'classic' ? 'default' : 'ghost'} onClick={() => setWorkspaceView('classic')}>
-                {uiLocale === 'ar' ? 'إعداد كلاسيكي' : 'Classic setup'}
-              </Button>
-              <Button size="sm" variant={workspaceView === 'wizard' ? 'default' : 'ghost'} onClick={() => setWorkspaceView('wizard')}>
-                {uiLocale === 'ar' ? 'معالج الإعداد' : 'Onboarding wizard'}
-              </Button>
-              <Button
-                size="sm"
-                variant={workspaceView === 'control' ? 'default' : 'ghost'}
-                disabled={!selectedCode}
-                onClick={() => setWorkspaceView('control')}
-              >
-                {uiLocale === 'ar' ? 'تحكم الشركة' : 'Company control'}
-              </Button>
-            </CardContent>
-          </Card>
-          {error ? <ErrorNotice message={error} /> : null}
+        {error ? <ErrorNotice message={error} /> : null}
           {workspaceView === 'modules' ? (
             <>
               {detailLoading && !detail ? (
@@ -587,6 +586,7 @@ export default function SetupConsoleApp() {
                   locale={uiLocale}
                   modules={detail.available_modules}
                   bundles={detail.module_bundles || detail.module_guidance?.bundles || []}
+                  lastChange={detail.last_module_change}
                   onChanged={async () => {
                     await refreshDetail()
                     await loadCompanies(credentials)
@@ -595,6 +595,27 @@ export default function SetupConsoleApp() {
                 />
               ) : null}
             </>
+          ) : null}
+          {workspaceView === 'policies' && selectedCode ? (
+            detailLoading && !detail ? (
+              <Card className="flex min-h-72 items-center justify-center">
+                <LoadingLine label={uiLocale === 'ar' ? 'جاري تحميل السياسات' : 'Loading policies and workflows'} />
+              </Card>
+            ) : detail ? (
+              <PoliciesWorkflowsPage
+                credentials={credentials}
+                companyCode={selectedCode}
+                locale={uiLocale}
+                modules={detail.available_modules}
+                onChanged={async () => {
+                  await refreshDetail()
+                  await loadCompanies(credentials)
+                }}
+                onError={(nextError) => setError(messageFrom(nextError))}
+              />
+            ) : (
+              <EmptySelection />
+            )
           ) : null}
           {workspaceView === 'launch' && selectedCode ? (
             <LaunchReadinessPage credentials={connectedCredentials} companyCode={selectedCode} locale={uiLocale} />
@@ -634,11 +655,11 @@ export default function SetupConsoleApp() {
               }}
               onError={(nextError) => setError(messageFrom(nextError))}
               onOpenModules={() => setWorkspaceView('modules')}
+              onOpenPolicies={() => setWorkspaceView('policies')}
             />
           ) : null}
             </>
           ) : null}
-        </section>
       </main>
     </div>
   )
@@ -813,6 +834,7 @@ function CompanyWorkspace({
   onChanged,
   onError,
   onOpenModules,
+  onOpenPolicies,
 }: {
   credentials: SetupCredentials
   detail: CompanyDetailResponse
@@ -823,9 +845,9 @@ function CompanyWorkspace({
   onChanged: () => Promise<void>
   onError: (error: unknown) => void
   onOpenModules: () => void
+  onOpenPolicies: () => void
 }) {
   const readiness = detail?.readiness
-  const availableModules = Array.isArray(detail?.available_modules) ? detail.available_modules : []
   const channelPolicy = detail?.channel_policy || {}
   const lifecycleStatus = companyLifecycleStatus(readiness)
   return (
@@ -891,138 +913,26 @@ function CompanyWorkspace({
         </Card>
       </div>
 
-      <EmployeeAppAccessPolicyCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        moduleEnabled={Boolean(
-          availableModules.find((module) => module.key === 'employee_app')?.configured ||
-            availableModules.find((module) => module.key === 'employee_app')?.effective,
-        )}
-        onChanged={onChanged}
-        onError={onError}
-      />
-
-      <PayrollSetupCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        moduleEnabled={Boolean(
-          availableModules.find((module) => module.key === 'payroll')?.configured ||
-            availableModules.find((module) => module.key === 'payroll')?.effective,
-        )}
-        onChanged={onChanged}
-        onError={onError}
-      />
-
-      <ModuleCompanyPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        availableModules={availableModules}
-        onChanged={onChanged}
-        onError={onError}
-      />
-
-      <Wave1HireReadyPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave2WorkforceTruthPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave3EmployeeLifecyclePoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave4PerformancePoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave4TalentPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave5HrIntelligencePoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6JobArchitecturePoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6LearningPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6BenefitsPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6EmployeeRelationsPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6EngagementPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6CompensationPlanningPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <Wave6WorkforcePlanningPoliciesCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
+      <Card id="classic-deprecated-policies" data-ownership="classic_deprecated">
+        <CardHeader>
+          <CardTitle>{locale === 'ar' ? 'الإعداد الكلاسيكي لم يعد المسار الأساسي' : 'Classic setup is deprecated'}</CardTitle>
+          <CardDescription>
+            {locale === 'ar'
+              ? 'سياسات الوحدات وموجات ٤–٦ انتقلت إلى السياسات ومسارات العمل، وتظهر هناك فقط عند التخويل والنشر.'
+              : 'Module and Wave 4–6 policy editors moved to Policies & Workflows, and open there only when entitled and deployed.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button type="button" size="sm" onClick={onOpenPolicies}>
+            {locale === 'ar' ? 'فتح السياسات ومسارات العمل' : 'Open Policies & Workflows'}
+          </Button>
+          <Button type="button" size="sm" variant="secondary" onClick={onOpenModules}>
+            {locale === 'ar' ? 'فتح الوحدات والوصول' : 'Open Modules & Access'}
+          </Button>
+        </CardContent>
+      </Card>
 
       <IntegrationsCatalogCard
-        credentials={credentials}
-        companyCode={companyCode}
-        locale={locale}
-        onError={onError}
-      />
-
-      <NotificationDeliveryPoliciesCard
         credentials={credentials}
         companyCode={companyCode}
         locale={locale}
@@ -1718,8 +1628,7 @@ function EmptySelection() {
         </div>
         <h2 className="mt-5 text-lg font-semibold">Select a company</h2>
         <p className="mt-2 text-sm leading-6 text-subtle">
-          Choose a company from the list, or create one. Module entitlements open on Modules & Access
-          and stay in the URL as ?company=CODE.
+          Open the company selector, or create a company. Module entitlements stay in the URL as ?company=CODE.
         </p>
       </div>
     </Card>

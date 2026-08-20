@@ -48143,7 +48143,45 @@ def setup_console_company_detail(company_code: str, superadmin: dict[str, Any] =
         "channel_account": setup_console_channel_account(company),
         "email_admin": _setup_email_admin_snapshot(company),
         "effective_state_honesty": _eff.honesty_payload(),
+        "last_module_change": setup_console_last_module_change(company),
     }
+
+
+def setup_console_last_module_change(company_code: str) -> dict[str, Any] | None:
+    """Latest setup_modules_updated row from the existing action_results audit sink."""
+    try:
+        with db_connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT created_at, actor_email, actor_phone, actor_role, final_reply, result
+                    FROM action_results
+                    WHERE company_code=%s AND action_type=%s
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """,
+                    (company_code, "setup_modules_updated"),
+                )
+                row = cur.fetchone()
+    except Exception:
+        logger.warning("setup console last module change lookup failed", exc_info=True)
+        return None
+    if not row:
+        return None
+    body = dict(row)
+    result = body.get("result") if isinstance(body.get("result"), dict) else {}
+    details = result.get("details") if isinstance(result.get("details"), dict) else {}
+    created = body.get("created_at")
+    return json_safe(
+        {
+            "at": created.isoformat() if hasattr(created, "isoformat") else created,
+            "actor_email": body.get("actor_email"),
+            "actor_phone": body.get("actor_phone"),
+            "actor_role": body.get("actor_role"),
+            "summary": body.get("final_reply"),
+            "modules": details.get("modules"),
+        }
+    )
 
 
 def _setup_email_admin_snapshot(company_code: str) -> dict[str, Any]:
@@ -49277,14 +49315,29 @@ def setup_console_module_policies_get(
 
     with db_connect() as conn:
         with conn.cursor() as cur:
-            payload = _p3b.get_all_module_policies(cur, company)
-            wave1 = _w1p.get_all_wave1_policies(cur, company)
-            wave2 = _w2p.get_all_wave2_policies(cur, company)
-            wave3 = _w3p.get_all_wave3_policies(cur, company)
-            wave4 = _w4p.get_all_wave4_policies(cur, company)
-            wave5 = _w5p.get_all_wave5_policies(cur, company)
-            wave6 = _w6p.get_all_wave6_policies(cur, company)
-            delivery = _deliv.get_delivery_policy(cur, company)
+
+            def _section(name: str, loader: Any) -> dict[str, Any]:
+                try:
+                    cur.execute(f"SAVEPOINT {name}")
+                    out = loader()
+                    cur.execute(f"RELEASE SAVEPOINT {name}")
+                    return out if isinstance(out, dict) else {"ok": False, "error": "policy_section_unavailable", "section": name}
+                except Exception:
+                    logger.warning("setup module-policies section %s failed", name, exc_info=True)
+                    try:
+                        cur.execute(f"ROLLBACK TO SAVEPOINT {name}")
+                    except Exception:
+                        pass
+                    return {"ok": False, "error": "policy_section_unavailable", "section": name}
+
+            payload = _section("sc_p3b", lambda: _p3b.get_all_module_policies(cur, company))
+            wave1 = _section("sc_w1", lambda: _w1p.get_all_wave1_policies(cur, company))
+            wave2 = _section("sc_w2", lambda: _w2p.get_all_wave2_policies(cur, company))
+            wave3 = _section("sc_w3", lambda: _w3p.get_all_wave3_policies(cur, company))
+            wave4 = _section("sc_w4", lambda: _w4p.get_all_wave4_policies(cur, company))
+            wave5 = _section("sc_w5", lambda: _w5p.get_all_wave5_policies(cur, company))
+            wave6 = _section("sc_w6", lambda: _w6p.get_all_wave6_policies(cur, company))
+            delivery = _section("sc_deliv", lambda: _deliv.get_delivery_policy(cur, company))
             payload.update(
                 {
                     "requisitions": wave1.get("requisitions"),

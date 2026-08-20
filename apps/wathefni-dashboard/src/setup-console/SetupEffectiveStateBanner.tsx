@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 export type SetupEffectiveState = {
   effective_state?: string
@@ -31,9 +32,11 @@ function tone(state: string): 'success' | 'warning' | 'danger' | 'muted' {
 export function SetupEffectiveStateBanner({
   state,
   locale,
+  compact = false,
 }: {
   state: SetupEffectiveState | null | undefined
   locale: 'en' | 'ar'
+  compact?: boolean
 }) {
   const isAr = locale === 'ar'
   const key = String(state?.effective_state || 'available_disabled')
@@ -41,7 +44,7 @@ export function SetupEffectiveStateBanner({
   const detail = isAr ? state?.deployment?.message_ar : state?.deployment?.message_en
   const storedOnUnusable = Boolean(state?.stored_enabled) && state?.usable !== true
   return (
-    <div className="space-y-1" data-effective-state={key} data-usable={String(state?.usable === true)}>
+    <div className={cn(compact ? 'inline-flex' : 'space-y-1')} data-effective-state={key} data-usable={String(state?.usable === true)}>
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline" data-tone={tone(key)}>
           {label}
@@ -52,7 +55,7 @@ export function SetupEffectiveStateBanner({
           </Badge>
         ) : null}
       </div>
-      {detail && key !== 'enabled_usable' ? (
+      {!compact && detail && key !== 'enabled_usable' ? (
         <p className="text-xs text-muted-foreground">{detail}</p>
       ) : null}
     </div>

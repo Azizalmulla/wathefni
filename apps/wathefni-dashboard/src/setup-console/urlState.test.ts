@@ -13,9 +13,11 @@ describe('setup console URL state', () => {
     expect(viewFromLocation('?company=WATHEFNI', '')).toBe('modules')
   })
 
-  test('classic deep links still open classic setup except modules', () => {
+  test('classic deep links still open classic setup except modules and policies', () => {
     expect(viewFromLocation('', '#classic-profile')).toBe('classic')
     expect(viewFromLocation('', '#classic-modules')).toBe('modules')
+    expect(viewFromLocation('', '#classic-wave4-performance')).toBe('policies')
+    expect(viewFromLocation('?view=policies', '')).toBe('policies')
     expect(viewFromLocation('?view=control', '')).toBe('control')
   })
 

@@ -97,7 +97,11 @@ if (!rootEl) {
 } else {
   try {
     clearBootShell()
-    createRoot(rootEl).render(
+    document.getElementById('setup-console-boot')?.remove()
+    const existing = (window as Window & { __SETUP_CONSOLE_ROOT__?: ReturnType<typeof createRoot> }).__SETUP_CONSOLE_ROOT__
+    const root = existing || createRoot(rootEl)
+    ;(window as Window & { __SETUP_CONSOLE_ROOT__?: ReturnType<typeof createRoot> }).__SETUP_CONSOLE_ROOT__ = root
+    root.render(
       <StrictMode>
         <SetupConsoleErrorBoundary>
           <ConfirmProvider>

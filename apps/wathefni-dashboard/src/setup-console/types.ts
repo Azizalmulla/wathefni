@@ -128,6 +128,15 @@ export type ChannelAccount = {
   platform_available?: boolean
 }
 
+export type LastModuleChange = {
+  at?: string | null
+  actor_email?: string | null
+  actor_phone?: string | null
+  actor_role?: string | null
+  summary?: string | null
+  modules?: string[] | null
+}
+
 export type CompanyDetailResponse = {
   readiness: SetupReadiness
   available_modules: AvailableModule[]
@@ -136,6 +145,7 @@ export type CompanyDetailResponse = {
   users: SetupUser[]
   channel_policy: ChannelPolicy
   channel_account: ChannelAccount | null
+  last_module_change?: LastModuleChange | null
 }
 
 export type CompanyCreateInput = {

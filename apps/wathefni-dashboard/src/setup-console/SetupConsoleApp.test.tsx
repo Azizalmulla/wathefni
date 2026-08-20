@@ -13,14 +13,21 @@ function renderConsole() {
   )
 }
 
-/** Selecting a company opens Modules & Access; classic cards stay under Classic setup. */
+/** Selecting a company opens Modules & Access. Classic cards remain on ?view=classic only. */
 async function selectCompany(companyName = /Acme Company/) {
   fireEvent.click(await screen.findByRole('button', { name: companyName }, { timeout: 8000 }))
 }
 
+async function openLegacyClassic() {
+  const url = new URL(window.location.href)
+  url.searchParams.set('view', 'classic')
+  window.history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
 async function selectCompanyClassicSetup(companyName = /Acme Company/) {
   await selectCompany(companyName)
-  fireEvent.click(await screen.findByRole('button', { name: 'Classic setup' }))
+  await openLegacyClassic()
 }
 
 function authHeader(init?: RequestInit) {
@@ -130,19 +137,28 @@ describe('setup console', () => {
     expect(screen.getByText('Post Hire')).toBeInTheDocument()
     expect(screen.getByText(/Selected company/i)).toBeInTheDocument()
 
-    const employeeRow = screen.getByText('Employee App').closest('label')
+    const employeeRow = screen.getByText('Employee App').closest('[data-module-key]')
     expect(employeeRow).not.toBeNull()
     expect(within(employeeRow!).getByRole('checkbox')).toBeEnabled()
     expect(employeeRow!.querySelector('[data-effective-state="unavailable_deployment"]')).not.toBeNull()
 
-    const performanceRow = screen.getByText('Performance').closest('label')
+    const performanceRow = screen.getByText('Performance').closest('[data-module-key]')
     expect(performanceRow).not.toBeNull()
     expect(within(performanceRow!).getByRole('checkbox')).toBeDisabled()
     expect(within(performanceRow!).getByText(/Blocked by a deployment allowlist/i)).toBeInTheDocument()
 
+    expect(screen.getByText(/Last change: 2026-08-18T12:00:00Z/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Apply Hiring Assessment Suite/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Classic setup' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Onboarding wizard' })).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Search modules'), { target: { value: 'Performance' } })
+    expect(screen.getByText('Performance')).toBeInTheDocument()
+    expect(screen.queryByText('Assessments')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Search modules'), { target: { value: '' } })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Classic setup' }))
+    await openLegacyClassic()
+    expect(screen.getByRole('heading', { name: 'Classic setup is deprecated' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /Performance policies/i })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Company WhatsApp Business account' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'HR-user WhatsApp identity' })).toBeInTheDocument()
     expect(screen.getByText(/shared provider account and sender/i)).toBeInTheDocument()
@@ -170,36 +186,42 @@ describe('setup console', () => {
     await selectCompany()
     await screen.findByRole('heading', { name: 'Modules & Access' })
 
-    const preHiringRow = screen.getByText('Pre-Hiring').closest('label')
+    const preHiringRow = screen.getByText('Pre-Hiring').closest('[data-module-key]')
     fireEvent.click(within(preHiringRow!).getByRole('checkbox'))
     expect(within(preHiringRow!).getByRole('checkbox')).not.toBeChecked()
 
-    const assessmentsRow = screen.getByText('Assessments').closest('label')
+    const assessmentsRow = screen.getByText('Assessments').closest('[data-module-key]')
     fireEvent.click(within(assessmentsRow!).getByRole('checkbox'))
     expect(await screen.findByText(/Assessments requires Pre-Hiring, so Pre-Hiring was included/)).toBeInTheDocument()
     expect(within(preHiringRow!).getByRole('checkbox')).toBeChecked()
 
     fireEvent.click(screen.getByRole('button', { name: /Apply Workforce Operations/ }))
-    const shiftsRow = screen.getByText('Shifts').closest('label')
+    const shiftsRow = screen.getByText('Shifts').closest('[data-module-key]')
     expect(within(shiftsRow!).getByRole('checkbox')).toBeChecked()
     fireEvent.click(within(shiftsRow!).getByRole('checkbox'))
     expect(within(shiftsRow!).getByRole('checkbox')).not.toBeChecked()
     expect(screen.getByText(/Recommended with selection/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /\+ Shifts/ })).toBeInTheDocument()
 
-    const payrollRow = screen.getAllByText('Payroll').find((node) => node.closest('label'))?.closest('label')
+    const payrollRow = screen.getAllByText('Payroll').find((node) => node.closest('[data-module-key]'))?.closest('[data-module-key]')
     expect(payrollRow).not.toBeNull()
     expect(within(payrollRow!).getByRole('checkbox')).toBeChecked()
 
-    const employeeRow = screen.getByText('Employee App').closest('label')
+    const employeeRow = screen.getByText('Employee App').closest('[data-module-key]')
     fireEvent.click(within(employeeRow!).getByRole('checkbox'))
     expect(within(employeeRow!).getByText('Configured, awaiting platform activation')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Employee App surface preview' })).toBeInTheDocument()
     expect(screen.getByText(/Surfaces below appear when WATHEFNI_EMPLOYEE_APP is ON/)).toBeInTheDocument()
     expect(screen.getByText(/Attendance status/)).toBeInTheDocument()
     expect(screen.queryByText(/Payroll/i, { selector: 'li' })).not.toBeInTheDocument()
+    expect(screen.getByText(/Review & Apply/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Discard' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Save modules' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('Apply module changes?')).toBeInTheDocument()
+    expect(within(dialog).getByText(/Enable:/)).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Apply' }))
     await waitFor(() => {
       const modulesCall = fetchMock.mock.calls.find(
         ([input, init]) => String(input).endsWith('/ACME/modules') && init?.method === 'PATCH',
@@ -218,6 +240,7 @@ describe('setup console', () => {
     renderConsole()
 
     await screen.findByRole('button', { name: /Acme Company/ }, { timeout: 8000 })
+    fireEvent.click(screen.getByRole('button', { name: 'Create company' }))
     fireEvent.change(screen.getByLabelText('Company code'), { target: { value: 'northstar' } })
     fireEvent.change(screen.getByLabelText('Display name'), { target: { value: 'Northstar Co' } })
     fireEvent.change(screen.getByLabelText('Country'), { target: { value: 'kw' } })
@@ -237,7 +260,7 @@ describe('setup console', () => {
       currency: 'KWD',
     })
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Classic setup' }))
+    await openLegacyClassic()
     const profileHeading = await screen.findByRole('heading', { name: 'Company profile' })
     const profileCard = profileHeading.closest('section')
     expect(profileCard).not.toBeNull()
@@ -315,6 +338,27 @@ describe('setup console', () => {
       })
     })
   })
+
+  test('opens Policies & Workflows with EN/AR RTL and keeps blocked Wave 4–6 as unavailable', async () => {
+    seedSession()
+    mockSetupApi()
+    renderConsole()
+
+    await selectCompany()
+    await screen.findByRole('heading', { name: 'Modules & Access' })
+    fireEvent.click(screen.getByRole('button', { name: 'Policies & Workflows' }))
+    expect(window.location.search).toContain('view=policies')
+    expect(await screen.findByRole('heading', { name: 'Policies & Workflows' })).toBeInTheDocument()
+    expect(screen.getByText('Performance policies')).toBeInTheDocument()
+    expect(screen.getAllByText(/Wave 4–6 policies appear here only when the module is entitled and deployed/i).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('heading', { name: /Goals \/ OKRs \/ KPIs/i })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'AR' }))
+    expect(screen.getByTestId('setup-console-root')).toHaveAttribute('dir', 'rtl')
+    expect(await screen.findByRole('heading', { name: 'السياسات ومسارات العمل' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'الوحدات والوصول' }))
+    expect(await screen.findByRole('heading', { name: 'الوحدات والوصول' })).toBeInTheDocument()
+  })
 })
 
 function seedSession() {
@@ -362,6 +406,21 @@ function mockSetupApi() {
         overall: 'ready',
         items: [],
       })
+    }
+    if (path.includes('/module-policies')) {
+      return jsonResponse({ ok: true, wave4: { modules: {} }, wave6: { modules: {} }, delivery: { policy: {} } })
+    }
+    if (path.includes('/employee-app-access')) {
+      return jsonResponse({ ok: true, access_mode: 'all' })
+    }
+    if (path.includes('/payroll-setup')) {
+      return jsonResponse({ ok: true, payroll_mode: 'native', approved_policy: {}, finalize_policy: {} })
+    }
+    if (path.includes('/team-access')) {
+      return jsonResponse({ ok: true, members: [] })
+    }
+    if (path.includes('/integrations-catalog')) {
+      return jsonResponse({ ok: true, integrations: [] })
     }
     if (path.includes('/dashboard/superadmin/setup/companies?')) {
       return jsonResponse({
@@ -594,6 +653,12 @@ function companyDetail(path: string) {
       audiences: ['candidate'],
       status: 'active',
       verified: true,
+    },
+    last_module_change: {
+      at: '2026-08-18T12:00:00Z',
+      actor_email: 'aziz@example.com',
+      summary: 'Enabled modules for ACME: pre_hiring.',
+      modules: ['pre_hiring'],
     },
   }
 }

@@ -21,6 +21,42 @@ LEAVE_TYPES = ("annual", "sick", "unpaid")
 MODULE_KEYS = ("leave", "attendance", "shifts", "compliance", "onboarding", "documents")
 
 
+def _sp(cur: Any, name: str = "p3b") -> None:
+    try:
+        cur.execute(f"SAVEPOINT {name}")
+    except Exception:
+        pass
+
+
+def _sp_release(cur: Any, name: str = "p3b") -> None:
+    try:
+        cur.execute(f"RELEASE SAVEPOINT {name}")
+    except Exception:
+        try:
+            cur.execute(f"ROLLBACK TO SAVEPOINT {name}")
+        except Exception:
+            pass
+
+
+def _sp_rollback(cur: Any, name: str = "p3b") -> None:
+    try:
+        cur.execute(f"ROLLBACK TO SAVEPOINT {name}")
+    except Exception:
+        pass
+
+
+def _isolate_policy(cur: Any, name: str, loader: Any) -> dict[str, Any]:
+    """Run a policy GET without aborting the shared Setup Console transaction."""
+    _sp(cur, name)
+    try:
+        payload = loader()
+        _sp_release(cur, name)
+        return payload if isinstance(payload, dict) else {"ok": False, "error": "policy_unavailable", "module_key": name}
+    except Exception:
+        _sp_rollback(cur, name)
+        return {"ok": False, "error": "policy_unavailable", "module_key": name}
+
+
 def _company(code: str) -> str:
     return str(code or "").upper()
 
@@ -83,13 +119,17 @@ def _save_module_settings(cur: Any, company: str, module_key: str, settings: dic
 
 
 def _calendar_weekend_days(cur: Any, company: str) -> list[str]:
+    _sp(cur, "p3b_cal")
     try:
         import setup_console_payroll_phase3a as p3a
 
         settings = pyw1.ensure_company_settings(cur, company_code=company)
         extras = p3a.parse_setup_extras(settings)
-        return list(extras.get("weekend_days") or [])
+        days = list(extras.get("weekend_days") or [])
+        _sp_release(cur, "p3b_cal")
+        return days
     except Exception:
+        _sp_rollback(cur, "p3b_cal")
         return ["fri", "sat"]
 
 
@@ -270,12 +310,15 @@ def get_attendance_company_policy(cur: Any, company_code: str) -> dict[str, Any]
     # Reference payroll attendance authority
     att_mode = None
     grace = overlay.get("lateness_grace_minutes")
+    _sp(cur, "p3b_att_mode")
     try:
         import payroll_input_snapshot_p2 as p2
 
         att_mode = p2.resolve_attendance_payroll_mode(cur, company_code=company)
+        _sp_release(cur, "p3b_att_mode")
     except Exception:
-        pass
+        _sp_rollback(cur, "p3b_att_mode")
+    _sp(cur, "p3b_att_grace")
     try:
         cur.execute(
             """
@@ -293,8 +336,9 @@ def get_attendance_company_policy(cur: Any, company_code: str) -> dict[str, Any]
             if grace is None and d.get("lateness_grace_minutes") is not None:
                 grace = d.get("lateness_grace_minutes")
             att_mode = att_mode or d.get("attendance_payroll_mode")
+        _sp_release(cur, "p3b_att_grace")
     except Exception:
-        pass
+        _sp_rollback(cur, "p3b_att_grace")
     calendar_days = _calendar_weekend_days(cur, company)
     return {
         "ok": True,
@@ -375,11 +419,14 @@ def get_shifts_company_policy(cur: Any, company_code: str) -> dict[str, Any]:
     mod = _module_row(cur, company, "shifts")
     overlay = mod["settings"].get("shifts_setup") if isinstance(mod["settings"].get("shifts_setup"), dict) else {}
     settings = {}
+    _sp(cur, "p3b_sh")
     try:
         import shifts_authority_wave1 as sh
 
         settings = sh.get_shift_authority_settings(cur, company)
+        _sp_release(cur, "p3b_sh")
     except Exception:
+        _sp_rollback(cur, "p3b_sh")
         settings = {}
     calendar_days = _calendar_weekend_days(cur, company)
     rest_from_calendar = sorted({WEEKDAY_TO_INT[d] for d in calendar_days if d in WEEKDAY_TO_INT})
@@ -715,11 +762,11 @@ def get_all_module_policies(cur: Any, company_code: str) -> dict[str, Any]:
         "phase": PHASE,
         "contract_version": CONTRACT_VERSION,
         "company_code": company,
-        "leave": get_leave_company_policy(cur, company),
-        "attendance": get_attendance_company_policy(cur, company),
-        "shifts": get_shifts_company_policy(cur, company),
-        "documents": get_documents_company_policy(cur, company),
-        "onboarding": get_onboarding_company_policy(cur, company),
+        "leave": _isolate_policy(cur, "p3b_leave", lambda: get_leave_company_policy(cur, company)),
+        "attendance": _isolate_policy(cur, "p3b_att", lambda: get_attendance_company_policy(cur, company)),
+        "shifts": _isolate_policy(cur, "p3b_shifts", lambda: get_shifts_company_policy(cur, company)),
+        "documents": _isolate_policy(cur, "p3b_docs", lambda: get_documents_company_policy(cur, company)),
+        "onboarding": _isolate_policy(cur, "p3b_onb", lambda: get_onboarding_company_policy(cur, company)),
         "cross_module": {
             "working_calendar": "/setup-console#classic-payroll-setup-calendar",
             "attendance_pay": "/setup-console#classic-payroll-setup-attendance",

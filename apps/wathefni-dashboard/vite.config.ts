@@ -29,6 +29,14 @@ function setupConsoleCanonicalUrl() {
 export default defineConfig({
   base: '/dashboard/',
   plugins: [react(), tailwindcss(), setupConsoleCanonicalUrl()],
+  server: {
+    proxy: {
+      '/dashboard/superadmin': {
+        target: 'http://127.0.0.1:8010',
+        changeOrigin: true,
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

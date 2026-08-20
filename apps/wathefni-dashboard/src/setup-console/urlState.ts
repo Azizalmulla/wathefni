@@ -1,8 +1,8 @@
-export type WorkspaceView = 'modules' | 'launch' | 'classic' | 'wizard' | 'control'
+export type WorkspaceView = 'modules' | 'policies' | 'launch' | 'classic' | 'wizard' | 'control'
 
 export const DEFAULT_WORKSPACE_VIEW: WorkspaceView = 'modules'
 
-const VIEWS = new Set<WorkspaceView>(['modules', 'launch', 'classic', 'wizard', 'control'])
+const VIEWS = new Set<WorkspaceView>(['modules', 'policies', 'launch', 'classic', 'wizard', 'control'])
 
 export function readCompanyParam(search = typeof window === 'undefined' ? '' : window.location.search) {
   return String(new URLSearchParams(search).get('company') || '')
@@ -20,6 +20,15 @@ export function viewFromLocation(
     .toLowerCase()
   const hashKey = hash.replace(/^#/, '')
   if (hashKey === 'classic-modules') return 'modules'
+  if (
+    hashKey.startsWith('classic-wave') ||
+    hashKey === 'classic-module-policies' ||
+    hashKey === 'classic-employee-app-access' ||
+    hashKey === 'classic-payroll-setup' ||
+    hashKey === 'classic-notification-delivery'
+  ) {
+    return 'policies'
+  }
   if (hashKey.startsWith('classic-') || hashKey === 'classic-ownership') return 'classic'
   if (hashKey === 'control') return 'control'
   if (hashKey === 'launch') return 'launch'
