@@ -30,6 +30,8 @@ HONESTY = {
     "attention_is_not_intelligence": True,
     "scheduled_delivery_safe_debt": True,
     "employee_app_no_company_intelligence": True,
+    "no_frontend_rebuild": True,
+    "projection_from_domain_events": True,
 }
 
 FAMILY_ORDER = (
@@ -619,12 +621,20 @@ def compose_overview(
         for family in FAMILY_ORDER
         if groups[family]
     ]
+    freshness = {"mode": "near_real_time_spine", "guaranteed_current": False, "status": "unknown"}
+    try:
+        import hr_intelligence_projection as proj
+
+        freshness = proj.freshness_payload(cur, company)
+    except Exception:
+        pass
     return {
         "ok": True,
         "company_code": c1.company_code_norm(company),
         "families": families,
         "omitted_count": len(omitted),
         "omitted": omitted,
+        "freshness": freshness,
         "honesty": honesty_payload(company_code=company),
     }
 
@@ -1317,6 +1327,14 @@ def bootstrap_payload(cur: Any, *, company: str, actor: str) -> dict[str, Any]:
     if not ent.get("ok"):
         return {**ent, "c6_enabled": False, "honesty": honesty_payload(company_code=company)}
     published = list_published_kpis(cur, company, actor)
+    freshness = {"mode": "near_real_time_spine", "guaranteed_current": False, "status": "unknown"}
+    try:
+        import hr_intelligence_projection as proj
+
+        proj.ensure_hr_intelligence_projection_schema(cur)
+        freshness = proj.freshness_payload(cur, company)
+    except Exception:
+        pass
     return {
         "ok": True,
         "c6_enabled": True,
@@ -1324,6 +1342,7 @@ def bootstrap_payload(cur: Any, *, company: str, actor: str) -> dict[str, Any]:
         "honesty": honesty_payload(company_code=company),
         "overview": {"families": [], "evaluated": False},
         "published_kpis": published.get("kpis") or [],
+        "freshness": freshness,
         "settings": {
             "manager_analytics_enabled": bool(ent["settings"].get("manager_analytics_enabled")),
             "export_person_level_requires_permission": bool(

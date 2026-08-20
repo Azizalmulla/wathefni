@@ -1,0 +1,1791 @@
+{
+  "ok": true,
+  "stamp": "20260820T213939Z",
+  "canary": "HINTL-FRESH-20260820T213939Z",
+  "checks": [
+    {
+      "name": "projection_module",
+      "pass": true
+    },
+    {
+      "name": "http_registered",
+      "pass": true
+    },
+    {
+      "name": "c1_freshness_wired",
+      "pass": true
+    },
+    {
+      "name": "no_frontend_rebuild",
+      "pass": true
+    },
+    {
+      "name": "bootstrap",
+      "pass": true,
+      "detail": {
+        "http": 200,
+        "freshness": {
+          "mode": "near_real_time_spine",
+          "company_code": "WATHEFNI",
+          "status": "current",
+          "guaranteed_current": true,
+          "evaluated_at": "2026-08-20T21:39:43.065746+00:00",
+          "stale_after_seconds": 180,
+          "families": {
+            "attendance": {
+              "source_family": "attendance",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.386717+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "leave": {
+              "source_family": "leave",
+              "data_as_of": "2026-08-20T21:38:12.992170+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:38:12.992170+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.393966+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "payroll": {
+              "source_family": "payroll",
+              "data_as_of": null,
+              "last_source_event_at": null,
+              "last_projected_at": null,
+              "last_reconciled_at": null,
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "unavailable",
+              "guaranteed_current": false,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": "payroll_not_sealed"
+            },
+            "performance": {
+              "source_family": "performance",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.411481+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "recruiting": {
+              "source_family": "recruiting",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.381241+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "shifts": {
+              "source_family": "shifts",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.404517+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "talent": {
+              "source_family": "talent",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.416015+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "workforce": {
+              "source_family": "workforce",
+              "data_as_of": "2026-08-20T21:38:16.714366+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:38:16.714366+00:00",
+              "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+              "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            }
+          },
+          "payroll_money_current": false,
+          "rebuild_path": "hr-intelligence-projection-worker.py --rebuild COMPANY",
+          "no_frontend_rebuild": true
+        }
+      }
+    },
+    {
+      "name": "bootstrap_freshness_present",
+      "pass": true,
+      "detail": {
+        "mode": "near_real_time_spine",
+        "company_code": "WATHEFNI",
+        "status": "current",
+        "guaranteed_current": true,
+        "evaluated_at": "2026-08-20T21:39:43.065746+00:00",
+        "stale_after_seconds": 180,
+        "families": {
+          "attendance": {
+            "source_family": "attendance",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.386717+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "leave": {
+            "source_family": "leave",
+            "data_as_of": "2026-08-20T21:38:12.992170+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:38:12.992170+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.393966+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "payroll": {
+            "source_family": "payroll",
+            "data_as_of": null,
+            "last_source_event_at": null,
+            "last_projected_at": null,
+            "last_reconciled_at": null,
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "unavailable",
+            "guaranteed_current": false,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": "payroll_not_sealed"
+          },
+          "performance": {
+            "source_family": "performance",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.411481+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "recruiting": {
+            "source_family": "recruiting",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.381241+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "shifts": {
+            "source_family": "shifts",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.404517+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "talent": {
+            "source_family": "talent",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.416015+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "workforce": {
+            "source_family": "workforce",
+            "data_as_of": "2026-08-20T21:38:16.714366+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:38:16.714366+00:00",
+            "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+            "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          }
+        },
+        "payroll_money_current": false,
+        "rebuild_path": "hr-intelligence-projection-worker.py --rebuild COMPANY",
+        "no_frontend_rebuild": true
+      }
+    },
+    {
+      "name": "honesty_no_frontend_rebuild",
+      "pass": true
+    },
+    {
+      "name": "headcount_before_http",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "status": "ok",
+        "value": 9.0,
+        "unit": "heads",
+        "numerator_value": 9.0,
+        "denominator_value": null,
+        "population_ids": [
+          "WATHEFNI-9655280101",
+          "WATHEFNI-9655248103",
+          "WATHEFNI-9655280103",
+          "WATHEFNI-9655238102",
+          "WATHEFNI-96599338566",
+          "WATHEFNI-96597727743",
+          "WATHEFNI-96599411617",
+          "WATHEFNI-96566363363",
+          "WATHEFNI-96550252254"
+        ],
+        "population_count": 9,
+        "kpi_definition_id": "bafecf93-1396-4bfc-9f86-50082b545800",
+        "semantic_key": "workforce.headcount.active_heads",
+        "effective_version": 2,
+        "formula_snapshot": {
+          "kind": "workforce_headcount",
+          "sensitive_aggregate": false
+        },
+        "permission_class": "workforce_general",
+        "filters": {},
+        "time_window": {},
+        "freshness": {
+          "source_family": "workforce",
+          "data_as_of": "2026-08-20T21:38:16.714366+00:00",
+          "last_source_event_at": null,
+          "last_projected_at": "2026-08-20T21:38:16.714366+00:00",
+          "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+          "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+          "lag_seconds": 0,
+          "status": "current",
+          "guaranteed_current": true,
+          "pending_outbox_count": 0,
+          "failed_outbox_count": 0,
+          "last_error": null,
+          "mode": "near_real_time_spine",
+          "evaluated_at": "2026-08-20T21:39:43.161784+00:00",
+          "semantic_key": "workforce.headcount.active_heads"
+        },
+        "name_en": "Active headcount (heads)",
+        "name_ar": "\u0639\u062f\u062f \u0627\u0644\u0631\u0624\u0648\u0633 \u0627\u0644\u0646\u0634\u0637",
+        "min_cohort_n": 5,
+        "same_authority_as_export": true,
+        "explain": {
+          "as_of": "2026-08-20",
+          "inclusion_policy": {
+            "measure": "heads",
+            "pending_start_in_headcount": false,
+            "pending_start_separate_future_starters_metric": true,
+            "notice_period_in_headcount_until_effective_lwd_or_end": true,
+            "active_on_leave_or_suspension_in_headcount": true,
+            "contingent_mixed_into_employee_headcount": false,
+            "fte_publishable": false,
+            "fte_never_assume_one_head_equals_one_fte": true,
+            "fte_requires_authoritative_standard_hours_inputs": true
+          },
+          "members": [
+            {
+              "employee_key": "WATHEFNI-9655280101",
+              "employment_period_key": "WATHEFNI-9655280101",
+              "person_key": null,
+              "department": "Retail",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Store Manager",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-9655248103",
+              "employment_period_key": "WATHEFNI-9655248103",
+              "person_key": null,
+              "department": "Sales",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Sales Associate",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-9655280103",
+              "employment_period_key": "WATHEFNI-9655280103",
+              "person_key": null,
+              "department": "Sales",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Sales Associate",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-9655238102",
+              "employment_period_key": "WATHEFNI-9655238102",
+              "person_key": null,
+              "department": "Operations",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Warehouse Operative",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96599338566",
+              "employment_period_key": "WATHEFNI-96599338566",
+              "person_key": null,
+              "department": "Internal QA",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Mobile QA Tester",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "employment_period_key": "WATHEFNI-96597727743",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Marketing Specialist",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96599411617",
+              "employment_period_key": "WATHEFNI-96599411617",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": null,
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96566363363",
+              "employment_period_key": "WATHEFNI-96566363363",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "IT Maintenance",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "employment_period_key": "WATHEFNI-96550252254",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Social Media Manager",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            }
+          ],
+          "name_en": "Active headcount (heads)",
+          "name_ar": "\u0639\u062f\u062f \u0627\u0644\u0631\u0624\u0648\u0633 \u0627\u0644\u0646\u0634\u0637"
+        },
+        "evaluation_id": "747a3483-c0cc-427a-8922-d6f06167b975",
+        "evaluated_at": "2026-08-20T21:39:43.110125+00:00",
+        "status_label": "Available",
+        "about_metric": {
+          "semantic_key": "workforce.headcount.active_heads",
+          "definition_id": "bafecf93-1396-4bfc-9f86-50082b545800",
+          "effective_version": 2,
+          "family": "workforce",
+          "name_en": "Active headcount (heads)",
+          "name_ar": "\u0639\u062f\u062f \u0627\u0644\u0631\u0624\u0648\u0633 \u0627\u0644\u0646\u0634\u0637",
+          "description_en": "Point-in-time employee heads per binding inclusion policy.",
+          "description_ar": "\u0639\u062f\u062f \u0627\u0644\u0645\u0648\u0638\u0641\u064a\u0646 \u0627\u0644\u0646\u0634\u0637\u064a\u0646 \u062d\u0633\u0628 \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0625\u062f\u0631\u0627\u062c \u0627\u0644\u0645\u0644\u0632\u0645\u0629.",
+          "business_meaning": "Workforce size as-of date; pending_start excluded; notice included until LWD.",
+          "numerator": {
+            "description": "included employees"
+          },
+          "denominator": null,
+          "inclusion_rules": {
+            "measure": "heads",
+            "fte_publishable": false,
+            "pending_start_in_headcount": false,
+            "contingent_mixed_into_employee_headcount": false,
+            "fte_never_assume_one_head_equals_one_fte": true,
+            "active_on_leave_or_suspension_in_headcount": true,
+            "pending_start_separate_future_starters_metric": true,
+            "fte_requires_authoritative_standard_hours_inputs": true,
+            "notice_period_in_headcount_until_effective_lwd_or_end": true
+          },
+          "exclusion_rules": {},
+          "unit": "heads",
+          "time_semantics": "point_in_time",
+          "supported_dimensions": [
+            "department",
+            "location",
+            "manager",
+            "job_role",
+            "grade"
+          ],
+          "permission_class": "workforce_general",
+          "definition_status": "published",
+          "status_honesty": {
+            "ok": {
+              "en": "Available",
+              "ar": "\u0645\u062a\u0627\u062d"
+            },
+            "unavailable": {
+              "en": "Unavailable",
+              "ar": "\u063a\u064a\u0631 \u0645\u062a\u0627\u062d"
+            },
+            "insufficient_data": {
+              "en": "Insufficient data",
+              "ar": "\u0628\u064a\u0627\u0646\u0627\u062a \u063a\u064a\u0631 \u0643\u0627\u0641\u064a\u0629"
+            },
+            "not_applicable": {
+              "en": "Not applicable",
+              "ar": "\u063a\u064a\u0631 \u0645\u0646\u0637\u0628\u0642"
+            },
+            "suppressed": {
+              "en": "Suppressed",
+              "ar": "\u0645\u062d\u062c\u0648\u0628"
+            },
+            "blocked": {
+              "en": "Blocked",
+              "ar": "\u0645\u062d\u0638\u0648\u0631"
+            },
+            "stale": {
+              "en": "May be stale",
+              "ar": "\u0642\u062f \u064a\u0643\u0648\u0646 \u0642\u062f\u064a\u0645\u0627\u064b"
+            },
+            "refreshing": {
+              "en": "Refreshing",
+              "ar": "\u062c\u0627\u0631\u064d \u0627\u0644\u062a\u062d\u062f\u064a\u062b"
+            }
+          }
+        },
+        "family": "workforce",
+        "governed_by_c1": true,
+        "_http": 200
+      }
+    },
+    {
+      "name": "schema",
+      "pass": true
+    },
+    {
+      "name": "employee_insert",
+      "pass": true
+    },
+    {
+      "name": "leave_insert",
+      "pass": true
+    },
+    {
+      "name": "incremental_pass",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "companies": [
+          {
+            "company_code": "WATHEFNI",
+            "ingest": {
+              "ok": true,
+              "company_code": "WATHEFNI",
+              "enqueued": {
+                "workforce": 2,
+                "recruiting": 0,
+                "attendance": 0,
+                "leave": 1,
+                "shifts": 0,
+                "performance": 0,
+                "talent": 0
+              }
+            },
+            "drain": {
+              "ok": true,
+              "processed": 3,
+              "failed": 0,
+              "skipped": 0,
+              "seen": 3
+            },
+            "reconcile": null,
+            "rebuild": null,
+            "freshness": {
+              "mode": "near_real_time_spine",
+              "company_code": "WATHEFNI",
+              "status": "current",
+              "guaranteed_current": true,
+              "evaluated_at": "2026-08-20T21:39:43.910216+00:00",
+              "stale_after_seconds": 180,
+              "families": {
+                "attendance": {
+                  "source_family": "attendance",
+                  "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+                  "last_reconciled_at": "2026-08-20T21:33:49.386717+00:00",
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                },
+                "leave": {
+                  "source_family": "leave",
+                  "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+                  "last_reconciled_at": "2026-08-20T21:33:49.393966+00:00",
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                },
+                "payroll": {
+                  "source_family": "payroll",
+                  "data_as_of": null,
+                  "last_source_event_at": null,
+                  "last_projected_at": null,
+                  "last_reconciled_at": null,
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "unavailable",
+                  "guaranteed_current": false,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": "payroll_not_sealed"
+                },
+                "performance": {
+                  "source_family": "performance",
+                  "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+                  "last_reconciled_at": "2026-08-20T21:33:49.411481+00:00",
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                },
+                "recruiting": {
+                  "source_family": "recruiting",
+                  "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+                  "last_reconciled_at": "2026-08-20T21:33:49.381241+00:00",
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                },
+                "shifts": {
+                  "source_family": "shifts",
+                  "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+                  "last_reconciled_at": "2026-08-20T21:33:49.404517+00:00",
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                },
+                "talent": {
+                  "source_family": "talent",
+                  "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+                  "last_reconciled_at": "2026-08-20T21:33:49.416015+00:00",
+                  "last_rebuild_at": null,
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                },
+                "workforce": {
+                  "source_family": "workforce",
+                  "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+                  "last_source_event_at": null,
+                  "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+                  "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+                  "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+                  "lag_seconds": 0,
+                  "status": "current",
+                  "guaranteed_current": true,
+                  "pending_outbox_count": 0,
+                  "failed_outbox_count": 0,
+                  "last_error": null
+                }
+              },
+              "payroll_money_current": false,
+              "rebuild_path": "hr-intelligence-projection-worker.py --rebuild COMPANY",
+              "no_frontend_rebuild": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "incremental_processed",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "processed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "seen": 3
+      }
+    },
+    {
+      "name": "canary_period_projected",
+      "pass": true,
+      "detail": {
+        "status": "active",
+        "department": "IntelligenceFreshness"
+      }
+    },
+    {
+      "name": "canary_outbox_done",
+      "pass": true,
+      "detail": {
+        "n": 2
+      }
+    },
+    {
+      "name": "freshness_payload",
+      "pass": true,
+      "detail": {
+        "mode": "near_real_time_spine",
+        "company_code": "WATHEFNI",
+        "status": "current",
+        "guaranteed_current": true,
+        "evaluated_at": "2026-08-20T21:39:43.940516+00:00",
+        "stale_after_seconds": 180,
+        "families": {
+          "attendance": {
+            "source_family": "attendance",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.386717+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "leave": {
+            "source_family": "leave",
+            "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.393966+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "payroll": {
+            "source_family": "payroll",
+            "data_as_of": null,
+            "last_source_event_at": null,
+            "last_projected_at": null,
+            "last_reconciled_at": null,
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "unavailable",
+            "guaranteed_current": false,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": "payroll_not_sealed"
+          },
+          "performance": {
+            "source_family": "performance",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.411481+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "recruiting": {
+            "source_family": "recruiting",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.381241+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "shifts": {
+            "source_family": "shifts",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.404517+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "talent": {
+            "source_family": "talent",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.416015+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "workforce": {
+            "source_family": "workforce",
+            "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+            "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+            "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          }
+        },
+        "payroll_money_current": false,
+        "rebuild_path": "hr-intelligence-projection-worker.py --rebuild COMPANY",
+        "no_frontend_rebuild": true
+      }
+    },
+    {
+      "name": "payroll_not_current",
+      "pass": true,
+      "detail": {
+        "source_family": "payroll",
+        "data_as_of": null,
+        "last_source_event_at": null,
+        "last_projected_at": null,
+        "last_reconciled_at": null,
+        "last_rebuild_at": null,
+        "lag_seconds": 0,
+        "status": "unavailable",
+        "guaranteed_current": false,
+        "pending_outbox_count": 0,
+        "failed_outbox_count": 0,
+        "last_error": "payroll_not_sealed"
+      }
+    },
+    {
+      "name": "workforce_not_never",
+      "pass": true,
+      "detail": {
+        "source_family": "workforce",
+        "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+        "last_source_event_at": null,
+        "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+        "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+        "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+        "lag_seconds": 0,
+        "status": "current",
+        "guaranteed_current": true,
+        "pending_outbox_count": 0,
+        "failed_outbox_count": 0,
+        "last_error": null
+      }
+    },
+    {
+      "name": "headcount_after_http",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "status": "ok",
+        "value": 10.0,
+        "unit": "heads",
+        "numerator_value": 10.0,
+        "denominator_value": null,
+        "population_ids": [
+          "WATHEFNI-9655280101",
+          "WATHEFNI-9655248103",
+          "WATHEFNI-9655280103",
+          "WATHEFNI-9655238102",
+          "WATHEFNI-96599338566",
+          "WATHEFNI-96597727743",
+          "WATHEFNI-96599411617",
+          "WATHEFNI-96566363363",
+          "WATHEFNI-96550252254",
+          "WATHEFNI-HINTL-FRESH-20260820T213939Z"
+        ],
+        "population_count": 10,
+        "kpi_definition_id": "bafecf93-1396-4bfc-9f86-50082b545800",
+        "semantic_key": "workforce.headcount.active_heads",
+        "effective_version": 2,
+        "formula_snapshot": {
+          "kind": "workforce_headcount",
+          "sensitive_aggregate": false
+        },
+        "permission_class": "workforce_general",
+        "filters": {},
+        "time_window": {},
+        "freshness": {
+          "source_family": "workforce",
+          "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+          "last_source_event_at": null,
+          "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+          "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+          "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+          "lag_seconds": 0,
+          "status": "current",
+          "guaranteed_current": true,
+          "pending_outbox_count": 0,
+          "failed_outbox_count": 0,
+          "last_error": null,
+          "mode": "near_real_time_spine",
+          "evaluated_at": "2026-08-20T21:39:44.003079+00:00",
+          "semantic_key": "workforce.headcount.active_heads"
+        },
+        "name_en": "Active headcount (heads)",
+        "name_ar": "\u0639\u062f\u062f \u0627\u0644\u0631\u0624\u0648\u0633 \u0627\u0644\u0646\u0634\u0637",
+        "min_cohort_n": 5,
+        "same_authority_as_export": true,
+        "explain": {
+          "as_of": "2026-08-20",
+          "inclusion_policy": {
+            "measure": "heads",
+            "pending_start_in_headcount": false,
+            "pending_start_separate_future_starters_metric": true,
+            "notice_period_in_headcount_until_effective_lwd_or_end": true,
+            "active_on_leave_or_suspension_in_headcount": true,
+            "contingent_mixed_into_employee_headcount": false,
+            "fte_publishable": false,
+            "fte_never_assume_one_head_equals_one_fte": true,
+            "fte_requires_authoritative_standard_hours_inputs": true
+          },
+          "members": [
+            {
+              "employee_key": "WATHEFNI-9655280101",
+              "employment_period_key": "WATHEFNI-9655280101",
+              "person_key": null,
+              "department": "Retail",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Store Manager",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-9655248103",
+              "employment_period_key": "WATHEFNI-9655248103",
+              "person_key": null,
+              "department": "Sales",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Sales Associate",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-9655280103",
+              "employment_period_key": "WATHEFNI-9655280103",
+              "person_key": null,
+              "department": "Sales",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Sales Associate",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-9655238102",
+              "employment_period_key": "WATHEFNI-9655238102",
+              "person_key": null,
+              "department": "Operations",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Warehouse Operative",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96599338566",
+              "employment_period_key": "WATHEFNI-96599338566",
+              "person_key": null,
+              "department": "Internal QA",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Mobile QA Tester",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96597727743",
+              "employment_period_key": "WATHEFNI-96597727743",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Marketing Specialist",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96599411617",
+              "employment_period_key": "WATHEFNI-96599411617",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": null,
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96566363363",
+              "employment_period_key": "WATHEFNI-96566363363",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "IT Maintenance",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-96550252254",
+              "employment_period_key": "WATHEFNI-96550252254",
+              "person_key": null,
+              "department": null,
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Social Media Manager",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            },
+            {
+              "employee_key": "WATHEFNI-HINTL-FRESH-20260820T213939Z",
+              "employment_period_key": "WATHEFNI-HINTL-FRESH-20260820T213939Z",
+              "person_key": null,
+              "department": "IntelligenceFreshness",
+              "location": null,
+              "manager_employee_key": null,
+              "job_role": "Freshness Canary",
+              "grade": null,
+              "status": "active",
+              "worker_class": "employee",
+              "include_in_headcount": true,
+              "include_in_future_starters": false,
+              "bucket": "active_included",
+              "reason_en": "Active employment (leave/suspension still included)",
+              "reason_ar": "\u062a\u0648\u0638\u064a\u0641 \u0646\u0634\u0637 (\u0627\u0644\u0625\u062c\u0627\u0632\u0629/\u0627\u0644\u0648\u0642\u0641 \u0645\u0627 \u0632\u0627\u0644\u0627 \u0645\u0634\u0645\u0648\u0644\u064a\u0646)"
+            }
+          ],
+          "name_en": "Active headcount (heads)",
+          "name_ar": "\u0639\u062f\u062f \u0627\u0644\u0631\u0624\u0648\u0633 \u0627\u0644\u0646\u0634\u0637"
+        },
+        "evaluation_id": "e0542880-23cd-40af-9d0e-c3585c53cd17",
+        "evaluated_at": "2026-08-20T21:39:43.972057+00:00",
+        "status_label": "Available",
+        "about_metric": {
+          "semantic_key": "workforce.headcount.active_heads",
+          "definition_id": "bafecf93-1396-4bfc-9f86-50082b545800",
+          "effective_version": 2,
+          "family": "workforce",
+          "name_en": "Active headcount (heads)",
+          "name_ar": "\u0639\u062f\u062f \u0627\u0644\u0631\u0624\u0648\u0633 \u0627\u0644\u0646\u0634\u0637",
+          "description_en": "Point-in-time employee heads per binding inclusion policy.",
+          "description_ar": "\u0639\u062f\u062f \u0627\u0644\u0645\u0648\u0638\u0641\u064a\u0646 \u0627\u0644\u0646\u0634\u0637\u064a\u0646 \u062d\u0633\u0628 \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0625\u062f\u0631\u0627\u062c \u0627\u0644\u0645\u0644\u0632\u0645\u0629.",
+          "business_meaning": "Workforce size as-of date; pending_start excluded; notice included until LWD.",
+          "numerator": {
+            "description": "included employees"
+          },
+          "denominator": null,
+          "inclusion_rules": {
+            "measure": "heads",
+            "fte_publishable": false,
+            "pending_start_in_headcount": false,
+            "contingent_mixed_into_employee_headcount": false,
+            "fte_never_assume_one_head_equals_one_fte": true,
+            "active_on_leave_or_suspension_in_headcount": true,
+            "pending_start_separate_future_starters_metric": true,
+            "fte_requires_authoritative_standard_hours_inputs": true,
+            "notice_period_in_headcount_until_effective_lwd_or_end": true
+          },
+          "exclusion_rules": {},
+          "unit": "heads",
+          "time_semantics": "point_in_time",
+          "supported_dimensions": [
+            "department",
+            "location",
+            "manager",
+            "job_role",
+            "grade"
+          ],
+          "permission_class": "workforce_general",
+          "definition_status": "published",
+          "status_honesty": {
+            "ok": {
+              "en": "Available",
+              "ar": "\u0645\u062a\u0627\u062d"
+            },
+            "unavailable": {
+              "en": "Unavailable",
+              "ar": "\u063a\u064a\u0631 \u0645\u062a\u0627\u062d"
+            },
+            "insufficient_data": {
+              "en": "Insufficient data",
+              "ar": "\u0628\u064a\u0627\u0646\u0627\u062a \u063a\u064a\u0631 \u0643\u0627\u0641\u064a\u0629"
+            },
+            "not_applicable": {
+              "en": "Not applicable",
+              "ar": "\u063a\u064a\u0631 \u0645\u0646\u0637\u0628\u0642"
+            },
+            "suppressed": {
+              "en": "Suppressed",
+              "ar": "\u0645\u062d\u062c\u0648\u0628"
+            },
+            "blocked": {
+              "en": "Blocked",
+              "ar": "\u0645\u062d\u0638\u0648\u0631"
+            },
+            "stale": {
+              "en": "May be stale",
+              "ar": "\u0642\u062f \u064a\u0643\u0648\u0646 \u0642\u062f\u064a\u0645\u0627\u064b"
+            },
+            "refreshing": {
+              "en": "Refreshing",
+              "ar": "\u062c\u0627\u0631\u064d \u0627\u0644\u062a\u062d\u062f\u064a\u062b"
+            }
+          }
+        },
+        "family": "workforce",
+        "governed_by_c1": true,
+        "_http": 200
+      }
+    },
+    {
+      "name": "headcount_increased",
+      "pass": true,
+      "detail": {
+        "before": 9.0,
+        "after": 10.0,
+        "freshness": {
+          "source_family": "workforce",
+          "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+          "last_source_event_at": null,
+          "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+          "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+          "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+          "lag_seconds": 0,
+          "status": "current",
+          "guaranteed_current": true,
+          "pending_outbox_count": 0,
+          "failed_outbox_count": 0,
+          "last_error": null,
+          "mode": "near_real_time_spine",
+          "evaluated_at": "2026-08-20T21:39:44.003079+00:00",
+          "semantic_key": "workforce.headcount.active_heads"
+        }
+      }
+    },
+    {
+      "name": "evaluate_has_data_as_of",
+      "pass": true,
+      "detail": {
+        "source_family": "workforce",
+        "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+        "last_source_event_at": null,
+        "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+        "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+        "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+        "lag_seconds": 0,
+        "status": "current",
+        "guaranteed_current": true,
+        "pending_outbox_count": 0,
+        "failed_outbox_count": 0,
+        "last_error": null,
+        "mode": "near_real_time_spine",
+        "evaluated_at": "2026-08-20T21:39:44.003079+00:00",
+        "semantic_key": "workforce.headcount.active_heads"
+      }
+    },
+    {
+      "name": "evaluate_not_guaranteed_false_when_current",
+      "pass": true,
+      "detail": {
+        "source_family": "workforce",
+        "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+        "last_source_event_at": null,
+        "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+        "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+        "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+        "lag_seconds": 0,
+        "status": "current",
+        "guaranteed_current": true,
+        "pending_outbox_count": 0,
+        "failed_outbox_count": 0,
+        "last_error": null,
+        "mode": "near_real_time_spine",
+        "evaluated_at": "2026-08-20T21:39:44.003079+00:00",
+        "semantic_key": "workforce.headcount.active_heads"
+      }
+    },
+    {
+      "name": "drill_http",
+      "pass": true,
+      "detail": {
+        "error": null
+      }
+    },
+    {
+      "name": "drill_includes_canary",
+      "pass": true,
+      "detail": {
+        "population_sample": [
+          "{'id': 'WATHEFNI-9655280101', 'label': 'WATHEFNI-9655280101'}",
+          "{'id': 'WATHEFNI-9655248103', 'label': 'WATHEFNI-9655248103'}",
+          "{'id': 'WATHEFNI-9655280103', 'label': 'WATHEFNI-9655280103'}",
+          "{'id': 'WATHEFNI-9655238102', 'label': 'WATHEFNI-9655238102'}",
+          "{'id': 'WATHEFNI-96599338566', 'label': 'WATHEFNI-96599338566'}",
+          "{'id': 'WATHEFNI-96597727743', 'label': 'WATHEFNI-96597727743'}",
+          "{'id': 'WATHEFNI-96599411617', 'label': 'WATHEFNI-96599411617'}",
+          "{'id': 'WATHEFNI-96566363363', 'label': 'WATHEFNI-96566363363'}"
+        ],
+        "keys": [
+          "ok",
+          "status",
+          "rows",
+          "total",
+          "offset",
+          "limit",
+          "reauthorized",
+          "aggregate_population_count",
+          "explain",
+          "_http"
+        ]
+      }
+    },
+    {
+      "name": "trend_http",
+      "pass": true,
+      "detail": {
+        "error": null,
+        "keys": [
+          "ok",
+          "semantic_key",
+          "bucket",
+          "time_semantics",
+          "series",
+          "about_metric",
+          "_http"
+        ]
+      }
+    },
+    {
+      "name": "segment_http",
+      "pass": true,
+      "detail": {
+        "http": 200,
+        "error": null,
+        "status": null
+      }
+    },
+    {
+      "name": "overview_http",
+      "pass": true,
+      "detail": {
+        "http": 200
+      }
+    },
+    {
+      "name": "overview_freshness",
+      "pass": true,
+      "detail": {
+        "mode": "near_real_time_spine",
+        "company_code": "WATHEFNI",
+        "status": "current",
+        "guaranteed_current": true,
+        "evaluated_at": "2026-08-20T21:39:46.124195+00:00",
+        "stale_after_seconds": 180,
+        "families": {
+          "attendance": {
+            "source_family": "attendance",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.386717+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "leave": {
+            "source_family": "leave",
+            "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.393966+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "payroll": {
+            "source_family": "payroll",
+            "data_as_of": null,
+            "last_source_event_at": null,
+            "last_projected_at": null,
+            "last_reconciled_at": null,
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "unavailable",
+            "guaranteed_current": false,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": "payroll_not_sealed"
+          },
+          "performance": {
+            "source_family": "performance",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.411481+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "recruiting": {
+            "source_family": "recruiting",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.381241+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "shifts": {
+            "source_family": "shifts",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.404517+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "talent": {
+            "source_family": "talent",
+            "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+            "last_reconciled_at": "2026-08-20T21:33:49.416015+00:00",
+            "last_rebuild_at": null,
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          },
+          "workforce": {
+            "source_family": "workforce",
+            "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+            "last_source_event_at": null,
+            "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+            "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+            "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+            "lag_seconds": 0,
+            "status": "current",
+            "guaranteed_current": true,
+            "pending_outbox_count": 0,
+            "failed_outbox_count": 0,
+            "last_error": null
+          }
+        },
+        "payroll_money_current": false,
+        "rebuild_path": "hr-intelligence-projection-worker.py --rebuild COMPANY",
+        "no_frontend_rebuild": true
+      }
+    },
+    {
+      "name": "ar_bootstrap",
+      "pass": true
+    },
+    {
+      "name": "payroll_money_unavailable",
+      "pass": true,
+      "detail": {
+        "http": 200,
+        "status": "unavailable",
+        "error": null
+      }
+    },
+    {
+      "name": "retry_enqueue_missing_date",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "enqueued": true,
+        "idempotency_key": "workforce:employee:WATHEFNI-HINTL-FRESH-20260820T213939Z-missing-date:retry:HINTL-FRESH-20260820T213939Z",
+        "company_code": "WATHEFNI"
+      }
+    },
+    {
+      "name": "missing_date_skipped_not_failed",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "processed": 1,
+        "failed": 0,
+        "skipped": 1,
+        "seen": 1
+      }
+    },
+    {
+      "name": "rebuild_path",
+      "pass": true,
+      "detail": {
+        "periods": 11
+      }
+    },
+    {
+      "name": "canary_closed_or_absent",
+      "pass": true,
+      "detail": {
+        "status": "left",
+        "effective_end": "2026-08-20"
+      }
+    },
+    {
+      "name": "headcount_restored",
+      "pass": true,
+      "detail": {
+        "before": 9.0,
+        "restored": 9.0
+      }
+    },
+    {
+      "name": "c2_still_registered",
+      "pass": true
+    }
+  ],
+  "cleanup": [
+    "employees:1",
+    "lifecycle_events:1",
+    "leave_ledger:1",
+    "applications:0",
+    "app_events:0",
+    "shifts:0",
+    "attendance_days:0",
+    "attendance_events:0",
+    "talent_profiles:0",
+    "intel_periods:1",
+    "outbox:4"
+  ],
+  "published_sample": [
+    "workforce.exits.count",
+    "workforce.future_starters.count",
+    "workforce.headcount.active_heads",
+    "workforce.hires.count",
+    "workforce.retention.rate",
+    "workforce.span_of_control",
+    "workforce.tenure.distribution",
+    "workforce.turnover.rate",
+    "hire_ready.onboarding_completion_rate",
+    "hire_ready.onboarding_completion_time",
+    "hire_ready.preboarding_completion_rate",
+    "hire_ready.probation_outcomes",
+    "recruiting.application_to_hire_by_source",
+    "recruiting.applications_by_source",
+    "recruiting.funnel.events",
+    "recruiting.hires.count",
+    "recruiting.hires_by_source",
+    "recruiting.offer_acceptance_rate",
+    "recruiting.offer_accepts_by_source",
+    "recruiting.offers.accepted"
+  ],
+  "headcount_before": 9.0,
+  "incremental": {
+    "ok": true,
+    "companies": [
+      {
+        "company_code": "WATHEFNI",
+        "ingest": {
+          "ok": true,
+          "company_code": "WATHEFNI",
+          "enqueued": {
+            "workforce": 2,
+            "recruiting": 0,
+            "attendance": 0,
+            "leave": 1,
+            "shifts": 0,
+            "performance": 0,
+            "talent": 0
+          }
+        },
+        "drain": {
+          "ok": true,
+          "processed": 3,
+          "failed": 0,
+          "skipped": 0,
+          "seen": 3
+        },
+        "reconcile": null,
+        "rebuild": null,
+        "freshness": {
+          "mode": "near_real_time_spine",
+          "company_code": "WATHEFNI",
+          "status": "current",
+          "guaranteed_current": true,
+          "evaluated_at": "2026-08-20T21:39:43.910216+00:00",
+          "stale_after_seconds": 180,
+          "families": {
+            "attendance": {
+              "source_family": "attendance",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.386717+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "leave": {
+              "source_family": "leave",
+              "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.393966+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "payroll": {
+              "source_family": "payroll",
+              "data_as_of": null,
+              "last_source_event_at": null,
+              "last_projected_at": null,
+              "last_reconciled_at": null,
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "unavailable",
+              "guaranteed_current": false,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": "payroll_not_sealed"
+            },
+            "performance": {
+              "source_family": "performance",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.411481+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "recruiting": {
+              "source_family": "recruiting",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.381241+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "shifts": {
+              "source_family": "shifts",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.404517+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "talent": {
+              "source_family": "talent",
+              "data_as_of": "2026-08-20T21:36:48.064637+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:36:48.064637+00:00",
+              "last_reconciled_at": "2026-08-20T21:33:49.416015+00:00",
+              "last_rebuild_at": null,
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            },
+            "workforce": {
+              "source_family": "workforce",
+              "data_as_of": "2026-08-20T21:39:43.177677+00:00",
+              "last_source_event_at": null,
+              "last_projected_at": "2026-08-20T21:39:43.177677+00:00",
+              "last_reconciled_at": "2026-08-20T21:38:16.909266+00:00",
+              "last_rebuild_at": "2026-08-20T21:38:16.955480+00:00",
+              "lag_seconds": 0,
+              "status": "current",
+              "guaranteed_current": true,
+              "pending_outbox_count": 0,
+              "failed_outbox_count": 0,
+              "last_error": null
+            }
+          },
+          "payroll_money_current": false,
+          "rebuild_path": "hr-intelligence-projection-worker.py --rebuild COMPANY",
+          "no_frontend_rebuild": true
+        }
+      }
+    ]
+  }
+}

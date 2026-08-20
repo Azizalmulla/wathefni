@@ -97,6 +97,7 @@ STATUS_LABELS = {
     "unavailable": {"en": "Unavailable", "ar": "غير متاح"},
     "suppressed": {"en": "Suppressed", "ar": "محجوب"},
     "forbidden": {"en": "Forbidden", "ar": "ممنوع"},
+    "stale": {"en": "May be stale", "ar": "قد يكون قديماً"},
 }
 
 
@@ -1008,9 +1009,24 @@ def evaluate_kpi(
         "mode": "near_real_time_spine",
         "evaluated_at": datetime.now(timezone.utc).isoformat(),
         "guaranteed_current": False,
+        "status": "unknown",
+        "data_as_of": None,
     }
+    try:
+        import hr_intelligence_projection as _proj
+
+        freshness = _proj.freshness_for_semantic_key(cur, company_code=company, semantic_key=key)
+    except Exception:
+        freshness["status"] = "unknown"
+    freshness_status = str(freshness.get("status") or "unknown")
+    if status == "ok" and freshness_status in {"stale", "error"}:
+        status = "stale"
+    if freshness_status == "unavailable" and key.startswith("payroll."):
+        status = "unavailable"
+        value = None
+        population = []
     result = {
-        "ok": status in ("ok", "not_applicable", "insufficient_data", "suppressed", "blocked", "unavailable"),
+        "ok": status in ("ok", "not_applicable", "insufficient_data", "suppressed", "blocked", "unavailable", "stale"),
         "status": status,
         "value": value,
         "unit": unit,

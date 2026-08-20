@@ -1,0 +1,13 @@
+[Unit]
+Description=Wathefni HR Intelligence projection freshness timer
+Documentation=file:///opt/wathefni/orchestrator/hr_intelligence_projection.py
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=1min
+AccuracySec=15s
+Persistent=true
+Unit=wathefni-hr-intelligence-projection.service
+
+[Install]
+WantedBy=timers.target

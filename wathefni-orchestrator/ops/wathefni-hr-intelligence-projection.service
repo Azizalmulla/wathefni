@@ -1,0 +1,38 @@
+[Unit]
+Description=Wathefni HR Intelligence projection freshness worker (oneshot)
+After=network-online.target postgresql.service wathefni-orchestrator.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/wathefni/orchestrator
+Environment=WATHEFNI_WORKSPACE=/root/.openclaw/workspaces/company-wathefni
+Environment=WATHEFNI_POSTGRES_ENV=/root/.openclaw/secrets/postgres.env
+Environment=WATHEFNI_ENV=production
+Environment=WATHEFNI_EXPECTED_DATABASE_HOST=127.0.0.1
+Environment=WATHEFNI_EXPECTED_DATABASE_PORT=5432
+Environment=WATHEFNI_EXPECTED_DATABASE_NAME=wathefni
+Environment=WATHEFNI_DATABASE_ENVIRONMENT_MARKER=wathefni-production-isolation-v1
+Environment=HOME=/root
+Environment=WATHEFNI_HR_INTELLIGENCE_REGISTRY_C1=on
+Environment=WATHEFNI_HR_INTELLIGENCE_REGISTRY_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_WORKFORCE_C2=on
+Environment=WATHEFNI_HR_INTELLIGENCE_WORKFORCE_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_RECRUITING_C3=on
+Environment=WATHEFNI_HR_INTELLIGENCE_RECRUITING_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_TIME_PAY_C4=on
+Environment=WATHEFNI_HR_INTELLIGENCE_TIME_PAY_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_PERF_TALENT_C5=on
+Environment=WATHEFNI_HR_INTELLIGENCE_PERF_TALENT_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_SURFACES_C6=on
+Environment=WATHEFNI_HR_INTELLIGENCE_SURFACES_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_PRODUCT_C7=on
+Environment=WATHEFNI_HR_INTELLIGENCE_PRODUCT_COMPANIES=WATHEFNI
+Environment=WATHEFNI_HR_INTELLIGENCE_PROJECTION_ACTOR=96599338566
+Environment=WATHEFNI_HR_INTELLIGENCE_STALE_AFTER_SECONDS=180
+Environment=WATHEFNI_HR_INTELLIGENCE_RECONCILE_EVERY_SECONDS=900
+TimeoutStartSec=8min
+ExecStart=/opt/wathefni/orchestrator/.venv/bin/python hr-intelligence-projection-worker.py
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
