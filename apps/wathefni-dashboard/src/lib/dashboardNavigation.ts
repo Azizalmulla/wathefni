@@ -165,11 +165,15 @@ export function buildDashboardSearchParams(
       const value = String(filters[key as keyof DashboardNavFilters] || '').trim()
       if (value) params.set(key, value)
     }
-  } else if (state.page === 'employees') {
+  } else if (state.page === 'employees' || state.page === 'leave') {
     const view = String(filters.view || '').trim()
     if (view) params.set('view', view)
   } else if (state.page === 'overview' && typeof state.overviewScrollY === 'number' && state.overviewScrollY > 0) {
     params.set('overview_scroll', String(Math.round(state.overviewScrollY)))
+  }
+  if (!['candidates', 'interviews', 'assessments'].includes(state.page)) {
+    const tab = String(filters.tab || '').trim()
+    if (tab) params.set('tab', tab)
   }
   return params
 }

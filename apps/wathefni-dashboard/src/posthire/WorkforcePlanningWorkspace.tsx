@@ -6,6 +6,8 @@
 import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/field'
@@ -43,6 +45,8 @@ export type WorkforcePlanningWorkspaceProps = {
 }
 
 type Tab = 'overview' | 'plan' | 'scenarios' | 'demand' | 'cost' | 'approvals' | 'execution' | 'history'
+
+const WORKSPACE_TABS = URL_BACKED_WORKSPACE_TABS['workforce-planning'] as readonly Tab[]
 
 function formatKwd(value: unknown, isAr: boolean) {
   const n = Number(value)
@@ -155,7 +159,7 @@ export function WorkforcePlanningWorkspace({
 }: WorkforcePlanningWorkspaceProps) {
   const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useUrlBackedTab<Tab>('workforce-planning', WORKSPACE_TABS, 'overview')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [forbidden, setForbidden] = useState(false)

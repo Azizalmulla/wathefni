@@ -1,6 +1,8 @@
 import { Copy, Inbox, Loader2, LogOut, MessageCircle, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
+import { useUrlBackedTab, SETTINGS_SECTIONS } from '@/lib/hrWebUrlTab'
+
 import { useConfirm } from '@/components/ConfirmDialog'
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { PlatformIntegrationsPanel } from '@/components/PlatformIntegrationsPanel'
@@ -128,7 +130,7 @@ export function SettingsPage({
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
   type SettingsSection = 'account' | 'team' | 'company' | 'communications' | 'integrations' | 'advanced'
-  const [section, setSection] = useState<SettingsSection>('account')
+  const [section, setSection] = useUrlBackedTab<SettingsSection>('settings', SETTINGS_SECTIONS, 'account')
   const canSeeAdvanced = canManageSettings
   const canSeeIntegrations = canManagePlatformIntegrations
   const canSeeCommunications = canManageSettings

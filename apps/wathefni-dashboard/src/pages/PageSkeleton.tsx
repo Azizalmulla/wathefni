@@ -1,7 +1,13 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { pageChunkLoaded } from '@/lib/hrWebNavPrefetch'
 
 function SkeletonBlock({ className }: { className: string }) {
   return <div className={`animate-pulse rounded-2xl bg-white/55 ${className}`} />
+}
+
+export function PagePaintFallback({ page }: { page: string }) {
+  if (pageChunkLoaded(page)) return null
+  return <PageSkeleton />
 }
 
 export function PageSkeleton() {

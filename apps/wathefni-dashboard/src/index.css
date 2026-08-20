@@ -75,6 +75,37 @@
   --color-ph-state-cancelled: var(--color-wf-accent-paused);
   --color-ph-state-cancelled-soft: var(--color-wf-accent-paused-soft);
   --color-ph-state-cancelled-ink: var(--color-wf-accent-paused-ink);
+
+  /*
+   * Palette-swap layer (HR Web UX Overhaul Phase 1).
+   * These aliases must stay var() references — never freeze the current OctoHR hex here.
+   * A later central palette change should retarget --color-wf-* / --color-accent only.
+   */
+  --color-semantic-canvas: var(--color-wf-canvas);
+  --color-semantic-frame: var(--color-wf-frame);
+  --color-semantic-sidebar: var(--color-wf-sidebar);
+  --color-semantic-surface: var(--color-wf-surface);
+  --color-semantic-surface-raised: var(--color-wf-surface-raised);
+  --color-semantic-ink: var(--color-wf-ink);
+  --color-semantic-ink-muted: var(--color-wf-ink-muted);
+  --color-semantic-text: var(--color-text);
+  --color-semantic-subtle: var(--color-subtle);
+  --color-semantic-mist: var(--color-mist);
+  --color-semantic-line: var(--color-line);
+  --color-semantic-accent: var(--color-accent);
+  --color-semantic-accent-soft: var(--color-accent-soft);
+  --color-semantic-danger: var(--color-wf-accent-active);
+  --color-semantic-danger-soft: var(--color-wf-accent-active-soft);
+  --color-semantic-danger-ink: var(--color-wf-accent-active-ink);
+  --color-semantic-success: var(--color-wf-accent-priority);
+  --color-semantic-success-soft: var(--color-wf-accent-priority-soft);
+  --color-semantic-success-ink: var(--color-wf-accent-priority-ink);
+  --color-semantic-warning: var(--color-wf-accent-review);
+  --color-semantic-warning-soft: var(--color-wf-accent-review-soft);
+  --color-semantic-warning-ink: var(--color-wf-accent-review-ink);
+  --color-semantic-info: var(--color-wf-accent-follow);
+  --color-semantic-info-soft: var(--color-wf-accent-follow-soft);
+  --color-semantic-info-ink: var(--color-wf-accent-follow-ink);
 }
 
 html,

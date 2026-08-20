@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node ../../ops/full-web-e2e/run-static-control-inventory.cjs",
+    "prebuild": "node ../../ops/full-web-e2e/run-static-control-inventory.cjs && node ../../ops/full-web-e2e/run-hr-web-surface-census.cjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -97,3 +97,34 @@ describe('Pre-hire semantic color contract', () => {
     expect(src).not.toMatch(/assistant-empty-chips[\s\S]{0,800}wf-accent-/)
   })
 })
+
+describe('HR Web semantic token layer (palette is not frozen)', () => {
+  test('semantic aliases exist and only reference other tokens', () => {
+    const css = read('index.css')
+    const tokens = [
+      'semantic-canvas',
+      'semantic-frame',
+      'semantic-sidebar',
+      'semantic-surface',
+      'semantic-surface-raised',
+      'semantic-ink',
+      'semantic-ink-muted',
+      'semantic-text',
+      'semantic-subtle',
+      'semantic-mist',
+      'semantic-line',
+      'semantic-accent',
+      'semantic-accent-soft',
+      'semantic-danger',
+      'semantic-success',
+      'semantic-warning',
+      'semantic-info',
+    ]
+    for (const token of tokens) {
+      const match = css.match(new RegExp(`--color-${token}:\\s*([^;]+);`))
+      expect(match, token).toBeTruthy()
+      expect(match![1].trim().startsWith('var('), `${token} must alias, not freeze a hex`).toBe(true)
+      expect(match![1]).not.toMatch(/#[0-9a-fA-F]{3,8}/)
+    }
+  })
+})

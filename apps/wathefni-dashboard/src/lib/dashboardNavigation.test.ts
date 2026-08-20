@@ -138,4 +138,41 @@ describe('dashboardNavigation', () => {
     expect(params.get('page')).toBe('employees')
     expect(params.get('view')).toBe('migration')
   })
+
+  test('writes and restores enterprise workspace tabs', () => {
+    const params = buildDashboardSearchParams({
+      page: 'talent',
+      candidate: null,
+      filters: { tab: 'people' },
+    })
+    expect(params.get('page')).toBe('talent')
+    expect(params.get('tab')).toBe('people')
+    const nav = readDashboardNavState(`?${params.toString()}`)
+    expect(nav.page).toBe('talent')
+    expect(nav.filters.tab).toBe('people')
+  })
+
+  test('writes and restores Settings sections', () => {
+    const params = buildDashboardSearchParams({
+      page: 'settings',
+      candidate: null,
+      filters: { tab: 'team' },
+    })
+    expect(params.get('page')).toBe('settings')
+    expect(params.get('tab')).toBe('team')
+    const nav = readDashboardNavState(`?${params.toString()}`)
+    expect(nav.filters.tab).toBe('team')
+  })
+
+  test('writes and restores Leave view', () => {
+    const params = buildDashboardSearchParams({
+      page: 'leave',
+      candidate: null,
+      filters: { view: 'history' },
+    })
+    expect(params.get('page')).toBe('leave')
+    expect(params.get('view')).toBe('history')
+    const nav = readDashboardNavState(`?${params.toString()}`)
+    expect(nav.filters.view).toBe('history')
+  })
 })

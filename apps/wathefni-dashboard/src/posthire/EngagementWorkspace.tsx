@@ -5,6 +5,8 @@
 import { Loader2, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/field'
@@ -36,6 +38,8 @@ export type EngagementWorkspaceProps = {
 }
 
 type Tab = 'overview' | 'surveys' | 'results' | 'actions' | 'history'
+
+const WORKSPACE_TABS = URL_BACKED_WORKSPACE_TABS.engagement as readonly Tab[]
 
 function copy(isAr: boolean) {
   return isAr
@@ -116,7 +120,7 @@ export function EngagementWorkspace({
 }: EngagementWorkspaceProps) {
   const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useUrlBackedTab<Tab>('engagement', WORKSPACE_TABS, 'overview')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [forbidden, setForbidden] = useState(false)

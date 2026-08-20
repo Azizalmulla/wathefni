@@ -11,9 +11,10 @@ const addEnd = postHireSrc.indexOf('function EditEmployeeModal(')
 const addSrc = postHireSrc.slice(addStart, addEnd)
 const importStart = postHireSrc.indexOf('function ImportEmployeesModal(')
 const importSrc = postHireSrc.slice(importStart, employeesStart)
-const pageMount = postHireSrc.slice(
-  postHireSrc.indexOf('export function PostHirePage('),
-  postHireSrc.indexOf('function PostHireModuleBody('),
+const dispatcherSrc = readFileSync(resolve(__dirname, './PostHireDispatcher.tsx'), 'utf8')
+const pageMount = dispatcherSrc.slice(
+  dispatcherSrc.indexOf('export function PostHirePage('),
+  dispatcherSrc.indexOf('switch (page)'),
 )
 
 describe('Employees directory Wave 1 contract', () => {

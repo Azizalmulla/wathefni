@@ -5,6 +5,8 @@
 import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/field'
@@ -37,6 +39,8 @@ export type BenefitsWorkspaceProps = {
 }
 
 type Tab = 'overview' | 'plans' | 'enrollment' | 'coverage' | 'contributions' | 'history'
+
+const WORKSPACE_TABS = URL_BACKED_WORKSPACE_TABS.benefits as readonly Tab[]
 
 function copy(isAr: boolean) {
   return isAr
@@ -129,7 +133,7 @@ export function BenefitsWorkspace({
 }: BenefitsWorkspaceProps) {
   const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useUrlBackedTab<Tab>('benefits', WORKSPACE_TABS, 'overview')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [forbidden, setForbidden] = useState(false)

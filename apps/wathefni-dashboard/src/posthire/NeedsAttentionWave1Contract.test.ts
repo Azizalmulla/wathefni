@@ -13,7 +13,6 @@ const capSrc = readFileSync(resolve(__dirname, '../lib/workspaceCapability.ts'),
 
 describe('Needs Attention Wave 1 contract', () => {
   it('renames user-facing labels while keeping page id inbox', () => {
-    expect(appSrc).toMatch(/id: 'inbox', label: 'Needs Attention'/)
     expect(appSrc).toMatch(/inbox: 'Needs Attention'/)
     expect(appSrc).toMatch(/inbox: 'يحتاج متابعة'/)
     expect(appSrc).toMatch(/الأمور التي تحتاج متابعتك|Ranked follow-ups/)

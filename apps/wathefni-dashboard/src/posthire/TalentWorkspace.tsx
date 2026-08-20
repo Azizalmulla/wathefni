@@ -6,6 +6,8 @@
 import { Loader2, RefreshCw, Sparkles } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
 import { Input, Textarea } from '@/components/ui/field'
@@ -42,6 +44,8 @@ export type TalentWorkspaceProps = {
 }
 
 type Tab = 'overview' | 'people' | 'reviews' | 'succession' | 'mobility' | 'ninebox' | 'models' | 'rolefit' | 'map'
+
+const WORKSPACE_TABS = URL_BACKED_WORKSPACE_TABS.talent as readonly Tab[]
 
 function copy(isAr: boolean) {
   return isAr
@@ -164,7 +168,7 @@ export function TalentWorkspace({
 }: TalentWorkspaceProps) {
   const { isAr } = useEmployees360Locale()
   const t = copy(isAr)
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useUrlBackedTab<Tab>('talent', WORKSPACE_TABS, 'overview')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [forbidden, setForbidden] = useState(false)

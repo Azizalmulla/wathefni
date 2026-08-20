@@ -5,6 +5,8 @@
 import { CalendarClock, CalendarDays, Loader2, MoreHorizontal, Plus, RefreshCw, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
+import { useUrlBackedTab, URL_BACKED_VIEW_PAGES } from '@/lib/hrWebUrlTab'
+
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
@@ -1136,7 +1138,7 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
   const locale = useEmployees360Locale()
   const c = leaveCopy(locale)
   const isAr = locale === 'ar'
-  const [view, setView] = useState<'active' | 'history'>('active')
+  const [view, setView] = useUrlBackedTab<'active' | 'history'>('leave', URL_BACKED_VIEW_PAGES.leave, 'active', 'view')
   const [historyStatus, setHistoryStatus] = useState('')
   const [showFile, setShowFile] = useState(false)
   const [selected, setSelected] = useState<PosthireLeaveRow | null>(null)

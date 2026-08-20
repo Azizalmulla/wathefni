@@ -6,6 +6,8 @@
 import { Loader2, RefreshCw, Target } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
 import { Input, Textarea } from '@/components/ui/field'
@@ -40,6 +42,8 @@ export type PerformanceWorkspaceProps = {
 }
 
 type Tab = 'overview' | 'goals' | 'reviews' | 'calibration' | 'development'
+
+const WORKSPACE_TABS = URL_BACKED_WORKSPACE_TABS.performance as readonly Tab[]
 
 function copy(isAr: boolean) {
   return isAr
@@ -166,7 +170,7 @@ export function PerformanceWorkspace({
 }: PerformanceWorkspaceProps) {
   const isAr = useEmployees360Locale() === 'ar'
   const t = copy(isAr)
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useUrlBackedTab<Tab>('performance', WORKSPACE_TABS, 'overview')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [forbidden, setForbidden] = useState(false)

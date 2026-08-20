@@ -100,22 +100,7 @@ import {
   type HrOwnershipGroup,
 } from '@/posthire/employees360/onboardingDrawerGroups'
 import { completionLabel, completionTone } from '@/posthire/employees360/onboardingCompletion'
-import { WorkforcePage } from '@/posthire/employees360/WorkforcePage'
 import { MigrationSyncShell } from '@/posthire/MigrationSyncShell'
-import { LeaveWorkspace } from '@/posthire/LeaveWorkspace'
-import { PreboardingWorkspace } from '@/posthire/PreboardingWorkspace'
-import { PerformanceWorkspace } from '@/posthire/PerformanceWorkspace'
-import { TalentWorkspace } from '@/posthire/TalentWorkspace'
-import { LearningWorkspace } from '@/posthire/LearningWorkspace'
-import { BenefitsWorkspace } from '@/posthire/BenefitsWorkspace'
-import { EmployeeRelationsWorkspace } from '@/posthire/EmployeeRelationsWorkspace'
-import { EngagementWorkspace } from '@/posthire/EngagementWorkspace'
-import { CompensationPlanningWorkspace } from '@/posthire/CompensationPlanningWorkspace'
-import { WorkforcePlanningWorkspace } from '@/posthire/WorkforcePlanningWorkspace'
-import { JobArchitectureWorkspace } from '@/posthire/JobArchitectureWorkspace'
-import { ProbationWorkspace } from '@/posthire/ProbationWorkspace'
-import { IntelligenceWorkspace } from '@/posthire/intelligence/IntelligenceWorkspace'
-import { ShiftsWorkspace } from '@/posthire/ShiftsWorkspace'
 import { ExternalPayrollWorkspace } from '@/posthire/ExternalPayrollWorkspace'
 import { PayslipWorkspace } from '@/posthire/PayslipWorkspace'
 import { PayrollInputReadinessPanel } from '@/posthire/PayrollInputReadinessPanel'
@@ -193,7 +178,7 @@ const SENSITIVE_DOC_KEYS = new Set([
   'personal_photo',
 ])
 
-type PostHireProps = {
+export type PostHireProps = {
   page: PostHireModulePage
   access: DashboardAccess
   permissions: string[]
@@ -1440,7 +1425,7 @@ function ImportEmployeesModal({ access, onClose, onNotice, onImported }: {
   )
 }
 
-function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
+export function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
   const locale = useEmployees360Locale()
   const copy = employeesCopy(locale)
   const [query, setQuery] = useState('')
@@ -4160,7 +4145,7 @@ function OnboardingDetailPanel({
   )
 }
 
-function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
+export function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
   const [query, setQuery] = useState('')
@@ -4951,7 +4936,7 @@ function attendanceMonthStart(iso: string): string {
   return `${iso.slice(0, 7)}-01`
 }
 
-function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
+export function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
   const [range, setRange] = useState<{ start: string; end: string } | null>(null)
@@ -5206,17 +5191,7 @@ function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: 
   )
 }
 
-// --- Leave -----------------------------------------------------------------
-
-function LeavePage(props: PostHireCommonProps) {
-  return <LeaveWorkspace {...props} />
-}
-
-// --- Shifts ----------------------------------------------------------------
-
-function ShiftsPage(props: PostHireCommonProps) {
-  return <ShiftsWorkspace {...props} />
-}
+// --- Leave (LeaveWorkspace is a lazy chunk in PostHireDispatcher) ----------
 
 // --- Payroll ---------------------------------------------------------------
 
@@ -5396,7 +5371,7 @@ function PayrollExportDetailModal({ access, exportId, currency, onClose, onNotic
 }
 
 
-function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
+export function PayrollPage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const locale = useEmployees360Locale()
   const px = payrollExternalCopy(locale)
   const isAr = locale === 'ar'
@@ -5982,7 +5957,7 @@ const ANALYTICS_PATTERN_SKIP = new Set(['Absences', 'Late records', 'Pending rev
 
 // --- Action Inbox (Post-Hire Differentiation Wave 1) ----------------------
 
-function ActionInboxPage({
+export function ActionInboxPage({
   access,
   onAccessIssue,
   onNavigate,
@@ -6390,7 +6365,7 @@ function analyticsPatternLabel(metric: string, isAr: boolean): string {
   return metric.replace(/_/g, ' ')
 }
 
-function AnalyticsPage({
+export function AnalyticsPage({
   access,
   onAccessIssue,
   onNavigate,
@@ -6713,7 +6688,7 @@ function complianceDaysLabel(doc: { days_until_expiry?: number | null }, isAr = 
   return isAr ? `${days}ي متبقية` : `${days}d left`
 }
 
-function CompliancePage({
+export function CompliancePage({
   access,
   permissions,
   role,
@@ -7306,186 +7281,9 @@ function CompliancePage({
   )
 }
 
+// Alerts & Delivery owns communication failures — no duplicate DeliveryStatusStrip on specialist modules.
 
-// --- dispatcher ------------------------------------------------------------
+// --- dispatcher (PostHireDispatcher.tsx) ------------------------------------
 
-export function PostHirePage({ page, access, permissions, role, onNotice, onAccessIssue, onOpenNotifications, onNavigate }: PostHireProps) {
-  // Alerts & Delivery owns communication failures — no duplicate DeliveryStatusStrip on specialist modules.
-  void onOpenNotifications
-  return (
-    <PostHireModuleBody
-      page={page}
-      access={access}
-      permissions={permissions}
-      role={role}
-      onNotice={onNotice}
-      onAccessIssue={onAccessIssue}
-      onNavigate={onNavigate}
-    />
-  )
-}
 
-function PostHireModuleBody({ page, access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireProps) {
-  switch (page) {
-    case 'employees':
-      return <EmployeesPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} onNavigate={onNavigate} />
-    case 'workforce':
-      return (
-        <WorkforcePage
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-          onNavigate={onNavigate}
-        />
-      )
-    case 'inbox':
-      return <ActionInboxPage access={access} onAccessIssue={onAccessIssue} onNavigate={onNavigate} />
-    case 'preboarding':
-      return (
-        <PreboardingWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'probation':
-      return (
-        <ProbationWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'onboarding':
-      return <OnboardingPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} onNavigate={onNavigate} />
-    case 'attendance':
-      return <AttendancePage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
-    case 'leave':
-      return <LeavePage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
-    case 'performance':
-      return (
-        <PerformanceWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'talent':
-      return (
-        <TalentWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'learning':
-      return (
-        <LearningWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'benefits':
-      return (
-        <BenefitsWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'employee-relations':
-      return (
-        <EmployeeRelationsWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'engagement':
-      return (
-        <EngagementWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'compensation-planning':
-      return (
-        <CompensationPlanningWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'workforce-planning':
-      return (
-        <WorkforcePlanningWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'job-architecture':
-      return (
-        <JobArchitectureWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-        />
-      )
-    case 'shifts':
-      return <ShiftsPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
-    case 'payroll':
-      return <PayrollPage access={access} permissions={permissions} role={role} onNotice={onNotice} onAccessIssue={onAccessIssue} />
-    case 'analytics':
-      return (
-        <IntelligenceWorkspace
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-          onNavigate={onNavigate}
-          fallback={<AnalyticsPage access={access} onAccessIssue={onAccessIssue} onNavigate={onNavigate} />}
-        />
-      )
-    case 'compliance':
-      return (
-        <CompliancePage
-          access={access}
-          permissions={permissions}
-          role={role}
-          onNotice={onNotice}
-          onAccessIssue={onAccessIssue}
-          onNavigate={onNavigate}
-        />
-      )
-    default:
-      return null
-  }
-}
+

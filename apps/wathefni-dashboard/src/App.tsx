@@ -1,31 +1,4 @@
-import {
-  Activity,
-  BarChart3,
-  Bell,
-  BriefcaseBusiness,
-  CalendarCheck,
-  CalendarClock,
-  CalendarRange,
-  ClipboardCheck,
-  ClipboardList,
-  Clock,
-  Inbox,
-  LayoutDashboard,
-  Loader2,
-  Medal,
-  MessageCircle,
-  MoreHorizontal,
-  Network,
-  RefreshCw,
-  Settings,
-  ShieldCheck,
-  Target,
-  Timer,
-  UserCheck,
-  UserPlus,
-  Users,
-  Wallet,
-} from 'lucide-react'
+import { Loader2, MoreHorizontal, RefreshCw } from 'lucide-react'
 import { type InfiniteData } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -38,7 +11,10 @@ import {
   isPostHireNavPage,
   resolveFocusedPosthireLanding,
 } from '@/lib/moduleWorkspace'
-import { resolveWorkspaceAuthority } from '@/lib/workspaceCapability'
+import { resolveWorkspaceAuthority, type NavGroup } from '@/lib/workspaceCapability'
+import { DASHBOARD_NAV_CATALOG, isRegisteredDashboardPage } from '@/lib/hrWebNavCatalog'
+import { prefetchDashboardDestination } from '@/lib/hrWebNavPrefetch'
+import { prefetchPostHirePage } from '@/posthire/PostHireDispatcher'
 import {
   dashboardPerfMarkInteractionStart,
   dashboardPerfMarkNetworkComplete,
@@ -148,7 +124,7 @@ import type {
   SetupReadinessResponse,
 } from '@/types'
 import { AccessVerificationPage, AuthSessionResolvingPage, NeedsSettings } from '@/pages/ShellStates'
-import { PageSkeleton } from '@/pages/PageSkeleton'
+import { PagePaintFallback, PageSkeleton } from '@/pages/PageSkeleton'
 import {
   LazyAdminAIPage,
   LazyAssessmentsPage,
@@ -174,9 +150,6 @@ import {
   normalizedJobStatus,
   stageLabel,
 } from '@/pages/shared/format'
-
-type NavGroup = 'prehire' | 'posthire' | 'settings'
-type DashboardNavItem = { id: Page; label: string; icon: typeof LayoutDashboard; module?: string; group: NavGroup }
 
 const NAV_GROUP_LABELS: Record<NavGroup, string> = { prehire: 'Pre-Hiring', posthire: 'Post-Hire', settings: 'Workspace' }
 
@@ -258,36 +231,9 @@ function candidateFiltersFromDashboardNav(nav: DashboardNavState): CandidateFilt
   }
 }
 
-const navItems: DashboardNavItem[] = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard, module: 'pre_hiring', group: 'prehire' },
-  { id: 'ai', label: 'OctoHR Assistant', icon: MessageCircle, module: 'pre_hiring', group: 'prehire' },
-  { id: 'jobs', label: 'Jobs', icon: BriefcaseBusiness, module: 'pre_hiring', group: 'prehire' },
-  { id: 'requisitions', label: 'Requisitions', icon: ClipboardList, module: 'requisitions', group: 'prehire' },
-  { id: 'candidates', label: 'Candidates', icon: Users, module: 'pre_hiring', group: 'prehire' },
-  { id: 'interviews', label: 'Interviews', icon: CalendarCheck, module: 'interviews', group: 'prehire' },
-  { id: 'calendar', label: 'Calendar', icon: CalendarRange, module: 'calendar', group: 'prehire' },
-  { id: 'assessments', label: 'Assessments', icon: ClipboardCheck, module: 'assessments', group: 'prehire' },
-  { id: 'ranking', label: 'Ranking', icon: Medal, module: 'pre_hiring', group: 'prehire' },
-  { id: 'notifications', label: 'Alerts & Delivery', icon: Bell, group: 'settings' },
-  { id: 'reports', label: 'Reports', icon: BarChart3, module: 'pre_hiring', group: 'prehire' },
-  { id: 'employees', label: 'Employees', icon: Users, group: 'posthire' },
-  { id: 'workforce', label: 'Organization', icon: Network, group: 'posthire' },
-  { id: 'inbox', label: 'Needs Attention', icon: Inbox, group: 'posthire' },
-  { id: 'preboarding', label: 'Preboarding', icon: UserPlus, module: 'preboarding', group: 'posthire' },
-  { id: 'onboarding', label: 'Onboarding', icon: UserCheck, module: 'onboarding', group: 'posthire' },
-  { id: 'probation', label: 'Probation', icon: Timer, module: 'probation', group: 'posthire' },
-  { id: 'attendance', label: 'Attendance', icon: CalendarCheck, module: 'attendance', group: 'posthire' },
-  { id: 'leave', label: 'Leave', icon: CalendarClock, module: 'leave', group: 'posthire' },
-  { id: 'performance', label: 'Performance', icon: Target, module: 'performance', group: 'posthire' },
-  { id: 'shifts', label: 'Shifts', icon: Clock, module: 'shifts', group: 'posthire' },
-  { id: 'payroll', label: 'Payroll', icon: Wallet, module: 'payroll', group: 'posthire' },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3, module: 'analytics', group: 'posthire' },
-  { id: 'compliance', label: 'Compliance', icon: ShieldCheck, module: 'compliance', group: 'posthire' },
-  { id: 'activity', label: 'Activity', icon: Activity, group: 'settings' },
-  { id: 'settings', label: 'Settings', icon: Settings, group: 'settings' },
-]
+const navItems = DASHBOARD_NAV_CATALOG
 
-// Modules that are real once enabled live in navItems (gated by enabled_modules).
+// Modules that are real once enabled live in the catalog (gated by resolveWorkspaceAuthority).
 // This list is for genuinely-future tools with no backend yet; empty for now.
 const futureModuleItems: Array<{ label: string; module: string }> = []
 
@@ -411,7 +357,7 @@ function App() {
   const [access, setAccess] = useState<DashboardAccess>(() => normalizedAccess(storedAccess()))
   const [page, setPage] = useState<Page>(() => {
     const requested = String(initialNav.page || '').trim()
-    if (requested && navItems.some((item) => item.id === requested)) return requested as Page
+    if (requested && isRegisteredDashboardPage(requested)) return requested
     return 'overview'
   })
   const [lastWorkPage, setLastWorkPage] = useState<Page>('overview')
@@ -694,6 +640,12 @@ function App() {
   )
   const availableNavItems = navItems.filter((item) => workspaceAuthority.pageAllowed(item.id))
   const availableNavById = Object.fromEntries(availableNavItems.map((item) => [item.id, item]))
+  const prefetchDestination = useCallback(
+    (id: Page) => {
+      prefetchDashboardDestination(id, access, queryClient, { postHireLoader: prefetchPostHirePage })
+    },
+    [access, queryClient],
+  )
   const defaultWorkspacePage = (() => {
     // Preserve payroll-operator focused landing (payroll.read without prehire.read).
     if (hasDashboardPermission(moduleState?.access, 'payroll.read') && !hasDashboardPermission(moduleState?.access, 'prehire.read')) {
@@ -852,7 +804,7 @@ function App() {
 
   function applyNavStateToUi(nav: DashboardNavState, opts: { restoreScroll?: boolean } = {}) {
     skipUrlSyncRef.current = true
-    const nextPage = (nav.page && navItems.some((item) => item.id === nav.page) ? nav.page : page) as Page
+    const nextPage = (nav.page && isRegisteredDashboardPage(nav.page) ? nav.page : page) as Page
     if (nextPage !== 'ai' && nextPage !== 'settings') setLastWorkPage(nextPage)
     setPage(nextPage)
     if (nextPage === 'candidates') {
@@ -1974,7 +1926,7 @@ function App() {
       if (prompt) void askDashboardAssistant(prompt)
       return
     }
-    if (item.page && navItems.some((nav) => nav.id === item.page)) {
+    if (item.page && isRegisteredDashboardPage(item.page)) {
       openPage(item.page as Page)
     }
     if (item.page === 'ranking' && item.position_code) {
@@ -2348,6 +2300,8 @@ function App() {
                           className="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-white/55 transition duration-200 ease-out hover:bg-white/8 hover:text-white"
                           key={item.id}
                           onClick={() => openPage(item.id)}
+                          onFocus={() => prefetchDestination(item.id)}
+                          onPointerEnter={() => prefetchDestination(item.id)}
                           type="button"
                         >
                           <Icon size={16} />
@@ -2393,6 +2347,8 @@ function App() {
                                 setMobileMoreOpen(false)
                                 openPage(item.id)
                               }}
+                              onFocus={() => prefetchDestination(item.id)}
+                              onPointerEnter={() => prefetchDestination(item.id)}
                               role="menuitem"
                               type="button"
                             >
@@ -2456,6 +2412,8 @@ function App() {
                           data-active={isActive ? 'true' : undefined}
                           key={item.id}
                           onClick={() => openPage(item.id)}
+                          onFocus={() => prefetchDestination(item.id)}
+                          onPointerEnter={() => prefetchDestination(item.id)}
                           type="button"
                         >
                           <Icon className="shrink-0" size={16} />
@@ -2678,7 +2636,7 @@ function App() {
               )}
               {activePage === 'ai' && (
                 <div className="flex min-h-0 flex-1 flex-col">
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyAdminAIPage
                     busy={chatBusy}
                     input={chatInput}
@@ -2718,7 +2676,7 @@ function App() {
                 </div>
               )}
               {activePage === 'jobs' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyJobsPage
                     canCreateJobs={canCreateJobs}
                     deadlineFilter={jobsDeadlineFilter}
@@ -2758,7 +2716,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'requisitions' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyRequisitionsWorkspace
                     access={access}
                     permissions={userAccess?.permissions || []}
@@ -2769,7 +2727,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'candidates' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyCandidatesPage
                     access={access}
                     locale={recruitingLocale}
@@ -2872,7 +2830,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'interviews' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyInterviewsPage
                     access={access}
                     locale={recruitingLocale}
@@ -2936,7 +2894,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'calendar' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyCalendarShell
                     access={access}
                     canManage={hasDashboardPermission(moduleState?.access, 'calendar.manage')}
@@ -2972,7 +2930,7 @@ function App() {
                 </div>
               ) : null}
               {activePage === 'assessments' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyAssessmentsPage
                     access={access}
                     applications={assessmentQueueApps}
@@ -3172,7 +3130,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'ranking' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyRankingPage
                     busy={rankingBusy || busy}
                     locale={recruitingLocale}
@@ -3192,7 +3150,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'notifications' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyNotificationsPage
                     access={access}
                     permissions={userAccess?.permissions || []}
@@ -3209,7 +3167,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'reports' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyReportsPage
                     assessmentEnabled={assessmentModuleOn}
                     interviewsEnabled={dashboardModuleEnabled(moduleState, 'interviews')}
@@ -3228,7 +3186,7 @@ function App() {
                 </Suspense>
               )}
               {activePage === 'settings' && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazySettingsPage
                     access={access}
                     busy={busy}
@@ -3262,7 +3220,7 @@ function App() {
                 <ActivityLog access={access} onAccessIssue={handleAccessIssue} />
               )}
               {isPostHirePage(activePage) && (
-                <Suspense fallback={<PageSkeleton />}>
+                <Suspense fallback={<PagePaintFallback page={activePage} />}>
                   <LazyPostHirePage
                     page={activePage}
                     access={access}
