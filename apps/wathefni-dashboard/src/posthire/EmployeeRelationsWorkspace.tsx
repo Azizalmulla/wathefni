@@ -3,9 +3,10 @@
  * Sealed need-to-know. Intake ≠ finding. Investigation ≠ outcome. Outcome ≠ employment mutation.
  */
 import { RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
+import { useUrlBackedParam, useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
@@ -131,13 +132,15 @@ export function EmployeeRelationsWorkspace({
   const [forbidden, setForbidden] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<EmployeeRelationsWorkspacePayload | null>(null)
+  const payloadRef = useRef(payload)
+  payloadRef.current = payload
   const [cases, setCases] = useState<Array<Record<string, unknown>>>([])
   const [myWork, setMyWork] = useState<Array<Record<string, unknown>>>([])
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null)
   const [history, setHistory] = useState<Array<Record<string, unknown>>>([])
   const [tabError, setTabError] = useState(false)
   const [tabReady, setTabReady] = useState(false)
-  const [caseId, setCaseId] = useState('')
+  const [caseId, setCaseId] = useUrlBackedParam('employee-relations', 'q', '', 'replace')
   const [caseTypeId, setCaseTypeId] = useState('')
   const [subjectKey, setSubjectKey] = useState('')
   const [investigatorKey, setInvestigatorKey] = useState('')
@@ -151,7 +154,7 @@ export function EmployeeRelationsWorkspace({
     hasActorPermission(permissions, 'er.read') || canManage || canInvestigate || canDecide
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!payloadRef.current) setLoading(true)
     setError(false)
     setForbidden(false)
     setUnavailable(false)
@@ -171,7 +174,7 @@ export function EmployeeRelationsWorkspace({
       } else {
         setError(true)
       }
-      setPayload(null)
+      if (!payloadRef.current) setPayload(null)
     } finally {
       setLoading(false)
     }
@@ -264,15 +267,10 @@ export function EmployeeRelationsWorkspace({
   return (
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'} data-testid="employee-relations-workspace">
       <ConfigureInSetupBanner anchor="classic-wave6-employee-relations" />
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{t.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t.boundaries}</p>
-        </div>
-        <Button type="button" variant="outline" onClick={() => void load()}>
-          <RefreshCw className="h-4 w-4" />
-          {t.refresh}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-semantic-subtle">{t.boundaries}</p>
+        <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading} aria-label={t.refresh}>
+          <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </Button>
       </div>
 
@@ -300,13 +298,7 @@ export function EmployeeRelationsWorkspace({
         />
       ) : (
         <>
-        <div className="flex flex-wrap gap-2">
-          {tabs.map((item) => (
-            <Button key={item.id} type="button" variant={tab === item.id ? 'default' : 'outline'} onClick={() => setTab(item.id)}>
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        <HrSurfaceTabs value={tab} onChange={setTab} ariaLabel={t.title} items={tabs} />
 
         {tab === 'overview' ? (
           <div className="space-y-3">
@@ -359,7 +351,7 @@ export function EmployeeRelationsWorkspace({
                     variant="ghost"
                     className="ms-2 h-7 px-2"
                     onClick={() => {
-                      setCaseId(String(item.case_id || ''))
+                      setCaseId(String(item.case_id || ''), 'push')
                       setTab('detail')
                     }}
                   >

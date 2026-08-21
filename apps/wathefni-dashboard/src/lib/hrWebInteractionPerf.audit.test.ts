@@ -113,4 +113,16 @@ describe('HR Web interaction performance audit (source + contracts, no fake muta
     expect(urlTab).toContain("workforce: ['organization', 'lifecycle', 'remediation', 'migration', 'requests']")
     expect(urlTab).toContain("inbox: ['needs_action', 'due_soon', 'blocked', 'all']")
   })
+
+  test('enterprise flagship details are URL-backed (metric, case, campaign, cycle)', () => {
+    const intelligence = read('posthire/intelligence/IntelligenceWorkspace.tsx')
+    const er = read('posthire/EmployeeRelationsWorkspace.tsx')
+    const engagement = read('posthire/EngagementWorkspace.tsx')
+    const comp = read('posthire/CompensationPlanningWorkspace.tsx')
+    expect(intelligence).toContain("useUrlBackedParam('analytics', 'q'")
+    expect(intelligence).toContain('evaluateIntelligenceMetric')
+    expect(er).toContain("useUrlBackedParam('employee-relations', 'q'")
+    expect(engagement).toContain("useUrlBackedParam('engagement', 'q'")
+    expect(comp).toContain("useUrlBackedParam('compensation-planning', 'q'")
+  })
 })

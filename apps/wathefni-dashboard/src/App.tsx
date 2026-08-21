@@ -202,8 +202,23 @@ function isPeopleSpinePage(page: Page | string): boolean {
   )
 }
 
+function isEnterpriseFlagshipPage(page: Page | string): boolean {
+  return (
+    page === 'performance' ||
+    page === 'talent' ||
+    page === 'learning' ||
+    page === 'benefits' ||
+    page === 'employee-relations' ||
+    page === 'engagement' ||
+    page === 'compensation-planning' ||
+    page === 'workforce-planning' ||
+    page === 'job-architecture' ||
+    page === 'analytics'
+  )
+}
+
 function usesCanonicalPageHeader(page: Page | string): boolean {
-  return isOperationalCorePage(page) || isPeopleSpinePage(page)
+  return isOperationalCorePage(page) || isPeopleSpinePage(page) || isEnterpriseFlagshipPage(page)
 }
 
 // Lifecycle confirmation contract (kept in lockstep with HR mobile and lifecycle-labels tests).

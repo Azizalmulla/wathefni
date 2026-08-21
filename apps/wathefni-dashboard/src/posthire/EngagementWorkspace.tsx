@@ -3,9 +3,10 @@
  * Anonymous ≠ identified. Below threshold → suppress, never guess. Result ≠ action plan ≠ ER.
  */
 import { Loader2, RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
+import { useUrlBackedParam, useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
@@ -126,6 +127,8 @@ export function EngagementWorkspace({
   const [forbidden, setForbidden] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<EngagementWorkspacePayload | null>(null)
+  const payloadRef = useRef(payload)
+  payloadRef.current = payload
   const [campaigns, setCampaigns] = useState<Array<Record<string, unknown>>>([])
   const [results, setResults] = useState<Record<string, unknown> | null>(null)
   const [plans, setPlans] = useState<Array<Record<string, unknown>>>([])
@@ -136,7 +139,7 @@ export function EngagementWorkspace({
   const [titleEn, setTitleEn] = useState('')
   const [titleAr, setTitleAr] = useState('')
   const [audience, setAudience] = useState('')
-  const [selectedCampaign, setSelectedCampaign] = useState('')
+  const [selectedCampaign, setSelectedCampaign] = useUrlBackedParam('engagement', 'q', '', 'replace')
 
   const canManage = hasActorPermission(permissions, 'engagement.manage')
   const canLaunch = hasActorPermission(permissions, 'engagement.launch') || canManage
@@ -144,7 +147,7 @@ export function EngagementWorkspace({
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!payloadRef.current) setLoading(true)
     setError(false)
     setForbidden(false)
     setUnavailable(false)
@@ -174,7 +177,7 @@ export function EngagementWorkspace({
       } else {
         setError(true)
       }
-      setPayload(null)
+      if (!payloadRef.current) setPayload(null)
     } finally {
       setLoading(false)
     }
@@ -250,15 +253,12 @@ export function EngagementWorkspace({
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'} data-testid="engagement-workspace">
       <ConfigureInSetupBanner anchor="classic-wave6-engagement" />
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{t.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t.boundaries}</p>
-          <p className="text-xs text-muted-foreground">{t.notGenericBi}</p>
+        <div className="space-y-1">
+          <p className="text-xs text-semantic-subtle">{t.boundaries}</p>
+          <p className="text-xs text-semantic-subtle">{t.notGenericBi}</p>
         </div>
-        <Button type="button" variant="outline" onClick={() => void load()}>
-          <RefreshCw className="me-2 h-4 w-4" />
-          {t.refresh}
+        <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading} aria-label={t.refresh}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
         </Button>
       </div>
       {state !== 'ready' ? (
@@ -283,13 +283,12 @@ export function EngagementWorkspace({
         />
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            {tabs.map((id) => (
-              <Button key={id} type="button" variant={tab === id ? 'default' : 'outline'} onClick={() => setTab(id)}>
-                {t[id]}
-              </Button>
-            ))}
-          </div>
+          <HrSurfaceTabs
+            value={tab}
+            onChange={setTab}
+            ariaLabel={t.title}
+            items={tabs.map((id) => ({ id, label: t[id] }))}
+          />
           {tab === 'overview' && counts && (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
@@ -362,7 +361,7 @@ export function EngagementWorkspace({
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" onClick={() => { setSelectedCampaign(String(row.campaign_id)); setTab('results') }}>
+                    <Button type="button" variant="outline" onClick={() => { setSelectedCampaign(String(row.campaign_id), 'push'); setTab('results') }}>
                       {t.results}
                     </Button>
                     {canLaunch && row.status === 'draft' ? (

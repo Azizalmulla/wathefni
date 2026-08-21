@@ -251,4 +251,22 @@ describe('dashboardNavigation', () => {
     const workforceAlias = readDashboardNavState('?page=workforce&workforce=lifecycle')
     expect(workforceAlias.filters.tab).toBe('lifecycle')
   })
+
+  test('enterprise flagship details write q without recruiting chrome', () => {
+    const intelligence = buildDashboardSearchParams({
+      page: 'analytics',
+      candidate: null,
+      filters: { q: 'workforce.headcount' },
+    })
+    expect(intelligence.get('page')).toBe('analytics')
+    expect(intelligence.get('q')).toBe('workforce.headcount')
+
+    const er = buildDashboardSearchParams({
+      page: 'employee-relations',
+      candidate: null,
+      filters: { tab: 'detail', q: 'CASE-1' },
+    })
+    expect(er.get('tab')).toBe('detail')
+    expect(er.get('q')).toBe('CASE-1')
+  })
 })

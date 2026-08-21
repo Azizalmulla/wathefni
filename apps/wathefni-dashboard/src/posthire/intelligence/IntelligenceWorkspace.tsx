@@ -9,7 +9,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input, Select } from '@/components/ui/field'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { DashboardApiError } from '@/lib/api'
+import { useUrlBackedParam } from '@/lib/hrWebUrlTab'
 import {
   createIntelligenceExport,
   createIntelligenceSavedView,
@@ -211,8 +212,8 @@ function DetailPanel({
   const drill = detail.drill
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-black/20 backdrop-blur-[2px]" role="dialog" aria-modal="true">
-      <div className="h-full w-full max-w-2xl overflow-y-auto border-s border-line bg-[#fffdf8] p-5 shadow-2xl" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="fixed inset-0 z-40 flex justify-end bg-semantic-ink/20 backdrop-blur-[2px]" role="dialog" aria-modal="true">
+      <div className="h-full w-full max-w-2xl overflow-y-auto border-s border-semantic-line bg-semantic-surface p-5 shadow-2xl" dir={isAr ? 'rtl' : 'ltr'}>
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-subtle">
@@ -281,7 +282,7 @@ function DetailPanel({
                           <div
                             className={cn(
                               'w-full rounded-t-md',
-                              value === null ? 'bg-line/70' : 'bg-[#c89445]/75',
+                              value === null ? 'bg-semantic-line/70' : 'bg-semantic-accent/75',
                             )}
                             style={{ height: `${width}%` }}
                           />
@@ -407,11 +408,14 @@ export function IntelligenceWorkspace({
   const isAr = locale === 'ar'
   const c = copy(isAr)
   const [bootstrap, setBootstrap] = useState<IntelligenceBootstrap | null>(null)
+  const bootstrapRef = useRef(bootstrap)
+  bootstrapRef.current = bootstrap
   const [overview, setOverview] = useState<IntelligenceOverview | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [gateOff, setGateOff] = useState(false)
   const [error, setError] = useState(false)
+  const [metricKey, setMetricKey] = useUrlBackedParam('analytics', 'q', '', 'replace')
   const [selected, setSelected] = useState<IntelligenceDefinition | null>(null)
   const [detail, setDetail] = useState<DetailState>({ metric: null, trend: null, drill: null })
   const [detailBusy, setDetailBusy] = useState(false)
@@ -432,7 +436,7 @@ export function IntelligenceWorkspace({
   }, [onAccessIssue, onNotice])
 
   const load = useCallback(async (soft = false) => {
-    if (soft) setRefreshing(true)
+    if (soft || bootstrapRef.current) setRefreshing(true)
     else setLoading(true)
     setError(false)
     try {
@@ -451,8 +455,10 @@ export function IntelligenceWorkspace({
         code === 'c1_company_entitlement_required'
       ) {
         setGateOff(true)
-      } else {
+      } else if (!bootstrapRef.current) {
         setError(true)
+        reportError(caught, c.loadFailed)
+      } else {
         reportError(caught, c.loadFailed)
       }
     } finally {
@@ -493,9 +499,24 @@ export function IntelligenceWorkspace({
     }
   }, [access, c.loadFailed, locale, reportError, role])
 
+  useEffect(() => {
+    if (!metricKey || selected?.semantic_key === metricKey) return
+    const definition = definitions.get(metricKey)
+    if (!definition) return
+    setSelected(definition)
+    setSaveName(isAr ? definition.name_ar : definition.name_en)
+    setSegmentDimension(
+      definition.supported_dimensions.includes('department')
+        ? 'department'
+        : definition.supported_dimensions[0] || '',
+    )
+    void loadDetail(definition)
+  }, [metricKey, definitions, selected, isAr, loadDetail])
+
   const openMetric = (metric: IntelligenceMetric) => {
     const definition = metric.about_metric || definitions.get(metric.semantic_key)
     if (!definition) return
+    setMetricKey(definition.semantic_key, 'push')
     setSelected(definition)
     setDetail({ metric, trend: null, drill: null })
     setSegmentDimension(definition.supported_dimensions.includes('department') ? 'department' : definition.supported_dimensions[0] || '')
@@ -560,7 +581,7 @@ export function IntelligenceWorkspace({
     return <WorkflowEmpty title={c.notEnabled} hint={c.notEnabledHint} icon={<ShieldCheck className="h-7 w-7" />} />
   }
 
-  if (loading) {
+  if (loading && !bootstrap) {
     return (
       <div className="flex min-h-64 items-center justify-center gap-2 text-sm text-subtle">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -586,23 +607,18 @@ export function IntelligenceWorkspace({
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-[#a9702f]" />
-            <h1 className="text-2xl font-semibold tracking-tight text-text">{c.title}</h1>
-          </div>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-subtle">{c.subtitle}</p>
+          <p className="max-w-2xl text-sm leading-6 text-subtle">{c.subtitle}</p>
           <button
             type="button"
-            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-subtle underline-offset-4 hover:text-text hover:underline"
+            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-subtle underline-offset-4 transition-colors duration-150 hover:text-text hover:underline"
             onClick={() => onNavigate?.('inbox')}
           >
             <Inbox className="h-3.5 w-3.5" />
             {c.attention} · {c.attentionAction}
           </button>
         </div>
-        <Button variant="secondary" pending={refreshing} onClick={() => void load(true)}>
-          <RefreshCw className="h-4 w-4" />
-          {c.refresh}
+        <Button variant="ghost" size="sm" pending={refreshing} onClick={() => void load(true)} aria-label={c.refresh}>
+          <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
         </Button>
       </div>
 
@@ -627,7 +643,7 @@ export function IntelligenceWorkspace({
                 <Card
                   key={metric.semantic_key}
                   tone="quiet"
-                  className="cursor-pointer transition hover:-translate-y-0.5 hover:border-[#c89445]/35 hover:shadow-md"
+                  className="cursor-pointer transition-colors duration-150 hover:border-semantic-accent/35"
                   role="button"
                   tabIndex={0}
                   onClick={() => openMetric(metric)}
@@ -686,7 +702,10 @@ export function IntelligenceWorkspace({
           segmentResult={segmentResult}
           exporting={exporting}
           saving={saving}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setSelected(null)
+            setMetricKey('')
+          }}
           onDrillPage={(offset) => void loadDetail(selected, offset)}
           onExport={() => void runExport()}
           onSave={() => void saveView()}

@@ -68,8 +68,8 @@ describe('TalentWorkspace resource states', () => {
       />,
     )
 
-    await screen.findByRole('button', { name: 'People' })
-    fireEvent.click(screen.getByRole('button', { name: 'People' }))
+    await screen.findByRole('tab', { name: 'People' })
+    fireEvent.click(screen.getByRole('tab', { name: 'People' }))
 
     const state = await screen.findByTestId('talent-people-state')
     expect(state).toHaveAttribute('role', 'alert')
@@ -102,8 +102,8 @@ describe('TalentWorkspace resource states', () => {
       />,
     )
 
-    await screen.findByRole('button', { name: 'People' })
-    fireEvent.click(screen.getByRole('button', { name: 'People' }))
+    await screen.findByRole('tab', { name: 'People' })
+    fireEvent.click(screen.getByRole('tab', { name: 'People' }))
 
     await waitFor(() => {
       expect(screen.getByTestId('talent-people-state')).toHaveTextContent(/No Talent profiles yet/i)

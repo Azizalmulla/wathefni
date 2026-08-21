@@ -4,8 +4,9 @@
  * Planned headcount is not actual Wave 5 headcount. Planned cost is not payroll.
  */
 import { RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
@@ -165,6 +166,8 @@ export function WorkforcePlanningWorkspace({
   const [forbidden, setForbidden] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<WorkforcePlanningWorkspacePayload | null>(null)
+  const payloadRef = useRef(payload)
+  payloadRef.current = payload
   const [plans, setPlans] = useState<Array<Record<string, unknown>>>([])
   const [scenarios, setScenarios] = useState<Array<Record<string, unknown>>>([])
   const [demand, setDemand] = useState<Array<Record<string, unknown>>>([])
@@ -198,7 +201,7 @@ export function WorkforcePlanningWorkspace({
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!payloadRef.current) setLoading(true)
     setError(false)
     setForbidden(false)
     setUnavailable(false)
@@ -228,7 +231,7 @@ export function WorkforcePlanningWorkspace({
       } else {
         setError(true)
       }
-      setPayload(null)
+      if (!payloadRef.current) setPayload(null)
     } finally {
       setLoading(false)
     }
@@ -338,16 +341,13 @@ export function WorkforcePlanningWorkspace({
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'} data-testid="workforce-planning-workspace">
       <ConfigureInSetupBanner anchor="classic-wave6-workforce-planning" />
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{t.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t.boundaries}</p>
-          <p className="text-xs text-muted-foreground">{t.kwdOnly}</p>
-          <p className="text-xs text-muted-foreground">{t.jaRequired}</p>
+        <div className="space-y-1">
+          <p className="text-xs text-semantic-subtle">{t.boundaries}</p>
+          <p className="text-xs text-semantic-subtle">{t.kwdOnly}</p>
+          <p className="text-xs text-semantic-subtle">{t.jaRequired}</p>
         </div>
-        <Button type="button" variant="outline" onClick={() => void load()}>
-          <RefreshCw className="me-2 h-4 w-4" />
-          {t.refresh}
+        <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading} aria-label={t.refresh}>
+          <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </Button>
       </div>
       {state !== 'ready' ? (
@@ -372,13 +372,12 @@ export function WorkforcePlanningWorkspace({
         />
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            {tabs.map((id) => (
-              <Button key={id} type="button" variant={tab === id ? 'default' : 'outline'} onClick={() => setTab(id)}>
-                {t[id]}
-              </Button>
-            ))}
-          </div>
+          <HrSurfaceTabs
+            value={tab}
+            onChange={setTab}
+            ariaLabel={t.title}
+            items={tabs.map((id) => ({ id, label: t[id] }))}
+          />
           {tabError ? (
             <ResourceState
               kind="error"

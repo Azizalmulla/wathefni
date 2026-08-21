@@ -4,9 +4,10 @@
  * Grade ≠ salary band. Recommendation ≠ approval. Finalized ≠ applied.
  */
 import { Loader2, RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
+import { useUrlBackedParam, useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
@@ -154,6 +155,8 @@ export function CompensationPlanningWorkspace({
   const [forbidden, setForbidden] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<CompensationPlanningWorkspacePayload | null>(null)
+  const payloadRef = useRef(payload)
+  payloadRef.current = payload
   const [cycles, setCycles] = useState<Array<Record<string, unknown>>>([])
   const [rows, setRows] = useState<Array<Record<string, unknown>>>([])
   const [recommendations, setRecommendations] = useState<Array<Record<string, unknown>>>([])
@@ -166,7 +169,7 @@ export function CompensationPlanningWorkspace({
   const [code, setCode] = useState('')
   const [titleEn, setTitleEn] = useState('')
   const [titleAr, setTitleAr] = useState('')
-  const [selectedCycle, setSelectedCycle] = useState('')
+  const [selectedCycle, setSelectedCycle] = useUrlBackedParam('compensation-planning', 'q', '', 'replace')
   const [employeeKey, setEmployeeKey] = useState('')
   const [amount, setAmount] = useState('')
   const [originalRecId, setOriginalRecId] = useState('')
@@ -180,7 +183,7 @@ export function CompensationPlanningWorkspace({
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!payloadRef.current) setLoading(true)
     setError(false)
     setForbidden(false)
     setUnavailable(false)
@@ -210,7 +213,7 @@ export function CompensationPlanningWorkspace({
       } else {
         setError(true)
       }
-      setPayload(null)
+      if (!payloadRef.current) setPayload(null)
     } finally {
       setLoading(false)
     }
@@ -305,16 +308,13 @@ export function CompensationPlanningWorkspace({
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'} data-testid="compensation-planning-workspace">
       <ConfigureInSetupBanner anchor="classic-wave6-comp-planning" />
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{t.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t.boundaries}</p>
-          <p className="text-xs text-muted-foreground">{t.kwdOnly}</p>
-          <p className="text-xs text-muted-foreground">{t.jaRequired}</p>
+        <div className="space-y-1">
+          <p className="text-xs text-semantic-subtle">{t.boundaries}</p>
+          <p className="text-xs text-semantic-subtle">{t.kwdOnly}</p>
+          <p className="text-xs text-semantic-subtle">{t.jaRequired}</p>
         </div>
-        <Button type="button" variant="outline" onClick={() => void load()}>
-          <RefreshCw className="me-2 h-4 w-4" />
-          {t.refresh}
+        <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading} aria-label={t.refresh}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
         </Button>
       </div>
       {state !== 'ready' ? (
@@ -339,13 +339,12 @@ export function CompensationPlanningWorkspace({
         />
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            {tabs.map((id) => (
-              <Button key={id} type="button" variant={tab === id ? 'default' : 'outline'} onClick={() => setTab(id)}>
-                {t[id]}
-              </Button>
-            ))}
-          </div>
+          <HrSurfaceTabs
+            value={tab}
+            onChange={setTab}
+            ariaLabel={t.title}
+            items={tabs.map((id) => ({ id, label: t[id] }))}
+          />
           {tab === 'overview' && counts && (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
@@ -423,7 +422,7 @@ export function CompensationPlanningWorkspace({
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" onClick={() => { setSelectedCycle(String(row.cycle_id)); setTab('worksheet') }}>
+                    <Button type="button" variant="outline" onClick={() => { setSelectedCycle(String(row.cycle_id), 'push'); setTab('worksheet') }}>
                       {t.worksheet}
                     </Button>
                     {canManage && row.status === 'draft' ? (

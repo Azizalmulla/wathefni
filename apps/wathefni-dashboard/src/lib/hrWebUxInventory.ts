@@ -29,7 +29,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'App.tsx page header + PageIntro',
     path: 'src/App.tsx + src/components/ui/page-chrome.tsx',
     disposition: 'consolidate',
-    notes: 'Overview now uses HrPageHeader as the reference. Operational core and People spine (Employees, Organization, Onboarding, Preboarding, Probation, Needs Attention) use density=page. Recruiting and remaining enterprise/Settings keep the App h1 until later phases.',
+    notes: 'Overview uses HrPageHeader as the reference. Operational core, People spine, and Phase 6 enterprise flagship pages use density=page via usesCanonicalPageHeader. Recruiting and Settings keep the App h1 until later phases.',
   },
   {
     id: 'actions.button',
@@ -53,7 +53,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'Interviews/Assessments URL tabs',
     path: 'src/pages/InterviewsPage.tsx, AssessmentsPage.tsx',
     disposition: 'preserve',
-    notes: 'URL-backed tabs. This is the pattern enterprise workspaces should adopt.',
+    notes: 'URL-backed tabs. Recruiting Interviews/Assessments keep this pattern; enterprise workspaces now share HrSurfaceTabs.',
   },
   {
     id: 'tabs.enterprise',
@@ -61,7 +61,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'Post-hire workspace Tab unions',
     path: 'src/posthire/*Workspace.tsx',
     disposition: 'consolidate',
-    notes: 'Enterprise workspaces and Settings are URL-backed. Phase 4: Leave `?view=`, Shifts/Payroll `?tab=`, Attendance `?date=` / `?date_end=`. Phase 5 People: Employees `?employee=` / `?q=` / `?status=`, Organization `?tab=`, Onboarding/Preboarding/Probation/Inbox `?tab=`. Capture ops tabs stay local.',
+    notes: 'Enterprise workspaces and Settings are URL-backed. Phase 6: Performance/Talent/Learning/Benefits/ER/Engagement/Comp/Workforce Planning/Job Architecture use HrSurfaceTabs + `?tab=`. Intelligence metric via `?q=`. Recruiting and Settings chrome stay later.',
   },
   {
     id: 'search.filters',
@@ -69,7 +69,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'dashboardNavigation + SearchInput',
     path: 'src/lib/dashboardNavigation.ts + src/components/ui/search-input.tsx',
     disposition: 'preserve',
-    notes: 'Candidates/Interviews/Assessments filters are already URL-canonical. Leave history `?status=` and Attendance date range join that pattern. Phase 5 People directory search/status/department/onboarding are URL-backed. Shifts org filters stay local (scope, not chrome).',
+    notes: 'Candidates/Interviews/Assessments filters are already URL-canonical. Phase 6 also writes `?q=` for Intelligence metric, ER case, Engagement campaign, and Compensation cycle. Shifts org filters stay local (scope, not chrome).',
   },
   {
     id: 'tables.lists',

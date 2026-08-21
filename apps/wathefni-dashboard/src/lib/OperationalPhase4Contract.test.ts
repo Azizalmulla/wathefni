@@ -65,11 +65,9 @@ describe('HR Web Phase 4 operational core UX', () => {
     expect(byId['tab.attendance.capture']?.notes || '').toMatch(/local/)
   })
 
-  it('does not restyle Recruiting, remaining enterprise, or Settings chrome in this phase', () => {
-    const talent = read('posthire/TalentWorkspace.tsx')
+  it('does not restyle Recruiting or Settings chrome in this phase', () => {
     const settings = read('pages/SettingsPage.tsx')
     const jobs = read('pages/JobsPage.tsx')
-    expect(talent).not.toContain('HrSurfaceTabs')
     expect(settings).not.toContain('HrSurfaceTabs')
     expect(jobs).not.toContain('HrSurfaceTabs')
   })

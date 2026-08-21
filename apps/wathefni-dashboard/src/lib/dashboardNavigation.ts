@@ -209,6 +209,14 @@ export function buildDashboardSearchParams(
     const dateEnd = String(filters.date_end || '').trim()
     if (date) params.set('date', date)
     if (dateEnd) params.set('date_end', dateEnd)
+  } else if (
+    state.page === 'analytics' ||
+    state.page === 'employee-relations' ||
+    state.page === 'engagement' ||
+    state.page === 'compensation-planning'
+  ) {
+    const q = String(filters.q || '').trim()
+    if (q) params.set('q', q)
   } else if (state.page === 'overview' && typeof state.overviewScrollY === 'number' && state.overviewScrollY > 0) {
     params.set('overview_scroll', String(Math.round(state.overviewScrollY)))
   }

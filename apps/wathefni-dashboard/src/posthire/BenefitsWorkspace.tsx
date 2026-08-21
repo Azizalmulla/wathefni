@@ -3,8 +3,9 @@
  * Eligible ≠ enrolled ≠ coverage active ≠ provider confirmed ≠ payroll deducted.
  */
 import { RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
@@ -139,6 +140,8 @@ export function BenefitsWorkspace({
   const [forbidden, setForbidden] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<BenefitsWorkspacePayload | null>(null)
+  const payloadRef = useRef(payload)
+  payloadRef.current = payload
   const [plans, setPlans] = useState<Array<Record<string, unknown>>>([])
   const [enrollments, setEnrollments] = useState<Array<Record<string, unknown>>>([])
   const [coverage, setCoverage] = useState<Array<Record<string, unknown>>>([])
@@ -159,7 +162,7 @@ export function BenefitsWorkspace({
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!payloadRef.current) setLoading(true)
     setError(false)
     setForbidden(false)
     setUnavailable(false)
@@ -179,7 +182,7 @@ export function BenefitsWorkspace({
       } else {
         setError(true)
       }
-      setPayload(null)
+      if (!payloadRef.current) setPayload(null)
     } finally {
       setLoading(false)
     }
@@ -276,15 +279,10 @@ export function BenefitsWorkspace({
   return (
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <ConfigureInSetupBanner anchor="classic-wave6-benefits" />
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{t.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t.boundaries}</p>
-        </div>
-        <Button type="button" variant="outline" onClick={() => void load()}>
-          <RefreshCw className="h-4 w-4" />
-          {t.refresh}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-semantic-subtle">{t.boundaries}</p>
+        <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading} aria-label={t.refresh}>
+          <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </Button>
       </div>
 
@@ -312,13 +310,7 @@ export function BenefitsWorkspace({
         />
       ) : (
         <>
-        <div className="flex flex-wrap gap-2">
-          {tabs.map((item) => (
-            <Button key={item.id} type="button" variant={tab === item.id ? 'default' : 'outline'} onClick={() => setTab(item.id)}>
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        <HrSurfaceTabs value={tab} onChange={setTab} ariaLabel={t.title} items={tabs} />
 
         {tab === 'overview' ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

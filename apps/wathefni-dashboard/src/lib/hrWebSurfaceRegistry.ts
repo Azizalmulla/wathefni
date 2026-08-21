@@ -308,8 +308,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/performance',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
-    notes: 'In catalog + capability. Workspace tabs are URL-backed (`?tab=`).',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Flagship goals/reviews/calibration/development chrome. Backend remains progress, rollup, rating, and allowed_actions authority. No Talent vocabulary.',
   },
   {
     page: 'talent',
@@ -319,8 +319,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/talent',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
-    notes: 'Phase 2 lockstep: catalog + resolveWorkspaceAuthority. Entitled ?page=talent opens directly.',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Flagship profiles, succession, mobility, and derived 9-box visualization. No master talent score. Distinct from Performance and recruiting talent_pool.',
   },
   {
     page: 'learning',
@@ -330,8 +330,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/learning',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
-    notes: 'Phase 2 lockstep. Setup Console opsHref and sidebar share this destination.',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Catalog, assignments, sessions, certifications stay backend-authored. Learning completion does not close development plans.',
   },
   {
     page: 'benefits',
@@ -341,7 +341,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/benefits',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Plans, eligibility, enrollment, coverage, and contributions. Not claims and not payroll deductions.',
   },
   {
     page: 'employee-relations',
@@ -351,7 +352,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/employee-relations',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Case detail via `?tab=detail&q={case_id}`. Investigation/decision stay allowed_actions.',
   },
   {
     page: 'engagement',
@@ -362,7 +364,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/engagement',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Campaign results via `?tab=results&q={campaign_id}`. Suppression stays backend.',
   },
   {
     page: 'compensation-planning',
@@ -373,7 +376,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/comp-planning',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Worksheet via `?tab=worksheet&q={cycle_id}`. Amounts stay backend money authority.',
   },
   {
     page: 'workforce-planning',
@@ -384,7 +388,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/workforce-planning',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Demand, cost, scenarios, and execution remain backend-planned.',
   },
   {
     page: 'job-architecture',
@@ -394,8 +399,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/job-architecture',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
-    notes: 'No dedicated module SKU; permission-gated. Setup Console links here.',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. No dedicated module SKU; permission-gated. Catalog, grades, paths, mappings stay backend-authored. Not recruiting job descriptions.',
   },
   {
     page: 'shifts',
@@ -427,7 +432,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/intelligence + /dashboard/posthire/analytics',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 6 UX migrated. Governed KPI evaluate/trend/segment/drill remain backend. Freshness, suppression, and drill authority are not recomputed in the UI. Metric detail via `?q={semantic_key}`.',
   },
   {
     page: 'compliance',
@@ -592,6 +598,20 @@ const NESTED: HrWebSurface[] = [
     url_state: 'query',
     migration_status: 'canonical',
     notes: 'Canonical employee record. Phase 5: identity header, jump nav, module sections remain backend-published. Mutations stay on owning modules.',
+  }),
+  nested({
+    id: 'drawer.analytics.metric',
+    kind: 'drawer',
+    parent: 'page.analytics',
+    page: 'analytics',
+    route: '/dashboard?page=analytics&q={semantic_key}',
+    module: 'analytics',
+    permission: 'analytics.read',
+    component: 'IntelligenceDetailDrawer',
+    api_authority: '/dashboard/intelligence evaluate + trend + drill',
+    url_state: 'query',
+    migration_status: 'canonical',
+    notes: 'Phase 6. Metric detail is URL-backed. Evaluate/trend/segment/drill stay governed backend. Suppression and freshness are displayed, not recomputed.',
   }),
   nested({
     id: 'page.employees.view.migration',
@@ -1179,7 +1199,16 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
           page === 'onboarding' ||
           page === 'preboarding' ||
           page === 'probation' ||
-          page === 'inbox'
+          page === 'inbox' ||
+          page === 'performance' ||
+          page === 'talent' ||
+          page === 'learning' ||
+          page === 'benefits' ||
+          page === 'employee-relations' ||
+          page === 'engagement' ||
+          page === 'compensation-planning' ||
+          page === 'workforce-planning' ||
+          page === 'job-architecture'
             ? 'canonical'
             : 'enterprise',
         notes:
@@ -1191,7 +1220,17 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
                 page === 'probation' ||
                 page === 'inbox'
               ? 'Phase 5 People spine. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
-              : 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
+              : page === 'performance' ||
+                  page === 'talent' ||
+                  page === 'learning' ||
+                  page === 'benefits' ||
+                  page === 'employee-relations' ||
+                  page === 'engagement' ||
+                  page === 'compensation-planning' ||
+                  page === 'workforce-planning' ||
+                  page === 'job-architecture'
+                ? 'Phase 6 enterprise flagship. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
+                : 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
       }),
     )
   }

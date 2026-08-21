@@ -3,9 +3,10 @@
  * Backend remains authoritative for progress, rollup, review status, and ratings.
  * Talent / HiPo / 9-box vocabulary is forbidden here.
  */
-import { Loader2, RefreshCw, Target } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Loader2, RefreshCw } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
@@ -176,13 +177,15 @@ export function PerformanceWorkspace({
   const [forbidden, setForbidden] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [payload, setPayload] = useState<PerformanceWorkspacePayload | null>(null)
+  const payloadRef = useRef(payload)
+  payloadRef.current = payload
 
   const canCalibrate = hasActorPermission(permissions, 'performance.calibrate')
   const canManage = hasActorPermission(permissions, 'performance.manage')
   const managerOnly = String(role || '').toLowerCase() === 'manager'
 
   const load = useCallback(async () => {
-    setLoading(true)
+    if (!payloadRef.current) setLoading(true)
     setError(false)
     setForbidden(false)
     setUnavailable(false)
@@ -205,7 +208,7 @@ export function PerformanceWorkspace({
       } else {
         setError(true)
       }
-      setPayload(null)
+      if (!payloadRef.current) setPayload(null)
     } finally {
       setLoading(false)
     }
@@ -237,17 +240,9 @@ export function PerformanceWorkspace({
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'} className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">{t.title}</h2>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
-        </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading} aria-label={t.refresh}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          <span className="ms-2">{t.refresh}</span>
         </Button>
       </div>
 
@@ -264,19 +259,7 @@ export function PerformanceWorkspace({
         />
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            {tabs.map((item) => (
-              <Button
-                key={item.id}
-                type="button"
-                size="sm"
-                variant={tab === item.id ? 'default' : 'outline'}
-                onClick={() => setTab(item.id)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </div>
+          <HrSurfaceTabs value={tab} onChange={setTab} ariaLabel={t.title} items={tabs} />
 
           {tab === 'overview' ? (
             <div className="space-y-4">
