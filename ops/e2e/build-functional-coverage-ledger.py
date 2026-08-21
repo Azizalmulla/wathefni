@@ -220,6 +220,7 @@ API_SOURCE_PROOFS = {
     "talent_pool_classification_routes": "wathefni-orchestrator/smoke-test-r5c-talent-surface-db.py",
     "unified_candidates_routes": "wathefni-orchestrator/smoke-test-canonical-recruiting-lifecycle.py",
     "workforce_planning_http": "wathefni-orchestrator/smoke-test-r5j-workforce-planning-surface-db.py",
+    "workspace_work_http": "wathefni-orchestrator/smoke-test-workspace-work.py",
 }
 
 

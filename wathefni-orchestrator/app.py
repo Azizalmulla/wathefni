@@ -55784,7 +55784,7 @@ def dashboard_prehire_work_queue(
     scope: str | None = Query(default=None, description="mine | company (Wave 4 personal work queues)"),
     context: dict[str, Any] = Depends(prehire_dashboard_context),
 ):
-    """My work / Company work queue. Filtering is backend-authoritative (Wave 4)."""
+    """Pre-hire personal/company work queue. Overview uses GET /dashboard/work; this remains the recruiting source of action."""
     import prehire_personal_work as _ppw
     import prehire_visibility as _pv
 
@@ -69541,6 +69541,10 @@ import hr_intelligence_surfaces_http as _hr_intelligence_surfaces_http
 _preboarding_http.register_preboarding_http(sys.modules[__name__])
 _probation_http.register_probation_http(sys.modules[__name__])
 _hr_intelligence_surfaces_http.register_hr_intelligence_surfaces_http(sys.modules[__name__])
+
+import workspace_work_http as _workspace_work_http
+
+_workspace_work_http.register_workspace_work_http(sys.modules[__name__])
 
 
 # Performance HTTP must register after dashboard_context, _posthire_read_context,

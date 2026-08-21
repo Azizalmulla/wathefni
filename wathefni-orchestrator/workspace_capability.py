@@ -86,9 +86,11 @@ WORKSPACE_SURFACES: list[dict[str, Any]] = [
     {"id": "overview.action.review", "kind": "overview", "module": "pre_hiring", "permission": "candidates.read"},
     {"id": "overview.action.assessment", "kind": "overview", "module": "assessments", "permission": "assessment.manage"},
     {"id": "overview.action.followup", "kind": "overview", "module": "pre_hiring", "permission": "candidates.read"},
-    {"id": "overview.work_queue", "kind": "overview", "module": "pre_hiring", "permission_any_of": ["candidate.manage", "jobs.create", "report.export", "candidates.read"]},
+    {"id": "overview.work_queue", "kind": "overview", "module_any_of": ["pre_hiring", "assessments", "interviews", "employment_offers", "requisitions", "preboarding", "probation", "analytics", "compliance", "onboarding", "attendance", "leave", "shifts", "performance", "learning", "benefits", "employee_relations", "engagement", "comp_planning", "workforce_planning"], "permission_any_of": ["candidate.manage", "jobs.create", "report.export", "candidates.read", "assessment.manage", "interview.manage", "offer.approve", "requisitions.approve", "preboarding.manage", "probation.manage", "analytics.read", "compliance.read", "onboarding.manage", "leave.decide", "attendance.manage", "shifts.manage", "performance.manage", "learning.approve", "benefits.manage", "er.read", "engagement.actions", "comp_planning.approve", "workforce_planning.approve", "employees.read"]},
     {"id": "overview.role_priority", "kind": "overview", "module": "pre_hiring", "permission_any_of": ["candidate.manage", "jobs.create", "report.export"]},
     {"id": "overview.calendar", "kind": "overview", "module": "calendar", "permission": "calendar.read"},
+    {"id": "overview.approvals", "kind": "overview", "module_any_of": ["analytics", "compliance", "onboarding", "attendance", "leave", "shifts", "payroll"], "permission_any_of": ["analytics.read", "compliance.read", "onboarding.read", "attendance.read", "leave.read", "shifts.read", "payroll.read", "employees.read"]},
+    {"id": "overview.signals", "kind": "overview", "module": "analytics", "permission": "analytics.read"},
     {"id": "tab.interviews.video", "kind": "tab", "module": "video_interviews", "permission": "interview.manage"},
     {"id": "settings.team", "kind": "settings", "permission": "users.manage"},
     {"id": "settings.integrations", "kind": "settings", "permission": "settings.manage"},
@@ -142,8 +144,8 @@ COMPOSITION_MATRIX = [
         "modules": ["onboarding", "attendance", "leave", "payroll"],
         "role": "owner",
         "expect_nav_groups": ["posthire", "settings"],
-        "expect_nav_includes": ["ai", "onboarding", "attendance", "leave", "payroll", "employees"],
-        "expect_nav_excludes": ["overview", "jobs", "candidates", "assessments"],
+        "expect_nav_includes": ["overview", "ai", "onboarding", "attendance", "leave", "payroll", "employees"],
+        "expect_nav_excludes": ["jobs", "candidates", "assessments"],
         "expect_overview_layout": "none",
     },
     {
@@ -246,6 +248,26 @@ def resolve_workspace_authority(modules: list[str], role: str) -> dict[str, Any]
     ai = surfaces.get("nav.ai")
     if ai and ai.get("offerable") and "pre_hiring" not in enabled:
         surfaces["nav.ai"] = {**ai, "group": "posthire"}
+
+    # Overview is module-composed: recruiting off must not hide the company home.
+    overview = surfaces.get("nav.overview")
+    if overview and not overview.get("offerable") and "pre_hiring" not in enabled:
+        any_posthire = any(
+            surfaces[s["id"]].get("offerable")
+            for s in WORKSPACE_SURFACES
+            if s.get("kind") == "nav" and surfaces[s["id"]].get("group") == "posthire"
+        )
+        any_band = any(
+            surfaces.get(sid, {}).get("offerable")
+            for sid in ("overview.calendar", "overview.approvals", "overview.signals")
+        )
+        if any_posthire or any_band:
+            surfaces["nav.overview"] = {
+                **overview,
+                "offerable": True,
+                "status": "available",
+                "group": "posthire",
+            }
 
     group_order = ("prehire", "posthire", "settings")
     nav_groups = []

@@ -34,12 +34,12 @@ describe('Phase 3 Overview reference experience', () => {
   })
 
   test('inbox peek and C1 signals stay backend-owned', () => {
-    expect(overviewSrc).toContain('useActionInboxQuery')
+    expect(overviewSrc).toContain('useWorkQueueQuery')
     expect(overviewSrc).toContain('useIntelligenceOverviewQuery')
     expect(overviewSrc).toContain('intelligenceIsCurrent')
     expect(overviewSrc).toContain("CURRENT_INTELLIGENCE = new Set(['ok'])")
-    expect(overviewSrc).toContain('item.deep_link')
     expect(overviewSrc).toContain('onOpenDestination(item.destination)')
+    expect(overviewSrc).not.toContain('useActionInboxQuery')
   })
 
   test('uses semantic tokens rather than Overview hex palettes', () => {
@@ -53,7 +53,7 @@ describe('Phase 3 Overview reference experience', () => {
     expect(sectionSrc).toContain('SoftKeepSurface')
     expect(overviewSrc).toContain('HrSection')
     expect(overviewSrc).toContain('cold={workQueueLoading}')
-    expect(overviewSrc).toContain('cold={inboxLoading}')
+    expect(overviewSrc).not.toContain('cold={inboxLoading}')
     expect(overviewSrc).toContain('cold={intelligenceLoading}')
   })
 })

@@ -418,9 +418,55 @@ export const WORKSPACE_SURFACES: WorkspaceSurface[] = [
   {
     id: 'overview.work_queue',
     kind: 'overview',
-    module: 'pre_hiring',
-    permissionAnyOf: ['candidate.manage', 'jobs.create', 'report.export', 'candidates.read'],
-    label: 'Work queue',
+    moduleAnyOf: [
+      'pre_hiring',
+      'assessments',
+      'interviews',
+      'employment_offers',
+      'requisitions',
+      'preboarding',
+      'probation',
+      'analytics',
+      'compliance',
+      'onboarding',
+      'attendance',
+      'leave',
+      'shifts',
+      'performance',
+      'learning',
+      'benefits',
+      'employee_relations',
+      'engagement',
+      'comp_planning',
+      'workforce_planning',
+    ],
+    permissionAnyOf: [
+      'candidate.manage',
+      'jobs.create',
+      'report.export',
+      'candidates.read',
+      'assessment.manage',
+      'interview.manage',
+      'offer.approve',
+      'requisitions.approve',
+      'preboarding.manage',
+      'probation.manage',
+      'analytics.read',
+      'compliance.read',
+      'onboarding.manage',
+      'leave.decide',
+      'attendance.manage',
+      'shifts.manage',
+      'performance.manage',
+      'learning.approve',
+      'benefits.manage',
+      'er.read',
+      'engagement.actions',
+      'comp_planning.approve',
+      'workforce_planning.approve',
+      'employees.read',
+    ],
+    label: 'Work aggregation',
   },
   {
     id: 'overview.role_priority',
@@ -573,13 +619,13 @@ export function composeOverviewLayout(args: {
   else if (n === 3) layout = 'three'
   else if (n >= 4) layout = 'grid'
 
-  const showWorkQueue = Boolean(s['overview.work_queue']?.offerable)
+  const showWorkQueue = Boolean(s['overview.work_queue']?.offerable || s['overview.approvals']?.offerable)
   const showRolePriority = Boolean(s['overview.role_priority']?.offerable)
   const showCalendar = Boolean(s['overview.calendar']?.offerable)
   const showApprovals = Boolean(s['overview.approvals']?.offerable)
   const showSignals = Boolean(s['overview.signals']?.offerable)
   const showHiringMetrics = prioritySurfaces.length > 0
-  const hasRecruitingHome = showWorkQueue || showHiringMetrics || showRolePriority
+  const hasRecruitingHome = showHiringMetrics || showRolePriority
   const hasPosthireNav = Object.values(s).some((row) => row.group === 'posthire' && row.offerable && row.kind === 'nav')
   let headlineMode: OverviewComposition['headlineMode'] = 'calm'
   if (hasRecruitingHome && (hasPosthireNav || showApprovals || showSignals)) headlineMode = 'mixed'

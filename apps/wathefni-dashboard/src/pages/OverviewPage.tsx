@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { dashboardPerfMarkInteractionStart } from '@/lib/perf/dashboardPerf'
 import {
-  dedupeWorkQueueItems,
   formatOverviewPeopleMetric,
   formatWorkQueueShownTotal,
   roleDisplayCount,
@@ -20,7 +19,6 @@ import {
 } from '@/lib/prehireOverviewPresentation'
 import { overviewActionGridClass, type OverviewLayoutMode } from '@/lib/workspaceCapability'
 import {
-  useActionInboxQuery,
   useIntelligenceOverviewQuery,
   usePrefetchOppositeWorkScope,
   useWorkQueueQuery,
@@ -37,8 +35,8 @@ import type {
   PrehireNextAction,
   PrehireRoleNextStep,
   PrehireRolePriority,
-  PrehireWorkQueueItem,
   SetupReadinessResponse,
+  WorkspaceWorkItem,
 } from '@/types'
 
 const CURRENT_INTELLIGENCE = new Set(['ok'])
@@ -127,13 +125,6 @@ function personalizedOverviewGreeting(locale: RecruitingLocale, displayName?: st
   if (hour >= 5 && hour < 12) return isAr ? `صباح الخير، ${firstName}` : `Good morning, ${firstName}`
   if (hour >= 12 && hour < 17) return isAr ? `طاب يومك، ${firstName}` : `Good afternoon, ${firstName}`
   return isAr ? `مساء الخير، ${firstName}` : `Good evening, ${firstName}`
-}
-
-function streamLabel(stream: string, isAr: boolean) {
-  if (stream === 'analytics') return isAr ? 'التحليلات' : 'Analytics'
-  if (stream === 'compliance') return isAr ? 'الامتثال' : 'Compliance'
-  if (stream === 'employees') return isAr ? 'الموظفون' : 'Employees'
-  return stream
 }
 
 function intelligenceIsCurrent(metric: IntelligenceMetric) {
@@ -273,11 +264,11 @@ export function OverviewPage({
   void _nextAction
 
   const queryClient = useQueryClient()
-  const [workQueueScope, setWorkQueueScope] = useState<'mine' | 'company'>(() => {
+  const [workQueueScope, setWorkQueueScope] = useState<'mine' | 'attention'>(() => {
     try {
       const stored = localStorage.getItem('wathefni_work_queue_scope')
-      if (stored === 'company' && canViewCompanyWorkHint) return 'company'
-      if (stored === 'mine' || stored === 'company') return stored === 'company' && !canViewCompanyWorkHint ? 'mine' : (stored as 'mine' | 'company')
+      if ((stored === 'attention' || stored === 'company') && canViewCompanyWorkHint) return 'attention'
+      if (stored === 'mine') return 'mine'
     } catch {
       /* ignore */
     }
@@ -289,15 +280,10 @@ export function OverviewPage({
   const workQueueLoading = showWorkQueue && workQueueQuery.isPending && !workQueueQuery.data
   const workQueueError = showWorkQueue && workQueueQuery.isError && !workQueueQuery.data
   const canViewCompanyWork = Boolean(
-    workQueue?.can_view_company_work
+    workQueue?.can_view_attention
+    ?? workQueue?.can_view_company_work
     ?? canViewCompanyWorkHint,
   )
-
-  const inboxQuery = useActionInboxQuery(access, showApprovals)
-  const inbox = inboxQuery.data ?? null
-  const inboxRefreshing = inboxQuery.isFetching && Boolean(inboxQuery.data)
-  const inboxLoading = showApprovals && inboxQuery.isPending && !inboxQuery.data
-  const inboxError = showApprovals && inboxQuery.isError && !inboxQuery.data
 
   const intelligenceQuery = useIntelligenceOverviewQuery(access, locale, showSignals)
   const intelligence = intelligenceQuery.data ?? null
@@ -316,12 +302,13 @@ export function OverviewPage({
   usePrefetchOppositeWorkScope(access, workQueueScope, Boolean(workQueue))
 
   useEffect(() => {
-    if (workQueue?.can_view_company_work === false && workQueueScope === 'company') {
+    const allowed = workQueue?.can_view_attention ?? workQueue?.can_view_company_work
+    if (allowed === false && workQueueScope === 'attention') {
       setWorkQueueScope('mine')
     }
-  }, [workQueue?.can_view_company_work, workQueueScope])
+  }, [workQueue?.can_view_attention, workQueue?.can_view_company_work, workQueueScope])
 
-  const onWorkQueueScopeChange = useCallback((next: 'mine' | 'company') => {
+  const onWorkQueueScopeChange = useCallback((next: 'mine' | 'attention') => {
     if (next === workQueueScope) return
     dashboardPerfMarkInteractionStart('work-queue-scope')
     try {
@@ -334,36 +321,15 @@ export function OverviewPage({
 
   const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) => recruitingCopy(locale, key, vars)
   const isAr = locale === 'ar'
-  const personalized = workQueueScope === 'mine' && workQueue?.counts
-  const reviewCount = Number(
-    personalized ? (workQueue?.counts?.ready_for_review ?? 0) : (readyForReviewTotal || 0),
-  )
-  const followUpCount = Number(
-    personalized ? (workQueue?.counts?.follow_up ?? 0) : (followUpNeededTotal || 0),
-  )
-  const assessmentPeople = Number(
-    personalized
-      ? (workQueue?.counts?.assessment ?? 0)
-      : (assessmentPrimary?.people_count ?? assessmentPendingTotal ?? 0),
-  )
-  // Company summary publishes people + applications. My-work personalized counts
-  // are person-queue rows only — do not invent application totals for them.
-  const reviewMetric = formatOverviewPeopleMetric(
-    locale,
-    reviewCount,
-    personalized ? null : readyForReviewApplications,
-  )
-  const followUpMetric = formatOverviewPeopleMetric(
-    locale,
-    followUpCount,
-    personalized ? null : followUpNeededApplications,
-  )
+  const reviewCount = Number(readyForReviewTotal || 0)
+  const followUpCount = Number(followUpNeededTotal || 0)
+  const assessmentPeople = Number(assessmentPrimary?.people_count ?? assessmentPendingTotal ?? 0)
+  const reviewMetric = formatOverviewPeopleMetric(locale, reviewCount, readyForReviewApplications)
+  const followUpMetric = formatOverviewPeopleMetric(locale, followUpCount, followUpNeededApplications)
   const assessmentMetric = formatOverviewPeopleMetric(
     locale,
     assessmentPeople,
-    personalized
-      ? null
-      : (assessmentPrimary?.application_count ?? assessmentPendingApplications),
+    assessmentPrimary?.application_count ?? assessmentPendingApplications,
   )
   const assessmentAction = String(assessmentPrimary?.action || '')
   const assessmentLabel = assessmentAction === 'assessment_resend_needed'
@@ -373,7 +339,7 @@ export function OverviewPage({
       : assessmentAction === 'assessment_in_progress'
         ? (isAr ? 'متابعة التقييمات الجارية' : 'Check in-progress assessments')
         : (isAr ? 'إرسال التقييمات' : 'Send assessments')
-  const queueItems = workQueueLoading || workQueueError ? [] : dedupeWorkQueueItems(workQueue?.items || [])
+  const queueItems = workQueueLoading || workQueueError ? [] : (workQueue?.items || [])
   const people = queueItems.slice(0, 5)
   const roles = (roleNextSteps || [])
     .filter((role) => roleDisplayCount(role) > 0)
@@ -423,44 +389,44 @@ export function OverviewPage({
       }>)
     : []
 
-  const inboxPeek = !inboxLoading && !inboxError ? (inbox?.items || []).slice(0, 5) : []
-  const inboxTotal = typeof inbox?.summary?.total === 'number' ? inbox.summary.total : null
-  const inboxStreamTiles = Object.entries(inbox?.summary?.by_stream || {})
-    .filter(([, count]) => Number(count) > 0)
-    .map(([stream, count]) => ({
-      key: `stream:${stream}`,
-      title: streamLabel(stream, isAr),
-      primary: Number(count),
-    }))
-
-  const personAction = (item: PrehireWorkQueueItem) => {
-    if (item.next_action) return item.next_action
-    const type = String(item.action_type || '')
-    if (type.includes('follow')) return isAr ? 'متابعة' : 'Follow up'
-    if (type.includes('assessment')) return isAr ? 'إرسال التقييم' : 'Send assessment'
-    if (type.includes('interview_feedback') || type === 'interview_feedback') return isAr ? 'إرسال الملاحظات' : 'Submit feedback'
-    if (type.includes('interview')) return isAr ? 'جدولة مقابلة' : 'Schedule interview'
-    if (type.includes('overdue')) return isAr ? 'إكمال المهمة' : 'Complete task'
-    if (type.includes('approval')) return isAr ? 'موافقة' : 'Approve'
-    return isAr ? 'مراجعة المرشح' : 'Review candidate'
+  const personAction = (item: WorkspaceWorkItem) => {
+    if (isAr) return item.next_action_ar || item.title_ar || item.next_action_en || item.title_en || 'فتح'
+    return item.next_action_en || item.title_en || 'Open'
   }
 
   const dueStateLabel = (state?: string) => {
     if (state === 'overdue') return isAr ? 'متأخر' : 'Overdue'
     if (state === 'due_soon') return isAr ? 'قريب الاستحقاق' : 'Due soon'
+    if (state === 'blocked') return isAr ? 'محظور' : 'Blocked'
     return isAr ? 'مفتوح' : 'Open'
   }
 
-  const sourceLabel = (source?: string) => {
-    const key = String(source || '')
-    if (key === 'application_owner') return isAr ? 'مالك الطلب' : 'Application owner'
-    if (key === 'job_recruiter') return isAr ? 'مسؤول التوظيف' : 'Job recruiter'
-    if (key === 'job_hiring_manager') return isAr ? 'مدير التوظيف' : 'Hiring manager'
-    if (key === 'interview_assignment') return isAr ? 'تعيين مقابلة' : 'Interview assignment'
-    if (key === 'task_assignee') return isAr ? 'مهمة مسندة' : 'Task assignee'
-    if (key === 'approval_assignee') return isAr ? 'موافقة مسندة' : 'Approval assignee'
-    if (key === 'company_ops') return isAr ? 'تشغيل الشركة' : 'Company operations'
-    return key || (isAr ? 'مصدر غير معروف' : 'Unknown source')
+  const membershipLabel = (membership?: string) => {
+    if (membership === 'assigned') return isAr ? 'مسند إليك' : 'Assigned to you'
+    if (membership === 'unassigned') return isAr ? 'غير مسند' : 'Unassigned'
+    if (membership === 'supervisory') return isAr ? 'إشراف' : 'Supervisory'
+    return isAr ? 'غير معيّن' : 'Unassigned'
+  }
+
+  const moduleLabel = (module?: string) => {
+    const key = String(module || '')
+    const map: Record<string, [string, string]> = {
+      pre_hiring: ['Hiring', 'التوظيف'],
+      assessments: ['Assessments', 'التقييمات'],
+      interviews: ['Interviews', 'المقابلات'],
+      requisitions: ['Requisitions', 'طلبات التوظيف'],
+      preboarding: ['Preboarding', 'ما قبل الالتحاق'],
+      probation: ['Probation', 'فترة التجربة'],
+      leave: ['Leave', 'الإجازات'],
+      onboarding: ['Onboarding', 'التهيئة'],
+      compliance: ['Compliance', 'الامتثال'],
+      attendance: ['Attendance', 'الحضور'],
+      analytics: ['Analytics', 'التحليلات'],
+      shifts: ['Shifts', 'الورديات'],
+    }
+    const pair = map[key]
+    if (!pair) return key || (isAr ? 'وحدة' : 'Module')
+    return isAr ? pair[1] : pair[0]
   }
 
   const today = new Intl.DateTimeFormat(isAr ? 'ar-KW' : 'en-GB', {
@@ -480,9 +446,11 @@ export function OverviewPage({
     && Array.isArray(setupReadiness.steps)
     && setupReadiness.steps.length > 0
   const showAttention = showWorkQueue || (showRolePriority && Boolean(rolePriority || roles.length))
-  const showApprovalsBand = showApprovals && (inboxLoading || inboxError || inboxPeek.length > 0 || (inboxTotal != null && inboxTotal > 0))
   const showSignalsBand = showSignals && !intelligenceUnavailable && (intelligenceLoading || intelligenceError || signalTiles.length > 0)
-  const showMetricsBand = metricTiles.length > 0 || inboxStreamTiles.length > 0
+  const showMetricsBand = metricTiles.length > 0
+  void showApprovals
+  void onOpenInbox
+  void onOpenInboxItem
 
   const refreshOverview = () => {
     onRefresh()
@@ -640,14 +608,14 @@ export function OverviewPage({
                     />
                   )}
                   description={
-                    workQueueScope === 'company'
-                      ? (isAr ? 'أولويات تشغيلية على مستوى الشركة' : 'Company-wide operational priorities')
-                      : (isAr ? 'ما أنت مسؤول عنه فقط' : 'Only what you are responsible for')
+                    workQueueScope === 'attention'
+                      ? (isAr ? 'عمل غير محلول أو غير مسند أو إشرافي عبر الوحدات المفعّلة التي يحق لك الإشراف عليها.' : 'Unresolved, unassigned, or supervisory work across enabled modules you are authorized to oversee.')
+                      : (isAr ? 'إجراءات مسندة إليك عبر وحدات أوكتو إتش آر المفعّلة.' : 'Actions assigned to you across enabled OctoHR modules.')
                   }
                   refreshing={workQueueRefreshing}
                   refreshingLabel={isAr ? 'جاري التحديث' : 'Refreshing'}
                   testId="overview-work-queue"
-                  title={workQueueScope === 'company' ? (isAr ? 'عمل الشركة' : 'Company work') : (isAr ? 'عملي' : 'My work')}
+                  title={workQueueScope === 'attention' ? (isAr ? 'انتباه الشركة' : 'Company Attention') : (isAr ? 'عملي' : 'My Work')}
                   trailing={canViewCompanyWork ? (
                     <div className="inline-flex items-center gap-2">
                       <div className="inline-flex rounded-full border border-semantic-line bg-semantic-surface-raised p-0.5" role="group" aria-label={isAr ? 'نطاق العمل' : 'Work scope'}>
@@ -656,14 +624,14 @@ export function OverviewPage({
                           onClick={() => onWorkQueueScopeChange('mine')}
                           type="button"
                         >
-                          {isAr ? 'عملي' : 'My work'}
+                          {isAr ? 'عملي' : 'My Work'}
                         </button>
                         <button
-                          className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-150 ${workQueueScope === 'company' ? 'bg-semantic-ink text-white' : 'text-semantic-subtle'}`}
-                          onClick={() => onWorkQueueScopeChange('company')}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-150 ${workQueueScope === 'attention' ? 'bg-semantic-ink text-white' : 'text-semantic-subtle'}`}
+                          onClick={() => onWorkQueueScopeChange('attention')}
                           type="button"
                         >
-                          {isAr ? 'عمل الشركة' : 'Company work'}
+                          {isAr ? 'انتباه الشركة' : 'Company Attention'}
                         </button>
                       </div>
                       {workQueueRefreshing ? <Loader2 className="h-3.5 w-3.5 animate-spin text-semantic-subtle" aria-label={isAr ? 'جاري التحديث' : 'Refreshing'} /> : null}
@@ -684,28 +652,21 @@ export function OverviewPage({
                       />
                     ) : people.length ? (
                       people.map((item) => {
-                        const apps = item.applications || []
-                        const appCount = Math.max(apps.length, Number(item.application_count || 0))
+                        const reason = isAr ? (item.reason_ar || item.reason_en) : (item.reason_en || item.reason_ar)
+                        const title = item.subject_name || (isAr ? item.title_ar : item.title_en) || (isAr ? 'مهمة' : 'Task')
                         return (
                           <HrAttentionRow
                             actionLabel={item.destination?.page ? personAction(item) : undefined}
-                            detail={(
-                              <>
-                                {item.reason}
-                                {appCount > 1
-                                  ? ` · ${recruitingCopy(locale, 'overviewApplicationsHint', { count: appCount })}`
-                                  : ''}
-                              </>
-                            )}
-                            key={item.entity_id || item.person_key || `${item.action_type}-${item.app_key}`}
+                            detail={reason}
+                            key={item.work_id || item.dedupe_key || `${item.module}-${item.entity_id}`}
                             meta={[
-                              { label: isAr ? 'المالك' : 'Owner', value: item.owner || (isAr ? 'غير معيّن' : 'Unassigned') },
+                              { label: isAr ? 'العضوية' : 'Membership', value: membershipLabel(item.membership) },
+                              { label: isAr ? 'الوحدة' : 'Module', value: moduleLabel(item.module) },
                               { label: isAr ? 'الاستحقاق' : 'Due', value: dueStateLabel(item.due_state) },
-                              { label: isAr ? 'الإجراء التالي' : 'Next', value: personAction(item) },
-                              { label: isAr ? 'المصدر' : 'Source', value: sourceLabel(item.source) },
+                              { label: isAr ? 'المالك' : 'Owner', value: item.owner || (isAr ? 'غير معيّن' : 'Unassigned') },
                             ]}
                             onAction={item.destination?.page ? () => onOpenDestination(item.destination) : undefined}
-                            title={item.candidate_name || item.job_label || item.position_title || (isAr ? 'مهمة' : 'Task')}
+                            title={title}
                           />
                         )
                       })
@@ -715,8 +676,8 @@ export function OverviewPage({
                         locale={locale}
                         testId="overview-work-empty"
                         title={
-                          workQueueScope === 'company'
-                            ? (isAr ? 'لا توجد أولويات على مستوى الشركة الآن.' : 'No company-wide priorities right now.')
+                          workQueueScope === 'attention'
+                            ? (isAr ? 'لا يوجد عمل يحتاج انتباهاً الآن.' : 'No company attention items right now.')
                             : (isAr ? 'لا يوجد عمل مسند إليك الآن.' : 'No personal work assigned to you right now.')
                         }
                       />
@@ -731,71 +692,12 @@ export function OverviewPage({
               ) : null}
             </div>
           ) : null}
-
-          {showApprovalsBand ? (
-            <HrSection
-              cold={inboxLoading}
-              coldFallback={(
-                <ResourceState kind="loading" locale={locale} testId="overview-approvals-loading" title={isAr ? 'جاري التحميل…' : 'Loading…'} />
-              )}
-              description={isAr ? 'عناصر Needs Attention كما نشرها النظام.' : 'Needs Attention items as published by the system.'}
-              refreshing={inboxRefreshing}
-              refreshingLabel={isAr ? 'جاري التحديث' : 'Refreshing'}
-              testId="overview-approvals"
-              title={isAr ? 'الموافقات والانتباه' : 'Approvals'}
-              trailing={onOpenInbox ? (
-                <button className="text-xs font-semibold text-semantic-subtle underline-offset-4 hover:underline" onClick={onOpenInbox} type="button">
-                  {isAr ? 'فتح الصندوق' : 'Open inbox'}
-                </button>
-              ) : null}
-            >
-              {inboxError ? (
-                <ResourceState
-                  kind="error"
-                  locale={locale}
-                  onRetry={() => void inboxQuery.refetch()}
-                  retrying={inboxQuery.isFetching}
-                  testId="overview-approvals-error"
-                  title={isAr ? 'تعذّر تحميل صندوق الانتباه' : 'Could not load Needs Attention'}
-                />
-              ) : inboxPeek.length ? (
-                <div className="space-y-2">
-                  {inboxTotal != null ? (
-                    <div className="px-1 text-[11px] text-semantic-mist">
-                      {isAr ? `${inboxTotal} عنصر` : `${inboxTotal} items`}
-                    </div>
-                  ) : null}
-                  {inboxPeek.map((item) => (
-                    <HrAttentionRow
-                      actionLabel={item.deep_link?.page ? (isAr ? 'فتح' : 'Open') : undefined}
-                      detail={isAr ? (item.why_ar || item.why_en) : item.why_en}
-                      key={item.id}
-                      meta={[
-                        { label: isAr ? 'المالك' : 'Owner', value: (isAr ? item.owner_label_ar : item.owner_label_en) || item.owner_role || (isAr ? 'غير معيّن' : 'Unassigned') },
-                        { label: isAr ? 'الاستحقاق' : 'Due', value: (isAr ? item.deadline_label_ar : item.deadline_label_en) || item.deadline || (isAr ? 'مفتوح' : 'Open') },
-                        { label: isAr ? 'المصدر' : 'Source', value: streamLabel(String(item.source_stream || item.source_module || ''), isAr) },
-                      ]}
-                      onAction={item.deep_link?.page ? () => onOpenInboxItem?.(item) : undefined}
-                      title={(isAr ? item.what_ar : item.what_en) || item.what_en}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <ResourceState
-                  kind="empty"
-                  locale={locale}
-                  testId="overview-approvals-empty"
-                  title={isAr ? 'لا توجد عناصر انتباه الآن.' : 'No attention items right now.'}
-                />
-              )}
-            </HrSection>
-          ) : null}
         </div>
 
         <div className="space-y-4">
           {showMetricsBand ? (
             <HrSection testId="overview-metrics" title={isAr ? 'مؤشرات رئيسية' : 'Key metrics'}>
-              <section className={overviewActionGridClass(overviewLayout, metricTiles.length + inboxStreamTiles.length)} data-overview-layout={overviewLayout}>
+              <section className={overviewActionGridClass(overviewLayout, metricTiles.length)} data-overview-layout={overviewLayout}>
                 {metricTiles.map((card) => (
                   <HrMetricTile
                     hint={card.metric.applicationsHint}
@@ -805,15 +707,6 @@ export function OverviewPage({
                     primary={card.metric.primary}
                     srLabel={card.srLabel}
                     unitLabel={card.metric.unitLabel}
-                  />
-                ))}
-                {inboxStreamTiles.map((tile) => (
-                  <HrMetricTile
-                    key={tile.key}
-                    label={tile.title}
-                    onClick={onOpenInbox}
-                    primary={tile.primary}
-                    unitLabel={isAr ? 'عناصر' : 'items'}
                   />
                 ))}
               </section>

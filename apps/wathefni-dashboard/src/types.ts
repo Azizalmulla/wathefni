@@ -552,6 +552,60 @@ export type PrehireWorkQueueItem = {
   work_scope?: 'mine' | 'company' | string
 }
 
+export type WorkspaceWorkScope = 'mine' | 'attention'
+
+export type WorkspaceWorkItem = {
+  work_id: string
+  scope?: WorkspaceWorkScope | string
+  membership?: 'assigned' | 'unassigned' | 'supervisory' | string
+  module?: string
+  source_key?: string
+  authority_source?: string
+  action_type: string
+  title_en?: string
+  title_ar?: string
+  reason_en?: string
+  reason_ar?: string
+  next_action_en?: string
+  next_action_ar?: string
+  owner_user_id?: string | null
+  owner?: string
+  due_state?: string
+  due_at?: string | null
+  blocked?: boolean
+  priority?: number | null
+  entity_type?: string
+  entity_id?: string | null
+  subject_name?: string | null
+  destination?: { page?: string; filters?: Record<string, string>; employee?: string; cohort_key?: string }
+  dedupe_key?: string
+}
+
+export type WorkspaceWorkResponse = {
+  company_code: string
+  ok: boolean
+  contract?: string
+  contract_version?: string
+  scope?: WorkspaceWorkScope | string
+  work_scope?: WorkspaceWorkScope | string
+  audience?: string
+  can_view_attention?: boolean
+  can_view_company_work?: boolean
+  as_of?: string
+  authority_source?: string
+  composes_only?: boolean
+  total: number
+  limit: number
+  has_more?: boolean
+  items: WorkspaceWorkItem[]
+  counts?: {
+    total?: number
+    by_module?: Record<string, number>
+    by_membership?: Record<string, number>
+  }
+  sources?: Array<{ source_key?: string; used?: boolean; omitted?: string | null; count?: number }>
+}
+
 export type PrehireWorkQueueResponse = {
   company_code: string
   ok: boolean

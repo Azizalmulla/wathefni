@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest'
 const overviewSrc = readFileSync(resolve(__dirname, 'OverviewPage.tsx'), 'utf8')
 
 describe('Wave 2 Overview work-queue contract', () => {
-  test('no top-level View all beside My work / Company work opens follow-up', () => {
+  test('no top-level View all beside My Work / Company Attention opens follow-up', () => {
     // Miswired control was: onClick={onOpenFollowUps} labeled View all.
     // Follow-up attention cards may still call onOpenFollowUps — that is fine.
     expect(overviewSrc).not.toMatch(

@@ -15,8 +15,8 @@ export const qk = {
   summary: (access: DashboardAccess) => [...tenantRoot(access), 'summary'] as const,
   assessmentConfig: (access: DashboardAccess) => [...tenantRoot(access), 'assessment-config'] as const,
 
-  workQueue: (access: DashboardAccess, scope: 'mine' | 'company') =>
-    [...tenantRoot(access), 'work-queue', scope] as const,
+  workQueue: (access: DashboardAccess, scope: 'mine' | 'company' | 'attention') =>
+    [...tenantRoot(access), 'workspace-work', scope === 'company' ? 'attention' : scope] as const,
   notifications: (access: DashboardAccess, scope: 'mine' | 'company') =>
     [...tenantRoot(access), 'notifications', scope] as const,
 

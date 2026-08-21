@@ -81,8 +81,8 @@ function responseFor(path: string, options: { modules?: string[]; permissions?: 
       recent_applications: [],
     }
   }
-  if (path.startsWith('/dashboard/prehire/overview/work-queue')) {
-    return { company_code: 'WATHEFNI', ok: true, total: 0, limit: 10, can_view_company_work: true, items: [] }
+  if (path.startsWith('/dashboard/work') || path.startsWith('/dashboard/prehire/overview/work-queue')) {
+    return { company_code: 'WATHEFNI', ok: true, total: 0, limit: 10, can_view_attention: true, can_view_company_work: true, items: [] }
   }
   if (path.startsWith('/dashboard/prehire/notifications')) {
     return { company_code: 'WATHEFNI', notifications: [], enabled_modules: boot.enabled_modules }

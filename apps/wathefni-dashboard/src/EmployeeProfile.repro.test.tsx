@@ -136,8 +136,8 @@ describe('employee profile click (production data repro)', () => {
       if (path === '/dashboard/prehire/summary') return jsonResponse(summaryResponse())
       if (path.startsWith('/dashboard/prehire/applications')) return jsonResponse({ company_code: 'WATHEFNI', total: 0, limit: 50, offset: 0, applications: [] })
       if (path.startsWith('/dashboard/prehire/notifications')) return jsonResponse({ company_code: 'WATHEFNI', notifications: [] })
-      if (path.startsWith('/dashboard/prehire/overview/work-queue')) {
-        return jsonResponse({ company_code: 'WATHEFNI', items: [], can_view_company_work: false })
+      if (path.startsWith('/dashboard/work') || path.startsWith('/dashboard/prehire/overview/work-queue')) {
+        return jsonResponse({ company_code: 'WATHEFNI', items: [], can_view_attention: false, can_view_company_work: false })
       }
       if (path === '/dashboard/prehire/reports') return jsonResponse({ company_code: 'WATHEFNI', summary: {}, exports: {}, breakdowns: { applications_by_stage: [], candidates_by_role: [], followups_by_type: [] } })
       if (path.startsWith('/dashboard/prehire/interviews')) return jsonResponse({ company_code: 'WATHEFNI', total: 0, status_counts: [], feedback_counts: [], interviews: [] })

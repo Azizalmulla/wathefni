@@ -63,6 +63,7 @@ import type {
   PrehireNextAction,
   PrehireReportsResponse,
   PrehireWorkQueueResponse,
+  WorkspaceWorkResponse,
   Product2AuthoringStatus,
   Product2Blueprint,
   Product2BlueprintInput,
@@ -293,6 +294,19 @@ export function getPrehireWorkQueue(
   if (params.cursor) search.set('cursor', params.cursor)
   if (params.scope) search.set('scope', params.scope)
   return request<PrehireWorkQueueResponse>(`/dashboard/prehire/overview/work-queue?${search.toString()}`, access, init)
+}
+
+export function getWorkspaceWork(
+  access: DashboardAccess,
+  params: { limit?: number; scope?: 'mine' | 'attention' | string } = {},
+  init?: RequestInit,
+) {
+  const search = new URLSearchParams()
+  const raw = String(params.scope || 'mine').toLowerCase()
+  const scope = raw === 'company' || raw === 'attention' ? 'attention' : 'mine'
+  search.set('scope', scope)
+  search.set('limit', String(params.limit || 10))
+  return request<WorkspaceWorkResponse>(`/dashboard/work?${search.toString()}`, access, init)
 }
 
 export function getPrehireNextAction(access: DashboardAccess, params: { scope?: 'mine' | 'company' | string } = {}) {

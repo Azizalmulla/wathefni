@@ -33,7 +33,7 @@ describe('dashboard initial load', () => {
         expect.arrayContaining([
           '/dashboard/prehire/summary',
           '/dashboard/prehire/notifications?limit=25&scope=mine',
-          '/dashboard/prehire/overview/work-queue?limit=10&scope=mine',
+          '/dashboard/work?scope=mine&limit=10',
         ]),
       )
     })
@@ -380,17 +380,18 @@ describe('dashboard initial load', () => {
     const before = calledPaths(fetchMock).filter((path) =>
       path.startsWith('/dashboard/prehire/summary')
       || path.startsWith('/dashboard/prehire/reports')
+      || path.includes('/dashboard/work')
       || path.includes('work-queue')
       || path.includes('notifications'),
     )
     const summaryBefore = before.filter((path) => path.startsWith('/dashboard/prehire/summary')).length
     const reportsBefore = before.filter((path) => path.startsWith('/dashboard/prehire/reports')).length
 
-    fireEvent.click(screen.getByRole('button', { name: 'Company work' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Company Attention' }))
     await waitFor(() => {
       expect(calledPaths(fetchMock)).toEqual(
         expect.arrayContaining([
-          '/dashboard/prehire/overview/work-queue?limit=10&scope=company',
+          '/dashboard/work?scope=attention&limit=10',
         ]),
       )
     })
@@ -399,16 +400,16 @@ describe('dashboard initial load', () => {
     expect(after.filter((path) => path.startsWith('/dashboard/prehire/summary')).length).toBe(summaryBefore)
     expect(after.filter((path) => path.startsWith('/dashboard/prehire/reports')).length).toBe(reportsBefore)
 
-    fireEvent.click(screen.getByRole('button', { name: 'My work' }))
+    fireEvent.click(screen.getByRole('button', { name: 'My Work' }))
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'My work' })).toHaveClass('bg-semantic-ink')
+      expect(screen.getByRole('button', { name: 'My Work' })).toHaveClass('bg-semantic-ink')
     })
-    expect(screen.getByRole('button', { name: 'My work' })).not.toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Company work' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'My Work' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Company Attention' })).not.toBeDisabled()
 
     // Wave 2: top-level work-queue View all removed (no cross-module queue page).
     // Roles "View all" may still exist — only assert the follow-up miswire is gone.
-    const workHeading = screen.getAllByRole('heading', { name: /My work|Company work/i })[0]
+    const workHeading = screen.getAllByRole('heading', { name: /My Work|Company Attention/i })[0]
     const workSection = workHeading.closest('section')
     expect(workSection).toBeTruthy()
     const viewAllInWork = within(workSection as HTMLElement).queryAllByRole('button', { name: /View all|عرض الكل/i })
@@ -571,25 +572,31 @@ function responseFor(path: string, options: { enabledModules?: string[] } = {}) 
       recent_applications: [applicationSummary()],
     }
   }
-  if (path.startsWith('/dashboard/prehire/overview/work-queue')) {
+  if (path.startsWith('/dashboard/work') || path.startsWith('/dashboard/prehire/overview/work-queue')) {
     return {
       company_code: 'WATHEFNI',
       ok: true,
       as_of: '2026-07-20T00:00:00+00:00',
       total: 1,
       limit: 10,
+      can_view_attention: true,
       can_view_company_work: true,
       items: [
         {
+          work_id: 'prehire:person:APP-1:ready_for_review',
+          membership: 'assigned',
+          module: 'pre_hiring',
+          source_key: 'prehire_personal_work',
           action_type: 'ready_for_review',
-          app_key: 'APP-1',
-          candidate_name: 'Hamad Almulla',
-          reason: 'Candidate is ready for an HR decision',
-          priority: 70,
-          age_hours: 12,
+          title_en: 'Review candidate',
+          title_ar: 'مراجعة المرشح',
+          reason_en: 'Candidate is ready for an HR decision',
+          reason_ar: 'المرشح جاهز لقرار الموارد البشرية',
+          subject_name: 'Hamad Almulla',
+          owner: 'Application owner',
+          due_state: 'open',
           destination: { page: 'candidates', filters: { review_status: 'ready' } },
-          authority_source: 'prehire_overview.ready_for_review',
-          as_of: '2026-07-20T00:00:00+00:00',
+          authority_source: 'workspace_work.compose',
         },
       ],
     }

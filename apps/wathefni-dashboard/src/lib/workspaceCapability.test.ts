@@ -115,7 +115,7 @@ describe('workspaceCapability composition matrix', () => {
     expect(authority.pageAllowed('employees')).toBe(false)
     expect(authority.pageAllowed('compliance')).toBe(true)
     expect(authority.pageAllowed('overview')).toBe(true)
-    expect(authority.overview.showWorkQueue).toBe(false)
+    expect(authority.overview.showWorkQueue).toBe(true)
     expect(authority.navGroups.map((g) => g.group)).toEqual(['posthire', 'settings'])
   })
 
@@ -223,7 +223,7 @@ describe('workspaceCapability composition matrix', () => {
     )
     expect(authority.pageAllowed('overview')).toBe(true)
     expect(authority.pageAllowed('jobs')).toBe(false)
-    expect(authority.overview.showWorkQueue).toBe(false)
+    expect(authority.overview.showWorkQueue).toBe(true)
     expect(authority.overview.showRolePriority).toBe(false)
     expect(authority.overview.showHiringMetrics).toBe(false)
     expect(authority.overview.headlineMode).toBe('team')

@@ -12,13 +12,13 @@ export const invalidate = {
   overviewCore(client: QueryClient, access: DashboardAccess) {
     return Promise.all([
       client.invalidateQueries({ queryKey: qk.summary(access) }),
-      client.invalidateQueries({ queryKey: [...tenantRoot(access), 'work-queue'] }),
+      client.invalidateQueries({ queryKey: [...tenantRoot(access), 'workspace-work'] }),
       client.invalidateQueries({ queryKey: [...tenantRoot(access), 'notifications'] }),
     ])
   },
 
   workQueues(client: QueryClient, access: DashboardAccess) {
-    return client.invalidateQueries({ queryKey: [...tenantRoot(access), 'work-queue'] })
+    return client.invalidateQueries({ queryKey: [...tenantRoot(access), 'workspace-work'] })
   },
 
   applications(client: QueryClient, access: DashboardAccess) {

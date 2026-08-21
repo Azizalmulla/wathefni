@@ -73,9 +73,9 @@ export function useBootstrapQuery(access: DashboardAccess, enabled = true) {
   })
 }
 
-export function useWorkQueueQuery(access: DashboardAccess, scope: 'mine' | 'company', enabled = true) {
+export function useWorkQueueQuery(access: DashboardAccess, scope: 'mine' | 'company' | 'attention', enabled = true) {
   // Opt out of client-default keepPreviousData: scope is part of the key.
-  // Keeping the prior scope's rows makes My/Company briefly wrong; opposite scope is prefetched instead.
+  // Keeping the prior scope's rows makes My Work / Company Attention briefly wrong; opposite scope is prefetched instead.
   const refetchInterval = useVisibilityRefetchInterval(FRESHNESS_MS.workQueue, enabled)
   return useQuery({
     queryKey: qk.workQueue(access, scope),
@@ -463,11 +463,11 @@ export function useCandidateFeaturesQuery(access: DashboardAccess, enabled = tru
   return { unified, classification, taxonomy, views }
 }
 
-export function usePrefetchOppositeWorkScope(access: DashboardAccess, scope: 'mine' | 'company', enabled: boolean) {
+export function usePrefetchOppositeWorkScope(access: DashboardAccess, scope: 'mine' | 'company' | 'attention', enabled: boolean) {
   const client = useQueryClient()
   useEffect(() => {
     if (!enabled || !accessReady(access)) return
-    const other = scope === 'mine' ? 'company' : 'mine'
+    const other = scope === 'mine' ? 'attention' : 'mine'
     const handle = window.setTimeout(() => {
       void client.prefetchQuery({
         queryKey: qk.workQueue(access, other),

@@ -17,7 +17,7 @@ import {
   getNotifications,
   getPrehirePositions,
   getPrehireReports,
-  getPrehireWorkQueue,
+  getWorkspaceWork,
   getPosthireActionInbox,
   getSummary,
   getTalentPoolClassificationFeature,
@@ -53,10 +53,11 @@ export async function fetchBootstrap(access: DashboardAccess, _signal?: AbortSig
 
 export async function fetchWorkQueue(
   access: DashboardAccess,
-  scope: 'mine' | 'company',
+  scope: 'mine' | 'company' | 'attention',
   signal?: AbortSignal,
 ) {
-  return getPrehireWorkQueue(access, { limit: 10, scope }, { signal })
+  const mapped = scope === 'company' || scope === 'attention' ? 'attention' : 'mine'
+  return getWorkspaceWork(access, { limit: 10, scope: mapped }, { signal })
 }
 
 export async function fetchNotifications(
