@@ -1286,7 +1286,13 @@ def can_view_attention(
     from workspace_work_contributions import MODULE_WORK_CONTRIBUTIONS, attention_entitled
 
     for spec in MODULE_WORK_CONTRIBUTIONS:
-        if attention_entitled(spec, enabled=enabled, permissions=permissions, actor_role=actor_role):
+        if not attention_entitled(spec, enabled=enabled, permissions=permissions, actor_role=actor_role):
+            continue
+        # Read-only projections (analytics/compliance findings) do not unlock Company
+        # Attention for restricted viewers. Oversee requires act/approve/manage.
+        if any(not str(p).endswith(".read") for p in spec.attention_permissions if p in permissions):
+            return True
+        if spec.module in {"pre_hiring", "assessments", "interviews"}:
             return True
     return False
 

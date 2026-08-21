@@ -93,6 +93,15 @@ def main() -> None:
         is True,
     )
     check(
+        "viewer analytics.read does not unlock attention",
+        ww.can_view_attention(
+            actor_role="viewer",
+            permissions={"analytics.read", "compliance.read"},
+            enabled={"analytics", "compliance"},
+        )
+        is False,
+    )
+    check(
         "inbox does not unlock attention without entitled module",
         ww.can_view_attention(actor_role="viewer", permissions=set(), enabled=set(), inbox_ok=True)
         is False,
