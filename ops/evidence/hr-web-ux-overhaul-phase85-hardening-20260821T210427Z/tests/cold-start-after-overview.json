@@ -1,0 +1,41 @@
+{
+  "label": "after-overview",
+  "page": "overview",
+  "runs": [
+    {
+      "resolvingMs": 1149,
+      "shellMs": 1330,
+      "usefulMs": 1727,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": false,
+      "title": "Good evening, E2E",
+      "urlPage": "overview",
+      "usefulProbe": "true",
+      "settledShifts": false,
+      "settledShell": true,
+      "resolvedMs": 1315
+    },
+    {
+      "resolvingMs": 1018,
+      "shellMs": 1293,
+      "usefulMs": 2102,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": false,
+      "title": "Good evening, E2E",
+      "urlPage": "overview",
+      "usefulProbe": "true",
+      "settledShifts": false,
+      "settledShell": true,
+      "resolvedMs": 1288
+    }
+  ],
+  "median": {
+    "resolvingMs": 1084,
+    "resolvedMs": 1302,
+    "shellMs": 1312,
+    "usefulMs": 1915
+  },
+  "authWall": false
+}

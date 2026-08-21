@@ -115,4 +115,43 @@ describe('Shifts org-unit filter resource states', () => {
     expect(screen.queryByTestId('shifts-org-units-filter-state')).not.toBeInTheDocument()
     expect(screen.queryByText(/not an empty result/i)).not.toBeInTheDocument()
   })
+
+  test('org-unit permission_denied stays in Shifts and does not raise a session auth wall', async () => {
+    const onAccessIssue = vi.fn()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const path = String(input)
+        if (path.includes('/employee-org/units')) {
+          return jsonResponse({ detail: { error: 'permission_denied', message: 'You do not have access to do that.' } }, 403)
+        }
+        if (path.includes('/dashboard/posthire/shifts')) {
+          return jsonResponse({
+            company_code: 'WATHEFNI',
+            shifts: [],
+            swaps: [],
+            availability: [],
+            reconciliation_flags: [],
+            terminal_reminders: [],
+          })
+        }
+        return jsonResponse({ ok: true })
+      }),
+    )
+
+    renderWithProviders(
+      <ShiftsWorkspace
+        access={access}
+        permissions={['shifts.read', 'shifts.manage']}
+        role="owner"
+        onNotice={vi.fn()}
+        onAccessIssue={onAccessIssue}
+      />,
+    )
+
+    expect(await screen.findByTestId('shifts-workspace')).toBeInTheDocument()
+    const state = await screen.findByTestId('shifts-org-units-filter-state')
+    expect(state).toHaveAttribute('role', 'alert')
+    expect(onAccessIssue).not.toHaveBeenCalled()
+  })
 })

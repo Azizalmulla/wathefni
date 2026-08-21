@@ -147,6 +147,39 @@ describe('dashboard initial load', () => {
     expect(screen.queryByTestId('octohr-auth-resolving')).not.toBeInTheDocument()
   })
 
+  test('resource permission_denied after a valid session does not open the sign-in wall', async () => {
+    localStorage.setItem('wathefni_dashboard_token', 'saved-token')
+    localStorage.setItem('wathefni_company_code', 'WATHEFNI')
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input)
+      if (path === '/dashboard/bootstrap') {
+        return jsonResponse({
+          company_code: 'WATHEFNI',
+          enabled_modules: ['pre_hiring', 'shifts'],
+          access: {
+            role: 'owner',
+            permissions: ['prehire.read', 'shifts.read'],
+            user: { name: 'Aziz Almulla', email: 'aziz@example.com', company_code: 'WATHEFNI', role: 'owner', status: 'active' },
+          },
+        })
+      }
+      if (path === '/dashboard/prehire/summary') {
+        return jsonResponse({ detail: { error: 'permission_denied', message: 'You do not have access to do that.' } }, 403)
+      }
+      const payload = responseFor(path)
+      if (!payload) return jsonResponse({ detail: `Unexpected path ${path}` }, 404)
+      return jsonResponse(payload)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+
+    expect(await screen.findByTestId('app-sidebar')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Sign in' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/does not include access to this workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('octohr-auth-surface')).not.toBeInTheDocument()
+  })
+
   test('unsigned visit is a dedicated OctoHR sign-in without workspace chrome', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => jsonResponse({ detail: `Unexpected path ${String(input)}` }, 500))
     vi.stubGlobal('fetch', fetchMock)
@@ -368,7 +401,7 @@ describe('dashboard initial load', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'My work' }))
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'My work' })).toHaveClass('bg-[#23211d]')
+      expect(screen.getByRole('button', { name: 'My work' })).toHaveClass('bg-semantic-ink')
     })
     expect(screen.getByRole('button', { name: 'My work' })).not.toBeDisabled()
     expect(screen.getByRole('button', { name: 'Company work' })).not.toBeDisabled()
@@ -450,7 +483,7 @@ describe('dashboard initial load', () => {
     fireEvent.click(screen.getByTestId('mobile-nav-more'))
     expect(screen.getByRole('menuitem', { name: 'Employees' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Compliance' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Overview' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Overview' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Jobs' })).not.toBeInTheDocument()
     await waitFor(() => expect(calledPaths(fetchMock)).toContain('/dashboard/bootstrap'))
     expect(calledPaths(fetchMock)).not.toContain('/dashboard/prehire/summary')
@@ -491,7 +524,7 @@ describe('dashboard initial load', () => {
     renderApp()
 
     expect((await screen.findAllByRole('heading', { name: 'Compliance' })).length).toBeGreaterThan(0)
-    expect(screen.queryByRole('button', { name: 'Overview' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Overview' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Jobs' })).not.toBeInTheDocument()
     await waitFor(() => expect(calledPaths(fetchMock)).toContain('/dashboard/prehire/summary'))
     expect(calledPaths(fetchMock).some((path) => path.startsWith('/dashboard/prehire/applications'))).toBe(false)

@@ -1,0 +1,55 @@
+{
+  "label": "before",
+  "page": "shifts",
+  "runs": [
+    {
+      "resolvingMs": 991,
+      "shellMs": 1280,
+      "usefulMs": 2440,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": true,
+      "title": "Sign in",
+      "urlPage": "shifts",
+      "usefulProbe": "true",
+      "settledShifts": false,
+      "settledShell": false,
+      "resolvedMs": 1270
+    },
+    {
+      "resolvingMs": 959,
+      "shellMs": 1161,
+      "usefulMs": 1921,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": true,
+      "title": "Sign in",
+      "urlPage": "shifts",
+      "usefulProbe": "true",
+      "settledShifts": false,
+      "settledShell": false,
+      "resolvedMs": 1151
+    },
+    {
+      "resolvingMs": 1000,
+      "shellMs": 1434,
+      "usefulMs": 2825,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": true,
+      "title": "Sign in",
+      "urlPage": "shifts",
+      "usefulProbe": "true",
+      "settledShifts": false,
+      "settledShell": false,
+      "resolvedMs": 1422
+    }
+  ],
+  "median": {
+    "resolvingMs": 991,
+    "resolvedMs": 1270,
+    "shellMs": 1280,
+    "usefulMs": 2440
+  },
+  "authWall": true
+}

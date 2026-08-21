@@ -32,9 +32,29 @@ export function accessIssueMessage(issue: AccessIssue, locale: RecruitingLocale)
   return issue.copyKey ? authCopy(locale, issue.copyKey) : issue.description
 }
 
+/** Codes that mean the stored session cannot continue. Resource 403s are not in this set. */
+const SESSION_AUTH_FAILURE_CODES = new Set([
+  'dashboard_auth_failed',
+  'dashboard_user_identity_required',
+  'dashboard_company_required',
+  'hr_user_not_allowed',
+  'account_inactive',
+])
+
+/**
+ * True only for genuine authentication/session failures.
+ * Resource-level `permission_denied` / `module_disabled` / `action_forbidden` stay in-page.
+ */
+export function isSessionAuthFailure(error: unknown): boolean {
+  if (!(error instanceof DashboardApiError)) return false
+  if (error.status === 401) return true
+  return SESSION_AUTH_FAILURE_CODES.has(error.code)
+}
+
 /** Map API auth/access failures to the sign-in screen. Returns null for ordinary errors. */
 export function accessIssueFromError(error: unknown, locale: RecruitingLocale = 'en'): AccessIssue | null {
   if (!(error instanceof DashboardApiError)) return null
+  if (!isSessionAuthFailure(error)) return null
   if (error.status === 401 || error.code === 'dashboard_auth_failed') {
     return sessionExpiredIssue(locale)
   }
@@ -53,17 +73,6 @@ export function accessIssueFromError(error: unknown, locale: RecruitingLocale = 
           ? authCopy(locale, 'authAccessNotAllowedBody')
           : 'This HR phone is not registered for the selected company. Check the company code and HR phone, then sign in again.',
       copyKey: 'authAccessNotAllowedBody',
-    }
-  }
-  if (error.code === 'permission_denied') {
-    return {
-      code: error.code,
-      title: locale === 'ar' ? authCopy(locale, 'authRoleCannotOpen') : 'Your role cannot open this dashboard',
-      description:
-        locale === 'ar'
-          ? authCopy(locale, 'authRoleCannotOpenBody')
-          : 'Your HR role does not include pre-hiring access. Ask a company Owner or HR Manager to update your role.',
-      copyKey: 'authRoleCannotOpenBody',
     }
   }
   if (error.code === 'account_inactive') {

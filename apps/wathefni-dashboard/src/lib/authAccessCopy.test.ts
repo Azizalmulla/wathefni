@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { accessIssueFromError, accessIssueMessage, sessionExpiredIssue } from './access'
+import { accessIssueFromError, accessIssueMessage, isSessionAuthFailure, sessionExpiredIssue } from './access'
 import { authCopy, isDefaultAuthPrompt } from './authCopy'
 import { DashboardApiError } from './api'
 
@@ -36,12 +36,22 @@ describe('access issues', () => {
     expect(issue?.description).toBe(authCopy('ar', 'authSessionExpired'))
   })
 
-  test('omitted locale keeps English descriptions for signed-in consumers', () => {
+  test('resource-level permission_denied does not become a global auth wall', () => {
     const error = new DashboardApiError(403, { error: 'permission_denied' }, 'Forbidden')
-    const issue = accessIssueFromError(error)
-    expect(issue?.description).toBe(
-      'Your HR role does not include pre-hiring access. Ask a company Owner or HR Manager to update your role.',
-    )
-    expect(accessIssueMessage(issue!, 'ar')).toBe(authCopy('ar', 'authRoleCannotOpenBody'))
+    expect(isSessionAuthFailure(error)).toBe(false)
+    expect(accessIssueFromError(error)).toBeNull()
+    expect(accessIssueFromError(error, 'ar')).toBeNull()
+  })
+
+  test('module and action forbids stay in-page', () => {
+    expect(accessIssueFromError(new DashboardApiError(403, { error: 'module_disabled' }, 'Off'))).toBeNull()
+    expect(accessIssueFromError(new DashboardApiError(403, { error: 'action_forbidden' }, 'No'))).toBeNull()
+  })
+
+  test('401 and identity failures remain session-ending', () => {
+    expect(isSessionAuthFailure(new DashboardApiError(401, { error: 'dashboard_auth_failed' }, 'Unauthorized'))).toBe(true)
+    expect(isSessionAuthFailure(new DashboardApiError(403, { error: 'hr_user_not_allowed' }, 'No'))).toBe(true)
+    expect(isSessionAuthFailure(new DashboardApiError(403, { error: 'account_inactive' }, 'No'))).toBe(true)
+    expect(isSessionAuthFailure(new DashboardApiError(400, { error: 'dashboard_company_required' }, 'No'))).toBe(true)
   })
 })

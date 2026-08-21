@@ -1,0 +1,55 @@
+{
+  "label": "after",
+  "page": "shifts",
+  "runs": [
+    {
+      "resolvingMs": 1052,
+      "shellMs": 1260,
+      "usefulMs": 1447,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": false,
+      "title": "Shifts",
+      "urlPage": "shifts",
+      "usefulProbe": "true",
+      "settledShifts": true,
+      "settledShell": true,
+      "resolvedMs": 1246
+    },
+    {
+      "resolvingMs": 1016,
+      "shellMs": 1344,
+      "usefulMs": 1567,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": false,
+      "title": "Shifts",
+      "urlPage": "shifts",
+      "usefulProbe": "true",
+      "settledShifts": true,
+      "settledShell": true,
+      "resolvedMs": 1334
+    },
+    {
+      "resolvingMs": 961,
+      "shellMs": 1164,
+      "usefulMs": 1322,
+      "loadingChipMs": null,
+      "loadingChipGoneMs": null,
+      "authWall": false,
+      "title": "Shifts",
+      "urlPage": "shifts",
+      "usefulProbe": "true",
+      "settledShifts": true,
+      "settledShell": true,
+      "resolvedMs": 1153
+    }
+  ],
+  "median": {
+    "resolvingMs": 1016,
+    "resolvedMs": 1246,
+    "shellMs": 1260,
+    "usefulMs": 1447
+  },
+  "authWall": false
+}

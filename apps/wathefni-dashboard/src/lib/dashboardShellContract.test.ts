@@ -78,4 +78,9 @@ describe('global dashboard shell contract', () => {
     expect(appSrc).not.toContain('border-r ')
     expect(appSrc).not.toContain('right-6')
   })
+
+  test('non-overview pages mount after bootstrap and do not wait for hiring summary', () => {
+    expect(appSrc).toContain("activePage === 'overview' ? overviewBootstrapped : workspaceBootstrapped")
+    expect(appSrc).not.toContain('const dashboardLoaded = Boolean(moduleState && (!prehireEnabled || (summary && notifications)))')
+  })
 })

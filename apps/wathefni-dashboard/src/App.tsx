@@ -649,15 +649,8 @@ function App() {
   )
 
   const bootNoticeShownRef = useRef(false)
+  const latestDataNoticeShownRef = useRef(false)
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false)
-  useEffect(() => {
-    if (!overviewInteractive || bootNoticeShownRef.current) return
-    bootNoticeShownRef.current = true
-    setNoticeOk(
-      recruitingLocale === 'ar' ? 'أنت تعرض أحدث البيانات.' : 'You’re viewing the latest data.',
-    )
-  }, [overviewInteractive, recruitingLocale, setNoticeOk])
-
   useEffect(() => {
     setSelected((current) => syncSelectedApplication(current, applications?.applications))
   }, [applications?.applications])
@@ -685,6 +678,23 @@ function App() {
 
   const moduleState: DashboardModuleState = workspaceBootstrap || summary
   const prehireEnabled = dashboardModuleEnabled(moduleState, 'pre_hiring')
+  useEffect(() => {
+    if (!moduleState || bootNoticeShownRef.current) return
+    if (!access.token.trim()) return
+    bootNoticeShownRef.current = true
+    setNoticeState((current) => {
+      if (current.tone !== 'info') return current
+      if (!/loading saved dashboard access|access verification required/i.test(current.text)) return current
+      return { text: '', tone: 'info' }
+    })
+  }, [access.token, moduleState])
+  useEffect(() => {
+    if (!overviewInteractive || latestDataNoticeShownRef.current) return
+    latestDataNoticeShownRef.current = true
+    setNoticeOk(
+      recruitingLocale === 'ar' ? 'أنت تعرض أحدث البيانات.' : 'You’re viewing the latest data.',
+    )
+  }, [overviewInteractive, recruitingLocale, setNoticeOk])
   const allApplications = applications?.applications || summary?.recent_applications || []
   const enabledNotificationModules = notifications?.enabled_modules
   const assessmentModuleOn = assessmentModuleEnabled(moduleState, summary)
@@ -752,7 +762,9 @@ function App() {
     setPage(defaultWorkspacePage as Page)
   }, [authorityReady, defaultWorkspacePage, moduleState, page, workspaceAuthority.navIds])
 
-  const dashboardLoaded = Boolean(moduleState && (!prehireEnabled || (summary && notifications)))
+  const workspaceBootstrapped = Boolean(moduleState)
+  const overviewBootstrapped = Boolean(moduleState && (!prehireEnabled || (summary && notifications)))
+  const pageContentReady = activePage === 'overview' ? overviewBootstrapped : workspaceBootstrapped
   const userAccess = moduleState?.access || null
   const showingInviteAcceptance = Boolean(inviteToken.trim())
   const canImportCandidates = hasDashboardPermission(userAccess, 'candidate.import')
@@ -1663,6 +1675,7 @@ function App() {
       setAccess(nextAccess)
       queryClient.clear()
       bootNoticeShownRef.current = false
+      latestDataNoticeShownRef.current = false
       setRanking(null)
       setTeam(null)
       setChatMessages([])
@@ -2760,7 +2773,7 @@ function App() {
 
           {activePage !== 'settings' && !access.token.trim() ? (
             <NeedsSettings onOpenSettings={() => openPage('settings')} />
-          ) : activePage !== 'settings' && !dashboardLoaded ? (
+          ) : activePage !== 'settings' && !pageContentReady ? (
             <PageSkeleton />
           ) : (
             <>
