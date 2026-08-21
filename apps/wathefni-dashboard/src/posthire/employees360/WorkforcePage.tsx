@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusPill } from '@/components/ui/page-chrome'
 import { SearchInput } from '@/components/ui/search-input'
+import { URL_BACKED_WORKSPACE_TABS, useUrlBackedTab } from '@/lib/hrWebUrlTab'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import {
   applyEmployeeEssRequest,
@@ -143,11 +144,7 @@ function sectionAllowed(section: SectionId, canManage: boolean, canApprove: bool
 export function WorkforcePage({ access, permissions, onNotice, onAccessIssue, onNavigate }: Props) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
-  const [section, setSection] = useState<SectionId>(() => {
-    if (typeof window === 'undefined') return PRIMARY_SECTION
-    const raw = new URLSearchParams(window.location.search).get('workforce')
-    return SECTIONS.some((s) => s.id === raw) ? (raw as SectionId) : PRIMARY_SECTION
-  })
+  const [section, setSection] = useUrlBackedTab('workforce', URL_BACKED_WORKSPACE_TABS.workforce, PRIMARY_SECTION)
   const [showAdvanced, setShowAdvanced] = useState(() => section !== PRIMARY_SECTION)
   const canManage = can(permissions, 'employees.manage')
   const canViewStructure = can(permissions, 'employees.read') || canManage
@@ -158,13 +155,6 @@ export function WorkforcePage({ access, permissions, onNotice, onAccessIssue, on
     || can(permissions, 'employees.ess.apply')
     || can(permissions, 'employees.read')
   const advancedVisible = ADVANCED_SECTIONS.filter((s) => sectionAllowed(s.id, canManage, canApprove, canSeeRequests, canViewStructure))
-
-  useEffect(() => {
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', 'workforce')
-    url.searchParams.set('workforce', section)
-    window.history.replaceState({}, '', `${url.pathname}${url.search}`)
-  }, [section])
 
   useEffect(() => {
     if (section !== PRIMARY_SECTION) setShowAdvanced(true)
@@ -184,19 +174,11 @@ export function WorkforcePage({ access, permissions, onNotice, onAccessIssue, on
   return (
     <div className="space-y-4" data-testid="workforce-hub" data-page="organization" dir={isAr ? 'rtl' : 'ltr'} lang={locale}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-mist">
-            {isAr ? 'ما بعد التوظيف' : 'Post-hire'}
-          </p>
-          <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-text">
-            {isAr ? 'الهيكل التنظيمي' : 'Organization'}
-          </h2>
-          <p className="mt-1 max-w-2xl text-[13px] leading-5 text-subtle/90">
-            {isAr
-              ? 'اعرض تسلسل وحدات الهيكل — الأقسام والفرق والمواقع والمناصب. هذا ليس خط إبلاغ المدير للموظف.'
-              : 'View the company unit hierarchy — departments, teams, locations, and positions. This is not employee–manager reporting lines.'}
-          </p>
-        </div>
+        <p className="max-w-2xl text-[13px] leading-5 text-semantic-subtle">
+          {isAr
+            ? 'اعرض تسلسل وحدات الهيكل — الأقسام والفرق والمواقع والمناصب. هذا ليس خط إبلاغ المدير للموظف.'
+            : 'View the company unit hierarchy — departments, teams, locations, and positions. This is not employee–manager reporting lines.'}
+        </p>
         <div className="flex flex-wrap items-center justify-end gap-2">
           {advancedVisible.length ? (
             <Button
@@ -217,7 +199,7 @@ export function WorkforcePage({ access, permissions, onNotice, onAccessIssue, on
       </div>
 
       {showAdvanced && advancedVisible.length ? (
-        <div className="rounded-[1.2rem] border border-[#e8dfd0]/80 bg-[#fffdf8]/55 px-3 py-2.5" data-testid="organization-advanced-rail">
+        <div className="rounded-[1.2rem] border border-semantic-line/80 bg-semantic-surface-raised/55 px-3 py-2.5" data-testid="organization-advanced-rail">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-mist">
             {isAr ? 'إدارة متقدمة' : 'Advanced administration'}
           </p>

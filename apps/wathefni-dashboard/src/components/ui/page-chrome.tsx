@@ -55,7 +55,7 @@ export function StatusPill({
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-[-0.01em]',
-        tone === 'neutral' && 'bg-[#eee5d4] text-[#5c554a]',
+        tone === 'neutral' && 'bg-semantic-accent-soft text-semantic-ink-muted',
         (tone === 'success' || tone === 'priority') && 'bg-wf-accent-priority-soft text-wf-accent-priority-ink',
         (tone === 'warning' || tone === 'review') && 'bg-wf-accent-review-soft text-wf-accent-review-ink',
         tone === 'assess' && 'bg-wf-accent-assess-soft text-wf-accent-assess-ink',

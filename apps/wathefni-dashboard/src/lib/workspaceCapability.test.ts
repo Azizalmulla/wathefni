@@ -114,7 +114,8 @@ describe('workspaceCapability composition matrix', () => {
     })
     expect(authority.pageAllowed('employees')).toBe(false)
     expect(authority.pageAllowed('compliance')).toBe(true)
-    expect(authority.pageAllowed('overview')).toBe(false)
+    expect(authority.pageAllowed('overview')).toBe(true)
+    expect(authority.overview.showWorkQueue).toBe(false)
     expect(authority.navGroups.map((g) => g.group)).toEqual(['posthire', 'settings'])
   })
 
@@ -213,6 +214,20 @@ describe('workspaceCapability composition matrix', () => {
     expect(owner.overview.showRolePriority).toBe(true)
     expect(viewer.overview.showWorkQueue).toBe(false)
     expect(viewer.overview.showRolePriority).toBe(false)
+  })
+
+  test('post-hire only owner still gets Overview as company home without recruiting bands', () => {
+    const authority = authorityForMatrixRow(
+      COMPOSITION_MATRIX.find((r) => r.id === 'posthire_only')!,
+      catalog,
+    )
+    expect(authority.pageAllowed('overview')).toBe(true)
+    expect(authority.pageAllowed('jobs')).toBe(false)
+    expect(authority.overview.showWorkQueue).toBe(false)
+    expect(authority.overview.showRolePriority).toBe(false)
+    expect(authority.overview.showHiringMetrics).toBe(false)
+    expect(authority.overview.headlineMode).toBe('team')
+    expect(authority.navGroups.find((g) => g.group === 'posthire')?.ids).toContain('overview')
   })
 
   test('missing enabled_modules fails closed instead of enabling prehire', () => {

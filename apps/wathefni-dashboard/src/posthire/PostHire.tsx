@@ -33,6 +33,20 @@ import { LoadMoreBar } from '@/components/ui/load-more-bar'
 import { StatusPill } from '@/components/ui/page-chrome'
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
+import { HrAnchorNav } from '@/components/hr/HrAnchorNav'
+import { HrPageHeader } from '@/components/hr/HrPageHeader'
+import { HrSection } from '@/components/hr/HrSection'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
+import { SoftKeepSurface } from '@/components/ui/SoftKeepSurface'
+import {
+  EMPLOYEE_ONBOARDING_FILTERS,
+  EMPLOYEE_STATUS_FILTERS,
+  URL_BACKED_VIEW_PAGES,
+  URL_BACKED_WORKSPACE_TABS,
+  useUrlBackedDateRange,
+  useUrlBackedParam,
+  useUrlBackedTab,
+} from '@/lib/hrWebUrlTab'
 import { useEmployees360Locale, WorkflowEmpty } from '@/posthire/employees360/chrome'
 import { DocumentExtractionSummaryLoader } from '@/posthire/DocumentExtractionSummaryLoader'
 import { FRESHNESS_MS } from '@/lib/query/freshness'
@@ -1428,30 +1442,37 @@ function ImportEmployeesModal({ access, onClose, onNotice, onImported }: {
 export function EmployeesPage({ access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
   const locale = useEmployees360Locale()
   const copy = employeesCopy(locale)
-  const [query, setQuery] = useState('')
+  const [urlQ, setUrlQ] = useUrlBackedParam('employees', 'q', '', 'replace')
+  const [query, setQuery] = useState(urlQ)
+  useEffect(() => {
+    setQuery((prev) => (prev === urlQ ? prev : urlQ))
+  }, [urlQ])
   // Search runs on the server so it reaches the whole workforce, not just the
   // pages already loaded. Debounce the raw input so we fetch on the settled term.
   const debouncedQuery = useDebouncedValue(query.trim(), 350)
+  useEffect(() => {
+    if (debouncedQuery !== urlQ) setUrlQ(debouncedQuery, 'replace')
+  }, [debouncedQuery, urlQ, setUrlQ])
   const loader = useCallback(
     () => getPosthireEmployees(access, debouncedQuery ? { search: debouncedQuery } : undefined),
     [access, debouncedQuery],
   )
   const { data, loading, refreshing, error, reload } = useModuleData<PosthireEmployeesResponse>(loader, onAccessIssue)
-  const [selectedKey, setSelectedKey] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null
-    return new URLSearchParams(window.location.search).get('employee')
-  })
+  const [employeeKey, setEmployeeKey] = useUrlBackedParam('employees', 'employee', '')
+  const selectedKey = employeeKey || null
   const [showAdd, setShowAdd] = useState(false)
   const [showImport, setShowImport] = useState(false)
-  const [showMigration, setShowMigration] = useState(() => {
-    if (typeof window === 'undefined') return false
-    const params = new URLSearchParams(window.location.search)
-    return params.get('view') === 'migration' || params.get('page') === 'migration-sync'
-  })
-  const [statusFilter, setStatusFilter] = useState<'active' | 'left' | 'all'>('active')
-  const [departmentFilter, setDepartmentFilter] = useState('')
-  const [onboardingFilter, setOnboardingFilter] = useState<'any' | 'open' | 'complete' | 'not_started'>('any')
-  const [showMoreFilters, setShowMoreFilters] = useState(false)
+  const [migrationView, setMigrationView] = useUrlBackedTab('employees', URL_BACKED_VIEW_PAGES.employees, '', 'view')
+  const showMigration = migrationView === 'migration'
+  const [statusFilter, setStatusFilter] = useUrlBackedTab('employees', EMPLOYEE_STATUS_FILTERS, 'active', 'status')
+  const [departmentFilter, setDepartmentFilter] = useUrlBackedParam('employees', 'department', '')
+  const [onboardingFilter, setOnboardingFilter] = useUrlBackedTab(
+    'employees',
+    EMPLOYEE_ONBOARDING_FILTERS,
+    'any',
+    'onboarding',
+  )
+  const [showMoreFilters, setShowMoreFilters] = useState(() => onboardingFilter !== 'any')
   const canManageRoster = can(permissions, 'employees.manage', role)
 
   // P6.1: soft-refresh directory when Migration Sync / review applies (same or other tab).
@@ -1466,31 +1487,6 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
       enabled: !selectedKey && !showMigration,
     },
   )
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', 'employees')
-    if (selectedKey) url.searchParams.set('employee', selectedKey)
-    else url.searchParams.delete('employee')
-    if (showMigration) url.searchParams.set('view', 'migration')
-    else if (url.searchParams.get('view') === 'migration') url.searchParams.delete('view')
-    window.history.replaceState({}, '', `${url.pathname}${url.search}`)
-  }, [selectedKey, showMigration])
-
-  // Calendar / module deep links may update ?employee= via history without remounting.
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const syncFromUrl = () => {
-      const params = new URLSearchParams(window.location.search)
-      const key = params.get('employee')
-      setSelectedKey((prev) => (prev === key ? prev : key))
-      const nextMigration = params.get('view') === 'migration' || params.get('page') === 'migration-sync'
-      setShowMigration((prev) => (prev === nextMigration ? prev : nextMigration))
-    }
-    window.addEventListener('popstate', syncFromUrl)
-    return () => window.removeEventListener('popstate', syncFromUrl)
-  }, [])
 
   // All hooks (including this useMemo) must run unconditionally on every
   // render — the "open a profile" early return below must come after every
@@ -1564,15 +1560,15 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
   }, [access, employees.length, debouncedQuery, onAccessIssue, onNotice, copy.loadMoreFailed])
 
   if (selectedKey) {
-    return <EmployeeProfile access={access} permissions={permissions} role={role} employeeKey={selectedKey} onBack={() => setSelectedKey(null)} onNotice={onNotice} onAccessIssue={onAccessIssue} onNavigate={onNavigate} />
+    return <EmployeeProfile access={access} permissions={permissions} role={role} employeeKey={selectedKey} onBack={() => setEmployeeKey('')} onNotice={onNotice} onAccessIssue={onAccessIssue} onNavigate={onNavigate} />
   }
 
   const openProfile = (emp: PosthireEmployee) => {
-    if (emp.employee_key) setSelectedKey(emp.employee_key)
+    if (emp.employee_key) setEmployeeKey(emp.employee_key)
   }
 
   const filterSelectClass =
-    'h-10 rounded-full border border-line/60 bg-white/70 px-3 text-[13px] text-text outline-none transition focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15'
+    'h-10 rounded-full border border-semantic-line/60 bg-semantic-surface-raised/70 px-3 text-[13px] text-semantic-ink outline-none transition-colors duration-150 focus:border-semantic-accent/40 focus:ring-2 focus:ring-semantic-accent/15'
 
   if (showMigration) {
     return (
@@ -1581,7 +1577,7 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
         onNotice={onNotice}
         onAccessIssue={onAccessIssue}
         onBack={() => {
-          setShowMigration(false)
+          setMigrationView('')
           void reload()
         }}
       />
@@ -1590,10 +1586,69 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
 
   return (
     <div className="space-y-4" dir={copy.isAr ? 'rtl' : 'ltr'} lang={locale} data-testid="employees-directory">
-      {loading ? (
-        <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={() => void reload()} />
+      {error && data ? (
+        <ResourceState
+          kind="error"
+          locale={locale}
+          title={error}
+          onRetry={() => void reload()}
+          retrying={refreshing}
+        />
+      ) : null}
+      {error && !data ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} />
+      ) : (
+      <HrSection
+        cold={loading}
+        coldFallback={<ResourceState kind="loading" locale={locale} />}
+        refreshing={refreshing && !loading}
+        refreshingLabel={copy.isAr ? 'جاري التحديث…' : 'Updating…'}
+        testId="employees-directory-board"
+        title={copy.directory}
+        description={
+          searching
+            ? copy.resultsFor(totalEmployees, debouncedQuery)
+            : `${copy.showingOf(filtered.length, statusFilter === 'active' ? activeTotal : totalEmployees, statusFilter === 'active')}${
+                leftTotal && statusFilter === 'active' && !searching
+                  ? copy.isAr
+                    ? ` · ${leftTotal} غادر`
+                    : ` · ${leftTotal} left`
+                  : ''
+              }`
+        }
+        trailing={
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {canManageRoster ? (
+              <>
+                <Button variant="secondary" size="sm" onClick={() => setMigrationView('migration')}>
+                  <Upload className="h-4 w-4" /> {copy.migrationSync}
+                </Button>
+                <Button size="sm" onClick={() => setShowAdd(true)}>
+                  <Plus className="h-4 w-4" /> {copy.addEmployee}
+                </Button>
+              </>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void reload()}
+              disabled={refreshing}
+              aria-label={copy.refresh}
+              title={copy.refresh}
+            >
+              <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
+              <span className="sr-only sm:not-sr-only sm:ms-1">{copy.refresh}</span>
+            </Button>
+          </div>
+        }
+      >
+      {!data && !loading ? (
+        <ResourceState
+          kind="empty"
+          locale={locale}
+          title={copy.noEmployees}
+          detail={canManageRoster ? copy.emptyHintManage : copy.emptyHintRead}
+        />
       ) : employees.length === 0 && !searching ? (
         <EmptyState
           icon={<UserRound className="h-5 w-5" />}
@@ -1605,54 +1660,15 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
               <Button size="sm" onClick={() => setShowAdd(true)}>
                 <Plus className="h-4 w-4" /> {copy.addEmployee}
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => setShowMigration(true)}>
+              <Button variant="secondary" size="sm" onClick={() => setMigrationView('migration')}>
                 <Upload className="h-4 w-4" /> {copy.migrationSync}
               </Button>
             </div>
           ) : undefined}
         />
       ) : (
-        <Card tone="board" data-testid="employees-directory-board">
-          <CardHeader className="space-y-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <CardTitle>{copy.directory}</CardTitle>
-                <CardDescription>
-                  {searching
-                    ? copy.resultsFor(totalEmployees, debouncedQuery)
-                    : copy.showingOf(filtered.length, statusFilter === 'active' ? activeTotal : totalEmployees, statusFilter === 'active')}
-                  {leftTotal && statusFilter === 'active' && !searching
-                    ? copy.isAr
-                      ? ` · ${leftTotal} غادر`
-                      : ` · ${leftTotal} left`
-                    : null}
-                </CardDescription>
-              </div>
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {canManageRoster ? (
-                  <>
-                    <Button variant="secondary" size="sm" onClick={() => setShowMigration(true)}>
-                      <Upload className="h-4 w-4" /> {copy.migrationSync}
-                    </Button>
-                    <Button size="sm" onClick={() => setShowAdd(true)}>
-                      <Plus className="h-4 w-4" /> {copy.addEmployee}
-                    </Button>
-                  </>
-                ) : null}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void reload()}
-                  disabled={refreshing}
-                  aria-label={copy.refresh}
-                  title={copy.refresh}
-                >
-                  <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
-                  <span className="sr-only sm:not-sr-only sm:ms-1">{copy.refresh}</span>
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
+        <>
+            <div className="flex flex-wrap items-center gap-2 pb-3">
               <SearchInput
                 value={query}
                 onChange={setQuery}
@@ -1691,7 +1707,7 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
               </Button>
             </div>
             {showMoreFilters ? (
-              <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-[#f7f1e6]/70 px-3 py-2.5">
+              <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl bg-semantic-accent-soft/70 px-3 py-2.5">
                 <select
                   className={filterSelectClass}
                   value={onboardingFilter}
@@ -1705,9 +1721,7 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
                 </select>
               </div>
             ) : null}
-          </CardHeader>
-          <CardContent>
-            {filtered.length === 0 ? (
+          {filtered.length === 0 ? (
               <EmptyState
                 icon={<Search className="h-5 w-5" />}
                 title={searching ? copy.noMatch(debouncedQuery) : copy.noShow}
@@ -1722,9 +1736,9 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
                       type="button"
                       onClick={() => openProfile(emp)}
                       disabled={!emp.employee_key}
-                      className="flex w-full items-start gap-3 rounded-[1.15rem] border border-[#e8dfd0]/80 bg-white/55 px-3.5 py-3 text-start transition hover:bg-white/80 disabled:cursor-default disabled:opacity-70"
+                      className="flex w-full items-start gap-3 rounded-[1.15rem] border border-semantic-line/80 bg-semantic-surface-raised/55 px-3.5 py-3 text-start transition-colors duration-150 hover:bg-semantic-surface-raised/80 disabled:cursor-default disabled:opacity-70"
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#eee5d4] text-[13px] font-semibold text-[#5c554a]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-semantic-accent-soft text-[13px] font-semibold text-semantic-ink-muted">
                         {(emp.name || '?').trim().slice(0, 1).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -1744,9 +1758,9 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
                   ))}
                 </div>
 
-                <div className="hidden overflow-x-auto rounded-[1.1rem] border border-[#e8dfd0]/80 md:block" data-testid="employees-desktop-table">
+                <div className="hidden overflow-x-auto rounded-[1.1rem] border border-semantic-line/80 md:block" data-testid="employees-desktop-table">
                   <table className="w-full min-w-[640px] text-start text-[13px]">
-                    <thead className="bg-[#f7f1e6] text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
+                    <thead className="bg-semantic-accent-soft/80 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                       <tr>
                         <th className="px-4 py-3 font-medium">{copy.employee}</th>
                         <th className="px-4 py-3 font-medium">{copy.department}</th>
@@ -1755,16 +1769,16 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
                         <th className="px-4 py-3 font-medium">{copy.onboarding}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e8dfd0]/70">
+                    <tbody className="divide-y divide-semantic-line/70">
                       {filtered.map((emp) => (
                         <tr
                           key={emp.employee_key || emp.phone || emp.name}
-                          className={cn('min-h-[3.25rem] hover:bg-white/45', emp.employee_key ? 'cursor-pointer' : '')}
+                          className={cn('min-h-[3.25rem] hover:bg-semantic-surface-raised/45', emp.employee_key ? 'cursor-pointer' : '')}
                           onClick={emp.employee_key ? () => openProfile(emp) : undefined}
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eee5d4] text-[12px] font-semibold text-[#5c554a]">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-semantic-accent-soft text-[12px] font-semibold text-semantic-ink-muted">
                                 {(emp.name || '?').trim().slice(0, 1).toUpperCase()}
                               </div>
                               <div>
@@ -1810,8 +1824,9 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
               loadMoreLabel={copy.loadMore}
               loadingLabel={copy.loading}
             />
-          </CardContent>
-        </Card>
+        </>
+      )}
+      </HrSection>
       )}
       {showAdd ? (
         <AddEmployeeModal access={access} onClose={() => setShowAdd(false)} onNotice={onNotice} onAdded={() => void reload()} />
@@ -1825,15 +1840,16 @@ export function EmployeesPage({ access, permissions, role, onNotice, onAccessIss
 
 // --- Employee 360 ----------------------------------------------------------
 
-function tenureLabel(hiredAt?: string | null): string | null {
+function tenureLabel(hiredAt?: string | null, isAr = false): string | null {
   if (!hiredAt) return null
   const hired = new Date(hiredAt)
   if (Number.isNaN(hired.getTime())) return null
   const months = Math.max(0, Math.floor((Date.now() - hired.getTime()) / (1000 * 60 * 60 * 24 * 30.44)))
-  if (months < 1) return 'joined this month'
-  if (months < 12) return `${months} month${months === 1 ? '' : 's'}`
+  if (months < 1) return isAr ? 'انضم هذا الشهر' : 'joined this month'
+  if (months < 12) return isAr ? `${months} شهر` : `${months} month${months === 1 ? '' : 's'}`
   const years = Math.floor(months / 12)
   const rem = months % 12
+  if (isAr) return rem ? `${years}س ${rem}ش` : `${years} سنة`
   return rem ? `${years}y ${rem}m` : `${years} year${years === 1 ? '' : 's'}`
 }
 
@@ -1876,15 +1892,18 @@ function NextActionsPanel({
   runningKey: string | null
 }) {
   const [showAll, setShowAll] = useState(false)
+  const isAr = useEmployees360Locale() === 'ar'
   const cap = summary?.visible_cap ?? 5
   const visible = showAll ? actions : actions.slice(0, cap)
   return (
-    <Card>
+    <Card id="emp360-section-next">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <CardTitle>What to do next</CardTitle>
-            <CardDescription>Ranked by seriousness — the most urgent items first.</CardDescription>
+            <CardTitle>{isAr ? 'ماذا تفعل الآن' : 'What to do next'}</CardTitle>
+            <CardDescription>
+              {isAr ? 'مرتّبة حسب الأهمية من الخادم — الأخطر أولاً.' : 'Ranked by seriousness — the most urgent items first.'}
+            </CardDescription>
           </div>
           {summary ? <NextActionsSummary summary={summary} /> : null}
         </div>
@@ -2530,7 +2549,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
   const sections = data?.sections
   const nextActions = data?.next_actions ?? []
   const nextActionsEnabled = Boolean(data?.next_actions_enabled)
-  const tenure = tenureLabel(emp?.hired_at)
+  const tenure = tenureLabel(emp?.hired_at, isAr)
 
   // Only safe one-click nudges are executable from the panel, and only when the
   // viewer holds the same permission the module page requires. Everything else
@@ -2591,63 +2610,106 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
         <Button variant="ghost" size="sm" onClick={onBack}>
           {isAr ? '→ العودة إلى الدليل' : '← Back to directory'}
         </Button>
-        <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
+        <Button variant="ghost" size="sm" onClick={() => void reload()} disabled={refreshing} aria-label={isAr ? 'تحديث' : 'Refresh'}>
+          <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
+          <span className="sr-only sm:not-sr-only sm:ms-1">{isAr ? 'تحديث' : 'Refresh'}</span>
+        </Button>
       </div>
-      {loading ? (
-        <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={() => void reload()} />
+      {error && data ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} />
+      ) : null}
+      <SoftKeepSurface
+        cold={loading}
+        coldFallback={<ResourceState kind="loading" locale={locale} />}
+        refreshing={refreshing && !loading}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
+      {error && !emp ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} />
       ) : !emp ? (
-        <EmptyState icon={<UserRound className="h-5 w-5" />} title="Employee not found" hint="This employee may have been removed." />
+        <ResourceState
+          kind="empty"
+          locale={locale}
+          title={isAr ? 'الموظف غير موجود' : 'Employee not found'}
+          detail={isAr ? 'قد يكون هذا الموظف قد أُزيل.' : 'This employee may have been removed.'}
+        />
       ) : (
         <>
-          <Card tone="board">
-            <CardContent className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-text">{emp.name}</h2>
-                <p className="text-[13px] text-subtle/90">
+          <HrPageHeader
+            density="page"
+            titleAs="h2"
+            className="border-0 pb-2"
+            dir={isAr ? 'rtl' : 'ltr'}
+            title={emp.name}
+            description={
+              <>
+                <span className="block">
                   {[emp.position_title, emp.department].filter(Boolean).join(' · ') || (isAr ? 'لا يوجد دور مسجّل' : 'No role on file')}
-                </p>
-                <p className="mt-1 text-[12.5px] text-subtle/80">
+                </span>
+                <span className="mt-1 block text-[12.5px] text-semantic-subtle">
                   {emp.phone || (isAr ? 'لا يوجد هاتف' : 'No phone')}
                   {emp.email ? ` · ${emp.email}` : ''}
-                </p>
+                </span>
                 {emp.hired_at ? (
-                  <p className="mt-1 text-[12.5px] text-subtle/80">
+                  <span className="mt-1 block text-[12.5px] text-semantic-subtle">
                     {isAr ? `تاريخ التعيين ${formatDate(emp.hired_at)}` : `Hired ${formatDate(emp.hired_at)}`}
                     {tenure ? (isAr ? ` · ${tenure} مع الشركة` : ` · ${tenure} with the company`) : ''}
-                  </p>
+                  </span>
                 ) : null}
-              </div>
+              </>
+            }
+            actions={
               <div className="flex flex-col items-start gap-2 sm:items-end">
                 <div className="flex items-center gap-2">
-                  {hasLeft ? <Badge tone="muted">Left</Badge> : null}
+                  {hasLeft ? <Badge tone="muted">{isAr ? 'غادر' : 'Left'}</Badge> : null}
                   <StatusBadge status={emp.onboarding_status} />
                 </div>
                 {canManageRoster ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <Button variant="secondary" size="sm" disabled={statusBusy} onClick={() => setShowEdit(true)}>
-                      Edit
+                      {isAr ? 'تعديل' : 'Edit'}
                     </Button>
                     {canRequestStatusChange ? (
                       hasLeft ? (
                         <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('active')}>
-                          {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Reactivate
+                          {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} {isAr ? 'إعادة تفعيل' : 'Reactivate'}
                         </Button>
                       ) : (
                         <Button variant="ghost" size="sm" disabled={statusBusy} onClick={() => void changeStatus('left')}>
-                          {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Mark as left
+                          {statusBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} {isAr ? 'تسجيل المغادرة' : 'Mark as left'}
                         </Button>
                       )
                     ) : null}
                   </div>
                 ) : null}
               </div>
-            </CardContent>
-          </Card>
+            }
+          />
+          <HrAnchorNav
+            dir={isAr ? 'rtl' : 'ltr'}
+            ariaLabel={isAr ? 'أقسام السجل' : 'Record sections'}
+            items={[
+              { id: 'emp360-section-next', label: isAr ? 'التالية' : 'Next' },
+              { id: 'emp360-section-employment', label: isAr ? 'التوظيف' : 'Employment' },
+              { id: 'emp360-section-assignment', label: isAr ? 'الهيكل' : 'Assignment' },
+              ...(sections?.onboarding ? [{ id: 'emp360-section-onboarding', label: isAr ? 'التهيئة' : 'Onboarding' }] : []),
+              ...(sections?.documents && sections.documents.items.length > 0
+                ? [{ id: 'emp360-section-documents', label: isAr ? 'المستندات' : 'Documents' }]
+                : []),
+              ...(sections?.compliance ? [{ id: 'emp360-section-compliance', label: isAr ? 'الامتثال' : 'Compliance' }] : []),
+              ...(sections?.attendance ? [{ id: 'emp360-section-attendance', label: isAr ? 'الحضور' : 'Attendance' }] : []),
+              ...(sections?.leave ? [{ id: 'emp360-section-leave', label: isAr ? 'الإجازات' : 'Leave' }] : []),
+              ...(sections?.shifts ? [{ id: 'emp360-section-shifts', label: isAr ? 'الورديات' : 'Shifts' }] : []),
+              { id: 'emp360-section-bank', label: isAr ? 'البنك' : 'Bank' },
+              ...(sections?.payroll ? [{ id: 'emp360-section-payroll', label: isAr ? 'الرواتب' : 'Payroll' }] : []),
+            ]}
+          />
+          <div id="emp360-section-identity" className="sr-only">
+            {emp.name}
+          </div>
 
           {canManageRoster ? (
-            <Card>
+            <Card id="emp360-section-employment">
               <CardHeader>
                 <CardTitle>{isAr ? 'وصول التطبيق' : 'App access'}</CardTitle>
                 <CardDescription>
@@ -2905,7 +2967,16 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
           ) : null}
 
           {nextActions.length === 0 ? (
-            <NextAction tone="success" icon={<CheckCircle2 className="h-5 w-5" />} title="Nothing needs attention" detail={`${emp.name} has no open items across the enabled modules.`} />
+            <NextAction
+              tone="success"
+              icon={<CheckCircle2 className="h-5 w-5" />}
+              title={isAr ? 'لا يوجد ما يحتاج متابعة' : 'Nothing needs attention'}
+              detail={
+                isAr
+                  ? `${emp.name} ليس لديه بنود مفتوحة في الوحدات المفعّلة.`
+                  : `${emp.name} has no open items across the enabled modules.`
+              }
+            />
           ) : nextActionsEnabled ? (
             <NextActionsPanel
               actions={nextActions}
@@ -2917,10 +2988,10 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
               runningKey={action.runningKey}
             />
           ) : (
-            <Card>
+            <Card id="emp360-section-next">
               <CardHeader>
-                <CardTitle>What to do next</CardTitle>
-                <CardDescription>The open items HR should clear for this employee.</CardDescription>
+                <CardTitle>{isAr ? 'ماذا تفعل الآن' : 'What to do next'}</CardTitle>
+                <CardDescription>{isAr ? 'البنود المفتوحة التي ينبغي على الموارد البشرية إغلاقها لهذا الموظف.' : 'The open items HR should clear for this employee.'}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {nextActions.map((a, idx) => (
@@ -2933,7 +3004,10 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
             </Card>
           )}
 
-          <AssignmentHistoryPanel access={access} employeeKey={employeeKey} onAccessIssue={onAccessIssue} />
+          <div id="emp360-section-assignment">
+            <AssignmentHistoryPanel access={access} employeeKey={employeeKey} onAccessIssue={onAccessIssue} />
+          </div>
+          <div id="emp360-section-bank">
           <BankReviewPanel
             key={employeeKey}
             access={access}
@@ -2954,19 +3028,24 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
             onAccessIssue={onAccessIssue}
             onDecided={() => void reload()}
           />
+          </div>
 
           <div className="space-y-4">
             {sections?.onboarding ? (
               <CollapsibleSection
                 id="emp360-section-onboarding"
                 icon={<ClipboardList className="h-4 w-4" />}
-                title="Onboarding"
-                description={`${sections.onboarding.outstanding_count} outstanding · ${sections.onboarding.complete_count} complete`}
+                title={isAr ? 'التهيئة' : 'Onboarding'}
+                description={
+                  isAr
+                    ? `${sections.onboarding.outstanding_count} معلّق · ${sections.onboarding.complete_count} مكتمل`
+                    : `${sections.onboarding.outstanding_count} outstanding · ${sections.onboarding.complete_count} complete`
+                }
                 defaultOpen={sections.onboarding.outstanding_count > 0}
               >
                 <div className="space-y-3">
                   {sections.onboarding.outstanding.length === 0 ? (
-                    <p className="text-[13px] text-subtle/85">All required documents are in.</p>
+                    <p className="text-[13px] text-subtle/85">{isAr ? 'كل المستندات المطلوبة مكتملة.' : 'All required documents are in.'}</p>
                   ) : (
                     <ul className="space-y-1.5 text-[13px]">
                       {sections.onboarding.outstanding.map((it, idx) => (
@@ -2978,14 +3057,16 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
                     </ul>
                   )}
                   <p className="text-[12.5px] text-subtle/85">
-                    Checklist updates, reminders, reschedule, and cancel live on Onboarding.
+                    {isAr
+                      ? 'تحديث القائمة والتذكير وإعادة الجدولة والإلغاء تتم في التهيئة.'
+                      : 'Checklist updates, reminders, reschedule, and cancel live on Onboarding.'}
                   </p>
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => onNavigate?.('onboarding', { employee: employeeKey })}
                   >
-                    Open in Onboarding
+                    {isAr ? 'فتح في التهيئة' : 'Open in Onboarding'}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -2996,11 +3077,15 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
               <CollapsibleSection
                 id="emp360-section-compliance"
                 icon={<ShieldCheck className="h-4 w-4" />}
-                title="Compliance"
+                title={isAr ? 'الامتثال' : 'Compliance'}
                 description={
                   sections.compliance.needs_attention
-                    ? `${sections.compliance.needs_attention} need attention`
-                    : 'All documents up to date'
+                    ? isAr
+                      ? `${sections.compliance.needs_attention} يحتاج متابعة`
+                      : `${sections.compliance.needs_attention} need attention`
+                    : isAr
+                      ? 'كل المستندات محدّثة'
+                      : 'All documents up to date'
                 }
                 defaultOpen={sections.compliance.documents.length > 0}
               >
@@ -3043,7 +3128,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
               <CollapsibleSection
                 id="emp360-section-attendance"
                 icon={<Clock className="h-4 w-4" />}
-                title="Attendance"
+                title={isAr ? 'الحضور' : 'Attendance'}
                 description={`Last ${sections.attendance.window_days} days`}
                 defaultOpen={sections.attendance.absent > 0}
               >
@@ -3082,7 +3167,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
               <CollapsibleSection
                 id="emp360-section-leave"
                 icon={<CalendarDays className="h-4 w-4" />}
-                title="Leave"
+                title={isAr ? 'الإجازات' : 'Leave'}
                 description={sections.leave.pending_count ? `${sections.leave.pending_count} awaiting decision` : 'No pending requests'}
                 defaultOpen={sections.leave.pending_count > 0}
               >
@@ -3132,8 +3217,12 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
               <CollapsibleSection
                 id="emp360-section-shifts"
                 icon={<CalendarClock className="h-4 w-4" />}
-                title="Upcoming shifts"
-                description={`${sections.shifts.upcoming_count} scheduled`}
+                title={isAr ? 'الورديات القادمة' : 'Upcoming shifts'}
+                description={
+                  isAr
+                    ? `${sections.shifts.upcoming_count} مجدولة`
+                    : `${sections.shifts.upcoming_count} scheduled`
+                }
                 defaultOpen={false}
               >
                 <div>
@@ -3168,7 +3257,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
               <CollapsibleSection
                 id="emp360-section-payroll"
                 icon={<DollarSign className="h-4 w-4" />}
-                title="Payroll"
+                title={isAr ? 'الرواتب' : 'Payroll'}
                 description="Recent timesheets"
                 defaultOpen={sections.payroll.items.some((it) => canPayrollManage && String(it.status || '').toLowerCase() === 'draft')}
               >
@@ -3271,6 +3360,7 @@ function EmployeeProfile({ access, permissions, role, employeeKey, onBack, onNot
           </div>
         </>
       )}
+      </SoftKeepSurface>
     </div>
   )
 }
@@ -4148,8 +4238,15 @@ function OnboardingDetailPanel({
 export function OnboardingPage({ access, permissions, role, onNotice, onAccessIssue, onNavigate }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
-  const [query, setQuery] = useState('')
+  const [urlQ, setUrlQ] = useUrlBackedParam('onboarding', 'q', '', 'replace')
+  const [query, setQuery] = useState(urlQ)
+  useEffect(() => {
+    setQuery((prev) => (prev === urlQ ? prev : urlQ))
+  }, [urlQ])
   const debouncedQuery = useDebouncedValue(query.trim(), 350)
+  useEffect(() => {
+    if (debouncedQuery !== urlQ) setUrlQ(debouncedQuery, 'replace')
+  }, [debouncedQuery, urlQ, setUrlQ])
   const loader = useCallback(
     () => getPosthireOnboarding(access, debouncedQuery ? { search: debouncedQuery } : undefined),
     [access, debouncedQuery],
@@ -4158,7 +4255,7 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
   const canManage = can(permissions, 'onboarding.manage', role)
   const [extraInProgress, setExtraInProgress] = useState<PosthireEmployee[]>([])
   const [loadingMore, setLoadingMore] = useState(false)
-  const [filter, setFilter] = useState<'needs_attention' | 'in_progress' | 'not_started' | 'completed' | 'all'>('needs_attention')
+  const [filter, setFilter] = useUrlBackedTab('onboarding', URL_BACKED_WORKSPACE_TABS.onboarding, 'needs_attention')
   const [menuFor, setMenuFor] = useState<string | null>(null)
   const [focusMissing, setFocusMissing] = useState(false)
   const [focusPin, setFocusPin] = useState<PosthireEmployee | null>(null)
@@ -4167,7 +4264,9 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
   useEffect(() => {
     setExtraInProgress([])
   }, [data])
-  const [selectedKey, setSelectedKey] = useState<string | null>(null)
+  const [employeeParam, setEmployeeParam] = useUrlBackedParam('onboarding', 'employee', '')
+  const selectedKey = employeeParam || null
+  const setSelectedKey = useCallback((key: string | null) => setEmployeeParam(key || ''), [setEmployeeParam])
   const [detail, setDetail] = useState<OnboardingDetailResponse | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState(false)
@@ -4191,13 +4290,8 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
   )
 
   const syncEmployeeParam = useCallback((key: string | null) => {
-    if (typeof window === 'undefined') return
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', 'onboarding')
-    if (key) url.searchParams.set('employee', key)
-    else url.searchParams.delete('employee')
-    window.history.replaceState({}, '', `${url.pathname}${url.search}`)
-  }, [])
+    setEmployeeParam(key || '')
+  }, [setEmployeeParam])
 
   const openChecklist = useCallback(
     async (focusKey: string, opts?: { scroll?: boolean }) => {
@@ -4493,24 +4587,10 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
         : 'New hires appear here while they finish onboarding.',
   }
 
-  const filterChip = (id: typeof filter, label: string, count: number) => (
-    <button
-      key={id}
-      type="button"
-      onClick={() => setFilter(id)}
-      className={cn(
-        'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition',
-        filter === id ? 'bg-[#23211d] text-white' : 'bg-[#eee5d4]/80 text-[#5c554a] hover:bg-[#eee5d4]',
-      )}
-    >
-      {label}
-      <span className="ms-1.5 tabular-nums opacity-80">{count}</span>
-    </button>
-  )
-
   return (
     <div className="space-y-4" dir={isAr ? 'rtl' : 'ltr'} lang={locale} data-testid="onboarding-page">
       {action.dialog}
+      <p className="max-w-2xl text-[13px] leading-5 text-semantic-subtle">{copy.queueHint}</p>
       <ConfigureInSetupBanner
         title={isAr ? 'سياسة قالب التهيئة' : 'Company onboarding policy'}
         body={
@@ -4521,14 +4601,23 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
         anchor="classic-module-onboarding"
         locale={isAr ? 'ar' : 'en'}
       />
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="max-w-2xl text-[13px] leading-5 text-subtle/90">{copy.queueHint}</p>
-        <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <Button variant="ghost" size="sm" onClick={() => void reload()} disabled={refreshing} aria-label={isAr ? 'تحديث' : 'Refresh'}>
+          <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
+          <span className="sr-only sm:not-sr-only sm:ms-1">{isAr ? 'تحديث' : 'Refresh'}</span>
+        </Button>
       </div>
-      {loading ? (
-        <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={() => void reload()} />
+      {error && data ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} />
+      ) : null}
+      <SoftKeepSurface
+        cold={loading}
+        coldFallback={<ResourceState kind="loading" locale={locale} />}
+        refreshing={refreshing && !loading}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
+      {error && !data ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} />
       ) : (
         <>
           {!canManage ? (
@@ -4537,7 +4626,7 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
             <p className="text-[12.5px] text-subtle/85">{copy.readOnly}</p>
           ) : null}
           {focusMissing ? (
-            <div className="rounded-[1.05rem] border border-[#e2bd78]/70 bg-[#fff7e8]/70 px-4 py-3 text-[13px] text-text">{copy.focusMissing}</div>
+            <div className="rounded-[1.05rem] border border-semantic-warning/70 bg-semantic-warning-soft/70 px-4 py-3 text-[13px] text-semantic-ink">{copy.focusMissing}</div>
           ) : null}
           <Card tone="board" data-testid="onboarding-queue">
             <CardHeader className="space-y-3">
@@ -4556,13 +4645,19 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
                 </div>
                 <SearchInput value={query} onChange={setQuery} placeholder={copy.search} />
               </div>
-              <div className="flex flex-wrap gap-1.5" data-testid="onboarding-filters" role="tablist">
-                {filterChip('needs_attention', copy.filterNeeds, filterCounts.needs_attention)}
-                {filterChip('in_progress', copy.filterInProg, filterCounts.in_progress)}
-                {filterChip('not_started', copy.filterNotStarted, filterCounts.not_started)}
-                {filterChip('completed', copy.filterDone, filterCounts.completed)}
-                {filterChip('all', copy.filterAll, filterCounts.all)}
-              </div>
+              <HrSurfaceTabs
+                value={filter}
+                onChange={setFilter}
+                testId="onboarding-filters"
+                ariaLabel={isAr ? 'تصفية التهيئة' : 'Onboarding filters'}
+                items={[
+                  { id: 'needs_attention', label: copy.filterNeeds, count: filterCounts.needs_attention },
+                  { id: 'in_progress', label: copy.filterInProg, count: filterCounts.in_progress },
+                  { id: 'not_started', label: copy.filterNotStarted, count: filterCounts.not_started },
+                  { id: 'completed', label: copy.filterDone, count: filterCounts.completed },
+                  { id: 'all', label: copy.filterAll, count: filterCounts.all },
+                ]}
+              />
             </CardHeader>
             <CardContent>
               {filter === 'completed' ? (
@@ -4920,6 +5015,7 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
           </OnboardingDetailDrawer>
         </>
       )}
+      </SoftKeepSurface>
     </div>
   )
 }
@@ -4939,7 +5035,7 @@ function attendanceMonthStart(iso: string): string {
 export function AttendancePage({ access, permissions, role, onNotice, onAccessIssue }: PostHireCommonProps) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
-  const [range, setRange] = useState<{ start: string; end: string } | null>(null)
+  const [range, setRange] = useUrlBackedDateRange('attendance')
   const loader = useCallback(
     () => getPosthireAttendance(access, range ? { start_date: range.start, end_date: range.end } : undefined),
     [access, range],
@@ -5062,32 +5158,41 @@ export function AttendancePage({ access, permissions, role, onNotice, onAccessIs
         />
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="max-w-2xl text-[13px] leading-5 text-subtle/90">{copy.hint}</p>
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <ModuleToolbar onRefresh={() => void reload()} refreshing={refreshing} />
       </div>
 
       {!canManage ? <p className="text-[12.5px] text-subtle/85">{copy.noPerm}</p> : null}
 
-      {loading ? (
-        <LoadingState />
-      ) : error ? (
-        <ErrorState message={error} onRetry={() => void reload()} />
+      {error && data ? (
+        <ResourceState
+          kind="error"
+          locale={locale}
+          title={error}
+          onRetry={() => void reload()}
+          retrying={refreshing}
+          testId="attendance-refresh-error"
+        />
+      ) : null}
+
+      <SoftKeepSurface
+        cold={loading}
+        coldFallback={<ResourceState kind="loading" locale={locale} testId="attendance-loading" />}
+        refreshing={refreshing && !loading}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
+      {error && !data ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} testId="attendance-error" />
       ) : (
         <>
           <AttendanceAttentionStrip rows={rows} exceptionCount={exceptionCount} />
 
-          <Card tone="board" data-testid="attendance-board">
-            <CardHeader className="space-y-3">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <CardTitle>{copy.board}</CardTitle>
-                  <CardDescription>
-                    {rangeLabel} · {isAr ? `${totalRows} سجل` : `${totalRows} record${totalRows === 1 ? '' : 's'}`}
-                  </CardDescription>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2" data-testid="attendance-date-chrome">
+          <HrSection
+            title={copy.board}
+            description={`${rangeLabel} · ${isAr ? `${totalRows} سجل` : `${totalRows} record${totalRows === 1 ? '' : 's'}`}`}
+            testId="attendance-board"
+          >
+              <div className="flex flex-wrap items-center gap-2 pb-3" data-testid="attendance-date-chrome">
                 <Button variant={isToday ? 'secondary' : 'ghost'} size="sm" disabled={refreshing} onClick={() => setRange(null)}>
                   {isAr ? 'اليوم' : 'Today'}
                 </Button>
@@ -5113,20 +5218,18 @@ export function AttendancePage({ access, permissions, role, onNotice, onAccessIs
                     value={effStart}
                     max={effEnd || undefined}
                     onChange={(e) => e.target.value && setRange({ start: e.target.value, end: effEnd < e.target.value ? e.target.value : effEnd })}
-                    className="h-9 rounded-full border border-line/60 bg-white/70 px-3 text-[12.5px] text-text outline-none focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
+                    className="h-9 rounded-full border border-semantic-line/60 bg-semantic-surface-raised/70 px-3 text-[12.5px] text-semantic-ink outline-none focus:border-semantic-accent/40 focus:ring-2 focus:ring-semantic-accent/15"
                   />
-                  <span className="text-[12px] text-subtle/70">→</span>
+                  <span className="text-[12px] text-semantic-subtle/70">→</span>
                   <input
                     type="date"
                     value={effEnd}
                     min={effStart || undefined}
                     onChange={(e) => e.target.value && setRange({ start: effStart, end: e.target.value })}
-                    className="h-9 rounded-full border border-line/60 bg-white/70 px-3 text-[12.5px] text-text outline-none focus:border-[#c89445]/40 focus:ring-2 focus:ring-[#c89445]/15"
+                    className="h-9 rounded-full border border-semantic-line/60 bg-semantic-surface-raised/70 px-3 text-[12.5px] text-semantic-ink outline-none focus:border-semantic-accent/40 focus:ring-2 focus:ring-semantic-accent/15"
                   />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
               <AttendanceDailyTable rows={rows} canManage={canManage} onResolve={canManage ? resolveFromBoard : undefined} />
               <LoadMoreBar
                 loaded={rows.length}
@@ -5135,8 +5238,7 @@ export function AttendancePage({ access, permissions, role, onNotice, onAccessIs
                 onLoadMore={() => void loadMore()}
                 noun={isAr ? 'سجل' : 'record'}
               />
-            </CardContent>
-          </Card>
+          </HrSection>
 
           {canManage ? (
             <AttendanceOpsPanel
@@ -5151,21 +5253,21 @@ export function AttendancePage({ access, permissions, role, onNotice, onAccessIs
             />
           ) : null}
 
-          <div className="rounded-[1.05rem] border border-[#e8dfd0] bg-[#fffdf8]/70" data-testid="attendance-operations">
+          <div className="rounded-[1.05rem] border border-semantic-line bg-semantic-surface-raised/70" data-testid="attendance-operations">
             <button
               type="button"
-              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start"
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start transition-colors duration-150"
               onClick={() => setOperationsOpen((o) => !o)}
               aria-expanded={operationsOpen}
             >
               <div>
-                <p className="text-[14px] font-semibold text-text">{copy.operations}</p>
-                <p className="text-[12.5px] text-subtle/85">{copy.operationsHint}</p>
+                <p className="text-[14px] font-semibold text-semantic-ink">{copy.operations}</p>
+                <p className="text-[12.5px] text-semantic-subtle">{copy.operationsHint}</p>
               </div>
-              <span className="text-[12.5px] font-semibold text-subtle">{operationsOpen ? copy.hideOps : copy.showOps}</span>
+              <span className="text-[12.5px] font-semibold text-semantic-subtle">{operationsOpen ? copy.hideOps : copy.showOps}</span>
             </button>
             {operationsOpen ? (
-              <div className="space-y-4 border-t border-[#e8dfd0] px-4 py-4">
+              <div className="space-y-4 border-t border-semantic-line px-4 py-4">
                 <div className="flex flex-wrap gap-2">
                   {canManage && data?.import_enabled ? (
                     <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
@@ -5187,6 +5289,7 @@ export function AttendancePage({ access, permissions, role, onNotice, onAccessIs
           </div>
         </>
       )}
+      </SoftKeepSurface>
     </div>
   )
 }
@@ -5375,70 +5478,62 @@ export function PayrollPage({ access, permissions, role, onNotice, onAccessIssue
   const locale = useEmployees360Locale()
   const px = payrollExternalCopy(locale)
   const isAr = locale === 'ar'
-  const [surface, setSurface] = useState<'run' | 'hours' | 'records'>('run')
-  const [recordsPanel, setRecordsPanel] = useState<'payslips' | 'close' | 'statutory'>('payslips')
+  const [surface, setSurface] = useUrlBackedTab<'run' | 'hours' | 'records'>(
+    'payroll',
+    URL_BACKED_WORKSPACE_TABS.payroll,
+    'run',
+  )
+  const [recordsPanel, setRecordsPanel] = useUrlBackedTab<'payslips' | 'close' | 'statutory'>(
+    'payroll',
+    URL_BACKED_VIEW_PAGES.payroll,
+    'payslips',
+    'view',
+  )
 
   return (
     <div className="space-y-4" dir={isAr ? 'rtl' : 'ltr'} lang={locale} data-testid="payroll-workspace" data-payroll-queue>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-xl text-[13px] text-subtle/90">{px.payrollHint}</p>
-      </div>
-
-      <div className="flex flex-wrap gap-2" data-payroll-surfaces role="tablist" aria-label={px.surfaceRun}>
-        {(
-          [
-            ['run', px.surfaceRun],
-            ['hours', px.surfaceHours],
-            ['records', px.surfaceRecords],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={surface === id}
-            data-surface={id}
-            data-testid={
-              id === 'run'
-                ? 'payroll-tab-external-run'
-                : id === 'hours'
-                  ? 'payroll-tab-hours-review'
-                  : 'payroll-tab-records'
-            }
-            className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${
-              surface === id ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle'
-            }`}
-            onClick={() => setSurface(id)}
-            title={id === 'run' ? px.tabExternalHint : id === 'hours' ? px.tabTimesheetsHint : undefined}
-          >
-            {label}
-          </button>
-        ))}
+      <div data-payroll-surfaces>
+        <HrSurfaceTabs
+          value={surface}
+          onChange={setSurface}
+          ariaLabel={px.surfaceRun}
+          items={[
+            {
+              id: 'run',
+              label: px.surfaceRun,
+              testId: 'payroll-tab-external-run',
+              title: px.tabExternalHint,
+              dataAttrs: { 'data-surface': 'run' },
+            },
+            {
+              id: 'hours',
+              label: px.surfaceHours,
+              testId: 'payroll-tab-hours-review',
+              title: px.tabTimesheetsHint,
+              dataAttrs: { 'data-surface': 'hours' },
+            },
+            {
+              id: 'records',
+              label: px.surfaceRecords,
+              testId: 'payroll-tab-records',
+              dataAttrs: { 'data-surface': 'records' },
+            },
+          ]}
+        />
       </div>
 
       {surface === 'records' ? (
-        <div className="flex flex-wrap gap-2" data-payroll-records-panels role="tablist">
-          {(
-            [
-              ['payslips', px.recordsPayslips, 'payroll-tab-payslips'],
-              ['close', px.recordsClose, 'payroll-tab-close-export'],
-              ['statutory', px.recordsStatutory, 'payroll-tab-statutory'],
-            ] as const
-          ).map(([id, label, testId]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={recordsPanel === id}
-              data-testid={testId}
-              className={`rounded-full px-3 py-1.5 text-sm ${
-                recordsPanel === id ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle'
-              }`}
-              onClick={() => setRecordsPanel(id)}
-            >
-              {label}
-            </button>
-          ))}
+        <div data-payroll-records-panels>
+          <HrSurfaceTabs
+            value={recordsPanel}
+            onChange={setRecordsPanel}
+            ariaLabel={px.surfaceRecords}
+            items={[
+              { id: 'payslips', label: px.recordsPayslips, testId: 'payroll-tab-payslips' },
+              { id: 'close', label: px.recordsClose, testId: 'payroll-tab-close-export' },
+              { id: 'statutory', label: px.recordsStatutory, testId: 'payroll-tab-statutory' },
+            ]}
+          />
         </div>
       ) : null}
 
@@ -5970,7 +6065,7 @@ export function ActionInboxPage({
   const [fetchedAtMs, setFetchedAtMs] = useState<number | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [showDefinitions, setShowDefinitions] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'needs_action' | 'due_soon' | 'blocked'>('needs_action')
+  const [filter, setFilter] = useUrlBackedTab('inbox', URL_BACKED_WORKSPACE_TABS.inbox, 'needs_action')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -6131,27 +6226,13 @@ export function ActionInboxPage({
       : 'This page only prioritizes and routes. Resolve work in the owning module; communication failures live under Alerts & Delivery.',
   }
 
-  const filterChip = (id: typeof filter, label: string, count: number) => (
-    <button
-      key={id}
-      type="button"
-      onClick={() => setFilter(id)}
-      className={cn(
-        'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition',
-        filter === id ? 'bg-[#23211d] text-white' : 'bg-[#eee5d4]/80 text-[#5c554a] hover:bg-[#eee5d4]',
-      )}
-    >
-      {label}
-      <span className="ms-1.5 tabular-nums opacity-80">{count}</span>
-    </button>
-  )
-
   const counts = {
-    all: items.length,
+    all: typeof data?.summary?.total === 'number' ? data.summary.total : items.length,
     needs_action: items.filter(isNeedsAction).length,
     due_soon: items.filter(isDueSoon).length,
     blocked: items.filter(isBlocked).length,
   }
+  const titleCount = filter === 'all' ? counts.all : filtered.length
 
   return (
     <div className="space-y-4" dir={isAr ? 'rtl' : 'ltr'} lang={locale} data-testid="needs-attention-page">
@@ -6162,16 +6243,23 @@ export function ActionInboxPage({
         </Button>
       </div>
 
-      {loading ? (
-        <LoadingState />
-      ) : error ? (
-        <ErrorState message={error || copy.loadingErr} onRetry={() => void reload()} />
-      ) : items.length === 0 && !partial && !hasSourceError ? (
+      {error && data ? (
+        <ResourceState kind="error" locale={locale} title={error || copy.loadingErr} onRetry={() => void reload()} retrying={refreshing} />
+      ) : null}
+      <SoftKeepSurface
+        cold={loading}
+        coldFallback={<ResourceState kind="loading" locale={locale} />}
+        refreshing={refreshing && !loading}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
+      {error && !data ? (
+        <ResourceState kind="error" locale={locale} title={error || copy.loadingErr} onRetry={() => void reload()} retrying={refreshing} />
+      ) : items.length === 0 && !partial && !hasSourceError && !loading ? (
         <EmptyState icon={<Inbox className="h-5 w-5" />} title={copy.emptyTitle} hint={copy.emptyHint} points={copy.emptyPoints} />
       ) : (
         <>
           {isStale ? (
-            <div className="rounded-[1.1rem] border border-[#e2bd78]/70 bg-[#fff7e8]/70 px-4 py-3 text-[13px] text-text">
+            <div className="rounded-[1.1rem] border border-semantic-warning/70 bg-semantic-warning-soft/70 px-4 py-3 text-[13px] text-semantic-ink">
               {copy.stale}
               {asOfLabel ? <span className="text-subtle/85"> · {copy.asOf} {asOfLabel}</span> : null}
             </div>
@@ -6198,18 +6286,24 @@ export function ActionInboxPage({
             <CardHeader className="space-y-3">
               <div className="flex flex-wrap items-end justify-between gap-2">
                 <div>
-                  <CardTitle>{copy.countLabel(filtered.length)}</CardTitle>
+                  <CardTitle>{copy.countLabel(titleCount)}</CardTitle>
                   <CardDescription>
                     {asOfLabel ? `${copy.asOf} ${asOfLabel}` : copy.honesty}
                   </CardDescription>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1.5" data-testid="needs-attention-filters" role="tablist">
-                {filterChip('needs_action', copy.filterNeeds, counts.needs_action)}
-                {filterChip('due_soon', copy.filterDue, counts.due_soon)}
-                {filterChip('blocked', copy.filterBlocked, counts.blocked)}
-                {filterChip('all', copy.filterAll, counts.all)}
-              </div>
+              <HrSurfaceTabs
+                value={filter}
+                onChange={setFilter}
+                testId="needs-attention-filters"
+                ariaLabel={isAr ? 'تصفية المتابعة' : 'Attention filters'}
+                items={[
+                  { id: 'needs_action', label: copy.filterNeeds, count: counts.needs_action },
+                  { id: 'due_soon', label: copy.filterDue, count: counts.due_soon },
+                  { id: 'blocked', label: copy.filterBlocked, count: counts.blocked },
+                  { id: 'all', label: copy.filterAll, count: counts.all },
+                ]}
+              />
             </CardHeader>
             <CardContent>
               {filtered.length === 0 ? (
@@ -6344,6 +6438,7 @@ export function ActionInboxPage({
           </div>
         </>
       )}
+      </SoftKeepSurface>
     </div>
   )
 }

@@ -2,13 +2,17 @@
  * Preboarding Surface Wave — HR Web primary operator workspace.
  * Thin client over frozen preboarding authority (no business-logic rewrite).
  */
-import { AlertTriangle, CheckCircle2, Clock3, Loader2, RefreshCw, UserPlus } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, CheckCircle2, Clock3, RefreshCw, UserPlus } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
-import { Input, Select, Textarea } from '@/components/ui/field'
+import { Input, Textarea } from '@/components/ui/field'
 import { StatusPill } from '@/components/ui/page-chrome'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
+import { SoftKeepSurface } from '@/components/ui/SoftKeepSurface'
+import { URL_BACKED_WORKSPACE_TABS, useUrlBackedParam, useUrlBackedTab } from '@/lib/hrWebUrlTab'
+import { ResourceState } from '@/pages/shared/dataState'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import {
   DashboardApiError,
@@ -161,8 +165,15 @@ export function PreboardingWorkspace({
   const [loading, setLoading] = useState(true)
   const [rows, setRows] = useState<AssignmentRow[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
-  const [filter, setFilter] = useState('')
+  const [tab, setTab] = useUrlBackedTab('preboarding', URL_BACKED_WORKSPACE_TABS.preboarding, 'all')
+  const filter = tab === 'all' ? '' : tab
+  const [employeeKey, setEmployeeKey] = useUrlBackedParam('preboarding', 'employee', '')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const rowsRef = useRef(rows)
+  const selectedIdRef = useRef(selectedId)
+  rowsRef.current = rows
+  selectedIdRef.current = selectedId
   const [detail, setDetail] = useState<{
     assignment?: AssignmentRow
     items?: ItemRow[]
@@ -182,17 +193,22 @@ export function PreboardingWorkspace({
   const canWaive = permissions.includes('preboarding.waive_item')
 
   const loadQueue = useCallback(async () => {
-    setLoading(true)
+    const cold = rowsRef.current.length === 0
+    if (cold) setLoading(true)
+    else setRefreshing(true)
     try {
       const res = await getPosthirePreboarding(access, {
         status: filter || undefined,
         limit: 100,
       })
-      setRows((res.assignments || []) as AssignmentRow[])
+      const next = (res.assignments || []) as AssignmentRow[]
+      setRows(next)
       setCounts((res.counts || {}) as Record<string, number>)
       setModuleDenied(false)
-      if (!selectedId && res.assignments?.[0]?.assignment_id) {
-        setSelectedId(String(res.assignments[0].assignment_id))
+      const focused = employeeKey ? next.find((row) => row.employee_key === employeeKey) : null
+      if (focused) setSelectedId(focused.assignment_id)
+      else if (!selectedIdRef.current && next[0]?.assignment_id) {
+        setSelectedId(String(next[0].assignment_id))
       }
     } catch (error) {
       const issue = accessIssueFromError(error)
@@ -204,8 +220,9 @@ export function PreboardingWorkspace({
       }
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
-  }, [access, filter, isAr, onAccessIssue, onNotice, selectedId])
+  }, [access, employeeKey, filter, isAr, onAccessIssue, onNotice])
 
   const loadDetail = useCallback(
     async (assignmentId: string) => {
@@ -264,36 +281,27 @@ export function PreboardingWorkspace({
   }
 
   return (
-    <div className="flex h-full min-h-[70vh] flex-col gap-4 p-4 md:p-6" dir={isAr ? 'rtl' : 'ltr'}>
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{c.title}</h1>
-          <p className="text-sm text-muted-foreground">{c.subtitle}</p>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <span>blocked {counts.blocked ?? 0}</span>
-            <span>ready {counts.ready ?? 0}</span>
-            <span>in progress {counts.in_progress ?? 0}</span>
-            <span>open {counts.open_total ?? 0}</span>
-          </div>
-        </div>
+    <div className="flex h-full min-h-[70vh] flex-col gap-4" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <HrSurfaceTabs
+          value={tab}
+          onChange={setTab}
+          ariaLabel={isAr ? 'تصفية التهيئة قبل الالتحاق' : 'Preboarding status'}
+          items={[
+            { id: 'all', label: c.filterAll, count: counts.open_total },
+            { id: 'blocked', label: c.filterBlocked, count: counts.blocked },
+            { id: 'ready', label: c.filterReady, count: counts.ready },
+            { id: 'in_progress', label: c.filterProgress, count: counts.in_progress },
+            { id: 'not_started', label: 'Not started', count: counts.not_started },
+          ]}
+        />
         <div className="flex flex-wrap gap-2">
-          <Select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            aria-label="status filter"
-          >
-            <option value="">{c.filterAll}</option>
-            <option value="blocked">{c.filterBlocked}</option>
-            <option value="ready">{c.filterReady}</option>
-            <option value="in_progress">{c.filterProgress}</option>
-            <option value="not_started">Not started</option>
-          </Select>
-          <Button variant="outline" size="sm" onClick={() => void loadQueue()}>
-            <RefreshCw className="h-4 w-4" /> {c.refresh}
+          <Button variant="ghost" size="sm" onClick={() => void loadQueue()} disabled={refreshing}>
+            <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} /> {c.refresh}
           </Button>
           {canManage ? (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={async () => {
                 setConfigOpen(true)
@@ -310,7 +318,7 @@ export function PreboardingWorkspace({
             </Button>
           ) : null}
         </div>
-      </header>
+      </div>
 
       {canManage ? (
         <div className="flex flex-wrap items-end gap-2 rounded-lg border p-3">
@@ -333,16 +341,17 @@ export function PreboardingWorkspace({
         </div>
       ) : null}
 
+      <SoftKeepSurface
+        cold={loading && rows.length === 0}
+        coldFallback={<ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} />}
+        refreshing={refreshing}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(280px,360px)_1fr]">
-        <section className="overflow-auto rounded-xl border bg-background">
-          {loading ? (
-            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> …
-            </div>
-          ) : null}
-          {!loading && filtered.length === 0 ? (
+        <section className="overflow-auto rounded-xl border border-semantic-line/80 bg-semantic-surface">
+          {filtered.length === 0 ? (
             <div className="p-6">
-              <WorkflowEmpty title={c.empty} description={c.emptyHint} />
+              <WorkflowEmpty title={c.empty} hint={c.emptyHint} />
             </div>
           ) : null}
           <ul className="divide-y">
@@ -354,7 +363,10 @@ export function PreboardingWorkspace({
                     'flex w-full flex-col gap-1 px-4 py-3 text-start hover:bg-muted/50',
                     selectedId === row.assignment_id && 'bg-muted',
                   )}
-                  onClick={() => setSelectedId(row.assignment_id)}
+                  onClick={() => {
+                    setSelectedId(row.assignment_id)
+                    setEmployeeKey(row.employee_key)
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">{row.employee_name || row.employee_key}</span>
@@ -587,6 +599,7 @@ export function PreboardingWorkspace({
           )}
         </section>
       </div>
+      </SoftKeepSurface>
 
       {configOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

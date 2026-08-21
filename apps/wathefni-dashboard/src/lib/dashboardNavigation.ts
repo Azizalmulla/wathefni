@@ -36,9 +36,13 @@ export type DashboardNavFilters = {
   tab?: string
   role?: string
   date?: string
+  date_end?: string
   interviewer?: string
   action?: string
   cohort_key?: string
+  department?: string
+  onboarding?: string
+  employee?: string
   cv_status?: string
   source_channel?: string
   recruiter_owner?: string
@@ -92,13 +96,14 @@ export const CANDIDATE_FILTER_KEYS = [
 const INTERVIEW_FILTER_KEYS = ['status', 'tab', 'role', 'date', 'interviewer', 'cohort_key', 'overview_cohort'] as const
 const RANKING_FILTER_KEYS = ['position_code', 'cohort_key'] as const
 const ASSESSMENT_FILTER_KEYS = ['assessment_cohort', 'overview_cohort', 'cohort_key', 'tab', 'action', 'q'] as const
+const PEOPLE_FILTER_KEYS = ['q', 'status', 'view', 'tab', 'department', 'onboarding', 'employee'] as const
 
 export function readDashboardNavState(search = typeof window !== 'undefined' ? window.location.search : ''): DashboardNavState {
   const params = new URLSearchParams(search)
   let page = String(params.get('page') || 'overview').trim() || 'overview'
   const candidate = String(params.get('candidate') || '').trim() || null
   const filters: DashboardNavFilters = {}
-  for (const key of [...CANDIDATE_FILTER_KEYS, ...INTERVIEW_FILTER_KEYS, ...RANKING_FILTER_KEYS, ...ASSESSMENT_FILTER_KEYS]) {
+  for (const key of [...CANDIDATE_FILTER_KEYS, ...INTERVIEW_FILTER_KEYS, ...RANKING_FILTER_KEYS, ...ASSESSMENT_FILTER_KEYS, ...PEOPLE_FILTER_KEYS, 'date_end'] as const) {
     const value = String(params.get(key) || '').trim()
     if (value) filters[key as keyof DashboardNavFilters] = value
   }
@@ -112,6 +117,10 @@ export function readDashboardNavState(search = typeof window !== 'undefined' ? w
   }
   if (!filters.position && filters.position_code) filters.position = filters.position_code
   // Legacy Setup→Ops alias. There is no `migration-sync` page — open Employees Migration Sync.
+  if (page === 'workforce' && !filters.tab) {
+    const workforceTab = String(params.get('workforce') || '').trim()
+    if (workforceTab) filters.tab = workforceTab
+  }
   if (page === 'migration-sync') {
     page = 'employees'
     if (!filters.view) filters.view = 'migration'
@@ -135,6 +144,11 @@ export function buildDashboardSearchParams(
     'page',
     'candidate',
     'overview_scroll',
+    'date_end',
+    'employee',
+    'department',
+    'onboarding',
+    'workforce',
     ...CANDIDATE_FILTER_KEYS,
     ...INTERVIEW_FILTER_KEYS,
     ...RANKING_FILTER_KEYS,
@@ -165,9 +179,36 @@ export function buildDashboardSearchParams(
       const value = String(filters[key as keyof DashboardNavFilters] || '').trim()
       if (value) params.set(key, value)
     }
-  } else if (state.page === 'employees' || state.page === 'leave') {
+  } else if (state.page === 'employees') {
+    const view = String(filters.view || '').trim()
+    const q = String(filters.q || '').trim()
+    const status = String(filters.status || '').trim()
+    const department = String(filters.department || '').trim()
+    const onboarding = String(filters.onboarding || '').trim()
+    const employee = String(filters.employee || '').trim()
+    if (view) params.set('view', view)
+    if (q) params.set('q', q)
+    if (status && status !== 'active') params.set('status', status)
+    if (department) params.set('department', department)
+    if (onboarding && onboarding !== 'any') params.set('onboarding', onboarding)
+    if (employee) params.set('employee', employee)
+  } else if (state.page === 'onboarding' || state.page === 'preboarding' || state.page === 'probation') {
+    const q = String(filters.q || '').trim()
+    const employee = String(filters.employee || '').trim()
+    if (q) params.set('q', q)
+    if (employee) params.set('employee', employee)
+  } else if (state.page === 'leave' || state.page === 'payroll') {
     const view = String(filters.view || '').trim()
     if (view) params.set('view', view)
+    if (state.page === 'leave') {
+      const status = String(filters.status || '').trim()
+      if (status) params.set('status', status)
+    }
+  } else if (state.page === 'attendance') {
+    const date = String(filters.date || '').trim()
+    const dateEnd = String(filters.date_end || '').trim()
+    if (date) params.set('date', date)
+    if (dateEnd) params.set('date_end', dateEnd)
   } else if (state.page === 'overview' && typeof state.overviewScrollY === 'number' && state.overviewScrollY > 0) {
     params.set('overview_scroll', String(Math.round(state.overviewScrollY)))
   }

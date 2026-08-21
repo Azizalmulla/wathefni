@@ -78,8 +78,39 @@ describe('HR Web interaction performance audit (source + contracts, no fake muta
     expect(client).toContain('retry: 0')
   })
 
-  test('StatusPill still has a one-off hex that should move onto semantic tokens', () => {
+  test('StatusPill and ResourceState empty use semantic tokens instead of one-off hex', () => {
     const chrome = read('components/ui/page-chrome.tsx')
-    expect(chrome).toContain("tone === 'neutral' && 'bg-[#eee5d4] text-[#5c554a]'")
+    expect(chrome).toContain("tone === 'neutral' && 'bg-semantic-accent-soft text-semantic-ink-muted'")
+    expect(chrome).not.toContain("bg-[#eee5d4]")
+    const dataState = read('pages/shared/dataState.tsx')
+    expect(dataState).toContain('bg-semantic-accent')
+    expect(dataState).not.toContain('bg-[#c89445]')
+  })
+
+  test('operational core surfaces are URL-backed (Leave view, Shifts/Payroll tabs, Attendance dates)', () => {
+    const leave = read('posthire/LeaveWorkspace.tsx')
+    const shifts = read('posthire/ShiftsWorkspace.tsx')
+    const payroll = read('posthire/PostHire.tsx')
+    const urlTab = read('lib/hrWebUrlTab.ts')
+    expect(leave).toContain("useUrlBackedTab<'active' | 'history'>('leave'")
+    expect(shifts).toContain("useUrlBackedTab<SurfaceTab>('shifts'")
+    expect(payroll).toContain("useUrlBackedTab<'run' | 'hours' | 'records'>")
+    expect(payroll).toContain("useUrlBackedTab<'payslips' | 'close' | 'statutory'>")
+    expect(payroll).toContain('useUrlBackedDateRange')
+    expect(payroll).toContain('function AttendancePage(')
+    expect(urlTab).toContain("shifts: ['schedule', 'requests', 'planning']")
+    expect(urlTab).toContain("payroll: ['run', 'hours', 'records']")
+  })
+
+  test('People spine surfaces are URL-backed (employee, directory filters, org/onboarding/inbox tabs)', () => {
+    const employees = read('posthire/PostHire.tsx')
+    const workforce = read('posthire/employees360/WorkforcePage.tsx')
+    const urlTab = read('lib/hrWebUrlTab.ts')
+    expect(employees).toContain("useUrlBackedParam('employees', 'employee'")
+    expect(employees).toContain("useUrlBackedTab('onboarding', URL_BACKED_WORKSPACE_TABS.onboarding")
+    expect(employees).toContain("useUrlBackedTab('inbox', URL_BACKED_WORKSPACE_TABS.inbox")
+    expect(workforce).toContain("useUrlBackedTab('workforce'")
+    expect(urlTab).toContain("workforce: ['organization', 'lifecycle', 'remediation', 'migration', 'requests']")
+    expect(urlTab).toContain("inbox: ['needs_action', 'due_soon', 'blocked', 'all']")
   })
 })

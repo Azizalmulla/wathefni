@@ -14,7 +14,8 @@ describe('Shifts Wave 1 IA refinement contract', () => {
     expect(shiftsSrc).toContain('surfaceSchedule')
     expect(shiftsSrc).toContain('surfaceRequests')
     expect(shiftsSrc).toContain('surfacePlanning')
-    expect(shiftsSrc).toContain("useState<SurfaceTab>('schedule')")
+    expect(shiftsSrc).toContain("useUrlBackedTab<SurfaceTab>('shifts'")
+    expect(shiftsSrc).not.toContain("useState<SurfaceTab>('schedule')")
     // Old peer tablist of board+swaps+availability+… should not drive first paint
     expect(shiftsSrc).not.toMatch(/\[\s*\['board',\s*c\.board\],\s*\['swaps'/)
   })

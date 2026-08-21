@@ -153,7 +153,7 @@ export function AttendanceAttentionStrip({
 
   return (
     <div
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[1.05rem] border border-[#e8dfd0] bg-[#fffdf8]/90 px-4 py-3"
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[1.05rem] border border-semantic-line bg-semantic-surface-raised/90 px-4 py-3"
       data-testid="attendance-attention-strip"
       dir={locale === 'ar' ? 'rtl' : 'ltr'}
     >
@@ -216,7 +216,7 @@ export function AttendanceDailyTable({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-[1.2rem] border border-[#e8dfd0] bg-[#fffdf8] px-5 py-10 text-center" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="rounded-[1.2rem] border border-semantic-line bg-semantic-surface-raised px-5 py-10 text-center" dir={isAr ? 'rtl' : 'ltr'}>
         <CalendarDays className="mx-auto h-5 w-5 text-mist" />
         <p className="mt-3 text-[15px] font-semibold text-text">{t.empty}</p>
         <p className="mt-1 text-[13px] text-subtle/90">{t.emptyHint}</p>
@@ -226,9 +226,9 @@ export function AttendanceDailyTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-[1.1rem] border border-[#e8dfd0]" dir={isAr ? 'rtl' : 'ltr'} data-testid="attendance-daily-table">
+    <div className="overflow-x-auto rounded-[1.1rem] border border-semantic-line" dir={isAr ? 'rtl' : 'ltr'} data-testid="attendance-daily-table">
       <table className="w-full min-w-[860px] text-start text-[13px]">
-        <thead className="bg-[#fff8ee] text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
+        <thead className="bg-semantic-accent-soft/50 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
           <tr>
             <th className="px-4 py-3 font-medium">{t.employee}</th>
             <th className="px-4 py-3 font-medium">{t.date}</th>
@@ -240,7 +240,7 @@ export function AttendanceDailyTable({
             <th className="px-4 py-3 text-end font-medium">{t.action}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#e8dfd0]/80">
+        <tbody className="divide-y divide-semantic-line/80">
           {rows.map((row, idx) => {
             const rowKey = row.attendance_id || `${row.employee_key}-${idx}`
             const life = attendanceLifeState(row)
@@ -292,10 +292,10 @@ export function AttendanceDailyTable({
                   </td>
                 </tr>
                 {isOpen ? (
-                  <tr className="bg-[#fffdf8]/90">
+                  <tr className="bg-semantic-surface-raised/90">
                     <td colSpan={8} className="px-4 py-4">
                       <div className="grid gap-3 lg:grid-cols-2">
-                        <div className="rounded-[1rem] border border-[#e8dfd0] bg-white px-3 py-3">
+                        <div className="rounded-[1rem] border border-semantic-line bg-white px-3 py-3">
                           <p className="text-[12px] font-semibold text-mist">{t.sessions}</p>
                           <p className="mt-1 text-[13px] text-text">{sessionSummary(row, locale)}</p>
                           <p className="mt-3 text-[12px] font-semibold text-mist">{t.breaks}</p>
@@ -315,7 +315,7 @@ export function AttendanceDailyTable({
                           {exclusion ? (
                             <BlockedReason locale={locale} reason={exclusion} />
                           ) : (
-                            <p className="rounded-[1rem] border border-[#d7e8d2] bg-[#f3faf1] px-3 py-2 text-[13px] text-[#2f5d3a]">
+                            <p className="rounded-[1rem] border border-semantic-success/40 bg-semantic-success-soft px-3 py-2 text-[13px] text-semantic-success-ink">
                               {locale === 'ar' ? 'مؤهل لكشف الرواتب عند الاعتماد.' : 'Eligible for Payroll when approved.'}
                             </p>
                           )}
@@ -350,7 +350,7 @@ export function AttendanceRangeCard({
   actions?: ReactNode
 }) {
   return (
-    <Card className="border-[#e8dfd0] bg-[#fffdf8]">
+    <Card className="border-semantic-line bg-semantic-surface-raised">
       <CardHeader className="flex flex-col gap-3">
         <div className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div>

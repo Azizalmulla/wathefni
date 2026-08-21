@@ -98,6 +98,7 @@ import {
 } from '@/components/candidates/ClassificationFilters'
 import { JobsForm, jobFormToPayload, type JobFormValues } from '@/components/JobsForm'
 import { SendResultPanel, extractSendResult, type OutboundSendResult } from '@/components/SendResultPanel'
+import { HrPageHeader } from '@/components/hr/HrPageHeader'
 import { Button } from '@/components/ui/button'
 import { useDebouncedValue } from '@/components/ui/search-input'
 import type {
@@ -184,6 +185,25 @@ function actionInboxNavOfferable(state: DashboardModuleState): boolean {
 
 function isPostHirePage(page: Page): page is PostHireModulePage {
   return isPostHireNavPage(page)
+}
+
+function isOperationalCorePage(page: Page | string): boolean {
+  return page === 'leave' || page === 'attendance' || page === 'shifts' || page === 'payroll'
+}
+
+function isPeopleSpinePage(page: Page | string): boolean {
+  return (
+    page === 'employees' ||
+    page === 'workforce' ||
+    page === 'onboarding' ||
+    page === 'preboarding' ||
+    page === 'probation' ||
+    page === 'inbox'
+  )
+}
+
+function usesCanonicalPageHeader(page: Page | string): boolean {
+  return isOperationalCorePage(page) || isPeopleSpinePage(page)
 }
 
 // Lifecycle confirmation contract (kept in lockstep with HR mobile and lifecycle-labels tests).
@@ -2459,7 +2479,52 @@ function App() {
           )}
           data-testid="app-main"
         >
-          {activePage !== 'overview' ? (
+          {activePage !== 'overview' && usesCanonicalPageHeader(activePage) ? (
+            <HrPageHeader
+              className="mb-6"
+              density="page"
+              dir={recruitingLocale === 'ar' ? 'rtl' : 'ltr'}
+              eyebrow={recruitingLocale === 'ar' ? 'ما بعد التوظيف' : 'Post-Hire'}
+              title={pageTitle}
+              description={pageSubtitle}
+              actions={
+                busy ? (
+                  <div className="rounded-full border border-semantic-line/50 bg-semantic-surface/80 px-3.5 py-2 text-xs font-medium text-semantic-mist" data-interaction-shell-busy>
+                    {notice.text && !/^refreshing hiring data/i.test(notice.text)
+                      ? notice.text
+                      : recruitingLocale === 'ar'
+                        ? 'جاري العمل...'
+                        : 'Working…'}
+                  </div>
+                ) : notice.text ? (
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium',
+                      notice.tone === 'success'
+                        ? 'border-semantic-success/60 bg-semantic-success-soft/80 text-semantic-success-ink'
+                        : notice.tone === 'error'
+                          ? 'border-semantic-danger/60 bg-semantic-danger-soft/85 text-semantic-danger-ink'
+                          : 'border-semantic-line/50 bg-semantic-surface/80 text-semantic-mist',
+                    )}
+                    role="status"
+                  >
+                    <span>{notice.text}</span>
+                    {notice.tone === 'error' ? (
+                      <button
+                        type="button"
+                        onClick={() => setNotice('')}
+                        aria-label={recruitingLocale === 'ar' ? 'إخفاء' : 'Dismiss'}
+                        className="-me-1 ms-0.5 rounded-full px-1 text-semantic-danger-ink/80 hover:text-semantic-danger-ink"
+                      >
+                        ×
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null
+              }
+            />
+          ) : null}
+          {activePage !== 'overview' && !usesCanonicalPageHeader(activePage) ? (
           <header
             className={cn(
               'mb-6 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between',
@@ -2632,6 +2697,25 @@ function App() {
                   overviewLayout={workspaceAuthority.overview.layout}
                   showWorkQueue={workspaceAuthority.overview.showWorkQueue}
                   showRolePriority={workspaceAuthority.overview.showRolePriority}
+                  showApprovals={workspaceAuthority.overview.showApprovals}
+                  showSignals={workspaceAuthority.overview.showSignals}
+                  showHiringMetrics={workspaceAuthority.overview.showHiringMetrics}
+                  onOpenInbox={() => openPage('inbox')}
+                  onOpenInboxItem={(item) => {
+                    const nextPage = String(item.deep_link?.page || item.system_of_action || '').trim()
+                    if (!nextPage) return
+                    const honorsEmployee = nextPage === 'employees' || nextPage === 'onboarding'
+                    const employee = honorsEmployee
+                      ? (item.deep_link?.employee || item.employee_key || undefined)
+                      : undefined
+                    openPage(nextPage as Page)
+                    if (employee) {
+                      const url = new URL(window.location.href)
+                      url.searchParams.set('employee', String(employee))
+                      window.history.replaceState({}, '', `${url.pathname}${url.search}`)
+                      window.dispatchEvent(new PopStateEvent('popstate'))
+                    }
+                  }}
                 />
               )}
               {activePage === 'ai' && (

@@ -108,7 +108,7 @@ export function ResourceState({
         data-testid={testId || 'resource-state-empty'}
       >
         <div className="flex items-center gap-2 font-medium text-text">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#c89445]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-semantic-accent" />
           <span className="max-w-2xl">{heading}</span>
         </div>
         {body ? <p className="mt-2 max-w-2xl text-subtle">{body}</p> : null}

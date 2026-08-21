@@ -53,6 +53,9 @@ export type OverviewComposition = {
   showWorkQueue: boolean
   showRolePriority: boolean
   showCalendar: boolean
+  showApprovals: boolean
+  showSignals: boolean
+  showHiringMetrics: boolean
   allClear: boolean
   headlineMode: 'hiring' | 'team' | 'mixed' | 'calm'
 }
@@ -433,6 +436,37 @@ export const WORKSPACE_SURFACES: WorkspaceSurface[] = [
     permission: 'calendar.read',
     label: 'Calendar',
   },
+  {
+    id: 'overview.approvals',
+    kind: 'overview',
+    moduleAnyOf: [
+      'analytics',
+      'compliance',
+      'onboarding',
+      'attendance',
+      'leave',
+      'shifts',
+      'payroll',
+    ],
+    permissionAnyOf: [
+      'analytics.read',
+      'compliance.read',
+      'onboarding.read',
+      'attendance.read',
+      'leave.read',
+      'shifts.read',
+      'payroll.read',
+      'employees.read',
+    ],
+    label: 'Approvals peek',
+  },
+  {
+    id: 'overview.signals',
+    kind: 'overview',
+    module: 'analytics',
+    permission: 'analytics.read',
+    label: 'Workforce signals',
+  },
   // Tabs
   {
     id: 'tab.interviews.video',
@@ -542,12 +576,15 @@ export function composeOverviewLayout(args: {
   const showWorkQueue = Boolean(s['overview.work_queue']?.offerable)
   const showRolePriority = Boolean(s['overview.role_priority']?.offerable)
   const showCalendar = Boolean(s['overview.calendar']?.offerable)
-  const hasPrehire = Boolean(s['nav.overview']?.offerable)
+  const showApprovals = Boolean(s['overview.approvals']?.offerable)
+  const showSignals = Boolean(s['overview.signals']?.offerable)
+  const showHiringMetrics = prioritySurfaces.length > 0
+  const hasRecruitingHome = showWorkQueue || showHiringMetrics || showRolePriority
   const hasPosthireNav = Object.values(s).some((row) => row.group === 'posthire' && row.offerable && row.kind === 'nav')
   let headlineMode: OverviewComposition['headlineMode'] = 'calm'
-  if (hasPrehire && hasPosthireNav) headlineMode = 'mixed'
-  else if (hasPrehire) headlineMode = 'hiring'
-  else if (hasPosthireNav) headlineMode = 'team'
+  if (hasRecruitingHome && (hasPosthireNav || showApprovals || showSignals)) headlineMode = 'mixed'
+  else if (hasRecruitingHome) headlineMode = 'hiring'
+  else if (hasPosthireNav || showApprovals || showSignals || showCalendar) headlineMode = 'team'
   const allClear = args.urgentCount <= 0
 
   return {
@@ -556,6 +593,9 @@ export function composeOverviewLayout(args: {
     showWorkQueue,
     showRolePriority,
     showCalendar,
+    showApprovals,
+    showSignals,
+    showHiringMetrics,
     allClear,
     headlineMode,
   }
@@ -588,10 +628,37 @@ export function resolveWorkspaceAuthority(args: {
       }
     }
   }
+  if (surfaces['overview.approvals'] && !args.actionInboxOfferable) {
+    surfaces['overview.approvals'] = {
+      ...surfaces['overview.approvals'],
+      status: 'permission_denied',
+      offerable: false,
+    }
+  }
 
   // Assistant lives with post-hire when pre_hiring is off so the prehire group can hide.
   if (surfaces['nav.ai']?.offerable && !moduleEnabled(enabled, 'pre_hiring')) {
     surfaces['nav.ai'] = { ...surfaces['nav.ai'], group: 'posthire' }
+  }
+
+  // Overview is module-composed: recruiting off must not hide the company home.
+  if (surfaces['nav.overview'] && !surfaces['nav.overview'].offerable && !moduleEnabled(enabled, 'pre_hiring')) {
+    const anyPosthireNav = Object.values(surfaces).some(
+      (row) => row.kind === 'nav' && row.group === 'posthire' && row.offerable,
+    )
+    const anyOverviewBand = Boolean(
+      surfaces['overview.calendar']?.offerable
+      || surfaces['overview.approvals']?.offerable
+      || surfaces['overview.signals']?.offerable,
+    )
+    if (anyPosthireNav || anyOverviewBand) {
+      surfaces['nav.overview'] = {
+        ...surfaces['nav.overview'],
+        status: 'available',
+        offerable: true,
+        group: 'posthire',
+      }
+    }
   }
 
   const navIds = WORKSPACE_SURFACES.filter((s) => s.kind === 'nav' && surfaces[s.id]?.offerable).map((s) => s.page as string)
@@ -712,8 +779,8 @@ export const COMPOSITION_MATRIX: CompositionMatrixRow[] = [
     modules: ['onboarding', 'attendance', 'leave', 'payroll'],
     role: 'owner',
     expectNavGroups: ['posthire', 'settings'],
-    expectNavIncludes: ['ai', 'onboarding', 'attendance', 'leave', 'payroll', 'employees'],
-    expectNavExcludes: ['overview', 'jobs', 'candidates', 'assessments'],
+    expectNavIncludes: ['overview', 'ai', 'onboarding', 'attendance', 'leave', 'payroll', 'employees'],
+    expectNavExcludes: ['jobs', 'candidates', 'assessments'],
     expectOverviewLayout: 'none',
   },
   {

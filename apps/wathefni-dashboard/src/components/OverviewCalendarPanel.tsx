@@ -59,18 +59,18 @@ export const OverviewCalendarPanel = memo(function OverviewCalendarPanel({
   const dayItems = upcoming.filter((e) => String(e.start_at || '').startsWith(selectedDay || data?.today || ''))
 
   return (
-    <section className="rounded-[1.55rem] bg-[#fffaf0] p-5" dir={isAr ? 'rtl' : 'ltr'} data-testid="overview-my-calendar">
+    <section className="rounded-[1.55rem] bg-semantic-surface p-5" dir={isAr ? 'rtl' : 'ltr'} data-testid="overview-my-calendar">
       <div className="flex items-center justify-between gap-3 px-1 pb-3">
         <div className="flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-[#716a5e]" />
-          <h3 className="text-[15px] font-semibold tracking-[-0.025em] text-[#23211d]">
+          <CalendarDays className="h-4 w-4 text-semantic-subtle" />
+          <h3 className="text-[15px] font-semibold tracking-[-0.025em] text-semantic-ink">
             {isAr ? 'تقويمي' : 'My calendar'}
           </h3>
           {refreshing ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-[#716a5e]" aria-label={isAr ? 'جاري التحديث' : 'Refreshing'} />
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-semantic-subtle" aria-label={isAr ? 'جاري التحديث' : 'Refreshing'} />
           ) : null}
         </div>
-        <button className="text-xs font-semibold text-[#716a5e] underline-offset-4 hover:underline" onClick={onOpenCalendar} type="button">
+        <button className="text-xs font-semibold text-semantic-subtle underline-offset-4 hover:underline" onClick={onOpenCalendar} type="button">
           {isAr ? 'عرض التقويم الكامل' : 'View full calendar'}
         </button>
       </div>
@@ -81,11 +81,11 @@ export const OverviewCalendarPanel = memo(function OverviewCalendarPanel({
         </div>
       ) : (
         <>
-          <div className="rounded-[1.1rem] bg-white/70 p-3" data-rendering-soft-keep data-rendering-updating={refreshing ? 'true' : undefined}>
-            <div className="mb-2 text-center text-xs font-semibold text-[#716a5e]">
+          <div className="rounded-[1.1rem] bg-semantic-surface-raised p-3" data-rendering-soft-keep data-rendering-updating={refreshing ? 'true' : undefined}>
+            <div className="mb-2 text-center text-xs font-semibold text-semantic-subtle">
               {first.toLocaleDateString(isAr ? 'ar' : 'en', { month: 'long', year: 'numeric' })}
             </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-[#8a8274]">
+            <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-semantic-mist">
               {(isAr ? ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S']).map((d, i) => (
                 <div key={`${d}-${i}`}>{d}</div>
               ))}
@@ -101,12 +101,12 @@ export const OverviewCalendarPanel = memo(function OverviewCalendarPanel({
                     key={cell.iso}
                     type="button"
                     onClick={() => setSelectedDay(cell.iso || '')}
-                    className={`relative grid h-8 place-items-center rounded-full text-[11px] ${
-                      isSelected ? 'bg-[#23211d] text-white' : isToday ? 'bg-[#eee5d4] text-[#23211d]' : 'text-[#23211d] hover:bg-[#f3ebe0]'
+                    className={`relative grid h-8 place-items-center rounded-full text-[11px] transition-colors duration-150 ${
+                      isSelected ? 'bg-semantic-ink text-white' : isToday ? 'bg-semantic-accent-soft text-semantic-ink' : 'text-semantic-ink hover:bg-semantic-accent-soft'
                     }`}
                   >
                     {cell.day}
-                    {hasBusy ? <span className={`absolute bottom-1 h-1 w-1 rounded-full ${isSelected ? 'bg-white' : 'bg-[#c89445]'}`} /> : null}
+                    {hasBusy ? <span className={`absolute bottom-1 h-1 w-1 rounded-full ${isSelected ? 'bg-white' : 'bg-semantic-accent'}`} /> : null}
                   </button>
                 )
               })}
@@ -115,29 +115,29 @@ export const OverviewCalendarPanel = memo(function OverviewCalendarPanel({
 
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between px-1">
-              <h4 className="text-xs font-semibold text-[#716a5e]">
+              <h4 className="text-xs font-semibold text-semantic-subtle">
                 {selectedDay || data?.today
                   ? (isAr ? 'أحداث اليوم' : 'Day events')
                   : (isAr ? 'القادمة' : 'Upcoming')}
               </h4>
               {onAddEvent ? (
-                <button type="button" className="inline-flex items-center gap-1 text-xs font-semibold text-[#716a5e]" onClick={onAddEvent}>
+                <button type="button" className="inline-flex items-center gap-1 text-xs font-semibold text-semantic-subtle" onClick={onAddEvent}>
                   <Plus className="h-3.5 w-3.5" /> {isAr ? 'إضافة' : 'Add'}
                 </button>
               ) : null}
             </div>
             {(dayItems.length ? dayItems : upcoming).length === 0 ? (
-              <p className="px-1 text-sm text-[#8a8274]">{isAr ? 'لا أحداث' : 'No events'}</p>
+              <p className="px-1 text-sm text-semantic-mist">{isAr ? 'لا أحداث' : 'No events'}</p>
             ) : (
               (dayItems.length ? dayItems : upcoming).map((event) => (
                 <button
                   key={event.event_id}
                   type="button"
                   onClick={onOpenCalendar}
-                  className="flex w-full items-center justify-between rounded-[1rem] border border-[#e8dfd0] bg-[#f8f3e9] px-3 py-2 text-left"
+                  className="flex w-full items-center justify-between rounded-[1rem] border border-semantic-line bg-semantic-surface-raised px-3 py-2 text-start"
                 >
-                  <span className="truncate text-sm font-semibold text-[#23211d]">{eventLabel(event, isAr)}</span>
-                  <span className="shrink-0 text-[11px] text-[#8a8274]">
+                  <span className="truncate text-sm font-semibold text-semantic-ink">{eventLabel(event, isAr)}</span>
+                  <span className="shrink-0 text-[11px] text-semantic-mist">
                     {event.start_at ? new Date(event.start_at).toLocaleTimeString(isAr ? 'ar' : 'en', { hour: '2-digit', minute: '2-digit' }) : ''}
                   </span>
                 </button>

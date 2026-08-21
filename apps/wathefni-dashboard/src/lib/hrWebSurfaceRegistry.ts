@@ -95,15 +95,15 @@ type PageDef = {
 const PAGE_DEFS: PageDef[] = [
   {
     page: 'overview',
-    module: 'pre_hiring',
+    module: null,
     permission: null,
-    permission_any_of: ['candidate.manage', 'jobs.create', 'report.export'],
+    permission_any_of: ['candidate.manage', 'jobs.create', 'report.export', 'leave.read', 'attendance.read', 'analytics.read', 'calendar.read'],
     component: 'OverviewPage',
-    api_authority: '/dashboard/prehire/summary + work-queue',
+    api_authority: 'composed: work-queue + action-inbox + intelligence/overview + calendar',
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
-    notes: 'Focused landing when pre_hiring is on. Soft-keep already applied.',
+    notes: 'Module-composed company home. Recruiting bands hide when pre_hiring is off. Soft-keep on every band.',
   },
   {
     page: 'ai',
@@ -220,7 +220,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
-    notes: 'People spine — offerable when any people_surface module is on.',
+    notes: 'People spine — Phase 5 UX migrated. Offerable when any people_surface module is on. Directory filters (`q`, `status`, `department`, `onboarding`) and `employee` 360 deep-link are URL-backed. `view=migration` is Migration Sync.',
   },
   {
     page: 'workforce',
@@ -230,7 +230,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/employees (org)',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
+    migration_status: 'canonical',
+    notes: 'People spine — Phase 5 UX migrated. Structure is first paint; Advanced queues stay behind the toggle. `?tab=` (legacy `?workforce=` alias) is URL-backed.',
   },
   {
     page: 'inbox',
@@ -241,8 +242,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/action-inbox',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
-    notes: 'Fail-closed on bootstrap action_inbox.offerable.',
+    migration_status: 'canonical',
+    notes: 'Fail-closed on bootstrap action_inbox.offerable. Phase 5 UX migrated. Presentation filters are URL-backed (`?tab=`). Board title uses published `summary.total` when filter is All; does not invent a second approvals model.',
   },
   {
     page: 'preboarding',
@@ -252,7 +253,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/preboarding',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'People spine — Phase 5 UX migrated. Frozen preboarding authority unchanged. Status filter is URL-backed (`?tab=`); selected joiner uses `?employee=`.',
   },
   {
     page: 'onboarding',
@@ -263,6 +265,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'People spine — Phase 5 UX migrated. Queue-first. Filter is URL-backed (`?tab=`); checklist focus uses `?employee=`. Search uses `?q=`.',
   },
   {
     page: 'probation',
@@ -272,7 +275,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/posthire/probation',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'People spine — Phase 5 UX migrated. Frozen probation authority unchanged. Status filter is URL-backed (`?tab=`); selected case uses `?employee=`.',
   },
   {
     page: 'attendance',
@@ -283,6 +287,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 4 UX migrated. Board range is URL-backed (`?date=` / `?date_end=`). Capture ops tabs stay local behind Operations.',
   },
   {
     page: 'leave',
@@ -293,6 +298,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 4 UX migrated. Active/history via `?view=`; history status via `?status=`. No frontend leave formulas.',
   },
   {
     page: 'performance',
@@ -400,6 +406,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 4 UX migrated. Schedule / Requests / Planning via `?tab=`. Board range stays committed soft-keep.',
   },
   {
     page: 'payroll',
@@ -410,7 +417,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
-    notes: 'Backend remains money authority. Do not optimistic-mutate payroll.',
+    notes: 'Phase 4 UX migrated. Run / Hours / Records via `?tab=`; records panels via `?view=`. Backend remains money authority. Do not optimistic-mutate payroll.',
   },
   {
     page: 'analytics',
@@ -548,6 +555,13 @@ const WORKSPACE_TABS: Record<string, string[]> = {
   'compensation-planning': ['overview', 'worksheet', 'calibration', 'approvals', 'finalized', 'history'],
   'workforce-planning': ['overview', 'plan', 'scenarios', 'demand', 'cost', 'approvals', 'execution', 'history'],
   'job-architecture': ['overview', 'catalog', 'grades', 'paths', 'mappings'],
+  shifts: ['schedule', 'requests', 'planning'],
+  payroll: ['run', 'hours', 'records'],
+  workforce: ['organization', 'lifecycle', 'remediation', 'migration', 'requests'],
+  onboarding: ['needs_attention', 'in_progress', 'not_started', 'completed', 'all'],
+  preboarding: ['all', 'blocked', 'ready', 'in_progress', 'not_started'],
+  probation: ['attention', 'active', 'under_review', 'confirmed', 'extended', 'failed'],
+  inbox: ['needs_action', 'due_soon', 'blocked', 'all'],
 }
 
 const NESTED: HrWebSurface[] = [
@@ -564,6 +578,20 @@ const NESTED: HrWebSurface[] = [
     url_state: 'alias',
     migration_status: 'legacy_alias',
     notes: 'Rewritten to ?page=employees&view=migration. Keep alias forever.',
+  }),
+  nested({
+    id: 'detail.employees.profile',
+    kind: 'detail',
+    parent: 'page.employees',
+    page: 'employees',
+    route: '/dashboard?page=employees&employee={employee_key}',
+    module: null,
+    permission: 'employees.read',
+    component: 'EmployeeProfile (360)',
+    api_authority: '/dashboard/posthire/employees/{employee_key}',
+    url_state: 'query',
+    migration_status: 'canonical',
+    notes: 'Canonical employee record. Phase 5: identity header, jump nav, module sections remain backend-published. Mutations stay on owning modules.',
   }),
   nested({
     id: 'page.employees.view.migration',
@@ -813,7 +841,7 @@ const NESTED: HrWebSurface[] = [
     api_authority: '/dashboard/posthire/attendance/capture',
     url_state: 'query',
     migration_status: 'canonical',
-    notes: 'connectors | mapping | missing | conflicts — local tab state.',
+    notes: 'connectors | mapping | missing | conflicts — local tab state behind collapsed Operations. Not URL-backed on purpose.',
   }),
   nested({
     id: 'tab.leave.active',
@@ -827,6 +855,7 @@ const NESTED: HrWebSurface[] = [
     api_authority: '/dashboard/posthire/leave?view=active',
     url_state: 'query',
     migration_status: 'canonical',
+    notes: 'Active/history via `?view=`. Refresh/back restore the same queue.',
   }),
   nested({
     id: 'tab.leave.history',
@@ -838,6 +867,46 @@ const NESTED: HrWebSurface[] = [
     permission: 'leave.read',
     component: 'LeaveWorkspace',
     api_authority: '/dashboard/posthire/leave?view=history',
+    url_state: 'query',
+    migration_status: 'canonical',
+    notes: 'History status filter is URL-backed via ?status=.',
+  }),
+  nested({
+    id: 'tab.payroll.records.payslips',
+    kind: 'subtab',
+    parent: 'tab.payroll.records',
+    page: 'payroll',
+    route: '/dashboard?page=payroll&tab=records&view=payslips',
+    module: 'payroll',
+    permission: 'payroll.read',
+    component: 'PayslipWorkspace',
+    api_authority: '/dashboard/posthire/payroll/payslips',
+    url_state: 'query',
+    migration_status: 'canonical',
+  }),
+  nested({
+    id: 'tab.payroll.records.close',
+    kind: 'subtab',
+    parent: 'tab.payroll.records',
+    page: 'payroll',
+    route: '/dashboard?page=payroll&tab=records&view=close',
+    module: 'payroll',
+    permission: 'payroll.read',
+    component: 'CloseExportWorkspace',
+    api_authority: '/dashboard/posthire/payroll/close-export',
+    url_state: 'query',
+    migration_status: 'canonical',
+  }),
+  nested({
+    id: 'tab.payroll.records.statutory',
+    kind: 'subtab',
+    parent: 'tab.payroll.records',
+    page: 'payroll',
+    route: '/dashboard?page=payroll&tab=records&view=statutory',
+    module: 'payroll',
+    permission: 'payroll.read',
+    component: 'StatutoryWorksheetWorkspace',
+    api_authority: '/dashboard/posthire/payroll/statutory',
     url_state: 'query',
     migration_status: 'canonical',
   }),
@@ -906,6 +975,34 @@ const NESTED: HrWebSurface[] = [
     api_authority: '/dashboard/prehire/overview/work-queue',
     url_state: 'page',
     migration_status: 'canonical',
+  }),
+  nested({
+    id: 'overview.approvals',
+    kind: 'overview',
+    parent: 'page.overview',
+    page: 'overview',
+    route: '/dashboard?page=inbox',
+    module: null,
+    permission: null,
+    component: 'OverviewPage approvals peek',
+    api_authority: '/dashboard/posthire/action-inbox',
+    url_state: 'page',
+    migration_status: 'canonical',
+    notes: 'Fail-closed on bootstrap action_inbox.offerable. Peek only — no client ranking.',
+  }),
+  nested({
+    id: 'overview.signals',
+    kind: 'overview',
+    parent: 'page.overview',
+    page: 'overview',
+    route: '/dashboard?page=analytics',
+    module: 'analytics',
+    permission: 'analytics.read',
+    component: 'OverviewPage workforce signals',
+    api_authority: '/dashboard/posthire/intelligence/overview',
+    url_state: 'page',
+    migration_status: 'canonical',
+    notes: 'C1 evaluations as published. Stale/suppressed/insufficient are not labelled current.',
   }),
   nested({
     id: 'setup.console.modules',
@@ -1075,8 +1172,26 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
         component: parent?.component || `${page} workspace`,
         api_authority: parent?.api_authority || '/dashboard/posthire',
         url_state: 'query',
-        migration_status: 'enterprise',
-        notes: 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
+        migration_status:
+          page === 'shifts' ||
+          page === 'payroll' ||
+          page === 'workforce' ||
+          page === 'onboarding' ||
+          page === 'preboarding' ||
+          page === 'probation' ||
+          page === 'inbox'
+            ? 'canonical'
+            : 'enterprise',
+        notes:
+          page === 'shifts' || page === 'payroll'
+            ? 'Phase 4 operational core. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
+            : page === 'workforce' ||
+                page === 'onboarding' ||
+                page === 'preboarding' ||
+                page === 'probation' ||
+                page === 'inbox'
+              ? 'Phase 5 People spine. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
+              : 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
       }),
     )
   }

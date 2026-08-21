@@ -5,20 +5,24 @@
 import { CalendarClock, CalendarDays, Loader2, MoreHorizontal, Plus, RefreshCw, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
-import { useUrlBackedTab, URL_BACKED_VIEW_PAGES } from '@/lib/hrWebUrlTab'
+import { useUrlBackedTab, URL_BACKED_VIEW_PAGES, LEAVE_HISTORY_STATUSES } from '@/lib/hrWebUrlTab'
 
 import { useConfirm, type ConfirmOptions } from '@/components/ConfirmDialog'
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
+import { HrSection } from '@/components/hr/HrSection'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { Button } from '@/components/ui/button'
 import { Input, Select, Textarea } from '@/components/ui/field'
 import { LoadMoreBar } from '@/components/ui/load-more-bar'
 import { StatusPill } from '@/components/ui/page-chrome'
+import { SoftKeepSurface } from '@/components/ui/SoftKeepSurface'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { DashboardApiError, getPosthireEmployees, getPosthireLeave, runPosthireAction } from '@/lib/api'
 import { FRESHNESS_MS } from '@/lib/query/freshness'
 import { useVisibilitySoftPoll } from '@/lib/query/useVisibilitySoftPoll'
 import { touchCalendarProjections } from '@/lib/query/touchCalendarProjections'
 import { cn } from '@/lib/utils'
+import { ResourceState } from '@/pages/shared/dataState'
 import {
   ApprovalStrip,
   BlockedReason,
@@ -615,19 +619,19 @@ function LeaveDetailDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/25 backdrop-blur-[2px]" onClick={onClose}>
       <aside
-        className="flex h-full w-full max-w-md flex-col border-s border-[#e8dfd0] bg-[#fffdf8]/98 shadow-[-20px_0_60px_rgba(24,20,15,0.18)]"
+        className="flex h-full w-full max-w-md flex-col border-s border-semantic-line bg-semantic-surface-raised/98 shadow-[-20px_0_60px_rgba(24,20,15,0.18)]"
         dir={isAr ? 'rtl' : 'ltr'}
         lang={isAr ? 'ar' : 'en'}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-[#e8dfd0] px-5 py-4">
+        <div className="flex items-start justify-between gap-3 border-b border-semantic-line px-5 py-4">
           <div className="min-w-0 space-y-1">
             <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">{row.employee_name || (isAr ? 'موظف' : 'Employee')}</p>
             <p className="text-[12px] text-subtle/85">
               {typeLabel(row.leave_type, locale)} · {formatLeaveDates(row.start_date, row.end_date, locale)}
             </p>
           </div>
-          <button type="button" className="rounded-full p-1.5 text-subtle hover:bg-[#f7f1e6]" onClick={onClose} aria-label="Close">
+          <button type="button" className="rounded-full p-1.5 text-subtle hover:bg-semantic-accent-soft/60" onClick={onClose} aria-label="Close">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -659,13 +663,13 @@ function LeaveDetailDrawer({
             </div>
           </div>
           {chargeable ? (
-            <p className="rounded-[1rem] border border-[#e8dfd0] bg-[#fbf7f0] px-3 py-2 text-[13px] text-subtle/90">
+            <p className="rounded-[1rem] border border-semantic-line bg-semantic-surface px-3 py-2 text-[13px] text-subtle/90">
               {isAr ? 'الأيام/الساعات المحتسبة' : 'Chargeable'}: <span className="font-medium text-text">{chargeable}</span>
             </p>
           ) : null}
-          <p className="rounded-[1rem] border border-[#e8dfd0] bg-[#fffdf8] px-3 py-2.5 text-[12.5px] leading-5 text-subtle/95">{c.approveSeparate}</p>
+          <p className="rounded-[1rem] border border-semantic-line bg-semantic-surface-raised px-3 py-2.5 text-[12.5px] leading-5 text-subtle/95">{c.approveSeparate}</p>
           {row.is_unpaid || String(row.leave_type || '').toLowerCase() === 'unpaid' ? (
-            <p className="rounded-[1rem] border border-[#e8dfd0] bg-[#fbf7f0] px-3 py-2.5 text-[12.5px] leading-5 text-subtle/95">{c.unpaidNote}</p>
+            <p className="rounded-[1rem] border border-semantic-line bg-semantic-surface px-3 py-2.5 text-[12.5px] leading-5 text-subtle/95">{c.unpaidNote}</p>
           ) : null}
           {balancesEnabled && annual ? (
             <div>
@@ -690,7 +694,7 @@ function LeaveDetailDrawer({
           ) : null}
         </div>
         {canManage ? (
-          <div className="flex flex-wrap gap-2 border-t border-[#e8dfd0] px-5 py-4">
+          <div className="flex flex-wrap gap-2 border-t border-semantic-line px-5 py-4">
             {primaryLabel ? (
               <Button size="sm" disabled={busy} onClick={runPrimary} data-primary-action={primaryKind}>
                 {runningKey?.includes(String(row.leave_id)) ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -926,7 +930,7 @@ function LeaveRowCard({
 
   return (
     <div
-      className="flex flex-wrap items-center justify-between gap-3 rounded-[1.1rem] border border-[#e8dfd0] bg-[#fffdf8]/90 px-4 py-3"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-[1.1rem] border border-semantic-line bg-semantic-surface-raised/90 px-4 py-3"
       data-leave-row
       data-status={status}
     >
@@ -935,7 +939,7 @@ function LeaveRowCard({
           <p className="font-semibold text-text">{row.employee_name || (locale === 'ar' ? 'موظف' : 'Employee')}</p>
           <StatusPill tone={statusTone(row.status)}>{statusLabel(row.status, locale)}</StatusPill>
           {annual && balancesEnabled ? (
-            <span className="rounded-full border border-[#e8dfd0] bg-white/70 px-2 py-0.5 text-[11px] font-medium text-subtle/90">
+            <span className="rounded-full border border-semantic-line bg-white/70 px-2 py-0.5 text-[11px] font-medium text-subtle/90">
               {Math.round(annual.current_balance * 10) / 10}/{Math.round(annual.entitlement_days * 10) / 10}
             </span>
           ) : null}
@@ -973,11 +977,11 @@ function LeaveRowCard({
               <MoreHorizontal className="h-4 w-4" />
             </Button>
             {menuOpen ? (
-              <div className="absolute end-0 top-full z-20 mt-1 min-w-[12rem] rounded-xl border border-[#e8dfd0] bg-white p-1 shadow-md">
+              <div className="absolute end-0 top-full z-20 mt-1 min-w-[12rem] rounded-xl border border-semantic-line bg-white p-1 shadow-md">
                 {primaryKind !== 'view_details' ? (
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-[#f7f1e6]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-semantic-accent-soft/60"
                     onClick={() => {
                       onToggleMenu()
                       onOpen()
@@ -989,7 +993,7 @@ function LeaveRowCard({
                 {(status === 'requested' || status === 'needs_review') && primaryKind !== 'approve' ? (
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-[#f7f1e6]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-semantic-accent-soft/60"
                     disabled={busy}
                     onClick={() => {
                       onToggleMenu()
@@ -1003,7 +1007,7 @@ function LeaveRowCard({
                   <>
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] text-[#8a3b2a] hover:bg-[#f7f1e6]"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] text-semantic-danger-ink hover:bg-semantic-accent-soft/60"
                       disabled={busy}
                       onClick={() => {
                         onToggleMenu()
@@ -1022,7 +1026,7 @@ function LeaveRowCard({
                     </button>
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-[#f7f1e6]"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-semantic-accent-soft/60"
                       disabled={busy}
                       onClick={() => {
                         onToggleMenu()
@@ -1042,7 +1046,7 @@ function LeaveRowCard({
                 {isStale && primaryKind !== 'start_dual' ? (
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-[#f7f1e6]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-semantic-accent-soft/60"
                     disabled={busy}
                     onClick={() => {
                       onToggleMenu()
@@ -1062,7 +1066,7 @@ function LeaveRowCard({
                 {primaryKind !== 'confirm_dual' && (row.dual_control_pending || row.dual_pending || row.dual_control_status) ? (
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-[#f7f1e6]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] hover:bg-semantic-accent-soft/60"
                     disabled={busy}
                     onClick={() => {
                       onToggleMenu()
@@ -1086,7 +1090,7 @@ function LeaveRowCard({
                 {status === 'needs_info' ? (
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] text-[#8a3b2a] hover:bg-[#f7f1e6]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] text-semantic-danger-ink hover:bg-semantic-accent-soft/60"
                     disabled={busy}
                     onClick={() => {
                       onToggleMenu()
@@ -1107,7 +1111,7 @@ function LeaveRowCard({
                 {status === 'approved' && primaryKind !== 'cancel' ? (
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] text-[#8a3b2a] hover:bg-[#f7f1e6]"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-[13px] text-semantic-danger-ink hover:bg-semantic-accent-soft/60"
                     disabled={busy}
                     onClick={() => {
                       onToggleMenu()
@@ -1138,8 +1142,17 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
   const locale = useEmployees360Locale()
   const c = leaveCopy(locale)
   const isAr = locale === 'ar'
-  const [view, setView] = useUrlBackedTab<'active' | 'history'>('leave', URL_BACKED_VIEW_PAGES.leave, 'active', 'view')
-  const [historyStatus, setHistoryStatus] = useState('')
+  const [view, setViewRaw] = useUrlBackedTab<'active' | 'history'>('leave', URL_BACKED_VIEW_PAGES.leave, 'active', 'view')
+  const [historyStatus, setHistoryStatus] = useUrlBackedTab<(typeof LEAVE_HISTORY_STATUSES)[number]>(
+    'leave',
+    LEAVE_HISTORY_STATUSES,
+    '',
+    'status',
+  )
+  const setView = (next: 'active' | 'history') => {
+    setViewRaw(next)
+    if (next === 'active' && historyStatus) setHistoryStatus('')
+  }
   const [showFile, setShowFile] = useState(false)
   const [selected, setSelected] = useState<PosthireLeaveRow | null>(null)
   const [surfaceError, setSurfaceError] = useState<string | null>(null)
@@ -1263,13 +1276,16 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2" data-leave-filters>
-          <Button variant={view === 'active' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('active')}>
-            {c.active}
-          </Button>
-          <Button variant={view === 'history' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('history')}>
-            {c.history}
-          </Button>
+        <div data-leave-filters>
+          <HrSurfaceTabs
+            value={view}
+            onChange={setView}
+            ariaLabel={c.title}
+            items={[
+              { id: 'active', label: c.active },
+              { id: 'history', label: c.history },
+            ]}
+          />
         </div>
         <div className="flex items-center gap-2">
           {canFile ? (
@@ -1290,34 +1306,46 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
       </div>
 
       {balancesEnabled || data?.balances_enforced === false ? (
-        <p className="rounded-[1rem] border border-[#e8dfd0] bg-[#fffdf8]/80 px-4 py-2.5 text-[12px] leading-5 text-subtle/85">{c.balancesBanner}</p>
+        <p className="rounded-[1rem] border border-semantic-line bg-semantic-surface-raised/80 px-4 py-2.5 text-[12px] leading-5 text-subtle/85">{c.balancesBanner}</p>
       ) : null}
       {showHolidayBanner ? (
-        <p className="rounded-[1rem] border border-[#e8c9a0] bg-wf-accent-review-soft/70 px-4 py-2.5 text-[12px] leading-5 text-wf-accent-review-ink" role="alert">
+        <p className="rounded-[1rem] border border-semantic-warning bg-wf-accent-review-soft/70 px-4 py-2.5 text-[12px] leading-5 text-wf-accent-review-ink" role="alert">
           {isAr ? holiday?.message_ar || c.holidayPending : holiday?.message_en || c.holidayPending}
         </p>
       ) : null}
       {surfaceError ? <BlockedReason reason={surfaceError} locale={locale} /> : null}
 
-      {loading ? (
-        <div className="flex items-center justify-center gap-2 rounded-[var(--radius-wf-panel)] border border-dashed border-[#e8dfd0] bg-[#fffdf8]/70 px-6 py-16 text-[13px] text-subtle">
-          <Loader2 className="h-4 w-4 animate-spin" /> {c.loading}
-        </div>
-      ) : error ? (
-        <div className="space-y-3 rounded-[var(--radius-wf-panel)] border border-rose-200/80 bg-rose-50/50 px-6 py-10 text-center">
-          <p className="text-[14px] font-medium text-rose-800">{error}</p>
-          <Button size="sm" variant="secondary" onClick={() => void reload()}>
-            {c.retry}
-          </Button>
-        </div>
+      {error && data ? (
+        <ResourceState
+          kind="error"
+          locale={locale}
+          title={error}
+          onRetry={() => void reload()}
+          retrying={refreshing}
+          testId="leave-refresh-error"
+        />
+      ) : null}
+
+      <SoftKeepSurface
+        cold={loading}
+        coldFallback={<ResourceState kind="loading" locale={locale} title={c.loading} testId="leave-loading" />}
+        refreshing={refreshing && !loading}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
+      {error && !data ? (
+        <ResourceState kind="error" locale={locale} title={error} onRetry={() => void reload()} retrying={refreshing} testId="leave-error" />
       ) : view === 'history' ? (
-        <div className="space-y-3 rounded-[1.25rem] border border-[#e8dfd0]/80 bg-[#fbf7f0]/55 p-4" data-leave-history>
-          <div className="flex flex-row flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[14px] font-semibold text-text">{c.historyTitle}</p>
-              <p className="text-[12px] text-subtle/85">{c.historyHint}</p>
-            </div>
-            <Select className="h-9 w-auto" value={historyStatus} onChange={(e) => setHistoryStatus(e.target.value)}>
+        <HrSection
+          title={c.historyTitle}
+          description={c.historyHint}
+          testId="leave-history"
+          className="border border-semantic-line/80"
+          trailing={
+            <Select
+              className="h-9 w-auto"
+              value={historyStatus}
+              onChange={(e) => setHistoryStatus((e.target.value || '') as (typeof LEAVE_HISTORY_STATUSES)[number])}
+            >
               <option value="">{c.allStatuses}</option>
               <option value="approved">{statusLabel('approved', locale)}</option>
               <option value="rejected">{statusLabel('rejected', locale)}</option>
@@ -1325,13 +1353,15 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
               <option value="withdrawn">{statusLabel('withdrawn', locale)}</option>
               <option value="requested">{statusLabel('requested', locale)}</option>
             </Select>
-          </div>
+          }
+        >
+          <div className="space-y-3" data-leave-history>
           {history.length === 0 ? (
             <WorkflowEmpty icon={<CalendarDays className="h-5 w-5" />} title={c.emptyHistory} hint={c.historyHint} />
           ) : (
-            <div className="overflow-x-auto rounded-[1.1rem] border border-[#e8dfd0] bg-white/50">
+            <div className="overflow-x-auto rounded-[1.1rem] border border-semantic-line bg-white/50">
               <table className="w-full min-w-[640px] text-start text-[13px]">
-                <thead className="bg-[#f7f1e6]/80 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
+                <thead className="bg-semantic-accent-soft/80 text-[11.5px] uppercase tracking-[0.06em] text-subtle/80">
                   <tr>
                     <th className="px-4 py-3 font-medium">{isAr ? 'الموظف' : 'Employee'}</th>
                     <th className="px-4 py-3 font-medium">{c.type}</th>
@@ -1340,11 +1370,11 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
                     <th className="px-4 py-3 font-medium">{c.status}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e8dfd0]/70">
+                <tbody className="divide-y divide-semantic-line/70">
                   {history.map((row, idx) => (
                     <tr
                       key={row.leave_id || idx}
-                      className="cursor-pointer hover:bg-[#fffdf8]"
+                      className="cursor-pointer hover:bg-semantic-surface-raised"
                       onClick={() => setSelected(row)}
                     >
                       <td className="px-4 py-3 font-semibold text-text">{row.employee_name || '—'}</td>
@@ -1367,13 +1397,14 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
               />
             </div>
           )}
-        </div>
+          </div>
+        </HrSection>
       ) : (
         <>
           <div
             className={cn(
               'flex gap-3 rounded-[1.25rem] border px-4 py-3.5',
-              pendingTotal ? 'border-[#e8c9a0] bg-wf-accent-review-soft/50' : 'border-[#e8dfd0] bg-[#fffdf8]/70',
+              pendingTotal ? 'border-semantic-warning bg-wf-accent-review-soft/50' : 'border-semantic-line bg-semantic-surface-raised/70',
             )}
             data-leave-attention
           >
@@ -1388,11 +1419,8 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
             </div>
           </div>
 
+          <HrSection title={c.pendingTitle} description={c.pendingHint} className="bg-transparent p-0 sm:p-0">
           <section className="space-y-2.5" data-leave-pending>
-            <div className="px-0.5">
-              <p className="text-[14px] font-semibold text-text">{c.pendingTitle}</p>
-              <p className="text-[12px] text-subtle/85">{c.pendingHint}</p>
-            </div>
             {pending.length === 0 ? (
               <WorkflowEmpty icon={<CalendarDays className="h-5 w-5" />} title={c.emptyPending} hint={c.pendingHint} />
             ) : (
@@ -1426,12 +1454,10 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
               </div>
             )}
           </section>
+          </HrSection>
 
-          <section className="space-y-2 border-t border-[#e8dfd0]/70 pt-4" data-leave-upcoming>
-            <div className="px-0.5">
-              <p className="text-[13px] font-semibold text-text/90">{c.upcomingTitle}</p>
-              <p className="text-[12px] text-subtle/80">{c.upcomingHint}</p>
-            </div>
+          <HrSection title={c.upcomingTitle} description={c.upcomingHint} className="bg-transparent p-0 sm:p-0">
+          <section className="space-y-2 border-t border-semantic-line/70 pt-4" data-leave-upcoming>
             {upcoming.length === 0 ? (
               <WorkflowEmpty icon={<CalendarDays className="h-5 w-5" />} title={c.emptyUpcoming} hint={c.upcomingHint} />
             ) : (
@@ -1465,8 +1491,10 @@ export function LeaveWorkspace({ access, permissions, role: _role, onNotice, onA
               </div>
             )}
           </section>
+          </HrSection>
         </>
       )}
+      </SoftKeepSurface>
     </div>
   )
 }

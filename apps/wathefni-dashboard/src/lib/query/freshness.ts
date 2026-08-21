@@ -37,4 +37,5 @@ export const FRESHNESS_MS = {
   actionInbox: 60_000,
   /** Inbound employee work for Leave / Onboarding / Compliance / ESS. */
   inboundQueue: 60_000,
+  intelligenceOverview: 90_000,
 } as const

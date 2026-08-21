@@ -68,6 +68,10 @@ export const qk = {
   calendarSyncConnections: (access: DashboardAccess) =>
     [...tenantRoot(access), 'calendar', 'sync-connections'] as const,
 
+  actionInbox: (access: DashboardAccess) => [...tenantRoot(access), 'action-inbox'] as const,
+  intelligenceOverview: (access: DashboardAccess, lang: string) =>
+    [...tenantRoot(access), 'intelligence-overview', lang] as const,
+
   employeeBankReview: (access: DashboardAccess, employeeKey: string, locale: string) =>
     [...tenantRoot(access), 'employee-bank-review', employeeKey, locale] as const,
 }

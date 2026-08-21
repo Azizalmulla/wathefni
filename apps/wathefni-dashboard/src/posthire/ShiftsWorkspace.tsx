@@ -18,8 +18,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 
 import { useConfirm } from '@/components/ConfirmDialog'
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { Button } from '@/components/ui/button'
 import { Input, Textarea } from '@/components/ui/field'
+import { useUrlBackedTab, URL_BACKED_WORKSPACE_TABS } from '@/lib/hrWebUrlTab'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import {
   cancelShift,
@@ -433,7 +435,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
     typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches ? 'day' : 'week',
   )
   const [anchor, setAnchor] = useState(() => startOfDay(new Date()))
-  const [surface, setSurface] = useState<SurfaceTab>('schedule')
+  const [surface, setSurface] = useUrlBackedTab<SurfaceTab>('shifts', URL_BACKED_WORKSPACE_TABS.shifts, 'schedule')
   const [requestPanel, setRequestPanel] = useState<RequestPanel>('swaps')
   const [planningPanel, setPlanningPanel] = useState<PlanningPanel>('templates')
   const [advancedOpen, setAdvancedOpen] = useState(false)
@@ -1177,37 +1179,24 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
         locale={locale}
       />
       {/* Top bar: Surface IA navigation on left; Refresh + Single Primary Schedule CTA on right */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-wf-ink/[0.06] pb-2.5" data-shifts-header>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-semantic-line/60 pb-2.5" data-shifts-header>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex w-fit items-center gap-0.5 rounded-[0.75rem] bg-wf-ink/[0.05] p-0.5" data-shifts-surfaces role="tablist" aria-label={c.title}>
-            {(
-              [
-                ['schedule', c.surfaceSchedule, shifts.length],
-                ['requests', c.surfaceRequests, requestCount],
-                ['planning', c.surfacePlanning, 0],
-              ] as [SurfaceTab, string, number][]
-            ).map(([id, label, count]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={surface === id}
-                data-surface={id}
-                className={cn(
-                  'rounded-[0.6rem] px-3.5 py-1.5 text-[12px] font-semibold transition',
-                  surface === id ? 'bg-wf-ink text-white' : 'text-muted hover:text-ink',
-                )}
-                onClick={() => setSurface(id)}
-              >
-                {label}
-                {id !== 'planning' && count ? <span className="ms-1 opacity-80">({count})</span> : null}
-              </button>
-            ))}
+          <div data-shifts-surfaces>
+            <HrSurfaceTabs
+              value={surface}
+              onChange={setSurface}
+              ariaLabel={c.title}
+              items={[
+                { id: 'schedule', label: c.surfaceSchedule, count: shifts.length, dataAttrs: { 'data-surface': 'schedule' } },
+                { id: 'requests', label: c.surfaceRequests, count: requestCount, dataAttrs: { 'data-surface': 'requests' } },
+                { id: 'planning', label: c.surfacePlanning, dataAttrs: { 'data-surface': 'planning' } },
+              ]}
+            />
           </div>
           {surface === 'schedule' && requestCount > 0 ? (
             <button
               type="button"
-              className="rounded-[0.65rem] bg-wf-accent-review-soft/70 px-2.5 py-1 text-[11px] font-semibold text-wf-accent-review-ink"
+              className="rounded-[0.65rem] bg-semantic-warning-soft/70 px-2.5 py-1 text-[11px] font-semibold text-semantic-warning-ink transition-colors duration-150"
               data-shifts-attention
               onClick={() => {
                 setSurface('requests')
@@ -1686,7 +1675,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     <p className="text-sm text-muted">{isAr ? 'لا قوالب بعد' : 'No templates yet'}</p>
                   ) : (
                     templates.map((t) => (
-                      <div key={String(t.template_id)} className="rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                      <div key={String(t.template_id)} className="rounded-xl border border-semantic-line px-3 py-2 text-sm">
                         <p className="font-medium text-ink">{String(t.name || '')}</p>
                         <p className="text-xs text-muted">
                           {String(t.start_time || '').slice(0, 5)}–{String(t.end_time || '').slice(0, 5)}
@@ -1706,7 +1695,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                       const cycle = String(r.cycle_type || '').replace(/_/g, ' ')
                       const status = String(r.status || '').replace(/_/g, ' ')
                       return (
-                        <div key={rid} className="space-y-2 rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                        <div key={rid} className="space-y-2 rounded-xl border border-semantic-line px-3 py-2 text-sm">
                           <p className="font-medium text-ink">{String(r.name || '')}</p>
                           <p className="text-xs text-muted">
                             {[cycle, status].filter(Boolean).join(' · ') || '—'}
@@ -1774,7 +1763,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                   )}
                 </div>
               </div>
-              {previewInfo ? <p className="rounded-xl bg-[#fbf7ee] px-3 py-2 text-xs text-muted" data-testid="shifts-wave4-preview-info">{previewInfo}</p> : null}
+              {previewInfo ? <p className="rounded-xl bg-semantic-surface px-3 py-2 text-xs text-muted" data-testid="shifts-wave4-preview-info">{previewInfo}</p> : null}
             </div>
           ) : null}
 
@@ -1816,7 +1805,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
               </div>
 
               <div className="grid gap-3 md:grid-cols-2" data-testid="shifts-publish-actions">
-                <div className="space-y-2 rounded-xl border border-[#e8dfd0] p-3">
+                <div className="space-y-2 rounded-xl border border-semantic-line p-3">
                   <p className="text-xs uppercase tracking-wide text-muted">{c.createPeriod}</p>
                   <Input placeholder={isAr ? 'اسم الفترة' : 'Period name'} value={periodName} onChange={(e) => setPeriodName(e.target.value)} />
                   <div className="grid grid-cols-2 gap-2">
@@ -1852,7 +1841,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     {c.createPeriod}
                   </Button>
                 </div>
-                <div className="space-y-2 rounded-xl border border-[#e8dfd0] p-3">
+                <div className="space-y-2 rounded-xl border border-semantic-line p-3">
                   <p className="text-xs uppercase tracking-wide text-muted">{c.createOpenShift} / {c.createCoverage}</p>
                   <Input type="date" value={openShiftDate} onChange={(e) => setOpenShiftDate(e.target.value)} />
                   <Button
@@ -2035,7 +2024,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                       <button
                         type="button"
                         key={String(p.period_id)}
-                        className={`w-full rounded-xl border px-3 py-2 text-start text-sm ${selectedPeriodId === String(p.period_id) ? 'border-wf-ink bg-[#fbf7ee]' : 'border-[#e8dfd0]'}`}
+                        className={`w-full rounded-xl border px-3 py-2 text-start text-sm ${selectedPeriodId === String(p.period_id) ? 'border-wf-ink bg-semantic-surface' : 'border-semantic-line'}`}
                         onClick={() => {
                           setSelectedPeriodId(String(p.period_id))
                           void (async () => {
@@ -2065,7 +2054,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     <p className="text-sm text-muted">{isAr ? 'لا ورديات مفتوحة' : 'No open shifts'}</p>
                   ) : (
                     openShifts.slice(0, 12).map((o) => (
-                      <div key={String(o.open_shift_id)} className="rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                      <div key={String(o.open_shift_id)} className="rounded-xl border border-semantic-line px-3 py-2 text-sm">
                         <p className="font-medium text-ink">
                           {String(o.shift_date || '').slice(0, 10)} · {String(o.start_time || '').slice(0, 5)}–{String(o.end_time || '').slice(0, 5)}
                         </p>
@@ -2084,7 +2073,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     <p className="text-sm text-muted">{isAr ? 'لا قواعد تغطية' : 'No coverage rules'}</p>
                   ) : (
                     coverageRules.slice(0, 12).map((r) => (
-                      <div key={String(r.rule_id)} className="rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                      <div key={String(r.rule_id)} className="rounded-xl border border-semantic-line px-3 py-2 text-sm">
                         <p className="font-medium text-ink">{String(r.name || '')}</p>
                         <p className="text-xs text-muted">
                           {c.coverageMin(String(r.min_staff ?? '—'))}
@@ -2095,7 +2084,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                   )}
                 </div>
               </div>
-              {publishInfo ? <p className="rounded-xl bg-[#fbf7ee] px-3 py-2 text-xs text-muted">{publishInfo}</p> : null}
+              {publishInfo ? <p className="rounded-xl bg-semantic-surface px-3 py-2 text-xs text-muted">{publishInfo}</p> : null}
             </div>
           ) : null}
 
@@ -2138,7 +2127,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     <p className="text-sm text-muted">{isAr ? 'لا أنماط بعد' : 'No patterns yet'}</p>
                   ) : (
                     rotationPatterns.slice(0, 8).map((p) => (
-                      <div key={String(p.pattern_id)} className="rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                      <div key={String(p.pattern_id)} className="rounded-xl border border-semantic-line px-3 py-2 text-sm">
                         <p className="font-medium text-ink">{String(p.name || '')}</p>
                         <p className="text-xs text-muted">{String(p.pattern_kind || '').replace(/_/g, ' ')}</p>
                       </div>
@@ -2151,7 +2140,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     <p className="text-sm text-muted">{isAr ? 'لا تعيينات بعد' : 'No assignments yet'}</p>
                   ) : (
                     rotationAssignments.slice(0, 8).map((a) => (
-                      <div key={String(a.assignment_id)} className="space-y-1 rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                      <div key={String(a.assignment_id)} className="space-y-1 rounded-xl border border-semantic-line px-3 py-2 text-sm">
                         <p className="font-medium text-ink">{String(a.name || a.target_key || '')}</p>
                         <div className="flex flex-wrap gap-1">
                           <Button
@@ -2207,19 +2196,19 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                   )}
                 </div>
               </div>
-              {enterpriseInfo ? <p className="rounded-xl bg-[#fbf7ee] px-3 py-2 text-xs text-muted" data-testid="shifts-rotations-info">{enterpriseInfo}</p> : null}
+              {enterpriseInfo ? <p className="rounded-xl bg-semantic-surface px-3 py-2 text-xs text-muted" data-testid="shifts-rotations-info">{enterpriseInfo}</p> : null}
             </div>
           ) : null}
 
           {queue === 'advanced' && canSeeAdvanced && advancedOpen ? (
-            <div className="space-y-4 rounded-[1.55rem] border border-dashed border-[#e8dfd0] bg-[#fffaf0]/50 p-4" data-testid="shifts-advanced-panel" data-shifts-advanced-panel>
+            <div className="space-y-4 rounded-[1.55rem] border border-dashed border-semantic-line bg-semantic-surface/50 p-4" data-testid="shifts-advanced-panel" data-shifts-advanced-panel>
               <div>
                 <h2 className="text-lg font-semibold text-ink">{c.advancedOps}</h2>
                 <p className="text-sm text-muted">{c.advancedOpsHint}</p>
               </div>
 
               {wave3?.enabled ? (
-                <div className="space-y-2 rounded-[1rem] border border-dashed border-[#e8dfd0] bg-white/70 px-3.5 py-3 text-[12px] text-muted" data-testid="shifts-honesty-banner">
+                <div className="space-y-2 rounded-[1rem] border border-dashed border-semantic-line bg-white/70 px-3.5 py-3 text-[12px] text-muted" data-testid="shifts-honesty-banner">
                   <p>
                     {wave6?.enabled
                       ? c.honestyEnterprise
@@ -2230,7 +2219,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                           : c.honestyNoTemplates}
                   </p>
                   <div className="flex flex-wrap gap-2 text-[11px]">
-                    {wave3.real_mutation_gate ? <span className="rounded-full bg-white/70 px-2 py-1 text-[#7a5a20]">{c.realGateOn}</span> : null}
+                    {wave3.real_mutation_gate ? <span className="rounded-full bg-white/70 px-2 py-1 text-semantic-warning-ink">{c.realGateOn}</span> : null}
                     <span className="rounded-full bg-white/70 px-2 py-1">{c.timersDisabled}</span>
                     <span className="rounded-full bg-white/70 px-2 py-1">{c.remindersSynthetic}</span>
                     <span className="rounded-full bg-white/70 px-2 py-1">{c.talalReadOnly}</span>
@@ -2240,7 +2229,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
 
               <QueueCanvas title={c.reminders} icon={<ShieldAlert className="h-4 w-4" />} empty={c.emptyReminders} refreshing={refreshing}>
                 {reminders.map((rem: Record<string, unknown>, idx: number) => (
-                  <div key={String(rem.reminder_id || idx)} className="rounded-2xl border border-[#e8dfd0] bg-white/70 px-4 py-3 text-sm">
+                  <div key={String(rem.reminder_id || idx)} className="rounded-2xl border border-semantic-line bg-white/70 px-4 py-3 text-sm">
                     <p className="font-semibold text-ink">{String(rem.employee_key || rem.shift_id || '—')}</p>
                     <p className="text-xs text-muted">{String(rem.last_error || rem.status || '')}</p>
                   </div>
@@ -2248,7 +2237,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
               </QueueCanvas>
 
               {wave6?.enabled ? (
-                <div className="space-y-2 rounded-xl border border-[#e8dfd0] bg-white px-3 py-3">
+                <div className="space-y-2 rounded-xl border border-semantic-line bg-white px-3 py-3">
                   <p className="text-sm font-semibold text-ink">{c.pamExport}</p>
                   <p className="text-xs text-muted">{c.pamExportHint}</p>
                   <Button
@@ -2276,7 +2265,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                     <p className="text-sm text-muted">{isAr ? 'لا صادرات بعد' : 'No exports yet'}</p>
                   ) : (
                     pamExports.slice(0, 6).map((e) => (
-                      <div key={String(e.export_id)} className="rounded-xl border border-[#e8dfd0] px-3 py-2 text-sm">
+                      <div key={String(e.export_id)} className="rounded-xl border border-semantic-line px-3 py-2 text-sm">
                         <p className="font-medium text-ink">{String(e.status || '').replace(/_/g, ' ')}</p>
                         <p className="text-xs text-muted">{String(e.created_at || '').slice(0, 19)}</p>
                       </div>
@@ -2398,7 +2387,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                       <label className="block space-y-1 text-[11px] font-medium text-muted">
                         <span>{c.branch}</span>
                         <select
-                          className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                          className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                           value={composerSelectValue(branchUnits, form.branch_key)}
                           onChange={(e) => applyComposerOrg('branch_key', e.target.value)}
                           data-org-field="branch_key"
@@ -2416,7 +2405,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                       <label className="block space-y-1 text-[11px] font-medium text-muted">
                         <span>{c.site}</span>
                         <select
-                          className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                          className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                           value={composerSelectValue(composerSiteOptions, form.site_key)}
                           onChange={(e) => applyComposerOrg('site_key', e.target.value)}
                           data-org-field="site_key"
@@ -2434,7 +2423,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                       <label className="block space-y-1 text-[11px] font-medium text-muted">
                         <span>{c.team}</span>
                         <select
-                          className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                          className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                           value={composerSelectValue(composerTeamOptions, form.team_key)}
                           onChange={(e) => applyComposerOrg('team_key', e.target.value)}
                           data-org-field="team_key"
@@ -2452,7 +2441,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                       <label className="block space-y-1 text-[11px] font-medium text-muted">
                         <span>{c.location}</span>
                         <select
-                          className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                          className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                           value={composerSelectValue(composerLocationOptions, form.location)}
                           onChange={(e) => applyComposerOrg('location', e.target.value)}
                           data-org-field="location"
@@ -2483,7 +2472,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                             <label className="block space-y-1 text-[11px] font-medium text-muted">
                               <span>{c.branch}</span>
                               <select
-                                className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                                className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                                 value={composerSelectValue(branchUnits, form.branch_key)}
                                 onChange={(e) => applyComposerOrg('branch_key', e.target.value)}
                                 data-org-field="branch_key"
@@ -2502,7 +2491,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                             <label className="block space-y-1 text-[11px] font-medium text-muted">
                               <span>{c.site}</span>
                               <select
-                                className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                                className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                                 value={composerSelectValue(composerSiteOptions, form.site_key)}
                                 onChange={(e) => applyComposerOrg('site_key', e.target.value)}
                                 data-org-field="site_key"
@@ -2521,7 +2510,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                             <label className="block space-y-1 text-[11px] font-medium text-muted">
                               <span>{c.team}</span>
                               <select
-                                className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                                className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                                 value={composerSelectValue(composerTeamOptions, form.team_key)}
                                 onChange={(e) => applyComposerOrg('team_key', e.target.value)}
                                 data-org-field="team_key"
@@ -2540,7 +2529,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                             <label className="block space-y-1 text-[11px] font-medium text-muted">
                               <span>{c.location}</span>
                               <select
-                                className="h-10 w-full rounded-xl border border-[#e8dfd0] bg-white px-3 text-sm text-ink"
+                                className="h-10 w-full rounded-xl border border-semantic-line bg-white px-3 text-sm text-ink"
                                 value={composerSelectValue(composerLocationOptions, form.location)}
                                 onChange={(e) => applyComposerOrg('location', e.target.value)}
                                 data-org-field="location"
@@ -2651,7 +2640,7 @@ export function ShiftsWorkspace({ access, permissions, role: _role, onNotice, on
                             </option>
                           ))}
                         </select>
-                        {hasLegacy ? <p className="text-[10px] font-normal text-[#7a5a20]">{c.unmappedOrgHint}</p> : null}
+                        {hasLegacy ? <p className="text-[10px] font-normal text-semantic-warning-ink">{c.unmappedOrgHint}</p> : null}
                       </label>
                     )
                   })}

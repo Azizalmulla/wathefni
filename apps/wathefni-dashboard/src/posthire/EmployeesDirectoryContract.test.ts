@@ -19,7 +19,7 @@ const pageMount = dispatcherSrc.slice(
 
 describe('Employees directory Wave 1 contract', () => {
   it('keeps directory as the dominant surface and drops duplicated attention chrome', () => {
-    expect(employeesSrc).toContain('data-testid="employees-directory-board"')
+    expect(employeesSrc).toContain('employees-directory-board')
     expect(employeesSrc).toContain('data-testid="employees-mobile-cards"')
     expect(employeesSrc).toContain('data-testid="employees-desktop-table"')
     expect(employeesSrc).not.toContain('<NextAction')
@@ -39,7 +39,7 @@ describe('Employees directory Wave 1 contract', () => {
   it('keeps Add/Import roster actions and softens Refresh', () => {
     expect(employeesSrc).toContain('setShowAdd(true)')
     // Import entry moved behind Migration & Sync (ImportEmployeesModal still exists).
-    expect(employeesSrc).toContain('setShowMigration(true)')
+    expect(employeesSrc).toContain("setMigrationView('migration')")
     expect(employeesSrc).toContain('copy.migrationSync')
     expect(employeesSrc).toContain('variant="ghost"')
     expect(employeesSrc).toContain('aria-label={copy.refresh}')

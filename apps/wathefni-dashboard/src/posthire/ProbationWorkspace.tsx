@@ -3,13 +3,17 @@
  * Thin client over frozen probation authority. Answers:
  * Who is on probation? What is due? How are they doing? What decision is required?
  */
-import { AlertTriangle, CheckCircle2, Clock3, Loader2, RefreshCw, Timer } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, CheckCircle2, Clock3, RefreshCw } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
 import { Button } from '@/components/ui/button'
-import { Input, Select, Textarea } from '@/components/ui/field'
+import { Input, Textarea } from '@/components/ui/field'
 import { StatusPill } from '@/components/ui/page-chrome'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
+import { SoftKeepSurface } from '@/components/ui/SoftKeepSurface'
+import { URL_BACKED_WORKSPACE_TABS, useUrlBackedParam, useUrlBackedTab } from '@/lib/hrWebUrlTab'
+import { ResourceState } from '@/pages/shared/dataState'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import {
   DashboardApiError,
@@ -162,8 +166,14 @@ export function ProbationWorkspace({
   const [loading, setLoading] = useState(true)
   const [rows, setRows] = useState<CaseRow[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
-  const [filter, setFilter] = useState('attention')
+  const [filter, setFilter] = useUrlBackedTab('probation', URL_BACKED_WORKSPACE_TABS.probation, 'attention')
+  const [employeeKey, setEmployeeKey] = useUrlBackedParam('probation', 'employee', '')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const rowsRef = useRef(rows)
+  const selectedIdRef = useRef(selectedId)
+  rowsRef.current = rows
+  selectedIdRef.current = selectedId
   const [detail, setDetail] = useState<{
     case?: CaseRow
     milestones?: MilestoneRow[]
@@ -180,17 +190,22 @@ export function ProbationWorkspace({
   const canManage = permissions.includes('probation.manage')
 
   const loadQueue = useCallback(async () => {
-    setLoading(true)
+    const cold = rowsRef.current.length === 0
+    if (cold) setLoading(true)
+    else setRefreshing(true)
     try {
       const res = await getPosthireProbation(access, {
         status: filter || undefined,
         limit: 100,
       })
-      setRows((res.cases || []) as CaseRow[])
+      const next = (res.cases || []) as CaseRow[]
+      setRows(next)
       setCounts((res.counts || {}) as Record<string, number>)
       setModuleDenied(false)
-      if (!selectedId && res.cases?.[0]?.case_id) {
-        setSelectedId(String(res.cases[0].case_id))
+      const focused = employeeKey ? next.find((row) => row.employee_key === employeeKey) : null
+      if (focused) setSelectedId(focused.case_id)
+      else if (!selectedIdRef.current && next[0]?.case_id) {
+        setSelectedId(String(next[0].case_id))
       }
     } catch (error) {
       const issue = accessIssueFromError(error)
@@ -202,8 +217,9 @@ export function ProbationWorkspace({
       }
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
-  }, [access, filter, isAr, onAccessIssue, onNotice, selectedId])
+  }, [access, employeeKey, filter, isAr, onAccessIssue, onNotice])
 
   const loadDetail = useCallback(
     async (caseId: string) => {
@@ -263,45 +279,25 @@ export function ProbationWorkspace({
   const selected = detail?.case
 
   return (
-    <div className="flex h-full min-h-[70vh] flex-col gap-4 p-4 md:p-6" dir={isAr ? 'rtl' : 'ltr'}>
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <Timer className="h-6 w-6" />
-            {c.title}
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{c.subtitle}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => void loadQueue()}>
-          <RefreshCw className="me-2 h-4 w-4" />
+    <div className="flex h-full min-h-[70vh] flex-col gap-4" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <HrSurfaceTabs
+          value={filter}
+          onChange={setFilter}
+          ariaLabel={isAr ? 'تصفية فترة التجربة' : 'Probation status'}
+          items={[
+            { id: 'attention', label: c.filterAttention, count: counts.attention },
+            { id: 'active', label: c.filterActive, count: counts.active },
+            { id: 'under_review', label: c.filterReview, count: counts.under_review },
+            { id: 'confirmed', label: c.filterConfirmed, count: counts.confirmed },
+            { id: 'extended', label: c.filterExtended, count: counts.extended },
+            { id: 'failed', label: c.filterFailed, count: counts.failed },
+          ]}
+        />
+        <Button variant="ghost" size="sm" onClick={() => void loadQueue()} disabled={refreshing}>
+          <RefreshCw className={cn('me-2 h-4 w-4', refreshing && 'animate-spin')} />
           {c.refresh}
         </Button>
-      </header>
-
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ['attention', c.filterAttention, counts.attention],
-            ['active', c.filterActive, counts.active],
-            ['under_review', c.filterReview, counts.under_review],
-            ['confirmed', c.filterConfirmed, counts.confirmed],
-            ['extended', c.filterExtended, counts.extended],
-            ['failed', c.filterFailed, counts.failed],
-          ] as const
-        ).map(([key, label, count]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setFilter(key)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-sm',
-              filter === key ? 'border-foreground bg-foreground text-background' : 'border-border',
-            )}
-          >
-            {label}
-            {typeof count === 'number' ? ` · ${count}` : ''}
-          </button>
-        ))}
       </div>
 
       {canManage && String(role || '') !== 'manager' ? (
@@ -325,21 +321,26 @@ export function ProbationWorkspace({
         </div>
       ) : null}
 
+      <SoftKeepSurface
+        cold={loading && rows.length === 0}
+        coldFallback={<ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} />}
+        refreshing={refreshing}
+        refreshingLabel={isAr ? 'جاري التحديث…' : 'Updating…'}
+      >
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(280px,1fr)_minmax(360px,1.4fr)]">
-        <section className="overflow-auto rounded-xl border border-border/70">
-          {loading ? (
-            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> …
-            </div>
-          ) : filtered.length === 0 ? (
-            <WorkflowEmpty title={c.empty} description={c.emptyHint} />
+        <section className="overflow-auto rounded-xl border border-semantic-line/70">
+          {filtered.length === 0 ? (
+            <WorkflowEmpty title={c.empty} hint={c.emptyHint} />
           ) : (
             <ul className="divide-y divide-border/60">
               {filtered.map((row) => (
                 <li key={row.case_id}>
                   <button
                     type="button"
-                    onClick={() => setSelectedId(row.case_id)}
+                    onClick={() => {
+                      setSelectedId(row.case_id)
+                      setEmployeeKey(row.employee_key)
+                    }}
                     className={cn(
                       'flex w-full flex-col gap-1 px-4 py-3 text-start hover:bg-muted/40',
                       selectedId === row.case_id && 'bg-muted/60',
@@ -615,6 +616,7 @@ export function ProbationWorkspace({
           )}
         </section>
       </div>
+      </SoftKeepSurface>
     </div>
   )
 }

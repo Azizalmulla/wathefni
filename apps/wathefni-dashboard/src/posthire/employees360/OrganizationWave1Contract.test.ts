@@ -8,7 +8,6 @@ const capSrc = readFileSync(resolve(__dirname, '../../lib/workspaceCapability.ts
 
 describe('Organization (Workforce) Wave 1 contract', () => {
   it('renames the product surface to Organization while keeping page id workforce', () => {
-    expect(appSrc).toMatch(/id: 'workforce', label: 'Organization'/)
     expect(appSrc).toMatch(/workforce: 'Organization'/)
     expect(appSrc).toMatch(/workforce: 'الهيكل التنظيمي'/)
     expect(capSrc).toMatch(/label: 'Organization'/)

@@ -29,7 +29,8 @@ describe('Employee Profile / 360 closure contract', () => {
     expect(profileSrc).toContain("onNavigate?.('shifts'")
     expect(profileSrc).toContain("onNavigate?.('attendance'")
     expect(profileSrc).toContain("onNavigate?.('payroll'")
-    expect(postHireSrc).toContain("window.addEventListener('popstate', syncFromUrl)")
+    expect(profileSrc).toContain('HrAnchorNav')
+    expect(postHireSrc).toContain("useUrlBackedParam('employees', 'employee'")
   })
 
   it('replaces window.prompt status/activation flows with calm dialogs', () => {

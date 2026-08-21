@@ -29,7 +29,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'App.tsx page header + PageIntro',
     path: 'src/App.tsx + src/components/ui/page-chrome.tsx',
     disposition: 'consolidate',
-    notes: 'Two intro patterns (App h1 vs PageIntro). Keep density personalities; stop duplicating titles inside modules.',
+    notes: 'Overview now uses HrPageHeader as the reference. Operational core and People spine (Employees, Organization, Onboarding, Preboarding, Probation, Needs Attention) use density=page. Recruiting and remaining enterprise/Settings keep the App h1 until later phases.',
   },
   {
     id: 'actions.button',
@@ -60,8 +60,8 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     family: 'tabs',
     component: 'Post-hire workspace Tab unions',
     path: 'src/posthire/*Workspace.tsx',
-    disposition: 'replace-later',
-    notes: 'Local React state, lost on back, not deep-linkable. Do not redesign chrome yet — first put tabs in the URL.',
+    disposition: 'consolidate',
+    notes: 'Enterprise workspaces and Settings are URL-backed. Phase 4: Leave `?view=`, Shifts/Payroll `?tab=`, Attendance `?date=` / `?date_end=`. Phase 5 People: Employees `?employee=` / `?q=` / `?status=`, Organization `?tab=`, Onboarding/Preboarding/Probation/Inbox `?tab=`. Capture ops tabs stay local.',
   },
   {
     id: 'search.filters',
@@ -69,15 +69,15 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'dashboardNavigation + SearchInput',
     path: 'src/lib/dashboardNavigation.ts + src/components/ui/search-input.tsx',
     disposition: 'preserve',
-    notes: 'Candidates/Interviews/Assessments filters are already URL-canonical. Extend to post-hire.',
+    notes: 'Candidates/Interviews/Assessments filters are already URL-canonical. Leave history `?status=` and Attendance date range join that pattern. Phase 5 People directory search/status/department/onboarding are URL-backed. Shifts org filters stay local (scope, not chrome).',
   },
   {
     id: 'tables.lists',
     family: 'tables/lists',
     component: 'ad-hoc tables + organization desktop table',
     path: 'src/components/candidates, src/posthire/employees360',
-    disposition: 'consolidate',
-    notes: 'No shared DataTable. Several hex cream tables. Keep list IA; tokenize colors via semantic layer.',
+    disposition: 'preserve',
+    notes: 'No shared DataTable. Leave stays a queue, Attendance a daily board, Shifts a roster, Payroll a run/hours/records workspace. Operational core lists use semantic tokens.',
   },
   {
     id: 'cards.surface',
@@ -101,7 +101,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'StatusPill + Badge',
     path: 'src/components/ui/page-chrome.tsx, badge.tsx',
     disposition: 'consolidate',
-    notes: 'StatusPill still has one hardcoded cream hex. Map remaining hex to semantic tokens without freezing the palette.',
+    notes: 'StatusPill mapped remaining cream hex onto semantic tokens. Palette is not frozen.',
   },
   {
     id: 'states.resource',

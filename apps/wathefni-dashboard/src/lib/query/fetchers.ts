@@ -18,18 +18,21 @@ import {
   getPrehirePositions,
   getPrehireReports,
   getPrehireWorkQueue,
+  getPosthireActionInbox,
   getSummary,
   getTalentPoolClassificationFeature,
   getTalentPoolClassificationTaxonomy,
   getUnifiedCandidatesFeature,
+  DashboardApiError,
   type CalendarEvent,
 } from '@/lib/api'
 import type {
   ApplicationSummary,
   ApplicationsResponse,
   DashboardAccess,
+  PosthireActionInboxResponse,
 } from '@/types'
-import { DashboardApiError } from '@/lib/api'
+import { getIntelligenceOverview, type IntelligenceOverview } from '@/lib/intelligenceApi'
 
 export function accessReady(access: DashboardAccess) {
   return Boolean(access.token?.trim() && access.companyCode?.trim())
@@ -230,6 +233,18 @@ export async function fetchClassificationTaxonomy(access: DashboardAccess) {
 
 export async function fetchSavedViews(access: DashboardAccess) {
   return getCandidateSavedViews(access)
+}
+
+export async function fetchActionInbox(access: DashboardAccess, _signal?: AbortSignal): Promise<PosthireActionInboxResponse> {
+  return getPosthireActionInbox(access)
+}
+
+export async function fetchIntelligenceOverview(
+  access: DashboardAccess,
+  lang: string,
+  _signal?: AbortSignal,
+): Promise<IntelligenceOverview> {
+  return getIntelligenceOverview(access, { lang })
 }
 
 export type { CalendarEvent }

@@ -10,7 +10,9 @@ const externalSrc = readFileSync(resolve(__dirname, './ExternalPayrollWorkspace.
 
 describe('Payroll Wave 1 IA refinement contract', () => {
   it('collapses peer tabs to Run / Hours / Records', () => {
-    expect(payrollSrc).toContain("useState<'run' | 'hours' | 'records'>('run')")
+    expect(payrollSrc).toContain("useUrlBackedTab<'run' | 'hours' | 'records'>")
+    expect(payrollSrc).toContain('URL_BACKED_WORKSPACE_TABS.payroll')
+    expect(payrollSrc).not.toContain("useState<'run' | 'hours' | 'records'>('run')")
     expect(payrollSrc).toContain('data-payroll-surfaces')
     expect(payrollSrc).toContain('surfaceRun')
     expect(payrollSrc).toContain('surfaceHours')

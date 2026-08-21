@@ -33,6 +33,8 @@ import {
   fetchSummary,
   fetchUnifiedCandidatesFeature,
   fetchWorkQueue,
+  fetchActionInbox,
+  fetchIntelligenceOverview,
   type ApplicationsQueryParams,
 } from '@/lib/query/fetchers'
 import { dashboardPerfCountRequest } from '@/lib/perf/dashboardPerf'
@@ -80,6 +82,28 @@ export function useWorkQueueQuery(access: DashboardAccess, scope: 'mine' | 'comp
     queryFn: ({ signal }) => fetchWorkQueue(access, scope, signal),
     enabled: enabled && accessReady(access),
     placeholderData: undefined,
+    refetchInterval,
+  })
+}
+
+export function useActionInboxQuery(access: DashboardAccess, enabled = true) {
+  const refetchInterval = useVisibilityRefetchInterval(FRESHNESS_MS.actionInbox, enabled)
+  return useQuery({
+    queryKey: qk.actionInbox(access),
+    queryFn: ({ signal }) => fetchActionInbox(access, signal),
+    enabled: enabled && accessReady(access),
+    placeholderData: keepPreviousData,
+    refetchInterval,
+  })
+}
+
+export function useIntelligenceOverviewQuery(access: DashboardAccess, lang: string, enabled = true) {
+  const refetchInterval = useVisibilityRefetchInterval(FRESHNESS_MS.intelligenceOverview, enabled)
+  return useQuery({
+    queryKey: qk.intelligenceOverview(access, lang),
+    queryFn: ({ signal }) => fetchIntelligenceOverview(access, lang, signal),
+    enabled: enabled && accessReady(access),
+    placeholderData: keepPreviousData,
     refetchInterval,
   })
 }

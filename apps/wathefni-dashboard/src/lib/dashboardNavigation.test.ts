@@ -175,4 +175,80 @@ describe('dashboardNavigation', () => {
     const nav = readDashboardNavState(`?${params.toString()}`)
     expect(nav.filters.view).toBe('history')
   })
+
+  test('writes Leave history status, Attendance dates, and Payroll tabs', () => {
+    const leave = buildDashboardSearchParams({
+      page: 'leave',
+      candidate: null,
+      filters: { view: 'history', status: 'approved' },
+    })
+    expect(leave.get('view')).toBe('history')
+    expect(leave.get('status')).toBe('approved')
+    expect(readDashboardNavState(`?${leave.toString()}`).filters.status).toBe('approved')
+
+    const attendance = buildDashboardSearchParams({
+      page: 'attendance',
+      candidate: null,
+      filters: { date: '2026-08-01', date_end: '2026-08-07' },
+    })
+    expect(attendance.get('date')).toBe('2026-08-01')
+    expect(attendance.get('date_end')).toBe('2026-08-07')
+    const attendanceNav = readDashboardNavState(`?${attendance.toString()}`)
+    expect(attendanceNav.filters.date).toBe('2026-08-01')
+    expect(attendanceNav.filters.date_end).toBe('2026-08-07')
+
+    const payroll = buildDashboardSearchParams({
+      page: 'payroll',
+      candidate: null,
+      filters: { tab: 'records', view: 'close' },
+    })
+    expect(payroll.get('tab')).toBe('records')
+    expect(payroll.get('view')).toBe('close')
+    const payrollNav = readDashboardNavState(`?${payroll.toString()}`)
+    expect(payrollNav.filters.tab).toBe('records')
+    expect(payrollNav.filters.view).toBe('close')
+  })
+
+  test('writes People spine URL chrome (employee, directory filters, workforce alias)', () => {
+    const employees = buildDashboardSearchParams({
+      page: 'employees',
+      candidate: null,
+      filters: {
+        q: 'aziz',
+        status: 'left',
+        department: 'Finance',
+        onboarding: 'open',
+        employee: 'WATHEFNI-AZIZ',
+        view: 'migration',
+      },
+    })
+    expect(employees.get('q')).toBe('aziz')
+    expect(employees.get('status')).toBe('left')
+    expect(employees.get('department')).toBe('Finance')
+    expect(employees.get('onboarding')).toBe('open')
+    expect(employees.get('employee')).toBe('WATHEFNI-AZIZ')
+    expect(employees.get('view')).toBe('migration')
+    const employeesNav = readDashboardNavState(`?${employees.toString()}`)
+    expect(employeesNav.filters.employee).toBe('WATHEFNI-AZIZ')
+    expect(employeesNav.filters.department).toBe('Finance')
+
+    const activeDefault = buildDashboardSearchParams({
+      page: 'employees',
+      candidate: null,
+      filters: { status: 'active' },
+    })
+    expect(activeDefault.get('status')).toBeNull()
+
+    const onboarding = buildDashboardSearchParams({
+      page: 'onboarding',
+      candidate: null,
+      filters: { tab: 'in_progress', employee: 'WATHEFNI-AZIZ', q: 'aziz' },
+    })
+    expect(onboarding.get('tab')).toBe('in_progress')
+    expect(onboarding.get('employee')).toBe('WATHEFNI-AZIZ')
+    expect(onboarding.get('q')).toBe('aziz')
+
+    const workforceAlias = readDashboardNavState('?page=workforce&workforce=lifecycle')
+    expect(workforceAlias.filters.tab).toBe('lifecycle')
+  })
 })
